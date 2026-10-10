@@ -2039,3 +2039,122 @@ Partas plugin gate. The operation regression was observed failing before the loo
 `TypeFlags.Any` covers four checker intrinsic names, and `any` includes the checker's own fallbacks (a circular alias, an inference placeholder) besides a written or omitted annotation, so `TR008` is not proof of authorship. `typeRef` reads `TypeResponse.IntrinsicName`: `any` keeps `TR008`; `error` and `unresolved` (a reference the program leaves unresolved or invalid) raise `TR063 ErrorTypeToObj` with the name the checker keeps; `intrinsic` (the body of `Uppercase` and its siblings) raises `TR064 IntrinsicMarkerToObj`. An Any without an intrinsic name is not claimed as a written `any`. Both are Escape, the tier `TR008` carries; the keys separate them. Resolve records the name from the error type's alias symbol, qualified through its unresolved parents (`NodeJS.Timeout`); a union, an intersection or an optional position the checker reduced over an error constituent carries none. A second export abbreviating the shared intrinsic marker (`Lowercase = Uppercase`) reports the same `TR064`.
 
 `unresolved-any-lab` pins an unresolved import, an undeclared name, a qualified name, an element position and a reduced union beside a written `any`, an omitted annotation and `unknown`. Committed corpus: `TR008` 841 to 830, `TR063` 0 to 17 (animejs 12: six members typed by the absent `three`, three sites typed by `InstanceParent`, which reduces to the nameless error type, two `NodeJS` references and one bare `TargetAdapterEntry`; the lab 5), `TR064` 0 to 5 (`compiler-lib-ownership-lab`'s `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`) and 0 to 5 in `Xantham.Fable.Core.TS`. Binding text is unchanged outside the lab.
+## TypeScript library catalogue identity (2026-10-09)
+
+Catalogue sources for installed TypeScript `lib/lib.*.d.ts` files use logical package
+ownership `typescript` across the wrapper and recognized platform distributions. Canonical
+root metadata hashes name, exact version and normalized gitHead, while source bytes and
+intervening manifests retain authentication. Library metadata must agree with the recognized
+compiler release; binary fallback retains exact executable authentication and permits missing
+gitHead. Ordinary package manifests and non-library files retain their previous hashes.
+Normalized source keys feed declaration handles, identities and canonical API references.
+Identity contract 3 requires regeneration of platform-coloured producers; API hashing,
+inference, customization, policy and transport versions remain unchanged. Core.TS emission
+is compared against the complete committed semantic catalogue on each CI OS, and a compiled
+consumer plus targeted mutations cover reuse and authentication.
+
+Full Core.TS reuse is covered with a compiler-only `export {}` program under the matching
+ES/DOM profile; its generated aliases compile against the original binding. An ordinary
+package probe containing `export function accept(value: Map<string, HTMLElement>):
+Map<string, HTMLElement>;` under the same shipping profile is still rejected for
+`AudioWorkletNodeOptions` API mismatch. The OS-identity correction preserves that guard;
+entry-dependent API compatibility remains a separate investigation.
+
+Diagnosis (2026-10-10): `harvestGlobals` returns early when module exports are
+non-empty and there is no global entry file, even when `typescript/lib` is `ship`.
+The empty Core.TS producer therefore seeds all library declarations, including generic
+`Record`, while the exported-function consumer only reaches instantiated library types.
+The consumer emits `AudioWorkletNodeOptions.parameterData` as a bare `Record<string, float>`
+application without emitting the generic `Record` declaration. Canonical API hashing
+therefore retains the literal name `Record` instead of the producer's declaration identity.
+Captured API texts are otherwise identical; the producer hash is `471214c5bcb9bc1ba777792d18f4bc9149969076b3b419cbab7ac4d6dcf9650c`,
+the consumer hash is `9316f56c62f5670d77a863edc99076431fd54f63527bcf9d1ca553fa1c5b9534`.
+A controlled experiment bypassing only that early return for compiler-library shipping
+restored `Record` and allowed the original exported-function consumer to reuse the complete
+Core.TS catalogue with all authentication enabled. The experiment was reverted after diagnosis;
+the production fix needs harvest regression coverage and full gates, not relaxed API checks.
+
+Validation of the OS identity wave: the full `build.fsx -- test --run-gate` pipeline passed,
+including the Generator and Wire suites, Fable run gate and customization Partas gate.
+The 28 new library identity/reuse cases cover all eight package names, complete Core.TS
+semantic re-emission, compiled aliases and reader rejection paths. Five Node portability
+and provenance checks passed. All 254 checked golden/Core.TS binding and manifest hashes
+remained unchanged. Independent review found no defects; actual Linux execution remains
+for CI, while the Windows regression authenticates the Linux-origin source-byte baseline.
+
+## Compiler-library entry invariance and computed keys (2026-10-10)
+
+Compiler-library `ship` runs harvest globals even when the entry module exports values or
+types. Module-only inputs query an actual default-library source's global scope: querying
+the entry scope duplicated module exports as globals and let local names hide library names.
+Explicit global public inputs retain their own scope. The small scripthost harvest lab
+compares the complete library declaration set across entry forms and checks that Reference,
+Widen and Map continue to withhold library globals. Programs with `no-default-lib` retain
+module exports without reharvesting them as globals.
+
+Drilling the Core.TS matrix exposed a second false mismatch in `String`: structural identities
+hashed escaped computed-member names such as `__@match@1085`. The numeric suffix is a
+compiler-session allocation, so even fresh compiler-only producers could differ. Computed
+member keys now authenticate normalized declaration handles; ordinary names have a disjoint
+encoding. Structural member hashing and inferred parent roles share this key. Missing computed
+declarations do not fall back to a session ID. Identity contract advances from 3 to 4; the
+Customization and policy contracts remain unchanged. Intrinsic checker
+types no longer borrow aggregate export handles or inferred parent roles: their named aliases
+retain their own declaration handles. The identity bump covers both corrections.
+
+Pure index-signature references use explicit `JS.Record` / `JS.ReadonlyRecord` support names.
+Previously a bare `Record` could bind to the shipped library's phantom or a local declaration;
+arity repair qualified it only for some consumers, causing different emitted APIs. Inference
+contract advances to 2 and API contract to 3 for this emitted ABI correction. Core.TS and dependent producers require
+regeneration; source and API authentication remain strict.
+
+The entry matrix covers empty module, function, value, interface, namespace, default, re-export,
+unrelated export, primitive aliases, local library-name/ReadonlyRecord collisions, type-only
+global and mixed public entries against a shared ES5/worker/scripthost catalogue.
+Each entry authenticates and compiles reused TextStreamReader/TextStreamWriter aliases.
+The worker library supplies a declaration-backed path to the synthesized global object;
+scripthost alone cannot catalogue that object. A single full Core.TS smoke retains semantic
+re-emission, Map/HTMLElement and AudioWorkletNodeOptions reuse, and Record/ReadonlyRecord
+collision checks. A global function adds a genuine `typeof globalThis` member: its changed
+GlobalThis API must still reject reuse of the unaugmented catalogue. This is distinct from
+the false entry-dependent hashes.
+
+The small producer is generated lazily once per test process. Every consumer still starts a
+fresh compiler session, and rejection tests mutate their own catalogue copies. The Expecto
+runner owns the producer's scratch-directory lifetime, including cleanup after failures;
+producer-generation failures clean up before propagating. This removes 21 repeated setup runs
+without dropping entry cases or sharing mutable consumer state.
+
+Reference transport, structure and compatibility checks now run immediately after bootstrap,
+before Harvest/Resolve/Shape, using the same cached compiler identity as final authentication.
+The later catalogue pass still checks source closures, F# APIs, owners and variants. This
+changes rejection order for incompatible inputs without accepting additional catalogues or
+changing contract versions. CI Expecto commands emit per-test timings so future repeated
+large-profile traversals can be identified in the job log.
+
+Runtime follow-up validation: the unfiltered Windows CI-mode `build.fsx -- test --run-gate`
+passed 1,258 Generator tests, 99 Wire tests (one existing ignored case per suite), 468 Fable
+checks and the Partas gate. With the shared producer, the Generator suite took 7m11s and the
+complete pipeline 9m21s. The first CI run before producer sharing reduced the Test step from
+41m58s to 24m51s; the Generator suite fell from 37m45s to 19m41s on that Linux runner.
+All tracked goldens and Core.TS artefacts stayed unchanged. A full ESNext/DOM input with an
+incompatible compiler-release reference rejected in 0.55s before declaration traversal.
+
+Validation: the full Windows `build.fsx -- test --run-gate` pipeline passed: 1,249 Generator
+tests, 99 Wire tests (one existing ignored case in each suite), 468 Fable checks and the real
+Partas customization gate. This wave adds 24 regression cases, including private/equal-valued
+literal alias reuse. All 118 golden-generation cases and five Node provenance/portability
+checks passed. Independent review's literal-alias and emitted-ABI probes were addressed.
+The 14 changed existing binding files differ only in explicit support-record qualification;
+all existing findings manifests and compiler input bytes are unchanged. Three new binding/
+manifest hashes cover the scripthost lab. Actual Linux execution remains for CI.
+
+### Combined portable-library and projection catalogue contract
+
+Integrating the independent portable library and early projection changes uses IdentityVersion 5, ApiVersion 4 and InferenceVersion 2. Both branches used API version 3 for different emitted contracts; taking the maximum would accept a pre-integration producer. The combined version rejects both old producers before traversal. Producer closure dependencies authenticate against actual consumer inputs; the shared-input test selects ES5 explicitly rather than relying on package sort order, and separately rejects a producer-only source. Global augmentation is rejected by the final GlobalThis API authentication before output is written.
+
+Regenerating Core.TS adds 776 catalogue declarations relative to the portable-library branch:
+774 literal-overload support declarations now retained in shipped compiler libraries, and
+the two intersection aliases `DecoratorMetadataObject.Base` and `ElementTagNameMap.Base`.
+The full-library smoke regenerates the catalogue and compiles reused consumer types; these
+additions follow the projection branch's overload and anonymous-intersection rules.

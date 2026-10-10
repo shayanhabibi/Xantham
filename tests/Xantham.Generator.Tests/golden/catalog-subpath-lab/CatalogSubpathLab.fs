@@ -30,7 +30,7 @@ module Chat =
     [<Erase>]
     type Exports =
         [<Import("create", "catalog-subpath-lab/chat")>]
-        static member create () : Record<string, U4<Chat.Create.Result.Item, Chat.Create.Result.Item2, Chat.Create.Result.Item3, Chat.Create.Result.Item4>> = jsNative
+        static member create () : JS.Record<string, U4<Chat.Create.Result.Item, Chat.Create.Result.Item2, Chat.Create.Result.Item3, Chat.Create.Result.Item4>> = jsNative
 
     module Create =
         module Result =

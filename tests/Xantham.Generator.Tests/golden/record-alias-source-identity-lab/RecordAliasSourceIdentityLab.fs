@@ -10,6 +10,6 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-type PipelineRecord = Record<string, obj>
+type PipelineRecord = JS.Record<string, obj>
 
-type ModelRecord = Record<string, obj>
+type ModelRecord = JS.Record<string, obj>

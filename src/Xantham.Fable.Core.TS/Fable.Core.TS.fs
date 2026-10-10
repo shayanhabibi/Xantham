@@ -11370,7 +11370,7 @@ module Es =
         /// </summary>
         /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
         /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
-        abstract values<'T>: o: U2<ArrayLike<'T>, Record<string, 'T>> -> 'T[]
+        abstract values<'T>: o: U2<ArrayLike<'T>, JS.Record<string, 'T>> -> 'T[]
         /// <summary>
         /// Returns an array of values of the enumerable own properties of an object
         /// </summary>
@@ -11382,7 +11382,7 @@ module Es =
         /// </summary>
         /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
         /// <param name="o">Object that contains the properties and methods. This can be an object that you created or an existing Document Object Model (DOM) object.</param>
-        abstract entries<'T>: o: U2<ArrayLike<'T>, Record<string, 'T>> -> (string * 'T)[]
+        abstract entries<'T>: o: U2<ArrayLike<'T>, JS.Record<string, 'T>> -> (string * 'T)[]
         /// <summary>
         /// Returns an array of key/values of the enumerable own properties of an object
         /// </summary>
@@ -11399,7 +11399,7 @@ module Es =
         /// </summary>
         /// <param name="entries">An iterable object that contains key-value entries for properties and methods.</param>
         /// <param name="entries">An iterable object that contains key-value entries for properties and methods.</param>
-        abstract fromEntries<'T>: entries: Iterable<(PropertyKey * 'T), obj, obj> -> Record<string, 'T>
+        abstract fromEntries<'T>: entries: Iterable<(PropertyKey * 'T), obj, obj> -> JS.Record<string, 'T>
         /// <summary>
         /// Returns an object created by key-value entries for properties and methods
         /// </summary>
@@ -19016,6 +19016,19 @@ module Es =
             | [<CompiledName("search")>] Search
             | [<CompiledName("sort")>] Sort
 
+    module Date =
+        [<StringEnum(CaseRules.None)>]
+        type Default =
+            | [<CompiledName("default")>] Default
+
+        [<StringEnum(CaseRules.None)>]
+        type Number =
+            | [<CompiledName("number")>] Number
+
+        [<StringEnum(CaseRules.None)>]
+        type String =
+            | [<CompiledName("string")>] String
+
     module DateTimeFormatOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type DateStyle =
@@ -19084,6 +19097,15 @@ module Es =
         type ItemConstructor =
             [<EmitConstructor>]
             abstract Create: [<ParamArray>] args: obj -> obj
+
+    module DecoratorMetadataObject =
+        type Base =
+            [<EmitIndexer>]
+            abstract Item: string -> obj with get, set
+            [<EmitIndexer>]
+            abstract Item: float -> obj with get, set
+            [<EmitIndexer>]
+            abstract Item: obj -> obj with get, set
 
     module Duration =
         module With =
@@ -19172,6 +19194,68 @@ module Es =
                 | [<CompiledName("millisecond")>] Millisecond
                 | [<CompiledName("nanosecond")>] Nanosecond
                 | [<CompiledName("second")>] Second
+
+    module ElementTagNameMap =
+        type Base =
+            abstract animate: Fable.Core.TS.Dom.SVGAnimateElement with get, set
+            abstract animateMotion: Fable.Core.TS.Dom.SVGAnimateMotionElement with get, set
+            abstract animateTransform: Fable.Core.TS.Dom.SVGAnimateTransformElement with get, set
+            abstract circle: Fable.Core.TS.Dom.SVGCircleElement with get, set
+            abstract clipPath: Fable.Core.TS.Dom.SVGClipPathElement with get, set
+            abstract defs: Fable.Core.TS.Dom.SVGDefsElement with get, set
+            abstract desc: Fable.Core.TS.Dom.SVGDescElement with get, set
+            abstract ellipse: Fable.Core.TS.Dom.SVGEllipseElement with get, set
+            abstract feBlend: Fable.Core.TS.Dom.SVGFEBlendElement with get, set
+            abstract feColorMatrix: Fable.Core.TS.Dom.SVGFEColorMatrixElement with get, set
+            abstract feComponentTransfer: Fable.Core.TS.Dom.SVGFEComponentTransferElement with get, set
+            abstract feComposite: Fable.Core.TS.Dom.SVGFECompositeElement with get, set
+            abstract feConvolveMatrix: Fable.Core.TS.Dom.SVGFEConvolveMatrixElement with get, set
+            abstract feDiffuseLighting: Fable.Core.TS.Dom.SVGFEDiffuseLightingElement with get, set
+            abstract feDisplacementMap: Fable.Core.TS.Dom.SVGFEDisplacementMapElement with get, set
+            abstract feDistantLight: Fable.Core.TS.Dom.SVGFEDistantLightElement with get, set
+            abstract feDropShadow: Fable.Core.TS.Dom.SVGFEDropShadowElement with get, set
+            abstract feFlood: Fable.Core.TS.Dom.SVGFEFloodElement with get, set
+            abstract feFuncA: Fable.Core.TS.Dom.SVGFEFuncAElement with get, set
+            abstract feFuncB: Fable.Core.TS.Dom.SVGFEFuncBElement with get, set
+            abstract feFuncG: Fable.Core.TS.Dom.SVGFEFuncGElement with get, set
+            abstract feFuncR: Fable.Core.TS.Dom.SVGFEFuncRElement with get, set
+            abstract feGaussianBlur: Fable.Core.TS.Dom.SVGFEGaussianBlurElement with get, set
+            abstract feImage: Fable.Core.TS.Dom.SVGFEImageElement with get, set
+            abstract feMerge: Fable.Core.TS.Dom.SVGFEMergeElement with get, set
+            abstract feMergeNode: Fable.Core.TS.Dom.SVGFEMergeNodeElement with get, set
+            abstract feMorphology: Fable.Core.TS.Dom.SVGFEMorphologyElement with get, set
+            abstract feOffset: Fable.Core.TS.Dom.SVGFEOffsetElement with get, set
+            abstract fePointLight: Fable.Core.TS.Dom.SVGFEPointLightElement with get, set
+            abstract feSpecularLighting: Fable.Core.TS.Dom.SVGFESpecularLightingElement with get, set
+            abstract feSpotLight: Fable.Core.TS.Dom.SVGFESpotLightElement with get, set
+            abstract feTile: Fable.Core.TS.Dom.SVGFETileElement with get, set
+            abstract feTurbulence: Fable.Core.TS.Dom.SVGFETurbulenceElement with get, set
+            abstract filter: Fable.Core.TS.Dom.SVGFilterElement with get, set
+            abstract foreignObject: Fable.Core.TS.Dom.SVGForeignObjectElement with get, set
+            abstract g: Fable.Core.TS.Dom.SVGGElement with get, set
+            abstract image: Fable.Core.TS.Dom.SVGImageElement with get, set
+            abstract line: Fable.Core.TS.Dom.SVGLineElement with get, set
+            abstract linearGradient: Fable.Core.TS.Dom.SVGLinearGradientElement with get, set
+            abstract marker: Fable.Core.TS.Dom.SVGMarkerElement with get, set
+            abstract mask: Fable.Core.TS.Dom.SVGMaskElement with get, set
+            abstract metadata: Fable.Core.TS.Dom.SVGMetadataElement with get, set
+            abstract mpath: Fable.Core.TS.Dom.SVGMPathElement with get, set
+            abstract path: Fable.Core.TS.Dom.SVGPathElement with get, set
+            abstract pattern: Fable.Core.TS.Dom.SVGPatternElement with get, set
+            abstract polygon: Fable.Core.TS.Dom.SVGPolygonElement with get, set
+            abstract polyline: Fable.Core.TS.Dom.SVGPolylineElement with get, set
+            abstract radialGradient: Fable.Core.TS.Dom.SVGRadialGradientElement with get, set
+            abstract rect: Fable.Core.TS.Dom.SVGRectElement with get, set
+            abstract set: Fable.Core.TS.Dom.SVGSetElement with get, set
+            abstract stop: Fable.Core.TS.Dom.SVGStopElement with get, set
+            abstract svg: Fable.Core.TS.Dom.SVGSVGElement with get, set
+            abstract switch: Fable.Core.TS.Dom.SVGSwitchElement with get, set
+            abstract symbol: Fable.Core.TS.Dom.SVGSymbolElement with get, set
+            abstract text: Fable.Core.TS.Dom.SVGTextElement with get, set
+            abstract textPath: Fable.Core.TS.Dom.SVGTextPathElement with get, set
+            abstract tspan: Fable.Core.TS.Dom.SVGTSpanElement with get, set
+            abstract ``use``: Fable.Core.TS.Dom.SVGUseElement with get, set
+            abstract view: Fable.Core.TS.Dom.SVGViewElement with get, set
 
     module Float16Array =
         module Every =
@@ -20723,10 +20807,10 @@ module Dom =
         abstract numberOfInputs: float option with get, set
         abstract numberOfOutputs: float option with get, set
         abstract outputChannelCount: float[] option with get, set
-        abstract parameterData: Fable.Core.TS.Es.Record<string, float> option with get, set
+        abstract parameterData: JS.Record<string, float> option with get, set
         abstract processorOptions: obj option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?numberOfInputs: float, ?numberOfOutputs: float, ?outputChannelCount: float[], ?parameterData: Fable.Core.TS.Es.Record<string, float>, ?processorOptions: obj, ?channelCount: float, ?channelCountMode: ChannelCountMode, ?channelInterpretation: ChannelInterpretation) : AudioWorkletNodeOptions = jsNative
+        static member Create (?numberOfInputs: float, ?numberOfOutputs: float, ?outputChannelCount: float[], ?parameterData: JS.Record<string, float>, ?processorOptions: obj, ?channelCount: float, ?channelCountMode: ChannelCountMode, ?channelInterpretation: ChannelInterpretation) : AudioWorkletNodeOptions = jsNative
 
     [<Interface>]
     type AuthenticationExtensionsClientInputs =
@@ -20804,16 +20888,16 @@ module Dom =
     [<Interface>]
     type AuthenticationExtensionsPRFInputs =
         abstract eval: AuthenticationExtensionsPRFValues option with get, set
-        abstract evalByCredential: Fable.Core.TS.Es.Record<string, AuthenticationExtensionsPRFValues> option with get, set
+        abstract evalByCredential: JS.Record<string, AuthenticationExtensionsPRFValues> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?eval: AuthenticationExtensionsPRFValues, ?evalByCredential: Fable.Core.TS.Es.Record<string, AuthenticationExtensionsPRFValues>) : AuthenticationExtensionsPRFInputs = jsNative
+        static member Create (?eval: AuthenticationExtensionsPRFValues, ?evalByCredential: JS.Record<string, AuthenticationExtensionsPRFValues>) : AuthenticationExtensionsPRFInputs = jsNative
 
     [<Interface>]
     type AuthenticationExtensionsPRFInputsJSON =
         abstract eval: AuthenticationExtensionsPRFValuesJSON option with get, set
-        abstract evalByCredential: Fable.Core.TS.Es.Record<string, AuthenticationExtensionsPRFValuesJSON> option with get, set
+        abstract evalByCredential: JS.Record<string, AuthenticationExtensionsPRFValuesJSON> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?eval: AuthenticationExtensionsPRFValuesJSON, ?evalByCredential: Fable.Core.TS.Es.Record<string, AuthenticationExtensionsPRFValuesJSON>) : AuthenticationExtensionsPRFInputsJSON = jsNative
+        static member Create (?eval: AuthenticationExtensionsPRFValuesJSON, ?evalByCredential: JS.Record<string, AuthenticationExtensionsPRFValuesJSON>) : AuthenticationExtensionsPRFInputsJSON = jsNative
 
     [<Interface>]
     type AuthenticationExtensionsPRFOutputs =
@@ -21312,15 +21396,15 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Instance/exports">MDN Reference</a>
         /// </summary>
-        abstract exports: Fable.Core.TS.Es.Record<string, ExportValue>
+        abstract exports: JS.Record<string, ExportValue>
         [<ParamObject; Emit("$0")>]
-        static member Create (exports: Fable.Core.TS.Es.Record<string, ExportValue>) : Instance = jsNative
+        static member Create (exports: JS.Record<string, ExportValue>) : Instance = jsNative
 
     type InstanceConstructor =
         [<EmitConstructor>]
-        abstract Create: ``module``: obj * ?importObject: Fable.Core.TS.Es.Record<string, Fable.Core.TS.Es.Record<string, ImportValue>> -> Instance
+        abstract Create: ``module``: obj * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> -> Instance
 
-    type InstantiateStreaming = delegate of source: U2<Fable.Core.TS.Es.PromiseLike<Response>, Response> * importObject: Fable.Core.TS.Es.Record<string, Fable.Core.TS.Es.Record<string, ImportValue>> option * options: WebAssemblyCompileOptions option -> Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
+    type InstantiateStreaming = delegate of source: U2<Fable.Core.TS.Es.PromiseLike<Response>, Response> * importObject: JS.Record<string, JS.Record<string, ImportValue>> option * options: WebAssemblyCompileOptions option -> Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
 
     [<Interface>]
     type LinkError =
@@ -21521,11 +21605,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiate_static">MDN Reference</a>
         /// </summary>
-        abstract instantiate: bytes: BufferSource * ?importObject: Fable.Core.TS.Es.Record<string, Fable.Core.TS.Es.Record<string, ImportValue>> * ?options: WebAssemblyCompileOptions -> Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
+        abstract instantiate: bytes: BufferSource * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> * ?options: WebAssemblyCompileOptions -> Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiate_static">MDN Reference</a>
         /// </summary>
-        abstract instantiate: moduleObject: obj * ?importObject: Fable.Core.TS.Es.Record<string, Fable.Core.TS.Es.Record<string, ImportValue>> -> Fable.Core.TS.Es.Promise<Instance>
+        abstract instantiate: moduleObject: obj * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> -> Fable.Core.TS.Es.Promise<Instance>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiateStreaming_static">MDN Reference</a>
         /// </summary>
@@ -22339,9 +22423,9 @@ module Dom =
         inherit GPUObjectDescriptorBase
         abstract defaultQueue: GPUQueueDescriptor option with get, set
         abstract requiredFeatures: GPUFeatureName[] option with get, set
-        abstract requiredLimits: Fable.Core.TS.Es.Record<string, float option> option with get, set
+        abstract requiredLimits: JS.Record<string, float option> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?defaultQueue: GPUQueueDescriptor, ?requiredFeatures: GPUFeatureName[], ?requiredLimits: Fable.Core.TS.Es.Record<string, float option>, ?label: string) : GPUDeviceDescriptor = jsNative
+        static member Create (?defaultQueue: GPUQueueDescriptor, ?requiredFeatures: GPUFeatureName[], ?requiredLimits: JS.Record<string, float option>, ?label: string) : GPUDeviceDescriptor = jsNative
 
     [<Interface>]
     type GPUExtent3DDict =
@@ -22366,7 +22450,7 @@ module Dom =
         inherit GPUProgrammableStage
         abstract targets: GPUColorTargetState option[] with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (targets: GPUColorTargetState option[], ``module``: GPUShaderModule, ?constants: Fable.Core.TS.Es.Record<string, float>, ?entryPoint: string) : GPUFragmentState = jsNative
+        static member Create (targets: GPUColorTargetState option[], ``module``: GPUShaderModule, ?constants: JS.Record<string, float>, ?entryPoint: string) : GPUFragmentState = jsNative
 
     [<Interface>]
     type GPUMultisampleState =
@@ -22429,11 +22513,11 @@ module Dom =
 
     [<Interface>]
     type GPUProgrammableStage =
-        abstract constants: Fable.Core.TS.Es.Record<string, float> option with get, set
+        abstract constants: JS.Record<string, float> option with get, set
         abstract entryPoint: string option with get, set
         abstract ``module``: GPUShaderModule with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``module``: GPUShaderModule, ?constants: Fable.Core.TS.Es.Record<string, float>, ?entryPoint: string) : GPUProgrammableStage = jsNative
+        static member Create (``module``: GPUShaderModule, ?constants: JS.Record<string, float>, ?entryPoint: string) : GPUProgrammableStage = jsNative
 
     [<Interface>]
     type GPUQuerySetDescriptor =
@@ -22667,7 +22751,7 @@ module Dom =
         inherit GPUProgrammableStage
         abstract buffers: GPUVertexBufferLayout option[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``module``: GPUShaderModule, ?buffers: GPUVertexBufferLayout option[], ?constants: Fable.Core.TS.Es.Record<string, float>, ?entryPoint: string) : GPUVertexState = jsNative
+        static member Create (``module``: GPUShaderModule, ?buffers: GPUVertexBufferLayout option[], ?constants: JS.Record<string, float>, ?entryPoint: string) : GPUVertexState = jsNative
 
     [<Interface>]
     type GainOptions =
@@ -23906,9 +23990,9 @@ module Dom =
     type PushSubscriptionJSON =
         abstract endpoint: string option with get, set
         abstract expirationTime: float option with get, set
-        abstract keys: Fable.Core.TS.Es.Record<string, string> option with get, set
+        abstract keys: JS.Record<string, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?endpoint: string, ?expirationTime: float, ?keys: Fable.Core.TS.Es.Record<string, string>) : PushSubscriptionJSON = jsNative
+        static member Create (?endpoint: string, ?expirationTime: float, ?keys: JS.Record<string, string>) : PushSubscriptionJSON = jsNative
 
     [<Interface>]
     type PushSubscriptionOptionsInit =
@@ -24171,7 +24255,7 @@ module Dom =
         abstract nackCount: float option with get, set
         abstract pliCount: float option with get, set
         abstract qpSum: float option with get, set
-        abstract qualityLimitationDurations: Fable.Core.TS.Es.Record<string, float> option with get, set
+        abstract qualityLimitationDurations: JS.Record<string, float> option with get, set
         abstract qualityLimitationReason: RTCQualityLimitationReason option with get, set
         abstract qualityLimitationResolutionChanges: float option with get, set
         abstract remoteId: string option with get, set
@@ -24990,10 +25074,10 @@ module Dom =
 
     [<Interface>]
     type URLPatternComponentResult =
-        abstract groups: Fable.Core.TS.Es.Record<string, string option> with get, set
+        abstract groups: JS.Record<string, string option> with get, set
         abstract input: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (groups: Fable.Core.TS.Es.Record<string, string option>, input: string) : URLPatternComponentResult = jsNative
+        static member Create (groups: JS.Record<string, string option>, input: string) : URLPatternComponentResult = jsNative
 
     [<Interface>]
     type URLPatternInit =
@@ -34023,7 +34107,7 @@ module Dom =
         /// </summary>
         abstract supports: ``type``: string -> bool
         [<EmitConstructor>]
-        abstract Create: items: Fable.Core.TS.Es.Record<string, U3<string, Blob, Fable.Core.TS.Es.PromiseLike<U2<string, Blob>>>> * ?options: ClipboardItemOptions -> ClipboardItem
+        abstract Create: items: JS.Record<string, U3<string, Blob, Fable.Core.TS.Es.PromiseLike<U2<string, Blob>>>> * ?options: ClipboardItemOptions -> ClipboardItem
 
     /// <summary>
     /// A <b><c>CloseEvent</c></b> is sent to clients using WebSockets when the connection is closed. This is delivered to the listener indicated by the WebSocket object's onclose attribute.
@@ -36371,13 +36455,31 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
         /// </summary>
-        abstract createElementNS: namespaceURI: string * qualifiedName: string -> HTMLElement
+        abstract createElementNS: namespaceURI: Document.HttpWwwW3Org1999Xhtml * qualifiedName: string -> HTMLElement
         /// <summary>
         /// Creates an element with the specified namespace URI and qualified name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
         /// </summary>
-        abstract createElementNS<'K>: namespaceURI: string * qualifiedName: 'K -> U63<SVGAElement, SVGAnimateElement, SVGAnimateMotionElement, SVGAnimateTransformElement, SVGCircleElement, SVGClipPathElement, SVGDefsElement, SVGDescElement, SVGEllipseElement, SVGFEBlendElement, SVGFEColorMatrixElement, SVGFEComponentTransferElement, SVGFECompositeElement, SVGFEConvolveMatrixElement, SVGFEDiffuseLightingElement, SVGFEDisplacementMapElement, SVGFEDistantLightElement, SVGFEDropShadowElement, SVGFEFloodElement, SVGFEFuncAElement, SVGFEFuncBElement, SVGFEFuncGElement, SVGFEFuncRElement, SVGFEGaussianBlurElement, SVGFEImageElement, SVGFEMergeElement, SVGFEMergeNodeElement, SVGFEMorphologyElement, SVGFEOffsetElement, SVGFEPointLightElement, SVGFESpecularLightingElement, SVGFESpotLightElement, SVGFETileElement, SVGFETurbulenceElement, SVGFilterElement, SVGForeignObjectElement, SVGGElement, SVGImageElement, SVGLineElement, SVGLinearGradientElement, SVGMarkerElement, SVGMaskElement, SVGMetadataElement, SVGMPathElement, SVGPathElement, SVGPatternElement, SVGPolygonElement, SVGPolylineElement, SVGRadialGradientElement, SVGRectElement, SVGScriptElement, SVGSetElement, SVGStopElement, SVGStyleElement, SVGSVGElement, SVGSwitchElement, SVGSymbolElement, SVGTextElement, SVGTextPathElement, SVGTitleElement, SVGTSpanElement, SVGUseElement, SVGViewElement>
+        abstract createElementNS<'K>: namespaceURI: Document.HttpWwwW3Org2000Svg * qualifiedName: 'K -> U63<SVGAElement, SVGAnimateElement, SVGAnimateMotionElement, SVGAnimateTransformElement, SVGCircleElement, SVGClipPathElement, SVGDefsElement, SVGDescElement, SVGEllipseElement, SVGFEBlendElement, SVGFEColorMatrixElement, SVGFEComponentTransferElement, SVGFECompositeElement, SVGFEConvolveMatrixElement, SVGFEDiffuseLightingElement, SVGFEDisplacementMapElement, SVGFEDistantLightElement, SVGFEDropShadowElement, SVGFEFloodElement, SVGFEFuncAElement, SVGFEFuncBElement, SVGFEFuncGElement, SVGFEFuncRElement, SVGFEGaussianBlurElement, SVGFEImageElement, SVGFEMergeElement, SVGFEMergeNodeElement, SVGFEMorphologyElement, SVGFEOffsetElement, SVGFEPointLightElement, SVGFESpecularLightingElement, SVGFESpotLightElement, SVGFETileElement, SVGFETurbulenceElement, SVGFilterElement, SVGForeignObjectElement, SVGGElement, SVGImageElement, SVGLineElement, SVGLinearGradientElement, SVGMarkerElement, SVGMaskElement, SVGMetadataElement, SVGMPathElement, SVGPathElement, SVGPatternElement, SVGPolygonElement, SVGPolylineElement, SVGRadialGradientElement, SVGRectElement, SVGScriptElement, SVGSetElement, SVGStopElement, SVGStyleElement, SVGSVGElement, SVGSwitchElement, SVGSymbolElement, SVGTextElement, SVGTextPathElement, SVGTitleElement, SVGTSpanElement, SVGUseElement, SVGViewElement>
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS: namespaceURI: Document.HttpWwwW3Org2000Svg * qualifiedName: string -> SVGElement
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS<'K>: namespaceURI: Document.HttpWwwW3Org1998MathMathML * qualifiedName: 'K -> MathMLElement
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS: namespaceURI: Document.HttpWwwW3Org1998MathMathML * qualifiedName: string -> MathMLElement
         /// <summary>
         /// Creates an element with the specified namespace URI and qualified name.
         /// <br /><br />
@@ -36394,7 +36496,367 @@ module Dom =
         /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
-        abstract createEvent: eventInterface: string -> AnimationEvent
+        abstract createEvent: eventInterface: Document.AnimationEvent -> AnimationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.AnimationPlaybackEvent -> AnimationPlaybackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.AudioProcessingEvent -> AudioProcessingEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.BeforeUnloadEvent -> BeforeUnloadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.BlobEvent -> BlobEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.ClipboardEvent -> ClipboardEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.CloseEvent -> CloseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.CommandEvent -> CommandEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.CompositionEvent -> CompositionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.ContentVisibilityAutoStateChangeEvent -> ContentVisibilityAutoStateChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.CookieChangeEvent -> CookieChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.CustomEvent -> CustomEvent<obj>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.DeviceMotionEvent -> DeviceMotionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.DeviceOrientationEvent -> DeviceOrientationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.DragEvent -> DragEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.ErrorEvent -> ErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.Event -> Event
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.Events -> Event
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.FocusEvent -> FocusEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.FontFaceSetLoadEvent -> FontFaceSetLoadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.FormDataEvent -> FormDataEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.GPUUncapturedErrorEvent -> GPUUncapturedErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.GamepadEvent -> GamepadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.HashChangeEvent -> HashChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.IDBVersionChangeEvent -> IDBVersionChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.InputEvent -> InputEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.KeyboardEvent -> KeyboardEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MIDIConnectionEvent -> MIDIConnectionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MIDIMessageEvent -> MIDIMessageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MediaEncryptedEvent -> MediaEncryptedEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MediaKeyMessageEvent -> MediaKeyMessageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MediaQueryListEvent -> MediaQueryListEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MediaStreamTrackEvent -> MediaStreamTrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MessageEvent -> MessageEvent<obj>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MouseEvent -> MouseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.MouseEvents -> MouseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.NavigateEvent -> NavigateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.NavigationCurrentEntryChangeEvent -> NavigationCurrentEntryChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.OfflineAudioCompletionEvent -> OfflineAudioCompletionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PageRevealEvent -> PageRevealEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PageSwapEvent -> PageSwapEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PageTransitionEvent -> PageTransitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PaymentMethodChangeEvent -> PaymentMethodChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PaymentRequestUpdateEvent -> PaymentRequestUpdateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PictureInPictureEvent -> PictureInPictureEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PointerEvent -> PointerEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PopStateEvent -> PopStateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.ProgressEvent -> ProgressEvent<EventTarget>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.PromiseRejectionEvent -> PromiseRejectionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.RTCDTMFToneChangeEvent -> RTCDTMFToneChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.RTCDataChannelEvent -> RTCDataChannelEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.RTCErrorEvent -> RTCErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.RTCPeerConnectionIceErrorEvent -> RTCPeerConnectionIceErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.RTCPeerConnectionIceEvent -> RTCPeerConnectionIceEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.RTCTrackEvent -> RTCTrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.SecurityPolicyViolationEvent -> SecurityPolicyViolationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.SpeechRecognitionErrorEvent -> SpeechRecognitionErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.SpeechRecognitionEvent -> SpeechRecognitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.SpeechSynthesisErrorEvent -> SpeechSynthesisErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.SpeechSynthesisEvent -> SpeechSynthesisEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.StorageEvent -> StorageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.SubmitEvent -> SubmitEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.TaskPriorityChangeEvent -> TaskPriorityChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.TextEvent -> TextEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.ToggleEvent -> ToggleEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.TouchEvent -> TouchEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.TrackEvent -> TrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.TransitionEvent -> TransitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.UIEvent -> UIEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.UIEvents -> UIEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.WebGLContextEvent -> WebGLContextEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: Document.WheelEvent -> WheelEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: string -> Event
         /// <summary>
         /// The <b><c>Document.createNodeIterator()</c></b> method returns a new NodeIterator object.
         /// <br /><br />
@@ -36483,7 +36945,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
         /// </summary>
-        abstract getElementsByTagNameNS: namespaceURI: string * localName: string -> HTMLCollectionOf<HTMLElement>
+        abstract getElementsByTagNameNS: namespaceURI: Document.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: Document.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: Document.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
         /// <summary>
         /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
         /// <br /><br />
@@ -37183,7 +37657,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
         /// </summary>
-        abstract getElementsByTagNameNS: namespaceURI: string * localName: string -> HTMLCollectionOf<HTMLElement>
+        abstract getElementsByTagNameNS: namespaceURI: Element.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: Element.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: Element.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
         /// <summary>
         /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
         /// <br /><br />
@@ -41262,6 +41748,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/type">MDN Reference</a>
         /// </summary>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAnchorElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAnchorElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAnchorElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLAnchorElementConstructor =
         [<EmitConstructor>]
@@ -41331,6 +41835,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAreaElement/target">MDN Reference</a>
         /// </summary>
         abstract target: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAreaElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAreaElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAreaElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLAreaElementConstructor =
         [<EmitConstructor>]
@@ -41343,6 +41865,24 @@ module Dom =
     /// </summary>
     type HTMLAudioElement =
         inherit HTMLMediaElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAudioElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAudioElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLAudioElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLAudioElementConstructor =
         [<EmitConstructor>]
@@ -41357,6 +41897,24 @@ module Dom =
         inherit HTMLElement
         /// <remarks>@deprecated</remarks>
         abstract clear: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBRElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBRElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBRElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLBRElementConstructor =
         [<EmitConstructor>]
@@ -41381,6 +41939,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLBaseElement/target">MDN Reference</a>
         /// </summary>
         abstract target: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBaseElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBaseElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBaseElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLBaseElementConstructor =
         [<EmitConstructor>]
@@ -41422,6 +41998,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
         abstract removeEventListener<'K>: ``type``: 'K * listener: (U30<UIEvent, Event, AnimationEvent, PointerEvent, InputEvent, ToggleEvent, BeforeUnloadEvent, FocusEvent, CompositionEvent, ClipboardEvent, MouseEvent, DragEvent, ErrorEvent, FormDataEvent, GamepadEvent, HashChangeEvent, KeyboardEvent, MessageEvent<obj>, PageTransitionEvent, PageRevealEvent, PageSwapEvent, PopStateEvent, ProgressEvent<EventTarget>, PromiseRejectionEvent, SecurityPolicyViolationEvent, StorageEvent, SubmitEvent, TouchEvent, TransitionEvent, WheelEvent> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBodyElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBodyElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLBodyElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLBodyElementConstructor =
         [<EmitConstructor>]
@@ -41549,6 +42143,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLButtonElement/setCustomValidity">MDN Reference</a>
         /// </summary>
         abstract setCustomValidity: error: string -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLButtonElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLButtonElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLButtonElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLButtonElementConstructor =
         [<EmitConstructor>]
@@ -41596,7 +42208,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/getContext">MDN Reference</a>
         /// </summary>
-        abstract getContext: contextId: string * ?options: WebGLContextAttributes -> WebGLRenderingContext option
+        abstract getContext: contextId: HTMLCanvasElement.Webgl * ?options: WebGLContextAttributes -> WebGLRenderingContext option
+        /// <summary>
+        /// The <b><c>HTMLCanvasElement.getContext()</c></b> method returns a drawing context on the canvas, or null if the context identifier is not supported, or the canvas has already been set to a different context mode.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/getContext">MDN Reference</a>
+        /// </summary>
+        abstract getContext: contextId: HTMLCanvasElement.Webgl2 * ?options: WebGLContextAttributes -> WebGL2RenderingContext option
         /// <summary>
         /// The <b><c>HTMLCanvasElement.getContext()</c></b> method returns a drawing context on the canvas, or null if the context identifier is not supported, or the canvas has already been set to a different context mode.
         /// <br /><br />
@@ -41621,6 +42239,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/transferControlToOffscreen">MDN Reference</a>
         /// </summary>
         abstract transferControlToOffscreen: unit -> OffscreenCanvas
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLCanvasElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLCanvasElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLCanvasElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLCanvasElementConstructor =
         [<EmitConstructor>]
@@ -41684,6 +42320,24 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLDListElement/compact">MDN Reference</a></remarks>
         abstract compact: bool with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDListElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDListElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDListElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLDListElementConstructor =
         [<EmitConstructor>]
@@ -41702,6 +42356,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDataElement/value">MDN Reference</a>
         /// </summary>
         abstract value: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDataElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDataElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDataElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLDataElementConstructor =
         [<EmitConstructor>]
@@ -41720,6 +42392,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDataListElement/options">MDN Reference</a>
         /// </summary>
         abstract options: HTMLCollectionOf<HTMLOptionElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDataListElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDataListElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDataListElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLDataListElementConstructor =
         [<EmitConstructor>]
@@ -41744,6 +42434,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDetailsElement/open">MDN Reference</a>
         /// </summary>
         abstract ``open``: bool with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDetailsElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDetailsElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDetailsElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLDetailsElementConstructor =
         [<EmitConstructor>]
@@ -41798,6 +42506,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/showModal">MDN Reference</a>
         /// </summary>
         abstract showModal: unit -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDialogElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDialogElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDialogElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLDialogElementConstructor =
         [<EmitConstructor>]
@@ -41809,6 +42535,24 @@ module Dom =
         inherit HTMLElement
         /// <remarks>@deprecated</remarks>
         abstract compact: bool with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDirectoryElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDirectoryElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDirectoryElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLDirectoryElementConstructor =
         [<EmitConstructor>]
@@ -41823,6 +42567,24 @@ module Dom =
         inherit HTMLElement
         /// <remarks>@deprecated</remarks>
         abstract align: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDivElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDivElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDivElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLDivElementConstructor =
         [<EmitConstructor>]
@@ -41833,6 +42595,414 @@ module Dom =
     /// </summary>
     type HTMLDocument =
         inherit Document
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS: namespaceURI: HTMLDocument.HttpWwwW3Org1999Xhtml * qualifiedName: string -> HTMLElement
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS<'K>: namespaceURI: HTMLDocument.HttpWwwW3Org2000Svg * qualifiedName: 'K -> U63<SVGAElement, SVGAnimateElement, SVGAnimateMotionElement, SVGAnimateTransformElement, SVGCircleElement, SVGClipPathElement, SVGDefsElement, SVGDescElement, SVGEllipseElement, SVGFEBlendElement, SVGFEColorMatrixElement, SVGFEComponentTransferElement, SVGFECompositeElement, SVGFEConvolveMatrixElement, SVGFEDiffuseLightingElement, SVGFEDisplacementMapElement, SVGFEDistantLightElement, SVGFEDropShadowElement, SVGFEFloodElement, SVGFEFuncAElement, SVGFEFuncBElement, SVGFEFuncGElement, SVGFEFuncRElement, SVGFEGaussianBlurElement, SVGFEImageElement, SVGFEMergeElement, SVGFEMergeNodeElement, SVGFEMorphologyElement, SVGFEOffsetElement, SVGFEPointLightElement, SVGFESpecularLightingElement, SVGFESpotLightElement, SVGFETileElement, SVGFETurbulenceElement, SVGFilterElement, SVGForeignObjectElement, SVGGElement, SVGImageElement, SVGLineElement, SVGLinearGradientElement, SVGMarkerElement, SVGMaskElement, SVGMetadataElement, SVGMPathElement, SVGPathElement, SVGPatternElement, SVGPolygonElement, SVGPolylineElement, SVGRadialGradientElement, SVGRectElement, SVGScriptElement, SVGSetElement, SVGStopElement, SVGStyleElement, SVGSVGElement, SVGSwitchElement, SVGSymbolElement, SVGTextElement, SVGTextPathElement, SVGTitleElement, SVGTSpanElement, SVGUseElement, SVGViewElement>
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS: namespaceURI: HTMLDocument.HttpWwwW3Org2000Svg * qualifiedName: string -> SVGElement
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS<'K>: namespaceURI: HTMLDocument.HttpWwwW3Org1998MathMathML * qualifiedName: 'K -> MathMLElement
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS: namespaceURI: HTMLDocument.HttpWwwW3Org1998MathMathML * qualifiedName: string -> MathMLElement
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.AnimationEvent -> AnimationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.AnimationPlaybackEvent -> AnimationPlaybackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.AudioProcessingEvent -> AudioProcessingEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.BeforeUnloadEvent -> BeforeUnloadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.BlobEvent -> BlobEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.ClipboardEvent -> ClipboardEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.CloseEvent -> CloseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.CommandEvent -> CommandEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.CompositionEvent -> CompositionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.ContentVisibilityAutoStateChangeEvent -> ContentVisibilityAutoStateChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.CookieChangeEvent -> CookieChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.CustomEvent -> CustomEvent<obj>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.DeviceMotionEvent -> DeviceMotionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.DeviceOrientationEvent -> DeviceOrientationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.DragEvent -> DragEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.ErrorEvent -> ErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.Event -> Event
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.Events -> Event
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.FocusEvent -> FocusEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.FontFaceSetLoadEvent -> FontFaceSetLoadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.FormDataEvent -> FormDataEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.GPUUncapturedErrorEvent -> GPUUncapturedErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.GamepadEvent -> GamepadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.HashChangeEvent -> HashChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.IDBVersionChangeEvent -> IDBVersionChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.InputEvent -> InputEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.KeyboardEvent -> KeyboardEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MIDIConnectionEvent -> MIDIConnectionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MIDIMessageEvent -> MIDIMessageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MediaEncryptedEvent -> MediaEncryptedEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MediaKeyMessageEvent -> MediaKeyMessageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MediaQueryListEvent -> MediaQueryListEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MediaStreamTrackEvent -> MediaStreamTrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MessageEvent -> MessageEvent<obj>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MouseEvent -> MouseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.MouseEvents -> MouseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.NavigateEvent -> NavigateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.NavigationCurrentEntryChangeEvent -> NavigationCurrentEntryChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.OfflineAudioCompletionEvent -> OfflineAudioCompletionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PageRevealEvent -> PageRevealEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PageSwapEvent -> PageSwapEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PageTransitionEvent -> PageTransitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PaymentMethodChangeEvent -> PaymentMethodChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PaymentRequestUpdateEvent -> PaymentRequestUpdateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PictureInPictureEvent -> PictureInPictureEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PointerEvent -> PointerEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PopStateEvent -> PopStateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.ProgressEvent -> ProgressEvent<EventTarget>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.PromiseRejectionEvent -> PromiseRejectionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.RTCDTMFToneChangeEvent -> RTCDTMFToneChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.RTCDataChannelEvent -> RTCDataChannelEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.RTCErrorEvent -> RTCErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.RTCPeerConnectionIceErrorEvent -> RTCPeerConnectionIceErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.RTCPeerConnectionIceEvent -> RTCPeerConnectionIceEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.RTCTrackEvent -> RTCTrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.SecurityPolicyViolationEvent -> SecurityPolicyViolationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.SpeechRecognitionErrorEvent -> SpeechRecognitionErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.SpeechRecognitionEvent -> SpeechRecognitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.SpeechSynthesisErrorEvent -> SpeechSynthesisErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.SpeechSynthesisEvent -> SpeechSynthesisEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.StorageEvent -> StorageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.SubmitEvent -> SubmitEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.TaskPriorityChangeEvent -> TaskPriorityChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.TextEvent -> TextEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.ToggleEvent -> ToggleEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.TouchEvent -> TouchEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.TrackEvent -> TrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.TransitionEvent -> TransitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.UIEvent -> UIEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.UIEvents -> UIEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.WebGLContextEvent -> WebGLContextEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: HTMLDocument.WheelEvent -> WheelEvent
+        /// <summary>
+        /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDocument.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDocument.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLDocument.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLDocumentConstructor =
         [<EmitConstructor>]
@@ -42009,6 +43179,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/togglePopover">MDN Reference</a>
         /// </summary>
         abstract togglePopover: ?options: U2<bool, TogglePopoverOptions> -> bool
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLElementConstructor =
         [<EmitConstructor>]
@@ -42055,6 +43243,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLEmbedElement/getSVGDocument">MDN Reference</a>
         /// </summary>
         abstract getSVGDocument: unit -> Document option
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLEmbedElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLEmbedElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLEmbedElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLEmbedElementConstructor =
         [<EmitConstructor>]
@@ -42133,6 +43339,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFieldSetElement/setCustomValidity">MDN Reference</a>
         /// </summary>
         abstract setCustomValidity: error: string -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFieldSetElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFieldSetElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFieldSetElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLFieldSetElementConstructor =
         [<EmitConstructor>]
@@ -42160,6 +43384,24 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLFontElement/size">MDN Reference</a></remarks>
         abstract size: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFontElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFontElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFontElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLFontElementConstructor =
         [<EmitConstructor>]
@@ -42298,6 +43540,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/submit">MDN Reference</a>
         /// </summary>
         abstract submit: unit -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFormElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFormElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFormElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
         [<EmitIndexer>]
         abstract Item: float -> Element with get, set
         [<EmitIndexer>]
@@ -42331,6 +43591,24 @@ module Dom =
         abstract scrolling: string with get, set
         /// <remarks>@deprecated</remarks>
         abstract src: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFrameElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFrameElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFrameElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLFrameElementConstructor =
         [<EmitConstructor>]
@@ -42364,6 +43642,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
         abstract removeEventListener<'K>: ``type``: 'K * listener: (U30<UIEvent, Event, AnimationEvent, PointerEvent, InputEvent, ToggleEvent, BeforeUnloadEvent, FocusEvent, CompositionEvent, ClipboardEvent, MouseEvent, DragEvent, ErrorEvent, FormDataEvent, GamepadEvent, HashChangeEvent, KeyboardEvent, MessageEvent<obj>, PageTransitionEvent, PageRevealEvent, PageSwapEvent, PopStateEvent, ProgressEvent<EventTarget>, PromiseRejectionEvent, SecurityPolicyViolationEvent, StorageEvent, SubmitEvent, TouchEvent, TransitionEvent, WheelEvent> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFrameSetElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFrameSetElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLFrameSetElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLFrameSetElementConstructor =
         [<EmitConstructor>]
@@ -42386,6 +43682,24 @@ module Dom =
         abstract size: string with get, set
         /// <remarks>@deprecated</remarks>
         abstract width: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHRElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHRElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHRElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLHRElementConstructor =
         [<EmitConstructor>]
@@ -42398,6 +43712,24 @@ module Dom =
     /// </summary>
     type HTMLHeadElement =
         inherit HTMLElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHeadElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHeadElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHeadElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLHeadElementConstructor =
         [<EmitConstructor>]
@@ -42412,6 +43744,24 @@ module Dom =
         inherit HTMLElement
         /// <remarks>@deprecated</remarks>
         abstract align: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHeadingElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHeadingElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHeadingElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLHeadingElementConstructor =
         [<EmitConstructor>]
@@ -42429,6 +43779,24 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLHtmlElement/version">MDN Reference</a></remarks>
         abstract version: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHtmlElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHtmlElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLHtmlElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLHtmlElementConstructor =
         [<EmitConstructor>]
@@ -42623,6 +43991,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLIFrameElement/getSVGDocument">MDN Reference</a>
         /// </summary>
         abstract getSVGDocument: unit -> Document option
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLIFrameElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLIFrameElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLIFrameElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLIFrameElementConstructor =
         [<EmitConstructor>]
@@ -42787,6 +44173,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLImageElement/decode">MDN Reference</a>
         /// </summary>
         abstract decode: unit -> Fable.Core.TS.Es.Promise<unit>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLImageElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLImageElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLImageElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLImageElementConstructor =
         [<EmitConstructor>]
@@ -43140,6 +44544,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/stepUp">MDN Reference</a>
         /// </summary>
         abstract stepUp: ?n: float -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLInputElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLInputElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLInputElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLInputElementConstructor =
         [<EmitConstructor>]
@@ -43160,6 +44582,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLLIElement/value">MDN Reference</a>
         /// </summary>
         abstract value: float with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLIElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLIElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLIElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLLIElementConstructor =
         [<EmitConstructor>]
@@ -43190,6 +44630,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLLabelElement/htmlFor">MDN Reference</a>
         /// </summary>
         abstract htmlFor: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLabelElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLabelElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLabelElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLLabelElementConstructor =
         [<EmitConstructor>]
@@ -43210,6 +44668,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLLegendElement/form">MDN Reference</a>
         /// </summary>
         abstract form: HTMLFormElement option
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLegendElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLegendElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLegendElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLLegendElementConstructor =
         [<EmitConstructor>]
@@ -43325,6 +44801,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLLinkElement/type">MDN Reference</a>
         /// </summary>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLinkElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLinkElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLLinkElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLLinkElementConstructor =
         [<EmitConstructor>]
@@ -43349,6 +44843,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMapElement/name">MDN Reference</a>
         /// </summary>
         abstract name: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMapElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMapElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMapElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLMapElementConstructor =
         [<EmitConstructor>]
@@ -43387,6 +44899,24 @@ module Dom =
         abstract start: unit -> unit
         /// <remarks>@deprecated</remarks>
         abstract stop: unit -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMarqueeElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMarqueeElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMarqueeElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLMarqueeElementConstructor =
         [<EmitConstructor>]
@@ -43665,6 +45195,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
         abstract removeEventListener<'K>: ``type``: 'K * listener: (U21<UIEvent, AnimationEvent, PointerEvent, InputEvent, Event, ToggleEvent, FocusEvent, CompositionEvent, ClipboardEvent, MouseEvent, DragEvent, MediaEncryptedEvent, ErrorEvent, FormDataEvent, KeyboardEvent, ProgressEvent<EventTarget>, SecurityPolicyViolationEvent, SubmitEvent, TouchEvent, TransitionEvent, WheelEvent> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMediaElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMediaElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMediaElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLMediaElementConstructor =
         abstract NETWORK_EMPTY: float
@@ -43691,6 +45239,24 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLMenuElement/compact">MDN Reference</a></remarks>
         abstract compact: bool with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMenuElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMenuElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMenuElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLMenuElementConstructor =
         [<EmitConstructor>]
@@ -43732,6 +45298,24 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLMetaElement/scheme">MDN Reference</a></remarks>
         abstract scheme: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMetaElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMetaElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMetaElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLMetaElementConstructor =
         [<EmitConstructor>]
@@ -43786,6 +45370,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMeterElement/value">MDN Reference</a>
         /// </summary>
         abstract value: float with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMeterElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMeterElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLMeterElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLMeterElementConstructor =
         [<EmitConstructor>]
@@ -43810,6 +45412,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLModElement/dateTime">MDN Reference</a>
         /// </summary>
         abstract dateTime: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLModElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLModElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLModElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLModElementConstructor =
         [<EmitConstructor>]
@@ -43845,6 +45465,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOListElement/type">MDN Reference</a>
         /// </summary>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOListElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOListElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOListElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLOListElementConstructor =
         [<EmitConstructor>]
@@ -43972,6 +45610,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLObjectElement/setCustomValidity">MDN Reference</a>
         /// </summary>
         abstract setCustomValidity: error: string -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLObjectElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLObjectElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLObjectElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLObjectElementConstructor =
         [<EmitConstructor>]
@@ -43996,6 +45652,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOptGroupElement/label">MDN Reference</a>
         /// </summary>
         abstract label: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOptGroupElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOptGroupElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOptGroupElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLOptGroupElementConstructor =
         [<EmitConstructor>]
@@ -44056,6 +45730,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOptionElement/value">MDN Reference</a>
         /// </summary>
         abstract value: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOptionElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOptionElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOptionElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLOptionElementConstructor =
         [<EmitConstructor>]
@@ -44220,6 +45912,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOutputElement/setCustomValidity">MDN Reference</a>
         /// </summary>
         abstract setCustomValidity: error: string -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOutputElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOutputElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLOutputElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLOutputElementConstructor =
         [<EmitConstructor>]
@@ -44234,6 +45944,24 @@ module Dom =
         inherit HTMLElement
         /// <remarks>@deprecated</remarks>
         abstract align: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLParagraphElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLParagraphElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLParagraphElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLParagraphElementConstructor =
         [<EmitConstructor>]
@@ -44254,6 +45982,24 @@ module Dom =
         abstract value: string with get, set
         /// <remarks>@deprecated</remarks>
         abstract valueType: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLParamElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLParamElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLParamElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLParamElementConstructor =
         [<EmitConstructor>]
@@ -44266,6 +46012,24 @@ module Dom =
     /// </summary>
     type HTMLPictureElement =
         inherit HTMLElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLPictureElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLPictureElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLPictureElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLPictureElementConstructor =
         [<EmitConstructor>]
@@ -44280,6 +46044,24 @@ module Dom =
         inherit HTMLElement
         /// <remarks>@deprecated</remarks>
         abstract width: float with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLPreElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLPreElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLPreElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLPreElementConstructor =
         [<EmitConstructor>]
@@ -44316,6 +46098,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLProgressElement/value">MDN Reference</a>
         /// </summary>
         abstract value: float with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLProgressElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLProgressElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLProgressElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLProgressElementConstructor =
         [<EmitConstructor>]
@@ -44334,6 +46134,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLQuoteElement/cite">MDN Reference</a>
         /// </summary>
         abstract cite: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLQuoteElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLQuoteElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLQuoteElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLQuoteElementConstructor =
         [<EmitConstructor>]
@@ -44418,6 +46236,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLScriptElement/type">MDN Reference</a>
         /// </summary>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLScriptElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLScriptElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLScriptElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLScriptElementConstructor =
         /// <summary>
@@ -44586,6 +46422,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSelectElement/showPicker">MDN Reference</a>
         /// </summary>
         abstract showPicker: unit -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSelectElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSelectElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSelectElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
         [<EmitIndexer>]
         abstract Item: float -> U2<HTMLOptGroupElement, HTMLOptionElement> with get, set
 
@@ -44624,6 +46478,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSlotElement/assignedNodes">MDN Reference</a>
         /// </summary>
         abstract assignedNodes: ?options: AssignedNodesOptions -> Node[]
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSlotElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSlotElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSlotElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLSlotElementConstructor =
         [<EmitConstructor>]
@@ -44678,6 +46550,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSourceElement/width">MDN Reference</a>
         /// </summary>
         abstract width: float with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSourceElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSourceElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSourceElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLSourceElementConstructor =
         [<EmitConstructor>]
@@ -44690,6 +46580,24 @@ module Dom =
     /// </summary>
     type HTMLSpanElement =
         inherit HTMLElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSpanElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSpanElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLSpanElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLSpanElementConstructor =
         [<EmitConstructor>]
@@ -44726,6 +46634,24 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLStyleElement/type">MDN Reference</a></remarks>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLStyleElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLStyleElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLStyleElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLStyleElementConstructor =
         [<EmitConstructor>]
@@ -44743,6 +46669,24 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableCaptionElement/align">MDN Reference</a></remarks>
         abstract align: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableCaptionElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableCaptionElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableCaptionElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTableCaptionElementConstructor =
         [<EmitConstructor>]
@@ -44827,6 +46771,24 @@ module Dom =
         abstract vAlign: string with get, set
         /// <remarks>@deprecated</remarks>
         abstract width: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableCellElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableCellElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableCellElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTableCellElementConstructor =
         [<EmitConstructor>]
@@ -44867,6 +46829,24 @@ module Dom =
         abstract vAlign: string with get, set
         /// <remarks>@deprecated</remarks>
         abstract width: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableColElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableColElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableColElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTableColElementConstructor =
         [<EmitConstructor>]
@@ -44875,6 +46855,24 @@ module Dom =
     /// <remarks>@deprecated prefer HTMLTableCellElement</remarks>
     type HTMLTableDataCellElement =
         inherit HTMLTableCellElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableDataCellElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableDataCellElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableDataCellElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     /// <summary>
     /// The <b><c>HTMLTableElement</c></b> interface provides special properties and methods (beyond the regular HTMLElement object interface it also has available to it by inheritance) for manipulating the layout and presentation of tables in an HTML document.
@@ -45012,6 +47010,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableElement/insertRow">MDN Reference</a>
         /// </summary>
         abstract insertRow: ?index: float -> HTMLTableRowElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTableElementConstructor =
         [<EmitConstructor>]
@@ -45020,6 +47036,24 @@ module Dom =
     /// <remarks>@deprecated prefer HTMLTableCellElement</remarks>
     type HTMLTableHeaderCellElement =
         inherit HTMLTableCellElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableHeaderCellElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableHeaderCellElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableHeaderCellElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     /// <summary>
     /// The <b><c>HTMLTableRowElement</c></b> interface provides special properties and methods (beyond the HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of rows in an HTML table.
@@ -45083,6 +47117,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableRowElement/insertCell">MDN Reference</a>
         /// </summary>
         abstract insertCell: ?index: float -> HTMLTableCellElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableRowElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableRowElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableRowElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTableRowElementConstructor =
         [<EmitConstructor>]
@@ -45133,6 +47185,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableSectionElement/insertRow">MDN Reference</a>
         /// </summary>
         abstract insertRow: ?index: float -> HTMLTableRowElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableSectionElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableSectionElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTableSectionElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTableSectionElementConstructor =
         [<EmitConstructor>]
@@ -45176,6 +47246,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTemplateElement/shadowRootSerializable">MDN Reference</a>
         /// </summary>
         abstract shadowRootSerializable: bool with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTemplateElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTemplateElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTemplateElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTemplateElementConstructor =
         [<EmitConstructor>]
@@ -45374,6 +47462,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTextAreaElement/setSelectionRange">MDN Reference</a>
         /// </summary>
         abstract setSelectionRange: ?start: float * ?``end``: float * ?direction: SelectionDirection -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTextAreaElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTextAreaElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTextAreaElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTextAreaElementConstructor =
         [<EmitConstructor>]
@@ -45392,6 +47498,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTimeElement/dateTime">MDN Reference</a>
         /// </summary>
         abstract dateTime: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTimeElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTimeElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTimeElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTimeElementConstructor =
         [<EmitConstructor>]
@@ -45410,6 +47534,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTitleElement/text">MDN Reference</a>
         /// </summary>
         abstract text: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTitleElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTitleElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTitleElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTitleElementConstructor =
         [<EmitConstructor>]
@@ -45468,6 +47610,24 @@ module Dom =
         abstract LOADING: float
         abstract LOADED: float
         abstract ERROR: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTrackElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTrackElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLTrackElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLTrackElementConstructor =
         abstract NONE: float
@@ -45491,6 +47651,24 @@ module Dom =
         abstract compact: bool with get, set
         /// <remarks>@deprecated</remarks>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLUListElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLUListElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLUListElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLUListElementConstructor =
         [<EmitConstructor>]
@@ -45503,6 +47681,24 @@ module Dom =
     /// </summary>
     type HTMLUnknownElement =
         inherit HTMLElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLUnknownElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLUnknownElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLUnknownElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLUnknownElementConstructor =
         [<EmitConstructor>]
@@ -45601,6 +47797,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
         abstract removeEventListener<'K>: ``type``: 'K * listener: (U22<UIEvent, AnimationEvent, PointerEvent, InputEvent, Event, ToggleEvent, FocusEvent, CompositionEvent, ClipboardEvent, MouseEvent, DragEvent, MediaEncryptedEvent, PictureInPictureEvent, ErrorEvent, FormDataEvent, KeyboardEvent, ProgressEvent<EventTarget>, SecurityPolicyViolationEvent, SubmitEvent, TouchEvent, TransitionEvent, WheelEvent> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLVideoElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLVideoElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: HTMLVideoElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type HTMLVideoElementConstructor =
         [<EmitConstructor>]
@@ -47882,6 +50096,24 @@ module Dom =
         inherit ElementCSSInlineStyle
         inherit GlobalEventHandlers
         inherit HTMLOrSVGElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: MathMLElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: MathMLElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: MathMLElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type MathMLElementConstructor =
         [<EmitConstructor>]
@@ -51383,7 +53615,25 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/getContext">MDN Reference</a>
         /// </summary>
-        abstract getContext: contextId: string * ?options: obj -> OffscreenCanvasRenderingContext2D option
+        abstract getContext: contextId: OffscreenCanvas.N2d * ?options: obj -> OffscreenCanvasRenderingContext2D option
+        /// <summary>
+        /// The <b><c>OffscreenCanvas.getContext()</c></b> method returns a drawing context for an offscreen canvas, or null if the context identifier is not supported, or the offscreen canvas has already been set to a different context mode.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/getContext">MDN Reference</a>
+        /// </summary>
+        abstract getContext: contextId: OffscreenCanvas.Bitmaprenderer * ?options: obj -> ImageBitmapRenderingContext option
+        /// <summary>
+        /// The <b><c>OffscreenCanvas.getContext()</c></b> method returns a drawing context for an offscreen canvas, or null if the context identifier is not supported, or the offscreen canvas has already been set to a different context mode.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/getContext">MDN Reference</a>
+        /// </summary>
+        abstract getContext: contextId: OffscreenCanvas.Webgl * ?options: obj -> WebGLRenderingContext option
+        /// <summary>
+        /// The <b><c>OffscreenCanvas.getContext()</c></b> method returns a drawing context for an offscreen canvas, or null if the context identifier is not supported, or the offscreen canvas has already been set to a different context mode.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/getContext">MDN Reference</a>
+        /// </summary>
+        abstract getContext: contextId: OffscreenCanvas.Webgl2 * ?options: obj -> WebGL2RenderingContext option
         /// <summary>
         /// The <b><c>OffscreenCanvas.getContext()</c></b> method returns a drawing context for an offscreen canvas, or null if the context identifier is not supported, or the offscreen canvas has already been set to a different context mode.
         /// <br /><br />
@@ -55872,6 +58122,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAElement/type">MDN Reference</a>
         /// </summary>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGAElementConstructor =
         [<EmitConstructor>]
@@ -55944,6 +58212,24 @@ module Dom =
     /// </summary>
     type SVGAnimateElement =
         inherit SVGAnimationElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGAnimateElementConstructor =
         [<EmitConstructor>]
@@ -55956,6 +58242,24 @@ module Dom =
     /// </summary>
     type SVGAnimateMotionElement =
         inherit SVGAnimationElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateMotionElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateMotionElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateMotionElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGAnimateMotionElementConstructor =
         [<EmitConstructor>]
@@ -55968,6 +58272,24 @@ module Dom =
     /// </summary>
     type SVGAnimateTransformElement =
         inherit SVGAnimationElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateTransformElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateTransformElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimateTransformElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGAnimateTransformElementConstructor =
         [<EmitConstructor>]
@@ -56354,6 +58676,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimationElement/getStartTime">MDN Reference</a>
         /// </summary>
         abstract getStartTime: unit -> float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimationElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimationElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGAnimationElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGAnimationElementConstructor =
         [<EmitConstructor>]
@@ -56384,6 +58724,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGCircleElement/r">MDN Reference</a>
         /// </summary>
         abstract r: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGCircleElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGCircleElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGCircleElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGCircleElementConstructor =
         [<EmitConstructor>]
@@ -56408,6 +58766,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGClipPathElement/transform">MDN Reference</a>
         /// </summary>
         abstract transform: SVGAnimatedTransformList
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGClipPathElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGClipPathElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGClipPathElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGClipPathElementConstructor =
         [<EmitConstructor>]
@@ -56468,6 +58844,24 @@ module Dom =
         abstract SVG_FECOMPONENTTRANSFER_TYPE_DISCRETE: float
         abstract SVG_FECOMPONENTTRANSFER_TYPE_LINEAR: float
         abstract SVG_FECOMPONENTTRANSFER_TYPE_GAMMA: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGComponentTransferFunctionElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGComponentTransferFunctionElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGComponentTransferFunctionElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGComponentTransferFunctionElementConstructor =
         abstract SVG_FECOMPONENTTRANSFER_TYPE_UNKNOWN: float
@@ -56486,6 +58880,24 @@ module Dom =
     /// </summary>
     type SVGDefsElement =
         inherit SVGGraphicsElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGDefsElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGDefsElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGDefsElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGDefsElementConstructor =
         [<EmitConstructor>]
@@ -56498,6 +58910,24 @@ module Dom =
     /// </summary>
     type SVGDescElement =
         inherit SVGElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGDescElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGDescElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGDescElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGDescElementConstructor =
         [<EmitConstructor>]
@@ -56531,6 +58961,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement/viewportElement">MDN Reference</a>
         /// </summary>
         abstract viewportElement: SVGElement option
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGElementConstructor =
         [<EmitConstructor>]
@@ -56567,6 +59015,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGEllipseElement/ry">MDN Reference</a>
         /// </summary>
         abstract ry: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGEllipseElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGEllipseElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGEllipseElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGEllipseElementConstructor =
         [<EmitConstructor>]
@@ -56615,6 +59081,24 @@ module Dom =
         abstract SVG_FEBLEND_MODE_SATURATION: float
         abstract SVG_FEBLEND_MODE_COLOR: float
         abstract SVG_FEBLEND_MODE_LUMINOSITY: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEBlendElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEBlendElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEBlendElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEBlendElementConstructor =
         abstract SVG_FEBLEND_MODE_UNKNOWN: float
@@ -56668,6 +59152,24 @@ module Dom =
         abstract SVG_FECOLORMATRIX_TYPE_SATURATE: float
         abstract SVG_FECOLORMATRIX_TYPE_HUEROTATE: float
         abstract SVG_FECOLORMATRIX_TYPE_LUMINANCETOALPHA: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEColorMatrixElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEColorMatrixElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEColorMatrixElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEColorMatrixElementConstructor =
         abstract SVG_FECOLORMATRIX_TYPE_UNKNOWN: float
@@ -56692,6 +59194,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEComponentTransferElement/in1">MDN Reference</a>
         /// </summary>
         abstract in1: SVGAnimatedString
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEComponentTransferElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEComponentTransferElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEComponentTransferElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEComponentTransferElementConstructor =
         [<EmitConstructor>]
@@ -56754,6 +59274,24 @@ module Dom =
         abstract SVG_FECOMPOSITE_OPERATOR_ATOP: float
         abstract SVG_FECOMPOSITE_OPERATOR_XOR: float
         abstract SVG_FECOMPOSITE_OPERATOR_ARITHMETIC: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFECompositeElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFECompositeElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFECompositeElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFECompositeElementConstructor =
         abstract SVG_FECOMPOSITE_OPERATOR_UNKNOWN: float
@@ -56850,6 +59388,24 @@ module Dom =
         abstract SVG_EDGEMODE_DUPLICATE: float
         abstract SVG_EDGEMODE_WRAP: float
         abstract SVG_EDGEMODE_NONE: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEConvolveMatrixElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEConvolveMatrixElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEConvolveMatrixElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEConvolveMatrixElementConstructor =
         abstract SVG_EDGEMODE_UNKNOWN: float
@@ -56897,6 +59453,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEDiffuseLightingElement/surfaceScale">MDN Reference</a>
         /// </summary>
         abstract surfaceScale: SVGAnimatedNumber
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDiffuseLightingElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDiffuseLightingElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDiffuseLightingElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEDiffuseLightingElementConstructor =
         [<EmitConstructor>]
@@ -56945,6 +59519,24 @@ module Dom =
         abstract SVG_CHANNEL_G: float
         abstract SVG_CHANNEL_B: float
         abstract SVG_CHANNEL_A: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDisplacementMapElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDisplacementMapElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDisplacementMapElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEDisplacementMapElementConstructor =
         abstract SVG_CHANNEL_UNKNOWN: float
@@ -56974,6 +59566,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEDistantLightElement/elevation">MDN Reference</a>
         /// </summary>
         abstract elevation: SVGAnimatedNumber
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDistantLightElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDistantLightElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDistantLightElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEDistantLightElementConstructor =
         [<EmitConstructor>]
@@ -57023,6 +59633,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEDropShadowElement/setStdDeviation">MDN Reference</a>
         /// </summary>
         abstract setStdDeviation: stdDeviationX: float * stdDeviationY: float -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDropShadowElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDropShadowElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEDropShadowElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEDropShadowElementConstructor =
         [<EmitConstructor>]
@@ -57036,6 +59664,24 @@ module Dom =
     type SVGFEFloodElement =
         inherit SVGElement
         inherit SVGFilterPrimitiveStandardAttributes
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFloodElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFloodElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFloodElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEFloodElementConstructor =
         [<EmitConstructor>]
@@ -57048,6 +59694,24 @@ module Dom =
     /// </summary>
     type SVGFEFuncAElement =
         inherit SVGComponentTransferFunctionElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncAElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncAElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncAElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEFuncAElementConstructor =
         [<EmitConstructor>]
@@ -57060,6 +59724,24 @@ module Dom =
     /// </summary>
     type SVGFEFuncBElement =
         inherit SVGComponentTransferFunctionElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncBElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncBElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncBElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEFuncBElementConstructor =
         [<EmitConstructor>]
@@ -57072,6 +59754,24 @@ module Dom =
     /// </summary>
     type SVGFEFuncGElement =
         inherit SVGComponentTransferFunctionElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncGElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncGElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncGElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEFuncGElementConstructor =
         [<EmitConstructor>]
@@ -57084,6 +59784,24 @@ module Dom =
     /// </summary>
     type SVGFEFuncRElement =
         inherit SVGComponentTransferFunctionElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncRElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncRElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEFuncRElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEFuncRElementConstructor =
         [<EmitConstructor>]
@@ -57121,6 +59839,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEGaussianBlurElement/setStdDeviation">MDN Reference</a>
         /// </summary>
         abstract setStdDeviation: stdDeviationX: float * stdDeviationY: float -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEGaussianBlurElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEGaussianBlurElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEGaussianBlurElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEGaussianBlurElementConstructor =
         [<EmitConstructor>]
@@ -57141,6 +59877,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEImageElement/preserveAspectRatio">MDN Reference</a>
         /// </summary>
         abstract preserveAspectRatio: SVGAnimatedPreserveAspectRatio
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEImageElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEImageElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEImageElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEImageElementConstructor =
         [<EmitConstructor>]
@@ -57154,6 +59908,24 @@ module Dom =
     type SVGFEMergeElement =
         inherit SVGElement
         inherit SVGFilterPrimitiveStandardAttributes
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMergeElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMergeElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMergeElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEMergeElementConstructor =
         [<EmitConstructor>]
@@ -57172,6 +59944,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEMergeNodeElement/in1">MDN Reference</a>
         /// </summary>
         abstract in1: SVGAnimatedString
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMergeNodeElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMergeNodeElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMergeNodeElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEMergeNodeElementConstructor =
         [<EmitConstructor>]
@@ -57212,6 +60002,24 @@ module Dom =
         abstract SVG_MORPHOLOGY_OPERATOR_UNKNOWN: float
         abstract SVG_MORPHOLOGY_OPERATOR_ERODE: float
         abstract SVG_MORPHOLOGY_OPERATOR_DILATE: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMorphologyElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMorphologyElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEMorphologyElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEMorphologyElementConstructor =
         abstract SVG_MORPHOLOGY_OPERATOR_UNKNOWN: float
@@ -57246,6 +60054,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEOffsetElement/in1">MDN Reference</a>
         /// </summary>
         abstract in1: SVGAnimatedString
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEOffsetElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEOffsetElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEOffsetElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEOffsetElementConstructor =
         [<EmitConstructor>]
@@ -57276,6 +60102,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEPointLightElement/z">MDN Reference</a>
         /// </summary>
         abstract z: SVGAnimatedNumber
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEPointLightElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEPointLightElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFEPointLightElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFEPointLightElementConstructor =
         [<EmitConstructor>]
@@ -57325,6 +60169,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFESpecularLightingElement/surfaceScale">MDN Reference</a>
         /// </summary>
         abstract surfaceScale: SVGAnimatedNumber
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFESpecularLightingElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFESpecularLightingElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFESpecularLightingElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFESpecularLightingElementConstructor =
         [<EmitConstructor>]
@@ -57385,6 +60247,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFESpotLightElement/z">MDN Reference</a>
         /// </summary>
         abstract z: SVGAnimatedNumber
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFESpotLightElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFESpotLightElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFESpotLightElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFESpotLightElementConstructor =
         [<EmitConstructor>]
@@ -57404,6 +60284,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFETileElement/in1">MDN Reference</a>
         /// </summary>
         abstract in1: SVGAnimatedString
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFETileElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFETileElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFETileElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFETileElementConstructor =
         [<EmitConstructor>]
@@ -57459,6 +60357,24 @@ module Dom =
         abstract SVG_STITCHTYPE_UNKNOWN: float
         abstract SVG_STITCHTYPE_STITCH: float
         abstract SVG_STITCHTYPE_NOSTITCH: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFETurbulenceElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFETurbulenceElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFETurbulenceElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFETurbulenceElementConstructor =
         abstract SVG_TURBULENCE_TYPE_UNKNOWN: float
@@ -57514,6 +60430,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFilterElement/y">MDN Reference</a>
         /// </summary>
         abstract y: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFilterElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFilterElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGFilterElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGFilterElementConstructor =
         [<EmitConstructor>]
@@ -57588,6 +60522,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGForeignObjectElement/y">MDN Reference</a>
         /// </summary>
         abstract y: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGForeignObjectElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGForeignObjectElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGForeignObjectElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGForeignObjectElementConstructor =
         [<EmitConstructor>]
@@ -57600,6 +60552,24 @@ module Dom =
     /// </summary>
     type SVGGElement =
         inherit SVGGraphicsElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGGElementConstructor =
         [<EmitConstructor>]
@@ -57642,6 +60612,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInStroke">MDN Reference</a>
         /// </summary>
         abstract isPointInStroke: ?point: DOMPointInit -> bool
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGeometryElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGeometryElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGeometryElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGGeometryElementConstructor =
         [<EmitConstructor>]
@@ -57677,6 +60665,24 @@ module Dom =
         abstract SVG_SPREADMETHOD_PAD: float
         abstract SVG_SPREADMETHOD_REFLECT: float
         abstract SVG_SPREADMETHOD_REPEAT: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGradientElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGradientElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGradientElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGGradientElementConstructor =
         abstract SVG_SPREADMETHOD_UNKNOWN: float
@@ -57718,6 +60724,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getScreenCTM">MDN Reference</a>
         /// </summary>
         abstract getScreenCTM: unit -> DOMMatrix option
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGraphicsElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGraphicsElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGGraphicsElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGGraphicsElementConstructor =
         [<EmitConstructor>]
@@ -57767,6 +60791,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGImageElement/y">MDN Reference</a>
         /// </summary>
         abstract y: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGImageElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGImageElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGImageElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGImageElementConstructor =
         [<EmitConstructor>]
@@ -57942,6 +60984,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGLineElement/y2">MDN Reference</a>
         /// </summary>
         abstract y2: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGLineElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGLineElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGLineElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGLineElementConstructor =
         [<EmitConstructor>]
@@ -57978,6 +61038,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGLinearGradientElement/y2">MDN Reference</a>
         /// </summary>
         abstract y2: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGLinearGradientElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGLinearGradientElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGLinearGradientElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGLinearGradientElementConstructor =
         [<EmitConstructor>]
@@ -57991,6 +61069,24 @@ module Dom =
     type SVGMPathElement =
         inherit SVGElement
         inherit SVGURIReference
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMPathElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMPathElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMPathElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGMPathElementConstructor =
         [<EmitConstructor>]
@@ -58065,6 +61161,24 @@ module Dom =
         abstract SVG_MARKER_ORIENT_AUTO: float
         abstract SVG_MARKER_ORIENT_ANGLE: float
         abstract SVG_MARKER_ORIENT_AUTO_START_REVERSE: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMarkerElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMarkerElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMarkerElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGMarkerElementConstructor =
         abstract SVG_MARKERUNITS_UNKNOWN: float
@@ -58120,6 +61234,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGMaskElement/y">MDN Reference</a>
         /// </summary>
         abstract y: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMaskElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMaskElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMaskElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGMaskElementConstructor =
         [<EmitConstructor>]
@@ -58132,6 +61264,24 @@ module Dom =
     /// </summary>
     type SVGMetadataElement =
         inherit SVGElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMetadataElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMetadataElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGMetadataElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGMetadataElementConstructor =
         [<EmitConstructor>]
@@ -58231,6 +61381,24 @@ module Dom =
     /// </summary>
     type SVGPathElement =
         inherit SVGGeometryElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPathElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPathElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPathElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGPathElementConstructor =
         [<EmitConstructor>]
@@ -58287,6 +61455,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPatternElement/y">MDN Reference</a>
         /// </summary>
         abstract y: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPatternElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPatternElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPatternElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGPatternElementConstructor =
         [<EmitConstructor>]
@@ -58367,6 +61553,24 @@ module Dom =
     type SVGPolygonElement =
         inherit SVGGeometryElement
         inherit SVGAnimatedPoints
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPolygonElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPolygonElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPolygonElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGPolygonElementConstructor =
         [<EmitConstructor>]
@@ -58380,6 +61584,24 @@ module Dom =
     type SVGPolylineElement =
         inherit SVGGeometryElement
         inherit SVGAnimatedPoints
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPolylineElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPolylineElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGPolylineElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGPolylineElementConstructor =
         [<EmitConstructor>]
@@ -58482,6 +61704,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGRadialGradientElement/r">MDN Reference</a>
         /// </summary>
         abstract r: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGRadialGradientElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGRadialGradientElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGRadialGradientElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGRadialGradientElementConstructor =
         [<EmitConstructor>]
@@ -58530,6 +61770,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGRectElement/y">MDN Reference</a>
         /// </summary>
         abstract y: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGRectElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGRectElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGRectElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGRectElementConstructor =
         [<EmitConstructor>]
@@ -58708,6 +61966,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
         abstract removeEventListener<'K>: ``type``: 'K * listener: (U30<UIEvent, Event, AnimationEvent, PointerEvent, InputEvent, ToggleEvent, BeforeUnloadEvent, FocusEvent, CompositionEvent, ClipboardEvent, MouseEvent, DragEvent, ErrorEvent, FormDataEvent, GamepadEvent, HashChangeEvent, KeyboardEvent, MessageEvent<obj>, PageTransitionEvent, PageRevealEvent, PageSwapEvent, PopStateEvent, ProgressEvent<EventTarget>, PromiseRejectionEvent, SecurityPolicyViolationEvent, StorageEvent, SubmitEvent, TouchEvent, TransitionEvent, WheelEvent> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSVGElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSVGElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSVGElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGSVGElementConstructor =
         [<EmitConstructor>]
@@ -58727,6 +62003,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGScriptElement/type">MDN Reference</a>
         /// </summary>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGScriptElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGScriptElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGScriptElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGScriptElementConstructor =
         [<EmitConstructor>]
@@ -58739,6 +62033,24 @@ module Dom =
     /// </summary>
     type SVGSetElement =
         inherit SVGAnimationElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSetElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSetElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSetElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGSetElementConstructor =
         [<EmitConstructor>]
@@ -58757,6 +62069,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGStopElement/offset">MDN Reference</a>
         /// </summary>
         abstract offset: SVGAnimatedNumber
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGStopElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGStopElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGStopElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGStopElementConstructor =
         [<EmitConstructor>]
@@ -58860,6 +62190,24 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/SVGStyleElement/type">MDN Reference</a></remarks>
         abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGStyleElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGStyleElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGStyleElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGStyleElementConstructor =
         [<EmitConstructor>]
@@ -58872,6 +62220,24 @@ module Dom =
     /// </summary>
     type SVGSwitchElement =
         inherit SVGGraphicsElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSwitchElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSwitchElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSwitchElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGSwitchElementConstructor =
         [<EmitConstructor>]
@@ -58885,6 +62251,24 @@ module Dom =
     type SVGSymbolElement =
         inherit SVGElement
         inherit SVGFitToViewBox
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSymbolElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSymbolElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGSymbolElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGSymbolElementConstructor =
         [<EmitConstructor>]
@@ -58897,6 +62281,24 @@ module Dom =
     /// </summary>
     type SVGTSpanElement =
         inherit SVGTextPositioningElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTSpanElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTSpanElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTSpanElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGTSpanElementConstructor =
         [<EmitConstructor>]
@@ -58987,6 +62389,24 @@ module Dom =
         abstract LENGTHADJUST_UNKNOWN: float
         abstract LENGTHADJUST_SPACING: float
         abstract LENGTHADJUST_SPACINGANDGLYPHS: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextContentElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextContentElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextContentElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGTextContentElementConstructor =
         abstract LENGTHADJUST_UNKNOWN: float
@@ -59002,6 +62422,24 @@ module Dom =
     /// </summary>
     type SVGTextElement =
         inherit SVGTextPositioningElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGTextElementConstructor =
         [<EmitConstructor>]
@@ -59039,6 +62477,24 @@ module Dom =
         abstract TEXTPATH_SPACINGTYPE_UNKNOWN: float
         abstract TEXTPATH_SPACINGTYPE_AUTO: float
         abstract TEXTPATH_SPACINGTYPE_EXACT: float
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextPathElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextPathElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextPathElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGTextPathElementConstructor =
         abstract TEXTPATH_METHODTYPE_UNKNOWN: float
@@ -59087,6 +62543,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTextPositioningElement/y">MDN Reference</a>
         /// </summary>
         abstract y: SVGAnimatedLengthList
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextPositioningElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextPositioningElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTextPositioningElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGTextPositioningElementConstructor =
         [<EmitConstructor>]
@@ -59099,6 +62573,24 @@ module Dom =
     /// </summary>
     type SVGTitleElement =
         inherit SVGElement
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTitleElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTitleElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGTitleElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGTitleElementConstructor =
         [<EmitConstructor>]
@@ -59326,6 +62818,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGUseElement/y">MDN Reference</a>
         /// </summary>
         abstract y: SVGAnimatedLength
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGUseElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGUseElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGUseElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGUseElementConstructor =
         [<EmitConstructor>]
@@ -59339,6 +62849,24 @@ module Dom =
     type SVGViewElement =
         inherit SVGElement
         inherit SVGFitToViewBox
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGViewElement.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGViewElement.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: SVGViewElement.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type SVGViewElementConstructor =
         [<EmitConstructor>]
@@ -62780,7 +66308,7 @@ module Dom =
 
     type URLSearchParamsConstructor =
         [<EmitConstructor>]
-        abstract Create: ?init: U4<string, string[][], Fable.Core.TS.Es.Record<string, string>, URLSearchParams> -> URLSearchParams
+        abstract Create: ?init: U4<string, string[][], JS.Record<string, string>, URLSearchParams> -> URLSearchParams
 
     /// <summary>
     /// The <b><c>UserActivation</c></b> interface provides information about whether a user is currently interacting with the page, or has completed an interaction since page load.
@@ -64032,6 +67560,142 @@ module Dom =
         inherit WebGL2RenderingContextBase
         inherit WebGL2RenderingContextOverloads
         inherit WebGLRenderingContextBase
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.ANGLEInstancedArrays -> ANGLE_instanced_arrays option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTBlendMinmax -> EXT_blend_minmax option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTColorBufferFloat -> EXT_color_buffer_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTColorBufferHalfFloat -> EXT_color_buffer_half_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTFloatBlend -> EXT_float_blend option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTFragDepth -> EXT_frag_depth option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTSRGB -> EXT_sRGB option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTShaderTextureLod -> EXT_shader_texture_lod option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTTextureCompressionBptc -> EXT_texture_compression_bptc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTTextureCompressionRgtc -> EXT_texture_compression_rgtc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.EXTTextureFilterAnisotropic -> EXT_texture_filter_anisotropic option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.KHRParallelShaderCompile -> KHR_parallel_shader_compile option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OESElementIndexUint -> OES_element_index_uint option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OESFboRenderMipmap -> OES_fbo_render_mipmap option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OESStandardDerivatives -> OES_standard_derivatives option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OESTextureFloat -> OES_texture_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OESTextureFloatLinear -> OES_texture_float_linear option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OESTextureHalfFloat -> OES_texture_half_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OESTextureHalfFloatLinear -> OES_texture_half_float_linear option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OESVertexArrayObject -> OES_vertex_array_object option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.OVRMultiview2 -> OVR_multiview2 option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLColorBufferFloat -> WEBGL_color_buffer_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLCompressedTextureAstc -> WEBGL_compressed_texture_astc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLCompressedTextureEtc -> WEBGL_compressed_texture_etc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLCompressedTextureEtc1 -> WEBGL_compressed_texture_etc1 option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLCompressedTexturePvrtc -> WEBGL_compressed_texture_pvrtc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLCompressedTextureS3tc -> WEBGL_compressed_texture_s3tc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLCompressedTextureS3tcSrgb -> WEBGL_compressed_texture_s3tc_srgb option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLDebugRendererInfo -> WEBGL_debug_renderer_info option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLDebugShaders -> WEBGL_debug_shaders option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLDepthTexture -> WEBGL_depth_texture option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLDrawBuffers -> WEBGL_draw_buffers option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLLoseContext -> WEBGL_lose_context option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGL2RenderingContext.WEBGLMultiDraw -> WEBGL_multi_draw option
 
     type WebGL2RenderingContextConstructor =
         abstract READ_BUFFER: float
@@ -65618,6 +69282,142 @@ module Dom =
     type WebGLRenderingContext =
         inherit WebGLRenderingContextBase
         inherit WebGLRenderingContextOverloads
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.ANGLEInstancedArrays -> ANGLE_instanced_arrays option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTBlendMinmax -> EXT_blend_minmax option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTColorBufferFloat -> EXT_color_buffer_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTColorBufferHalfFloat -> EXT_color_buffer_half_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTFloatBlend -> EXT_float_blend option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTFragDepth -> EXT_frag_depth option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTSRGB -> EXT_sRGB option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTShaderTextureLod -> EXT_shader_texture_lod option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTTextureCompressionBptc -> EXT_texture_compression_bptc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTTextureCompressionRgtc -> EXT_texture_compression_rgtc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.EXTTextureFilterAnisotropic -> EXT_texture_filter_anisotropic option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.KHRParallelShaderCompile -> KHR_parallel_shader_compile option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OESElementIndexUint -> OES_element_index_uint option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OESFboRenderMipmap -> OES_fbo_render_mipmap option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OESStandardDerivatives -> OES_standard_derivatives option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OESTextureFloat -> OES_texture_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OESTextureFloatLinear -> OES_texture_float_linear option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OESTextureHalfFloat -> OES_texture_half_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OESTextureHalfFloatLinear -> OES_texture_half_float_linear option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OESVertexArrayObject -> OES_vertex_array_object option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.OVRMultiview2 -> OVR_multiview2 option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLColorBufferFloat -> WEBGL_color_buffer_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLCompressedTextureAstc -> WEBGL_compressed_texture_astc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLCompressedTextureEtc -> WEBGL_compressed_texture_etc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLCompressedTextureEtc1 -> WEBGL_compressed_texture_etc1 option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLCompressedTexturePvrtc -> WEBGL_compressed_texture_pvrtc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLCompressedTextureS3tc -> WEBGL_compressed_texture_s3tc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLCompressedTextureS3tcSrgb -> WEBGL_compressed_texture_s3tc_srgb option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLDebugRendererInfo -> WEBGL_debug_renderer_info option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLDebugShaders -> WEBGL_debug_shaders option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLDepthTexture -> WEBGL_depth_texture option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLDrawBuffers -> WEBGL_draw_buffers option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLLoseContext -> WEBGL_lose_context option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContext.WEBGLMultiDraw -> WEBGL_multi_draw option
 
     type WebGLRenderingContextConstructor =
         abstract DEPTH_BUFFER_BIT: float
@@ -66173,6 +69973,142 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
         /// </summary>
         abstract getExtension: name: string -> obj
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.ANGLEInstancedArrays -> ANGLE_instanced_arrays option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTBlendMinmax -> EXT_blend_minmax option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTColorBufferFloat -> EXT_color_buffer_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTColorBufferHalfFloat -> EXT_color_buffer_half_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTFloatBlend -> EXT_float_blend option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTFragDepth -> EXT_frag_depth option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTSRGB -> EXT_sRGB option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTShaderTextureLod -> EXT_shader_texture_lod option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTTextureCompressionBptc -> EXT_texture_compression_bptc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTTextureCompressionRgtc -> EXT_texture_compression_rgtc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.EXTTextureFilterAnisotropic -> EXT_texture_filter_anisotropic option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.KHRParallelShaderCompile -> KHR_parallel_shader_compile option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OESElementIndexUint -> OES_element_index_uint option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OESFboRenderMipmap -> OES_fbo_render_mipmap option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OESStandardDerivatives -> OES_standard_derivatives option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OESTextureFloat -> OES_texture_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OESTextureFloatLinear -> OES_texture_float_linear option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OESTextureHalfFloat -> OES_texture_half_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OESTextureHalfFloatLinear -> OES_texture_half_float_linear option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OESVertexArrayObject -> OES_vertex_array_object option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.OVRMultiview2 -> OVR_multiview2 option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLColorBufferFloat -> WEBGL_color_buffer_float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLCompressedTextureAstc -> WEBGL_compressed_texture_astc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLCompressedTextureEtc -> WEBGL_compressed_texture_etc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLCompressedTextureEtc1 -> WEBGL_compressed_texture_etc1 option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLCompressedTexturePvrtc -> WEBGL_compressed_texture_pvrtc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLCompressedTextureS3tc -> WEBGL_compressed_texture_s3tc option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLCompressedTextureS3tcSrgb -> WEBGL_compressed_texture_s3tc_srgb option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLDebugRendererInfo -> WEBGL_debug_renderer_info option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLDebugShaders -> WEBGL_debug_shaders option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLDepthTexture -> WEBGL_depth_texture option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLDrawBuffers -> WEBGL_draw_buffers option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLLoseContext -> WEBGL_lose_context option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getExtension">MDN Reference</a>
+        /// </summary>
+        abstract getExtension: extensionName: WebGLRenderingContextBase.WEBGLMultiDraw -> WEBGL_multi_draw option
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/getFramebufferAttachmentParameter">MDN Reference</a>
         /// </summary>
@@ -68201,6 +72137,414 @@ module Dom =
     /// </summary>
     type XMLDocument =
         inherit Document
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS: namespaceURI: XMLDocument.HttpWwwW3Org1999Xhtml * qualifiedName: string -> HTMLElement
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS<'K>: namespaceURI: XMLDocument.HttpWwwW3Org2000Svg * qualifiedName: 'K -> U63<SVGAElement, SVGAnimateElement, SVGAnimateMotionElement, SVGAnimateTransformElement, SVGCircleElement, SVGClipPathElement, SVGDefsElement, SVGDescElement, SVGEllipseElement, SVGFEBlendElement, SVGFEColorMatrixElement, SVGFEComponentTransferElement, SVGFECompositeElement, SVGFEConvolveMatrixElement, SVGFEDiffuseLightingElement, SVGFEDisplacementMapElement, SVGFEDistantLightElement, SVGFEDropShadowElement, SVGFEFloodElement, SVGFEFuncAElement, SVGFEFuncBElement, SVGFEFuncGElement, SVGFEFuncRElement, SVGFEGaussianBlurElement, SVGFEImageElement, SVGFEMergeElement, SVGFEMergeNodeElement, SVGFEMorphologyElement, SVGFEOffsetElement, SVGFEPointLightElement, SVGFESpecularLightingElement, SVGFESpotLightElement, SVGFETileElement, SVGFETurbulenceElement, SVGFilterElement, SVGForeignObjectElement, SVGGElement, SVGImageElement, SVGLineElement, SVGLinearGradientElement, SVGMarkerElement, SVGMaskElement, SVGMetadataElement, SVGMPathElement, SVGPathElement, SVGPatternElement, SVGPolygonElement, SVGPolylineElement, SVGRadialGradientElement, SVGRectElement, SVGScriptElement, SVGSetElement, SVGStopElement, SVGStyleElement, SVGSVGElement, SVGSwitchElement, SVGSymbolElement, SVGTextElement, SVGTextPathElement, SVGTitleElement, SVGTSpanElement, SVGUseElement, SVGViewElement>
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS: namespaceURI: XMLDocument.HttpWwwW3Org2000Svg * qualifiedName: string -> SVGElement
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS<'K>: namespaceURI: XMLDocument.HttpWwwW3Org1998MathMathML * qualifiedName: 'K -> MathMLElement
+        /// <summary>
+        /// Creates an element with the specified namespace URI and qualified name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
+        /// </summary>
+        abstract createElementNS: namespaceURI: XMLDocument.HttpWwwW3Org1998MathMathML * qualifiedName: string -> MathMLElement
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.AnimationEvent -> AnimationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.AnimationPlaybackEvent -> AnimationPlaybackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.AudioProcessingEvent -> AudioProcessingEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.BeforeUnloadEvent -> BeforeUnloadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.BlobEvent -> BlobEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.ClipboardEvent -> ClipboardEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.CloseEvent -> CloseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.CommandEvent -> CommandEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.CompositionEvent -> CompositionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.ContentVisibilityAutoStateChangeEvent -> ContentVisibilityAutoStateChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.CookieChangeEvent -> CookieChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.CustomEvent -> CustomEvent<obj>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.DeviceMotionEvent -> DeviceMotionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.DeviceOrientationEvent -> DeviceOrientationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.DragEvent -> DragEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.ErrorEvent -> ErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.Event -> Event
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.Events -> Event
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.FocusEvent -> FocusEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.FontFaceSetLoadEvent -> FontFaceSetLoadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.FormDataEvent -> FormDataEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.GPUUncapturedErrorEvent -> GPUUncapturedErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.GamepadEvent -> GamepadEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.HashChangeEvent -> HashChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.IDBVersionChangeEvent -> IDBVersionChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.InputEvent -> InputEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.KeyboardEvent -> KeyboardEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MIDIConnectionEvent -> MIDIConnectionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MIDIMessageEvent -> MIDIMessageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MediaEncryptedEvent -> MediaEncryptedEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MediaKeyMessageEvent -> MediaKeyMessageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MediaQueryListEvent -> MediaQueryListEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MediaStreamTrackEvent -> MediaStreamTrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MessageEvent -> MessageEvent<obj>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MouseEvent -> MouseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.MouseEvents -> MouseEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.NavigateEvent -> NavigateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.NavigationCurrentEntryChangeEvent -> NavigationCurrentEntryChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.OfflineAudioCompletionEvent -> OfflineAudioCompletionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PageRevealEvent -> PageRevealEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PageSwapEvent -> PageSwapEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PageTransitionEvent -> PageTransitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PaymentMethodChangeEvent -> PaymentMethodChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PaymentRequestUpdateEvent -> PaymentRequestUpdateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PictureInPictureEvent -> PictureInPictureEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PointerEvent -> PointerEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PopStateEvent -> PopStateEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.ProgressEvent -> ProgressEvent<EventTarget>
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.PromiseRejectionEvent -> PromiseRejectionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.RTCDTMFToneChangeEvent -> RTCDTMFToneChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.RTCDataChannelEvent -> RTCDataChannelEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.RTCErrorEvent -> RTCErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.RTCPeerConnectionIceErrorEvent -> RTCPeerConnectionIceErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.RTCPeerConnectionIceEvent -> RTCPeerConnectionIceEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.RTCTrackEvent -> RTCTrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.SecurityPolicyViolationEvent -> SecurityPolicyViolationEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.SpeechRecognitionErrorEvent -> SpeechRecognitionErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.SpeechRecognitionEvent -> SpeechRecognitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.SpeechSynthesisErrorEvent -> SpeechSynthesisErrorEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.SpeechSynthesisEvent -> SpeechSynthesisEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.StorageEvent -> StorageEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.SubmitEvent -> SubmitEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.TaskPriorityChangeEvent -> TaskPriorityChangeEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.TextEvent -> TextEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.ToggleEvent -> ToggleEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.TouchEvent -> TouchEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.TrackEvent -> TrackEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.TransitionEvent -> TransitionEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.UIEvent -> UIEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.UIEvents -> UIEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.WebGLContextEvent -> WebGLContextEvent
+        /// <summary>
+        /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
+        abstract createEvent: eventInterface: XMLDocument.WheelEvent -> WheelEvent
+        /// <summary>
+        /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: XMLDocument.HttpWwwW3Org1999Xhtml * localName: string -> HTMLCollectionOf<HTMLElement>
+        /// <summary>
+        /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: XMLDocument.HttpWwwW3Org2000Svg * localName: string -> HTMLCollectionOf<SVGElement>
+        /// <summary>
+        /// Returns a list of elements with the given tag name belonging to the given namespace. The complete document is searched, including the root node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagNameNS">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagNameNS: namespaceURI: XMLDocument.HttpWwwW3Org1998MathMathML * localName: string -> HTMLCollectionOf<MathMLElement>
 
     type XMLDocumentConstructor =
         [<EmitConstructor>]
@@ -69124,65 +73468,7 @@ module Dom =
     /// <remarks>@deprecated Directly use HTMLElementTagNameMap or SVGElementTagNameMap as appropriate, instead.</remarks>
     type ElementTagNameMap =
         inherit HTMLElementTagNameMap
-        abstract animate: SVGAnimateElement with get, set
-        abstract animateMotion: SVGAnimateMotionElement with get, set
-        abstract animateTransform: SVGAnimateTransformElement with get, set
-        abstract circle: SVGCircleElement with get, set
-        abstract clipPath: SVGClipPathElement with get, set
-        abstract defs: SVGDefsElement with get, set
-        abstract desc: SVGDescElement with get, set
-        abstract ellipse: SVGEllipseElement with get, set
-        abstract feBlend: SVGFEBlendElement with get, set
-        abstract feColorMatrix: SVGFEColorMatrixElement with get, set
-        abstract feComponentTransfer: SVGFEComponentTransferElement with get, set
-        abstract feComposite: SVGFECompositeElement with get, set
-        abstract feConvolveMatrix: SVGFEConvolveMatrixElement with get, set
-        abstract feDiffuseLighting: SVGFEDiffuseLightingElement with get, set
-        abstract feDisplacementMap: SVGFEDisplacementMapElement with get, set
-        abstract feDistantLight: SVGFEDistantLightElement with get, set
-        abstract feDropShadow: SVGFEDropShadowElement with get, set
-        abstract feFlood: SVGFEFloodElement with get, set
-        abstract feFuncA: SVGFEFuncAElement with get, set
-        abstract feFuncB: SVGFEFuncBElement with get, set
-        abstract feFuncG: SVGFEFuncGElement with get, set
-        abstract feFuncR: SVGFEFuncRElement with get, set
-        abstract feGaussianBlur: SVGFEGaussianBlurElement with get, set
-        abstract feImage: SVGFEImageElement with get, set
-        abstract feMerge: SVGFEMergeElement with get, set
-        abstract feMergeNode: SVGFEMergeNodeElement with get, set
-        abstract feMorphology: SVGFEMorphologyElement with get, set
-        abstract feOffset: SVGFEOffsetElement with get, set
-        abstract fePointLight: SVGFEPointLightElement with get, set
-        abstract feSpecularLighting: SVGFESpecularLightingElement with get, set
-        abstract feSpotLight: SVGFESpotLightElement with get, set
-        abstract feTile: SVGFETileElement with get, set
-        abstract feTurbulence: SVGFETurbulenceElement with get, set
-        abstract filter: SVGFilterElement with get, set
-        abstract foreignObject: SVGForeignObjectElement with get, set
-        abstract g: SVGGElement with get, set
-        abstract image: SVGImageElement with get, set
-        abstract line: SVGLineElement with get, set
-        abstract linearGradient: SVGLinearGradientElement with get, set
-        abstract marker: SVGMarkerElement with get, set
-        abstract mask: SVGMaskElement with get, set
-        abstract metadata: SVGMetadataElement with get, set
-        abstract mpath: SVGMPathElement with get, set
-        abstract path: SVGPathElement with get, set
-        abstract pattern: SVGPatternElement with get, set
-        abstract polygon: SVGPolygonElement with get, set
-        abstract polyline: SVGPolylineElement with get, set
-        abstract radialGradient: SVGRadialGradientElement with get, set
-        abstract rect: SVGRectElement with get, set
-        abstract set: SVGSetElement with get, set
-        abstract stop: SVGStopElement with get, set
-        abstract svg: SVGSVGElement with get, set
-        abstract switch: SVGSwitchElement with get, set
-        abstract symbol: SVGSymbolElement with get, set
-        abstract text: SVGTextElement with get, set
-        abstract textPath: SVGTextPathElement with get, set
-        abstract tspan: SVGTSpanElement with get, set
-        abstract ``use``: SVGUseElement with get, set
-        abstract view: SVGViewElement with get, set
+        inherit Fable.Core.TS.Es.ElementTagNameMap.Base
 
     type AudioConstructor =
         [<EmitConstructor>]
@@ -69409,7 +73695,7 @@ module Dom =
 
     type HashAlgorithmIdentifier = AlgorithmIdentifier
 
-    type HeadersInit = U3<(string * string)[], Headers, Fable.Core.TS.Es.Record<string, string>>
+    type HeadersInit = U3<(string * string)[], Headers, JS.Record<string, string>>
 
     type IDBValidKey = U6<string, float, obj[], Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>, Fable.Core.TS.Es.Date>
 
@@ -69449,7 +73735,7 @@ module Dom =
 
     type PerformanceEntryList = PerformanceEntry[]
 
-    type PublicKeyCredentialClientCapabilities = Fable.Core.TS.Es.Record<string, bool>
+    type PublicKeyCredentialClientCapabilities = JS.Record<string, bool>
 
     type RTCRtpReceiverTransform = RTCRtpScriptTransform
 
@@ -71796,6 +76082,320 @@ module Dom =
             | [<CompiledName("none")>] None
             | [<CompiledName("uninitialized")>] Uninitialized
 
+    module Document =
+        [<StringEnum(CaseRules.None)>]
+        type AnimationEvent =
+            | AnimationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type AnimationPlaybackEvent =
+            | AnimationPlaybackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type AudioProcessingEvent =
+            | AudioProcessingEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type BeforeUnloadEvent =
+            | BeforeUnloadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type BlobEvent =
+            | BlobEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ClipboardEvent =
+            | ClipboardEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CloseEvent =
+            | CloseEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CommandEvent =
+            | CommandEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CompositionEvent =
+            | CompositionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ContentVisibilityAutoStateChangeEvent =
+            | ContentVisibilityAutoStateChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CookieChangeEvent =
+            | CookieChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CustomEvent =
+            | CustomEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DeviceMotionEvent =
+            | DeviceMotionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DeviceOrientationEvent =
+            | DeviceOrientationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DragEvent =
+            | DragEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ErrorEvent =
+            | ErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type Event =
+            | Event
+
+        [<StringEnum(CaseRules.None)>]
+        type Events =
+            | Events
+
+        [<StringEnum(CaseRules.None)>]
+        type FocusEvent =
+            | FocusEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type FontFaceSetLoadEvent =
+            | FontFaceSetLoadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type FormDataEvent =
+            | FormDataEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type GPUUncapturedErrorEvent =
+            | GPUUncapturedErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type GamepadEvent =
+            | GamepadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type HashChangeEvent =
+            | HashChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+        [<StringEnum(CaseRules.None)>]
+        type IDBVersionChangeEvent =
+            | IDBVersionChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type InputEvent =
+            | InputEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type KeyboardEvent =
+            | KeyboardEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MIDIConnectionEvent =
+            | MIDIConnectionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MIDIMessageEvent =
+            | MIDIMessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaEncryptedEvent =
+            | MediaEncryptedEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaKeyMessageEvent =
+            | MediaKeyMessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaQueryListEvent =
+            | MediaQueryListEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaStreamTrackEvent =
+            | MediaStreamTrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MessageEvent =
+            | MessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MouseEvent =
+            | MouseEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MouseEvents =
+            | MouseEvents
+
+        [<StringEnum(CaseRules.None)>]
+        type NavigateEvent =
+            | NavigateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type NavigationCurrentEntryChangeEvent =
+            | NavigationCurrentEntryChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type OfflineAudioCompletionEvent =
+            | OfflineAudioCompletionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageRevealEvent =
+            | PageRevealEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageSwapEvent =
+            | PageSwapEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageTransitionEvent =
+            | PageTransitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PaymentMethodChangeEvent =
+            | PaymentMethodChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PaymentRequestUpdateEvent =
+            | PaymentRequestUpdateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PictureInPictureEvent =
+            | PictureInPictureEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PointerEvent =
+            | PointerEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PopStateEvent =
+            | PopStateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ProgressEvent =
+            | ProgressEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PromiseRejectionEvent =
+            | PromiseRejectionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCDTMFToneChangeEvent =
+            | RTCDTMFToneChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCDataChannelEvent =
+            | RTCDataChannelEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCErrorEvent =
+            | RTCErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCPeerConnectionIceErrorEvent =
+            | RTCPeerConnectionIceErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCPeerConnectionIceEvent =
+            | RTCPeerConnectionIceEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCTrackEvent =
+            | RTCTrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SecurityPolicyViolationEvent =
+            | SecurityPolicyViolationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechRecognitionErrorEvent =
+            | SpeechRecognitionErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechRecognitionEvent =
+            | SpeechRecognitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechSynthesisErrorEvent =
+            | SpeechSynthesisErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechSynthesisEvent =
+            | SpeechSynthesisEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type StorageEvent =
+            | StorageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SubmitEvent =
+            | SubmitEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TaskPriorityChangeEvent =
+            | TaskPriorityChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TextEvent =
+            | TextEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ToggleEvent =
+            | ToggleEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TouchEvent =
+            | TouchEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TrackEvent =
+            | TrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TransitionEvent =
+            | TransitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type UIEvent =
+            | UIEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type UIEvents =
+            | UIEvents
+
+        [<StringEnum(CaseRules.None)>]
+        type WebGLContextEvent =
+            | WebGLContextEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type WheelEvent =
+            | WheelEvent
+
+    module Element =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
     module EventCounts =
         module ForEach =
             type Callbackfn = delegate of value: float * key: string * parent: EventCounts -> unit
@@ -71818,6 +76418,84 @@ module Dom =
         module ForEach =
             type Callbackfn = delegate of value: string * key: string * parent: GPUSupportedFeatures -> unit
 
+    module HTMLAnchorElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLAreaElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLAudioElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLBRElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLBaseElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLBodyElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
     module HTMLButtonElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Type =
@@ -71825,12 +76503,592 @@ module Dom =
             | [<CompiledName("reset")>] Reset
             | [<CompiledName("submit")>] Submit
 
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLCanvasElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+        [<StringEnum(CaseRules.None)>]
+        type Webgl =
+            | [<CompiledName("webgl")>] Webgl
+
+        [<StringEnum(CaseRules.None)>]
+        type Webgl2 =
+            | [<CompiledName("webgl2")>] Webgl2
+
+    module HTMLDListElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLDataElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLDataListElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLDetailsElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLDialogElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLDirectoryElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLDivElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLDocument =
+        [<StringEnum(CaseRules.None)>]
+        type AnimationEvent =
+            | AnimationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type AnimationPlaybackEvent =
+            | AnimationPlaybackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type AudioProcessingEvent =
+            | AudioProcessingEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type BeforeUnloadEvent =
+            | BeforeUnloadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type BlobEvent =
+            | BlobEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ClipboardEvent =
+            | ClipboardEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CloseEvent =
+            | CloseEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CommandEvent =
+            | CommandEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CompositionEvent =
+            | CompositionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ContentVisibilityAutoStateChangeEvent =
+            | ContentVisibilityAutoStateChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CookieChangeEvent =
+            | CookieChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CustomEvent =
+            | CustomEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DeviceMotionEvent =
+            | DeviceMotionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DeviceOrientationEvent =
+            | DeviceOrientationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DragEvent =
+            | DragEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ErrorEvent =
+            | ErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type Event =
+            | Event
+
+        [<StringEnum(CaseRules.None)>]
+        type Events =
+            | Events
+
+        [<StringEnum(CaseRules.None)>]
+        type FocusEvent =
+            | FocusEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type FontFaceSetLoadEvent =
+            | FontFaceSetLoadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type FormDataEvent =
+            | FormDataEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type GPUUncapturedErrorEvent =
+            | GPUUncapturedErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type GamepadEvent =
+            | GamepadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type HashChangeEvent =
+            | HashChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+        [<StringEnum(CaseRules.None)>]
+        type IDBVersionChangeEvent =
+            | IDBVersionChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type InputEvent =
+            | InputEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type KeyboardEvent =
+            | KeyboardEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MIDIConnectionEvent =
+            | MIDIConnectionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MIDIMessageEvent =
+            | MIDIMessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaEncryptedEvent =
+            | MediaEncryptedEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaKeyMessageEvent =
+            | MediaKeyMessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaQueryListEvent =
+            | MediaQueryListEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaStreamTrackEvent =
+            | MediaStreamTrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MessageEvent =
+            | MessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MouseEvent =
+            | MouseEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MouseEvents =
+            | MouseEvents
+
+        [<StringEnum(CaseRules.None)>]
+        type NavigateEvent =
+            | NavigateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type NavigationCurrentEntryChangeEvent =
+            | NavigationCurrentEntryChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type OfflineAudioCompletionEvent =
+            | OfflineAudioCompletionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageRevealEvent =
+            | PageRevealEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageSwapEvent =
+            | PageSwapEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageTransitionEvent =
+            | PageTransitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PaymentMethodChangeEvent =
+            | PaymentMethodChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PaymentRequestUpdateEvent =
+            | PaymentRequestUpdateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PictureInPictureEvent =
+            | PictureInPictureEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PointerEvent =
+            | PointerEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PopStateEvent =
+            | PopStateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ProgressEvent =
+            | ProgressEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PromiseRejectionEvent =
+            | PromiseRejectionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCDTMFToneChangeEvent =
+            | RTCDTMFToneChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCDataChannelEvent =
+            | RTCDataChannelEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCErrorEvent =
+            | RTCErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCPeerConnectionIceErrorEvent =
+            | RTCPeerConnectionIceErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCPeerConnectionIceEvent =
+            | RTCPeerConnectionIceEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCTrackEvent =
+            | RTCTrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SecurityPolicyViolationEvent =
+            | SecurityPolicyViolationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechRecognitionErrorEvent =
+            | SpeechRecognitionErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechRecognitionEvent =
+            | SpeechRecognitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechSynthesisErrorEvent =
+            | SpeechSynthesisErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechSynthesisEvent =
+            | SpeechSynthesisEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type StorageEvent =
+            | StorageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SubmitEvent =
+            | SubmitEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TaskPriorityChangeEvent =
+            | TaskPriorityChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TextEvent =
+            | TextEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ToggleEvent =
+            | ToggleEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TouchEvent =
+            | TouchEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TrackEvent =
+            | TrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TransitionEvent =
+            | TransitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type UIEvent =
+            | UIEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type UIEvents =
+            | UIEvents
+
+        [<StringEnum(CaseRules.None)>]
+        type WebGLContextEvent =
+            | WebGLContextEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type WheelEvent =
+            | WheelEvent
+
     module HTMLElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Hidden =
             | [<CompiledName("until-found")>] UntilFound
             | [<CompiledValue(false)>] False
             | [<CompiledValue(true)>] True
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLEmbedElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLFieldSetElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLFontElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLFormElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLFrameElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLFrameSetElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLHRElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLHeadElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLHeadingElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLHtmlElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLIFrameElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
 
     module HTMLImageElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -71850,11 +77108,594 @@ module Dom =
             | [<CompiledName("eager")>] Eager
             | [<CompiledName("lazy")>] Lazy
 
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLInputElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLLIElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLLabelElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLLegendElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLLinkElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLMapElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLMarqueeElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLMediaElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLMenuElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLMetaElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLMeterElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLModElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLOListElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLObjectElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLOptGroupElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLOptionElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLOutputElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLParagraphElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLParamElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLPictureElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLPreElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLProgressElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLQuoteElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLScriptElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
     module HTMLSelectElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Type =
             | [<CompiledName("select-multiple")>] SelectMultiple
             | [<CompiledName("select-one")>] SelectOne
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLSlotElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLSourceElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLSpanElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLStyleElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTableCaptionElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTableCellElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTableColElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTableDataCellElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTableElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTableHeaderCellElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTableRowElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTableSectionElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTemplateElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTextAreaElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTimeElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTitleElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLTrackElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLUListElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module HTMLUnknownElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
 
     module HTMLVideoElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -71863,6 +77704,18 @@ module Dom =
             | [<CompiledName("auto")>] Auto
             | [<CompiledName("metadata")>] Metadata
             | [<CompiledName("none")>] None
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
 
     module Headers =
         module ForEach =
@@ -71884,6 +77737,19 @@ module Dom =
         module ForEach =
             type Callbackfn = delegate of value: MIDIOutput * key: string * parent: MIDIOutputMap -> unit
 
+    module MathMLElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
     module MediaKeyStatusMap =
         module ForEach =
             type Callbackfn = delegate of value: MediaKeyStatus * key: BufferSource * parent: MediaKeyStatusMap -> unit
@@ -71895,6 +77761,23 @@ module Dom =
     module NodeListOf =
         module ForEach =
             type Callbackfn<'TNode when 'TNode :> Node> = delegate of value: 'TNode * key: float * parent: NodeListOf<'TNode> -> unit
+
+    module OffscreenCanvas =
+        [<StringEnum(CaseRules.None)>]
+        type Bitmaprenderer =
+            | [<CompiledName("bitmaprenderer")>] Bitmaprenderer
+
+        [<StringEnum(CaseRules.None)>]
+        type N2d =
+            | [<CompiledName("2d")>] N2d
+
+        [<StringEnum(CaseRules.None)>]
+        type Webgl =
+            | [<CompiledName("webgl")>] Webgl
+
+        [<StringEnum(CaseRules.None)>]
+        type Webgl2 =
+            | [<CompiledName("webgl2")>] Webgl2
 
     module RTCStatsReport =
         module ForEach =
@@ -71911,6 +77794,929 @@ module Dom =
                 abstract mode: string with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (mode: string) : Options = jsNative
+
+    module SVGAElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGAnimateElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGAnimateMotionElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGAnimateTransformElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGAnimationElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGCircleElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGClipPathElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGComponentTransferFunctionElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGDefsElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGDescElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGEllipseElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEBlendElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEColorMatrixElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEComponentTransferElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFECompositeElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEConvolveMatrixElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEDiffuseLightingElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEDisplacementMapElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEDistantLightElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEDropShadowElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEFloodElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEFuncAElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEFuncBElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEFuncGElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEFuncRElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEGaussianBlurElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEImageElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEMergeElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEMergeNodeElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEMorphologyElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEOffsetElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFEPointLightElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFESpecularLightingElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFESpotLightElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFETileElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFETurbulenceElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGFilterElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGForeignObjectElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGGElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGGeometryElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGGradientElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGGraphicsElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGImageElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGLineElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGLinearGradientElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGMPathElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGMarkerElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGMaskElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGMetadataElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGPathElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGPatternElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGPolygonElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGPolylineElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGRadialGradientElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGRectElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGSVGElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGScriptElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGSetElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGStopElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGStyleElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGSwitchElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGSymbolElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGTSpanElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGTextContentElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGTextElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGTextPathElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGTextPositioningElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGTitleElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGUseElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+    module SVGViewElement =
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
 
     module StylePropertyMapReadOnly =
         module ForEach =
@@ -72011,6 +78817,417 @@ module Dom =
                     | [<CompiledName("i64")>] I64
                     | [<CompiledName("v128")>] V128
 
+    module WebGL2RenderingContext =
+        [<StringEnum(CaseRules.None)>]
+        type ANGLEInstancedArrays =
+            | [<CompiledName("ANGLE_instanced_arrays")>] ANGLEInstancedArrays
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTBlendMinmax =
+            | [<CompiledName("EXT_blend_minmax")>] EXTBlendMinmax
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTColorBufferFloat =
+            | [<CompiledName("EXT_color_buffer_float")>] EXTColorBufferFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTColorBufferHalfFloat =
+            | [<CompiledName("EXT_color_buffer_half_float")>] EXTColorBufferHalfFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTFloatBlend =
+            | [<CompiledName("EXT_float_blend")>] EXTFloatBlend
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTFragDepth =
+            | [<CompiledName("EXT_frag_depth")>] EXTFragDepth
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTSRGB =
+            | [<CompiledName("EXT_sRGB")>] EXTSRGB
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTShaderTextureLod =
+            | [<CompiledName("EXT_shader_texture_lod")>] EXTShaderTextureLod
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureCompressionBptc =
+            | [<CompiledName("EXT_texture_compression_bptc")>] EXTTextureCompressionBptc
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureCompressionRgtc =
+            | [<CompiledName("EXT_texture_compression_rgtc")>] EXTTextureCompressionRgtc
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureFilterAnisotropic =
+            | [<CompiledName("EXT_texture_filter_anisotropic")>] EXTTextureFilterAnisotropic
+
+        [<StringEnum(CaseRules.None)>]
+        type KHRParallelShaderCompile =
+            | [<CompiledName("KHR_parallel_shader_compile")>] KHRParallelShaderCompile
+
+        [<StringEnum(CaseRules.None)>]
+        type OESElementIndexUint =
+            | [<CompiledName("OES_element_index_uint")>] OESElementIndexUint
+
+        [<StringEnum(CaseRules.None)>]
+        type OESFboRenderMipmap =
+            | [<CompiledName("OES_fbo_render_mipmap")>] OESFboRenderMipmap
+
+        [<StringEnum(CaseRules.None)>]
+        type OESStandardDerivatives =
+            | [<CompiledName("OES_standard_derivatives")>] OESStandardDerivatives
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureFloat =
+            | [<CompiledName("OES_texture_float")>] OESTextureFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureFloatLinear =
+            | [<CompiledName("OES_texture_float_linear")>] OESTextureFloatLinear
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureHalfFloat =
+            | [<CompiledName("OES_texture_half_float")>] OESTextureHalfFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureHalfFloatLinear =
+            | [<CompiledName("OES_texture_half_float_linear")>] OESTextureHalfFloatLinear
+
+        [<StringEnum(CaseRules.None)>]
+        type OESVertexArrayObject =
+            | [<CompiledName("OES_vertex_array_object")>] OESVertexArrayObject
+
+        [<StringEnum(CaseRules.None)>]
+        type OVRMultiview2 =
+            | [<CompiledName("OVR_multiview2")>] OVRMultiview2
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLColorBufferFloat =
+            | [<CompiledName("WEBGL_color_buffer_float")>] WEBGLColorBufferFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureAstc =
+            | [<CompiledName("WEBGL_compressed_texture_astc")>] WEBGLCompressedTextureAstc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureEtc =
+            | [<CompiledName("WEBGL_compressed_texture_etc")>] WEBGLCompressedTextureEtc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureEtc1 =
+            | [<CompiledName("WEBGL_compressed_texture_etc1")>] WEBGLCompressedTextureEtc1
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTexturePvrtc =
+            | [<CompiledName("WEBGL_compressed_texture_pvrtc")>] WEBGLCompressedTexturePvrtc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureS3tc =
+            | [<CompiledName("WEBGL_compressed_texture_s3tc")>] WEBGLCompressedTextureS3tc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureS3tcSrgb =
+            | [<CompiledName("WEBGL_compressed_texture_s3tc_srgb")>] WEBGLCompressedTextureS3tcSrgb
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDebugRendererInfo =
+            | [<CompiledName("WEBGL_debug_renderer_info")>] WEBGLDebugRendererInfo
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDebugShaders =
+            | [<CompiledName("WEBGL_debug_shaders")>] WEBGLDebugShaders
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDepthTexture =
+            | [<CompiledName("WEBGL_depth_texture")>] WEBGLDepthTexture
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDrawBuffers =
+            | [<CompiledName("WEBGL_draw_buffers")>] WEBGLDrawBuffers
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLLoseContext =
+            | [<CompiledName("WEBGL_lose_context")>] WEBGLLoseContext
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLMultiDraw =
+            | [<CompiledName("WEBGL_multi_draw")>] WEBGLMultiDraw
+
+    module WebGLRenderingContext =
+        [<StringEnum(CaseRules.None)>]
+        type ANGLEInstancedArrays =
+            | [<CompiledName("ANGLE_instanced_arrays")>] ANGLEInstancedArrays
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTBlendMinmax =
+            | [<CompiledName("EXT_blend_minmax")>] EXTBlendMinmax
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTColorBufferFloat =
+            | [<CompiledName("EXT_color_buffer_float")>] EXTColorBufferFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTColorBufferHalfFloat =
+            | [<CompiledName("EXT_color_buffer_half_float")>] EXTColorBufferHalfFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTFloatBlend =
+            | [<CompiledName("EXT_float_blend")>] EXTFloatBlend
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTFragDepth =
+            | [<CompiledName("EXT_frag_depth")>] EXTFragDepth
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTSRGB =
+            | [<CompiledName("EXT_sRGB")>] EXTSRGB
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTShaderTextureLod =
+            | [<CompiledName("EXT_shader_texture_lod")>] EXTShaderTextureLod
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureCompressionBptc =
+            | [<CompiledName("EXT_texture_compression_bptc")>] EXTTextureCompressionBptc
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureCompressionRgtc =
+            | [<CompiledName("EXT_texture_compression_rgtc")>] EXTTextureCompressionRgtc
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureFilterAnisotropic =
+            | [<CompiledName("EXT_texture_filter_anisotropic")>] EXTTextureFilterAnisotropic
+
+        [<StringEnum(CaseRules.None)>]
+        type KHRParallelShaderCompile =
+            | [<CompiledName("KHR_parallel_shader_compile")>] KHRParallelShaderCompile
+
+        [<StringEnum(CaseRules.None)>]
+        type OESElementIndexUint =
+            | [<CompiledName("OES_element_index_uint")>] OESElementIndexUint
+
+        [<StringEnum(CaseRules.None)>]
+        type OESFboRenderMipmap =
+            | [<CompiledName("OES_fbo_render_mipmap")>] OESFboRenderMipmap
+
+        [<StringEnum(CaseRules.None)>]
+        type OESStandardDerivatives =
+            | [<CompiledName("OES_standard_derivatives")>] OESStandardDerivatives
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureFloat =
+            | [<CompiledName("OES_texture_float")>] OESTextureFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureFloatLinear =
+            | [<CompiledName("OES_texture_float_linear")>] OESTextureFloatLinear
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureHalfFloat =
+            | [<CompiledName("OES_texture_half_float")>] OESTextureHalfFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureHalfFloatLinear =
+            | [<CompiledName("OES_texture_half_float_linear")>] OESTextureHalfFloatLinear
+
+        [<StringEnum(CaseRules.None)>]
+        type OESVertexArrayObject =
+            | [<CompiledName("OES_vertex_array_object")>] OESVertexArrayObject
+
+        [<StringEnum(CaseRules.None)>]
+        type OVRMultiview2 =
+            | [<CompiledName("OVR_multiview2")>] OVRMultiview2
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLColorBufferFloat =
+            | [<CompiledName("WEBGL_color_buffer_float")>] WEBGLColorBufferFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureAstc =
+            | [<CompiledName("WEBGL_compressed_texture_astc")>] WEBGLCompressedTextureAstc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureEtc =
+            | [<CompiledName("WEBGL_compressed_texture_etc")>] WEBGLCompressedTextureEtc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureEtc1 =
+            | [<CompiledName("WEBGL_compressed_texture_etc1")>] WEBGLCompressedTextureEtc1
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTexturePvrtc =
+            | [<CompiledName("WEBGL_compressed_texture_pvrtc")>] WEBGLCompressedTexturePvrtc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureS3tc =
+            | [<CompiledName("WEBGL_compressed_texture_s3tc")>] WEBGLCompressedTextureS3tc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureS3tcSrgb =
+            | [<CompiledName("WEBGL_compressed_texture_s3tc_srgb")>] WEBGLCompressedTextureS3tcSrgb
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDebugRendererInfo =
+            | [<CompiledName("WEBGL_debug_renderer_info")>] WEBGLDebugRendererInfo
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDebugShaders =
+            | [<CompiledName("WEBGL_debug_shaders")>] WEBGLDebugShaders
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDepthTexture =
+            | [<CompiledName("WEBGL_depth_texture")>] WEBGLDepthTexture
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDrawBuffers =
+            | [<CompiledName("WEBGL_draw_buffers")>] WEBGLDrawBuffers
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLLoseContext =
+            | [<CompiledName("WEBGL_lose_context")>] WEBGLLoseContext
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLMultiDraw =
+            | [<CompiledName("WEBGL_multi_draw")>] WEBGLMultiDraw
+
+    module WebGLRenderingContextBase =
+        [<StringEnum(CaseRules.None)>]
+        type ANGLEInstancedArrays =
+            | [<CompiledName("ANGLE_instanced_arrays")>] ANGLEInstancedArrays
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTBlendMinmax =
+            | [<CompiledName("EXT_blend_minmax")>] EXTBlendMinmax
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTColorBufferFloat =
+            | [<CompiledName("EXT_color_buffer_float")>] EXTColorBufferFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTColorBufferHalfFloat =
+            | [<CompiledName("EXT_color_buffer_half_float")>] EXTColorBufferHalfFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTFloatBlend =
+            | [<CompiledName("EXT_float_blend")>] EXTFloatBlend
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTFragDepth =
+            | [<CompiledName("EXT_frag_depth")>] EXTFragDepth
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTSRGB =
+            | [<CompiledName("EXT_sRGB")>] EXTSRGB
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTShaderTextureLod =
+            | [<CompiledName("EXT_shader_texture_lod")>] EXTShaderTextureLod
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureCompressionBptc =
+            | [<CompiledName("EXT_texture_compression_bptc")>] EXTTextureCompressionBptc
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureCompressionRgtc =
+            | [<CompiledName("EXT_texture_compression_rgtc")>] EXTTextureCompressionRgtc
+
+        [<StringEnum(CaseRules.None)>]
+        type EXTTextureFilterAnisotropic =
+            | [<CompiledName("EXT_texture_filter_anisotropic")>] EXTTextureFilterAnisotropic
+
+        [<StringEnum(CaseRules.None)>]
+        type KHRParallelShaderCompile =
+            | [<CompiledName("KHR_parallel_shader_compile")>] KHRParallelShaderCompile
+
+        [<StringEnum(CaseRules.None)>]
+        type OESElementIndexUint =
+            | [<CompiledName("OES_element_index_uint")>] OESElementIndexUint
+
+        [<StringEnum(CaseRules.None)>]
+        type OESFboRenderMipmap =
+            | [<CompiledName("OES_fbo_render_mipmap")>] OESFboRenderMipmap
+
+        [<StringEnum(CaseRules.None)>]
+        type OESStandardDerivatives =
+            | [<CompiledName("OES_standard_derivatives")>] OESStandardDerivatives
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureFloat =
+            | [<CompiledName("OES_texture_float")>] OESTextureFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureFloatLinear =
+            | [<CompiledName("OES_texture_float_linear")>] OESTextureFloatLinear
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureHalfFloat =
+            | [<CompiledName("OES_texture_half_float")>] OESTextureHalfFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type OESTextureHalfFloatLinear =
+            | [<CompiledName("OES_texture_half_float_linear")>] OESTextureHalfFloatLinear
+
+        [<StringEnum(CaseRules.None)>]
+        type OESVertexArrayObject =
+            | [<CompiledName("OES_vertex_array_object")>] OESVertexArrayObject
+
+        [<StringEnum(CaseRules.None)>]
+        type OVRMultiview2 =
+            | [<CompiledName("OVR_multiview2")>] OVRMultiview2
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLColorBufferFloat =
+            | [<CompiledName("WEBGL_color_buffer_float")>] WEBGLColorBufferFloat
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureAstc =
+            | [<CompiledName("WEBGL_compressed_texture_astc")>] WEBGLCompressedTextureAstc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureEtc =
+            | [<CompiledName("WEBGL_compressed_texture_etc")>] WEBGLCompressedTextureEtc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureEtc1 =
+            | [<CompiledName("WEBGL_compressed_texture_etc1")>] WEBGLCompressedTextureEtc1
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTexturePvrtc =
+            | [<CompiledName("WEBGL_compressed_texture_pvrtc")>] WEBGLCompressedTexturePvrtc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureS3tc =
+            | [<CompiledName("WEBGL_compressed_texture_s3tc")>] WEBGLCompressedTextureS3tc
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLCompressedTextureS3tcSrgb =
+            | [<CompiledName("WEBGL_compressed_texture_s3tc_srgb")>] WEBGLCompressedTextureS3tcSrgb
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDebugRendererInfo =
+            | [<CompiledName("WEBGL_debug_renderer_info")>] WEBGLDebugRendererInfo
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDebugShaders =
+            | [<CompiledName("WEBGL_debug_shaders")>] WEBGLDebugShaders
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDepthTexture =
+            | [<CompiledName("WEBGL_depth_texture")>] WEBGLDepthTexture
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLDrawBuffers =
+            | [<CompiledName("WEBGL_draw_buffers")>] WEBGLDrawBuffers
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLLoseContext =
+            | [<CompiledName("WEBGL_lose_context")>] WEBGLLoseContext
+
+        [<StringEnum(CaseRules.None)>]
+        type WEBGLMultiDraw =
+            | [<CompiledName("WEBGL_multi_draw")>] WEBGLMultiDraw
+
     module WebSocket =
         type ReadyState =
             | N0 = 0
@@ -72051,6 +79268,307 @@ module Dom =
                     abstract highWaterMark: float option with get, set
                     [<ParamObject; Emit("$0")>]
                     static member Create (?highWaterMark: float) : Strategy = jsNative
+
+    module XMLDocument =
+        [<StringEnum(CaseRules.None)>]
+        type AnimationEvent =
+            | AnimationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type AnimationPlaybackEvent =
+            | AnimationPlaybackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type AudioProcessingEvent =
+            | AudioProcessingEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type BeforeUnloadEvent =
+            | BeforeUnloadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type BlobEvent =
+            | BlobEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ClipboardEvent =
+            | ClipboardEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CloseEvent =
+            | CloseEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CommandEvent =
+            | CommandEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CompositionEvent =
+            | CompositionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ContentVisibilityAutoStateChangeEvent =
+            | ContentVisibilityAutoStateChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CookieChangeEvent =
+            | CookieChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type CustomEvent =
+            | CustomEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DeviceMotionEvent =
+            | DeviceMotionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DeviceOrientationEvent =
+            | DeviceOrientationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type DragEvent =
+            | DragEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ErrorEvent =
+            | ErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type Event =
+            | Event
+
+        [<StringEnum(CaseRules.None)>]
+        type Events =
+            | Events
+
+        [<StringEnum(CaseRules.None)>]
+        type FocusEvent =
+            | FocusEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type FontFaceSetLoadEvent =
+            | FontFaceSetLoadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type FormDataEvent =
+            | FormDataEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type GPUUncapturedErrorEvent =
+            | GPUUncapturedErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type GamepadEvent =
+            | GamepadEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type HashChangeEvent =
+            | HashChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1998MathMathML =
+            | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org1999Xhtml =
+            | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
+
+        [<StringEnum(CaseRules.None)>]
+        type HttpWwwW3Org2000Svg =
+            | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
+
+        [<StringEnum(CaseRules.None)>]
+        type IDBVersionChangeEvent =
+            | IDBVersionChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type InputEvent =
+            | InputEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type KeyboardEvent =
+            | KeyboardEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MIDIConnectionEvent =
+            | MIDIConnectionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MIDIMessageEvent =
+            | MIDIMessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaEncryptedEvent =
+            | MediaEncryptedEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaKeyMessageEvent =
+            | MediaKeyMessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaQueryListEvent =
+            | MediaQueryListEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MediaStreamTrackEvent =
+            | MediaStreamTrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MessageEvent =
+            | MessageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MouseEvent =
+            | MouseEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type MouseEvents =
+            | MouseEvents
+
+        [<StringEnum(CaseRules.None)>]
+        type NavigateEvent =
+            | NavigateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type NavigationCurrentEntryChangeEvent =
+            | NavigationCurrentEntryChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type OfflineAudioCompletionEvent =
+            | OfflineAudioCompletionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageRevealEvent =
+            | PageRevealEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageSwapEvent =
+            | PageSwapEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PageTransitionEvent =
+            | PageTransitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PaymentMethodChangeEvent =
+            | PaymentMethodChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PaymentRequestUpdateEvent =
+            | PaymentRequestUpdateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PictureInPictureEvent =
+            | PictureInPictureEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PointerEvent =
+            | PointerEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PopStateEvent =
+            | PopStateEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ProgressEvent =
+            | ProgressEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type PromiseRejectionEvent =
+            | PromiseRejectionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCDTMFToneChangeEvent =
+            | RTCDTMFToneChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCDataChannelEvent =
+            | RTCDataChannelEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCErrorEvent =
+            | RTCErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCPeerConnectionIceErrorEvent =
+            | RTCPeerConnectionIceErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCPeerConnectionIceEvent =
+            | RTCPeerConnectionIceEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type RTCTrackEvent =
+            | RTCTrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SecurityPolicyViolationEvent =
+            | SecurityPolicyViolationEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechRecognitionErrorEvent =
+            | SpeechRecognitionErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechRecognitionEvent =
+            | SpeechRecognitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechSynthesisErrorEvent =
+            | SpeechSynthesisErrorEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SpeechSynthesisEvent =
+            | SpeechSynthesisEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type StorageEvent =
+            | StorageEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type SubmitEvent =
+            | SubmitEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TaskPriorityChangeEvent =
+            | TaskPriorityChangeEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TextEvent =
+            | TextEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type ToggleEvent =
+            | ToggleEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TouchEvent =
+            | TouchEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TrackEvent =
+            | TrackEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type TransitionEvent =
+            | TransitionEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type UIEvent =
+            | UIEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type UIEvents =
+            | UIEvents
+
+        [<StringEnum(CaseRules.None)>]
+        type WebGLContextEvent =
+            | WebGLContextEvent
+
+        [<StringEnum(CaseRules.None)>]
+        type WheelEvent =
+            | WheelEvent
 
 [<Erase>]
 type U11<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11> =

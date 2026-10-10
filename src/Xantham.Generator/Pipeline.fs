@@ -461,6 +461,8 @@ let private generateCore
         let catalogProducer =
             DeclarationCatalog.createProducer ctx |> DeclarationCatalog.cacheProducer
 
+        do! DeclarationCatalog.validateReferencesWithProducer catalogProducer ctx
+
         let! harvest, harvestFindings = runTier ctx Harvest.passes HarvestModel.Empty
         let! resolve, resolveFindings = runTier ctx Resolve.passes (toResolve harvest)
 

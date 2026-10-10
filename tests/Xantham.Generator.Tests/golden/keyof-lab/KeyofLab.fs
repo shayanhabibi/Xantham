@@ -83,7 +83,7 @@ type Slots =
 /// <summary>
 /// <c>Record</c> over concrete operands.
 /// </summary>
-type Registry = Record<string, float>
+type Registry = JS.Record<string, float>
 
 /// <summary>
 /// A readonly string index signature.

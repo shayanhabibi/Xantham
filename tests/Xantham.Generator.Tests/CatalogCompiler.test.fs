@@ -56,6 +56,20 @@ let tests =
             let identity = discoverWith probe id executable |> Async.RunSynchronously
             Expect.equal identity (TypeScriptPackage(version, revision, Ast.ProtocolVersion)) "installed compiler identity"
 
+        for release in [ "7.1.0-dev.20260902.2"; "7.1.0-dev.20260903.1"; "7.1.0"; "7.1.0-dev.20260902.1+build.1" ] do
+            testCase ("unchanged executable bytes retain the verified exact release " + release) <| fun _ ->
+                use scratch = Scratch.directory "catalog-compiler-release"
+                let executable, platform, wrapper = install scratch.Path
+                let bytes = File.ReadAllBytes executable
+                for manifest in [ platform; wrapper ] do
+                    edit manifest "version" (System.Text.Json.JsonSerializer.Serialize release)
+                edit wrapper "optionalDependencies"
+                    (System.Text.Json.JsonSerializer.Serialize(Map.ofList [ "@typescript/typescript-win32-x64", release ]))
+                let actual = discoverWith (fun _ -> async.Return ("Version " + release)) id executable |> Async.RunSynchronously
+                Expect.equal actual (TypeScriptPackage(release, revision, Ast.ProtocolVersion)) "discovery preserves exact release metadata"
+                Expect.notEqual actual (TypeScriptPackage(version, revision, Ast.ProtocolVersion)) "equal executable bytes do not erase release identity"
+                Expect.sequenceEqual (File.ReadAllBytes executable) bytes "the executable input stayed identical"
+
         testCase "copied executable cannot borrow nearby wrapper identity" <| fun _ ->
             use scratch = Scratch.directory "catalog-compiler"
             install scratch.Path |> ignore

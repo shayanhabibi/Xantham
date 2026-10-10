@@ -310,7 +310,8 @@ let private collapseNodeAliases (ctx: Context) (exports: HarvestedExport list) =
 
         collapsed, findings
 
-/// Harvests package globals when a public input is a global script, or module exports are empty.
+/// Harvests package globals when a public input is a global script, module exports are empty,
+/// or compiler libraries ship alongside the entry package.
 /// A mixed run reads the global script's scope and retains the public module exports.
 let harvestGlobals: Pass<HarvestModel> =
     {
@@ -332,11 +333,44 @@ let harvestGlobals: Pass<HarvestModel> =
                         |> Async.Sequential
 
                     let globalFile = globalFiles |> Array.tryPick id
+                    let shipsCompilerLib = GeneratorConfig.disposition ctx.Config CompilerLib = Ship
 
-                    if not (List.isEmpty model.Exports) && Option.isNone globalFile then
+                    let! libraryFile =
+                        async {
+                            if shipsCompilerLib && Option.isNone globalFile then
+                                // Module locals can shadow library names and are not globals.
+                                // A library file exposes the program's actual global scope.
+                                let! files = ctx.Session.getSourceFileNames ()
+
+                                let! libraries =
+                                    files
+                                    |> Array.map (fun file ->
+                                        async {
+                                            let! metadata =
+                                                ctx.Session.getSourceFileMetadata (DocumentIdentifier.FileName file)
+
+                                            return
+                                                if metadata |> ValueOption.exists _.IsDefaultLibrary then
+                                                    Some(file * uom<declFile>)
+                                                else
+                                                    None
+                                        })
+                                    |> Async.Parallel
+
+                                return libraries |> Array.tryPick id
+                            else
+                                return None
+                        }
+
+                    if
+                        not (List.isEmpty model.Exports)
+                        && Option.isNone globalFile
+                        && Option.isNone libraryFile
+                    then
                         return Advanced model
                     else
-                        let scopeFile = globalFile |> Option.defaultValue ctx.EntryFile
+                        let scopeFile =
+                            globalFile |> Option.orElse libraryFile |> Option.defaultValue ctx.EntryFile
 
                         // Types and values both: a global library is mostly interfaces and aliases,
                         // but `declare function`/`declare var` are exactly what needs `[<Global>]`.
@@ -353,8 +387,6 @@ let harvestGlobals: Pass<HarvestModel> =
                         // full rather than through `libBinding` (`Shape/Spec.fs`), so a
                         // declaration this pass withholds never reaches anything downstream that
                         // could act on it.
-                        let shipsCompilerLib = GeneratorConfig.disposition ctx.Config CompilerLib = Ship
-
                         let admits origin =
                             origin = EntryPackage || (origin = CompilerLib && shipsCompilerLib)
 

@@ -44,11 +44,32 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 3, 3, 1, 1)
-                "identity 3: namespace values, the intrinsic empty object and bound type parameters change catalog keys; API 3: tagged unions bind their type parameters"
+                (1, 5, 4, 2, 1)
+                "identity 5 and API 4 combine the independent portable library and generic projection contracts; inference 2 retains stable entry closure"
+
+        for label, identityVersion, apiVersion, inferenceVersion in [
+            "portable library before projection integration", 4, 3, 2
+            "early projections before portable library integration", 3, 3, 1
+        ] do
+            testCase ("combined contract rejects " + label) <| fun _ ->
+                let old =
+                    { expected.Contract with
+                        IdentityVersion = identityVersion
+                        ApiVersion = apiVersion
+                        InferenceVersion = inferenceVersion }
+                rejects "identity version" (fun () ->
+                    validateContract 2 expected.Compiler expected.Generator "profile" (Some old))
 
         testCase "portable contract accepts rebuilt generator and platform binary" <| fun _ ->
             validateContract 2 "compiler-producer" "generator-producer" "profile" (Some expected.Contract)
+
+        for version in [ "7.1.0-dev.20260902.2"; "7.1.0-dev.20260903.1"; "7.1.0"; "7.1.0-dev.20260902.1+build.1" ] do
+            testCase ("identical revision and protocol do not authenticate another compiler release " + version) <| fun _ ->
+                let contract = { expected.Contract with Compiler = TypeScriptPackage(version, String.replicate 40 "a", 8u) }
+                let document = encoded ()
+                document["compatibility"] <- write contract
+                rejects "compiler version" (fun () ->
+                    validateContract 2 "compiler-producer" "generator-producer" "profile" (readText (document.ToJsonString())))
 
         testCase "catalog composition requires regenerated source closures and constraints" <| fun _ ->
             rejects "identity version" (fun () ->

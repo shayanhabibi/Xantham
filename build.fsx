@@ -445,6 +445,7 @@ module Stages =
             and! update = Options.updateGoldens
             and! filter = Options.testFilter
             and! runGate = Options.runGate
+            and! isCI = Baked.Common.isCI
 
             // Each test project is an Expecto console app and runs as its built executable, with
             // output streamed as written. `--filter` is Expecto's own hint: a substring of the full test name.
@@ -466,7 +467,11 @@ module Stages =
                         let assembly = System.IO.Path.Combine(output, project.Name + ".dll")
 
                         let command =
-                            if System.String.IsNullOrWhiteSpace filter then
+                            if isCI && System.String.IsNullOrWhiteSpace filter then
+                                cmd $"dotnet {assembly} --debug --no-spinner"
+                            elif isCI then
+                                cmd $"dotnet {assembly} --filter {filter} --debug --no-spinner"
+                            elif System.String.IsNullOrWhiteSpace filter then
                                 cmd $"dotnet {assembly}"
                             else
                                 cmd $"dotnet {assembly} --filter {filter}"

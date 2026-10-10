@@ -4584,7 +4584,7 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "abstract values: ReadonlyRecord<string, bool>"
+                              "abstract values: JS.ReadonlyRecord<string, bool>"
                               "a readonly inline index signature reads ReadonlyRecord, with no setter"
 
                       testCase "a named index-signature declaration keeps minting its own name" <| fun _ ->
@@ -5431,4 +5431,11 @@ let recursiveGroupTests =
                 Expect.stringContains entry "static member status" "entry owns the subpath value exports"
                 Expect.stringContains entry "Import(\"status\", \"recursive-groups-lab/collision/api\")" "public import path is preserved"
         ])
+    ]
+
+[<Tests>]
+let catalogLibraryEntryFixtureTests =
+    let package = handFixture "catalog-library-entry-lab"
+    testList "catalog library entry fixture" [
+        yield! fixtureTests "catalog-library-entry-lab" package (handConfig package) (fun _ -> [])
     ]
