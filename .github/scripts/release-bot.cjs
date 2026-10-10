@@ -30,7 +30,7 @@ function verifyPullRequest(pr, repository, expected) {
 }
 
 function verifyChangedPaths(paths) {
-  const names = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator',
+  const names = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Generator.Myriad',
     'Xantham.Fable.Core', 'Xantham.Fable.Core.TS', 'Xantham.Fable.Node'];
   const allowed = new Set(names.flatMap(name => [`src/${name}/${name}.fsproj`, `src/${name}/CHANGELOG.md`]));
   if (paths.some(file => !allowed.has(file))) throw new Error('ShipIt changed files outside package versions and changelogs.');
