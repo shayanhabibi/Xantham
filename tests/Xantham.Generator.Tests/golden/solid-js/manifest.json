@@ -4,8 +4,8 @@
   "module": "SolidJs",
   "counts": {
     "exact": 69,
-    "ergonomic": 147,
-    "widened": 84,
+    "ergonomic": 146,
+    "widened": 85,
     "escape": 42
   },
   "passes": [
@@ -57,8 +57,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 158,
-      "ergonomic": 158
+      "total": 166,
+      "ergonomic": 158,
+      "widened": 8
     },
     {
       "pass": "RA - repair-arity",

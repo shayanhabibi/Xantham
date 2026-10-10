@@ -2016,6 +2016,24 @@ A nullable position hides its application: `x?: Job<string>` reaches the shape t
 
 `generic-tag-lab` pins the shape matrix (two parameters, array and promise payloads, a constraint, a phantom, recursion, interface arms, an intersection distributed over arms with a default, nullable and optional positions including a phantom argument and an application no other member reaches, a re-export, a re-alias, a transformed subset and a phantom literal union) and a producer/adapter catalog run reading `Job<string> option` across packages; `shared-tag-lab` pins the `Scheduled<T>` reducer. Committed corpus: `TR013` and `TP006` unchanged (no golden held a generic tagged union); labs before/after `TR013` 27 to 0, `TP006` 1 to 0, and the 27 `obj` tokens the generic payloads produced to 0. The nullable-application fix removes the lab's four unreferenced arm copies (`Queue.Last`, `Queue.Last2`, `MaybeJob2`, `MaybeJob3`), and a phantom argument beside `undefined` reads `Marker<string>` where it read `Marker<obj>` with `TR013`. `SP004` reads 63 across the committed goldens (`workers-types` 37) and 37 in `Xantham.Fable.Core.TS`; `solid-js`'s 8 wait on a regeneration where its paths case-fold (`caseFoldSensitive`).
 
+## Operation declaration-name selection (2026-10-10)
+
+Before-Shape operation selection matches method and selected-field names recovered from typed
+declarations. Leading double underscores remain JavaScript keys: `__method` and `__proto__`
+select their declarations, while checker-escaped aliases reject. Required sibling checks compare
+symbol identity. Final declaration-name, receiver, source-closure and snapshot authentication
+remain in place. The resolved-operation regression covers whole parameters, selected fields,
+authenticated companion plans and escaped-name rejection.
+
+The review follow-up also regenerates the outstanding Windows `solid-js` findings: `SP004`
+increases from 0 to 8 across `Universal.RendererOptions` and `Universal.Renderer`. Binding text
+is unchanged; one symbol moves from Ergonomic to Widened. The original PR head reproduces the
+stale findings failure before this regeneration.
+
+Validation: the unfiltered Windows `build.fsx -- test --run-gate --ci` passed 1,271 Generator
+tests and 99 Wire tests (one existing ignored case in each suite), 528 Fable checks and the real
+Partas plugin gate. The operation regression was observed failing before the lookup fix.
+
 ## The checker's error type (2026-10-09)
 
 `TypeFlags.Any` covers four checker intrinsic names, and `any` includes the checker's own fallbacks (a circular alias, an inference placeholder) besides a written or omitted annotation, so `TR008` is not proof of authorship. `typeRef` reads `TypeResponse.IntrinsicName`: `any` keeps `TR008`; `error` and `unresolved` (a reference the program leaves unresolved or invalid) raise `TR063 ErrorTypeToObj` with the name the checker keeps; `intrinsic` (the body of `Uppercase` and its siblings) raises `TR064 IntrinsicMarkerToObj`. An Any without an intrinsic name is not claimed as a written `any`. Both are Escape, the tier `TR008` carries; the keys separate them. Resolve records the name from the error type's alias symbol, qualified through its unresolved parents (`NodeJS.Timeout`); a union, an intersection or an optional position the checker reduced over an error constituent carries none. A second export abbreviating the shared intrinsic marker (`Lowercase = Uppercase`) reports the same `TR064`.

@@ -238,7 +238,8 @@ insufficient: another receiver can have the same method name with an incompatibl
 guards. A local interface named `Array<T>` is not evidence of JavaScript array representation.
 
 **Operation property keys come from typed declarations.** Checker symbol names escape leading
-double underscores (`__proto__` becomes `___proto__`). Record projections recover the declaration
+double underscores (`__proto__` becomes `___proto__`). Method and selected-field lookup must
+compare recovered declaration spellings, retaining the final name authentication. Record projections recover the declaration
 spelling and use allocated F# field names; computed/symbol keys reject. Emit own data properties
 with `Object.defineProperty`: ordinary assignment to `__proto__` invokes the prototype setter.
 Optional record and selected-field inputs have an outer option for omission, separate from

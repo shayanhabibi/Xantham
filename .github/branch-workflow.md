@@ -60,5 +60,7 @@ Manual package verification on develop cannot publish. The wrapper runs from
 protected master. ShipIt runs in a separate read-only job; finalization applies
 its patch on a fresh runner without executing tools or hooks from develop.
 It checks the maintainer identity and current PR commits, and
-only commits the six package project files and changelogs. It rejects stale
+only commits the seven package project files and changelogs. The trusted master policy must
+include Myriad before preparing its first release (the policy bootstrap is PR #116).
+It rejects stale
 versions, unexpected file changes, and branches that moved during preparation.

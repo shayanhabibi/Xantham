@@ -115,6 +115,18 @@ let private operationLookup
         let handles (symbol: SymbolResponse) =
             symbol.DeclarationHandles |> ValueOption.defaultValue [||] |> Array.toList
 
+        let namedMembers name members =
+            members
+            |> List.map (fun member_ ->
+                async {
+                    let! declaredName = Resolve.declarationMemberName ctx member_.Symbol
+                    return if declaredName = Some name then Some member_ else None
+                })
+            |> Async.Sequential
+            |> Async.RunSynchronously
+            |> Array.choose id
+            |> Array.toList
+
         let exports =
             model.Harvest.Exports
             |> List.filter (fun export ->
@@ -163,10 +175,7 @@ let private operationLookup
                     | Some receiver when not (Shape.Spec.declParamIds receiver).IsEmpty ->
                         fail "Generic receivers are outside the operation projection contract"
                     | Some receiver ->
-                        match
-                            receiver.Members
-                            |> List.filter (fun member_ -> member_.Symbol.Name = methodName)
-                        with
+                        match receiver.Members |> namedMembers methodName with
                         | [ method_ ] when method_.Symbol.Flags.HasFlag SymbolFlags.Method && not method_.Optional ->
                             match facts method_.TypeId with
                             | None -> incomplete "The selected method was not fully resolved"
@@ -221,10 +230,7 @@ let private operationLookup
                                                 && value.IndexInfos.IsEmpty
                                                 && (Shape.Spec.declParamIds value).IsEmpty
                                                 ->
-                                                match
-                                                    value.Members
-                                                    |> List.filter (fun member_ -> member_.Symbol.Name = field)
-                                                with
+                                                match value.Members |> namedMembers field with
                                                 | [ property ] when
                                                     not (property.Symbol.Flags.HasFlag SymbolFlags.Method)
                                                     ->
@@ -233,7 +239,8 @@ let private operationLookup
                                                     elif
                                                         value.Members
                                                         |> List.exists (fun member_ ->
-                                                            member_.Symbol.Name <> field && not member_.Optional)
+                                                            member_.Symbol.SymbolId <> property.Symbol.SymbolId
+                                                            && not member_.Optional)
                                                     then
                                                         fail
                                                             "The object parameter has required fields that this operation would omit"

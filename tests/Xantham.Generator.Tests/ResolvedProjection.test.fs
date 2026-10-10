@@ -189,6 +189,30 @@ let private operationPlan source model =
 [<Tests>]
 let operationTests =
     testList "projection resolved operations" [
+        testCase "declared double-underscore methods and fields authenticate without checker escapes" <| fun _ ->
+            use scratch = Scratch.directory "projection-operation-declared-names"
+            operationPackage scratch.Path """
+export interface Harness {
+  plain(change: { ordinary?: string; '__proto__'?: string }): void;
+  '__method'(change: { ordinary?: string }): void;
+}
+"""
+            let server, ctx, resolved = resolve scratch.Path
+            use _ = server
+            let model = snapshot ctx resolved
+            for methodName, field in ["plain", "__proto__"; "__method", "ordinary"] do
+                let source = Resolved.tryFindParameterField "projection-operations" ["Harness"] methodName "change" field model |> Option.get
+                Expect.equal (Resolved.shape source model) (Ok(ResolvedValueShape.Union [ResolvedValueShape.String; ResolvedValueShape.Undefined])) "declared keys select the original value shape"
+                let operation = Resolved.operation source model |> Result.defaultWith (fun errors -> failtestf "%A" errors)
+                Expect.equal (operation.MethodName, operation.FieldName) (methodName, Some field) "JavaScript call metadata retains declaration spelling"
+                operationPlan source model |> ignore
+            let whole = operationSource "__method" "change" model
+            Expect.isOk (Resolved.shape whole model) "whole-parameter lookup also uses declaration spelling"
+            operationPlan whole model |> ignore
+            for methodName, field in ["plain", "___proto__"; "___method", "ordinary"] do
+                let source = Resolved.tryFindParameterField "projection-operations" ["Harness"] methodName "change" field model |> Option.get
+                Expect.isTrue (Resolved.shape source model |> hasCode "projection/unsupported-operation") "checker escapes cannot select a different JavaScript key"
+
         testCase "input arrays preserve tagged records and optional properties before Shape" <| fun _ ->
             use scratch = Scratch.directory "projection-operation-shape"
             operationPackage scratch.Path inputModel
