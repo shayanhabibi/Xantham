@@ -73,7 +73,13 @@ function run(base = process.env.XANTHAM_RELEASE_BASE || 'origin/master', root = 
       dependencies: [...xml.matchAll(/<ProjectReference\s+Include="([^"]+)"/g)].map(match => path.posix.basename(match[1].replaceAll('\\', '/'), '.fsproj')),
     });
   }
-  if (packages.length !== 7) throw new Error(`Expected all seven published packages, found ${packages.length}. Update the release policy when adopting a package.`);
+  const required = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator',
+    'Xantham.Generator.Myriad', 'Xantham.Fable.Core', 'Xantham.Fable.Core.TS', 'Xantham.Fable.Node'];
+  const names = new Set(packages.map(pkg => pkg.name));
+  if (required.some(name => !names.has(name)) ||
+      packages.some(pkg => !required.includes(pkg.name))) {
+    throw new Error('Expected all seven published packages by name. Update the release policy when adopting a package.');
+  }
   const affected = validateVersions(packages, files);
   console.log(`Release versions verified against ${base}: ${[...affected].join(', ') || 'no package payload changes'}.`);
 }

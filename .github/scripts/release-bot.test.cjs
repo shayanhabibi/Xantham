@@ -4,6 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const bot = require('./release-bot.cjs');
+const { run: validateRelease } = require('./release-versions.cjs');
+const establishedPackages = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator',
+  'Xantham.Fable.Core', 'Xantham.Fable.Core.TS', 'Xantham.Fable.Node'];
 
 function pr() {
   return { state: 'open', head: { ref: 'develop', sha: 'head', repo: { full_name: 'owner/repo' } },
@@ -42,7 +45,7 @@ test('release commits contain only known project versions and changelogs', () =>
   }
 });
 
-function fixture(t) {
+function fixture(t, names = [...establishedPackages, 'Xantham.Generator.Myriad']) {
   const scratch = path.resolve(__dirname, '../../tests/.scratch');
   fs.mkdirSync(scratch, { recursive: true });
   const root = fs.mkdtempSync(path.join(scratch, 'xantham-release-bot-'));
@@ -52,7 +55,6 @@ function fixture(t) {
   git('config', 'core.autocrlf', 'false');
   git('config', 'user.name', 'Test');
   git('config', 'user.email', 'test@example.test');
-  const names = ['Xantham.Cli', 'Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Generator.Myriad', 'Xantham.Fable.Core', 'Xantham.Fable.Core.TS', 'Xantham.Fable.Node'];
   for (const name of names) {
     fs.mkdirSync(path.join(root, 'src', name), { recursive: true });
     fs.writeFileSync(path.join(root, 'src', name, `${name}.fsproj`), '<Project><PropertyGroup><Version>1.0.0</Version></PropertyGroup></Project>\n');
@@ -85,6 +87,24 @@ test('preview validates versions but does not commit, push, or dispatch', async 
   assert.equal(f.git('rev-parse', 'HEAD'), f.head);
   assert.equal(f.git('ls-remote', 'origin', 'refs/heads/develop').split('\t')[0], f.head);
   assert.deepEqual(f.dispatched, []);
+});
+
+test('develop release validation requires the adopted Myriad package', t => {
+  const f = fixture(t, establishedPackages);
+  assert.throws(() => validateRelease(f.input.request.base, f.input.root), /Expected all seven published packages/);
+  assert.equal(f.git('rev-parse', 'HEAD'), f.head);
+  assert.deepEqual(f.dispatched, []);
+});
+
+test('package counts cannot substitute an unknown package or omit an established one', t => {
+  for (const names of [[...establishedPackages, 'Unknown'],
+    [...establishedPackages.filter(name => name !== 'Xantham.TypeScript.Wire'), 'Xantham.Generator.Myriad'],
+    [...establishedPackages.filter(name => name !== 'Xantham.TypeScript.Wire'), 'Xantham.Generator.Myriad', 'Unknown']]) {
+    const f = fixture(t, names);
+    assert.throws(() => validateRelease(f.input.request.base, f.input.root), /Expected all seven published packages/);
+    assert.equal(f.git('rev-parse', 'HEAD'), f.head);
+    assert.deepEqual(f.dispatched, []);
+  }
 });
 test('release pushes once with bot identity; retries dispatch checks without another version commit', async t => {
   const f = fixture(t);
