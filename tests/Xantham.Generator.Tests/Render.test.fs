@@ -258,6 +258,7 @@ let renderTests =
                               Docs = ""
                               Tags = []
                               Order = None
+                              TypeParameters = []
                               Tag = "kind"
                               Cases =
                                 [ { Name = "Circle"
@@ -272,12 +273,40 @@ let renderTests =
                 "[<RequireQualifiedAccess; TypeScriptTaggedUnion(\"kind\", CaseRules.None)>]"
                 "the tag drives the attribute"
 
+            Expect.stringContains source "type Shape =" "a union binding no parameter has a bare head"
+
             Expect.stringContains
                 source
                 "    | [<CompiledName(\"circle\")>] Circle of radius: float"
                 "named field, so the JS key survives"
 
             Expect.stringContains source "    | Blank\n" "a tag-only arm carries nothing"
+
+        testCase "a generic tagged union writes its parameters, constraints at the head" <| fun _ ->
+            let shape name parameters =
+                FsTaggedUnion
+                    { Name = name
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = parameters
+                      Tag = "kind"
+                      Cases =
+                        [ { Name = "Circle"
+                            CompiledName = Some "circle"
+                            Fields = [ { Name = "radius"; Type = FsTypeVar "T" } ] } ] }
+
+            let model =
+                { baseModel with
+                    Decls =
+                        [ shape "Shape" [ { Name = "T"; Constraint = None } ]
+                          shape "Owned" [ { Name = "T"; Constraint = Some(FsNamed "Base") } ] ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains source "type Shape<'T> =" "the head binds the payload parameter"
+            Expect.stringContains source "type Owned<'T when 'T :> Base> =" "a constraint is written at the head"
+            Expect.stringContains source "Circle of radius: 'T" "the case reads the bound parameter"
 
         testCase "type variables and applications print in F# order" <| fun _ ->
             Expect.equal (Render.printType (FsTypeVar "T")) "'T" "the tick is the renderer's"

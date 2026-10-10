@@ -4,8 +4,8 @@
   "module": "DeclarationIdentityLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 13,
-    "widened": 0,
+    "ergonomic": 12,
+    "widened": 1,
     "escape": 0
   },
   "passes": [
@@ -21,8 +21,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 14,
-      "ergonomic": 14
+      "total": 15,
+      "ergonomic": 14,
+      "widened": 1
     }
   ]
 }

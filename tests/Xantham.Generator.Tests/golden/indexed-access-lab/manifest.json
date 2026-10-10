@@ -4,8 +4,8 @@
   "module": "IndexedAccessLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 26,
-    "widened": 2,
+    "ergonomic": 25,
+    "widened": 3,
     "escape": 0
   },
   "passes": [
@@ -33,8 +33,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 28,
-      "ergonomic": 28
+      "total": 29,
+      "ergonomic": 28,
+      "widened": 1
     }
   ]
 }

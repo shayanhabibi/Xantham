@@ -85,7 +85,7 @@ let augmentationTests = testSequenced <| testList "catalog library ambient authe
         let output = Path.Combine(scratch.Path, "rejected")
         Expect.throwsC
             (fun () -> Pipeline.run config package output |> Async.RunSynchronously |> ignore)
-            (fun error -> Expect.stringContains error.Message "source hash mismatch" "changed globalThis closure remains authenticated")
+            (fun error -> Expect.stringContains error.Message "F# API mismatch for GlobalThis" "augmented globalThis cannot authenticate the producer's unchanged API")
         Expect.isFalse (Directory.Exists output) "authentication happens before writing output")
 ]
 

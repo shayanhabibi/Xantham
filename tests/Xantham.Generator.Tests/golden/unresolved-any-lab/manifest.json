@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "package": "unresolved-any-lab",
+  "module": "UnresolvedAnyLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 0,
+    "widened": 0,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 8,
+      "widened": 1,
+      "escape": 7
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ]
+}

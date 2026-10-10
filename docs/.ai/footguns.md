@@ -14,10 +14,13 @@ argument, so `Model<string>` reads as two type arguments. Read heritage nodes an
 `getTypeFromTypeNode` for each contract. `TypeFacts.ImplementedTypes` records explicit
 `implements` contracts separately from `BaseTypes`.
 
-**Checker alias-symbol identity alone does not name a type.** A transformed type retains the
-symbol of the alias it came from, so the checker-declared type must equal the type being named
-before a source name is recovered. `NonNullable<Value>` matched the members of the nullable
-`Value` and reintroduced `null` on the strength of the shared symbol.
+**Checker alias-symbol identity alone does not name a type.** A transformed type retains the symbol of the alias it came from, so the checker-declared type must equal the type being named before a source name is recovered. `NonNullable<Value>` matched the members of the nullable `Value` and reintroduced `null` on the strength of the shared symbol. A union application of a generic tagged alias is recognised only where its arms correspond to the declared form's arm for arm. An arm that is an instantiation open over a signature parameter reaches the shape tier identity-only, with no members, so it corresponds by its target rather than by its tag.
+
+**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation and the checker's own fallbacks (a circular alias, an inference placeholder), so `TR008` is not proof an author wrote `any`. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
+
+**A nullable union hides the application it was written over.** `x?: Job<string>` reaches the shape tier as `Job<string>`'s arms beside `undefined`, and arms no argument re-instantiates are the declared form's own, so a member-set match lands on `Job<T>` outside its scope. Read `TypeFacts.NonNullableApplication` (the union origin's application, from `getNonNullableType`) and apply its arguments; a declared form's own parameters apply only where they are in scope. An alias that already includes `null` (`Maybe<T> | undefined`) leaves no single application in the origin, and its reference depends on the member-set match.
+
+**Expecto's `--filter` is a hierarchy prefix.** A fixture's tests are named `generator e2e.<fixture> generates the committed goldens` and its extra cases `generator e2e.<case name>`, so a bare fixture name selects zero tests and reports success.
 
 ## Declaration catalogs
 
@@ -239,3 +242,44 @@ Carried from lanes that closed without finishing these.
 - **Entrypoint subclassability.** Generated `Container`/`ContainerProxy` are not F# subclassable;
   direct subclassing goes through the ambient runtime base. The ordinary SDK class
   interface-and-constructor policy was retained rather than revisited.
+
+
+## Early projections must precede loss (2026-10-09)
+
+`Customization.Semantics.projectResolved` runs after Resolve, before Shape. Build companions
+from its original arms; an emitted `string` or `option` cannot recover source literal membership
+or the null/undefined distinction. Keep source tokens and companion plans snapshot-sealed;
+equal checker IDs or equal arm sets do not merge named declaration identity.
+A phantom alias such as `type Phantom<T> = "auto"` shares its checker type with a plain
+literal alias; inspect its declaration parameters through Resolve rather than tagging that type. Cached tokens and
+plans must fail on the next run, while nonces must never enter output provenance.
+
+Projection companions do not alter the raw ABI. Keep their manifest provenance separate from
+raw catalog variant policy and validate the complete emitted source before writing. The
+Myriad adapter's `Decoded|Invalid` matches through a strict raw-value decoder into a normal DU.
+It does not pattern-match an erased union or recover the originating alias from shared strings.
+An optional-property presence test requires separate object facts; decoding its read value
+cannot distinguish absence from an explicitly present `undefined` property.
+
+**Typed operations must authenticate their receiver after placement.** Before-Shape method
+facts carry their receiver token into `ProjectionCompanion.forOperation`. Pipeline checks its
+final qualified type after catalog application. A caller-supplied F# name plus an `unbox` is
+insufficient: another receiver can have the same method name with an incompatible argument.
+
+**Array identity comes from the checker.** Global augmentation can classify the built-in
+`Array<T>` under `@types/node`. Use `Session.isArrayType`, retaining the non-tuple/one-argument
+guards. A local interface named `Array<T>` is not evidence of JavaScript array representation.
+
+**Operation property keys come from typed declarations.** Checker symbol names escape leading
+double underscores (`__proto__` becomes `___proto__`). Method and selected-field lookup must
+compare recovered declaration spellings, retaining the final name authentication. Record projections recover the declaration
+spelling and use allocated F# field names; computed/symbol keys reject. Emit own data properties
+with `Object.defineProperty`: ordinary assignment to `__proto__` invokes the prototype setter.
+Optional record and selected-field inputs have an outer option for omission, separate from
+present undefined. Selected-field projections must reject required selected fields and required
+siblings. The contract describes resolved values, not `exactOptionalPropertyTypes` writes.
+
+**Shared operation input contracts require an explicit owner.** `Operations.createShared`
+aliases the first selection's emitted types only after exact resolved-shape agreement.
+Each method still authenticates its own occurrence and source closure. Automatic value-set
+deduplication would silently merge independent contracts.

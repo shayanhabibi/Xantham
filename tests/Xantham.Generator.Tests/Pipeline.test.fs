@@ -234,12 +234,14 @@ let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package:
     let goldenDir = Path.Combine(__SOURCE_DIRECTORY__, "golden", fixture)
     let rendered = Async.RunSynchronously(Pipeline.generate config package)
 
-    // A shipped group is written under `groups/` (O7); what every run owes is the entry
-    // package's module and the manifest's two halves.
+    let ordinaryFiles =
+        if config.RecursiveGroups then [ "manifest.json"; "symbols.jsonl" ]
+        else [ $"{rendered.ModuleName}.fs"; "manifest.json"; "symbols.jsonl" ]
+
     Expect.equal
         (rendered.Files |> List.map fst |> List.filter (fun name -> not (name.StartsWith "groups/")))
-        [ $"{rendered.ModuleName}.fs"; "manifest.json"; "symbols.jsonl" ]
-        "the entry module, the aggregate manifest and the per-symbol lines"
+        ordinaryFiles
+        "the configured entry layout, the aggregate manifest and the per-symbol lines"
 
     if updateGoldens then
         Directory.CreateDirectory goldenDir |> ignore
@@ -1936,8 +1938,8 @@ let pipelineTests =
                           |> List.map source.Contains
                           |> Flip.Expect.equal "opaque generic metadata cannot introduce declaration parameters" [ false; false; false ]
                           rendered.Findings
-                          |> List.exists (fun finding -> finding.Key = "TR008")
-                          |> Flip.Expect.equal "the unresolved type remains visible as an any-to-obj finding" true ])
+                          |> List.exists (fun finding -> finding.Key = "TR063")
+                          |> Flip.Expect.equal "the unresolved type remains visible as an error-type finding" true ])
 
         yield!
             fixtureTests
@@ -4351,7 +4353,131 @@ let pipelineTests =
                       // `Terminal` and `Onset` exercise on flat arms.
                       Expect.stringContains source "type OnEvent = (OnEvent.Event -> unit)" "the intersection arm no longer blocks the fold"
                       Expect.stringContains source "| [<CompiledName(\"log\")>] Log of level: string" "the two Log arms fold into one case"
-                      Expect.equal (keysFor "OnEvent.Event") [ "DT002"; "DT004"; "SY004" ] "discriminated, folded once, and named under its owner" ])
+                      Expect.equal (keysFor "OnEvent.Event") [ "DT002"; "DT004"; "SY004" ] "discriminated, folded once, and named under its owner"
+
+                  testCase "generic tagged payloads preserve declaration and method type parameters" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "type Scheduled<'T> =" "the union binds its payload parameter"
+                      Expect.stringContains source "Once of payload: 'T" "the case carries the same parameter"
+                      Expect.stringContains source "Repeat of payload: 'T * previous: 'T option" "optional payloads retain their parameter"
+                      Expect.stringContains source "abstract schedule<'T>: payload: 'T -> Scheduled<'T>" "the result preserves the input relationship"
+                      Expect.stringContains source "type Result<'T> =" "an inline return union binds its free method parameter"
+                      Expect.stringContains source "abstract current<'T>: unit -> Scheduler.Current.Result<'T>" "the inline return applies the method parameter"
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR013" && (finding.Symbol.StartsWith "Scheduled" || finding.Symbol.StartsWith "Scheduler")))
+                          "tagged payload parameters stay in scope"
+
+                  testCase "an application of a generic tagged alias is written, not hoisted again" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "Scheduler.Schedule.Result") "the application reads the declaration"
+                      Expect.isFalse (source.Contains "module Schedule =") "and declares no copy under its owner"
+
+                      Expect.hasLength
+                          (rendered.Findings |> List.filter (fun f -> f.Symbol = "Scheduled" && f.Key = "DT002"))
+                          1
+                          "the union is declared once"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> List.contains f.Key [ "TP006"; "RA003"; "RA004"; "SY002" ]))
+                          "no parameter is erased and no reference widens for want of arguments" ])
+
+        // The checker's error type is reported apart from the intrinsic `any`: an unresolved
+        // import, an undeclared name, a qualified name, an element position and a union reduced
+        // over an unresolved arm read `TR063` with the name the checker keeps; a written `any`,
+        // an omitted annotation and `unknown` keep their keys.
+        yield!
+            fixtureTests "unresolved-any-lab" (handFixture "unresolved-any-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "the checker's error type is reported apart from a written any" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      let reported symbol =
+                          rendered.Findings
+                          |> List.filter (fun finding -> finding.Symbol = symbol && finding.Key.StartsWith "TR")
+                          |> List.map (fun finding -> finding.Key, finding.Payload |> Array.map (snd >> string) |> Array.toList)
+
+                      Expect.equal (reported "Probe.imported") [ "TR063", [ "Schema" ] ] "an unresolved import names the reference"
+                      Expect.equal (reported "Probe.undeclared") [ "TR063", [ "Undeclared" ] ] "an undeclared name"
+                      Expect.equal (reported "Probe.qualified") [ "TR063", [ "Absent.Timer" ] ] "a qualified name with its qualifier"
+                      Expect.equal (reported "Probe.elements") [ "TR063", [ "Schema" ] ] "an element position"
+                      Expect.equal (reported "Probe.either") [ "TR063", [ "" ] ] "a union the checker reduced to its error type"
+                      Expect.equal (reported "Probe.written") [ "TR008", [] ] "a written any"
+                      Expect.equal (reported "Probe.omitted") [ "TR008", [] ] "an omitted annotation"
+                      Expect.equal (reported "Probe.opaque") [ "TR009", [] ] "a written unknown" ])
+
+        // Tagged unions over type parameters: the union binds the alias's own parameters, or the
+        // ones it reads from the signature it is written in, and every reference applies them.
+        yield!
+            fixtureTests "generic-tag-lab" (handFixture "generic-tag-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a generic tagged union binds its parameters and every reference applies them" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let declaredCount symbol =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && f.Key = "DT002")
+                          |> List.length
+
+                      Expect.isFalse
+                          (Text.RegularExpressions.Regex.IsMatch(source, @"\bobj\b"))
+                          "no payload, field or reference widens to obj"
+
+                      Expect.isEmpty
+                          (rendered.Findings
+                           |> List.filter (fun f -> List.contains f.Key [ "TR013"; "TP006"; "RA003"; "RA004"; "SY002" ]))
+                          "every parameter stays in scope and every reference carries its arguments"
+
+                      // The shape matrix, one declaration per form.
+                      Expect.stringContains source "type Pair<'T, 'U> =" "two parameters"
+                      Expect.stringContains source "Both of left: 'T * right: 'U" "an arm reading both"
+                      Expect.stringContains source "Many of items: 'T[]" "a parameter under an array"
+                      Expect.stringContains source "Later of pending: JS.Promise<'T>" "and under a promise"
+                      Expect.stringContains source "type Owned<'T when 'T :> Base> =" "a constraint at the head"
+                      Expect.stringContains source "type Marker<'T> =" "a parameter no arm reads"
+                      Expect.stringContains source "Node of children: Tree<'T>[]" "a recursive reference re-applies the parameter"
+                      Expect.stringContains source "Fulfilled of value: 'T" "a named interface arm"
+                      Expect.stringContains source "Once of id: string * payload: 'T * at: float" "an intersection distributed over the arms"
+                      Expect.stringContains source "type Task<'T> = Job<'T>" "a second export abbreviates at the same arity"
+                      Expect.stringContains source "type JobAlias<'T> =" "a new alias over an application declares its own union"
+                      Expect.stringContains source "type Sided<'T, 'U> =" "a transformed subset is its own union"
+                      Expect.stringContains source "Left of value: 'T" "binding the parameters it reads"
+                      Expect.stringContains source "type Mode =" "a literal union stays a non-generic string enum"
+
+                      // The application sites.
+                      Expect.stringContains source "abstract head: Job<'T>" "an application at a property"
+                      Expect.stringContains source "abstract items: Job<'T>[]" "inside an array"
+                      Expect.stringContains source "abstract next: unit -> JS.Promise<Job<'T>>" "inside a promise"
+                      Expect.stringContains source "abstract last: Job<'T> option" "at an optional property"
+                      Expect.stringContains source "abstract peek: unit -> Job<'T> option" "beside undefined"
+                      Expect.stringContains source "abstract fallback: Job<string>" "under the alias's default"
+                      Expect.stringContains source "abstract concrete: unit -> Job<Base>" "under a concrete argument"
+                      Expect.stringContains source "abstract mode: Mode" "a string enum is never applied"
+                      Expect.stringContains source "abstract settle<'U>: value: 'U -> Settled<'U>" "a method parameter as the argument"
+                      Expect.stringContains source "abstract sided<'U>: value: 'U -> Sided<'T, 'U>" "declaration and method parameters together"
+                      Expect.stringContains source "abstract state: unit -> Queue.State.Result<'T>" "an inline union reading the declaration's parameter"
+                      Expect.stringContains source "Busy of job: Job<'T>" "an application inside a hoisted union"
+                      Expect.stringContains source "accept<'T> (input: Accept.Input<'T>) : 'T option" "an inline union at a function input"
+
+                      // Applications reached only beside null or undefined read the application the
+                      // checker keeps under the nullable union, a phantom argument included.
+                      Expect.stringContains source "abstract marker: Marker<string> option" "a phantom argument at an optional property"
+                      Expect.stringContains source "abstract nullable: Marker<float> option" "and beside null"
+                      Expect.stringContains source "abstract poll: unit -> Job<'T> option" "an application no other member reaches"
+                      Expect.stringContains source "type MaybeJob<'T> = Job<'T> option" "a nullable alias abbreviates the application"
+                      Expect.stringContains source "abstract either: U2<Marker2, Marker3>" "and shared arms with no application stay the arms"
+
+                      // Applications are references to one declaration, never copies of it.
+                      for copy in
+                          [ "Queue.Head"; "Queue.Items"; "Queue.Last"; "Queue.Next"; "Queue.Fallback"; "Queue.Concrete"
+                            "Queue.Settle"; "Queue.Sided"; "Holder.Marker"; "Holder.Nullable"; "Holder.Poll"; "MaybeJob2" ] do
+                          Expect.isFalse (source.Contains copy) $"{copy} is not hoisted"
+
+                      for name in [ "Job"; "Pair"; "Settled"; "Sided" ] do
+                          Expect.equal (declaredCount name) 1 $"{name} is declared once"
+
+                      Expect.isFalse (source.Contains "type Sided<'T, 'U> = Pair") "a subset is not an abbreviation of its source" ])
 
         // Wave thirteen lane CD. `T[K]` widened to `obj` wherever the operand was not a type
         // variable the signature bound as `typekeyof`. An operand whose own keys confine the
@@ -5258,6 +5384,53 @@ let catalogSourceProjectionTests =
     let config = { handConfig package with DeclarationCatalog = false }
     testList "catalog source projection fixture" [
         yield! fixtureTests "catalog-source-projection-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let projectionLab =
+    testList "projection-lab"
+        (fixtureTests "projection-lab" (handFixture "projection-lab") GeneratorConfig.Default (fun _ -> []))
+
+[<Tests>]
+let recursiveGroupTests =
+    let package = handInstalledFixture "recursive-groups-lab"
+    let config = handConfig package
+    let placement config =
+        Pipeline.groupModules { Build.context with Config = config } (Build.shapeModel [])
+
+    testList "recursive groups" [
+        testCase "configuration opts in explicitly" <| fun _ ->
+            Expect.isFalse GeneratorConfig.Default.RecursiveGroups "ordinary runs retain their existing layout"
+            Expect.isTrue config.RecursiveGroups "the JSON key reaches the placement configuration"
+            Expect.equal (placement GeneratorConfig.Default |> List.head).Namespace None "ordinary entry stays a module"
+
+        testCase "missing namespace is rejected" <| fun _ ->
+            Expect.throwsT<System.ArgumentException>
+                (fun () -> placement { config with Namespace = None } |> ignore)
+                "the namespace is explicit"
+
+        testCase "entry must be an immediate child of the namespace" <| fun _ ->
+            for name in [ "Other.Entry"; "RecursiveGroupsLab.Nested.Entry"; "RecursiveGroupsLab" ] do
+                Expect.throwsT<System.ArgumentException>
+                    (fun () -> placement { config with ModuleName = Some name } |> ignore)
+                    "each module occupies one child namespace level"
+
+        yield! fixtureTests "recursive-groups-lab" package config (fun package -> [
+            testCase "cyclic packages share a recursive namespace source" <| fun _ ->
+                let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                let files = rendered.Files |> Map.ofList
+                let source = files |> Map.find "groups/RecursiveGroupsLab.fs"
+                Expect.stringContains source "namespace rec RecursiveGroupsLab" "both directions resolve within the file"
+                Expect.stringContains source "module Entry =" "entry retains its qualified module"
+                Expect.stringContains source "module RecursivePeerLab =" "dependency retains its qualified module"
+                Expect.stringContains source "RecursiveGroupsLab.Entry.Root" "dependency points back to the entry"
+                Expect.stringContains source "RecursiveGroupsLab.RecursivePeerLab.Peer" "entry points to the dependency"
+                Expect.equal (files |> Map.keys |> Seq.filter _.EndsWith(".fs") |> Seq.length) 1 "one source contains the cycle"
+                let entry = source.Split("module RecursivePeerLab =")[0]
+                Expect.stringContains entry "module Collision =" "public subpath keeps its entry owner despite a dependency type sharing the parent name"
+                Expect.stringContains entry "static member status" "entry owns the subpath value exports"
+                Expect.stringContains entry "Import(\"status\", \"recursive-groups-lab/collision/api\")" "public import path is preserved"
+        ])
     ]
 
 [<Tests>]

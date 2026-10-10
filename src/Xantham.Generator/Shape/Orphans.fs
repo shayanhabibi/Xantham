@@ -77,7 +77,9 @@ let internal readNames (decl: FsDecl) : string list =
         |> List.filter (fun name -> name <> d.Name)
     | FsPhantom p -> typeParamNames p.TypeParameters @ namesOf p.Carrier
     | FsMeasure m -> namesOf m.Primitive
-    | FsTaggedUnion u -> u.Cases |> List.collect (_.Fields >> List.collect (_.Type >> namesOf))
+    | FsTaggedUnion u ->
+        typeParamNames u.TypeParameters
+        @ (u.Cases |> List.collect (_.Fields >> List.collect (_.Type >> namesOf)))
     | FsExports container -> container.Members |> List.collect (_.Member >> exportMemberNames)
     | FsStringEnum _
     | FsEnum _ -> []

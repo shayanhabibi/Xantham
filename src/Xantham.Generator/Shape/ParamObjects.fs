@@ -141,14 +141,26 @@ let synthesizeParamObjects: Pass<ShapeModel> =
 
                                     let carried =
                                         members
-                                        |> List.choose (function
+                                        |> List.collect (function
                                             | FsMethod method' ->
-                                                Some(
+                                                let symbol = $"{decl.Name}.{method'.Name}"
+
+                                                let bound =
+                                                    method'.TypeParameters
+                                                    |> List.map (fun p -> $"'{p.Name}")
+                                                    |> String.concat ", "
+
+                                                [
                                                     Finding.make
-                                                        $"{decl.Name}.{method'.Name}"
+                                                        symbol
                                                         SynthesizeParamObjects.MethodMemberAsCreateParameter
-                                                )
-                                            | _ -> None)
+                                                    if not method'.TypeParameters.IsEmpty then
+                                                        Finding.make
+                                                            symbol
+                                                            (SynthesizeParamObjects.MethodTypeParametersBoundAtCreate
+                                                                bound)
+                                                ]
+                                            | _ -> [])
 
                                     findings <-
                                         findings

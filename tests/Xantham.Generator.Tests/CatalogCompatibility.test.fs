@@ -35,6 +35,31 @@ let private encoded () =
 [<Tests>]
 let tests =
     testList "catalog compatibility" [
+        testCase "the current contract pins every version" <| fun _ ->
+            let contract = current identity
+
+            Expect.equal
+                (contract.ContractVersion,
+                 contract.IdentityVersion,
+                 contract.ApiVersion,
+                 contract.InferenceVersion,
+                 contract.CustomizationVersion)
+                (1, 5, 4, 2, 1)
+                "identity 5 and API 4 combine the independent portable library and generic projection contracts; inference 2 retains stable entry closure"
+
+        for label, identityVersion, apiVersion, inferenceVersion in [
+            "portable library before projection integration", 4, 3, 2
+            "early projections before portable library integration", 3, 3, 1
+        ] do
+            testCase ("combined contract rejects " + label) <| fun _ ->
+                let old =
+                    { expected.Contract with
+                        IdentityVersion = identityVersion
+                        ApiVersion = apiVersion
+                        InferenceVersion = inferenceVersion }
+                rejects "identity version" (fun () ->
+                    validateContract 2 expected.Compiler expected.Generator "profile" (Some old))
+
         testCase "portable contract accepts rebuilt generator and platform binary" <| fun _ ->
             validateContract 2 "compiler-producer" "generator-producer" "profile" (Some expected.Contract)
 

@@ -348,6 +348,187 @@ let private sourceFile (ctx: Context) (path: string) : Async<Ast.SourceFile vopt
         .Value
     |> Async.AwaitTask
 
+/// A type alias can bind unused parameters that disappear from its resolved type. Read the
+/// declaring alias rather than attaching that fact to a type shared with nongeneric aliases.
+let internal declarationHasTypeParameters (ctx: Context) (symbol: SymbolResponse) =
+    async {
+        if not (symbol.Flags.HasFlag SymbolFlags.TypeAlias) then
+            return Ok false
+        else
+            let handles = symbol.Declarations |> ValueOption.defaultValue [||]
+
+            let! declarations =
+                handles
+                |> Array.map (fun declaration ->
+                    async {
+                        match NodeHandle.parse declaration with
+                        | ValueNone -> return Error "The alias has a malformed declaration handle"
+                        | ValueSome handle ->
+                            let! source = attempt (sourceFile ctx handle.Path)
+
+                            match source with
+                            | Error reason -> return Error reason
+                            | Ok ValueNone -> return Error "The alias declaration source is unavailable"
+                            | Ok(ValueSome source) ->
+                                let node = Node.ofIndex<AnyNode> source handle.Index
+
+                                if node.Kind <> SyntaxKind.TypeAliasDeclaration then
+                                    return Error "The alias handle does not identify a type alias declaration"
+                                else
+                                    return
+                                        Node.retag<AnyNode, TypeAliasDeclaration> node
+                                        |> TypeAliasDeclaration.typeParameters
+                                        |> Seq.isEmpty
+                                        |> not
+                                        |> Ok
+                    })
+                |> Async.Sequential
+
+            if Array.isEmpty declarations then
+                return Error "The alias has no declaration handles"
+            else
+                match
+                    declarations
+                    |> Array.tryPick (function
+                        | Error reason -> Some reason
+                        | Ok _ -> None)
+                with
+                | Some reason -> return Error reason
+                | None -> return Ok(declarations |> Array.exists ((=) (Ok true)))
+    }
+
+let internal declarationMemberName (ctx: Context) (symbol: SymbolResponse) =
+    async {
+        let declarations = symbol.Declarations |> ValueOption.defaultValue [||]
+
+        let! names =
+            declarations
+            |> Array.map (fun declaration ->
+                async {
+                    match NodeHandle.parse declaration with
+                    | ValueNone -> return None
+                    | ValueSome handle ->
+                        let! source = sourceFile ctx handle.Path
+
+                        match source with
+                        | ValueNone -> return None
+                        | ValueSome source ->
+                            let node = Node.ofIndex<AnyNode> source handle.Index
+
+                            let name =
+                                match node.Kind with
+                                | SyntaxKind.PropertySignature ->
+                                    Node.retag<AnyNode, PropertySignatureDeclaration> node
+                                    |> PropertySignatureDeclaration.name
+                                | SyntaxKind.PropertyDeclaration ->
+                                    Node.retag<AnyNode, PropertyDeclaration> node |> PropertyDeclaration.name
+                                | SyntaxKind.MethodSignature ->
+                                    Node.retag<AnyNode, MethodSignatureDeclaration> node
+                                    |> MethodSignatureDeclaration.name
+                                | SyntaxKind.MethodDeclaration ->
+                                    Node.retag<AnyNode, MethodDeclaration> node |> MethodDeclaration.name
+                                | _ -> ValueNone
+
+                            return
+                                name
+                                |> ValueOption.bind (fun name ->
+                                    match name.Kind with
+                                    | SyntaxKind.Identifier
+                                    | SyntaxKind.StringLiteral -> name.Text
+                                    | SyntaxKind.NumericLiteral when name.Text = ValueSome symbol.Name -> name.Text
+                                    | _ -> ValueNone)
+                                |> ValueOption.toOption
+                })
+            |> Async.Sequential
+
+        return
+            match names |> Array.distinct with
+            | [| Some name |] -> Some name
+            | _ -> None
+    }
+
+/// Declaration sources referenced by selected type annotations, including imported aliases.
+let internal declarationTypeClosure (ctx: Context) (roots: string<declHandle> list) =
+    async {
+        let mutable pending = roots
+        let mutable visited = Set.empty
+        let mutable generic = false
+        let mutable failure = None
+
+        while not pending.IsEmpty && failure.IsNone do
+            let declaration = pending.Head
+            pending <- pending.Tail
+
+            if not (Set.contains declaration visited) then
+                visited <- Set.add declaration visited
+
+                if visited.Count > 512 then
+                    failure <- Some "Selected declaration source closure exceeds 512 declarations"
+                else
+                    match NodeHandle.parse (declaration / uom<_>) with
+                    | ValueNone -> failure <- Some "A selected type has a malformed declaration handle"
+                    | ValueSome handle ->
+                        let! source = attempt (sourceFile ctx handle.Path)
+
+                        match source with
+                        | Error reason -> failure <- Some reason
+                        | Ok ValueNone -> failure <- Some "A selected declaration source is unavailable"
+                        | Ok(ValueSome source) ->
+                            let node = Node.ofIndex<AnyNode> source handle.Index
+
+                            if node.Kind = SyntaxKind.TypeAliasDeclaration then
+                                generic <-
+                                    generic
+                                    || (Node.retag<AnyNode, TypeAliasDeclaration> node
+                                        |> TypeAliasDeclaration.typeParameters
+                                        |> Seq.isEmpty
+                                        |> not)
+
+                            for child in Seq.append [ node ] (Node.descendants node) do
+                                if child.Kind = SyntaxKind.ImportType || child.Kind = SyntaxKind.TypeQuery then
+                                    failure <-
+                                        Some
+                                            "Import types and type queries are outside the authenticated source closure contract"
+                                elif child.Kind = SyntaxKind.TypeReference then
+                                    match TypeReferenceNode.typeName (Node.retag<AnyNode, TypeReferenceNode> child) with
+                                    | ValueNone -> failure <- Some "A selected type reference has no name"
+                                    | ValueSome name ->
+                                        let location =
+                                            NodeHandle.format
+                                                {
+                                                    Index = Node.index name
+                                                    Kind = name.Kind
+                                                    Path = handle.Path
+                                                }
+
+                                        let! symbol = ctx.Session.getSymbolAtLocation location
+
+                                        match symbol with
+                                        | ValueNone -> failure <- Some "A selected type reference has no symbol"
+                                        | ValueSome symbol ->
+                                            let! symbol =
+                                                if symbol.Flags.HasFlag SymbolFlags.Alias then
+                                                    ctx.Session.getAliasedSymbol symbol.Id
+                                                else
+                                                    async.Return symbol
+
+                                            if Grouping.classify ctx.PackageDir (ValueSome symbol) <> CompilerLib then
+                                                let declarations =
+                                                    symbol.DeclarationHandles
+                                                    |> ValueOption.defaultValue [||]
+                                                    |> Array.toList
+
+                                                if declarations.IsEmpty then
+                                                    failure <- Some "A selected type reference has no declaration"
+                                                else
+                                                    pending <- pending @ declarations
+
+        return
+            match failure with
+            | Some reason -> Error reason
+            | None -> Ok(Set.toList visited, generic)
+    }
+
 /// The instantiated interface contracts explicitly declared by a class's `implements` clauses.
 let private implementedTypes (ctx: Context) (symbol: SymbolResponse voption) : Async<TypeResponse list> =
     async {
@@ -697,6 +878,37 @@ let private deriveFacts
                         return None
                 }
 
+            // `getNonNullableType` returns the application a nullable union was written over
+            // (`Job<T> | undefined` -> `Job<T>`) where the union's origin retains it. Its arguments
+            // are what a reference to the application writes.
+            let! nonNullableApplication =
+                async {
+                    let others = members |> List.filter (isNullish >> not)
+
+                    if
+                        nonNullable.IsNone
+                        && others.Length >= 2
+                        && others.Length < members.Length
+                        && others
+                           |> List.exists (fun member_ ->
+                               member_.Flags.HasFlag TypeFlags.Object
+                               || member_.Flags.HasFlag TypeFlags.Intersection)
+                    then
+                        let! result = ctx.Session.getNonNullableType ty.Id
+
+                        if result.Id <> ty.Id && result.AliasSymbol.IsSome then
+                            let! arguments = ctx.Session.getAliasTypeArgumentsOfType result.Id
+
+                            match arguments with
+                            | ValueSome arguments when arguments.Length > 0 ->
+                                return Some(result, Array.toList arguments)
+                            | _ -> return None
+                        else
+                            return None
+                    else
+                        return None
+                }
+
             let! alias =
                 async {
                     if recoverAlias && ty.AliasSymbol.IsSome then
@@ -715,6 +927,7 @@ let private deriveFacts
                 { TypeFacts.shallow ty with
                     UnionMembers = members |> List.map _.TypeId
                     NonNullableAlias = nonNullable |> Option.map _.TypeId
+                    NonNullableApplication = nonNullableApplication |> Option.map (fst >> _.TypeId)
                     AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                     SymbolName = alias |> ValueOption.map _.SymbolName |> ValueOption.toOption
                     SymbolParent = alias |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
@@ -726,6 +939,12 @@ let private deriveFacts
                 channel trace "union-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
                 @ channel trace "nonnullable-alias" (Option.toList nonNullable)
+                @ channel
+                    trace
+                    "nonnullable-application"
+                    (nonNullableApplication
+                     |> Option.map (fun (application, arguments) -> application :: arguments)
+                     |> Option.defaultValue [])
         elif has TypeFlags.Intersection then
             // The constituents, followed into the table. A branding intersection (§4.6) is
             // decided by what its object operands *contain* - a marker property or a real
@@ -1109,7 +1328,9 @@ let private deriveFacts
                             Conditional = None
                             UnionMembers = []
                             NonNullableAlias = None
+                            NonNullableApplication = None
                             AliasIdentity = None
+                            UnresolvedName = None
                         },
                         discovered
         elif has TypeFlags.TypeParameter && ty.IsThisType <> ValueSome true then
@@ -1279,10 +1500,40 @@ let private deriveFacts
                 else
                     async.Return(None, [])
 
+            // An error type built for an unresolved reference carries the written name on its alias
+            // symbol (`isErrorType`: Any with an alias): the rightmost identifier, under one
+            // unresolved parent per qualifier.
+            let! unresolvedName =
+                if has TypeFlags.Any && ty.AliasSymbol.IsSome then
+                    async {
+                        let rec qualified (symbol: SymbolResponse) (name: string) =
+                            async {
+                                if symbol.CheckFlags.HasFlag CheckFlags.Unresolved && symbol.Parent.IsSome then
+                                    let! parent = ctx.Session.getParentOfSymbol symbol.Id
+
+                                    match parent with
+                                    | ValueSome parent -> return! qualified parent $"{parent.Name}.{name}"
+                                    | ValueNone -> return name
+                                else
+                                    return name
+                            }
+
+                        let! alias = ctx.Session.getAliasSymbolOfType ty.Id
+
+                        match alias with
+                        | ValueSome alias ->
+                            let! name = qualified alias alias.Name
+                            return Some(name * uom<symbolName>)
+                        | ValueNone -> return None
+                    }
+                else
+                    async.Return None
+
             return
                 { TypeFacts.shallow ty with
                     AliasTypeArguments = bound |> List.map _.TypeId
                     Conditional = fst conditional
+                    UnresolvedName = unresolvedName
                 },
                 bound @ snd conditional
     }

@@ -30,6 +30,25 @@ standard libraries.
 
 Configure the same namespace for related generation runs.
 
+## Ship mutually dependent groups
+
+Set `recursiveGroups` when the entry package and shipped dependencies refer back to
+one another. Their modules share a `namespace rec` source at
+`groups/<namespace>.fs`, which compiles the complete cycle together.
+
+```json title="xantham.json"
+{
+  "module": "MyBindings.Client",
+  "namespace": "MyBindings",
+  "recursiveGroups": true,
+  "groups": { "shared-models": "ship" }
+}
+```
+
+The namespace must be explicit, and each emitted package module must be its immediate
+child. Compiler-library output keeps its configured layout. The default remains
+separate files. Declaration identities and qualified type names stay the same.
+
 ## Map an existing type
 
 A string destination takes no type arguments. Use the object form to state

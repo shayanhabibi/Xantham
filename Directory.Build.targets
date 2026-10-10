@@ -1,6 +1,7 @@
 <Project>
-    <ItemGroup>
-        <!-- F# consumers supply FSharp.Core; the build reference stays private to each package. -->
+    <ItemGroup Condition="'$(PackAsTool)' != 'true'">
+        <!-- F# consumers supply FSharp.Core; the build reference stays private to each library
+             package. A .NET tool runs standalone and ships FSharp.Core with its own output. -->
         <PackageReference Update="FSharp.Core" PrivateAssets="all" />
     </ItemGroup>
 </Project>

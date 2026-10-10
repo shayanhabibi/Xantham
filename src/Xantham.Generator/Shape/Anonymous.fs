@@ -42,10 +42,22 @@ let private isAliasIntersectionForm (model: ShapeModel) (facts: TypeFacts) =
         && (arrayElement model facts).IsNone
         && hasConditionalOperand model facts)
 
-/// The declaration form of every generic *alias* over an intersection: alias symbol -> the
-/// smallest type id carrying it that binds parameters of its own. The checker creates an
-/// alias's declared type before it can instantiate it, so the smallest such id is the declared
-/// form and every larger one carrying the same alias symbol is an application of it.
+/// A generic alias over a tagged union, in a form that binds parameters of its own: every
+/// argument it carries is a distinct type parameter (§4.9, §4.5(2)).
+let private isAliasTaggedForm (model: ShapeModel) (facts: TypeFacts) =
+    isTaggedDeclaration model facts
+    && (match facts.Response.AliasArgumentTypeIds with
+        | ValueSome arguments ->
+            arguments.Length > 0
+            && arguments.Length = (declParamIds facts).Length
+            && arguments
+               |> Array.forall (fun id -> Map.tryFind id model.Types |> Option.exists (flag TypeFlags.TypeParameter))
+        | ValueNone -> false)
+
+/// The declaration form of every generic *alias* over an intersection or a tagged union: alias
+/// symbol -> the smallest type id carrying it that binds parameters of its own. Every larger id
+/// carrying the same alias symbol is read as an application of that form. Where the declared type
+/// is in the table it is the form, since the checker creates it before any instantiation.
 let private aliasDeclarationForms (model: ShapeModel) : Map<int<Measure.symbolId>, int<Measure.typeId>> =
     model.Types
     |> Map.toList
@@ -55,12 +67,46 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<int<Measure.symbolId
             match facts.Response.AliasSymbolId with
             | ValueSome alias when
                 not (Map.containsKey alias forms)
-                && isAliasIntersectionForm model facts
-                && not (List.isEmpty (declParamIds facts))
+                && ((isAliasIntersectionForm model facts && not (List.isEmpty (declParamIds facts)))
+                    || isAliasTaggedForm model facts)
                 ->
                 Map.add alias typeId forms
             | _ -> forms)
         Map.empty
+
+/// Whether a union carrying a generic tagged alias's symbol is an application of the alias's
+/// declared form, arm for arm: each instance arm is the declared arm itself, an application of
+/// the same named declaration, or an arm written inline under the same tag value and fields.
+/// Correspondence fails for a transformed union that keeps the alias symbol over another arm set.
+let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: TypeFacts) =
+    match taggedUnionShape model declared with
+    | Discriminated(tag, cases, []) ->
+        let instanceArms =
+            instance.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+        let fields (arm: TypeFacts) =
+            taggedCaseFields tag arm |> List.map (fun m -> m.Symbol.Name, m.Optional)
+
+        let isReference (arm: TypeFacts) =
+            arm.Response.ObjectFlags
+            |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Reference)
+
+        let corresponds (declaredArm: TypeFacts, value: string) (instanceArm: TypeFacts) =
+            declaredArm.Response.TypeId = instanceArm.Response.TypeId
+            || (isReference declaredArm
+                && isReference instanceArm
+                && declaredArm.Response.TargetTypeId.IsSome
+                && declaredArm.Response.TargetTypeId = instanceArm.Response.TargetTypeId)
+            || (taggedArmValue model tag instanceArm = Some value
+                && fields instanceArm = fields declaredArm)
+
+        instanceArms.Length = cases.Length
+        && instanceArms.Length = instance.UnionMembers.Length
+        && cases
+           |> List.forall (fun case -> (instanceArms |> List.filter (corresponds case)).Length = 1)
+        && instanceArms
+           |> List.forall (fun arm -> (cases |> List.filter (fun case -> corresponds case arm)).Length = 1)
+    | _ -> false
 
 /// The consistent parameter bindings recoverable from two compiler-identified forms of one
 /// alias. Transformed fragments contribute no bindings; conflicting bindings reject the result.
@@ -215,6 +261,26 @@ let internal aliasInstantiationOf
                 Some(name, arguments)
             | _ -> None
         | _ -> None
+    | ValueSome alias when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+        // A union application writes the arguments its alias carries. An application whose
+        // arguments are not all in the table is hoisted on its own.
+        match Map.tryFind alias forms with
+        | Some declared when declared <> facts.Response.TypeId ->
+            match Map.tryFind declared model.DeclNames, Map.tryFind declared model.Types with
+            | Some name, Some declaredFacts when
+                flag TypeFlags.Union declaredFacts && armsCorrespond model declaredFacts facts
+                ->
+                let parameters = declParamIds declaredFacts
+
+                facts.Response.AliasArgumentTypeIds
+                |> ValueOption.toOption
+                |> Option.map Array.toList
+                |> Option.filter (fun arguments ->
+                    arguments.Length = parameters.Length
+                    && arguments |> List.forall (fun argument -> Map.containsKey argument model.Types))
+                |> Option.map (fun arguments -> name, Some arguments)
+            | _ -> None
+        | _ -> None
     | _ -> None
 
 /// Walks the type graph reachable from the exports in deterministic order and names what needs
@@ -349,14 +415,10 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     /// A union `detect-tagged-unions` declines stays a reference: a name minted for it would be
     /// written at every site and declared at none.
     let becomesTaggedUnion (facts: TypeFacts) =
-        let nullish, remaining = splitNullish model facts
+        let _, remaining = splitNullish model facts
 
-        List.isEmpty nullish
+        isTaggedDeclaration model facts
         && (namedUnionByMembers ctx { model with DeclNames = names } remaining).IsNone
-        && (match taggedUnionShape { model with DeclNames = names } facts with
-            | Discriminated(tag, tagged, _) -> tagged |> List.forall (fst >> isTaggedCaseData tag)
-            | TagCollides _
-            | Untagged -> false)
 
     /// The type ids a declaration reads through call signatures rather than through a reference
     /// position: an export's own function type, a method member's, and the callback behind an
@@ -425,7 +487,10 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 && (facts.SymbolName |> Option.exists (isSyntheticName >> not))
                 && GeneratorConfig.disposition ctx.Config facts.Origin = Ship
 
-            isLiteralUnion facts || becomesTaggedUnion facts || canonicalAlias
+            (isLiteralUnion facts || becomesTaggedUnion facts || canonicalAlias)
+            // An application of a generic tagged alias this run declares is written as that
+            // application rather than hoisted a second time.
+            && (aliasInstantiationOf { model with DeclNames = names } aliasForms facts).IsNone
         elif flag TypeFlags.Object facts && isPureCallback facts then
             // A callback the arity rule retains as a delegate is declared under a name of its
             // own (D5), so the consumer reads `x: float * y: float` where `Func<float, float,
@@ -487,6 +552,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             | None -> ()
             | Some facts ->
                 facts.NonNullableAlias |> Option.iter (walk path order)
+                facts.NonNullableApplication |> Option.iter (walk path order)
 
                 // The generic declaration behind an instantiation is named ahead of it, so
                 // `Ready<T>` reached only through `Resource<T> = Ready<T> | ...` declares
@@ -497,11 +563,19 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
                 // Private alias declarations precede their applications too. A deferred
                 // conditional has no members to walk, so its first application supplies its name.
+                // A union reads only a union form.
+                //FOR-REVIEW an intersection alias applied to a union argument distributes into a union that keeps the alias symbol; without the guard that union walks or claims the intersection form under its own path
                 match facts.Response.AliasSymbolId with
-                | ValueSome alias when isFlattenable model facts ->
+                | ValueSome alias when
+                    isFlattenable model facts
+                    || (flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts))
+                    ->
                     match Map.tryFind alias aliasForms with
                     | Some declared when declared <> typeId && not (Map.containsKey declared names) ->
                         match Map.tryFind declared model.Types with
+                        | Some declaredFacts when flag TypeFlags.Union facts ->
+                            if flag TypeFlags.Union declaredFacts then
+                                walk path order declared
                         | Some declaredFacts when hasConditionalOperand model declaredFacts ->
                             claim None path declared order |> ignore
                         | Some _ -> walk path order declared
@@ -612,8 +686,15 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
                         walk (into "Result") order signature.ReturnTypeId
 
-                    for memberId in facts.UnionMembers do
-                        walk (named |> Option.defaultValue path) order memberId
+                    // A union read as the named application it adds `null`/`undefined` to walks
+                    // that application, above, in place of its arms.
+                    let readsApplication =
+                        facts.NonNullableApplication
+                        |> Option.exists (fun application -> Map.containsKey application names)
+
+                    if not readsApplication then
+                        for memberId in facts.UnionMembers do
+                            walk (named |> Option.defaultValue path) order memberId
 
                     for argument in facts.TypeArguments do
                         walk (into "Item") order argument
@@ -630,7 +711,13 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     then
                         for operand in facts.IntersectionMembers do
                             match Map.tryFind operand model.Types with
-                            | Some operandFacts when operandFacts.SymbolName |> Option.exists (isSyntheticName >> not) ->
+                            | Some operandFacts when
+                                (operandFacts.SymbolName |> Option.exists (isSyntheticName >> not))
+                                || not operandFacts.AliasDeclarations.IsEmpty
+                                ->
+                                // A named object alias has the anonymous body's __type symbol.
+                                // Its alias declaration still anchors the base when the owning
+                                // package is reached through an intersection in a consumer.
                                 walk (into "Base") order operand
                             | _ -> ()
 

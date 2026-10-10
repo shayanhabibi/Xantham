@@ -63,5 +63,6 @@ It checks the maintainer identity and current PR commits, and
 only commits approved package project files and changelogs. The trusted policy supports the
 six established packages and the incoming `Xantham.Generator.Myriad` package. Land this policy
 on master before preparing the first Myriad release; the wrapper always executes master's
-scripts against the release checkout. It rejects stale
+scripts against the release checkout. Develop's local release validation requires all seven
+adopted packages by name. The trusted master policy bootstrap is PR #116. It rejects stale
 versions, unexpected file changes, and branches that moved during preparation.

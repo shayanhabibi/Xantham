@@ -30,6 +30,8 @@
         <Compile Include="CatalogMember.test.fs" />
         <Compile Include="Pipeline.test.fs" />
         <Compile Include="Customization.test.fs" />
+        <Compile Include="ResolvedProjection.test.fs" />
+        <Compile Include="Projection.test.fs" />
         <Compile Include="ExportLayout.test.fs" />
         <Compile Include="ExportLayoutPaths.test.fs" />
         <Compile Include="Bootstrap.test.fs" />
@@ -45,6 +47,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Xantham.Generator\Xantham.Generator.fsproj" />
+        <ProjectReference Include="..\..\src\Xantham.Generator.Myriad\Xantham.Generator.Myriad.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Cli\Xantham.Cli.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core.TS\Xantham.Fable.Core.TS.fsproj" ReferenceOutputAssembly="false" />
     </ItemGroup>

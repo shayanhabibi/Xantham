@@ -1210,6 +1210,16 @@ section above.
   assertion about a run performed elsewhere. A run configuring no namespace raises none and
   emits exactly what it emitted before.
 
+  *Recursive package output (2026-10-09).* `recursiveGroups: true` places the entry and
+  shipped dependency modules in the renderer's existing `namespace rec` bundle at
+  `groups/<namespace>.fs`. Configuration requires an explicit namespace and immediate
+  child module names; compiler-library placement retains its own layout. The default
+  keeps separate module files. This is an O7 placement choice: catalog identities,
+  qualified names and source ownership retain their existing contracts. The
+  `recursive-groups-lab` gates a two-package declaration cycle through the normal golden
+  corpus and compile gate. Entry and ambient export blocks retain their declared entry
+  owner; a dependency type sharing a public subpath's name cannot redirect those exports.
+
   *Settled (wave five lane W): the compiler-lib group will not ship, and O7's default stays
   `widen`.* Shipping `TypeScript.Lib` needs no code beyond lane S's group emission, and it
   does not terminate for a realistic entry package: one `EventTarget` reference resolves
@@ -1938,6 +1948,97 @@ Other structurally incompatible defaults retain the existing `TP008` policy.
 applications, generic-bound arguments, nominal subclasses, recursive bounds and invalid concrete
 arguments. Catalog constraint authentication remains unchanged.
 
+
+## Early union projections (2026-10-09)
+
+The customization owner now exposes a separate `ResolvedSnapshot` after Resolve and before
+Shape. It projects exported declaration handles, finite union arms and source fingerprints;
+checker type IDs never serve as public identity. Equal literal sets retain separate named
+source selections. Snapshot nonces seal both selected sources and returned companion plans.
+This does not move catalog ownership or change the ordinary shape passes.
+
+`ProjectionExtension` is additive to the existing `GeneratorExtension` record.
+`generateProjectedWith` / `runProjectedWith` take a required validation compiler, early
+projections and late customizations. Apply validates identities across both phases, current
+snapshot seals, paths and exported names. Compile checks all output and type witnesses before
+write. Projection provenance lives only in the manifest; raw catalog variant policy remains
+owned by existing late customization. Empty early registration preserves existing output.
+`CU006` reports the arbitrary-source projection boundary as Escape, retaining raw findings.
+
+The opt-in `Xantham.Generator.Myriad` project owns emission via the published Myriad.Core 1.1.0
+`IMyriadGenerator` source contract. Xantham owns resolution and source validation. Its first
+adapter emits ordinary DUs, strict JavaScript codecs and the scalable two-case
+`Decoded|Invalid` active pattern for selected string literal sets with number/null/undefined.
+Existing naming helpers allocate cases; reserved payload/absence cases win collisions.
+No signature replacement or overlapping-union provenance inference is attempted. Generic,
+boolean, numeric-literal, broad-string, object and unresolved shapes fail closed.
+
+`projection-lab`, early contract tests, compiler rejection controls and companion goldens
+exercise the seam. The existing Fable RunGate executes null/undefined matching, non-finite
+numbers, hostile strings, equal/overlapping sets and the explicit raw echo boundary.
+
+### Operation contracts (2026-10-09)
+
+The same early snapshot now resolves selected instance-method parameter occurrences lazily,
+while the compiler session is alive. `Resolved.shape` carries bounded primitive, array, record
+and union facts; `Resolved.operation` carries argument order, optionality and optional selected
+field metadata. Resolve owns typed declaration keys and defining-source closure reads.
+Semantics owns validation and occurrence fingerprints. Missing facts, unsupported source forms,
+generic/overloaded calls, recursive/indexed/callable payloads and symbolic keys fail closed.
+
+`ProjectionCompanion.forOperation` adds a sealed receiver assertion. Pipeline verifies that
+assertion against the final qualified Shape/catalog mapping before compilation. The Myriad
+operation emitter consumes the preserved shape to generate closed input DUs and records, private
+encoders and public typed methods. Remaining parameters and results are inferred from the real
+SDK method call. Raw binding types and catalog ownership remain intact.
+
+Optional record properties preserve omission separately from present undefined, with null as
+its own value case. Required literal fields are automatic discriminators. Actual declaration
+keys and safe own-property writes preserve hostile string keys. `Operations.createShared`
+provides explicit coordination: the first selection owns the input types and later operations
+alias them after exact shape equality. Per-operation source authentication remains independent.
+
+The operation matrix extends `projection-lab` and the existing contract, compile and Fable gates.
+The real integration target is CloudEdge's Agents 0.27/Pi 1.1/Chord 1.1 bundle. Its closed generated
+dependency graph uses opt-in `recursiveGroups` placement. The configured namespace must be
+the immediate parent of every ordinary shipped module; compiler-library modules retain their
+separate owner. The existing namespace renderer owns the single-file recursive representation.
+
+## Generic tagged unions (2026-10-09)
+
+A discriminated union declares the type parameters its arms read (§4.5(2), §4.9). `FsTaggedUnionDecl.TypeParameters` holds the alias's own parameters, then those `bind-free-type-params` records for a union hoisted out of a generic scope; `detect-tagged-unions` shapes the case fields under that scope, so a `T` payload reads `'T` rather than `obj` with `TR013`. `Spec.isTaggedDeclaration` states the conditions `detect-tagged-unions` applies inline; the naming walk and the reference read it. `unionRef` applies the parameters at every reference: an alias application its recovered arguments, any other tagged declaration its own and free parameters. Literal-union aliases with a phantom parameter stay non-generic string enums.
+
+`synthesize-anonymous` recognises an application of a generic tagged alias the way it recognises one over an intersection. The form is the smallest id carrying the alias symbol whose arguments are its own distinct type parameters. An application must correspond to that form arm for arm - the same arm, a reference to the same declaration, or an inline arm under the same tag value and field names - and carry its arguments in the type table. Otherwise the union is hoisted on its own, generic over what it reads. `schedule<T>(): Scheduled<T>` therefore reads `Scheduled<'T>` instead of minting `Scheduler.Schedule.Result`. The walk's alias-form clause reads only a union form for a union, since an intersection alias distributed over a union argument keeps its symbol on the union. Arity, alias re-exports, orphan reads, rendering, foreign qualification and the declaration catalog carry the parameters; catalog `apiVersion` advances to 3 because tagged-union arity and canonical API change. Identity keys are unchanged: union identities bind only declared alias parameters, and applications stay outside the catalog's name map.
+
+A nullable position hides its application: `x?: Job<string>` reaches the shape tier as the application's arms beside `undefined`. Resolve records the application from `getNonNullableType`, which returns it through the union's origin (`TypeFacts.NonNullableApplication`, with its arguments followed into the table) for a union keeping two or more members, one an object. The naming walk registers the application ahead of the union and leaves the union's arms unnamed, and `unionRef` writes it under `option`: `poll(): Job<T> | undefined` reads `Job<'T> option`, and `MaybeJob<T> = Job<T> | null` abbreviates `Job<'T> option` rather than an erased union over arm copies. A parameter no arm reads leaves the arms shared by every application, so a member-set match lands on the declared form from outside its scope; `unionRef` then takes the arguments of the site's own application (`marker?: Marker<string>` reads `Marker<string> option`) and declines to the erased union where the site carries none, never applying an out-of-scope parameter as `obj`. `Maybe<T> | undefined` over an alias that already includes `null` leaves no single application in the origin and still depends on the member-set match.
+
+`synthesize-paramobjects` carries a generic method into `Create` with its type parameters bound once per call, which the interface does not promise; `SP004 MethodTypeParametersBoundAtCreate` (Widened) now reports each such method. Refusing the `Create` instead is a user decision.
+
+`generic-tag-lab` pins the shape matrix (two parameters, array and promise payloads, a constraint, a phantom, recursion, interface arms, an intersection distributed over arms with a default, nullable and optional positions including a phantom argument and an application no other member reaches, a re-export, a re-alias, a transformed subset and a phantom literal union) and a producer/adapter catalog run reading `Job<string> option` across packages; `shared-tag-lab` pins the `Scheduled<T>` reducer. Committed corpus: `TR013` and `TP006` unchanged (no golden held a generic tagged union); labs before/after `TR013` 27 to 0, `TP006` 1 to 0, and the 27 `obj` tokens the generic payloads produced to 0. The nullable-application fix removes the lab's four unreferenced arm copies (`Queue.Last`, `Queue.Last2`, `MaybeJob2`, `MaybeJob3`), and a phantom argument beside `undefined` reads `Marker<string>` where it read `Marker<obj>` with `TR013`. `SP004` reads 63 across the committed goldens (`workers-types` 37) and 37 in `Xantham.Fable.Core.TS`; `solid-js`'s 8 wait on a regeneration where its paths case-fold (`caseFoldSensitive`).
+
+## Operation declaration-name selection (2026-10-10)
+
+Before-Shape operation selection matches method and selected-field names recovered from typed
+declarations. Leading double underscores remain JavaScript keys: `__method` and `__proto__`
+select their declarations, while checker-escaped aliases reject. Required sibling checks compare
+symbol identity. Final declaration-name, receiver, source-closure and snapshot authentication
+remain in place. The resolved-operation regression covers whole parameters, selected fields,
+authenticated companion plans and escaped-name rejection.
+
+The review follow-up also regenerates the outstanding Windows `solid-js` findings: `SP004`
+increases from 0 to 8 across `Universal.RendererOptions` and `Universal.Renderer`. Binding text
+is unchanged; one symbol moves from Ergonomic to Widened. The original PR head reproduces the
+stale findings failure before this regeneration.
+
+Validation: the unfiltered Windows `build.fsx -- test --run-gate --ci` passed 1,271 Generator
+tests and 99 Wire tests (one existing ignored case in each suite), 528 Fable checks and the real
+Partas plugin gate. The operation regression was observed failing before the lookup fix.
+
+## The checker's error type (2026-10-09)
+
+`TypeFlags.Any` covers four checker intrinsic names, and `any` includes the checker's own fallbacks (a circular alias, an inference placeholder) besides a written or omitted annotation, so `TR008` is not proof of authorship. `typeRef` reads `TypeResponse.IntrinsicName`: `any` keeps `TR008`; `error` and `unresolved` (a reference the program leaves unresolved or invalid) raise `TR063 ErrorTypeToObj` with the name the checker keeps; `intrinsic` (the body of `Uppercase` and its siblings) raises `TR064 IntrinsicMarkerToObj`. An Any without an intrinsic name is not claimed as a written `any`. Both are Escape, the tier `TR008` carries; the keys separate them. Resolve records the name from the error type's alias symbol, qualified through its unresolved parents (`NodeJS.Timeout`); a union, an intersection or an optional position the checker reduced over an error constituent carries none. A second export abbreviating the shared intrinsic marker (`Lowercase = Uppercase`) reports the same `TR064`.
+
+`unresolved-any-lab` pins an unresolved import, an undeclared name, a qualified name, an element position and a reduced union beside a written `any`, an omitted annotation and `unknown`. Committed corpus: `TR008` 841 to 830, `TR063` 0 to 17 (animejs 12: six members typed by the absent `three`, three sites typed by `InstanceParent`, which reduces to the nameless error type, two `NodeJS` references and one bare `TargetAdapterEntry`; the lab 5), `TR064` 0 to 5 (`compiler-lib-ownership-lab`'s `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`) and 0 to 5 in `Xantham.Fable.Core.TS`. Binding text is unchanged outside the lab.
 ## TypeScript library catalogue identity (2026-10-09)
 
 Catalogue sources for installed TypeScript `lib/lib.*.d.ts` files use logical package
@@ -2015,7 +2116,7 @@ The worker library supplies a declaration-backed path to the synthesized global 
 scripthost alone cannot catalogue that object. A single full Core.TS smoke retains semantic
 re-emission, Map/HTMLElement and AudioWorkletNodeOptions reuse, and Record/ReadonlyRecord
 collision checks. A global function adds a genuine `typeof globalThis` member: its changed
-source closure must still reject reuse of the unaugmented catalogue. This is distinct from
+GlobalThis API must still reject reuse of the unaugmented catalogue. This is distinct from
 the false entry-dependent hashes.
 
 The small producer is generated lazily once per test process. Every consumer still starts a
@@ -2047,3 +2148,13 @@ checks passed. Independent review's literal-alias and emitted-ABI probes were ad
 The 14 changed existing binding files differ only in explicit support-record qualification;
 all existing findings manifests and compiler input bytes are unchanged. Three new binding/
 manifest hashes cover the scripthost lab. Actual Linux execution remains for CI.
+
+### Combined portable-library and projection catalogue contract
+
+Integrating the independent portable library and early projection changes uses IdentityVersion 5, ApiVersion 4 and InferenceVersion 2. Both branches used API version 3 for different emitted contracts; taking the maximum would accept a pre-integration producer. The combined version rejects both old producers before traversal. Producer closure dependencies authenticate against actual consumer inputs; the shared-input test selects ES5 explicitly rather than relying on package sort order, and separately rejects a producer-only source. Global augmentation is rejected by the final GlobalThis API authentication before output is written.
+
+Regenerating Core.TS adds 776 catalogue declarations relative to the portable-library branch:
+774 literal-overload support declarations now retained in shipped compiler libraries, and
+the two intersection aliases `DecoratorMetadataObject.Base` and `ElementTagNameMap.Base`.
+The full-library smoke regenerates the catalogue and compiles reused consumer types; these
+additions follow the projection branch's overload and anonymous-intersection rules.

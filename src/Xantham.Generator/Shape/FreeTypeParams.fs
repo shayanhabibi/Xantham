@@ -223,9 +223,9 @@ let private reuseAnonymousApplications includeUnnamed (model: ShapeModel) =
             | _ -> current)
         model
 
-/// Declares each hoisted object type over the type parameters it reads from the scope it was
-/// written in (§4.9, `DeclParams`). `each<T, U>(props: { items: T[]; render: (item: T) => U })`
-/// declares `EachProps<'T, 'U>`, and the parameter position applies them back.
+/// Declares each hoisted object type and tagged union over the type parameters it reads from the
+/// scope it was written in (§4.9, `DeclParams`). `each<T, U>(props: { items: T[]; render: (item:
+/// T) => U })` declares `EachProps<'T, 'U>`, and the parameter position applies them back.
 let bindFreeTypeParams: Pass<ShapeModel> =
     Pass.pure' "bind-free-type-params" (fun ctx model ->
         let bound =
@@ -240,6 +240,8 @@ let bindFreeTypeParams: Pass<ShapeModel> =
                      && (arrayElement model facts).IsNone
                      && not (isTuple facts))
                     || isFlattenable model facts
+                    || (isTaggedDeclaration model facts
+                        && not (Map.containsKey typeId model.AliasApplications))
                     ->
                     let own = declParamIds facts
 

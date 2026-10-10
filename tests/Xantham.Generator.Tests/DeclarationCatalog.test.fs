@@ -251,6 +251,245 @@ let useBoth (a: Identity.OwnerA.AOptions) (b: Identity.OwnerB.BOptions) =
                 (fun error -> Expect.stringContains error.Message "input source hash mismatch" "a changed producer input invalidates the coordinated catalog")
 
 [<Tests>]
+let shippedOverloadTests =
+    testCase "declaration catalog shipped dependencies retain literal overload contracts" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-shipped-overloads-" + Guid.NewGuid().ToString "N")
+        let package = Path.Combine(directory, "package")
+        let dependency = Path.Combine(package, "node_modules", "store-owner-lab")
+        try
+            writePackageFile package "package.json" """{"name":"store-consumer-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile package "index.d.ts" """import { Store } from 'store-owner-lab'; export function use(store: Store): Store;"""
+            writePackageFile dependency "package.json" """{"name":"store-owner-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile dependency "index.d.ts" """export interface Store {
+    get(kind: "text"): string;
+    get(kind: "bytes"): number;
+}"""
+            let configure name references =
+                let path = Path.Combine(directory, name + ".json")
+                File.WriteAllText(path,
+                    JsonSerializer.Serialize {| ``module`` = "Identity." + name; ``namespace`` = "Identity.Support"
+                                                lib = [| "esnext" |]; types = ([||] : string array)
+                                                groups = Map.ofList [ "store-owner-lab", "ship" ]
+                                                declarationCatalog = true; declarationReferences = references |})
+                GeneratorConfig.loadFile path
+            let producer = Path.Combine(directory, "root")
+            Pipeline.run (configure "Root" [||]) dependency producer |> Async.RunSynchronously |> ignore
+            let reference = Path.Combine(producer, "declarations.json")
+            Pipeline.run (configure "Adapter" [| reference |]) package (Path.Combine(directory, "adapter"))
+            |> Async.RunSynchronously |> ignore
+            let consumer = """module Identity.Consumer
+let read (store: Identity.Root.Store) (text: Identity.Root.Store.Text) (bytes: Identity.Root.Store.Bytes) : string * float =
+    let shared = Identity.Adapter.Exports.``use`` store
+    shared.get text, shared.get bytes
+"""
+            let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+            Expect.equal code 0 output
+            let invalid = consumer + "\nlet invalid (store: Identity.Root.Store) = store.get \"anything\"\n"
+            let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] invalid
+            Expect.notEqual code 0 "arbitrary strings must not enter a literal-discriminated overload"
+            Expect.stringContains output "FS0041" "overload resolution rejects the wrong discriminator"
+        finally
+            if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
+let shippedIntersectionTests =
+    testCase "declaration catalog shipped intersections retain named alias bases" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-shipped-intersection-" + Guid.NewGuid().ToString "N")
+        let package = Path.Combine(directory, "package")
+        let dependency = Path.Combine(package, "node_modules", "intersection-owner-lab")
+        try
+            writePackageFile package "package.json" """{"name":"intersection-consumer-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile package "index.d.ts" """import { Result } from 'intersection-owner-lab'; export function use(value: Result): Result;"""
+            writePackageFile dependency "package.json" """{"name":"intersection-owner-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile dependency "index.d.ts" """export type Base = { name: string }; export type Result = Base & { id: number };"""
+            let configure name references =
+                let path = Path.Combine(directory, name + ".json")
+                File.WriteAllText(path,
+                    JsonSerializer.Serialize {| ``module`` = "Identity." + name; ``namespace`` = "Identity.Support"
+                                                lib = [| "esnext" |]; types = ([||] : string array)
+                                                groups = Map.ofList [ "intersection-owner-lab", "ship" ]
+                                                declarationCatalog = true; declarationReferences = references |})
+                GeneratorConfig.loadFile path
+            let producer = Path.Combine(directory, "root")
+            Pipeline.run (configure "Root" [||]) dependency producer |> Async.RunSynchronously |> ignore
+            let reference = Path.Combine(producer, "declarations.json")
+            Pipeline.run (configure "Adapter" [| reference |]) package (Path.Combine(directory, "adapter"))
+            |> Async.RunSynchronously |> ignore
+            let consumer = """module Identity.Consumer
+let useBase (value: Identity.Root.Result) : Identity.Root.Base = Identity.Adapter.Exports.``use`` value :> Identity.Root.Base
+let id (value: Identity.Root.Result) : float = (Identity.Adapter.Exports.``use`` value).id
+"""
+            let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+            Expect.equal code 0 output
+        finally
+            if Directory.Exists directory then Directory.Delete(directory, true)
+
+/// The trailing syntax kind of a normalized catalog handle (`<source>#<index>.<kind>`).
+let private handleKind (handle: string) =
+    handle.Substring(handle.LastIndexOf '.' + 1) |> UInt32.Parse |> LanguagePrimitives.EnumOfValue<uint32, SyntaxKind>
+
+[<Tests>]
+let privateNamespaceTests =
+    testCase "declaration catalog merged namespace values retain intrinsic empty object arguments" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-namespace-value-" + Guid.NewGuid().ToString "N")
+        try
+            writePackageFile directory "package.json" """{"name":"namespace-value-lab","version":"1.0.0","types":"index.d.ts"}"""
+            // A function merged with a namespace has a structural identity, which depends on the
+            // checker's intrinsic `{}` in the second `Object.keys` overload.
+            writePackageFile directory "util.d.ts" """export function util(): void; export namespace util { const keys: ObjectConstructor["keys"]; }"""
+            writePackageFile directory "index.d.ts" """import { util } from './util'; export const helpers: typeof util;"""
+            let producer = Path.Combine(directory, "root")
+            Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory producer
+            |> Async.RunSynchronously |> ignore
+            let reference = Path.Combine(producer, "declarations.json")
+            let read path = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText path, JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+            let util = (read reference).Declarations |> Array.find (fun entry -> entry.FSharpName = "Identity.Root.Util")
+            util.Handles |> Array.map handleKind |> Array.sort
+            |> Flip.Expect.equal "the merged value is identified by both declarations" [| SyntaxKind.FunctionDeclaration; SyntaxKind.ModuleDeclaration |]
+            writePackageFile directory "adapter.d.ts" """import { helpers } from './index'; export const helpers2: typeof helpers;"""
+            Pipeline.run (configured directory "Adapter" "adapter.d.ts" [| reference |]) directory (Path.Combine(directory, "adapter"))
+            |> Async.RunSynchronously |> ignore
+            (read (Path.Combine(directory, "adapter", "declarations.json"))).Declarations
+            |> Array.filter (fun entry -> entry.Identity = util.Identity)
+            |> Array.map (fun entry -> entry.FSharpName, entry.Owner)
+            |> Flip.Expect.equal "the adapter reuses the producer's merged value" [| "Identity.Root.Util", "Identity.Root" |]
+            let consumer = """module Identity.Consumer
+let keys (helpers: Identity.Root.Util) (value: obj): string[] = helpers.keys value
+"""
+            let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+            Expect.equal code 0 output
+            let unresolved = async {
+                let config = configured directory "Unresolved" "index.d.ts" [||]
+                let! mailbox, ctx = Bootstrap.start config directory
+                use _ = mailbox :> IDisposable
+                let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+                let! resolve, _ = Pipeline.runTier ctx Resolve.passes (Pipeline.toResolve harvest)
+                let! shape, _ = Pipeline.runTier ctx Shape.Passes.passes (Pipeline.toShape (GeneratorConfig.runtimePackage config ctx.PackageName) resolve)
+                let intrinsic =
+                    shape.Types |> Map.toList |> List.filter (fun (_, facts) ->
+                        facts.Response.Flags.HasFlag TypeFlags.Object && facts.Origin = Unclassified
+                        && facts.DeclFile.IsNone && facts.Declarations.IsEmpty
+                        && facts.Members.IsEmpty && facts.CallSignatures.IsEmpty && facts.ConstructSignatures.IsEmpty
+                        && facts.SymbolName |> Option.exists (fun name -> name / uom<symbolName> = "__type"))
+                Expect.equal intrinsic.Length 1 "the fixture reaches one intrinsic empty object"
+                let id, facts = intrinsic.Head
+                let unresolved =
+                    { shape with
+                        Types = Map.add id (TypeFacts.shallow facts.Response) shape.Types
+                        NotFollowed = Map.add id "fixture: derivation failed" shape.NotFollowed }
+                return! DeclarationCatalog.apply ctx unresolved (Pipeline.groupModules ctx unresolved)
+            }
+            Expect.throwsC
+                (fun () -> unresolved |> Async.RunSynchronously |> ignore)
+                (fun error -> Expect.stringContains error.Message "no stable declaration" "checker MembersResolved cannot certify a locally failed derivation")
+        finally
+            if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
+let namespaceIdentityTests =
+    let read path =
+        JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText path, JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+    // Each value carries a conditional member, which has no structural key: the namespace and
+    // the module object are identified by their declarations alone.
+    let producer directory =
+        writePackageFile directory "package.json" """{"name":"namespace-identity-lab","version":"1.0.0","types":"index.d.ts"}"""
+        writePackageFile directory "util.d.ts" """export namespace util { const keys: ObjectConstructor["keys"]; function check<T>(value: T): T extends string ? string : number; }"""
+        writePackageFile directory "external.d.ts" """export declare const version: string; export declare function check<T>(value: T): T extends string ? string : number;"""
+        writePackageFile directory "index.d.ts" """import * as external from "./external";
+export { util } from "./util";
+export const moduleValue: typeof external;
+export const frozen: Readonly<typeof import("./util").util>;
+"""
+        let output = Path.Combine(directory, "root")
+        Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory output |> Async.RunSynchronously |> ignore
+        Path.Combine(output, "declarations.json")
+    testList "declaration catalog namespace identities" [
+        testCase "re-exported namespaces and module objects keep their producer identity" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-namespace-identity-" + Guid.NewGuid().ToString "N")
+            try
+                let reference = producer directory
+                let find name = (read reference).Declarations |> Array.find (fun entry -> entry.FSharpName = "Identity.Root." + name)
+                let util, moduleValue, frozen = find "Util", find "ModuleValue", find "Frozen"
+                (util.Role, util.Handles |> Array.map handleKind)
+                |> Flip.Expect.equal "a namespace value is identified by its declaration" ("type", [| SyntaxKind.ModuleDeclaration |])
+                (moduleValue.Role, moduleValue.Handles |> Array.map handleKind)
+                |> Flip.Expect.equal "a module object is identified by its source file" ("type", [| SyntaxKind.SourceFile |])
+                Expect.equal frozen.Role "alias" "a mapped derivative is identified by its alias application"
+                Expect.notEqual frozen.Identity util.Identity "a mapped derivative is a different type from the namespace it maps"
+                writePackageFile directory "adapter.d.ts" """import { util, moduleValue } from "./index";
+export const helpers: typeof util;
+export const module2: typeof moduleValue;
+"""
+                Pipeline.run (configured directory "Adapter" "adapter.d.ts" [| reference |]) directory (Path.Combine(directory, "adapter"))
+                |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let helpers: Identity.Root.Util = Identity.Adapter.Exports.helpers
+let moduleValue: Identity.Root.ModuleValue = Identity.Adapter.Exports.module2
+let keys (value: obj) : string[] = helpers.keys value
+let version : string = moduleValue.version
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                Expect.equal code 0 output
+            finally
+                if Directory.Exists directory then Directory.Delete(directory, true)
+
+        testCase "an augmented namespace cannot claim its owner's declaration" <| fun _ ->
+            let directory = Path.Combine(temporaryRoot, "xantham-namespace-augmentation-" + Guid.NewGuid().ToString "N")
+            try
+                let reference = producer directory
+                // The augmentation is a second declaration of the producer's namespace, visible
+                // only in the consumer's program.
+                writePackageFile directory "augmented.d.ts" """import { util } from "./util";
+declare module "./util" { namespace util { const extra: number; } }
+export const helpers: typeof util;
+"""
+                Expect.throwsC
+                    (fun () ->
+                        Pipeline.run (configured directory "Augmented" "augmented.d.ts" [| reference |]) directory (Path.Combine(directory, "augmented"))
+                        |> Async.RunSynchronously |> ignore)
+                    (fun error -> Expect.stringContains error.Message "declaration handle set conflict for Util" "the augmented namespace keeps both declarations in its identity")
+            finally
+                if Directory.Exists directory then Directory.Delete(directory, true)
+    ]
+
+[<Tests>]
+let specializedUnionTests =
+    testCase "declaration catalog distinguishes closed and open extracted generic unions" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-catalog-extracted-union-" + Guid.NewGuid().ToString "N")
+        let dependency = Path.Combine(directory, "node_modules", "task-owner-lab")
+        try
+            writePackageFile directory "package.json" """{"name":"task-consumer-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile dependency "package.json" """{"name":"task-owner-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile dependency "index.d.ts" """export type Outcome<R> = {kind:"ok";value:R}|{kind:"error";error:string};
+export type State<R> = {status:"live";checkpoint:R}|{status:"done";outcome:Outcome<R>}|{status:"cancelled";outcome:Outcome<R>};
+export type Record<R> = {id:string} & ({state:Extract<State<R>,{status:"live"}>}|{state:Extract<State<R>,{status:"done"|"cancelled"}>});
+"""
+            writePackageFile directory "index.d.ts" """import { Record } from 'task-owner-lab';
+export function write(value:Record<string>):void;
+export function read<R>():Record<R>;
+"""
+            let config =
+                { configured directory "Task" "index.d.ts" [||] with
+                    Groups = Map.ofList [ "task-owner-lab" * uom<npmDependency>, Ship ] }
+            let generated = Path.Combine(directory, "generated")
+            Pipeline.run config directory generated |> Async.RunSynchronously |> ignore
+            let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(generated, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+            let find name = catalog.Declarations |> Array.find (fun entry -> entry.FSharpName = "Identity.Task." + name)
+            let generic = find "Read.Result2.State"
+            let closed = find "Write.Value2.State"
+            Expect.equal generic.Arity 1 "the read result retains its caller's result type"
+            Expect.equal closed.Arity 0 "the write result is specialized to string"
+            Expect.notEqual generic.Identity closed.Identity "a concrete argument cannot be alpha-normalized as a bound parameter"
+            let consumer = """module Identity.Consumer
+let generic (value: Identity.Task.Read.Result2.State<string>) = value
+let closed (value: Identity.Task.Write.Value2.State) = value
+"""
+            let code, output = compileConsumer directory [ "generated/Identity.Task.fs" ] consumer
+            Expect.equal code 0 output
+        finally
+            if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
 let classImplementsTests =
     match Tsc.locate __SOURCE_DIRECTORY__ with
     | None -> testCase "class implements catalog skipped - no compiler" <| fun _ -> skiptest "no tsc"
@@ -726,6 +965,44 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
 """
                     let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
                     Expect.equal code 0 output
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "producer source closure is authenticated against the consumer program" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-source-closure-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let root = configured directory "Root" "index.d.ts" [||]
+                    let producer = Path.Combine(directory, "root")
+                    run root fixture producer |> Async.RunSynchronously |> ignore
+                    let path = Path.Combine(producer, "declarations.json")
+                    let catalog = JsonNode.Parse(File.ReadAllText path)
+                    let client = catalog["declarations"].AsArray() |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.PublicClient")
+                    let sources = client["sources"].AsArray()
+                    // A producer may traverse more of a shared type than the consumer. The
+                    // extra dependency is still authenticated, even though its reachability
+                    // through the consumer's resolved graph is different.
+                    let extra = catalog["inputs"].AsArray() |> Seq.find (fun input -> input["file"].GetValue<string>() = "lib/lib.es5.d.ts")
+                    Expect.isTrue (sources |> Seq.forall (fun source -> not (JsonNode.DeepEquals(source, extra))))
+                        "the common compiler input is outside this declaration's closure"
+                    sources.Add(extra.DeepClone())
+                    File.WriteAllText(path, catalog.ToJsonString())
+                    let adapter = configured directory "Adapter" "adapter.d.ts" [| path |]
+                    run adapter fixture (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    sources[sources.Count - 1]["sha256"] <- JsonValue.Create "changed"
+                    File.WriteAllText(path, catalog.ToJsonString())
+                    Expect.throwsC
+                        (fun () -> run adapter fixture (Path.Combine(directory, "stale")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "source hash mismatch" "the producer's additional source is authenticated")
+                    sources.RemoveAt(sources.Count - 1)
+                    let producerOnly = catalog["inputs"].AsArray() |> Seq.find (fun input ->
+                        input["package"].GetValue<string>() = "declaration-identity-lab"
+                        && input["file"].GetValue<string>() = "index.d.ts")
+                    sources.Add(producerOnly.DeepClone())
+                    File.WriteAllText(path, catalog.ToJsonString())
+                    Expect.throwsC
+                        (fun () -> run adapter fixture (Path.Combine(directory, "absent")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "source hash mismatch" "a source absent from the consumer cannot authenticate the producer")
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 
@@ -1227,6 +1504,32 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     code |> Flip.Expect.equal output 0
                 finally Directory.Delete(directory, true)
 
+            testCase "generic tagged unions retain their arity across packages" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-catalog-generic-tag-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let input = Path.GetFullPath(Path.Combine(fixture, "..", "generic-tag-lab"))
+                    let root = configured directory "Root" "index.d.ts" [||]
+                    run root input (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
+                    let reference = Path.Combine(directory, "root", "declarations.json")
+                    use catalog = JsonDocument.Parse(File.ReadAllText reference)
+                    let job =
+                        catalog.RootElement.GetProperty("declarations").EnumerateArray()
+                        |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Job")
+                    job.GetProperty("arity").GetInt32() |> Flip.Expect.equal "the union's parameter is part of its arity" 1
+                    job.GetProperty("constraints").GetArrayLength() |> Flip.Expect.equal "one constraint slot per parameter" 1
+                    let adapter = configured directory "Adapter" "adapter.d.ts" [| reference |]
+                    run adapter input (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = """module Identity.Consumer
+let once (payload: string) : Identity.Root.Job<string> = Identity.Root.Job.Once("id", payload, 1.0)
+let reexported (job: Identity.Adapter.Job<string>) : Identity.Root.Job<string> = job
+let run (runner: Identity.Adapter.Runner<string>) (job: Identity.Root.Job<string>) : Identity.Root.Job<string> = runner.run job
+let poll (runner: Identity.Adapter.Runner<string>) : Identity.Root.Job<string> option = runner.poll ()
+"""
+                    let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                    code |> Flip.Expect.equal output 0
+                finally Directory.Delete(directory, true)
+
             testCase "renamed exports and generic subpath types share producer identity" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-declaration-catalog-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
@@ -1270,15 +1573,23 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 let directory = Path.Combine(temporaryRoot, "xantham-catalog-versions-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
                 try
+                    // Each `dep` installation resolves a different `peer` version, which gives the
+                    // copies distinct compiler package identities at equal versions.
+                    let dependencyManifest version =
+                        $"""{{"name":"dep","version":"{version}","types":"index.d.ts","peerDependencies":{{"peer":"*"}}}}"""
                     writePackageFile directory "package.json" """{"name":"versions-lab","version":"1.0.0","type":"module"}"""
                     writePackageFile directory "index.d.ts" """export { One } from "dep"; export { Two } from "owner";"""
                     writePackageFile directory "adapter.d.ts" """import { One, Two } from "./index.js"; export function one(value: One): One; export function two(value: Two): Two;"""
-                    writePackageFile directory "node_modules/dep/package.json" """{"name":"dep","version":"1.0.0","types":"index.d.ts"}"""
-                    writePackageFile directory "node_modules/dep/index.d.ts" "export interface One { one: string; }"
+                    writePackageFile directory "node_modules/dep/package.json" (dependencyManifest "1.0.0")
+                    writePackageFile directory "node_modules/dep/index.d.ts" "export interface One { one: string; } export interface Two { two: number; }"
+                    writePackageFile directory "node_modules/peer/package.json" """{"name":"peer","version":"1.0.0","types":"index.d.ts"}"""
+                    writePackageFile directory "node_modules/peer/index.d.ts" "export {};"
                     writePackageFile directory "node_modules/owner/package.json" """{"name":"owner","version":"1.0.0","types":"index.d.ts"}"""
                     writePackageFile directory "node_modules/owner/index.d.ts" """export { Two } from "dep";"""
-                    writePackageFile directory "node_modules/owner/node_modules/dep/package.json" """{"name":"dep","version":"2.0.0","types":"index.d.ts"}"""
-                    writePackageFile directory "node_modules/owner/node_modules/dep/index.d.ts" "export interface Two { two: number; }"
+                    writePackageFile directory "node_modules/owner/node_modules/dep/package.json" (dependencyManifest "2.0.0")
+                    writePackageFile directory "node_modules/owner/node_modules/dep/index.d.ts" "export interface One { one: string; } export interface Two { two: number; extra?: boolean; }"
+                    writePackageFile directory "node_modules/owner/node_modules/peer/package.json" """{"name":"peer","version":"2.0.0","types":"index.d.ts"}"""
+                    writePackageFile directory "node_modules/owner/node_modules/peer/index.d.ts" "export {};"
                     let groups = Map.ofList [ "dep" * uom<npmDependency>, Ship; "owner" * uom<npmDependency>, Ship ]
                     let root = { configured directory "Root" "index.d.ts" [||] with Groups = groups }
                     run root directory (Path.Combine(directory, "root")) |> Async.RunSynchronously |> ignore
@@ -1291,6 +1602,27 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     |> Seq.map (fun source -> source.GetProperty("version").GetString())
                     |> Seq.distinct |> Seq.sort |> Seq.toList
                     |> Flip.Expect.equal "dependency versions keep separate provenance" [ "1.0.0"; "2.0.0" ]
+                    // The second installation now claims the first version with different bytes.
+                    // A matching copy must not authenticate the conflicting one.
+                    writePackageFile directory "node_modules/owner/node_modules/dep/package.json" (dependencyManifest "1.0.0")
+                    let unreferenced = { configured directory "Inputs" "adapter.d.ts" [||] with Groups = groups }
+                    run unreferenced directory (Path.Combine(directory, "inputs")) |> Async.RunSynchronously |> ignore
+                    use inputs = JsonDocument.Parse(File.ReadAllText(Path.Combine(directory, "inputs", "declarations.json")))
+                    let copies =
+                        inputs.RootElement.GetProperty("inputs").EnumerateArray()
+                        |> Seq.filter (fun source -> source.GetProperty("package").GetString() = "dep")
+                        |> Seq.map (fun source ->
+                            source.GetProperty("version").GetString(),
+                            source.GetProperty("file").GetString(),
+                            source.GetProperty("sha256").GetString())
+                        |> Seq.toList
+                    copies |> List.map (fun (version, file, _) -> version, file)
+                    |> Flip.Expect.equal "both installations enter the adapter's program under one source key" [ "1.0.0", "index.d.ts"; "1.0.0", "index.d.ts" ]
+                    copies |> List.map (fun (_, _, sha256) -> sha256) |> List.distinct |> List.length
+                    |> Flip.Expect.equal "the same-version installations differ in content" 2
+                    Expect.throwsC
+                        (fun () -> run adapter directory (Path.Combine(directory, "conflicting-copy")) |> Async.RunSynchronously |> ignore)
+                        (fun error -> Expect.stringContains error.Message "input source hash mismatch" "a matching copy cannot authenticate conflicting same-version bytes")
                 finally Directory.Delete(directory, true)
 
             let inline (==>) input expected = input, expected
@@ -1318,6 +1650,8 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                 "input" =!> "input source hash mismatch"
                 "api" =!> "F# API mismatch"
                 "source" =!> "source hash mismatch"
+                "source-missing" =!> "source hash mismatch"
+                "source-removed" =!> "source hash mismatch"
                 "arity" =!> "arity mismatch"
                 "constraints" =!> "constraint mismatch"
                 "cycle" =!> "owner dependency cycle"
@@ -1350,6 +1684,8 @@ let share (agent: Identity.Adapter.Agent) : Identity.Root.Agent = agent
                     | "input" -> sharedInput["sha256"] <- JsonValue.Create "changed"
                     | "api" -> client["api"] <- JsonValue.Create "changed"
                     | "source" -> (client["sources"][0])["sha256"] <- JsonValue.Create "changed"
+                    | "source-missing" -> (client["sources"][0])["file"] <- JsonValue.Create "missing.d.ts"
+                    | "source-removed" -> client["sources"] <- JsonArray()
                     | "arity" ->
                         client["arity"] <- JsonValue.Create 1
                         client["constraints"] <- JsonArray(JsonValue.Create "None")
@@ -1714,9 +2050,9 @@ let copy<'T> (source: Identity.Root.Options<'T>) (target: Identity.Adapter.Optio
                     (code <> 0 && output.Contains "FS0193") |> Flip.Expect.equal "distinct payload types must reject cross-assignment" true
                     let payloads = """
 let stringPayload (value: Identity.Root.Options<string>) : string option =
-    value.direct |> Option.bind (function Fable.Core.U2.Case1 ok -> Some ok.value | _ -> None)
+    value.direct |> Option.bind (function Identity.Root.Result.Ok payload -> Some payload | _ -> None)
 let numberPayload (value: Identity.Adapter.Options<float>) : float option =
-    value.wrapped |> Option.bind (function Fable.Core.U2.Case1 ok -> Some ok.value | _ -> None)
+    value.wrapped |> Option.bind (function Identity.Root.Result.Ok payload -> Some payload | _ -> None)
 """
                     let code, output = compileConsumer directory sources (consumer + payloads)
                     code |> Flip.Expect.equal output 0

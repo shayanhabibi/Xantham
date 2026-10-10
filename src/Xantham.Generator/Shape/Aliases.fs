@@ -91,6 +91,7 @@ let shapeAliases: Pass<ShapeModel> =
                             | FsAbbrev decl -> Some(decl.Name, decl.TypeParameters)
                             | FsDelegateType decl -> Some(decl.Name, decl.TypeParameters)
                             | FsPhantom decl -> Some(decl.Name, decl.TypeParameters)
+                            | FsTaggedUnion decl -> Some(decl.Name, decl.TypeParameters)
                             | _ -> None)
                         |> Map.ofList
 
@@ -149,6 +150,13 @@ let shapeAliases: Pass<ShapeModel> =
                                                 FsNamed primary
                                             else
                                                 FsApp(primary, typeParameters |> List.map (_.Name >> FsTypeVar))
+
+                                        // An abbreviation of a shared Any intrinsic (`Lowercase =
+                                        // Uppercase`) carries the widening its claimant reports.
+                                        match Map.tryFind typeId model.Types with
+                                        | Some facts when flag TypeFlags.Any facts ->
+                                            findings <- findings @ snd (typeRef ctx model None name typeId)
+                                        | _ -> ()
 
                                         claimed <- Set.add name claimed
 

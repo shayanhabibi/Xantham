@@ -9,7 +9,9 @@ open Xantham.Generator.Shape.Spec
 /// one payload per case, erased by Fable back to the object - `Circle(radius = 2.0)` becomes
 /// `{ kind: "circle", radius: 2 }`. An arm that is not plain data is left to `shape-aliases`.
 /// Arms sharing a tag value fold into one case carrying the members they agree on; a fold
-/// leaving a single case leaves the union to `shape-aliases` too.
+/// leaving a single case leaves the union to `shape-aliases` too. The DU binds the alias's type
+/// parameters and those it reads from the scope it was written in (§4.9): a payload of type `T`
+/// reads `'T`. An application of a generic alias reads its declaration.
 let detectTaggedUnions: Pass<ShapeModel> =
     {
         Name = "detect-tagged-unions"
@@ -22,6 +24,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                         model.DeclNames
                         |> Map.toList
                         |> List.sortBy fst
+                        |> List.filter (fun (typeId, _) -> not (Map.containsKey typeId model.AliasApplications))
                         |> List.choose (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
                             | Some facts when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
@@ -50,6 +53,12 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                             None
                                         else
 
+                                            let typeParameters, scope, parameterFindings =
+                                                declTypeParams ctx model name facts
+
+                                            findings <- findings @ parameterFindings
+                                            let scoped = { model with TypeVars = scope }
+
                                             let caseNames =
                                                 tagged |> List.map (snd >> Naming.enumCaseOfString) |> uniqueCaseNames
 
@@ -62,7 +71,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                 let reference, refFindings =
                                                                     typeRef
                                                                         ctx
-                                                                        model
+                                                                        scoped
                                                                         None
                                                                         $"{name}.{caseName}.{m.Symbol.Name}"
                                                                         m.TypeId
@@ -102,6 +111,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                         Order =
                                                             Map.tryFind typeId model.DeclOrders
                                                             |> Option.defaultValue None
+                                                        TypeParameters = typeParameters
                                                         Tag = tag
                                                         Cases = cases
                                                     }

@@ -43,7 +43,7 @@ to start the checks again without another version commit.
 If the workflow reports that develop or master moved during preparation, rerun
 the command against the updated PR; the bot will never force-push over new work.
 
-ShipIt calculates six independent package versions from conventional commits.
+ShipIt calculates seven independent package versions from conventional commits.
 If validation reports a changed package that was not bumped (for example a
 dependency upgrade with a `build` commit), add `force_version: 0.2.0` using the
 intended version to that package's changelog front matter on develop, then rerun
