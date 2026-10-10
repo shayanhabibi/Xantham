@@ -14,12 +14,77 @@ argument, so `Model<string>` reads as two type arguments. Read heritage nodes an
 `getTypeFromTypeNode` for each contract. `TypeFacts.ImplementedTypes` records explicit
 `implements` contracts separately from `BaseTypes`.
 
-**Checker alias-symbol identity alone does not name a type.** A transformed type retains the
-symbol of the alias it came from, so the checker-declared type must equal the type being named
-before a source name is recovered. `NonNullable<Value>` matched the members of the nullable
-`Value` and reintroduced `null` on the strength of the shared symbol.
+**Checker alias-symbol identity alone does not name a type.** A transformed type retains the symbol of the alias it came from, so the checker-declared type must equal the type being named before a source name is recovered. `NonNullable<Value>` matched the members of the nullable `Value` and reintroduced `null` on the strength of the shared symbol. A union application of a generic tagged alias is recognised only where its arms correspond to the declared form's arm for arm. An arm that is an instantiation open over a signature parameter reaches the shape tier identity-only, with no members, so it corresponds by its target rather than by its tag.
+
+**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation and the checker's own fallbacks (a circular alias, an inference placeholder), so `TR008` is not proof an author wrote `any`. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
+
+**A nullable union hides the application it was written over.** `x?: Job<string>` reaches the shape tier as `Job<string>`'s arms beside `undefined`, and arms no argument re-instantiates are the declared form's own, so a member-set match lands on `Job<T>` outside its scope. Read `TypeFacts.NonNullableApplication` (the union origin's application, from `getNonNullableType`) and apply its arguments; a declared form's own parameters apply only where they are in scope. An alias that already includes `null` (`Maybe<T> | undefined`) leaves no single application in the origin, and its reference depends on the member-set match.
+
+**Expecto's `--filter` is a hierarchy prefix.** A fixture's tests are named `generator e2e.<fixture> generates the committed goldens` and its extra cases `generator e2e.<case name>`, so a bare fixture name selects zero tests and reports success.
 
 ## Declaration catalogs
+
+**TypeScript library ownership is logical, not a platform distribution.** Installed
+`lib/lib.*.d.ts` files from `typescript` and recognized `@typescript/typescript-<rid>`
+packages share package identity `typescript`, their package-relative library path and
+exact source-byte hash. Their root manifest fingerprint covers canonical name, exact
+version and normalized full gitHead; intervening manifests remain byte-authenticated.
+Recognized compiler release metadata must match the library metadata. Binary fallback
+permits an absent gitHead while retaining exact executable authentication. Other package
+sources retain raw manifest hashes. Identity contract 4 rejects earlier platform-coloured
+catalogs before reuse. Core.TS regeneration must match the committed semantic catalogue
+on both operating systems; compiler/generator binary provenance may differ.
+
+**Compiler-library shipping must not depend on module exports.** `harvestGlobals` also runs
+when `typescript/lib` is `ship`. For module-only inputs, read global scope through a verified
+default-library source, not the module entry: module locals can hide library names, and
+module exports must not be harvested again as global values. Public global scripts retain
+their own scope. Type-only global declarations can reuse Core.TS; new global values change
+`typeof globalThis` and its transitive source closure, which remains authenticated.
+
+**Computed-member escaped names contain compiler-session IDs.** A name such as
+`__@match@1085` is not portable identity. Catalogue structural member keys and parent roles
+use the full normalized declaration-handle set for computed keys, with a disjoint encoding
+for ordinary names. Equal unique-symbol spellings from different declarations remain distinct;
+computed keys without declaration evidence get no fabricated portable key. Identity contract 4
+requires regenerating catalogues built before this correction. The small harvest lab locks the
+scope boundary; the Core.TS entry matrix authenticates and compiles complete catalogue reuse.
+
+**Intrinsic types are shared by unrelated exports.** A boolean value or alias cannot lend
+its declaration handles to every alias of the checker's boolean type. Intrinsic alias identities
+come from their own declarations, without type-wide export handles or generated parent roles.
+Pure index signatures reference `JS.Record` / `JS.ReadonlyRecord` explicitly: a bare support name
+can accidentally resolve to a shipped library phantom or a local type. Inference contract 2 and API contract 3
+requires regeneration for this mapping correction.
+
+**Brotli completion requires the decoder's Done status.** Catalogue file transport accepts
+exactly one complete stream and checks buffered and subsequent bytes for trailing data.
+A complete JSON value can precede the Brotli end marker. The shared stream reader counts actual
+decoded UTF-8 bytes with an inclusive 128 MiB limit for JSON and Brotli. JsonDocument.Parse
+reads to logical EOF; compatibility, declarations and variants use that shared document.
+Compression belongs to Pipeline.run's disk boundary. Generation retains a declarations.json
+text entry, output reports the actual filename, and switching formats retains old output.
+
+**Schema 2 compatibility is an explicit maintenance contract.** Assess every change to
+catalogue identity, source closure or ownership (`identityVersion`), canonical API/constraint
+hashing or emitted ABI (`apiVersion`), inference/profile semantics (`inferenceVersion`), and
+variant/customization semantics (`customizationVersion`). Bump the affected version in
+`CatalogCompatibility.current` when an earlier producer must be rejected; bump
+`contractVersion` for changes to the policy itself. All five versions require exact equality.
+An assembly rebuild alone remains compatible. Producer compiler/generator SHA-256 fields remain
+provenance; schema 1 still authenticates both hashes exactly.
+
+**Compiler identity belongs to the executable Bootstrap launched.** Recognized TypeScript
+wrapper/platform packages must agree on exact release and full gitHead, match the platform
+dependency, and match the bounded `--version` probe. Portable identity also includes the binary
+AST protocol. Missing package identity uses the executable hash; conflicting recognized metadata
+fails. Keep the captured path and cached per-run discovery shared across customization passes.
+Preserve the selected logical install path for linked platform packages; its expected executable
+must match the actual physical executable beneath the resolved package directory. A file link to
+another conventional install uses that physical install's metadata. An unrelated file link stays
+binary. Resolving away the install path before locating the wrapper loses valid package-store pairs.
+Decode compatibility and variants from the same JSON document and retain downstream source,
+manifest, API, arity, constraint, owner and variant authentication.
 
 Each rule below was written against a catalog authentication failure between two real packages;
 the corresponding lab under `tests/fixtures/` is the reducer.
@@ -31,6 +96,10 @@ the corresponding lab under `tests/fixtures/` is the reducer.
 - **The source closure follows the sources selected for canonical identities**, not the alias
   files of every occurrence. Two independent packages that both write `Record<string, unknown>`
   share a canonical identity and must not authenticate different alias files.
+- **Export-only handles do not anchor transitive source closures.** An indexed projection can
+  export a compiler-interned anonymous type from a consumer file. Keep that handle for the
+  projection's own identity, but traverse intrinsic type declarations when authenticating its
+  owner's sources. Explicit named aliases still carry their declaration files.
 - **Named literal aliases keep independent identities at equal values.** Collapsing them by value
   was tried and reverted: named aliases lost their declaration handles, private same-valued
   aliases became one F# type, and alias declaration files vanished from source closures. Nine
@@ -45,6 +114,15 @@ the corresponding lab under `tests/fixtures/` is the reducer.
 - **A diagnostic that fails deliberately before output is not acceptance evidence.** Several lanes
   recorded a probe reaching a *later* mismatch as proof of the earlier fix; that establishes the
   earlier guard passes and nothing about the run as a whole.
+- **Shared anonymous literals need a producer ownership decision.** Two independently generated
+  producers can expose different F# enum types under the same structural catalog identity.
+  Regenerate dependent producers against the selected owner's catalog; a consumer-only preference
+  cannot change the enum types in their compiled APIs. The ownership lab compiles indexed field
+  calls and transfers, not just whole options objects, and retains independent-ownership rejection.
+- **A `never` generic default does not invalidate its nominal constraint.** Preserve the declared
+  bound and apply the ordinary argument check at concrete uses. Dropping the bound on a callback's
+  type parameter can give its result a different F# constraint from the exported generic alias
+  with the same catalog identity. The generic-defaults lab covers this without nullable types.
 
 ## Generator passes
 
@@ -164,3 +242,44 @@ Carried from lanes that closed without finishing these.
 - **Entrypoint subclassability.** Generated `Container`/`ContainerProxy` are not F# subclassable;
   direct subclassing goes through the ambient runtime base. The ordinary SDK class
   interface-and-constructor policy was retained rather than revisited.
+
+
+## Early projections must precede loss (2026-10-09)
+
+`Customization.Semantics.projectResolved` runs after Resolve, before Shape. Build companions
+from its original arms; an emitted `string` or `option` cannot recover source literal membership
+or the null/undefined distinction. Keep source tokens and companion plans snapshot-sealed;
+equal checker IDs or equal arm sets do not merge named declaration identity.
+A phantom alias such as `type Phantom<T> = "auto"` shares its checker type with a plain
+literal alias; inspect its declaration parameters through Resolve rather than tagging that type. Cached tokens and
+plans must fail on the next run, while nonces must never enter output provenance.
+
+Projection companions do not alter the raw ABI. Keep their manifest provenance separate from
+raw catalog variant policy and validate the complete emitted source before writing. The
+Myriad adapter's `Decoded|Invalid` matches through a strict raw-value decoder into a normal DU.
+It does not pattern-match an erased union or recover the originating alias from shared strings.
+An optional-property presence test requires separate object facts; decoding its read value
+cannot distinguish absence from an explicitly present `undefined` property.
+
+**Typed operations must authenticate their receiver after placement.** Before-Shape method
+facts carry their receiver token into `ProjectionCompanion.forOperation`. Pipeline checks its
+final qualified type after catalog application. A caller-supplied F# name plus an `unbox` is
+insufficient: another receiver can have the same method name with an incompatible argument.
+
+**Array identity comes from the checker.** Global augmentation can classify the built-in
+`Array<T>` under `@types/node`. Use `Session.isArrayType`, retaining the non-tuple/one-argument
+guards. A local interface named `Array<T>` is not evidence of JavaScript array representation.
+
+**Operation property keys come from typed declarations.** Checker symbol names escape leading
+double underscores (`__proto__` becomes `___proto__`). Method and selected-field lookup must
+compare recovered declaration spellings, retaining the final name authentication. Record projections recover the declaration
+spelling and use allocated F# field names; computed/symbol keys reject. Emit own data properties
+with `Object.defineProperty`: ordinary assignment to `__proto__` invokes the prototype setter.
+Optional record and selected-field inputs have an outer option for omission, separate from
+present undefined. Selected-field projections must reject required selected fields and required
+siblings. The contract describes resolved values, not `exactOptionalPropertyTypes` writes.
+
+**Shared operation input contracts require an explicit owner.** `Operations.createShared`
+aliases the first selection's emitted types only after exact resolved-shape agreement.
+Each method still authenticates its own occurrence and source closure. Automatic value-set
+deduplication would silently merge independent contracts.

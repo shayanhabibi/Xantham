@@ -877,7 +877,7 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
         yield $"[<RequireQualifiedAccess; TypeScriptTaggedUnion({stringLit decl.Tag}, CaseRules.None)>]"
-        yield $"type {ident decl.Name} ="
+        yield $"type {declHead decl.Name decl.TypeParameters} ="
 
         for case in decl.Cases do
             // Named fields, so the JS keys survive: Fable emits each field under its own name.
@@ -1215,6 +1215,7 @@ let internal qualifyDecl foreign =
     | FsTaggedUnion decl ->
         FsTaggedUnion
             { decl with
+                TypeParameters = qualifyTypeParams foreign decl.TypeParameters
                 Cases =
                     decl.Cases
                     |> List.map (fun case ->
@@ -1343,8 +1344,9 @@ let private declErasedArities (decl: FsDecl) : int list =
         @ erasedArities d.Return
     | FsMeasure d -> erasedArities d.Primitive
     | FsTaggedUnion d ->
-        d.Cases
-        |> List.collect (fun case -> case.Fields |> List.collect (fun f -> erasedArities f.Type))
+        (d.TypeParameters |> List.collect ofTypeParam)
+        @ (d.Cases
+           |> List.collect (fun case -> case.Fields |> List.collect (fun f -> erasedArities f.Type)))
     | FsExports container -> container.Members |> List.collect (fun owned -> ofExportMember owned.Member)
     | FsStringEnum _
     | FsEnum _ -> []

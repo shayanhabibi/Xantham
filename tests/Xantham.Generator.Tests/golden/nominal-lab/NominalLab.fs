@@ -22,9 +22,9 @@ type GLAttr =
     [<ParamObject; Emit("$0")>]
     static member Create (kind: string) : GLAttr = jsNative
 
-type Narrow = Record<string, Attr>
+type Narrow = JS.Record<string, Attr>
 
-type Wide = Record<string, Wide.Item>
+type Wide = JS.Record<string, Wide.Item>
 
 [<Interface>]
 type Geometry<'Attributes> =

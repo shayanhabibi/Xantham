@@ -60,9 +60,9 @@ type Loose<'P> =
 /// </summary>
 [<Interface>]
 type Bag =
-    abstract loose: Record<string, string> with get, set
+    abstract loose: JS.Record<string, string> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (loose: Record<string, string>) : Bag = jsNative
+    static member Create (loose: JS.Record<string, string>) : Bag = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

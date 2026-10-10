@@ -1,0 +1,11 @@
+{
+  "module": "LiteralUnionOwnershipLab",
+  "namespace": "Identity",
+  "lib": ["esnext"],
+  "types": [],
+  "groups": {
+    "literal-owner-a-lab": "ship",
+    "literal-owner-b-lab": "ship"
+  },
+  "declarationCatalog": true
+}

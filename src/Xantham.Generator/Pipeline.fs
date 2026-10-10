@@ -240,15 +240,19 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
             | None -> Map.tryFind name origins |> Option.defaultValue Unclassified
 
     let sourceGroupOf decl =
-        let origin =
-            match Render.declName decl with
-            | name when Map.containsKey name origins -> originOf name
-            | name ->
-                secondaryAliasOrder decl
-                |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (order.File / uom<node>))
-                |> Option.defaultWith (fun () -> name |> originOf)
+        match decl with
+        | FsExports { Owner = EntryModule }
+        | FsExports { Owner = AmbientModule _ } -> EntryPackage
+        | _ ->
+            let origin =
+                match Render.declName decl with
+                | name when Map.containsKey name origins -> originOf name
+                | name ->
+                    secondaryAliasOrder decl
+                    |> Option.map (fun order -> Grouping.classifyFile ctx.PackageDir (order.File / uom<node>))
+                    |> Option.defaultWith (fun () -> name |> originOf)
 
-        emittingGroup ctx origin
+            emittingGroup ctx origin
 
     let compilerAliases =
         shape.Decls
@@ -326,6 +330,22 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
     let placed = shape.Decls |> List.groupBy placementOf |> Map.ofList
     let entrySpecifiers = moduleSpecifiers shape
 
+    let recursiveNamespace (moduleName: string) =
+        if ctx.Config.RecursiveGroups then
+            match ctx.Config.Namespace with
+            | Some ns when
+                moduleName.LastIndexOf '.' > 0
+                && moduleName.Substring(0, moduleName.LastIndexOf '.') = ns
+                ->
+                Some ns
+            | Some ns ->
+                invalidArg
+                    "config"
+                    $"xantham.json: recursiveGroups requires module '{moduleName}' to be an immediate child of namespace '{ns}'"
+            | None -> invalidArg "config" "xantham.json: recursiveGroups requires namespace"
+        else
+            None
+
     let moduleOf (origin: PackageId, family: string) : Render.GroupModule =
         let decls = placed |> Map.tryFind (origin, family) |> Option.defaultValue []
 
@@ -335,7 +355,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                 Group = ctx.PackageName
                 IsEntry = true
                 Module = moduleName ctx
-                Namespace = None
+                Namespace = recursiveNamespace (moduleName ctx)
                 RuntimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
                 CompilerLib = None
                 ModuleSpecifiers = entrySpecifiers
@@ -350,7 +370,9 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
                      else
                          compilerLibLayout.EsQualifiedModule),
                     None
-                | origin -> Naming.groupModule ctx.Config ctx.PackageName origin, None
+                | origin ->
+                    let name = Naming.groupModule ctx.Config ctx.PackageName origin
+                    name, recursiveNamespace name
 
             {
                 Group = key
@@ -423,16 +445,43 @@ let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : Rende
 /// touching the output directory - what tests diff against goldens.
 let private generateCore
     compiler
+    (projections: Customization.ProjectionExtension list)
     (extensions: Customization.GeneratorExtension list)
     (config: GeneratorConfig)
     (packageDir: string)
     : Async<RenderModel> =
     async {
+        Customization.Apply.validateIdentities (
+            (projections |> List.map _.Identity) @ (extensions |> List.map _.Identity)
+        )
+
         let! mailbox, ctx = Bootstrap.start config packageDir
         use _ = mailbox :> IDisposable
 
+        let catalogProducer =
+            DeclarationCatalog.createProducer ctx |> DeclarationCatalog.cacheProducer
+
+        do! DeclarationCatalog.validateReferencesWithProducer catalogProducer ctx
+
         let! harvest, harvestFindings = runTier ctx Harvest.passes HarvestModel.Empty
         let! resolve, resolveFindings = runTier ctx Resolve.passes (toResolve harvest)
+
+        let! projectionPlans =
+            if projections.IsEmpty then
+                async.Return []
+            else
+                async {
+                    let! snapshot = Customization.Semantics.projectResolved ctx resolve
+                    return Customization.Apply.project projections snapshot
+                }
+
+        let projectionFindings =
+            projectionPlans
+            |> List.collect (fun (owner, plan) ->
+                let _, _, _, names, _ = Customization.ContractData.projectionCompanionInfo plan
+
+                names
+                |> List.map (fun name -> Finding.make name (CustomizeOutput.ProjectionEmitted owner)))
 
         let! shape, shapeFindings =
             runTier
@@ -457,7 +506,8 @@ let private generateCore
                         Customization.Semantics.project ctx shape (harvestFindings @ resolveFindings @ shapeFindings)
 
                     let! _, _, referencedNames =
-                        DeclarationCatalog.applyWith
+                        DeclarationCatalog.applyWithProducer
+                            catalogProducer
                             extensionProfile
                             Map.empty
                             shape
@@ -503,7 +553,8 @@ let private generateCore
                 invalidOp "customization/compiler-required: raw replacements require generateValidatedWith"
 
         let! shape, catalog, referencedNames =
-            DeclarationCatalog.applyWith
+            DeclarationCatalog.applyWithProducer
+                catalogProducer
                 extensionProfile
                 annotations
                 originalShape
@@ -521,6 +572,20 @@ let private generateCore
         let qualified =
             Map.fold (fun names key value -> Map.add key value names) foreign referencedNames
 
+        for _, plan in projectionPlans do
+            match Customization.ContractData.projectionReceiver plan with
+            | None -> ()
+            | Some(receiver, expected) ->
+                let actual =
+                    Shape.Spec.typeRef ctx shape None "projection receiver" receiver
+                    |> fst
+                    |> Render.qualifyType qualified
+                    |> Render.printType
+
+                if actual <> expected then
+                    invalidOp
+                        $"projection/receiver-mismatch: the selected declaration is emitted as {actual}, not {expected}"
+
         let companions =
             semanticSnapshot
             |> Option.map (fun snapshot ->
@@ -532,7 +597,14 @@ let private generateCore
             |> Option.defaultValue []
 
         let render =
-            toRender ctx shape (harvestFindings @ resolveFindings @ shapeFindings @ customizationFindings)
+            toRender
+                ctx
+                shape
+                (harvestFindings
+                 @ resolveFindings
+                 @ shapeFindings
+                 @ customizationFindings
+                 @ projectionFindings)
 
         // The two halves of the render tier run separately so the manifest reports what group
         // emission found: a pass reads the findings the model carries, not the ones the fold
@@ -544,6 +616,17 @@ let private generateCore
                     Render.renderSourcesCustomized annotations raw (groupModulesForScope compilerOnly ctx shape)
                 ]
                 render
+
+        let projectionFiles =
+            let occupied =
+                (qualified |> Map.toList |> List.map snd)
+                @ (groupModulesForScope compilerOnly ctx shape |> List.map _.Module)
+                @ (companionSpecs
+                   |> List.collect (fun spec ->
+                       let ns, name, _, _, _, _ = Customization.ContractData.companionInfo spec
+                       [ ns + "." + name; ns + "." + name + "Extensions" ]))
+
+            Customization.Apply.renderProjections occupied (sourced.Files @ companions) projectionPlans
 
         let! rendered, manifestFindings =
             runTier
@@ -557,8 +640,9 @@ let private generateCore
             { rendered with
                 Findings = rendered.Findings @ manifestFindings
                 Files =
-                    (rendered.Files @ companions
-                     |> Customization.Provenance.attach extensions companions)
+                    (rendered.Files @ companions @ projectionFiles
+                     |> Customization.Provenance.attach extensions companions
+                     |> Customization.Provenance.attachProjections projections projectionPlans)
                     @ (catalog |> Option.map (fun text -> "declarations.json", text) |> Option.toList)
             }
 
@@ -577,16 +661,26 @@ let private generateCore
                         else
                             None))
 
-            do! Customization.Compile.validate compiler result.Files contracts
+            let projectionContracts =
+                projectionPlans
+                |> List.collect (fun (_, plan) ->
+                    let _, _, _, names, _ = Customization.ContractData.projectionCompanionInfo plan
+                    names)
+
+            do! Customization.Compile.validate compiler result.Files (contracts @ projectionContracts)
 
         return result
     }
 
 let generateWith extensions config packageDir =
-    generateCore None extensions config packageDir
+    generateCore None [] extensions config packageDir
 
 let generateValidatedWith compiler extensions config packageDir =
-    generateCore (Some compiler) extensions config packageDir
+    generateCore (Some compiler) [] extensions config packageDir
+
+/// Runs early source projections and late customizations, validating their complete output before return.
+let generateProjectedWith compiler projections extensions config packageDir =
+    generateCore (Some compiler) projections extensions config packageDir
 
 let generate config packageDir = generateWith [] config packageDir
 
@@ -594,24 +688,49 @@ let private utf8NoBom = Text.UTF8Encoding false
 
 /// Runs the pipeline and writes the rendered files into `outDir`, creating it and the `groups/`
 /// directory a shipped group is written under if needed.
-let runWith extensions (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<RunReport> =
-    async {
-        let! rendered = generateWith extensions config packageDir
-        Directory.CreateDirectory outDir |> ignore
+let private write config (outDir: string) (rendered: RenderModel) : RunReport =
+    Directory.CreateDirectory outDir |> ignore
 
-        for name, content in rendered.Files do
-            let path = Path.Combine(outDir, name)
-            Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
+    let outputName name =
+        if
+            name = "declarations.json"
+            && config.DeclarationCatalogCompression = CatalogCompression.Brotli
+        then
+            name + ".br"
+        else
+            name
+
+    for name, content in rendered.Files do
+        let writtenName = outputName name
+        let path = Path.Combine(outDir, writtenName)
+        Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
+
+        if writtenName <> name then
+            CatalogTransport.writeBrotli path content
+        else
             File.WriteAllText(path, content, utf8NoBom)
 
-        return
-            {
-                ModuleName = rendered.ModuleName
-                OutputFiles = rendered.Files |> List.map fst
-                Findings = rendered.Findings
-                Counts = Render.counts (Render.symbolTiers rendered)
-                ShadowedByLib = rendered.ShadowedByLib
-            }
+    {
+        ModuleName = rendered.ModuleName
+        OutputFiles = rendered.Files |> List.map (fst >> outputName)
+        Findings = rendered.Findings
+        Counts = Render.counts (Render.symbolTiers rendered)
+        ShadowedByLib = rendered.ShadowedByLib
+    }
+
+let runWith extensions config packageDir outDir =
+    async {
+        let! rendered = generateWith extensions config packageDir
+        return write config outDir rendered
+    }
+
+/// Validates all projection sources before writing any output file.
+let runProjectedWith compiler projections extensions config packageDir outDir =
+    async {
+        let! rendered =
+            generateProjectedWith compiler projections extensions config packageDir
+
+        return write config outDir rendered
     }
 
 let run config packageDir outDir = runWith [] config packageDir outDir

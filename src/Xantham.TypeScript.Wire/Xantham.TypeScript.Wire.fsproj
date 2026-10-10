@@ -5,7 +5,7 @@
         <NoWarn>FS0842</NoWarn>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <FSharpCoreImplicitPackageVersion>8.0.100</FSharpCoreImplicitPackageVersion>
-        <Version>0.2.1</Version>
+        <Version>0.3.0</Version>
         <AssemblyVersion>0.0.0.0</AssemblyVersion>
     </PropertyGroup>
 

@@ -183,7 +183,9 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 | `symbol` / `unique symbol` | `JS.Symbol` | Exact / Widened | unique symbols lose uniqueness; consider erased brand per unique symbol (open). |
 | `object` | `obj` | Widened | |
 | `unknown` | `obj` | Escape-ish | **Decided (D8):** `obj` for now. An erased `Unknown` wrapper forcing explicit narrowing may become a config toggle if it stays cheap to implement. |
-| `any` | `obj` | Escape | Tier-marked in doc comment. |
+| `any` | `obj` | Escape | `TR008`. Intrinsic name `any`: a written or omitted annotation, or a checker fallback (a circular alias, an inference placeholder). |
+| the checker's error type | `obj` | Escape | `TR063`, with the name the checker keeps (qualified through unresolved parents; empty once a union or optional position reduces it). Intrinsic name `error` or `unresolved`: a reference the program leaves unresolved or invalid, not a source `any`. |
+| `intrinsic` alias body | `obj` | Escape | `TR064`. The marker behind `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`. |
 | `void` (return) | `unit` | Exact | |
 | `undefined` / `null` in unions | hoisted to `option` | Ergonomic | See §4.3. |
 | `never` | — | — | In unions: dropped (identity). As return type: `'T` generic or `unit` + doc note; F# has no bottom type. |
@@ -302,9 +304,7 @@ application and is written as the constraint instead (`TR044`).
 Order of preference, decided per union after §4.2's categorization:
 
 1. All-literal → StringEnum/enum (Exact).
-2. Discriminated by a common literal tag property (checker: every member has property `k`
-   with a unique literal type) → **`[<TypeScriptTaggedUnion>]`** (Exact, pattern-matchable —
-   by far the best consumer experience; detect aggressively).
+2. Discriminated by a common literal tag property (checker: every member has property `k` with a unique literal type) → **`[<TypeScriptTaggedUnion>]`** (Exact, pattern-matchable — by far the best consumer experience; detect aggressively). A generic union declares the parameters its arms read - the alias's own, then those of the scope it was written in - and every reference applies them: `type Scheduled<'T> = | Once of payload: 'T`, read as `Scheduled<'T>` at `schedule<T>(): Scheduled<T>`. An application of the alias is written as that application wherever it corresponds to the declared form arm for arm, including beside `null`/`undefined` (`x?: Job<string>` reads `Job<string> option`); a transformed subset (`Extract<Pair<T, U>, ...>`) is its own union.
 3. Nullability hoisted + a *single* remaining member → `option`-wrapped member.
 4. Two-to-nine heterogeneous members → `U2`–`U9` (Exact for writing; reading requires
    runtime tests the consumer writes). **Decided (D4):** the `U_n` threshold is 9, one
@@ -552,6 +552,7 @@ absence under the live compiler.
   (`extends keyof T`, `extends string`); this one has a form and is still not provable.
   `tests/fixtures/nominal-lab` pins it, with the two negatives - a bound the argument *is*, and
   a bound the argument `inherit`s - that must keep their `:>` (landed 2026-09-02, wave two).
+- A tagged union (§4.5(2)) binds type parameters like any other declaration, and an inline one hoisted out of a generic signature binds the signature's parameters it reads: `current<T>(): { kind: "ready"; payload: T } | ...` reads `Current.Result<'T>`, so `'T` stays live on the method. `generic-tag-lab` pins the forms (landed 2026-10-09).
 - **Default type arguments** (`interface Foo<T = string>`) — F# permits same-name types with
   different generic arity: emit `type Foo<'T> = ...` *and* `type Foo = Foo<string>` (an
   abbreviation per defaulted suffix). Ergonomic, cheap, and exactly how consumers expect it

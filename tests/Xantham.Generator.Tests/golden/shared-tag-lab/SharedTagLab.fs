@@ -229,6 +229,33 @@ type Narrow =
 
 type OnEvent = (OnEvent.Event -> unit)
 
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+type Scheduled<'T> =
+    | [<CompiledName("once")>] Once of payload: 'T
+    | [<CompiledName("repeat")>] Repeat of payload: 'T * previous: 'T option
+
+[<Interface>]
+type Scheduled2<'T> =
+    abstract kind: string
+    abstract payload: 'T
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: string, payload: 'T) : Scheduled2<'T> = jsNative
+
+[<Interface>]
+type Scheduled3<'T> =
+    abstract kind: string
+    abstract payload: 'T
+    abstract previous: 'T option
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: string, payload: 'T, ?previous: 'T) : Scheduled3<'T> = jsNative
+
+[<Interface>]
+type Scheduler =
+    abstract schedule<'T>: payload: 'T -> Scheduled<'T>
+    abstract current<'T>: unit -> Scheduler.Current.Result<'T>
+    [<ParamObject; Emit("$0")>]
+    static member Create (schedule: ('T -> Scheduled<'T>), current: (unit -> Scheduler.Current.Result<'T>)) : Scheduler = jsNative
+
 module Narrow =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Event =
@@ -249,6 +276,27 @@ module OnEvent =
         | [<CompiledName("socket")>] Socket
         | [<CompiledName("trace")>] Trace
         | [<CompiledName("log")>] Log of level: string
+
+module Scheduler =
+    module Current =
+        [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+        type Result<'T> =
+            | [<CompiledName("ready")>] Ready of payload: 'T
+            | [<CompiledName("waiting")>] Waiting of previous: 'T option
+
+        [<Interface>]
+        type Result2<'T> =
+            abstract kind: string
+            abstract payload: 'T
+            [<ParamObject; Emit("$0")>]
+            static member Create (kind: string, payload: 'T) : Result2<'T> = jsNative
+
+        [<Interface>]
+        type Result3<'T> =
+            abstract kind: string
+            abstract previous: 'T option
+            [<ParamObject; Emit("$0")>]
+            static member Create (kind: string, ?previous: 'T) : Result3<'T> = jsNative
 
 module Wide =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]

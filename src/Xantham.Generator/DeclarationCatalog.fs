@@ -107,9 +107,24 @@ let private profile (config: GeneratorConfig) =
     |> hashText
 
 let private compiler (ctx: Context) =
-    match Tsc.locate (ctx.PackageDir / uom<dirPath>) with
-    | Some path -> File.ReadAllBytes path |> hash
-    | None -> fail "the compiler executable could not be identified"
+    Bootstrap.compilerPath ctx |> File.ReadAllBytes |> hash
+
+let internal createProducer (ctx: Context) : Async<CatalogCompatibility.Producer> =
+    async {
+        let! identity = Bootstrap.compilerPath ctx |> CatalogCompiler.discover
+
+        return
+            {
+                Compiler = compiler ctx
+                Generator = typeof<GeneratorConfig>.Assembly.Location |> File.ReadAllBytes |> hash
+                InferenceProfile = profile ctx.Config
+                Contract = CatalogCompatibility.current identity
+            }
+    }
+
+let internal cacheProducer (operation: Async<CatalogCompatibility.Producer>) =
+    let task = lazy (Async.StartAsTask operation)
+    fun () -> task.Value |> Async.AwaitTask
 
 let private packageOf (ctx: Context) (file: string) =
     let rec boundary directory =
@@ -179,13 +194,17 @@ let private packageOf (ctx: Context) (file: string) =
         | None -> find directory
 
 /// Hashes package ownership metadata and intervening module manifests.
-let private manifestHash (root: string) (file: string) =
+let private manifestHash (root: string) (file: string) rootHash =
     let rec collect directory manifests =
         let manifest = Path.Combine(directory, "package.json")
 
         let manifests =
             if File.Exists manifest then
-                (Path.GetRelativePath(root, manifest) |> slash, File.ReadAllBytes manifest |> hash)
+                (Path.GetRelativePath(root, manifest) |> slash,
+                 if directory = root then
+                     rootHash |> Option.defaultWith (fun () -> File.ReadAllBytes manifest |> hash)
+                 else
+                     File.ReadAllBytes manifest |> hash)
                 :: manifests
             else
                 manifests
@@ -201,7 +220,7 @@ let private manifestHash (root: string) (file: string) =
     | [ (_, value) ] -> value
     | values -> values |> List.sortBy fst |> json |> hashText
 
-let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
+let private sources compiler (ctx: Context) (handles: string<Measure.declHandle> list) =
     async {
         let paths =
             handles
@@ -218,6 +237,19 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
             |> List.map (fun file ->
                 async {
                     let root, package, version = packageOf ctx file
+
+                    let relative =
+                        if file.StartsWith "bundled:" then
+                            file
+                        else
+                            slash (Path.GetRelativePath(root, file))
+
+                    let library = CatalogLibrary.tryIdentity compiler root package version relative
+
+                    let package, rootHash =
+                        match library with
+                        | Some(package, fingerprint) -> package, Some fingerprint
+                        | None -> package, None
 
                     let! bytes =
                         if File.Exists file then
@@ -236,17 +268,13 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
                         {
                             Package = package
                             Version = version
-                            File =
-                                if file.StartsWith "bundled:" then
-                                    file
-                                else
-                                    slash (Path.GetRelativePath(root, file))
+                            File = relative
                             Sha256 = hash bytes
                             ManifestSha256 =
                                 if file.StartsWith "bundled:" then
                                     "bundled"
                                 else
-                                    manifestHash root file
+                                    manifestHash root file rootHash
                         }
                 })
             |> Async.Parallel
@@ -265,6 +293,7 @@ let private parameters =
     | FsAbbrev decl -> decl.TypeParameters
     | FsDelegateType decl -> decl.TypeParameters
     | FsPhantom decl -> decl.TypeParameters
+    | FsTaggedUnion decl -> decl.TypeParameters
     | _ -> []
 
 let private order =
@@ -392,17 +421,48 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         else
             ""
 
+    let boundParameters id facts =
+        Shape.Spec.declParamIds facts @ Shape.Spec.freeParamsOf shape id
+        |> List.distinct
+        // Alias applications also carry concrete arguments in these tables. Only actual
+        // type parameters bind; normalizing `Outcome<string>` as `Outcome<'T>` collapses
+        // closed and open parent roles onto one catalog identity.
+        |> List.filter (fun parameter ->
+            Map.tryFind parameter shape.Types
+            |> Option.exists (fun parameter -> parameter.Response.Flags.HasFlag TypeFlags.TypeParameter))
+
     let rec typeIdentity visited bindings id =
         if List.contains id visited then
             None
         else
             match Map.tryFind id shape.Types with
             | None -> None
+            | Some facts when intrinsicArgumentKey facts.Response <> "" ->
+                // Intrinsic checker types are shared by unrelated exports. Their aliases
+                // belong to the individual declaration, never the aggregate export handles.
+                None
             | Some facts ->
                 let flags = facts.Response.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
+                // A namespace or module object, uninstantiated and declared only by namespace
+                // declarations and source files, is identified by that complete declaration set.
+                // A class, function or enum merged with a namespace keeps its structural identity.
+                let namespaceValue =
+                    not facts.Declarations.IsEmpty
+                    && facts.Declarations
+                       |> List.forall (fun declaration ->
+                           NodeHandle.parse (declaration / uom<_>)
+                           |> ValueOption.exists (fun handle ->
+                               handle.Kind = SyntaxKind.ModuleDeclaration
+                               || handle.Kind = SyntaxKind.SourceFile))
+                    && not (flags.HasFlag ObjectFlags.Mapped || flags.HasFlag ObjectFlags.Instantiated)
+                    && facts.TypeArguments.IsEmpty
+                    && facts.AliasTypeArguments.IsEmpty
+                    && facts.DeclarationArguments.IsEmpty
+
                 let structural =
-                    not (flags.HasFlag ObjectFlags.Reference)
+                    not namespaceValue
+                    && not (flags.HasFlag ObjectFlags.Reference)
                     && (flags.HasFlag ObjectFlags.Anonymous || flags.HasFlag ObjectFlags.Mapped)
 
                 let handles =
@@ -412,7 +472,50 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         facts.Declarations
 
                 if List.isEmpty handles then
-                    literalUnionIdentity true facts
+                    match facts.NonNullableAlias with
+                    | Some alias ->
+                        typeIdentity (id :: visited) bindings alias
+                        |> Option.map (fun identity ->
+                            // Nullable identity retains the alias used by the shaped F# reference.
+                            let nullish =
+                                facts.UnionMembers
+                                |> List.choose (fun memberId ->
+                                    Map.tryFind memberId shape.Types
+                                    |> Option.filter Shape.Spec.isNullish
+                                    |> Option.map (fun member_ -> intrinsicArgumentKey member_.Response))
+                                |> List.sort
+
+                            { identity with
+                                Key = hashText (json ("nullable-alias", identity.Key, nullish))
+                                Role = "nullable-alias"
+                            })
+                    | None ->
+                        if
+                            structural
+                            && facts.Response.Flags.HasFlag TypeFlags.Object
+                            && flags.HasFlag ObjectFlags.MembersResolved
+                            && not (Map.containsKey id shape.NotFollowed)
+                            && not (flags.HasFlag ObjectFlags.Mapped)
+                            && facts.Origin = Unclassified
+                            && facts.DeclFile.IsNone
+                            && facts.AliasDeclarations.IsEmpty
+                            && facts.DeclarationArguments.IsEmpty
+                            && facts.Members.IsEmpty
+                            && facts.IndexInfos.IsEmpty
+                            && facts.CallSignatures.IsEmpty
+                            && facts.ConstructSignatures.IsEmpty
+                            && facts.TypeArguments.IsEmpty
+                            && facts.AliasTypeArguments.IsEmpty
+                            && facts.Response.TypeParameters.IsNone
+                            && facts.Response.TargetTypeId.IsNone
+                        then
+                            // The checker's intrinsic `{}` has a synthetic symbol without a
+                            // source declaration (for example Object.keys' second overload).
+                            // It is distinct from `object`, unknown, and a declaration whose
+                            // members were not resolved.
+                            Some(identity "empty-object" [] [])
+                        else
+                            literalUnionIdentity true facts
                 else
                     let role =
                         if List.isEmpty facts.ConstructSignatures then
@@ -420,9 +523,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         else
                             "constructor"
 
-                    let parameters =
-                        (Shape.Spec.declParamIds facts @ Shape.Spec.freeParamsOf shape id)
-                        |> List.distinct
+                    let parameters = boundParameters id facts
 
                     let bindings =
                         parameters
@@ -545,7 +646,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                     facts.Members
                                     |> List.map (fun member_ ->
                                         json (
-                                            member_.Symbol.Name,
+                                            CatalogMember.key (normalizeHandle sourceFiles) member_.Symbol
+                                            |> Option.defaultWith (fun () ->
+                                                complete <- false
+                                                ""),
                                             member_.Optional,
                                             member_.ReadOnly,
                                             partKey member_.TypeId
@@ -646,12 +750,14 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             yield! facts.Conditional |> Option.bind _.Branch |> Option.map snd |> Option.toList
         ]
 
-    let canonicalTypes = byType
+    // Export-only handles anchor public aliases. Transitive source closures use intrinsic
+    // type declarations.
+    let canonicalTypes =
+        byType
+        |> Map.filter (fun id _ -> not (List.isEmpty shape.Types[id].Declarations))
 
     let closure id =
-        let bound =
-            Shape.Spec.declParamIds shape.Types[id] @ Shape.Spec.freeParamsOf shape id
-            |> Set.ofList
+        let bound = boundParameters id shape.Types[id] |> Set.ofList
 
         let visited = Collections.Generic.HashSet<int<Measure.typeId>>()
         let sources = Collections.Generic.HashSet<Source>()
@@ -687,7 +793,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     let edges (facts: TypeFacts) =
         [
             for member_ in facts.Members do
-                yield member_.TypeId, "member:" + member_.Symbol.Name
+                match CatalogMember.key (normalizeHandle sourceFiles) member_.Symbol with
+                | Some key -> yield member_.TypeId, "member:" + key
+                | None -> ()
             for index, info in List.indexed facts.IndexInfos do
                 yield info.KeyTypeId, $"index:{index}:key"
                 yield info.ValueTypeId, $"index:{index}:value"
@@ -718,7 +826,11 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             |> List.collect (fun (id, parent) ->
                 edges shape.Types[id]
                 |> List.choose (fun (child, role) ->
-                    if Map.containsKey child byType || not (Map.containsKey child shape.Types) then
+                    if
+                        Map.containsKey child byType
+                        || not (Map.containsKey child shape.Types)
+                        || intrinsicArgumentKey shape.Types[child].Response <> ""
+                    then
                         None
                     else
                         Some(
@@ -813,23 +925,33 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     |> List.map (fun decl -> Render.declName decl |> (fun name -> name, forDecl name decl))
     |> Map.ofList
 
-let private load profile compiler generator (path: string) =
+type private Loaded =
+    {
+        Catalog: Catalog
+        Compatibility: CatalogCompatibility.Contract option
+        Variants: Variant list
+    }
+
+let private load producer (path: string) =
     if not (File.Exists path) then
         fail $"reference does not exist: {path}"
 
-    let catalog = JsonSerializer.Deserialize<Catalog>(File.ReadAllText path, options)
+    use document = CatalogTransport.readJson path
+    let root = document.RootElement
+    let compatibility = CatalogCompatibility.read path root
+    let catalog = JsonSerializer.Deserialize<Catalog>(root, options)
 
-    if isNull (box catalog) || catalog.SchemaVersion <> 1 then
+    if isNull (box catalog) then
         fail $"{path} has an unsupported schema"
 
-    if catalog.Compiler <> compiler then
-        fail $"{path} uses a different compiler"
-
-    if catalog.Generator <> generator then
-        fail $"{path} uses a different generator"
-
-    if catalog.InferenceProfile <> profile then
-        fail $"{path} uses a different inference profile"
+    CatalogCompatibility.validate
+        path
+        catalog.SchemaVersion
+        producer
+        catalog.Compiler
+        catalog.Generator
+        catalog.InferenceProfile
+        compatibility
 
     if
         isNull catalog.Declarations
@@ -853,7 +975,26 @@ let private load profile compiler generator (path: string) =
         then
             fail $"{path} has an invalid declaration"
 
-    catalog
+    let variants =
+        match root.TryGetProperty "variants" with
+        | true, variants ->
+            variants.EnumerateArray()
+            |> Seq.map (fun variant ->
+                {
+                    Identity = variant.GetProperty("identity").GetString()
+                    BaseApi = variant.GetProperty("baseApi").GetString()
+                    Api = variant.GetProperty("api").GetString()
+                    ContractChanged = variant.GetProperty("contractChanged").GetBoolean()
+                    Profile = variant.GetProperty("profile").GetString()
+                })
+            |> Seq.toList
+        | _ -> []
+
+    {
+        Catalog = catalog
+        Compatibility = compatibility
+        Variants = variants
+    }
 
 let private ownerOrder (owners: Owner list) =
     let owners =
@@ -1072,8 +1213,20 @@ module Canonical =
         | FsBranded(primitive, measure) -> node "branded" [ reference primitive; text measure ]
         | FsNamed name -> node "named" [ text name ]
 
+/// Rejects incompatible reference contracts before declaration traversal.
+let internal validateReferencesWithProducer producer (ctx: Context) =
+    async {
+        if not ctx.Config.DeclarationReferences.IsEmpty then
+            let! expected = producer ()
+
+            for reference in ctx.Config.DeclarationReferences do
+                let path = Path.GetFullPath(Path.Combine(ctx.PackageDir / uom<dirPath>, reference))
+                load expected path |> ignore
+    }
+
 /// Redirects matching F# references, retains public aliases and value imports, and emits a catalog.
-let internal applyWith
+let internal applyWithProducer
+    (producer: unit -> Async<CatalogCompatibility.Producer>)
     customizationProfile
     annotations
     (originalShape: ShapeModel)
@@ -1090,11 +1243,10 @@ let internal applyWith
         else
             let originalShape, _, _ = classValues ctx originalShape groups
             let shape, groups, classValues = classValues ctx shape groups
-            let inferenceProfile = profile ctx.Config
-            let compiler = compiler ctx
-
-            let generator =
-                typeof<GeneratorConfig>.Assembly.Location |> File.ReadAllBytes |> hash
+            let! producer = producer ()
+            let inferenceProfile = producer.InferenceProfile
+            let compiler = producer.Compiler
+            let generator = producer.Generator
 
             let owner = Naming.groupModule ctx.Config ctx.PackageName EntryPackage
 
@@ -1102,9 +1254,9 @@ let internal applyWith
                 ctx.Config.DeclarationReferences
                 |> List.map (fun path -> Path.GetFullPath(Path.Combine(ctx.PackageDir / uom<dirPath>, path)))
 
-            let catalogs =
-                catalogPaths
-                |> List.map (fun path -> load inferenceProfile compiler generator path)
+            let loaded = catalogPaths |> List.map (load producer)
+
+            let catalogs = loaded |> List.map _.Catalog
 
             let inherited =
                 catalogs
@@ -1117,23 +1269,8 @@ let internal applyWith
                 |> Map.ofList
 
             let inheritedVariants =
-                catalogPaths
-                |> List.collect (fun path ->
-                    use document = JsonDocument.Parse(File.ReadAllText path)
-
-                    match document.RootElement.TryGetProperty "variants" with
-                    | true, variants ->
-                        variants.EnumerateArray()
-                        |> Seq.map (fun variant ->
-                            {
-                                Identity = variant.GetProperty("identity").GetString()
-                                BaseApi = variant.GetProperty("baseApi").GetString()
-                                Api = variant.GetProperty("api").GetString()
-                                ContractChanged = variant.GetProperty("contractChanged").GetBoolean()
-                                Profile = variant.GetProperty("profile").GetString()
-                            })
-                        |> Seq.toList
-                    | _ -> [])
+                loaded
+                |> List.collect _.Variants
                 |> List.groupBy _.Identity
                 |> List.map (fun (identity, variants) ->
                     match List.distinct variants with
@@ -1166,6 +1303,7 @@ let internal applyWith
 
             let! sourceFiles =
                 sources
+                    producer.Contract.Compiler
                     ctx
                     (rawHandles
                      @ (inputFiles
@@ -1186,11 +1324,11 @@ let internal applyWith
             for catalog in catalogs do
                 for input in catalog.Inputs do
                     match Map.tryFind (sourceKey input) currentInputs with
-                    | Some candidates when not (List.contains input candidates) ->
-                        if candidates |> List.exists (fun current -> current.Sha256 = input.Sha256) then
-                            fail $"package manifest mismatch for {input.Package}"
-                        else
+                    | Some candidates when candidates |> List.exists ((<>) input) ->
+                        if candidates |> List.exists (fun current -> current.Sha256 <> input.Sha256) then
                             fail $"input source hash mismatch for {inputKey input}"
+                        else
+                            fail $"package manifest mismatch for {input.Package}"
                     | _ -> ()
 
             let identities = identities ctx shape sourceFiles
@@ -1208,7 +1346,27 @@ let internal applyWith
                 |> List.choose (fun (name, identity) ->
                     match Map.tryFind identity.Key inherited with
                     | Some producer ->
-                        if producer.Sources |> Array.toList <> identity.Sources then
+                        // Closure traversal depends on which types the checker reached in this
+                        // program. Authenticate the producer's required sources against actual
+                        // inputs, including every installed copy of a source key. A matching
+                        // copy must not conceal a conflicting same-version installation.
+                        let authenticated =
+                            producer.Sources
+                            |> Array.forall (fun source ->
+                                match Map.tryFind (sourceKey source) currentInputs with
+                                | Some candidates -> candidates |> List.forall ((=) source)
+                                | None -> false)
+
+                        // A catalog cannot discard the sources anchoring its own handles.
+                        // Literal-union identities intentionally have no declaration handles.
+                        let anchored =
+                            producer.Handles
+                            |> Array.forall (fun handle ->
+                                producer.Sources
+                                |> Array.exists (fun source ->
+                                    handle.StartsWith(sourceKey source + "#", StringComparison.Ordinal)))
+
+                        if not authenticated || not anchored then
                             fail $"source hash mismatch for {name} ({producer.FSharpName})"
 
                         Some(name, producer)
@@ -1634,7 +1792,7 @@ let internal applyWith
 
             let catalog =
                 {
-                    SchemaVersion = 1
+                    SchemaVersion = 2
                     Compiler = compiler
                     Generator = generator
                     InferenceProfile = inferenceProfile
@@ -1651,12 +1809,10 @@ let internal applyWith
 
             let serialized =
                 let text = JsonSerializer.Serialize(catalog, options)
+                let document = JsonNode.Parse text
+                document["compatibility"] <- CatalogCompatibility.write producer.Contract
 
-                if variants.IsEmpty then
-                    text
-                else
-                    let document = JsonNode.Parse text
-
+                if not variants.IsEmpty then
                     let values =
                         variants
                         |> List.map (fun variant ->
@@ -1670,7 +1826,8 @@ let internal applyWith
                         |> List.toArray
 
                     document["variants"] <- JsonSerializer.SerializeToNode(values, options)
-                    document.ToJsonString options
+
+                document.ToJsonString options
 
             let outputCatalog =
                 if ctx.Config.DeclarationCatalog then
@@ -1680,6 +1837,16 @@ let internal applyWith
 
             return { shape with Decls = declarations }, outputCatalog, redirects
     }
+
+let internal applyWith customizationProfile annotations originalShape ctx shape groups =
+    applyWithProducer
+        (cacheProducer (createProducer ctx))
+        customizationProfile
+        annotations
+        originalShape
+        ctx
+        shape
+        groups
 
 let apply ctx shape groups =
     async {

@@ -89,19 +89,19 @@ test('preview validates versions but does not commit, push, or dispatch', async 
   assert.deepEqual(f.dispatched, []);
 });
 
-test('trusted policy still prepares the established six-package release', async t => {
+test('develop release validation requires the adopted Myriad package', t => {
   const f = fixture(t, establishedPackages);
-  f.input.request.preview = true;
-  await bot.finish(f.input);
+  assert.throws(() => validateRelease(f.input.request.base, f.input.root), /Expected all seven published packages/);
   assert.equal(f.git('rev-parse', 'HEAD'), f.head);
   assert.deepEqual(f.dispatched, []);
 });
 
 test('package counts cannot substitute an unknown package or omit an established one', t => {
   for (const names of [[...establishedPackages, 'Unknown'],
-    [...establishedPackages.filter(name => name !== 'Xantham.TypeScript.Wire'), 'Xantham.Generator.Myriad']]) {
+    [...establishedPackages.filter(name => name !== 'Xantham.TypeScript.Wire'), 'Xantham.Generator.Myriad'],
+    [...establishedPackages.filter(name => name !== 'Xantham.TypeScript.Wire'), 'Xantham.Generator.Myriad', 'Unknown']]) {
     const f = fixture(t, names);
-    assert.throws(() => validateRelease(f.input.request.base, f.input.root), /Expected the six established packages/);
+    assert.throws(() => validateRelease(f.input.request.base, f.input.root), /Expected all seven published packages/);
     assert.equal(f.git('rev-parse', 'HEAD'), f.head);
     assert.deepEqual(f.dispatched, []);
   }

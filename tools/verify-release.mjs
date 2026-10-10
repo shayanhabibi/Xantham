@@ -1,13 +1,14 @@
 // Exercise the installed tool against a real disposable monorepo, including consumers.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const repository = fileURLToPath(new URL('../', import.meta.url));
-const root = fs.mkdtempSync(path.join(os.tmpdir(), 'xantham-shipit-'));
+const scratch = path.join(repository, 'tests/.scratch');
+fs.mkdirSync(scratch, { recursive: true });
+const root = fs.mkdtempSync(path.join(scratch, 'xantham-shipit-'));
 function run(command, ...args) {
   const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: 120_000 });
   assert.ifError(result.error);
@@ -25,7 +26,7 @@ try {
   const validator = path.join(root, '.github/scripts/release-versions.cjs');
   fs.copyFileSync(path.join(repository, '.github/scripts/release-versions.cjs'), validator);
   const names = fs.readdirSync(path.join(repository, 'src')).filter(name => fs.existsSync(path.join(repository, 'src', name, 'CHANGELOG.md')));
-  assert.equal(names.length, 6);
+  assert.equal(names.length, 7);
   const expected = {};
   for (const name of names) {
     const directory = path.join(root, 'src', name);
@@ -35,7 +36,7 @@ try {
     const version = /<Version>([^<]+)<\/Version>/.exec(fs.readFileSync(path.join(directory, `${name}.fsproj`), 'utf8'))[1];
     const changelogVersion = /^## (\S+)/m.exec(fs.readFileSync(path.join(directory, 'CHANGELOG.md'), 'utf8'))[1];
     assert.equal(changelogVersion, version, `${name}: changelog must match the project version`);
-    if (['Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Cli'].includes(name)) {
+    if (['Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Generator.Myriad', 'Xantham.Cli'].includes(name)) {
       const [major, minor, patch] = version.split(/[.-]/);
       expected[name] = version.includes('-') ? `${major}.${minor}.${patch}` : `${major}.${minor}.${BigInt(patch) + 1n}`;
     } else expected[name] = version;
@@ -54,7 +55,7 @@ try {
   run('git', 'commit', '-m', 'fix(wire): exercise dependency releases');
   const stale = spawnSync(process.execPath, [validator, baseline], { cwd: root, encoding: 'utf8' });
   assert.equal(stale.status, 1, stale.stdout + stale.stderr);
-  for (const name of ['Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Cli']) assert.ok(stale.stderr.includes(name));
+  for (const name of ['Xantham.TypeScript.Wire', 'Xantham.Generator', 'Xantham.Generator.Myriad', 'Xantham.Cli']) assert.ok(stale.stderr.includes(name));
   run('dotnet', 'tool', 'restore');
   run('dotnet', 'shipit', '--allow-branch', 'develop', '--mode', 'local', '--skip-merge-commit');
   for (const [name, version] of Object.entries(expected)) {

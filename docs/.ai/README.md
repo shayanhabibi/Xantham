@@ -9,8 +9,14 @@ notes for the agents and people who come after them. It is not rendered to the s
   lives in `plans/generator-architecture.md` (phase and wave records) and
   `plans/generator-type-mapping.md` (per-construct mapping, decisions D1–D12). Those two are the
   living documents and are updated in the same commit as a behaviour change.
+- `handovers/myriad-early-projections.md` — the early Myriad projection increment, gates,
+  ownership boundaries and residuals; retire on merge.
 - `footguns.md` — facts that constrain future changes: compiler-API traps, declaration-catalog
   identity rules, pass invariants, and the threads left open when a lane closed.
+- `plans/2026-10-09-portable-catalogue-design.md` and
+  `plans/2026-10-09-portable-catalogue-implementation.md` — approved compatibility spec and active
+  implementation plan for issue #110; read before changing portable catalogue validation,
+  compiler identity, or its migration.
 - `plans/2026-10-06-generator-customization-design.md`,
   `plans/2026-10-06-generator-customization.md`, and
   `plans/2026-10-06-generator-customization-execution.md` — customization design, implementation

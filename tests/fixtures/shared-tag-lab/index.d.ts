@@ -146,3 +146,14 @@ export type OnEvent = (event:
     | SocketInfo
     | CustomInfo
     | Log) => void;
+
+export type Scheduled<T> =
+    | { readonly kind: "once"; readonly payload: T }
+    | { readonly kind: "repeat"; readonly payload: T; readonly previous?: T };
+
+export interface Scheduler {
+    schedule<T>(payload: T): Scheduled<T>;
+    current<T>():
+        | { readonly kind: "ready"; readonly payload: T }
+        | { readonly kind: "waiting"; readonly previous?: T };
+}

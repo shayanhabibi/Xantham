@@ -1,0 +1,5 @@
+{
+  "lib": ["scripthost"],
+  "groups": {"typescript/lib": "ship"},
+  "module": "Library.Consumer"
+}

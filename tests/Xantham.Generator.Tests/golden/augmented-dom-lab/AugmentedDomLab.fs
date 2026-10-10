@@ -149,7 +149,7 @@ type RequestInit<'T> =
     /// <summary>
     /// A Headers object, an object literal, or an array of two-item arrays to set request's headers.
     /// </summary>
-    abstract headers: U3<(string * string)[], Fable.Core.TS.Dom.Headers, Record<string, string>> option with get, set
+    abstract headers: U3<(string * string)[], Fable.Core.TS.Dom.Headers, JS.Record<string, string>> option with get, set
     /// <summary>
     /// A cryptographic hash of the resource to be fetched by request. Sets request's integrity.
     /// </summary>
@@ -189,7 +189,7 @@ type RequestInit<'T> =
     abstract window: unit option with get, set
     abstract cf: 'T option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?body: U7<string, JS.ArrayBuffer, JS.ArrayBufferView, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Dom.FormData, Fable.Core.TS.Dom.ReadableStream<obj>, Fable.Core.TS.Dom.URLSearchParams>, ?cache: Request.Cache, ?credentials: Request.Credentials, ?headers: U3<(string * string)[], Fable.Core.TS.Dom.Headers, Record<string, string>>, ?integrity: string, ?keepalive: bool, ?``method``: string, ?mode: Request.Mode, ?priority: RequestInit.Priority, ?redirect: Request.Redirect, ?referrer: string, ?referrerPolicy: Request.ReferrerPolicy, ?signal: Fable.Core.TS.Dom.AbortSignal, ?window: unit, ?cf: 'T) : RequestInit<'T> = jsNative
+    static member Create (?body: U7<string, JS.ArrayBuffer, JS.ArrayBufferView, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Dom.FormData, Fable.Core.TS.Dom.ReadableStream<obj>, Fable.Core.TS.Dom.URLSearchParams>, ?cache: Request.Cache, ?credentials: Request.Credentials, ?headers: U3<(string * string)[], Fable.Core.TS.Dom.Headers, JS.Record<string, string>>, ?integrity: string, ?keepalive: bool, ?``method``: string, ?mode: Request.Mode, ?priority: RequestInit.Priority, ?redirect: Request.Redirect, ?referrer: string, ?referrerPolicy: Request.ReferrerPolicy, ?signal: Fable.Core.TS.Dom.AbortSignal, ?window: unit, ?cf: 'T) : RequestInit<'T> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

@@ -143,6 +143,8 @@ module FindingCodes =
             "TR.ExclusiveArmsFolded", "TR060"
             "TR.ExclusiveArmsNotFoldable", "TR061"
             "TR.CallbackOverloadsNotSeparable", "TR062"
+            "TR.ErrorTypeToObj", "TR063"
+            "TR.IntrinsicMarkerToObj", "TR064"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -214,6 +216,7 @@ module FindingCodes =
             "SP.ParamObjectSynthesized", "SP001"
             "SP.MethodMemberAsCreateParameter", "SP002"
             "SP.CreateNotSynthesized", "SP003"
+            "SP.MethodTypeParametersBoundAtCreate", "SP004"
             "DO.OverloadDropped", "DO001"
             "DO.OverloadsDistinguishedByLiteral", "DO002"
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
@@ -246,6 +249,7 @@ module FindingCodes =
             "CU.MemberOmitted", "CU003"
             "CU.InteropReplaced", "CU004"
             "CU.DeclarationReplaced", "CU005"
+            "CU.ProjectionEmitted", "CU006"
         ]
 
     let private byName = Map.ofList table
@@ -505,6 +509,13 @@ type TypeReference =
     | [<Ergonomic>] ExclusiveArmsNotFoldable of arms: int
     /// A callback whose overloads separate on no F# form. The first signature shapes it.
     | [<Widened>] CallbackOverloadsNotSeparable of overloads: int
+    /// The checker's error type: a reference the program leaves unresolved, or one invalid where
+    /// it is written. `written` is the referenced name the checker keeps, qualified through its
+    /// unresolved parents (`NodeJS.Timeout`). It is empty for the nameless error type a union, an
+    /// intersection or an optional position reduces to, and for an error type with no alias.
+    | [<Escape>] ErrorTypeToObj of written: string
+    /// The `intrinsic` body of a compiler-implemented alias (`Uppercase`, `NoInfer`).
+    | [<Escape>] IntrinsicMarkerToObj
 
     interface IFindingKind with
         member this.Message =
@@ -623,6 +634,9 @@ type TypeReference =
                 $"{arms} exclusive arms separate on no required parameter; the union is written erased"
             | CallbackOverloadsNotSeparable overloads ->
                 $"callback with {overloads} overloads separates on no F# form; the first signature shapes it"
+            | ErrorTypeToObj "" -> "the checker resolved this reference to its error type; widened to obj"
+            | ErrorTypeToObj written -> $"the checker could not resolve {written}; widened to obj"
+            | IntrinsicMarkerToObj -> "intrinsic alias body is a compiler marker; widened to obj"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -1015,6 +1029,9 @@ type SynthesizeParamObjects =
     /// Wave four, lane O. An interface with no `Create`, and why. The interface itself is
     /// unchanged: a consumer builds it as they did before this convenience existed.
     | [<Ergonomic>] CreateNotSynthesized of reason: string
+    /// A generic method carried into `Create`: its type parameters are bound once per `Create`
+    /// call, so the object holds one instantiation of a method its interface declares generic.
+    | [<Widened>] MethodTypeParametersBoundAtCreate of parameters: string
 
     interface IFindingKind with
         member this.Message =
@@ -1023,6 +1040,8 @@ type SynthesizeParamObjects =
             | MethodMemberAsCreateParameter ->
                 "method member reads as a function-typed Create parameter; the delegate receives no this"
             | CreateNotSynthesized reason -> $"no ParamObject Create synthesized: {reason}"
+            | MethodTypeParametersBoundAtCreate parameters ->
+                $"generic method's {parameters} bound once per Create call; the object holds one instantiation"
 
 /// `dedupe-overloads`.
 [<Prefix("DO", "dedupe-overloads")>]
@@ -1195,6 +1214,7 @@ type CustomizeOutput =
     | [<Widened>] MemberOmitted of extensionId: string * memberName: string
     | [<Escape>] InteropReplaced of extensionId: string
     | [<Escape>] DeclarationReplaced of extensionId: string
+    | [<Escape>] ProjectionEmitted of extensionId: string
 
     interface IFindingKind with
         member this.Message =
@@ -1204,6 +1224,8 @@ type CustomizeOutput =
             | MemberOmitted(id, memberName) -> $"{id} omitted companion member {memberName}"
             | InteropReplaced id -> $"interop behavior replaced by {id}"
             | DeclarationReplaced id -> $"declaration contract replaced by {id}"
+            | ProjectionEmitted id ->
+                $"early source companion emitted by {id}; runtime semantics supplied by the extension"
 
 module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test

@@ -30,6 +30,25 @@ standard libraries.
 
 Configure the same namespace for related generation runs.
 
+## Ship mutually dependent groups
+
+Set `recursiveGroups` when the entry package and shipped dependencies refer back to
+one another. Their modules share a `namespace rec` source at
+`groups/<namespace>.fs`, which compiles the complete cycle together.
+
+```json title="xantham.json"
+{
+  "module": "MyBindings.Client",
+  "namespace": "MyBindings",
+  "recursiveGroups": true,
+  "groups": { "shared-models": "ship" }
+}
+```
+
+The namespace must be explicit, and each emitted package module must be its immediate
+child. Compiler-library output keeps its configured layout. The default remains
+separate files. Declaration identities and qualified type names stay the same.
+
 ## Map an existing type
 
 A string destination takes no type arguments. Use the object form to state
@@ -77,16 +96,76 @@ The run writes `declarations.json` beside its F# output. Reference it from a lat
 Catalog paths are absolute or relative to the input package directory.
 Replace the example path with the producer's output path.
 
+For Brotli output, configure the producer with
+`"declarationCatalog": { "enabled": true, "compression": "brotli" }`
+and reference `declarations.json.br`:
+
+```json title="Compressed catalogue reference"
+{
+  "declarationReferences": ["/bindings/root/declarations.json.br"]
+}
+```
+
+A `.br` filename suffix selects Brotli, case-insensitively. Other filenames
+are read as JSON, including custom filenames. References may mix formats in
+their existing order. Invalid, incomplete or trailing compressed data fails
+generation before consumer files are written.
+
+Both formats have an inclusive limit of 128 MiB (134,217,728 bytes) of decoded
+JSON. This measures the uncompressed catalogue's UTF-8 bytes, regardless of its
+compressed size. The reader streams these bytes into the JSON decoder; the
+JSON document and authenticated catalogue model still occupy memory.
+Switching producer formats preserves any old alternate-format file in the
+output directory; reference the file selected for the current run.
+
 The consumer reuses the producer's F# identities while retaining its own imports.
 Compile producers first, following the catalog's ordered `owners` list.
 
+## Choose a shared owner before generating related libraries
+
+Identical anonymous literal unions share a structural catalog identity. Two independent
+producers can emit that identity as different F# enum types; a consumer referencing both
+catalogs rejects the conflicting owners. Catalog order does not choose a winner.
+
+Choose the owner explicitly in the generation graph. Generate producer A first, then put
+A's `declarations.json` in producer B's `declarationReferences` and regenerate B. Consumers
+can then reference both catalogs. B's generated API uses A's enum, and B's catalog records
+its dependency on A. Compile and package that dependency as part of B's public API.
+
+Make this ownership choice consistently across a binding family and regenerate its affected
+producers together. Selecting a preferred catalog only in the final consumer cannot change
+the distinct enum types already compiled into the producers. Named literal aliases retain
+their own declaration identities even when their values match.
+
 ## Keep catalogs compatible
 
-Generate related bindings with the same Xantham build and compatible `lib`,
-`types`, group dispositions, and inference options.
-Keep separate catalogs for environments that need different globals.
+New catalogs use schema 2. Related bindings can reuse catalogs across Windows and Linux
+when the installed TypeScript packages have the exact same release and source revision,
+the AST protocol matches, and Xantham's identity, API, inference, customization, and policy
+contracts match. Rebuilding Xantham with the same contracts remains compatible.
+TypeScript standard-library catalogue sources use the logical package name `typescript`
+on every OS and CPU. Their identities retain the exact release, source revision, library
+path and source bytes. Platform distribution names and OS/CPU packaging fields do not
+change library identities. Other packages retain their manifest and source authentication.
+Computed-member identities also exclude the compiler's session-local symbol numbers.
+Regenerate Core.TS and dependent catalogues together when upgrading to identity contract 4
+with API contract 3 and inference contract 2 (which consistently qualify index-signature support types);
+older catalogues are rejected before reuse.
+Custom compiler executables without verifiable package metadata require identical compiler
+binary hashes. Matching TypeScript major/minor versions alone is insufficient.
 
-Catalogs check declaration identity, package/source hashes, and F# API compatibility.
+Keep `lib`, `types`, group dispositions, and inference options compatible.
+Use separate catalogs for environments that need different globals.
+
+Upgrade consumers before regenerating producers: older Xantham builds reject schema 2.
+Schema 1 catalogs retain exact compiler and generator binary checks. Regenerate their
+producers with the upgraded generator to obtain portable catalogs. Continue supplying
+explicit `declarationReferences` paths as shown above.
+
+Both schemas check declaration identity, package/source hashes, owner dependencies,
+generic arity and constraints, F# APIs, and customization variants. Schema 2 retains
+compiler and generator fingerprints as producer provenance.
+JSON and Brotli carry the same schema and pass the same authentication checks.
 If a catalog is rejected, regenerate the related bindings together and inspect
 the diagnostic. Some entry-dependent or generic shapes still cannot share an
 emitted identity; those combinations require separate bindings or a mapping change.

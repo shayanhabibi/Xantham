@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <Version>0.1.1</Version>
+        <Version>0.2.0</Version>
         <FSharpCoreImplicitPackageVersion>4.7.2</FSharpCoreImplicitPackageVersion>
         <AssemblyVersion>0.0.0.0</AssemblyVersion>
         <PackageId>Xantham.Fable.Core.TS</PackageId>

@@ -3,6 +3,7 @@ module Xantham.Generator.Tests.CustomizationTests
 open System.IO
 open System
 open System.Diagnostics
+open System.Text.Json.Nodes
 open Expecto
 open Xantham.Generator
 open Xantham.Generator.Customization
@@ -288,7 +289,8 @@ let tests =
             Expect.throws (fun () -> Pipeline.generateValidatedWith compiler [extension "type Input = ___DefinitelyMissingType"] GeneratorConfig.Default package |> Async.RunSynchronously |> ignore) "invalid raw source fails compiler"
             Expect.throws (fun () -> Pipeline.generateValidatedWith compiler [valid] {GeneratorConfig.Default with DeclarationCatalog = true} package |> Async.RunSynchronously |> ignore) "raw catalog API is unauthenticated"
 
-        testCase "customized producer catalog authenticates its original API and variant" <| fun _ ->
+        for compression in [CatalogCompression.Uncompressed; CatalogCompression.Brotli] do
+          testCase ("customized producer catalog authenticates its original API and variant " + string compression) <| fun _ ->
             use scratch = Scratch.directory "customization-catalog"
             let producer = Path.Combine(scratch.Path, "producer")
             let consumer = Path.Combine(scratch.Path, "consumer")
@@ -310,16 +312,21 @@ let tests =
             let generated = Pipeline.generateWith [extension "1"] catalogConfig producer |> Async.RunSynchronously
             let catalog = generated.Files |> List.find (fst >> ((=) "declarations.json")) |> snd
             Expect.stringContains catalog "variants" "catalog records variant"
+            let metadata = JsonNode.Parse catalog
+            Expect.equal (metadata["schemaVersion"].GetValue<int>()) 2 "customized catalogue uses portable schema"
+            Expect.isNotNull metadata["compatibility"] "customization preserves compatibility metadata"
             let companionOnly =
                 {Identity = {Id = "companion"; Version = "1"; Configuration = Map.empty}
                  Transform = fun model -> Ok (Edits.empty |> Edits.emitCompanion (Companion.create "Example" "ModelProperties" (requireType "custom-shared" ["Model"] model) model))}
             let baseCatalog = Pipeline.generate catalogConfig producer |> Async.RunSynchronously |> fun r -> r.Files |> List.find (fst >> ((=) "declarations.json")) |> snd
             let companionCatalog = Pipeline.generateWith [companionOnly] catalogConfig producer |> Async.RunSynchronously |> fun r -> r.Files |> List.find (fst >> ((=) "declarations.json")) |> snd
             Expect.isTrue (baseCatalog = companionCatalog) "companion-only output leaves producer base API bytes unchanged"
-            let catalogPath = Path.Combine(scratch.Path, "declarations.json")
-            File.WriteAllText(catalogPath, catalog)
-            let config = {GeneratorConfig.Default with DeclarationReferences = [catalogPath]}
+            let catalogPath = Path.Combine(scratch.Path, if compression = CatalogCompression.Brotli then "declarations.json.br" else "declarations.json")
+            CatalogFixtures.write compression catalogPath catalog
+            let config = {GeneratorConfig.Default with DeclarationReferences = [catalogPath]; DeclarationCatalog = true}
             let reused = Pipeline.generate config consumer |> Async.RunSynchronously
+            let inherited = reused.Files |> List.find (fst >> ((=) "declarations.json")) |> snd |> JsonNode.Parse
+            Expect.equal (inherited["variants"].ToJsonString()) (metadata["variants"].ToJsonString()) "consumer catalogue preserves producer variants"
             Expect.isTrue (reused.Files |> List.exists (fun (name, _) -> name.EndsWith ".fs")) "consumer authenticates source/API"
             let combined = {reused with Files = (generated.Files |> List.filter (fst >> fun n -> n.EndsWith ".fs")) @ reused.Files}
             let code, errors = compileConsumer combined "module Consumer\nlet roundtrip (x: CustomShared.Model) : CustomShared.Model = CustomConsumer.Exports.accept x\n"
@@ -337,10 +344,11 @@ let tests =
                     let selected = requireType "custom-shared" ["Model"] model
                     Ok (Edits.empty |> Edits.replaceDeclaration (Semantic.declarationTarget selected model |> Option.get) Replacement.marker)}
             let changedContract = Pipeline.generateWith [marker] catalogConfig producer |> Async.RunSynchronously
-            File.WriteAllText(catalogPath, changedContract.Files |> List.find (fst >> ((=) "declarations.json")) |> snd)
+            CatalogFixtures.write compression catalogPath (changedContract.Files |> List.find (fst >> ((=) "declarations.json")) |> snd)
             Expect.throws (fun () -> Pipeline.generate config consumer |> Async.RunSynchronously |> ignore) "marker replacement is not evidence of the original TypeScript contract"
 
-        testCase "referenced companions use producer names and cannot mutate producer output" <| fun _ ->
+        for compression in [CatalogCompression.Uncompressed; CatalogCompression.Brotli] do
+          testCase ("referenced companions use producer names and cannot mutate producer output " + string compression) <| fun _ ->
             use scratch = Scratch.directory "customization-referenced-companion"
             let producer, consumer = Path.Combine(scratch.Path, "producer"), Path.Combine(scratch.Path, "consumer")
             for directory, owner, source in [producer, "companion-producer", "export interface Detail { label: string }; export interface Model { detail: Detail }"; consumer, "companion-consumer", "import { Model } from '../producer/index'; export declare function accept(x: Model): Model; export interface Local { model: Model; label: string }"] do
@@ -348,8 +356,8 @@ let tests =
                 File.WriteAllText(Path.Combine(directory, "package.json"), $"{{\"name\":\"{owner}\",\"version\":\"1.0.0\",\"types\":\"index.d.ts\"}}")
                 File.WriteAllText(Path.Combine(directory, "index.d.ts"), source)
             let generatedProducer = Pipeline.generate {GeneratorConfig.Default with DeclarationCatalog = true} producer |> Async.RunSynchronously
-            let catalogPath = Path.Combine(scratch.Path, "declarations.json")
-            File.WriteAllText(catalogPath, generatedProducer.Files |> List.find (fst >> ((=) "declarations.json")) |> snd)
+            let catalogPath = Path.Combine(scratch.Path, if compression = CatalogCompression.Brotli then "declarations.json.br" else "declarations.json")
+            CatalogFixtures.write compression catalogPath (generatedProducer.Files |> List.find (fst >> ((=) "declarations.json")) |> snd)
             let config = {GeneratorConfig.Default with DeclarationReferences = [catalogPath]}
             let extension mutate =
                 {Identity = {Id = "referenced"; Version = "1"; Configuration = Map.empty}

@@ -107,6 +107,8 @@ let findingsTests =
                     "TR.ExclusiveArmsFolded TR060 ergonomic"
                     "TR.ExclusiveArmsNotFoldable TR061 ergonomic"
                     "TR.CallbackOverloadsNotSeparable TR062 widened"
+                    "TR.ErrorTypeToObj TR063 escape"
+                    "TR.IntrinsicMarkerToObj TR064 escape"
                     "TP.UnnamedTypeParameter TP001 widened"
                     "TP.ConstraintDropped TP002 ergonomic"
                     "TP.GenericFunctionHoisted TP003 ergonomic"
@@ -178,6 +180,7 @@ let findingsTests =
                     "SP.ParamObjectSynthesized SP001 ergonomic"
                     "SP.MethodMemberAsCreateParameter SP002 ergonomic"
                     "SP.CreateNotSynthesized SP003 ergonomic"
+                    "SP.MethodTypeParametersBoundAtCreate SP004 widened"
                     "DO.OverloadDropped DO001 widened"
                     "DO.OverloadsDistinguishedByLiteral DO002 exact"
                     "DO.OverloadsDistinguishedByLiteralUnion DO003 exact"
@@ -210,6 +213,7 @@ let findingsTests =
                     "CU.MemberOmitted CU003 widened"
                     "CU.InteropReplaced CU004 escape"
                     "CU.DeclarationReplaced CU005 escape"
+                    "CU.ProjectionEmitted CU006 escape"
                   ]
 
               Expect.equal

@@ -142,16 +142,16 @@ let internal nonNullishMemberSet (model: ShapeModel) (candidate: TypeFacts) =
         | None -> true)
     |> List.sort
 
-/// The declared union whose non-nullish member set matches, if any: what lets an
-/// `"ms" | "s" | undefined` member position resolve to the exported `TimeUnit` rather than a
-/// synthesized twin (literal types are interned, so the ids match across positions).
+/// The declared union whose non-nullish member set matches, if any, by type id and name: what
+/// lets an `"ms" | "s" | undefined` member position resolve to the exported `TimeUnit` rather
+/// than a synthesized twin (literal types are interned, so the ids match across positions).
 /// Catalog runs keep inline literal unions independent of reachable named aliases;
 /// direct alias references retain their declaration ownership.
 let internal namedUnionByMembers
     (ctx: Context)
     (model: ShapeModel)
     (memberIds: int<Measure.typeId> list)
-    : string option =
+    : (int<Measure.typeId> * string) option =
     let wanted = List.sort memberIds
 
     model.DeclNames
@@ -177,7 +177,7 @@ let internal namedUnionByMembers
                 )
                 && nonNullishMemberSet model candidate = wanted
             then
-                Some name
+                Some(typeId, name)
             else
                 None
         | _ -> None)
@@ -422,6 +422,16 @@ let private foldedArm (arms: TypeFacts list) =
             ConstructSignatures = arms |> List.collect _.ConstructSignatures
         }
 
+/// An arm's own string-literal value for the discriminant `tag`, when it has exactly one.
+let internal taggedArmValue (model: ShapeModel) (tag: string) (arm: TypeFacts) =
+    arm.Members
+    |> List.tryFind (fun property -> property.Symbol.Name = tag)
+    |> Option.bind (fun property -> Map.tryFind property.TypeId model.Types)
+    |> Option.bind (fun propertyType ->
+        match literalOf propertyType with
+        | Some(LitString text) -> Some text
+        | _ -> None)
+
 /// The discriminant of a tagged union (D4, §4.5(2)): the property every non-nullish object
 /// member carries with a string-literal type. A candidate whose values are all distinct wins,
 /// in the first member's order; where every candidate collides, the first one folds the arms
@@ -441,15 +451,7 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : TaggedSha
     if members.Length < 2 || not (members |> List.forall isObjectMember) then
         Untagged
     else
-        /// The member's own string-literal value for `tag`, when it has exactly one.
-        let tagValue (m: TypeFacts) (tag: string) =
-            m.Members
-            |> List.tryFind (fun property -> property.Symbol.Name = tag)
-            |> Option.bind (fun property -> Map.tryFind property.TypeId model.Types)
-            |> Option.bind (fun propertyType ->
-                match literalOf propertyType with
-                | Some(LitString text) -> Some text
-                | _ -> None)
+        let tagValue (m: TypeFacts) (tag: string) = taggedArmValue model tag m
 
         let candidates =
             members
@@ -719,6 +721,19 @@ let internal isTaggedCaseData (tag: string) (arm: TypeFacts) =
     && (fields |> List.forall (fun m -> not (hasAny SymbolFlags.Method m.Symbol.Flags)))
     && fields.Length <= TaggedCaseFieldBudget
 
+/// Whether a union meets the conditions `detect-tagged-unions` declares a DU under (D4,
+/// §4.5(2)): every member non-nullish, a discriminant separating the arms into at least two cases
+/// (arms sharing a value fold into one), and every case plain data. A reference to such a union
+/// applies the parameters its declaration binds.
+let internal isTaggedDeclaration (model: ShapeModel) (facts: TypeFacts) =
+    flag TypeFlags.Union facts
+    && not (flag TypeFlags.Boolean facts)
+    && List.isEmpty (fst (splitNullish model facts))
+    && (match taggedUnionShape model facts with
+        | Discriminated(tag, tagged, _) -> tagged |> List.forall (fst >> isTaggedCaseData tag)
+        | TagCollides _
+        | Untagged -> false)
+
 /// A tuple element the checker marked `...rest` or variadic. F# tuples are fixed-arity, so a
 /// tuple carrying one has no tuple form at all.
 let internal isVariadicElement (flags: ElementFlags) =
@@ -932,13 +947,16 @@ let internal satisfiesNominally (model: ShapeModel) (boundId: int<Measure.typeId
 /// (`TP008`) *and* the reference stops rewriting arguments to it (`TR044` falls silent), so
 /// the argument TypeScript resolved survives. Where it is true the head keeps `:>` and
 /// `TR044` still widens whatever cannot satisfy it.
+/// A `never` default retains the bound; concrete uses apply the normal argument check.
 let internal constraintProvenNominal
     (model: ShapeModel)
     (parameterId: int<Measure.typeId>)
     (boundId: int<Measure.typeId>)
     =
     match Map.tryFind parameterId model.Types |> Option.bind _.Default with
-    | Some fallback when fallback <> parameterId -> satisfiesNominally model boundId fallback
+    | Some fallback when fallback <> parameterId ->
+        (Map.tryFind fallback model.Types |> Option.exists (flag TypeFlags.Never))
+        || satisfiesNominally model boundId fallback
     | _ -> true
 
 /// A reference as the phrase a finding message names it by. Source-file spelling - module
@@ -1115,16 +1133,6 @@ type internal LiteralOverloadSet =
         Declared: (string * string * DeclOrder option) list
     }
 
-/// The declarations a run writes literals into: the entry module and the anonymous shapes that
-/// join it. A `reference` or shipped dependency group is left alone, so a synthesized literal
-/// type never lands in a module its owner does not read.
-let private ownedByEntry (facts: TypeFacts) =
-    match facts.Origin with
-    | EntryPackage
-    | Unclassified -> true
-    | CompilerLib
-    | Dependency _ -> false
-
 /// The overload sets a literal-typed parameter separates, over every declaration of the run.
 ///
 /// A member's call signatures group by their parameter types with literals erased: a group of
@@ -1246,7 +1254,11 @@ let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
         |> List.sortBy fst
         |> List.collect (fun (typeId, owner) ->
             match Map.tryFind typeId model.Types with
-            | Some facts when ownedByEntry facts ->
+            // DeclNames contains declarations this run shapes, including shipped groups.
+            // Their nested literal types follow the parent's group in Pipeline.groupModules.
+            // Restricting this to the entry package changes a shared declaration's API when
+            // reached from a consumer and drops otherwise distinguishable overloads.
+            | Some facts ->
                 let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
 
                 let members =
@@ -1572,7 +1584,21 @@ and internal typeRefOnPath
         elif has TypeFlags.Void || has TypeFlags.Undefined || has TypeFlags.Never then
             FsUnit, []
         elif has TypeFlags.Any then
-            FsObj, [ Finding.make owner TypeReference.AnyToObj ]
+            // Four intrinsic names carry the Any flag: `any` (a written or omitted annotation, or
+            // a checker fallback such as a circular alias), `error` and `unresolved` (a reference
+            // the program leaves unresolved), and `intrinsic` (the body of a compiler-implemented
+            // alias).
+            match facts.Response.IntrinsicName with
+            | ValueSome "any" -> FsObj, [ Finding.make owner TypeReference.AnyToObj ]
+            | ValueSome "intrinsic" -> FsObj, [ Finding.make owner TypeReference.IntrinsicMarkerToObj ]
+            //FOR-REVIEW the pinned server names every Any intrinsic (proto.go:984-986); an absent or unknown name is not claimed as a written any
+            | _ ->
+                let written =
+                    facts.UnresolvedName
+                    |> Option.map (fun value -> value / uom<symbolName>)
+                    |> Option.defaultValue ""
+
+                FsObj, [ Finding.make owner (TypeReference.ErrorTypeToObj written) ]
         elif has TypeFlags.Unknown then
             FsObj, [ Finding.make owner TypeReference.UnknownToObj ]
         elif has TypeFlags.TypeParameter then
@@ -2060,14 +2086,16 @@ and internal appliedRefTo
                 && (arrayElement model bound).IsNone
                 && not (isTuple bound)
                 && not (isPureCallback bound)
+                && not (isPureIndexSignature bound)
                 ->
                 Map.tryFind boundId model.DeclNames
+                |> Option.map FsNamed
                 |> Option.orElseWith (fun () ->
-                    libBinding ctx model self owner bound
-                    |> Option.bind (function
-                        | FsNamed name, [] when name <> "JS.Function" -> Some name
-                        | _ -> None))
-                |> Option.map (fun name -> boundId, name)
+                    match typeRef ctx model self owner boundId with
+                    | FsApp _ as reference, _ -> Some reference
+                    | FsNamed name, [] when name <> "JS.Function" -> Some(FsNamed name)
+                    | _ -> None)
+                |> Option.map (fun reference -> boundId, reference)
             | _ -> None)
 
     let satisfies = satisfiesNominally model
@@ -2097,27 +2125,33 @@ and internal appliedRefTo
             | Some(_, bound), FsObj ->
                 findings <-
                     findings
-                    @ [ Finding.make owner (TypeReference.ConstrainedArgumentWidened(name, bound)) ]
+                    @ [
+                        Finding.make owner (TypeReference.ConstrainedArgumentWidened(name, typeSpelling bound))
+                    ]
 
-                FsNamed bound
-            | Some(boundId, bound), FsTypeVar variable when statedConstraint argument <> Some(boundId, bound) ->
+                bound
+            | Some(boundId, bound), FsTypeVar variable when statedConstraint argument |> Option.map snd <> Some bound ->
                 findings <-
                     findings
                     @ [
-                        Finding.make owner (TypeReference.ArgumentNotBoundWithConstraint(variable, name, bound))
+                        Finding.make
+                            owner
+                            (TypeReference.ArgumentNotBoundWithConstraint(variable, name, typeSpelling bound))
                     ]
 
-                FsNamed bound
+                bound
             | Some(boundId, bound), (FsNamed shown | FsApp(shown, _)) when
-                shown <> bound && not (satisfies boundId argument)
+                reference <> bound && not (satisfies boundId argument)
                 ->
                 findings <-
                     findings
                     @ [
-                        Finding.make owner (TypeReference.ArgumentNotASubtypeOfConstraint(shown, name, bound))
+                        Finding.make
+                            owner
+                            (TypeReference.ArgumentNotASubtypeOfConstraint(shown, name, typeSpelling bound))
                     ]
 
-                FsNamed bound
+                bound
             // TypeScript admits a primitive against a structural bound - `string` has `length` -
             // where `:>` admits it nowhere, so a sealed form is written as the constraint too.
             | Some(boundId, bound), _ when sealedForm reference && not (satisfies boundId argument) ->
@@ -2126,10 +2160,14 @@ and internal appliedRefTo
                     @ [
                         Finding.make
                             owner
-                            (TypeReference.ArgumentNotASubtypeOfConstraint(typeSpelling reference, name, bound))
+                            (TypeReference.ArgumentNotASubtypeOfConstraint(
+                                typeSpelling reference,
+                                name,
+                                typeSpelling bound
+                            ))
                     ]
 
-                FsNamed bound
+                bound
             | _ -> reference)
 
     FsApp(name, mapped), findings
@@ -2220,8 +2258,8 @@ and internal delegateRef
 /// A pure index signature with no name of its own, resolved through the support package
 /// rather than minted a declaration (§4.10, TR059): `Record<'Key, 'Value>` for a writable
 /// index, `ReadonlyRecord<'Key, 'Value>` for a readonly one - the get-only form a readonly
-/// index signature already renders as `MB.IndexSignatureAsIndexer`. Both names reach a
-/// generated module through `open Fable.Core.JS`, which the support package shadows.
+/// index signature already renders as `MB.IndexSignatureAsIndexer`. Qualified names retain
+/// the support declaration even when a shipped library or consumer declares `Record`.
 and internal recordRef
     (ctx: Context)
     (model: ShapeModel)
@@ -2235,7 +2273,7 @@ and internal recordRef
 
     let name = if info.IsReadonly then "ReadonlyRecord" else "Record"
 
-    FsApp(name, [ key; value ]),
+    FsApp(Naming.SupportBindings.qualify name, [ key; value ]),
     keyFindings
     @ valueFindings
     @ [
@@ -2273,6 +2311,59 @@ and internal unionRef
                 (TypeReference.NullableHoistedToOption(absence.FromNull, absence.FromUndefined, absence.FromVoid))
             :: findings
 
+    // A reference to a tagged union applies the parameters its declaration binds (§4.9): an
+    // alias application its recovered arguments, any other declaration its own parameters and
+    // the free ones it reads.
+    let namedUnionRef (typeId: int<Measure.typeId>) (name: string) =
+        match
+            Map.tryFind typeId model.AliasApplications
+            |> Option.bind (fun declared -> Map.tryFind declared model.Types),
+            Map.tryFind typeId model.Types
+        with
+        | Some declared, _ ->
+            match freeParamsOf model typeId with
+            | [] -> FsNamed name, []
+            | arguments -> appliedRefTo ctx model self owner name (declParamIds declared) arguments
+        | None, Some named when isTaggedDeclaration model named ->
+            match declParamIds named @ freeParamsOf model typeId |> List.distinct with
+            | [] -> FsNamed name, []
+            | arguments -> appliedRef ctx model self owner name arguments
+        | _ -> FsNamed name, []
+
+    // A member-set match onto a generic tagged declaration outside its scope - the arms a
+    // phantom parameter leaves shared by every application - is written over the arguments of
+    // the site's own application of the same alias, and declined where the site carries none.
+    let matchedUnionRef (typeId: int<Measure.typeId>) (name: string) =
+        let inScope id =
+            Map.containsKey id model.TypeVars || Map.containsKey id model.KeyVars
+
+        match Map.tryFind typeId model.AliasApplications, Map.tryFind typeId model.Types with
+        | None, Some named when isTaggedDeclaration model named ->
+            let own = declParamIds named
+            let free = freeParamsOf model typeId
+
+            if own @ free |> List.forall inScope then
+                Some(namedUnionRef typeId name)
+            else
+                [
+                    Some facts
+                    facts.NonNullableApplication
+                    |> Option.bind (fun id -> Map.tryFind id model.Types)
+                ]
+                |> List.choose id
+                |> List.tryPick (fun site ->
+                    match site.Response.AliasSymbolId, site.Response.AliasArgumentTypeIds with
+                    | ValueSome alias, ValueSome arguments when
+                        named.Response.AliasSymbolId = ValueSome alias
+                        && List.isEmpty free
+                        && arguments.Length = own.Length
+                        && arguments |> Array.forall (fun argument -> Map.containsKey argument model.Types)
+                        ->
+                        Some(Array.toList arguments)
+                    | _ -> None)
+                |> Option.map (appliedRefTo ctx model self owner name own)
+        | _ -> Some(namedUnionRef typeId name)
+
     match facts.NonNullableAlias with
     | Some alias ->
         let reference, findings = typeRef ctx model self owner alias
@@ -2294,7 +2385,7 @@ and internal unionRef
         | _ when isBooleanPair model remaining -> wrap FsBool []
         | _ ->
             match Map.tryFind facts.Response.TypeId model.DeclNames with
-            | Some name when List.isEmpty hoisted -> FsNamed name, []
+            | Some name when List.isEmpty hoisted -> namedUnionRef facts.Response.TypeId name
             | Some name ->
                 let isLiteralEnum =
                     remaining.Length >= 2
@@ -2306,10 +2397,22 @@ and internal unionRef
                 else
                     wrap (FsNamed name) []
             | None ->
-                match namedUnionByMembers ctx model remaining with
-                | Some name -> wrap (FsNamed name) []
+                match
+                    facts.NonNullableApplication
+                    |> Option.filter (fun application -> Map.containsKey application model.DeclNames)
+                with
+                | Some application ->
+                    let reference, findings = typeRef ctx model self owner application
+                    wrap reference findings
                 | None ->
-                    let reference, findings = erasedUnionRef ctx model self owner remaining in wrap reference findings
+                    match
+                        namedUnionByMembers ctx model remaining
+                        |> Option.bind (fun (typeId, name) -> matchedUnionRef typeId name)
+                    with
+                    | Some(reference, findings) -> wrap reference findings
+                    | None ->
+                        let reference, findings = erasedUnionRef ctx model self owner remaining in
+                        wrap reference findings
 
 /// An unnamed heterogeneous union as Fable's `U2`-`U4` (D4, §4.5(4)). Arms are the members' own
 /// F# types, deduplicated after mapping, so an unnamed literal union collapses to `string`.

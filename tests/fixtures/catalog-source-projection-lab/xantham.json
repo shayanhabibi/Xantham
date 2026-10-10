@@ -1,0 +1,6 @@
+{
+  "module": "CatalogSourceProjectionLab",
+  "lib": ["esnext"],
+  "types": [],
+  "declarationCatalog": true
+}

@@ -1210,6 +1210,16 @@ section above.
   assertion about a run performed elsewhere. A run configuring no namespace raises none and
   emits exactly what it emitted before.
 
+  *Recursive package output (2026-10-09).* `recursiveGroups: true` places the entry and
+  shipped dependency modules in the renderer's existing `namespace rec` bundle at
+  `groups/<namespace>.fs`. Configuration requires an explicit namespace and immediate
+  child module names; compiler-library placement retains its own layout. The default
+  keeps separate module files. This is an O7 placement choice: catalog identities,
+  qualified names and source ownership retain their existing contracts. The
+  `recursive-groups-lab` gates a two-package declaration cycle through the normal golden
+  corpus and compile gate. Entry and ambient export blocks retain their declared entry
+  owner; a dependency type sharing a public subpath's name cannot redirect those exports.
+
   *Settled (wave five lane W): the compiler-lib group will not ship, and O7's default stays
   `widen`.* Shipping `TypeScript.Lib` needs no code beyond lane S's group emission, and it
   does not terminate for a realistic entry package: one `EventTarget` reference resolves
@@ -1826,6 +1836,45 @@ are recorded in `docs/.ai/footguns.md`.
   (`<$T, _T>` -> `<'_T2, '_T>`). Both report `SY005` with the written name; imports keep the
   JavaScript name. `dollar-name-lab` pins each position.
 
+## Nullable catalogue identities (2026-10-08)
+
+Nullable structural catalogue identities retain the compiler-recovered non-nullable alias
+selected by shaping. Equal literal values remain distinct when their F# references name
+different aliases. `catalog-mapped-options-lab` covers named versus anonymous locale options
+through `Pick`; the catalogue compatibility guard continues to reject conflicting APIs.
+
+## Portable catalogue compatibility (2026-10-09)
+
+Declaration catalogue emission uses schema 2 with an internal compatibility sidecar; the public
+Catalog and Context records retain their shapes. Contract, identity, API, inference and
+customization versions begin at 1 and compare exactly. The selected compiler's verified
+TypeScript release, full gitHead and AST protocol authenticate package toolchains across
+platform binaries. Unidentified executables retain exact compiler-hash authentication, and
+schema 1 retains exact compiler/generator hashes. Schema 2 keeps those hashes as provenance.
+
+Bootstrap captures the actual launched executable in a weak context association. Pipeline caches
+producer discovery once across preliminary and final customization authentication.
+Compiler discovery retains verified logical wrapper pairing for symlinked platform directories,
+with physical executable identity taking precedence for file links into another install. A reference
+is decoded once for catalogue, compatibility and variant metadata; existing declaration and
+ownership checks follow compatibility validation. The catalog-portability lab compiles a
+producer, adapter and downstream consumer, including accepted schema-1 input and differing
+portable provenance hashes. Contract negatives reject before output; customization retains
+variants. Local focused results: declaration catalogues 58/58, portable integration 19/19,
+customization 22/22. Cross-platform artifact exchange evidence is recorded after CI runs.
+
+## Brotli catalogue file transport (2026-10-09)
+
+CatalogTransport owns synchronous stream decoding, strict Brotli completion and the inclusive
+134,217,728-byte decoded limit. DeclarationCatalog consumes its JsonDocument through the
+existing schema, compatibility, source, ownership, API, generic and variant checks.
+Case-insensitive .br suffixes select compression; other paths retain JSON semantics.
+GeneratorConfig keeps its emission boolean and adds explicit output compression. Pipeline.run
+writes declarations.json.br when selected and reports its actual name; RenderModel.Files
+retains JSON text. Existing alternate-format output is preserved. Transport does not change
+the inference profile or compatibility versions. Opposing Windows/Linux exchange retains both
+payloads; package discovery and NuGet descriptors remain later work.
+
 # Easy Nits 
 
 To include in scope when a phases implementation/attempt ends up being small/quick.
@@ -1859,3 +1908,253 @@ and methods, while property companion selection stays property-only. Attribute t
 use authenticated producer names; both interface and concrete entrypoint renderers consume the
 same annotations. Replacement signatures reject unbound type variables, and companion namespaces
 cannot enter occupied generated modules/types.
+
+## Catalog composition (2026-10-09)
+
+Schema 2 compatibility advances `identityVersion` to 2 for the source-closure correction
+and `apiVersion` to 2 for the emitted generic-constraint change. Producers from the
+preceding contract must be regenerated; their catalogs reject before substitution.
+Contract policy, inference-profile semantics and customization rules are unchanged, so
+their versions remain 1. This deliberate boundary avoids relying on a declaration-specific
+mismatch to identify an older producer. Catalog transport and the compiler source contract
+remain unchanged.
+
+The catalog's transitive source closure uses canonical entries with intrinsic type declarations.
+Export-only handles still anchor their own public aliases, but an exported indexed projection
+cannot add its consumer file to an upstream interface's source set through a compiler-interned
+anonymous type. `catalog-source-projection-lab` covers scalar, array, nullable, tuple and nested
+object projections, preserves explicit named-alias sources, and rejects source/API/input changes.
+Named-versus-anonymous tagged-union API drift remains a separate migration blocker.
+
+Binding families select a shared anonymous-literal owner through the producer catalog graph.
+Generate the selected owner first, then regenerate each dependent producer against its catalog.
+The dependent producer exposes the selected enum in its public F# API and records the owner
+dependency. Consumers may list the coordinated catalogs in either order. Independent producers
+with different F# owners for one structural identity remain incompatible; consumer ordering does
+not select an owner. Named aliases retain their declaration identities at equal literal values.
+`literal-union-ownership-lab` covers both independent rejection and coordinated typed field use,
+including source/API invalidation and distinct named aliases.
+
+Nominal generic constraints remain present when a TypeScript type parameter defaults to `never`.
+`Shape.Spec.constraintProvenNominal` preserves that declaration bound; concrete applications
+retain the existing argument check and `TR044` fallback when the F# argument cannot satisfy it.
+Applied bounds retain their full F# reference, including generic arguments, at both declaration
+and argument sites. Constraint equivalence compares emitted references instead of checker IDs;
+two checker instantiations of the same bound must not force different widening. Arguments such
+as `any` or `never` widen to the complete bound through the existing findings. Pure index
+signatures remain outside nominal constraint mapping.
+Other structurally incompatible defaults retain the existing `TP008` policy.
+`catalog-generic-defaults-lab` covers declaration and callback-result agreement, bare default
+applications, generic-bound arguments, nominal subclasses, recursive bounds and invalid concrete
+arguments. Catalog constraint authentication remains unchanged.
+
+
+## Early union projections (2026-10-09)
+
+The customization owner now exposes a separate `ResolvedSnapshot` after Resolve and before
+Shape. It projects exported declaration handles, finite union arms and source fingerprints;
+checker type IDs never serve as public identity. Equal literal sets retain separate named
+source selections. Snapshot nonces seal both selected sources and returned companion plans.
+This does not move catalog ownership or change the ordinary shape passes.
+
+`ProjectionExtension` is additive to the existing `GeneratorExtension` record.
+`generateProjectedWith` / `runProjectedWith` take a required validation compiler, early
+projections and late customizations. Apply validates identities across both phases, current
+snapshot seals, paths and exported names. Compile checks all output and type witnesses before
+write. Projection provenance lives only in the manifest; raw catalog variant policy remains
+owned by existing late customization. Empty early registration preserves existing output.
+`CU006` reports the arbitrary-source projection boundary as Escape, retaining raw findings.
+
+The opt-in `Xantham.Generator.Myriad` project owns emission via the published Myriad.Core 1.1.0
+`IMyriadGenerator` source contract. Xantham owns resolution and source validation. Its first
+adapter emits ordinary DUs, strict JavaScript codecs and the scalable two-case
+`Decoded|Invalid` active pattern for selected string literal sets with number/null/undefined.
+Existing naming helpers allocate cases; reserved payload/absence cases win collisions.
+No signature replacement or overlapping-union provenance inference is attempted. Generic,
+boolean, numeric-literal, broad-string, object and unresolved shapes fail closed.
+
+`projection-lab`, early contract tests, compiler rejection controls and companion goldens
+exercise the seam. The existing Fable RunGate executes null/undefined matching, non-finite
+numbers, hostile strings, equal/overlapping sets and the explicit raw echo boundary.
+
+### Operation contracts (2026-10-09)
+
+The same early snapshot now resolves selected instance-method parameter occurrences lazily,
+while the compiler session is alive. `Resolved.shape` carries bounded primitive, array, record
+and union facts; `Resolved.operation` carries argument order, optionality and optional selected
+field metadata. Resolve owns typed declaration keys and defining-source closure reads.
+Semantics owns validation and occurrence fingerprints. Missing facts, unsupported source forms,
+generic/overloaded calls, recursive/indexed/callable payloads and symbolic keys fail closed.
+
+`ProjectionCompanion.forOperation` adds a sealed receiver assertion. Pipeline verifies that
+assertion against the final qualified Shape/catalog mapping before compilation. The Myriad
+operation emitter consumes the preserved shape to generate closed input DUs and records, private
+encoders and public typed methods. Remaining parameters and results are inferred from the real
+SDK method call. Raw binding types and catalog ownership remain intact.
+
+Optional record properties preserve omission separately from present undefined, with null as
+its own value case. Required literal fields are automatic discriminators. Actual declaration
+keys and safe own-property writes preserve hostile string keys. `Operations.createShared`
+provides explicit coordination: the first selection owns the input types and later operations
+alias them after exact shape equality. Per-operation source authentication remains independent.
+
+The operation matrix extends `projection-lab` and the existing contract, compile and Fable gates.
+The real integration target is CloudEdge's Agents 0.27/Pi 1.1/Chord 1.1 bundle. Its closed generated
+dependency graph uses opt-in `recursiveGroups` placement. The configured namespace must be
+the immediate parent of every ordinary shipped module; compiler-library modules retain their
+separate owner. The existing namespace renderer owns the single-file recursive representation.
+
+## Generic tagged unions (2026-10-09)
+
+A discriminated union declares the type parameters its arms read (§4.5(2), §4.9). `FsTaggedUnionDecl.TypeParameters` holds the alias's own parameters, then those `bind-free-type-params` records for a union hoisted out of a generic scope; `detect-tagged-unions` shapes the case fields under that scope, so a `T` payload reads `'T` rather than `obj` with `TR013`. `Spec.isTaggedDeclaration` states the conditions `detect-tagged-unions` applies inline; the naming walk and the reference read it. `unionRef` applies the parameters at every reference: an alias application its recovered arguments, any other tagged declaration its own and free parameters. Literal-union aliases with a phantom parameter stay non-generic string enums.
+
+`synthesize-anonymous` recognises an application of a generic tagged alias the way it recognises one over an intersection. The form is the smallest id carrying the alias symbol whose arguments are its own distinct type parameters. An application must correspond to that form arm for arm - the same arm, a reference to the same declaration, or an inline arm under the same tag value and field names - and carry its arguments in the type table. Otherwise the union is hoisted on its own, generic over what it reads. `schedule<T>(): Scheduled<T>` therefore reads `Scheduled<'T>` instead of minting `Scheduler.Schedule.Result`. The walk's alias-form clause reads only a union form for a union, since an intersection alias distributed over a union argument keeps its symbol on the union. Arity, alias re-exports, orphan reads, rendering, foreign qualification and the declaration catalog carry the parameters; catalog `apiVersion` advances to 3 because tagged-union arity and canonical API change. Identity keys are unchanged: union identities bind only declared alias parameters, and applications stay outside the catalog's name map.
+
+A nullable position hides its application: `x?: Job<string>` reaches the shape tier as the application's arms beside `undefined`. Resolve records the application from `getNonNullableType`, which returns it through the union's origin (`TypeFacts.NonNullableApplication`, with its arguments followed into the table) for a union keeping two or more members, one an object. The naming walk registers the application ahead of the union and leaves the union's arms unnamed, and `unionRef` writes it under `option`: `poll(): Job<T> | undefined` reads `Job<'T> option`, and `MaybeJob<T> = Job<T> | null` abbreviates `Job<'T> option` rather than an erased union over arm copies. A parameter no arm reads leaves the arms shared by every application, so a member-set match lands on the declared form from outside its scope; `unionRef` then takes the arguments of the site's own application (`marker?: Marker<string>` reads `Marker<string> option`) and declines to the erased union where the site carries none, never applying an out-of-scope parameter as `obj`. `Maybe<T> | undefined` over an alias that already includes `null` leaves no single application in the origin and still depends on the member-set match.
+
+`synthesize-paramobjects` carries a generic method into `Create` with its type parameters bound once per call, which the interface does not promise; `SP004 MethodTypeParametersBoundAtCreate` (Widened) now reports each such method. Refusing the `Create` instead is a user decision.
+
+`generic-tag-lab` pins the shape matrix (two parameters, array and promise payloads, a constraint, a phantom, recursion, interface arms, an intersection distributed over arms with a default, nullable and optional positions including a phantom argument and an application no other member reaches, a re-export, a re-alias, a transformed subset and a phantom literal union) and a producer/adapter catalog run reading `Job<string> option` across packages; `shared-tag-lab` pins the `Scheduled<T>` reducer. Committed corpus: `TR013` and `TP006` unchanged (no golden held a generic tagged union); labs before/after `TR013` 27 to 0, `TP006` 1 to 0, and the 27 `obj` tokens the generic payloads produced to 0. The nullable-application fix removes the lab's four unreferenced arm copies (`Queue.Last`, `Queue.Last2`, `MaybeJob2`, `MaybeJob3`), and a phantom argument beside `undefined` reads `Marker<string>` where it read `Marker<obj>` with `TR013`. `SP004` reads 63 across the committed goldens (`workers-types` 37) and 37 in `Xantham.Fable.Core.TS`; `solid-js`'s 8 wait on a regeneration where its paths case-fold (`caseFoldSensitive`).
+
+## Operation declaration-name selection (2026-10-10)
+
+Before-Shape operation selection matches method and selected-field names recovered from typed
+declarations. Leading double underscores remain JavaScript keys: `__method` and `__proto__`
+select their declarations, while checker-escaped aliases reject. Required sibling checks compare
+symbol identity. Final declaration-name, receiver, source-closure and snapshot authentication
+remain in place. The resolved-operation regression covers whole parameters, selected fields,
+authenticated companion plans and escaped-name rejection.
+
+The review follow-up also regenerates the outstanding Windows `solid-js` findings: `SP004`
+increases from 0 to 8 across `Universal.RendererOptions` and `Universal.Renderer`. Binding text
+is unchanged; one symbol moves from Ergonomic to Widened. The original PR head reproduces the
+stale findings failure before this regeneration.
+
+Validation: the unfiltered Windows `build.fsx -- test --run-gate --ci` passed 1,271 Generator
+tests and 99 Wire tests (one existing ignored case in each suite), 528 Fable checks and the real
+Partas plugin gate. The operation regression was observed failing before the lookup fix.
+
+## The checker's error type (2026-10-09)
+
+`TypeFlags.Any` covers four checker intrinsic names, and `any` includes the checker's own fallbacks (a circular alias, an inference placeholder) besides a written or omitted annotation, so `TR008` is not proof of authorship. `typeRef` reads `TypeResponse.IntrinsicName`: `any` keeps `TR008`; `error` and `unresolved` (a reference the program leaves unresolved or invalid) raise `TR063 ErrorTypeToObj` with the name the checker keeps; `intrinsic` (the body of `Uppercase` and its siblings) raises `TR064 IntrinsicMarkerToObj`. An Any without an intrinsic name is not claimed as a written `any`. Both are Escape, the tier `TR008` carries; the keys separate them. Resolve records the name from the error type's alias symbol, qualified through its unresolved parents (`NodeJS.Timeout`); a union, an intersection or an optional position the checker reduced over an error constituent carries none. A second export abbreviating the shared intrinsic marker (`Lowercase = Uppercase`) reports the same `TR064`.
+
+`unresolved-any-lab` pins an unresolved import, an undeclared name, a qualified name, an element position and a reduced union beside a written `any`, an omitted annotation and `unknown`. Committed corpus: `TR008` 841 to 830, `TR063` 0 to 17 (animejs 12: six members typed by the absent `three`, three sites typed by `InstanceParent`, which reduces to the nameless error type, two `NodeJS` references and one bare `TargetAdapterEntry`; the lab 5), `TR064` 0 to 5 (`compiler-lib-ownership-lab`'s `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`) and 0 to 5 in `Xantham.Fable.Core.TS`. Binding text is unchanged outside the lab.
+## TypeScript library catalogue identity (2026-10-09)
+
+Catalogue sources for installed TypeScript `lib/lib.*.d.ts` files use logical package
+ownership `typescript` across the wrapper and recognized platform distributions. Canonical
+root metadata hashes name, exact version and normalized gitHead, while source bytes and
+intervening manifests retain authentication. Library metadata must agree with the recognized
+compiler release; binary fallback retains exact executable authentication and permits missing
+gitHead. Ordinary package manifests and non-library files retain their previous hashes.
+Normalized source keys feed declaration handles, identities and canonical API references.
+Identity contract 3 requires regeneration of platform-coloured producers; API hashing,
+inference, customization, policy and transport versions remain unchanged. Core.TS emission
+is compared against the complete committed semantic catalogue on each CI OS, and a compiled
+consumer plus targeted mutations cover reuse and authentication.
+
+Full Core.TS reuse is covered with a compiler-only `export {}` program under the matching
+ES/DOM profile; its generated aliases compile against the original binding. An ordinary
+package probe containing `export function accept(value: Map<string, HTMLElement>):
+Map<string, HTMLElement>;` under the same shipping profile is still rejected for
+`AudioWorkletNodeOptions` API mismatch. The OS-identity correction preserves that guard;
+entry-dependent API compatibility remains a separate investigation.
+
+Diagnosis (2026-10-10): `harvestGlobals` returns early when module exports are
+non-empty and there is no global entry file, even when `typescript/lib` is `ship`.
+The empty Core.TS producer therefore seeds all library declarations, including generic
+`Record`, while the exported-function consumer only reaches instantiated library types.
+The consumer emits `AudioWorkletNodeOptions.parameterData` as a bare `Record<string, float>`
+application without emitting the generic `Record` declaration. Canonical API hashing
+therefore retains the literal name `Record` instead of the producer's declaration identity.
+Captured API texts are otherwise identical; the producer hash is `471214c5bcb9bc1ba777792d18f4bc9149969076b3b419cbab7ac4d6dcf9650c`,
+the consumer hash is `9316f56c62f5670d77a863edc99076431fd54f63527bcf9d1ca553fa1c5b9534`.
+A controlled experiment bypassing only that early return for compiler-library shipping
+restored `Record` and allowed the original exported-function consumer to reuse the complete
+Core.TS catalogue with all authentication enabled. The experiment was reverted after diagnosis;
+the production fix needs harvest regression coverage and full gates, not relaxed API checks.
+
+Validation of the OS identity wave: the full `build.fsx -- test --run-gate` pipeline passed,
+including the Generator and Wire suites, Fable run gate and customization Partas gate.
+The 28 new library identity/reuse cases cover all eight package names, complete Core.TS
+semantic re-emission, compiled aliases and reader rejection paths. Five Node portability
+and provenance checks passed. All 254 checked golden/Core.TS binding and manifest hashes
+remained unchanged. Independent review found no defects; actual Linux execution remains
+for CI, while the Windows regression authenticates the Linux-origin source-byte baseline.
+
+## Compiler-library entry invariance and computed keys (2026-10-10)
+
+Compiler-library `ship` runs harvest globals even when the entry module exports values or
+types. Module-only inputs query an actual default-library source's global scope: querying
+the entry scope duplicated module exports as globals and let local names hide library names.
+Explicit global public inputs retain their own scope. The small scripthost harvest lab
+compares the complete library declaration set across entry forms and checks that Reference,
+Widen and Map continue to withhold library globals. Programs with `no-default-lib` retain
+module exports without reharvesting them as globals.
+
+Drilling the Core.TS matrix exposed a second false mismatch in `String`: structural identities
+hashed escaped computed-member names such as `__@match@1085`. The numeric suffix is a
+compiler-session allocation, so even fresh compiler-only producers could differ. Computed
+member keys now authenticate normalized declaration handles; ordinary names have a disjoint
+encoding. Structural member hashing and inferred parent roles share this key. Missing computed
+declarations do not fall back to a session ID. Identity contract advances from 3 to 4; the
+Customization and policy contracts remain unchanged. Intrinsic checker
+types no longer borrow aggregate export handles or inferred parent roles: their named aliases
+retain their own declaration handles. The identity bump covers both corrections.
+
+Pure index-signature references use explicit `JS.Record` / `JS.ReadonlyRecord` support names.
+Previously a bare `Record` could bind to the shipped library's phantom or a local declaration;
+arity repair qualified it only for some consumers, causing different emitted APIs. Inference
+contract advances to 2 and API contract to 3 for this emitted ABI correction. Core.TS and dependent producers require
+regeneration; source and API authentication remain strict.
+
+The entry matrix covers empty module, function, value, interface, namespace, default, re-export,
+unrelated export, primitive aliases, local library-name/ReadonlyRecord collisions, type-only
+global and mixed public entries against a shared ES5/worker/scripthost catalogue.
+Each entry authenticates and compiles reused TextStreamReader/TextStreamWriter aliases.
+The worker library supplies a declaration-backed path to the synthesized global object;
+scripthost alone cannot catalogue that object. A single full Core.TS smoke retains semantic
+re-emission, Map/HTMLElement and AudioWorkletNodeOptions reuse, and Record/ReadonlyRecord
+collision checks. A global function adds a genuine `typeof globalThis` member: its changed
+GlobalThis API must still reject reuse of the unaugmented catalogue. This is distinct from
+the false entry-dependent hashes.
+
+The small producer is generated lazily once per test process. Every consumer still starts a
+fresh compiler session, and rejection tests mutate their own catalogue copies. The Expecto
+runner owns the producer's scratch-directory lifetime, including cleanup after failures;
+producer-generation failures clean up before propagating. This removes 21 repeated setup runs
+without dropping entry cases or sharing mutable consumer state.
+
+Reference transport, structure and compatibility checks now run immediately after bootstrap,
+before Harvest/Resolve/Shape, using the same cached compiler identity as final authentication.
+The later catalogue pass still checks source closures, F# APIs, owners and variants. This
+changes rejection order for incompatible inputs without accepting additional catalogues or
+changing contract versions. CI Expecto commands emit per-test timings so future repeated
+large-profile traversals can be identified in the job log.
+
+Runtime follow-up validation: the unfiltered Windows CI-mode `build.fsx -- test --run-gate`
+passed 1,258 Generator tests, 99 Wire tests (one existing ignored case per suite), 468 Fable
+checks and the Partas gate. With the shared producer, the Generator suite took 7m11s and the
+complete pipeline 9m21s. The first CI run before producer sharing reduced the Test step from
+41m58s to 24m51s; the Generator suite fell from 37m45s to 19m41s on that Linux runner.
+All tracked goldens and Core.TS artefacts stayed unchanged. A full ESNext/DOM input with an
+incompatible compiler-release reference rejected in 0.55s before declaration traversal.
+
+Validation: the full Windows `build.fsx -- test --run-gate` pipeline passed: 1,249 Generator
+tests, 99 Wire tests (one existing ignored case in each suite), 468 Fable checks and the real
+Partas customization gate. This wave adds 24 regression cases, including private/equal-valued
+literal alias reuse. All 118 golden-generation cases and five Node provenance/portability
+checks passed. Independent review's literal-alias and emitted-ABI probes were addressed.
+The 14 changed existing binding files differ only in explicit support-record qualification;
+all existing findings manifests and compiler input bytes are unchanged. Three new binding/
+manifest hashes cover the scripthost lab. Actual Linux execution remains for CI.
+
+### Combined portable-library and projection catalogue contract
+
+Integrating the independent portable library and early projection changes uses IdentityVersion 5, ApiVersion 4 and InferenceVersion 2. Both branches used API version 3 for different emitted contracts; taking the maximum would accept a pre-integration producer. The combined version rejects both old producers before traversal. Producer closure dependencies authenticate against actual consumer inputs; the shared-input test selects ES5 explicitly rather than relying on package sort order, and separately rejects a producer-only source. Global augmentation is rejected by the final GlobalThis API authentication before output is written.
+
+Regenerating Core.TS adds 776 catalogue declarations relative to the portable-library branch:
+774 literal-overload support declarations now retained in shipped compiler libraries, and
+the two intersection aliases `DecoratorMetadataObject.Base` and `ElementTagNameMap.Base`.
+The full-library smoke regenerates the catalogue and compiles reused consumer types; these
+additions follow the projection branch's overload and anonymous-intersection rules.

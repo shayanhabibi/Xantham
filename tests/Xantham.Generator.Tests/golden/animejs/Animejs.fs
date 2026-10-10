@@ -33,13 +33,13 @@ type Adapter =
 type TargetAdapter =
     abstract detect: (obj -> bool) with get, set
     /// <remarks>@type {Record&lt;string, TargetAdapterEntry&gt;}</remarks>
-    abstract props: Record<string, TargetAdapter.Props.Item> with get, set
+    abstract props: JS.Record<string, TargetAdapter.Props.Item> with get, set
     /// <summary>
     /// Registers a property the adapter handles. <c>setter</c> receives <c>(target, value, tween)</c>. For color and complex tweens <c>value</c> is <c>undefined</c>, read <c>tween._numbers</c> instead. <c>gate(target)</c> scopes the prop to a subset of matching targets.
     /// </summary>
     abstract registerProperty: name: string * getter: (obj -> obj) * setter: TargetAdapter.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (detect: (obj -> bool), props: Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), TargetAdapter.RegisterProperty.Setter, (obj -> bool) option>) : TargetAdapter = jsNative
+    static member Create (detect: (obj -> bool), props: JS.Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), TargetAdapter.RegisterProperty.Setter, (obj -> bool) option>) : TargetAdapter = jsNative
 
 type Instance =
     abstract isAnimejsInstanceProxy: bool with get, set
@@ -90,12 +90,12 @@ type Instance =
 type Animatable =
     abstract targets: Target[] with get, set
     /// <remarks>@type {Record&lt;String, JSAnimation&gt;}</remarks>
-    abstract animations: Record<string, JSAnimation> with get, set
+    abstract animations: JS.Record<string, JSAnimation> with get, set
     /// <remarks>@type {JSAnimation|null}</remarks>
     abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> Animatable
     [<ParamObject; Emit("$0")>]
-    static member Create (targets: Target[], animations: Record<string, JSAnimation>, revert: (unit -> Animatable), ?callbacks: JSAnimation) : Animatable = jsNative
+    static member Create (targets: Target[], animations: JS.Record<string, JSAnimation>, revert: (unit -> Animatable), ?callbacks: JSAnimation) : Animatable = jsNative
 
 [<Interface>]
 type Clock =
@@ -736,7 +736,7 @@ type LayoutAnimationTimingsParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?delay: U2<float, AutoLayoutParams.Ease>, ?duration: U2<float, AutoLayoutParams.Ease>, ?ease: U5<string, EasingFunction, AutoLayoutParams.Ease, Spring, TweakRegister>) : LayoutAnimationTimingsParams = jsNative
 
-type LayoutStateAnimationProperties = Record<string, U3<string, float, AutoLayoutParams.Ease>>
+type LayoutStateAnimationProperties = JS.Record<string, U3<string, float, AutoLayoutParams.Ease>>
 
 type LayoutStateParams =
     inherit LayoutAnimationTimingsParams
@@ -874,13 +874,13 @@ type Scope =
     /// <remarks>@type {Number}</remarks>
     abstract onceIndex: float with get, set
     /// <remarks>@type {Record&lt;String, ScopeMethod&gt;}</remarks>
-    abstract methods: Record<string, ScopeMethod> with get, set
+    abstract methods: JS.Record<string, ScopeMethod> with get, set
     /// <remarks>@type {Record&lt;String, Boolean&gt;}</remarks>
-    abstract matches: Record<string, bool> with get, set
+    abstract matches: JS.Record<string, bool> with get, set
     /// <remarks>@type {Record&lt;String, MediaQueryList&gt;}</remarks>
-    abstract mediaQueryLists: Record<string, Fable.Core.TS.Dom.MediaQueryList> with get, set
+    abstract mediaQueryLists: JS.Record<string, Fable.Core.TS.Dom.MediaQueryList> with get, set
     /// <remarks>@type {Record&lt;String, any&gt;}</remarks>
-    abstract data: Record<string, obj> with get, set
+    abstract data: JS.Record<string, obj> with get, set
     abstract register: revertible: Revertible -> unit
     /// <remarks>@template T</remarks>
     abstract execute<'T>: cb: (Scope -> 'T) -> 'T
@@ -992,7 +992,7 @@ type Segmenter =
 type Timeline =
     inherit Timer
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-    abstract labels: Record<string, float> with get, set
+    abstract labels: JS.Record<string, float> with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -1341,7 +1341,7 @@ type StaggerParams =
 
 type DOMTarget = U2<Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.SVGElement>
 
-type JSTarget = Record<string, obj>
+type JSTarget = JS.Record<string, obj>
 
 type Target = U3<Fable.Core.TS.Dom.HTMLElement, JSTarget, Fable.Core.TS.Dom.SVGElement>
 
@@ -1600,7 +1600,7 @@ type TweenPropertySiblings =
     [<ParamObject; Emit("$0")>]
     static member Create (?_head: Tween, ?_tail: Tween) : TweenPropertySiblings = jsNative
 
-type TweenLookups = Record<string, TweenPropertySiblings>
+type TweenLookups = JS.Record<string, TweenPropertySiblings>
 
 type TweenReplaceLookups = JS.WeakMap<Target, TweenLookups>
 
@@ -1655,9 +1655,9 @@ type PercentageKeyframeOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?ease: EasingParam) : PercentageKeyframeOptions = jsNative
 
-type PercentageKeyframeParams = Record<string, TweenParamValue>
+type PercentageKeyframeParams = JS.Record<string, TweenParamValue>
 
-type PercentageKeyframes = Record<string, PercentageKeyframes.Item>
+type PercentageKeyframes = JS.Record<string, PercentageKeyframes.Item>
 
 type DurationKeyframes = DurationKeyframes.Item[]
 
@@ -1819,9 +1819,9 @@ type AngularRef =
 type ScopeParams =
     abstract root: U6<string, AngularRef, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, ReactRef, Fable.Core.TS.Dom.SVGElement> option with get, set
     abstract defaults: DefaultsParams option with get, set
-    abstract mediaQueries: Record<string, string> option with get, set
+    abstract mediaQueries: JS.Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?root: U6<string, AngularRef, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, ReactRef, Fable.Core.TS.Dom.SVGElement>, ?defaults: DefaultsParams, ?mediaQueries: Record<string, string>) : ScopeParams = jsNative
+    static member Create (?root: U6<string, AngularRef, Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, ReactRef, Fable.Core.TS.Dom.SVGElement>, ?defaults: DefaultsParams, ?mediaQueries: JS.Record<string, string>) : ScopeParams = jsNative
 
 type ScopedCallback<'T> = (Scope -> 'T)
 
@@ -4197,10 +4197,10 @@ module Adapters =
                 [<Interface>]
                 type Result =
                     abstract detect: (obj -> bool) with get, set
-                    abstract props: Record<string, TargetAdapter.Props.Item> with get, set
+                    abstract props: JS.Record<string, TargetAdapter.Props.Item> with get, set
                     abstract registerProperty: name: string * getter: (obj -> obj) * setter: Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
                     [<ParamObject; Emit("$0")>]
-                    static member Create (detect: (obj -> bool), props: Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result.RegisterProperty.Setter, (obj -> bool) option>) : Result = jsNative
+                    static member Create (detect: (obj -> bool), props: JS.Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.Three.ThreeAdapter.RegisterTargetAdapter.Result.RegisterProperty.Setter, (obj -> bool) option>) : Result = jsNative
 
                 module Result =
                     module RegisterProperty =
@@ -4210,10 +4210,10 @@ module Adapters =
                 [<Interface>]
                 type Item =
                     abstract detect: (obj -> bool) with get, set
-                    abstract props: Record<string, TargetAdapter.Props.Item> with get, set
+                    abstract props: JS.Record<string, TargetAdapter.Props.Item> with get, set
                     abstract registerProperty: name: string * getter: (obj -> obj) * setter: Adapters.Three.ThreeAdapter.TargetAdapters.Item.RegisterProperty.Setter * ?gate: (obj -> bool) -> unit
                     [<ParamObject; Emit("$0")>]
-                    static member Create (detect: (obj -> bool), props: Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.Three.ThreeAdapter.TargetAdapters.Item.RegisterProperty.Setter, (obj -> bool) option>) : Item = jsNative
+                    static member Create (detect: (obj -> bool), props: JS.Record<string, TargetAdapter.Props.Item>, registerProperty: Action<string, (obj -> obj), Adapters.Three.ThreeAdapter.TargetAdapters.Item.RegisterProperty.Setter, (obj -> bool) option>) : Item = jsNative
 
                 module Item =
                     module RegisterProperty =

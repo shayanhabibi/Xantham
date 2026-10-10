@@ -236,6 +236,149 @@ and any referenced producer assemblies. Validation checks the complete output an
 the declared export before returning it. Raw replacements are rejected for catalog production.
 The validation directory is caller-owned scratch space; repository tests use `tests/.scratch`.
 
+## Project unions before widening
+
+Reference `Xantham.Generator.Myriad` to generate companion APIs from resolved TypeScript
+facts before Shape maps them to F# types. The adapter uses Myriad.Core 1.1.0; it does not
+need a sibling Myriad checkout. Select exported declarations explicitly:
+
+```fsharp
+open Xantham.Generator.Myriad
+
+let projections =
+    LiteralUnions.create
+        { Id = "example.choices"; Version = "1"; Configuration = Map.empty }
+        "tests/.scratch/myriad-inputs"
+        [{ Package = "projection-lab"
+           Path = ["Choice"]
+           ModuleName = "Projected.Choice"
+           TypeName = "Value" }]
+
+let compiler = Compiler.dotnet "tests/.scratch/myriad-compile" supportAssemblyPaths
+let report =
+    Pipeline.runProjectedWith compiler [projections] [] GeneratorConfig.Default input output
+    |> Async.RunSynchronously
+```
+
+Supply the current Xantham support DLLs and referenced producer DLLs in
+`supportAssemblyPaths`, as for raw replacement validation above. The runner compiles every
+output source plus witnesses for the declared companion types before returning or writing.
+Module and type names use unquoted ASCII identifiers; the type name starts with an uppercase letter.
+Existing `GeneratorExtension` registrations can be passed as the second extension list.
+An empty projection list leaves the ordinary output unchanged.
+
+For `"auto" | "manual" | number | null | undefined`, the companion contains a normal DU:
+
+```fsharp
+type Value = Auto | Manual | Number of float | Null | Undefined
+```
+
+The generated module provides `encode : Value -> obj`,
+`decode : obj -> Result<Value, string>`, and a two-case active pattern. Match a raw JavaScript
+value through the decoder:
+
+```fsharp
+open Projected.Choice
+
+let describe (raw: obj) =
+    match raw with
+    | Decoded Value.Null -> "explicit null"
+    | Decoded Value.Undefined -> "undefined"
+    | Decoded (Value.Number value) -> string value
+    | Decoded Value.Auto -> "automatic"
+    | Decoded Value.Manual -> "manual"
+    | Invalid reason -> reason
+```
+
+`null` and `undefined` use separate strict JavaScript predicates. Strings outside the literal
+set and values of other kinds return `Error`. The number arm preserves `NaN`, infinities and
+negative zero. These codecs target Fable; their JavaScript operations are not .NET runtime APIs.
+Decode before an `option` conversion can erase the distinction. An absent property read and a
+present property containing `undefined` both yield the same JavaScript value; this API does not
+inspect property presence.
+
+The literal-union DU is a companion representation. Call `encode` at an outgoing JavaScript boundary
+and `decode` on incoming raw values, or use the operation adapter below to generate the call boundary.
+Ordinary generated signatures retain their existing types. Equal string sets still
+produce distinct F# types when selected separately. Convert through `encode`/`decode` when needed.
+Overlapping sets may accept the same primitive, so decoding proves membership, not which source
+union produced it. Preserve an outer application DU if that provenance matters.
+
+The first projection contract supports string literals with `number`, `null` and `undefined`.
+Boolean and numeric literals, generic aliases, broad strings, object arms and incomplete resolved
+facts return `projection/unsupported-union` or `projection/incomplete-union` diagnostics.
+No companion is produced for a rejected selection. Existing source widening findings remain in
+the manifest. `CU006` marks the raw-source extension boundary as Escape; the source, artifact
+hashes, extension identity and selection configuration are recorded under `projections`.
+Projection metadata does not change raw declaration catalogs or require ordinary consumers to
+register the same companion policy.
+
+### Carry contracts into operations
+
+`Operations.create` generates an input contract and a typed method that performs the conversion
+internally. `Operations.createShared` shares the first input contract across selected methods
+with identical resolved shapes. For example, given a generated `ProjectionLab.Session`:
+
+```fsharp
+let submit =
+    { Package = "projection-lab"
+      ReceiverPath = ["Session"]
+      MethodName = "submit"
+      ParameterName = "input"
+      FieldName = None
+      ReceiverType = "ProjectionLab.Session"
+      ModuleName = "Projected.Submit"
+      TypeName = "Input"
+      FunctionName = "submit" }
+
+let operations =
+    Operations.create
+        { Id = "example.operations"; Version = "1"; Configuration = Map.empty }
+        "tests/.scratch/myriad-inputs"
+        [submit]
+
+// After generation, callers use the contract directly.
+// Projected.Submit.submit session (Projected.Submit.Input.Text "hello") None
+```
+
+The adapter reads the selected method argument before Shape. It supports primitive values,
+arrays, data records and unions, including Pi's text-or-content-array input. Required literal
+properties are encoded automatically; an image payload cannot accidentally carry the text tag.
+Other method arguments and results retain their generated SDK types. The receiver type must
+match the selected TypeScript declaration's final emitted owner, including catalog references.
+
+Optional payload fields use an outer `option`: `None` omits the property; a present `Undefined`
+case writes an own property containing undefined. `Null` remains distinct. A selected
+`FieldName = Some "thinkingLevel"` produces a method accepting an optional DU, provided the
+selected field and all omitted siblings are optional. The method constructs the object argument;
+the remaining method arguments are forwarded with their original order and optionality.
+
+For shared inputs, pass all operation selections to `Operations.createShared` with the same
+`TypeName`. Their modules remain distinct; later modules alias the first module's contract.
+Different resolved shapes reject with `myriad/shared-shape-mismatch`. Ordinary `create`
+continues to generate independent types.
+
+Overloads, generic methods/receivers, recursive or opaque payloads, indexed/callable objects,
+computed/symbol keys and unsupported source-reference forms reject explicitly. These are
+resolved value contracts; `exactOptionalPropertyTypes` write semantics are not promised.
+The compiler gate validates all generated source, and the Fable gate validates the JavaScript
+boundary. Runtime helpers must be shipped as Fable source with the consuming library.
+
+The checked-in example accepts one selected union and caller-owned scratch/reference paths:
+
+```bash
+dotnet run --project tools/customization-example -- \
+  tests/fixtures/projection-lab tests/.scratch/projected-output \
+  --union Choice --workspace tests/.scratch/projected-work \
+  --reference src/Xantham.Fable.Core/bin/Release/net8.0/Xantham.Fable.Core.dll \
+  --reference src/Xantham.Fable.Core.TS/bin/Release/net8.0/Xantham.Fable.Core.TS.dll
+```
+
+It emits `Projected.Choice.Value`. To verify the early-source matrix and companion goldens,
+run `dotnet fsi build.fsx -- test --quick --filter projection`. The complete
+`--run-gate` acceptance command also executes the generated active patterns, codecs, equal and
+overlapping union cases, and an imported JavaScript echo function.
+
 ## Ownership, conflicts and provenance
 
 Referenced declarations remain available for semantic selection and companion generation.

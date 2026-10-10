@@ -4,8 +4,8 @@
   "module": "DollarNameLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 15,
-    "widened": 0,
+    "ergonomic": 13,
+    "widened": 2,
     "escape": 0
   },
   "passes": [
@@ -32,8 +32,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 16,
-      "ergonomic": 16
+      "total": 18,
+      "ergonomic": 16,
+      "widened": 2
     }
   ]
 }

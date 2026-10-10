@@ -8,6 +8,46 @@ type OutputTarget
 type BindingType
 type SemanticSnapshot
 type ExtensionDiagnostic
+type ResolvedSource
+type ResolvedSnapshot
+type ProjectionCompanion
+
+/// The resolved value arms accepted by the first companion projection contract.
+[<RequireQualifiedAccess>]
+type ResolvedUnionArm =
+    | StringLiteral of string
+    | Number
+    | Null
+    | Undefined
+
+/// Bounded input values captured before Shape; record property presence is separate from Undefined.
+[<RequireQualifiedAccess>]
+type ResolvedValueShape =
+    | String
+    | Number
+    | Boolean
+    | Null
+    | Undefined
+    | StringLiteral of string
+    | Array of ResolvedValueShape
+    | Record of ResolvedValueField list
+    | Union of ResolvedValueShape list
+
+and ResolvedValueField =
+    {
+        Name: string
+        Optional: bool
+        Shape: ResolvedValueShape
+    }
+
+type ResolvedOperation =
+    {
+        MethodName: string
+        ParameterNames: string list
+        ParameterOptional: bool list
+        ParameterIndex: int
+        FieldName: string option
+    }
 
 type AttributeValue =
     | String of string
@@ -31,11 +71,43 @@ type ExtensionIdentity =
         Configuration: Map<string, string>
     }
 
+/// Produces companions from compiler facts before F# shaping can widen those facts.
+type ProjectionExtension =
+    {
+        Identity: ExtensionIdentity
+        Transform: ResolvedSnapshot -> Result<ProjectionCompanion list, ExtensionDiagnostic list>
+    }
+
 type GeneratorExtension =
     {
         Identity: ExtensionIdentity
         Transform: SemanticSnapshot -> Result<EditBatch, ExtensionDiagnostic list>
     }
+
+module Resolved =
+    val tryFind: string -> string list -> ResolvedSnapshot -> ResolvedSource option
+    /// Selects an instance-method parameter by package and TypeScript declaration names.
+    val tryFindParameter: string -> string list -> string -> string -> ResolvedSnapshot -> ResolvedSource option
+
+    /// Selects an optional field only when constructing that field alone omits no required siblings.
+    val tryFindParameterField:
+        string -> string list -> string -> string -> string -> ResolvedSnapshot -> ResolvedSource option
+
+    val shape: ResolvedSource -> ResolvedSnapshot -> Result<ResolvedValueShape, ExtensionDiagnostic list>
+    val operation: ResolvedSource -> ResolvedSnapshot -> Result<ResolvedOperation, ExtensionDiagnostic list>
+    val package: ResolvedSource -> ResolvedSnapshot -> string
+    val path: ResolvedSource -> ResolvedSnapshot -> string list
+    val identity: ResolvedSource -> ResolvedSnapshot -> string
+    val union: ResolvedSource -> ResolvedSnapshot -> Result<ResolvedUnionArm list, ExtensionDiagnostic list>
+    val diagnostics: ResolvedSnapshot -> ExtensionDiagnostic list
+
+module ProjectionCompanion =
+    /// Seals the selected facts into a plan; a foreign source or unsupported union is rejected.
+    val create: ResolvedSource -> string -> string list -> string -> ResolvedSnapshot -> ProjectionCompanion
+
+    /// Seals the expected F# receiver name for validation against its finalized binding before emission.
+    val forOperation:
+        ResolvedSource -> string -> string -> string list -> string -> ResolvedSnapshot -> ProjectionCompanion
 
 module Attribute =
     val create: string -> AttributeValue list -> AttributeSpec
@@ -126,6 +198,25 @@ type internal SemanticMemberInfo =
         Targets: (string * string * bool) list
     }
 
+type internal ResolvedSourceInfo =
+    {
+        Package: string
+        Path: string list
+        Declaration: string option
+        Fingerprint: string option
+        Union: Result<ResolvedUnionArm list, ExtensionDiagnostic list>
+    }
+
+type internal ResolvedOperationQuery = string * string list * string * string * string option
+
+type internal ResolvedOperationInfo =
+    {
+        Source: ResolvedSourceInfo
+        Shape: Result<ResolvedValueShape, ExtensionDiagnostic list>
+        Operation: Result<ResolvedOperation, ExtensionDiagnostic list>
+        ReceiverTypeId: int<Measure.typeId> option
+    }
+
 type internal Edit =
     | AddAttribute of OutputTarget * AttributeSpec
     | EmitCompanion of CompanionSpec
@@ -133,6 +224,14 @@ type internal Edit =
     | ReplaceDeclaration of OutputTarget * ReplacementSpec
 
 module internal ContractData =
+    val resolvedSnapshot: ResolvedSourceInfo list -> ResolvedSnapshot
+
+    val withOperationLookup:
+        (ResolvedOperationQuery -> ResolvedOperationInfo option) -> ResolvedSnapshot -> ResolvedSnapshot
+
+    val projectionCompanionInfo: ProjectionCompanion -> string * string * string * string list * string
+    val projectionCompanionIsCurrent: ResolvedSnapshot -> ProjectionCompanion -> bool
+    val projectionReceiver: ProjectionCompanion -> (int<Measure.typeId> * string) option
     val withReferences: Map<string, string> -> SemanticSnapshot -> SemanticSnapshot
     val edits: EditBatch -> Edit list
     val attributeInfo: AttributeSpec -> string * AttributeValue list * string

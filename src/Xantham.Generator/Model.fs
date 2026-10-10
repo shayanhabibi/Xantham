@@ -185,6 +185,11 @@ module CompilerLibLayout =
             DomQualifiedModule = $"{root}.{dom}"
         }
 
+[<RequireQualifiedAccess>]
+type CatalogCompression =
+    | Uncompressed
+    | Brotli
+
 /// Per-package generator configuration, read from `xantham.json` next to the package manifest
 /// when present (decision O4 in `docs/plans/generator-architecture.md`).
 type GeneratorConfig =
@@ -207,6 +212,11 @@ type GeneratorConfig =
         named under `groups` takes `<namespace>.<Leaf>`, so `@cloudedge/agents` under `FSharp.CloudEdge` reads \
         `FSharp.CloudEdge.Agents`. Both sides of a reference configure the same namespace.")>]
         Namespace: string option
+        /// Writes the entry and shipped dependency modules in one recursive namespace file.
+        /// Each module must be an immediate child of the configured namespace.
+        [<Description("Write the entry and shipped dependency modules in one recursive namespace file. \
+        Requires namespace and immediate child module names. Defaults to false.")>]
+        RecursiveGroups: bool
         /// Disposition per group, keyed as `xantham.json` spells them: npm name for a
         /// dependency, `typescript/lib` for the compiler lib.
         [<Description("What the generator does with each package boundary its declarations reach (decision O7), keyed \
@@ -230,6 +240,8 @@ type GeneratorConfig =
         /// Emits declarations.json with the identity and final F# name of reusable declarations.
         [<Description("Emit declarations.json with stable TypeScript declaration identities and final F# names. Defaults to false.")>]
         DeclarationCatalog: bool
+        /// Compression applied when writing the catalogue to disk.
+        DeclarationCatalogCompression: CatalogCompression
         /// Producer catalogs, absolute or relative to the input package directory.
         [<Description("Producer declarations.json files, absolute or relative to the input package directory. \
         Matching types reuse their producer's F# identity; incompatible catalogs fail generation.")>]
@@ -285,10 +297,12 @@ type GeneratorConfig =
         {
             ModuleName = None
             Namespace = None
+            RecursiveGroups = false
             Groups = Map.empty
             Lib = None
             Types = None
             DeclarationCatalog = false
+            DeclarationCatalogCompression = CatalogCompression.Uncompressed
             DeclarationReferences = []
             Entry = None
             RuntimePackage = None
@@ -301,6 +315,30 @@ type GeneratorConfig =
         }
 
 module GeneratorConfig =
+    let private parseDeclarationCatalog (value: JsonElement) =
+        match value.ValueKind with
+        | JsonValueKind.True -> true, CatalogCompression.Uncompressed
+        | JsonValueKind.False -> false, CatalogCompression.Uncompressed
+        | JsonValueKind.Object ->
+            let enabled =
+                match value.TryGetProperty "enabled" with
+                | true, flag when flag.ValueKind = JsonValueKind.True -> true
+                | true, flag when flag.ValueKind = JsonValueKind.False -> false
+                | _ -> failwith "xantham.json: declarationCatalog.enabled is required and must be a boolean"
+
+            let compression =
+                match value.TryGetProperty "compression" with
+                | false, _ -> CatalogCompression.Uncompressed
+                | true, name when name.ValueKind = JsonValueKind.String ->
+                    match name.GetString() with
+                    | "none" -> CatalogCompression.Uncompressed
+                    | "brotli" -> CatalogCompression.Brotli
+                    | _ -> failwith "xantham.json: declarationCatalog.compression must be none or brotli"
+                | _ -> failwith "xantham.json: declarationCatalog.compression must be a string"
+
+            enabled, compression
+        | _ -> failwith "xantham.json: declarationCatalog must be a boolean or an options object"
+
     let private jsonOptions =
         JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
 
@@ -449,6 +487,11 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: declarationReferences must be an array of nonempty paths"
                 | _ -> []
 
+            let declarationCatalog, declarationCatalogCompression =
+                match doc.RootElement.TryGetProperty "declarationCatalog" with
+                | true, value -> parseDeclarationCatalog value
+                | _ -> false, CatalogCompression.Uncompressed
+
             let subpaths =
                 match doc.RootElement.TryGetProperty "subpaths" with
                 | true, value when value.ValueKind = JsonValueKind.Array ->
@@ -566,10 +609,12 @@ module GeneratorConfig =
             {
                 ModuleName = field "module"
                 Namespace = field "namespace"
+                RecursiveGroups = boolField "recursiveGroups" GeneratorConfig.Default.RecursiveGroups
                 Groups = groups
                 Lib = lib
                 Types = types
-                DeclarationCatalog = boolField "declarationCatalog" false
+                DeclarationCatalog = declarationCatalog
+                DeclarationCatalogCompression = declarationCatalogCompression
                 DeclarationReferences = declarationReferences
                 Entry = entry
                 RuntimePackage = runtime
@@ -1175,11 +1220,17 @@ type TypeFacts =
         UnionMembers: int<typeId> list
         /// Compiler-returned literal-union alias after removing nullish members; populated only for catalog generation or reuse.
         NonNullableAlias: int<typeId> option
+        /// The generic alias application a nullable union adds `null` or `undefined` to, as the
+        /// checker retains it: `Job<T> | undefined` -> `Job<T>`. Populated where the union keeps at
+        /// least two other members, one of them an object, and `NonNullableAlias` is absent.
+        NonNullableApplication: int<typeId> option
         /// The alias name and single argument an indexed-access reference was written through,
         /// where the checker has already expanded past it before the flags reach the shaper
         /// (§4.11's `NoInfer`). Populated only at an indexed-access reference site, never on a
         /// declaration - unrelated to `AliasTypeArguments`, which serves the declaration form.
         AliasIdentity: (string<symbolName> * int<typeId>) option
+        /// The name an error type's reference was written with, where the checker retains it.
+        UnresolvedName: string<symbolName> option
     }
 
 module TypeFacts =
@@ -1210,7 +1261,9 @@ module TypeFacts =
             Conditional = None
             UnionMembers = []
             NonNullableAlias = None
+            NonNullableApplication = None
             AliasIdentity = None
+            UnresolvedName = None
         }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
@@ -1530,6 +1583,9 @@ type FsTaggedUnionDecl =
         Docs: string
         Tags: JSDocTagInfo list
         Order: DeclOrder option
+        /// The alias's own type parameters, then those the union reads from the scope it was
+        /// written in (§4.9): `type Scheduled<'T> = | Once of payload: 'T`.
+        TypeParameters: FsTypeParam list
         /// The discriminant property's name, as TypeScript spells it.
         Tag: string
         Cases: FsTaggedCase list

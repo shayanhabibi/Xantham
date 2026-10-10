@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "package": "catalog-mapped-options-lab",
+  "module": "CatalogMappedOptionsLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 6,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 16,
+      "ergonomic": 16
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 8,
+      "ergonomic": 8
+    }
+  ]
+}

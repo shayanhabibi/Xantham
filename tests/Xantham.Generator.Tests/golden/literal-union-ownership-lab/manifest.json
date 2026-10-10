@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "package": "literal-union-ownership-lab",
+  "module": "LiteralUnionOwnershipLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 4,
+    "widened": 0,
+    "escape": 2
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 4,
+      "ergonomic": 4
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 4,
+      "ergonomic": 4
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "",
+      "total": 2,
+      "escape": 2
+    },
+    {
+      "pass": "render-source",
+      "total": 2,
+      "exact": 2
+    }
+  ]
+}

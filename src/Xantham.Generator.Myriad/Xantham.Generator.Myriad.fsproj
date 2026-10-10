@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Version>0.2.0</Version>
+        <FSharpCoreImplicitPackageVersion>9.0.100</FSharpCoreImplicitPackageVersion>
+        <AssemblyVersion>0.0.0.0</AssemblyVersion>
+        <IsPackable>true</IsPackable>
+        <PackageId>Xantham.Generator.Myriad</PackageId>
+        <Authors>Shayan Habibi</Authors>
+        <Description>Opt-in Myriad companion projections from Xantham's resolved TypeScript facts.</Description>
+        <PackageTags>typescript;fsharp;fable;myriad;codegen</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+        <Compile Include="LiteralUnions.fs" />
+        <Compile Include="Operations.fs" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Xantham.Generator/Xantham.Generator.fsproj" />
+        <PackageReference Include="Myriad.Core" Version="1.1.0" />
+    </ItemGroup>
+</Project>
