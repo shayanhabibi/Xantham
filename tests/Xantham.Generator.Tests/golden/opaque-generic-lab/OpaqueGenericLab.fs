@@ -54,9 +54,9 @@ type Connection =
 
 [<Interface>]
 type Manager =
-    abstract connections: Record<string, Connection> with get, set
+    abstract connections: JS.Record<string, Connection> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (connections: Record<string, Connection>) : Manager = jsNative
+    static member Create (connections: JS.Record<string, Connection>) : Manager = jsNative
 
 [<Interface>]
 type Agent =

@@ -400,7 +400,7 @@ type MatchProps<'T> =
 [<Interface>]
 type SharedConfig =
     abstract context: SharedConfig.Context option with get, set
-    abstract resources: Record<string, obj> option with get, set
+    abstract resources: JS.Record<string, obj> option with get, set
     abstract load: (string -> obj) option with get, set
     abstract has: (string -> bool) option with get, set
     abstract gather: (string -> unit) option with get, set
@@ -411,7 +411,7 @@ type SharedConfig =
     abstract getContextId: unit -> string
     abstract getNextContextId: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, JsxDevRuntime.DOMElement>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
+    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: JS.Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, JsxDevRuntime.DOMElement>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -2810,7 +2810,7 @@ module Web =
         [<Import("Suspense", "solid-js/web")>]
         static member Suspense (props: Suspense.Props) : JSXElement = jsNative
         [<Import("Aliases", "solid-js/web")>]
-        static member Aliases: Record<string, string> = jsNative
+        static member Aliases: JS.Record<string, string> = jsNative
         [<Import("Properties", "solid-js/web")>]
         static member Properties: JS.Set<string> = jsNative
         [<Import("ChildProperties", "solid-js/web")>]
@@ -2822,7 +2822,7 @@ module Web =
         [<Import("SVGElements", "solid-js/web")>]
         static member SVGElements: JS.Set<string> = jsNative
         [<Import("SVGNamespace", "solid-js/web")>]
-        static member SVGNamespace: Record<string, string> = jsNative
+        static member SVGNamespace: JS.Record<string, string> = jsNative
         [<Import("getPropAlias", "solid-js/web")>]
         static member getPropAlias (prop: string, tagName: string) : string option = jsNative
         [<Import("render", "solid-js/web")>]
@@ -2862,9 +2862,9 @@ module Web =
         [<Import("addEventListener", "solid-js/web")>]
         static member addEventListener (node: JsxDevRuntime.DOMElement, name: string, handler: U3<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject, Web.AddEventListener.Handler>, ``delegate``: bool) : unit = jsNative
         [<Import("classList", "solid-js/web")>]
-        static member classList (node: JsxDevRuntime.DOMElement, value: Record<string, bool option>, ?prev: Record<string, bool option>) : Record<string, bool option> = jsNative
+        static member classList (node: JsxDevRuntime.DOMElement, value: JS.Record<string, bool option>, ?prev: JS.Record<string, bool option>) : JS.Record<string, bool option> = jsNative
         [<Import("style", "solid-js/web")>]
-        static member style (node: JsxDevRuntime.DOMElement, value: Record<string, string>, ?prev: Record<string, string>) : unit = jsNative
+        static member style (node: JsxDevRuntime.DOMElement, value: JS.Record<string, string>, ?prev: JS.Record<string, string>) : unit = jsNative
         [<Import("getOwner", "solid-js/web")>]
         static member getOwner () : obj = jsNative
         [<Import("dynamicProperty", "solid-js/web")>]
@@ -2947,9 +2947,9 @@ module Web =
         [<Import("ssrElement", "solid-js/web")>]
         static member ssrElement (name: string, props: obj, children: obj, needsId: bool) : Web.SsrElement.Result = jsNative
         [<Import("ssrClassList", "solid-js/web")>]
-        static member ssrClassList (value: Record<string, bool>) : string = jsNative
+        static member ssrClassList (value: JS.Record<string, bool>) : string = jsNative
         [<Import("ssrStyle", "solid-js/web")>]
-        static member ssrStyle (value: Record<string, string>) : string = jsNative
+        static member ssrStyle (value: JS.Record<string, string>) : string = jsNative
         [<Import("ssrAttribute", "solid-js/web")>]
         static member ssrAttribute (key: string, value: bool) : string = jsNative
         [<Import("ssrHydrationKey", "solid-js/web")>]

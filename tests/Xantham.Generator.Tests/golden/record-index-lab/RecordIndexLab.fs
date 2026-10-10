@@ -33,9 +33,9 @@ type Grid =
 /// </summary>
 [<Interface>]
 type Frozen =
-    abstract values: ReadonlyRecord<string, bool> with get, set
+    abstract values: JS.ReadonlyRecord<string, bool> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (values: ReadonlyRecord<string, bool>) : Frozen = jsNative
+    static member Create (values: JS.ReadonlyRecord<string, bool>) : Frozen = jsNative
 
 /// <summary>
 /// A pure index signature declared under its own name.

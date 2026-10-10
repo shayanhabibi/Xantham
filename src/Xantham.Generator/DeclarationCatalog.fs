@@ -194,13 +194,17 @@ let private packageOf (ctx: Context) (file: string) =
         | None -> find directory
 
 /// Hashes package ownership metadata and intervening module manifests.
-let private manifestHash (root: string) (file: string) =
+let private manifestHash (root: string) (file: string) rootHash =
     let rec collect directory manifests =
         let manifest = Path.Combine(directory, "package.json")
 
         let manifests =
             if File.Exists manifest then
-                (Path.GetRelativePath(root, manifest) |> slash, File.ReadAllBytes manifest |> hash)
+                (Path.GetRelativePath(root, manifest) |> slash,
+                 if directory = root then
+                     rootHash |> Option.defaultWith (fun () -> File.ReadAllBytes manifest |> hash)
+                 else
+                     File.ReadAllBytes manifest |> hash)
                 :: manifests
             else
                 manifests
@@ -216,7 +220,7 @@ let private manifestHash (root: string) (file: string) =
     | [ (_, value) ] -> value
     | values -> values |> List.sortBy fst |> json |> hashText
 
-let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
+let private sources compiler (ctx: Context) (handles: string<Measure.declHandle> list) =
     async {
         let paths =
             handles
@@ -233,6 +237,19 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
             |> List.map (fun file ->
                 async {
                     let root, package, version = packageOf ctx file
+
+                    let relative =
+                        if file.StartsWith "bundled:" then
+                            file
+                        else
+                            slash (Path.GetRelativePath(root, file))
+
+                    let library = CatalogLibrary.tryIdentity compiler root package version relative
+
+                    let package, rootHash =
+                        match library with
+                        | Some(package, fingerprint) -> package, Some fingerprint
+                        | None -> package, None
 
                     let! bytes =
                         if File.Exists file then
@@ -251,17 +268,13 @@ let private sources (ctx: Context) (handles: string<Measure.declHandle> list) =
                         {
                             Package = package
                             Version = version
-                            File =
-                                if file.StartsWith "bundled:" then
-                                    file
-                                else
-                                    slash (Path.GetRelativePath(root, file))
+                            File = relative
                             Sha256 = hash bytes
                             ManifestSha256 =
                                 if file.StartsWith "bundled:" then
                                     "bundled"
                                 else
-                                    manifestHash root file
+                                    manifestHash root file rootHash
                         }
                 })
             |> Async.Parallel
@@ -413,6 +426,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         else
             match Map.tryFind id shape.Types with
             | None -> None
+            | Some facts when intrinsicArgumentKey facts.Response <> "" ->
+                // Intrinsic checker types are shared by unrelated exports. Their aliases
+                // belong to the individual declaration, never the aggregate export handles.
+                None
             | Some facts ->
                 let flags = facts.Response.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
@@ -577,7 +594,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                     facts.Members
                                     |> List.map (fun member_ ->
                                         json (
-                                            member_.Symbol.Name,
+                                            CatalogMember.key (normalizeHandle sourceFiles) member_.Symbol
+                                            |> Option.defaultWith (fun () ->
+                                                complete <- false
+                                                ""),
                                             member_.Optional,
                                             member_.ReadOnly,
                                             partKey member_.TypeId
@@ -723,7 +743,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     let edges (facts: TypeFacts) =
         [
             for member_ in facts.Members do
-                yield member_.TypeId, "member:" + member_.Symbol.Name
+                match CatalogMember.key (normalizeHandle sourceFiles) member_.Symbol with
+                | Some key -> yield member_.TypeId, "member:" + key
+                | None -> ()
             for index, info in List.indexed facts.IndexInfos do
                 yield info.KeyTypeId, $"index:{index}:key"
                 yield info.ValueTypeId, $"index:{index}:value"
@@ -754,7 +776,11 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             |> List.collect (fun (id, parent) ->
                 edges shape.Types[id]
                 |> List.choose (fun (child, role) ->
-                    if Map.containsKey child byType || not (Map.containsKey child shape.Types) then
+                    if
+                        Map.containsKey child byType
+                        || not (Map.containsKey child shape.Types)
+                        || intrinsicArgumentKey shape.Types[child].Response <> ""
+                    then
                         None
                     else
                         Some(
@@ -1137,6 +1163,17 @@ module Canonical =
         | FsBranded(primitive, measure) -> node "branded" [ reference primitive; text measure ]
         | FsNamed name -> node "named" [ text name ]
 
+/// Rejects incompatible reference contracts before declaration traversal.
+let internal validateReferencesWithProducer producer (ctx: Context) =
+    async {
+        if not ctx.Config.DeclarationReferences.IsEmpty then
+            let! expected = producer ()
+
+            for reference in ctx.Config.DeclarationReferences do
+                let path = Path.GetFullPath(Path.Combine(ctx.PackageDir / uom<dirPath>, reference))
+                load expected path |> ignore
+    }
+
 /// Redirects matching F# references, retains public aliases and value imports, and emits a catalog.
 let internal applyWithProducer
     (producer: unit -> Async<CatalogCompatibility.Producer>)
@@ -1216,6 +1253,7 @@ let internal applyWithProducer
 
             let! sourceFiles =
                 sources
+                    producer.Contract.Compiler
                     ctx
                     (rawHandles
                      @ (inputFiles

@@ -289,15 +289,15 @@ type GlobalDescriptor =
 
 [<Interface>]
 type Instance =
-    abstract exports: Record<string, U4<JS.Function, Global, Memory, Table>>
+    abstract exports: JS.Record<string, U4<JS.Function, Global, Memory, Table>>
     [<ParamObject; Emit("$0")>]
-    static member Create (exports: Record<string, U4<JS.Function, Global, Memory, Table>>) : Instance = jsNative
+    static member Create (exports: JS.Record<string, U4<JS.Function, Global, Memory, Table>>) : Instance = jsNative
 
 type InstanceConstructor =
     [<EmitConstructor>]
-    abstract Create: ``module``: obj * ?imports: Record<string, Record<string, U5<float, JS.Function, Global, Memory, Table>>> -> Instance
+    abstract Create: ``module``: obj * ?imports: JS.Record<string, JS.Record<string, U5<float, JS.Function, Global, Memory, Table>>> -> Instance
 
-type Instantiate = delegate of ``module``: obj * imports: Record<string, Record<string, U5<float, JS.Function, Global, Memory, Table>>> option -> JS.Promise<Instance>
+type Instantiate = delegate of ``module``: obj * imports: JS.Record<string, JS.Record<string, U5<float, JS.Function, Global, Memory, Table>>> option -> JS.Promise<Instance>
 
 [<Interface>]
 type Memory =
@@ -849,9 +849,9 @@ type WritableStreamDefaultWriterConstructor =
 
 [<Interface>]
 type Cloudflare =
-    abstract compatibilityFlags: Record<string, bool>
+    abstract compatibilityFlags: JS.Record<string, bool>
     [<ParamObject; Emit("$0")>]
-    static member Create (compatibilityFlags: Record<string, bool>) : Cloudflare = jsNative
+    static member Create (compatibilityFlags: JS.Record<string, bool>) : Cloudflare = jsNative
 
 type TestController = obj
 
@@ -1328,7 +1328,7 @@ type DurableObjectTransaction =
     abstract get<'T>: keys: string[] * ?options: DurableObjectGetOptions -> JS.Promise<JS.Map<string, 'T>>
     abstract list<'T>: ?options: DurableObjectListOptions -> JS.Promise<JS.Map<string, 'T>>
     abstract put<'T>: key: string * value: 'T * ?options: DurableObjectPutOptions -> JS.Promise<unit>
-    abstract put<'T>: entries: Record<string, 'T> * ?options: DurableObjectPutOptions -> JS.Promise<unit>
+    abstract put<'T>: entries: JS.Record<string, 'T> * ?options: DurableObjectPutOptions -> JS.Promise<unit>
     abstract delete: key: string * ?options: DurableObjectPutOptions -> JS.Promise<bool>
     abstract delete: keys: string[] * ?options: DurableObjectPutOptions -> JS.Promise<float>
     abstract rollback: unit -> unit
@@ -1341,7 +1341,7 @@ type DurableObjectStorage =
     abstract get<'T>: keys: string[] * ?options: DurableObjectGetOptions -> JS.Promise<JS.Map<string, 'T>>
     abstract list<'T>: ?options: DurableObjectListOptions -> JS.Promise<JS.Map<string, 'T>>
     abstract put<'T>: key: string * value: 'T * ?options: DurableObjectPutOptions -> JS.Promise<unit>
-    abstract put<'T>: entries: Record<string, 'T> * ?options: DurableObjectPutOptions -> JS.Promise<unit>
+    abstract put<'T>: entries: JS.Record<string, 'T> * ?options: DurableObjectPutOptions -> JS.Promise<unit>
     abstract delete: key: string * ?options: DurableObjectPutOptions -> JS.Promise<bool>
     abstract delete: keys: string[] * ?options: DurableObjectPutOptions -> JS.Promise<float>
     abstract deleteAll: ?options: DurableObjectPutOptions -> JS.Promise<unit>
@@ -1494,18 +1494,18 @@ type Event =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/currentTarget">MDN Reference</a>
     /// </summary>
-    abstract currentTarget: EventTarget<Record<string, Event>> option
+    abstract currentTarget: EventTarget<JS.Record<string, Event>> option
     /// <summary>
     /// The read-only <b><c>target</c></b> property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/target">MDN Reference</a>
     /// </summary>
-    abstract target: EventTarget<Record<string, Event>> option
+    abstract target: EventTarget<JS.Record<string, Event>> option
     /// <summary>
     /// The deprecated <b><c>Event.srcElement</c></b> is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Event/srcElement">MDN Reference</a></remarks>
-    abstract srcElement: EventTarget<Record<string, Event>> option
+    abstract srcElement: EventTarget<JS.Record<string, Event>> option
     /// <summary>
     /// The <b><c>timeStamp</c></b> read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     /// <br /><br />
@@ -1547,9 +1547,9 @@ type Event =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Event/composedPath">MDN Reference</a>
     /// </summary>
-    abstract composedPath: unit -> EventTarget<Record<string, Event>>[]
+    abstract composedPath: unit -> EventTarget<JS.Record<string, Event>>[]
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : Event = jsNative
+    static member Create (``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : Event = jsNative
     [<Global("Event.NONE")>]
     static member NONE: float = jsNative
     [<Global("Event.CAPTURING_PHASE")>]
@@ -1655,7 +1655,7 @@ type AbortController =
 /// </summary>
 [<Interface>]
 type AbortSignal =
-    inherit EventTarget<Record<string, Event>>
+    inherit EventTarget<JS.Record<string, Event>>
     /// <summary>
     /// The <b><c>aborted</c></b> read-only property returns a value that indicates whether the asynchronous operations the signal is communicating with are aborted (true) or not (false).
     /// <br /><br />
@@ -1743,7 +1743,7 @@ type ExtendableEvent =
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (waitUntil: (JS.Promise<obj> -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : ExtendableEvent = jsNative
+    static member Create (waitUntil: (JS.Promise<obj> -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : ExtendableEvent = jsNative
     [<Global("ExtendableEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("ExtendableEvent.CAPTURING_PHASE")>]
@@ -1768,7 +1768,7 @@ type CustomEvent<'T> =
     /// </summary>
     abstract detail: 'T
     [<ParamObject; Emit("$0")>]
-    static member Create (detail: 'T, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : CustomEvent<'T> = jsNative
+    static member Create (detail: 'T, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : CustomEvent<'T> = jsNative
     [<Global("CustomEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("CustomEvent.CAPTURING_PHASE")>]
@@ -2332,7 +2332,7 @@ type ErrorEvent =
     /// </summary>
     abstract error: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (filename: string, message: string, lineno: float, colno: float, error: obj, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : ErrorEvent = jsNative
+    static member Create (filename: string, message: string, lineno: float, colno: float, error: obj, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : ErrorEvent = jsNative
     [<Global("ErrorEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("ErrorEvent.CAPTURING_PHASE")>]
@@ -2394,7 +2394,7 @@ type MessageEvent =
     /// </summary>
     abstract ports: MessagePort[]
     [<ParamObject; Emit("$0")>]
-    static member Create (data: obj, lastEventId: string, ports: MessagePort[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?origin: string, ?source: MessagePort, ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : MessageEvent = jsNative
+    static member Create (data: obj, lastEventId: string, ports: MessagePort[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), ?origin: string, ?source: MessagePort, ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : MessageEvent = jsNative
     [<Global("MessageEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("MessageEvent.CAPTURING_PHASE")>]
@@ -2438,7 +2438,7 @@ type PromiseRejectionEvent =
     /// </summary>
     abstract reason: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (promise: JS.Promise<obj>, reason: obj, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : PromiseRejectionEvent = jsNative
+    static member Create (promise: JS.Promise<obj>, reason: obj, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : PromiseRejectionEvent = jsNative
     [<Global("PromiseRejectionEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("PromiseRejectionEvent.CAPTURING_PHASE")>]
@@ -2640,7 +2640,7 @@ type FetchEvent =
     abstract respondWith: promise: U2<JS.Promise<Response>, Response> -> unit
     abstract passThroughOnException: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, respondWith: (U2<JS.Promise<Response>, Response> -> unit), passThroughOnException: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : FetchEvent = jsNative
+    static member Create (request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, respondWith: (U2<JS.Promise<Response>, Response> -> unit), passThroughOnException: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : FetchEvent = jsNative
     [<Global("FetchEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("FetchEvent.CAPTURING_PHASE")>]
@@ -3106,7 +3106,7 @@ type QueueEvent<'Body> =
     abstract retryAll: ?options: QueueRetryOptions -> unit
     abstract ackAll: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (messages: Message<'Body>[], queue: string, metadata: MessageBatchMetadata, retryAll: (QueueRetryOptions option -> unit), ackAll: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : QueueEvent<'Body> = jsNative
+    static member Create (messages: Message<'Body>[], queue: string, metadata: MessageBatchMetadata, retryAll: (QueueRetryOptions option -> unit), ackAll: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : QueueEvent<'Body> = jsNative
 
 [<Interface>]
 type MessageBatch<'Body> =
@@ -3195,13 +3195,13 @@ type R2Object =
     abstract checksums: R2Checksums
     abstract uploaded: JS.Date
     abstract httpMetadata: R2HTTPMetadata option
-    abstract customMetadata: Record<string, string> option
+    abstract customMetadata: JS.Record<string, string> option
     abstract range: R2Range option
     abstract storageClass: string
     abstract ssecKeyMd5: string option
     abstract writeHttpMetadata: headers: Headers -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (key: string, version: string, size: float, etag: string, httpEtag: string, checksums: R2Checksums, uploaded: JS.Date, storageClass: string, writeHttpMetadata: (Headers -> unit), ?httpMetadata: R2HTTPMetadata, ?customMetadata: Record<string, string>, ?range: R2Range, ?ssecKeyMd5: string) : R2Object = jsNative
+    static member Create (key: string, version: string, size: float, etag: string, httpEtag: string, checksums: R2Checksums, uploaded: JS.Date, storageClass: string, writeHttpMetadata: (Headers -> unit), ?httpMetadata: R2HTTPMetadata, ?customMetadata: JS.Record<string, string>, ?range: R2Range, ?ssecKeyMd5: string) : R2Object = jsNative
 
 [<Interface>]
 type R2ObjectBody =
@@ -3214,7 +3214,7 @@ type R2ObjectBody =
     abstract json<'T>: unit -> JS.Promise<'T>
     abstract blob: unit -> JS.Promise<Blob>
     [<ParamObject; Emit("$0")>]
-    static member Create (body: ReadableStream<obj>, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>), bytes: (unit -> JS.Promise<JS.Uint8Array>), text: (unit -> JS.Promise<string>), json: (unit -> JS.Promise<'T>), blob: (unit -> JS.Promise<Blob>), key: string, version: string, size: float, etag: string, httpEtag: string, checksums: R2Checksums, uploaded: JS.Date, storageClass: string, writeHttpMetadata: (Headers -> unit), ?httpMetadata: R2HTTPMetadata, ?customMetadata: Record<string, string>, ?range: R2Range, ?ssecKeyMd5: string) : R2ObjectBody = jsNative
+    static member Create (body: ReadableStream<obj>, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>), bytes: (unit -> JS.Promise<JS.Uint8Array>), text: (unit -> JS.Promise<string>), json: (unit -> JS.Promise<'T>), blob: (unit -> JS.Promise<Blob>), key: string, version: string, size: float, etag: string, httpEtag: string, checksums: R2Checksums, uploaded: JS.Date, storageClass: string, writeHttpMetadata: (Headers -> unit), ?httpMetadata: R2HTTPMetadata, ?customMetadata: JS.Record<string, string>, ?range: R2Range, ?ssecKeyMd5: string) : R2ObjectBody = jsNative
 
 type R2Range = U3<R2Object.Range, R2Object.Range2, R2Object.Range3>
 
@@ -3240,7 +3240,7 @@ type R2GetOptions =
 type R2PutOptions =
     abstract onlyIf: U2<Headers, R2Conditional> option with get, set
     abstract httpMetadata: U2<Headers, R2HTTPMetadata> option with get, set
-    abstract customMetadata: Record<string, string> option with get, set
+    abstract customMetadata: JS.Record<string, string> option with get, set
     abstract md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
@@ -3249,16 +3249,16 @@ type R2PutOptions =
     abstract storageClass: string option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: Record<string, string>, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2PutOptions = jsNative
+    static member Create (?onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: JS.Record<string, string>, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2PutOptions = jsNative
 
 [<Interface>]
 type R2MultipartOptions =
     abstract httpMetadata: U2<Headers, R2HTTPMetadata> option with get, set
-    abstract customMetadata: Record<string, string> option with get, set
+    abstract customMetadata: JS.Record<string, string> option with get, set
     abstract storageClass: string option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: Record<string, string>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2MultipartOptions = jsNative
+    static member Create (?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: JS.Record<string, string>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2MultipartOptions = jsNative
 
 [<Interface>]
 type R2Checksums =
@@ -3307,7 +3307,7 @@ type ScheduledEvent =
     abstract cron: string
     abstract noRetry: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (scheduledTime: float, cron: string, noRetry: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : ScheduledEvent = jsNative
+    static member Create (scheduledTime: float, cron: string, noRetry: (unit -> unit), ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : ScheduledEvent = jsNative
     [<Global("ScheduledEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("ScheduledEvent.CAPTURING_PHASE")>]
@@ -4018,7 +4018,7 @@ type TailEvent =
     abstract events: TraceItem[]
     abstract traces: TraceItem[]
     [<ParamObject; Emit("$0")>]
-    static member Create (events: TraceItem[], traces: TraceItem[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : TailEvent = jsNative
+    static member Create (events: TraceItem[], traces: TraceItem[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : TailEvent = jsNative
     [<Global("TailEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("TailEvent.CAPTURING_PHASE")>]
@@ -4040,7 +4040,7 @@ type TraceItem =
     abstract scriptVersion: ScriptVersion option
     abstract dispatchNamespace: string option
     abstract scriptTags: string[] option
-    abstract tailAttributes: Record<string, U3<string, float, bool>> option
+    abstract tailAttributes: JS.Record<string, U3<string, float, bool>> option
     abstract preview: TracePreviewInfo option
     abstract durableObjectId: string option
     abstract outcome: string
@@ -4049,7 +4049,7 @@ type TraceItem =
     abstract cpuTime: float
     abstract wallTime: float
     [<ParamObject; Emit("$0")>]
-    static member Create (logs: TraceLog[], exceptions: TraceException[], diagnosticsChannelEvents: TraceDiagnosticChannelEvent[], outcome: string, executionModel: string, truncated: bool, cpuTime: float, wallTime: float, ?``event``: obj, ?eventTimestamp: float, ?scriptName: string, ?entrypoint: string, ?scriptVersion: ScriptVersion, ?dispatchNamespace: string, ?scriptTags: string[], ?tailAttributes: Record<string, U3<string, float, bool>>, ?preview: TracePreviewInfo, ?durableObjectId: string) : TraceItem = jsNative
+    static member Create (logs: TraceLog[], exceptions: TraceException[], diagnosticsChannelEvents: TraceDiagnosticChannelEvent[], outcome: string, executionModel: string, truncated: bool, cpuTime: float, wallTime: float, ?``event``: obj, ?eventTimestamp: float, ?scriptName: string, ?entrypoint: string, ?scriptVersion: ScriptVersion, ?dispatchNamespace: string, ?scriptTags: string[], ?tailAttributes: JS.Record<string, U3<string, float, bool>>, ?preview: TracePreviewInfo, ?durableObjectId: string) : TraceItem = jsNative
 
 [<Interface>]
 type TraceItemAlarmEventInfo =
@@ -4105,12 +4105,12 @@ type TraceItemFetchEventInfo =
 [<Interface>]
 type TraceItemFetchEventInfoRequest =
     abstract cf: obj option
-    abstract headers: Record<string, string>
+    abstract headers: JS.Record<string, string>
     abstract ``method``: string
     abstract url: string
     abstract getUnredacted: unit -> TraceItemFetchEventInfoRequest
     [<ParamObject; Emit("$0")>]
-    static member Create (headers: Record<string, string>, ``method``: string, url: string, getUnredacted: (unit -> TraceItemFetchEventInfoRequest), ?cf: obj) : TraceItemFetchEventInfoRequest = jsNative
+    static member Create (headers: JS.Record<string, string>, ``method``: string, url: string, getUnredacted: (unit -> TraceItemFetchEventInfoRequest), ?cf: obj) : TraceItemFetchEventInfoRequest = jsNative
 
 [<Interface>]
 type TraceItemFetchEventInfoResponse =
@@ -4470,9 +4470,9 @@ type URLPatternInit =
 [<Interface>]
 type URLPatternComponentResult =
     abstract input: string with get, set
-    abstract groups: Record<string, string> with get, set
+    abstract groups: JS.Record<string, string> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (input: string, groups: Record<string, string>) : URLPatternComponentResult = jsNative
+    static member Create (input: string, groups: JS.Record<string, string>) : URLPatternComponentResult = jsNative
 
 [<Interface>]
 type URLPatternResult =
@@ -4521,7 +4521,7 @@ type CloseEvent =
     /// </summary>
     abstract wasClean: bool
     [<ParamObject; Emit("$0")>]
-    static member Create (code: float, reason: string, wasClean: bool, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : CloseEvent = jsNative
+    static member Create (code: float, reason: string, wasClean: bool, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : CloseEvent = jsNative
     [<Global("CloseEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("CloseEvent.CAPTURING_PHASE")>]
@@ -4735,7 +4735,7 @@ type SocketInfo =
 /// </summary>
 [<Interface>]
 type EventSource =
-    inherit EventTarget<Record<string, Event>>
+    inherit EventTarget<JS.Record<string, Event>>
     /// <summary>
     /// The <b><c>close()</c></b> method of the EventSource interface closes the connection, if one is made, and sets the EventSource.readyState attribute to 2 (closed).
     /// <br /><br />
@@ -4804,7 +4804,7 @@ type ExecOutput =
 [<Interface>]
 type ContainerExecOptions =
     abstract cwd: string option with get, set
-    abstract env: Record<string, string> option with get, set
+    abstract env: JS.Record<string, string> option with get, set
     abstract user: string option with get, set
     abstract signal: AbortSignal option with get, set
     abstract pty: U2<bool, ContainerExecPtyOptions> option with get, set
@@ -4812,7 +4812,7 @@ type ContainerExecOptions =
     abstract stdout: ContainerExecOptions.Stdout option with get, set
     abstract stderr: ContainerExecOptions.Stderr option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?cwd: string, ?env: Record<string, string>, ?user: string, ?signal: AbortSignal, ?pty: U2<bool, ContainerExecPtyOptions>, ?stdin: U2<string, ReadableStream<obj>>, ?stdout: ContainerExecOptions.Stdout, ?stderr: ContainerExecOptions.Stderr) : ContainerExecOptions = jsNative
+    static member Create (?cwd: string, ?env: JS.Record<string, string>, ?user: string, ?signal: AbortSignal, ?pty: U2<bool, ContainerExecPtyOptions>, ?stdin: U2<string, ReadableStream<obj>>, ?stdout: ContainerExecOptions.Stdout, ?stderr: ContainerExecOptions.Stderr) : ContainerExecOptions = jsNative
 
 [<Interface>]
 type ContainerExecPtyOptions =
@@ -4895,16 +4895,16 @@ type ContainerSnapshotOptions =
 type ContainerStartupOptions =
     abstract entrypoint: string[] option with get, set
     abstract enableInternet: bool with get, set
-    abstract env: Record<string, string> option with get, set
+    abstract env: JS.Record<string, string> option with get, set
     abstract instance: U2<string, ContainerStartResources> option with get, set
-    abstract labels: Record<string, string> option with get, set
+    abstract labels: JS.Record<string, string> option with get, set
     abstract directorySnapshots: ContainerDirectorySnapshotRestoreParams[] option with get, set
     abstract image: string option with get, set
     abstract containerSnapshot: ContainerSnapshotRestoreParams option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (enableInternet: bool, image: string, ?entrypoint: string[], ?env: Record<string, string>, ?instance: U2<string, ContainerStartResources>, ?labels: Record<string, string>, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[]) : ContainerStartupOptions = jsNative
+    static member Create (enableInternet: bool, image: string, ?entrypoint: string[], ?env: JS.Record<string, string>, ?instance: U2<string, ContainerStartResources>, ?labels: JS.Record<string, string>, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[]) : ContainerStartupOptions = jsNative
     [<ParamObject; Emit("$0")>]
-    static member Create (enableInternet: bool, ?entrypoint: string[], ?env: Record<string, string>, ?instance: U2<string, ContainerStartResources>, ?labels: Record<string, string>, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?containerSnapshot: ContainerSnapshotRestoreParams) : ContainerStartupOptions = jsNative
+    static member Create (enableInternet: bool, ?entrypoint: string[], ?env: JS.Record<string, string>, ?instance: U2<string, ContainerStartResources>, ?labels: JS.Record<string, string>, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?containerSnapshot: ContainerSnapshotRestoreParams) : ContainerStartupOptions = jsNative
 
 [<Interface>]
 type ContainerStartResources =
@@ -4921,7 +4921,7 @@ type ContainerStartResources =
 /// </summary>
 [<Interface>]
 type MessagePort =
-    inherit EventTarget<Record<string, Event>>
+    inherit EventTarget<JS.Record<string, Event>>
     /// <summary>
     /// The <b><c>postMessage()</c></b> method of the MessagePort interface sends a message from the port, and optionally, transfers ownership of objects to other browsing contexts.
     /// <br /><br />
@@ -5068,13 +5068,13 @@ type WorkerLoaderWorkerCode =
     abstract allowExperimental: bool option with get, set
     abstract limits: workerdResourceLimits option with get, set
     abstract mainModule: string with get, set
-    abstract modules: Record<string, obj> with get, set
+    abstract modules: JS.Record<string, obj> with get, set
     abstract env: obj option with get, set
     abstract globalOutbound: Request.Fetcher option with get, set
     abstract tails: Request.Fetcher[] option with get, set
     abstract streamingTails: Request.Fetcher[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (compatibilityDate: string, mainModule: string, modules: Record<string, obj>, ?compatibilityFlags: string[], ?allowExperimental: bool, ?limits: workerdResourceLimits, ?env: obj, ?globalOutbound: Request.Fetcher, ?tails: Request.Fetcher[], ?streamingTails: Request.Fetcher[]) : WorkerLoaderWorkerCode = jsNative
+    static member Create (compatibilityDate: string, mainModule: string, modules: JS.Record<string, obj>, ?compatibilityFlags: string[], ?allowExperimental: bool, ?limits: workerdResourceLimits, ?env: obj, ?globalOutbound: Request.Fetcher, ?tails: Request.Fetcher[], ?streamingTails: Request.Fetcher[]) : WorkerLoaderWorkerCode = jsNative
 
 [<Interface>]
 type workerdResourceLimits =
@@ -5091,7 +5091,7 @@ type workerdResourceLimits =
 /// </summary>
 [<Interface>]
 type Performance =
-    inherit EventTarget<Record<string, Event>>
+    inherit EventTarget<JS.Record<string, Event>>
     abstract timeOrigin: float
     abstract now: unit -> float
     abstract eventCounts: EventCounts
@@ -5508,10 +5508,10 @@ type Tracing =
 type Span =
     abstract isTraced: bool
     abstract setAttribute: key: string * value: U3<string, float, bool> -> Span
-    abstract setAttributes: attributes: Record<string, U3<string, float, bool> option> -> Span
+    abstract setAttributes: attributes: JS.Record<string, U3<string, float, bool> option> -> Span
     abstract ``end``: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (isTraced: bool, setAttribute: Func<string, U3<string, float, bool>, Span>, setAttributes: (Record<string, U3<string, float, bool> option> -> Span), ``end``: (unit -> unit)) : Span = jsNative
+    static member Create (isTraced: bool, setAttribute: Func<string, U3<string, float, bool>, Span>, setAttributes: (JS.Record<string, U3<string, float, bool> option> -> Span), ``end``: (unit -> unit)) : Span = jsNative
 
 /// <summary>
 /// Represents the identity of a user authenticated via Cloudflare Access.
@@ -5565,7 +5565,7 @@ type CloudflareAccessIdentity =
     /// <summary>
     /// Device posture check results, keyed by check ID.
     /// </summary>
-    abstract devicePosture: Record<string, obj> option with get, set
+    abstract devicePosture: JS.Record<string, obj> option with get, set
     /// <summary>
     /// True if the user connected via Cloudflare WARP.
     /// </summary>
@@ -6169,7 +6169,7 @@ type AiSearchInstanceInfo =
     /// Sync interval in seconds.
     /// </summary>
     abstract sync_interval: AiSearchInstanceInfo.SyncInterval option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
@@ -6264,7 +6264,7 @@ type AiSearchConfig =
     /// Sync interval in seconds. 3600=1h, 7200=2h, 14400=4h, 21600=6h, 43200=12h, 86400=24h.
     /// </summary>
     abstract sync_interval: AiSearchInstanceInfo.SyncInterval option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
@@ -6281,7 +6281,7 @@ type AiSearchItemInfo =
     abstract source_id: string option with get, set
     abstract last_seen_at: string option with get, set
     abstract created_at: string option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
@@ -6296,9 +6296,9 @@ type AiSearchItemContentResult =
 
 [<Interface>]
 type AiSearchUploadItemOptions =
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?metadata: Record<string, obj>) : AiSearchUploadItemOptions = jsNative
+    static member Create (?metadata: JS.Record<string, obj>) : AiSearchUploadItemOptions = jsNative
 
 [<Interface>]
 type AiSearchListItemsParams =
@@ -7191,10 +7191,10 @@ type ChatCompletionContentPart =
 type FunctionDefinition =
     abstract name: string with get, set
     abstract description: string option with get, set
-    abstract parameters: Record<string, obj> option with get, set
+    abstract parameters: JS.Record<string, obj> option with get, set
     abstract strict: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ?description: string, ?parameters: Record<string, obj>, ?strict: bool) : FunctionDefinition = jsNative
+    static member Create (name: string, ?description: string, ?parameters: JS.Record<string, obj>, ?strict: bool) : FunctionDefinition = jsNative
 
 [<Interface>]
 type ChatCompletionFunctionTool =
@@ -7443,12 +7443,12 @@ type ChatCompletionsCommonOptions =
     abstract model: string option with get, set
     abstract audio: AudioParams option with get, set
     abstract frequency_penalty: float option with get, set
-    abstract logit_bias: Record<string, obj> option with get, set
+    abstract logit_bias: JS.Record<string, obj> option with get, set
     abstract logprobs: bool option with get, set
     abstract top_logprobs: float option with get, set
     abstract max_tokens: float option with get, set
     abstract max_completion_tokens: float option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract modalities: ChatCompletionsCommonOptions.Modalities.Item[] option with get, set
     abstract n: float option with get, set
     abstract parallel_tool_calls: bool option with get, set
@@ -7653,12 +7653,12 @@ type EasyInputMessage =
 [<Interface>]
 type ResponsesFunctionTool =
     abstract name: string with get, set
-    abstract parameters: Record<string, obj> option with get, set
+    abstract parameters: JS.Record<string, obj> option with get, set
     abstract strict: bool option with get, set
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ``type``: string, ?parameters: Record<string, obj>, ?strict: bool, ?description: string) : ResponsesFunctionTool = jsNative
+    static member Create (name: string, ``type``: string, ?parameters: JS.Record<string, obj>, ?strict: bool, ?description: string) : ResponsesFunctionTool = jsNative
 
 [<Interface>]
 type ResponseIncompleteDetails =
@@ -7669,10 +7669,10 @@ type ResponseIncompleteDetails =
 [<Interface>]
 type ResponsePrompt =
     abstract id: string with get, set
-    abstract variables: Record<string, U3<string, ResponseInputImage, ResponseInputText>> option with get, set
+    abstract variables: JS.Record<string, U3<string, ResponseInputImage, ResponseInputText>> option with get, set
     abstract version: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ?variables: Record<string, U3<string, ResponseInputImage, ResponseInputText>>, ?version: string) : ResponsePrompt = jsNative
+    static member Create (id: string, ?variables: JS.Record<string, U3<string, ResponseInputImage, ResponseInputText>>, ?version: string) : ResponsePrompt = jsNative
 
 [<Interface>]
 type Reasoning =
@@ -7761,17 +7761,17 @@ type ResponseFormatJSONObject =
 type ResponseFormatTextConfig =
     | [<CompiledName("json_object")>] JsonObject
     | [<CompiledName("text")>] Text
-    | [<CompiledName("json_schema")>] JsonSchema of name: string * schema: Record<string, obj> * description: string option * strict: bool option
+    | [<CompiledName("json_schema")>] JsonSchema of name: string * schema: JS.Record<string, obj> * description: string option * strict: bool option
 
 [<Interface>]
 type ResponseFormatTextJSONSchemaConfig =
     abstract name: string with get, set
-    abstract schema: Record<string, obj> with get, set
+    abstract schema: JS.Record<string, obj> with get, set
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     abstract strict: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, schema: Record<string, obj>, ``type``: string, ?description: string, ?strict: bool) : ResponseFormatTextJSONSchemaConfig = jsNative
+    static member Create (name: string, schema: JS.Record<string, obj>, ``type``: string, ?description: string, ?strict: bool) : ResponseFormatTextJSONSchemaConfig = jsNative
 
 [<Interface>]
 type ResponseFunctionCallArgumentsDeltaEvent =
@@ -11580,7 +11580,7 @@ type AiInternalError =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, message: string, ?stack: string, ?cause: obj) : AiInternalError = jsNative
 
-type AiModelListType = Record<string, obj>
+type AiModelListType = JS.Record<string, obj>
 
 [<Interface>]
 type AiAsyncBatchResponse =
@@ -11609,7 +11609,7 @@ type Ai<'AiModelList> =
     abstract run: model: keyof<'AiModelList> * inputs: obj * options: Ai.Run.Options2 -> JS.Promise<Response>
     abstract run: model: keyof<'AiModelList> * inputs: obj * options: Ai.Run.Options3 -> JS.Promise<Response>
     abstract run: model: keyof<'AiModelList> * inputs: obj * ?options: AiOptions -> JS.Promise<ReadableStream<obj>>
-    abstract run: model: obj * inputs: Record<string, obj> * ?options: AiOptions -> JS.Promise<Record<string, obj>>
+    abstract run: model: obj * inputs: JS.Record<string, obj> * ?options: AiOptions -> JS.Promise<JS.Record<string, obj>>
     abstract models: ?``params``: AiModelsSearchParams -> JS.Promise<AiModelsSearchObject[]>
     abstract toMarkdown: unit -> ToMarkdownService
     abstract toMarkdown: files: MarkdownDocument[] * ?options: ConversionRequestOptions -> JS.Promise<ConversionResponse[]>
@@ -11650,27 +11650,27 @@ type GatewayOptions =
     abstract cacheKey: string option with get, set
     abstract cacheTtl: float option with get, set
     abstract skipCache: bool option with get, set
-    abstract metadata: Record<string, U4<string, float, bigint, bool> option> option with get, set
+    abstract metadata: JS.Record<string, U4<string, float, bigint, bool> option> option with get, set
     abstract collectLog: bool option with get, set
     abstract eventId: string option with get, set
     abstract requestTimeoutMs: float option with get, set
     abstract retries: GatewayRetries option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : GatewayOptions = jsNative
+    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: JS.Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : GatewayOptions = jsNative
 
 [<Interface>]
 type UniversalGatewayOptions =
     inherit GatewayOptions
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : UniversalGatewayOptions = jsNative
+    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: JS.Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : UniversalGatewayOptions = jsNative
 
 [<Interface>]
 type AiGatewayPatchLog =
     abstract score: float option with get, set
     abstract feedback: AiGatewayPatchLog.Feedback option with get, set
-    abstract metadata: Record<string, U4<string, float, bigint, bool> option> option with get, set
+    abstract metadata: JS.Record<string, U4<string, float, bigint, bool> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?score: float, ?feedback: AiGatewayPatchLog.Feedback, ?metadata: Record<string, U4<string, float, bigint, bool> option>) : AiGatewayPatchLog = jsNative
+    static member Create (?score: float, ?feedback: AiGatewayPatchLog.Feedback, ?metadata: JS.Record<string, U4<string, float, bigint, bool> option>) : AiGatewayPatchLog = jsNative
 
 type AiGatewayLog =
     abstract id: string with get, set
@@ -11687,7 +11687,7 @@ type AiGatewayLog =
     abstract cached: bool with get, set
     abstract tokens_in: float option with get, set
     abstract tokens_out: float option with get, set
-    abstract metadata: Record<string, U4<string, float, bigint, bool> option> option with get, set
+    abstract metadata: JS.Record<string, U4<string, float, bigint, bool> option> option with get, set
     abstract step: float option with get, set
     abstract cost: float option with get, set
     abstract custom_cost: bool option with get, set
@@ -11723,7 +11723,7 @@ type AIGatewayProviders =
     | [<CompiledName("workers-ai")>] WorkersAi
 
 type AIGatewayHeaders =
-    abstract ``cf-aig-metadata``: U2<string, Record<string, U4<string, float, bigint, bool> option>> with get, set
+    abstract ``cf-aig-metadata``: U2<string, JS.Record<string, U4<string, float, bigint, bool> option>> with get, set
     abstract ``cf-aig-custom-cost``: U3<string, AIGatewayUniversalRequest.Headers.CfAigCustomCost, AIGatewayUniversalRequest.Headers.CfAigCustomCost2> with get, set
     abstract ``cf-aig-cache-ttl``: U2<string, float> with get, set
     abstract ``cf-aig-skip-cache``: U2<string, bool> with get, set
@@ -12362,7 +12362,7 @@ type BrowserRunBaseOptions =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: Record<string, string> option with get, set
+    abstract setExtraHTTPHeaders: JS.Record<string, string> option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -12401,7 +12401,7 @@ type BrowserRunBaseOptions =
     /// <defaultValue>5</defaultValue>
     abstract cacheTTL: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunBaseOptions = jsNative
+    static member Create (?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunBaseOptions = jsNative
 
 /// <summary>
 /// Backend selection, mixed into the options of the quick actions that support it.
@@ -12430,7 +12430,7 @@ type BrowserRunCommonOptions2 =
     /// </summary>
     abstract url: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunCommonOptions3 =
@@ -12440,7 +12440,7 @@ type BrowserRunCommonOptions3 =
     /// </summary>
     abstract html: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions3 = jsNative
 
 [<Interface>]
 type BrowserRunPuppeteerScreenshotOptions =
@@ -12479,7 +12479,7 @@ type BrowserRunScreenshotOptions2 =
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
     abstract screenshotOptions: BrowserRunPuppeteerScreenshotOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunScreenshotOptions3 =
@@ -12500,7 +12500,7 @@ type BrowserRunScreenshotOptions3 =
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
     abstract screenshotOptions: BrowserRunPuppeteerScreenshotOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions3 = jsNative
 
 type BrowserRunPDFOptions = U2<BrowserRunPDFOptions2, BrowserRunPDFOptions3>
 
@@ -12515,7 +12515,7 @@ type BrowserRunPDFOptions2 =
     /// <remarks>@see https://pptr.dev/api/puppeteer.pdfoptions</remarks>
     abstract pdfOptions: BrowserRunPDFOptions2.PdfOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2.PdfOptions, ?browser: string) : BrowserRunPDFOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2.PdfOptions, ?browser: string) : BrowserRunPDFOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunPDFOptions3 =
@@ -12528,7 +12528,7 @@ type BrowserRunPDFOptions3 =
     /// <remarks>@see https://pptr.dev/api/puppeteer.pdfoptions</remarks>
     abstract pdfOptions: BrowserRunPDFOptions2.PdfOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2.PdfOptions, ?browser: string) : BrowserRunPDFOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2.PdfOptions, ?browser: string) : BrowserRunPDFOptions3 = jsNative
 
 type BrowserRunScrapeOptions = U2<BrowserRunScrapeOptions2, BrowserRunScrapeOptions3>
 
@@ -12544,7 +12544,7 @@ type BrowserRunScrapeOptions2 =
     /// </summary>
     abstract elements: BrowserRunScrapeOptions2.Elements.Item[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, elements: BrowserRunScrapeOptions2.Elements.Item[], ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions2 = jsNative
+    static member Create (url: string, elements: BrowserRunScrapeOptions2.Elements.Item[], ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunScrapeOptions3 =
@@ -12558,7 +12558,7 @@ type BrowserRunScrapeOptions3 =
     /// </summary>
     abstract elements: BrowserRunScrapeOptions2.Elements.Item[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, elements: BrowserRunScrapeOptions2.Elements.Item[], ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions3 = jsNative
+    static member Create (html: string, elements: BrowserRunScrapeOptions2.Elements.Item[], ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions3 = jsNative
 
 type BrowserRunLinksOptions = U2<BrowserRunLinksOptions2, BrowserRunLinksOptions3>
 
@@ -12580,7 +12580,7 @@ type BrowserRunLinksOptions2 =
     /// <defaultValue>false</defaultValue>
     abstract excludeExternalLinks: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunLinksOptions3 =
@@ -12600,7 +12600,7 @@ type BrowserRunLinksOptions3 =
     /// <defaultValue>false</defaultValue>
     abstract excludeExternalLinks: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions3 = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BrowserRunSnapshotFormat =
@@ -12627,7 +12627,7 @@ type BrowserRunSnapshotOptions2 =
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
     abstract screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions) : BrowserRunSnapshotOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions) : BrowserRunSnapshotOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunSnapshotOptions3 =
@@ -12645,7 +12645,7 @@ type BrowserRunSnapshotOptions3 =
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
     abstract screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions) : BrowserRunSnapshotOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: BrowserRunSnapshotOptions2.ScreenshotOptions) : BrowserRunSnapshotOptions3 = jsNative
 
 /// <summary>
 /// Options for the <c>accessibilityTree</c> quick action.
@@ -12673,7 +12673,7 @@ type BrowserRunAccessibilityTreeOptions2 =
     /// </summary>
     abstract root: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunAccessibilityTreeOptions3 =
@@ -12696,7 +12696,7 @@ type BrowserRunAccessibilityTreeOptions3 =
     /// </summary>
     abstract root: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions3 = jsNative
 
 [<Interface>]
 type BrowserRunJsonBaseOptions =
@@ -12732,7 +12732,7 @@ type BrowserRunJsonOptions2 =
     /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
     abstract response_format: AiTextGenerationResponseFormat option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, prompt: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions2 = jsNative
+    static member Create (url: string, prompt: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunJsonOptions3 =
@@ -12753,7 +12753,7 @@ type BrowserRunJsonOptions3 =
     /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
     abstract response_format: AiTextGenerationResponseFormat with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[], ?prompt: string) : BrowserRunJsonOptions3 = jsNative
+    static member Create (url: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[], ?prompt: string) : BrowserRunJsonOptions3 = jsNative
 
 [<Interface>]
 type BrowserRunJsonOptions4 =
@@ -12774,7 +12774,7 @@ type BrowserRunJsonOptions4 =
     /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
     abstract response_format: AiTextGenerationResponseFormat option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, prompt: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions4 = jsNative
+    static member Create (html: string, prompt: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions4 = jsNative
 
 [<Interface>]
 type BrowserRunJsonOptions5 =
@@ -12795,7 +12795,7 @@ type BrowserRunJsonOptions5 =
     /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
     abstract response_format: AiTextGenerationResponseFormat with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[], ?prompt: string) : BrowserRunJsonOptions5 = jsNative
+    static member Create (html: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptions.CustomAi.Item[], ?prompt: string) : BrowserRunJsonOptions5 = jsNative
 
 type BrowserRunContentOptions = U2<BrowserRunContentOptions2, BrowserRunContentOptions3>
 
@@ -12808,7 +12808,7 @@ type BrowserRunContentOptions2 =
     /// </summary>
     abstract url: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunContentOptions3 =
@@ -12819,7 +12819,7 @@ type BrowserRunContentOptions3 =
     /// </summary>
     abstract html: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptions.AddScriptTag.Item[], ?addStyleTag: BrowserRunBaseOptions.AddStyleTag.Item[], ?authenticate: BrowserRunBaseOptions.Authenticate, ?cookies: BrowserRunBaseOptions.Cookies.Item[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptions.GotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: JS.Record<string, string>, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptions.Viewport, ?waitForSelector: BrowserRunBaseOptions.WaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions3 = jsNative
 
 type BrowserRunMarkdownOptions = BrowserRunContentOptions
 
@@ -12836,9 +12836,9 @@ type BrowserRunRedirectHop =
     /// <summary>
     /// Redirect response headers, including <c>location</c>.
     /// </summary>
-    abstract headers: Record<string, string> with get, set
+    abstract headers: JS.Record<string, string> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, status: float, headers: Record<string, string>) : BrowserRunRedirectHop = jsNative
+    static member Create (url: string, status: float, headers: JS.Record<string, string>) : BrowserRunRedirectHop = jsNative
 
 [<Interface>]
 type BrowserRunResponseMeta =
@@ -12853,7 +12853,7 @@ type BrowserRunResponseMeta =
     /// <summary>
     /// Origin response headers, lowercased. Repeated headers are joined with a newline. Credential and transport-only headers that do not survive rendering are omitted.
     /// </summary>
-    abstract headers: Record<string, string> option with get, set
+    abstract headers: JS.Record<string, string> option with get, set
     /// <summary>
     /// URL that served the response, after any redirects the browser followed.
     /// </summary>
@@ -12863,7 +12863,7 @@ type BrowserRunResponseMeta =
     /// </summary>
     abstract redirectChain: BrowserRunRedirectHop[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (status: float, title: string, ?headers: Record<string, string>, ?finalUrl: string, ?redirectChain: BrowserRunRedirectHop[]) : BrowserRunResponseMeta = jsNative
+    static member Create (status: float, title: string, ?headers: JS.Record<string, string>, ?finalUrl: string, ?redirectChain: BrowserRunRedirectHop[]) : BrowserRunResponseMeta = jsNative
 
 /// <summary>
 /// A node in the page's accessibility tree, as exposed to assistive technology.
@@ -13024,10 +13024,10 @@ type BrowserRunJsonSuccessResponse =
     /// <summary>
     /// JSON data extracted from the page using an AI model
     /// </summary>
-    abstract result: Record<string, obj> with get, set
+    abstract result: JS.Record<string, obj> with get, set
     abstract meta: BrowserRunResponseMeta with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (success: bool, result: Record<string, obj>, meta: BrowserRunResponseMeta) : BrowserRunJsonSuccessResponse = jsNative
+    static member Create (success: bool, result: JS.Record<string, obj>, meta: BrowserRunResponseMeta) : BrowserRunJsonSuccessResponse = jsNative
 
 /// <summary>
 /// Success response for <c>markdown</c> action.
@@ -14474,7 +14474,7 @@ type RequestInitCfProperties =
     /// Force response to be cached for a given number of seconds based on the Origin status code.
     /// (e.g. { '200-299': 86400, '404': 1, '500-599': 0 })
     /// </summary>
-    abstract cacheTtlByStatus: Record<string, float> option with get, set
+    abstract cacheTtlByStatus: JS.Record<string, float> option with get, set
     /// <summary>
     /// Controls how responses with a <c>Vary</c> header are cached for this request.
     /// </summary>
@@ -15840,12 +15840,12 @@ type EmailReplyMessageBuilder =
     abstract from: U2<string, EmailAddress> with get, set
     abstract subject: string with get, set
     abstract replyTo: U2<string, EmailAddress> option with get, set
-    abstract headers: Record<string, string> option with get, set
+    abstract headers: JS.Record<string, string> option with get, set
     abstract text: string option with get, set
     abstract html: string option with get, set
     abstract attachments: EmailAttachment[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, ?replyTo: U2<string, EmailAddress>, ?headers: Record<string, string>, ?text: string, ?html: string, ?attachments: EmailAttachment[]) : EmailReplyMessageBuilder = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, ?replyTo: U2<string, EmailAddress>, ?headers: JS.Record<string, string>, ?text: string, ?html: string, ?attachments: EmailAttachment[]) : EmailReplyMessageBuilder = jsNative
 
 /// <summary>
 /// Fields for composing an email without constructing raw MIME, for
@@ -15860,7 +15860,7 @@ type EmailMessageBuilder2 =
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: Record<string, string>, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder2 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: JS.Record<string, string>, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder2 = jsNative
 
 [<Interface>]
 type EmailMessageBuilder3 =
@@ -15869,7 +15869,7 @@ type EmailMessageBuilder3 =
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: Record<string, string>, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder3 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: JS.Record<string, string>, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder3 = jsNative
 
 [<Interface>]
 type EmailMessageBuilder4 =
@@ -15878,7 +15878,7 @@ type EmailMessageBuilder4 =
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: Record<string, string>, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder4 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: JS.Record<string, string>, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder4 = jsNative
 
 /// <summary>
 /// A binding that allows a Worker to send email messages.
@@ -15892,7 +15892,7 @@ type EmailEvent =
     inherit ExtendableEvent
     abstract message: ForwardableEmailMessage
     [<ParamObject; Emit("$0")>]
-    static member Create (message: ForwardableEmailMessage, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<Record<string, Event>>, ?target: EventTarget<Record<string, Event>>, ?srcElement: EventTarget<Record<string, Event>>) : EmailEvent = jsNative
+    static member Create (message: ForwardableEmailMessage, ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), waitUntil: (JS.Promise<obj> -> unit), ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : EmailEvent = jsNative
     [<Global("EmailEvent.NONE")>]
     static member NONE: float = jsNative
     [<Global("EmailEvent.CAPTURING_PHASE")>]
@@ -15912,7 +15912,7 @@ type EmailMessageConstructor =
 /// Evaluation context for targeting rules.
 /// Keys are attribute names (e.g. "userId", "country"), values are the attribute values.
 /// </summary>
-type FlagshipEvaluationContext = Record<string, U3<string, float, bool>>
+type FlagshipEvaluationContext = JS.Record<string, U3<string, float, bool>>
 
 [<Interface>]
 type FlagshipEvaluationDetails<'T> =
@@ -16258,34 +16258,34 @@ type ImageMetadata =
     abstract filename: string option with get, set
     abstract uploaded: string option with get, set
     abstract requireSignedURLs: bool with get, set
-    abstract meta: Record<string, obj> option with get, set
+    abstract meta: JS.Record<string, obj> option with get, set
     abstract variants: string[] with get, set
     abstract draft: bool option with get, set
     abstract creator: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, requireSignedURLs: bool, variants: string[], ?filename: string, ?uploaded: string, ?meta: Record<string, obj>, ?draft: bool, ?creator: string) : ImageMetadata = jsNative
+    static member Create (id: string, requireSignedURLs: bool, variants: string[], ?filename: string, ?uploaded: string, ?meta: JS.Record<string, obj>, ?draft: bool, ?creator: string) : ImageMetadata = jsNative
 
 [<Interface>]
 type ImageUploadOptions =
     abstract id: string option with get, set
     abstract filename: string option with get, set
     abstract requireSignedURLs: bool option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract creator: string option with get, set
     /// <summary>
     /// If 'base64', the input data will be decoded from base64 before processing
     /// </summary>
     abstract encoding: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?filename: string, ?requireSignedURLs: bool, ?metadata: Record<string, obj>, ?creator: string, ?encoding: string) : ImageUploadOptions = jsNative
+    static member Create (?id: string, ?filename: string, ?requireSignedURLs: bool, ?metadata: JS.Record<string, obj>, ?creator: string, ?encoding: string) : ImageUploadOptions = jsNative
 
 [<Interface>]
 type ImageUpdateOptions =
     abstract requireSignedURLs: bool option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract creator: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?requireSignedURLs: bool, ?metadata: Record<string, obj>, ?creator: string) : ImageUpdateOptions = jsNative
+    static member Create (?requireSignedURLs: bool, ?metadata: JS.Record<string, obj>, ?creator: string) : ImageUpdateOptions = jsNative
 
 [<Interface>]
 type ImageMetadataFilterOperators =
@@ -16302,9 +16302,9 @@ type ImageMetadataFilterValue = U4<string, float, bool, ImageMetadataFilterOpera
 
 [<Interface>]
 type ImageListFilter =
-    abstract metadata: Record<string, ImageMetadataFilterValue> option with get, set
+    abstract metadata: JS.Record<string, ImageMetadataFilterValue> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?metadata: Record<string, ImageMetadataFilterValue>) : ImageListFilter = jsNative
+    static member Create (?metadata: JS.Record<string, ImageMetadataFilterValue>) : ImageListFilter = jsNative
 
 [<Interface>]
 type ImageListOptions =
@@ -16328,11 +16328,11 @@ type ImageSignedUrlOptions =
 type ImageDirectUploadOptions =
     abstract id: string option with get, set
     abstract requireSignedURLs: bool option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract creator: string option with get, set
     abstract expiresIn: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?requireSignedURLs: bool, ?metadata: Record<string, obj>, ?creator: string, ?expiresIn: float) : ImageDirectUploadOptions = jsNative
+    static member Create (?id: string, ?requireSignedURLs: bool, ?metadata: JS.Record<string, obj>, ?creator: string, ?expiresIn: float) : ImageDirectUploadOptions = jsNative
 
 [<Interface>]
 type ImageDirectUploadResult =
@@ -16915,7 +16915,7 @@ type StreamVideo =
     /// <summary>
     /// A user modifiable key-value store.
     /// </summary>
-    abstract meta: Record<string, string> with get, set
+    abstract meta: JS.Record<string, string> with get, set
     /// <summary>
     /// The date and time the video was created.
     /// </summary>
@@ -17088,7 +17088,7 @@ type StreamDirectUploadCreateParams =
     /// A user modifiable key-value store used to reference other systems of record for
     /// managing videos.
     /// </summary>
-    abstract meta: Record<string, string> option with get, set
+    abstract meta: JS.Record<string, string> option with get, set
     /// <summary>
     /// Lists the origins allowed to display the video.
     /// </summary>
@@ -17112,7 +17112,7 @@ type StreamDirectUploadCreateParams =
     /// </summary>
     abstract watermark: StreamDirectUploadWatermark option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (maxDurationSeconds: float, ?expiry: string, ?creator: string, ?meta: Record<string, string>, ?allowedOrigins: string[], ?requireSignedURLs: bool, ?thumbnailTimestampPct: float, ?scheduledDeletion: string, ?watermark: StreamDirectUploadWatermark) : StreamDirectUploadCreateParams = jsNative
+    static member Create (maxDurationSeconds: float, ?expiry: string, ?creator: string, ?meta: JS.Record<string, string>, ?allowedOrigins: string[], ?requireSignedURLs: bool, ?thumbnailTimestampPct: float, ?scheduledDeletion: string, ?watermark: StreamDirectUploadWatermark) : StreamDirectUploadCreateParams = jsNative
 
 [<Interface>]
 type StreamDirectUploadWatermark =
@@ -17139,7 +17139,7 @@ type StreamUrlUploadParams =
     /// A user modifiable key-value store used to reference other systems of
     /// record for managing videos.
     /// </summary>
-    abstract meta: Record<string, string> option with get, set
+    abstract meta: JS.Record<string, string> option with get, set
     /// <summary>
     /// Indicates whether the video can be a accessed using the id. When
     /// set to <c>true</c>, a signed token must be generated with a signing key to view the
@@ -17166,7 +17166,7 @@ type StreamUrlUploadParams =
     /// </summary>
     abstract watermarkId: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?allowedOrigins: string[], ?creator: string, ?meta: Record<string, string>, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float, ?watermarkId: string) : StreamUrlUploadParams = jsNative
+    static member Create (?allowedOrigins: string[], ?creator: string, ?meta: JS.Record<string, string>, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float, ?watermarkId: string) : StreamUrlUploadParams = jsNative
 
 [<Interface>]
 type StreamScopedCaptions =
@@ -17342,7 +17342,7 @@ type StreamUpdateVideoParams =
     /// A user modifiable key-value store used to reference other systems of
     /// record for managing videos.
     /// </summary>
-    abstract meta: Record<string, string> option with get, set
+    abstract meta: JS.Record<string, string> option with get, set
     /// <summary>
     /// Indicates whether the video can be a accessed using the id. When
     /// set to <c>true</c>, a signed token must be generated with a signing key to view the
@@ -17365,7 +17365,7 @@ type StreamUpdateVideoParams =
     /// </summary>
     abstract thumbnailTimestampPct: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?allowedOrigins: string[], ?creator: string, ?maxDurationSeconds: float, ?meta: Record<string, string>, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float) : StreamUpdateVideoParams = jsNative
+    static member Create (?allowedOrigins: string[], ?creator: string, ?maxDurationSeconds: float, ?meta: JS.Record<string, string>, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float) : StreamUpdateVideoParams = jsNative
 
 [<Interface>]
 type StreamCaption =
@@ -17716,7 +17716,7 @@ type VectorizeVectorMetadataValue = U4<string, float, bool, string[]>
 /// <summary>
 /// Additional information to associate with a vector.
 /// </summary>
-type VectorizeVectorMetadata = U5<string, float, bool, string[], Record<string, VectorizeVectorMetadataValue>>
+type VectorizeVectorMetadata = U5<string, float, bool, string[], JS.Record<string, VectorizeVectorMetadataValue>>
 
 type VectorFloatArray = U2<JS.Float32Array, JS.Float64Array>
 
@@ -17744,7 +17744,7 @@ type VectorizeVectorMetadataFilterCollectionOp =
 /// <summary>
 /// Filter criteria for vector metadata used to limit the retrieved query result set.
 /// </summary>
-type VectorizeVectorMetadataFilter = Record<string, U5<string, float, bool, VectorizeVectorMetadataFilter.Item, VectorizeVectorMetadataFilter.Item2> option>
+type VectorizeVectorMetadataFilter = JS.Record<string, U5<string, float, bool, VectorizeVectorMetadataFilter.Item, VectorizeVectorMetadataFilter.Item2> option>
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type VectorizeDistanceMetric =
@@ -17861,9 +17861,9 @@ type VectorizeVector =
     /// <summary>
     /// Metadata associated with the vector. Includes the values of other fields and potentially additional details.
     /// </summary>
-    abstract metadata: Record<string, VectorizeVectorMetadata> option with get, set
+    abstract metadata: JS.Record<string, VectorizeVectorMetadata> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: Record<string, VectorizeVectorMetadata>) : VectorizeVector = jsNative
+    static member Create (id: string, values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: JS.Record<string, VectorizeVectorMetadata>) : VectorizeVector = jsNative
 
 /// <summary>
 /// Represents a matched vector for a query along with its score and (if specified) the matching vector information.
@@ -17885,13 +17885,13 @@ type VectorizeMatch =
     /// <summary>
     /// Metadata associated with the vector. Includes the values of other fields and potentially additional details.
     /// </summary>
-    abstract metadata: Record<string, VectorizeVectorMetadata> option with get, set
+    abstract metadata: JS.Record<string, VectorizeVectorMetadata> option with get, set
     /// <summary>
     /// The score or rank for similarity, when returned as a result
     /// </summary>
     abstract score: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, score: float, ?values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: Record<string, VectorizeVectorMetadata>) : VectorizeMatch = jsNative
+    static member Create (id: string, score: float, ?values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: JS.Record<string, VectorizeVectorMetadata>) : VectorizeMatch = jsNative
 
 /// <summary>
 /// A set of matching VectorizeMatch for a particular query.
@@ -18200,9 +18200,9 @@ type DynamicDispatchOptions =
     /// <summary>
     /// Arguments for outbound Worker script, if configured.
     /// </summary>
-    abstract outbound: Record<string, obj> option with get, set
+    abstract outbound: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?limits: DynamicDispatchLimits, ?outbound: Record<string, obj>) : DynamicDispatchOptions = jsNative
+    static member Create (?limits: DynamicDispatchLimits, ?outbound: JS.Record<string, obj>) : DynamicDispatchOptions = jsNative
 
 [<Interface>]
 type DispatchNamespace =
@@ -18211,9 +18211,9 @@ type DispatchNamespace =
     /// <param name="options">Options for Dynamic Dispatch invocation.</param>
     /// <returns>A Fetcher object that allows you to send requests to the Worker script.</returns>
     /// <remarks>@throws If the Worker script does not exist in this dispatch namespace, an error will be thrown.</remarks>
-    abstract get: name: string * ?args: Record<string, obj> * ?options: DynamicDispatchOptions -> Request.Fetcher
+    abstract get: name: string * ?args: JS.Record<string, obj> * ?options: DynamicDispatchOptions -> Request.Fetcher
     [<ParamObject; Emit("$0")>]
-    static member Create (get: Func<string, Record<string, obj> option, DynamicDispatchOptions option, Request.Fetcher>) : DispatchNamespace = jsNative
+    static member Create (get: Func<string, JS.Record<string, obj> option, DynamicDispatchOptions option, Request.Fetcher>) : DispatchNamespace = jsNative
 
 [<Interface>]
 type Workflow<'PARAMS> =
@@ -19254,7 +19254,7 @@ type Exports =
 
 module AIGatewayUniversalRequest =
     type Headers =
-        abstract ``cf-aig-metadata``: U2<string, Record<string, U4<string, float, bigint, bool> option>> option with get, set
+        abstract ``cf-aig-metadata``: U2<string, JS.Record<string, U4<string, float, bigint, bool> option>> option with get, set
         abstract ``cf-aig-custom-cost``: U3<string, AIGatewayUniversalRequest.Headers.CfAigCustomCost, AIGatewayUniversalRequest.Headers.CfAigCustomCost2> option with get, set
         abstract ``cf-aig-cache-ttl``: U2<string, float> option with get, set
         abstract ``cf-aig-skip-cache``: U2<string, bool> option with get, set
@@ -19507,7 +19507,7 @@ module AiSearchInstance =
             /// Sync interval in seconds. 3600=1h, 7200=2h, 14400=4h, 21600=6h, 43200=12h, 86400=24h.
             /// </summary>
             abstract sync_interval: AiSearchInstanceInfo.SyncInterval option with get, set
-            abstract metadata: Record<string, obj> option with get, set
+            abstract metadata: JS.Record<string, obj> option with get, set
             [<EmitIndexer>]
             abstract Item: string -> obj with get, set
 
@@ -19576,9 +19576,9 @@ module AiSearchItemChunk =
     type Item =
         abstract timestamp: float option with get, set
         abstract key: string with get, set
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (key: string, ?timestamp: float, ?metadata: Record<string, obj>) : Item = jsNative
+        static member Create (key: string, ?timestamp: float, ?metadata: JS.Record<string, obj>) : Item = jsNative
 
 module AiSearchItemChunksResponse =
     [<Interface>]
@@ -19629,7 +19629,7 @@ module AiSearchItems =
             /// </summary>
             abstract timeoutMs: float option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?metadata: Record<string, obj>, ?pollIntervalMs: float, ?timeoutMs: float) : Options = jsNative
+            static member Create (?metadata: JS.Record<string, obj>, ?pollIntervalMs: float, ?timeoutMs: float) : Options = jsNative
 
 module AiSearchJobInfo =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -19703,9 +19703,9 @@ module AiSearchMultiSearchChunk =
     type Item =
         abstract timestamp: float option with get, set
         abstract key: string with get, set
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (key: string, ?timestamp: float, ?metadata: Record<string, obj>) : Item = jsNative
+        static member Create (key: string, ?timestamp: float, ?metadata: JS.Record<string, obj>) : Item = jsNative
 
     type ScoringDetails =
         /// <summary>
@@ -19925,10 +19925,10 @@ module AiTextGenerationToolInput =
         [<Interface>]
         type Parameters =
             abstract ``type``: string with get, set
-            abstract properties: Record<string, AiTextGenerationToolInput.Function.Parameters.Properties.Item> with get, set
+            abstract properties: JS.Record<string, AiTextGenerationToolInput.Function.Parameters.Properties.Item> with get, set
             abstract required: string[] with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, properties: Record<string, AiTextGenerationToolInput.Function.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
+            static member Create (``type``: string, properties: JS.Record<string, AiTextGenerationToolInput.Function.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
 
         module Parameters =
             module Properties =
@@ -19943,10 +19943,10 @@ module AiTextGenerationToolLegacyInput =
     [<Interface>]
     type Parameters =
         abstract ``type``: string with get, set
-        abstract properties: Record<string, AiTextGenerationToolLegacyInput.Parameters.Properties.Item> with get, set
+        abstract properties: JS.Record<string, AiTextGenerationToolLegacyInput.Parameters.Properties.Item> with get, set
         abstract required: string[] with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, properties: Record<string, AiTextGenerationToolLegacyInput.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
+        static member Create (``type``: string, properties: JS.Record<string, AiTextGenerationToolLegacyInput.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
 
     module Parameters =
         module Properties =
@@ -20179,9 +20179,9 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -20230,9 +20230,9 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -20329,9 +20329,9 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1 =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -20380,9 +20380,9 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1 =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -20884,9 +20884,9 @@ module Ai_Cf_Google_Gemma_3_12B_It_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -20935,9 +20935,9 @@ module Ai_Cf_Google_Gemma_3_12B_It_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Google_Gemma_3_12B_It_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -21098,9 +21098,9 @@ module Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -21149,9 +21149,9 @@ module Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -21317,9 +21317,9 @@ module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -21368,9 +21368,9 @@ module Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -21531,9 +21531,9 @@ module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -21582,9 +21582,9 @@ module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -21713,9 +21713,9 @@ module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -21764,9 +21764,9 @@ module Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -22025,9 +22025,9 @@ module Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -22076,9 +22076,9 @@ module Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -22414,9 +22414,9 @@ module Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -22465,9 +22465,9 @@ module Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -22692,9 +22692,9 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -22743,9 +22743,9 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -22842,9 +22842,9 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1 =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -22893,9 +22893,9 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1 =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -23072,9 +23072,9 @@ module Ai_Cf_Qwen_Qwq_32B_Messages =
                 /// <summary>
                 /// Definitions of each parameter.
                 /// </summary>
-                abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters.Properties.Item> with get, set
+                abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters.Properties.Item> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
             module Parameters =
                 module Properties =
@@ -23123,9 +23123,9 @@ module Ai_Cf_Qwen_Qwq_32B_Messages =
                     /// <summary>
                     /// Definitions of each parameter.
                     /// </summary>
-                    abstract properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
+                    abstract properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters.Properties.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, properties: Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
+                    static member Create (``type``: string, properties: JS.Record<string, Cloudflare.WorkersTypes.Ai_Cf_Qwen_Qwq_32B_Messages.Tools.Item2.Function.Parameters.Properties.Item>, ?required: string[]) : Parameters = jsNative
 
                 module Parameters =
                     module Properties =
@@ -23361,10 +23361,10 @@ module AutoRagSearchResponse =
             abstract file_id: string with get, set
             abstract filename: string with get, set
             abstract score: float with get, set
-            abstract attributes: Record<string, U3<string, float, bool> option> with get, set
+            abstract attributes: JS.Record<string, U3<string, float, bool> option> with get, set
             abstract content: Cloudflare.WorkersTypes.AutoRagSearchResponse.Data.Item.Content.Item[] with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (file_id: string, filename: string, score: float, attributes: Record<string, U3<string, float, bool> option>, content: Cloudflare.WorkersTypes.AutoRagSearchResponse.Data.Item.Content.Item[]) : Item = jsNative
+            static member Create (file_id: string, filename: string, score: float, attributes: JS.Record<string, U3<string, float, bool> option>, content: Cloudflare.WorkersTypes.AutoRagSearchResponse.Data.Item.Content.Item[]) : Item = jsNative
 
         module Item =
             module Content =
@@ -23910,9 +23910,9 @@ module ChatCompletionToolChoiceAllowedTools =
     [<Interface>]
     type AllowedTools =
         abstract mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode with get, set
-        abstract tools: Record<string, obj>[] with get, set
+        abstract tools: JS.Record<string, obj>[] with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode, tools: Record<string, obj>[]) : AllowedTools = jsNative
+        static member Create (mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode, tools: JS.Record<string, obj>[]) : AllowedTools = jsNative
 
     module AllowedTools =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -24027,7 +24027,7 @@ module Cloudflare =
             /// <returns>A promise containing the transformed PipelineRecord array</returns>
             abstract run: records: 'I[] * metadata: Cloudflare.WorkersTypes.Cloudflare.Pipelines.PipelineBatchMetadata -> JS.Promise<'O[]>
 
-        type PipelineRecord = Record<string, obj>
+        type PipelineRecord = JS.Record<string, obj>
 
         [<Interface>]
         type PipelineBatchMetadata =
@@ -25476,7 +25476,7 @@ module R2Bucket =
             inherit R2PutOptions
             abstract onlyIf: U2<Headers, R2Conditional> with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: Record<string, string>, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
+            static member Create (onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: JS.Record<string, string>, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
 
 module R2ListOptions =
     module Include =
@@ -25704,10 +25704,10 @@ module ResponseFormatJSONSchema =
     type JsonSchema =
         abstract name: string with get, set
         abstract description: string option with get, set
-        abstract schema: Record<string, obj> option with get, set
+        abstract schema: JS.Record<string, obj> option with get, set
         abstract strict: bool option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (name: string, ?description: string, ?schema: Record<string, obj>, ?strict: bool) : JsonSchema = jsNative
+        static member Create (name: string, ?description: string, ?schema: JS.Record<string, obj>, ?strict: bool) : JsonSchema = jsNative
 
 module ResponseFunctionToolCall =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
