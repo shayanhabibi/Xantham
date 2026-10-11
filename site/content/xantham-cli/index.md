@@ -14,7 +14,10 @@ order: 0
 You need the .NET 10 SDK, Node.js, and npm. See [Installation](guide/installation.md)
 for setup and updates.
 
+Current releases require the [temporary Cloudsmith source](guide/installation.md#install-xantham).
+
 ```bash frame=terminal
+dotnet nuget add source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json --name xantham-temporary
 dotnet tool install --global xantham
 xantham tsc init
 ```

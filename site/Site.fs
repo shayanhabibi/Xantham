@@ -15,28 +15,22 @@ let apiOptions =
         Sources =
             let root = AbsolutePath.create __SOURCE_DIRECTORY__ |> AbsolutePath.directory
 
-            [ "Xantham.TypeScript.Wire"; "Xantham.Fable.Core" ]
-            |> List.choose (fun project ->
-                Glob.files root $"src/{project}/*/Release/*/{project}.dll"
-                |> List.tryHead
-                |> Option.map (
-                    AbsolutePath.value
-                    >> function
-                        | dllPath when project = "Xantham.Fable.Core.TS" ->
-                            FSharpApiSource.create dllPath
-                            |> FSharpApiSource.searchPaths (
-                                [
-                                    AbsolutePath.combine
-                                        root
-                                        [ "src"; "Xantham.Fable.Core"; "bin"; "Release"; "net8.0" ]
-                                    AbsolutePath.combine
-                                        root
-                                        [ "src"; "Xantham.Fable.Core"; "obj"; "Release"; "net8.0" ]
-                                ]
-                                |> List.map AbsolutePath.value
-                            )
-                        | dllPath -> FSharpApiSource.create dllPath
-                ))
+            let searchPaths =
+                ApiProjects.projects
+                |> List.map (fun (project, framework) ->
+                    AbsolutePath.combine root [ "src"; project; "bin"; "Release"; framework ]
+                    |> AbsolutePath.value)
+
+            ApiProjects.projects
+            |> List.map (fun (project, framework) ->
+                let dllPath =
+                    AbsolutePath.combine root [ "src"; project; "bin"; "Release"; framework; project + ".dll" ]
+                    |> AbsolutePath.value
+
+                if not (System.IO.File.Exists dllPath) then
+                    failwith $"Missing API reference assembly: {dllPath}. Run dotnet fsi build.fsx -- docs."
+
+                FSharpApiSource.create dllPath |> FSharpApiSource.searchPaths searchPaths)
     }
 
 let navbar =

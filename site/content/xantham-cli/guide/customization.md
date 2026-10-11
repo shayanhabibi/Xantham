@@ -16,6 +16,15 @@ config input output` writes it.
 The existing `generate` and `run` functions retain their behavior.
 An empty registration produces the same sources, manifest and declaration catalog.
 
+Add the [temporary Cloudsmith source](installation.md#install-xantham), then
+reference the generator library from your console project:
+
+```bash frame=terminal
+dotnet add package Xantham.Generator
+```
+
+See the <a href="/Xantham/reference/xantham-generator/">generator API reference</a>.
+
 ## Add an attribute
 
 ```fsharp
@@ -241,6 +250,12 @@ The validation directory is caller-owned scratch space; repository tests use `te
 Reference `Xantham.Generator.Myriad` to generate companion APIs from resolved TypeScript
 facts before Shape maps them to F# types. The adapter uses Myriad.Core 1.1.0; it does not
 need a sibling Myriad checkout. Select exported declarations explicitly:
+
+```bash frame=terminal
+dotnet add package Xantham.Generator.Myriad
+```
+
+See the <a href="/Xantham/reference/xantham-generator-myriad/">Myriad adapter API reference</a>.
 
 ```fsharp
 open Xantham.Generator.Myriad

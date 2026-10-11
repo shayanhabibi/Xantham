@@ -24,7 +24,11 @@ layout: splash
 <h2 id="generate-heading">Declarations in. F# out.</h2>
 <p>Install the tool, cache its matching TypeScript compiler, and point it at an installed package.</p>
 
+Current releases use a temporary Cloudsmith feed while NuGet.org package ownership
+is transferred. See [Installation](xantham-cli/guide/installation.md) for setup and updates.
+
 ```bash frame=terminal title="Get generating"
+dotnet nuget add source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json --name xantham-temporary
 dotnet tool install --global xantham
 xantham tsc init
 xantham generate ./node_modules/your-package
