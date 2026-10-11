@@ -294,6 +294,12 @@ assembly's build record must match current inputs before packing. The package co
 smoke are release evidence. Consumers need both the restored catalogue file and a PackageReference
 to the same Core.TS package version; the descriptor alone supplies no binding implementation.
 
+The isolated local package test packs both Core.TS and its `Xantham.Fable.Core` dependency
+into its scratch feed. Its `PackageVersion` override propagates through project references,
+so both test packages use that override. Packing Core.TS alone can appear green while a
+published stable support version satisfies its prerelease range, then fail with NU1102 after
+the next Core.TS bump. Downloaded-package verification still restores real published dependencies.
+
 ## Release markers after a squashed release
 
 PR #117 was squashed into master at `500a04a`, which is the repository commit recorded by all

@@ -59,6 +59,8 @@ let tests = testSequenced <| testList "core-ts package" [
             match Environment.GetEnvironmentVariable "XANTHAM_CORE_TS_PACKAGE" with
             | null | "" ->
                 let version = (XDocument.Load(project).Descendants(XName.Get "Version") |> Seq.exactlyOne |> _.Value) + "-catalogue-test"
+                let support = Path.Combine(repository, "src", "Xantham.Fable.Core", "Xantham.Fable.Core.fsproj")
+                dotnet repository ["pack"; support; "-c"; "Release"; "--no-build"; "--no-restore"; "-p:PackageVersion=" + version; "-o"; feed; "-v"; "q"]
                 dotnet repository ["pack"; project; "-c"; "Release"; "--no-build"; "--no-restore"; "-p:PackageVersion=" + version; "-o"; feed; "-v"; "q"]
                 Path.Combine(feed, "Xantham.Fable.Core.TS." + version + ".nupkg")
             | published ->
