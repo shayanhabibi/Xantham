@@ -44,10 +44,11 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 5, 4, 2, 1)
-                "identity 5 and API 4 combine the independent portable library and generic projection contracts; inference 2 retains stable entry closure"
+                (1, 6, 5, 3, 1)
+                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 5 stabilizes default names; inference 3 preserves source contracts at the width cutoff"
 
         for label, identityVersion, apiVersion, inferenceVersion in [
+            "early projections before delivery contract recovery", 5, 4, 2
             "portable library before projection integration", 4, 3, 2
             "early projections before portable library integration", 3, 3, 1
         ] do
