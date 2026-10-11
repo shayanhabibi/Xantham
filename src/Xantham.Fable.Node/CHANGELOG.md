@@ -1,5 +1,5 @@
 ---
-last_commit_released: 78de2edf0c5370b8251f12ac47b81273d5639312
+last_commit_released: f8ccbd9fcc59ac4a36adaafa3b31c24ece8aaec5
 name: Xantham.Fable.Node
 include:
   - ../Xantham.Fable.Core/**
@@ -14,6 +14,14 @@ updaters:
 ---
 
 # Changelog
+
+## 0.2.1 - 2026-10-11
+
+### 🐞 Bug Fixes
+
+* *(core-ts)* Ship authenticated Brotli declaration catalogue (#120) ([ad60b48](https://github.com/shayanhabibi/Xantham/commit/ad60b4824298c580d19b2aafc7048bfc80a2eded))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/78de2edf0c5370b8251f12ac47b81273d5639312..f8ccbd9fcc59ac4a36adaafa3b31c24ece8aaec5)</small></strong>
 
 ## 0.2.0 - 2026-10-10
 
