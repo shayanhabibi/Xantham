@@ -121,6 +121,37 @@ output directory; reference the file selected for the current run.
 The consumer reuses the producer's F# identities while retaining its own imports.
 Compile producers first, following the catalog's ordered `owners` list.
 
+## Reuse the Core.TS package catalogue
+
+`Xantham.Fable.Core.TS` ships its standard-library catalogue at
+`xantham/declarations.json.br` inside the NuGet package. Restore the package in your
+consumer project and reference the file from that restored version:
+
+```json title="Reuse packaged DOM and ECMAScript types"
+{
+  "module": "MyBindings",
+  "lib": ["esnext", "dom"],
+  "declarationReferences": ["/path/to/packages/xantham.fable.core.ts/<version>/xantham/declarations.json.br"]
+}
+```
+
+Replace the example path and version with your actual package-cache location. Compile the
+generated consumer against that same `Xantham.Fable.Core.TS` version. A PackageReference
+with `GeneratePathProperty="true"` exposes the package directory as
+`$(PkgXantham_Fable_Core_TS)` to MSBuild integrations. Generation still receives an explicit
+file path.
+
+The accompanying `xantham/catalogue.json` descriptor identifies the package version and
+maps the authenticated owner `FableCoreTsInput` to `Xantham.Fable.Core.TS`. It records
+compatibility contracts and SHA-256 hashes of the compressed catalogue, assembly, binding
+sources and generation configuration. Pass the `.br` file to Xantham; the descriptor is
+metadata for integrations.
+Source and configuration hashes normalize CRLF to LF across checkouts.
+
+This catalogue reuses qualified types such as `Fable.Core.TS.Dom.HTMLInputElement`,
+`Fable.Core.TS.Dom.FileList` and `Fable.Core.TS.Es.Promise<'T>`. Install the exact TypeScript
+release/source revision recorded in the catalogue and keep your library profile compatible.
+
 ## Choose a shared owner before generating related libraries
 
 Identical anonymous literal unions share a structural catalog identity. Two independent

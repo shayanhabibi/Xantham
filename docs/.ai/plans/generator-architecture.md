@@ -2158,3 +2158,28 @@ Regenerating Core.TS adds 776 catalogue declarations relative to the portable-li
 the two intersection aliases `DecoratorMetadataObject.Base` and `ElementTagNameMap.Base`.
 The full-library smoke regenerates the catalogue and compiles reused consumer types; these
 additions follow the projection branch's overload and anonymous-intersection rules.
+
+## Core.TS catalogue package distribution (2026-10-11)
+
+Compiler-library regeneration now emits the committed schema-2 declaration catalogue in its
+normal input configuration. Core.TS packing invokes `tools/package-core-ts-catalog.fsx` before
+NuGet metadata generation, producing `xantham/declarations.json.br` and `xantham/catalogue.json`
+under `obj/xantham/`. The descriptor follows the actual MSBuild package version and records
+package identity, the existing `FableCoreTsInput` owner, ordered owners, compatibility contracts
+and hashes of the payload, compiled assembly, binding sources and generation configuration.
+Packaging preserves all declaration identities and generator compatibility contracts.
+
+The compiler-lib stage writes `catalogue-inputs.json` after moving the generated binding into
+place. Packing rejects catalogue/source/configuration hashes, producer entry/manifest hashes
+and the root TypeScript pin that differ from this record.
+Tracked text hashes normalize CRLF to LF. The Core.TS Build target records binding inputs and
+the compiled assembly hash beside that assembly; packing also rejects a missing or stale build
+record, including `--no-build` with stale output. Descriptor packageVersion uses PackageVersion
+so standard NuGet overrides retain the correct package identity.
+
+The package regression restores into a disposable isolated NuGet cache and compiles a generated
+consumer with PackageReferences only. It verifies HTMLInputElement/FileList arity 0 and Promise
+arity 1, native qualified names and ownership, and descriptor payload/assembly hashes. Setting
+`XANTHAM_CORE_TS_PACKAGE` to a downloaded nupkg exercises the same consumer against a published
+artifact without repacking the checkout. The existing full-library smoke still authenticates
+the regenerated semantic catalogue against the committed producer.

@@ -451,6 +451,8 @@ module Stages =
 
                             System.IO.File.Delete(System.IO.Path.Combine(output, "FableCoreTsInput.fs"))
                             System.IO.File.Delete(System.IO.Path.Combine(output, "symbols.jsonl")))
+
+                        run "dotnet fsi tools/package-core-ts-catalog.fsx -- stamp"
                     }
                     // The node library is a shipped artifact, not a normal generator input:
                     // opt in explicitly so ordinary generated-layer runs do not rewrite it.

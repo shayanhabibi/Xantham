@@ -2,6 +2,8 @@
 last_commit_released: a48389cf5e9f499b0302abbd506bcdb5d6d21534
 name: Xantham.Fable.Core.TS
 include:
+  - ../../tools/fable-core-ts-input/**
+  - ../../tools/package-core-ts-catalog.fsx
   - ../Xantham.Fable.Core/**
   - ../../Directory.Build.props
   - ../../Directory.Build.targets
