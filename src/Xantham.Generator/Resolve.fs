@@ -1236,7 +1236,9 @@ let private deriveFacts
 
                 let asIdentity =
                     isInstantiation
-                    && (isOpenOverSignature || not (registers.Structural.ContainsKey ty.TypeId))
+                    && (isOpenOverSignature
+                        || registers.IdentityOnly.ContainsKey ty.TypeId
+                        || not (registers.Structural.ContainsKey ty.TypeId))
 
                 if asIdentity then
                     if not isOpenOverSignature then
@@ -1542,7 +1544,7 @@ let private deriveFacts
 /// readable trace - a checker id is assigned in the order answers arrived, so it names no
 /// subset of a generation, only the generation as a whole), collect what derivation discovered,
 /// and recurse until the frontier is exhausted or a cutoff records the remainder.
-let resolveTypeTable: Pass<ResolveModel> =
+let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
     {
         Name = "resolve-type-table"
         Run =
@@ -1551,7 +1553,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                     let trace = Trace.start ()
 
                     // Counts every distinct id one generation of the frontier newly reaches,
-                    // whether or not the width cutoff goes on to defer the whole generation -
+                    // including entries deferred by the width cutoff -
                     // gated by `XANTHAM_RESOLVE_COUNTERS` so it costs nothing on a normal run.
                     // The final table size is read off `table` once the walk closes; `maxWidth`
                     // is the widest single generation the walk demanded, before the cutoff.
@@ -1565,8 +1567,204 @@ let resolveTypeTable: Pass<ResolveModel> =
                         |> List.map (fun export -> export.Symbol.SymbolId, export)
                         |> Map.ofList
 
+                    let declarationTypes =
+                        ConcurrentDictionary<string, Lazy<System.Threading.Tasks.Task<int>>>()
+
+                    let canonicalSourceType (ty: TypeResponse) =
+                        async {
+                            let! symbol = ctx.Session.getSymbolOfType ty.Id
+
+                            let! symbol =
+                                match symbol with
+                                | ValueSome _ -> async.Return symbol
+                                | ValueNone -> ctx.Session.getAliasSymbolOfType ty.Id
+
+                            let handles =
+                                symbol
+                                |> ValueOption.bind _.Declarations
+                                |> ValueOption.defaultValue [||]
+                                |> Array.sort
+
+                            let mutable canonical = false
+
+                            for handle in handles do
+                                if not canonical then
+                                    let lookup =
+                                        declarationTypes.GetOrAdd(
+                                            handle,
+                                            fun location ->
+                                                lazy
+                                                    (async {
+                                                        let! result = attempt (ctx.Session.getTypeAtLocation location)
+
+                                                        return
+                                                            match result with
+                                                            | Ok value -> value.Id
+                                                            | Error _ -> -1
+                                                     }
+                                                     |> Async.StartAsTask)
+                                        )
+
+                                    let! declared = lookup.Value |> Async.AwaitTask
+                                    canonical <- declared = ty.Id
+
+                            return canonical
+                        }
+
+                    let sourceContractIds (table: Map<int<typeId>, TypeFacts>) =
+                        let nominalDeclaration (facts: TypeFacts) =
+                            facts.Response.ObjectFlags
+                            |> ValueOption.exists (fun flags ->
+                                (flags.HasFlag ObjectFlags.Class || flags.HasFlag ObjectFlags.Interface)
+                                && not (flags.HasFlag ObjectFlags.Instantiated))
+                            && facts.Response.Target |> ValueOption.forall ((=) facts.Response.Id)
+                            && facts.Response.IsTupleType <> ValueSome true
+
+                        // These are edges of declarations already read, not a second compiler
+                        // walk. Keep nested source contracts when an unrelated instantiation
+                        // burst fills the frontier. Applications contribute their arguments,
+                        // never another recursively substituted copy of their members.
+                        let contracts = System.Collections.Generic.HashSet<int<typeId>>()
+                        let traversed = System.Collections.Generic.HashSet<int<typeId>>()
+
+                        let rec includeContract expandMembers id =
+                            let first = contracts.Add id
+
+                            if first || (expandMembers && not (traversed.Contains id)) then
+                                if expandMembers then
+                                    traversed.Add id |> ignore
+
+                                match Map.tryFind id table with
+                                | None -> ()
+                                | Some facts ->
+                                    let response = facts.Response
+
+                                    let application =
+                                        response.Target |> ValueOption.exists ((<>) response.Id)
+                                        || response.AliasTypeArguments |> ValueOption.exists (Array.isEmpty >> not)
+
+                                    for argument in facts.TypeArguments @ facts.AliasTypeArguments do
+                                        includeContract false argument
+                                    // Reading the operands of an application is finite, but opening
+                                    // their substituted members would bypass the application boundary.
+                                    for operand in facts.UnionMembers @ facts.IntersectionMembers do
+                                        includeContract (expandMembers && not application) operand
+
+                                    if expandMembers && not application then
+                                        for bound in Option.toList facts.Constraint @ Option.toList facts.Default do
+                                            includeContract true bound
+
+                                        let mapped =
+                                            response.ObjectFlags
+                                            |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Mapped)
+
+                                        if not mapped then
+                                            for member_ in facts.Members do
+                                                includeContract true member_.TypeId
+
+                                            for signature in facts.CallSignatures @ facts.ConstructSignatures do
+                                                includeContract true signature.ReturnTypeId
+
+                                                for parameter in signature.Parameters do
+                                                    includeContract true parameter.TypeId
+
+                                                for parameter in signature.TypeParameters do
+                                                    includeContract true parameter
+
+                        for KeyValue(id, facts) in table do
+                            if nominalDeclaration facts then
+                                includeContract true id
+
+                        contracts
+
+                    let deferredTypes =
+                        System.Collections.Generic.Dictionary<int<typeId>, TypeResponse>()
+
+                    let boundedFrontier table fresh =
+                        async {
+                            let sourceContracts = sourceContractIds table
+
+                            let! admitted =
+                                fresh
+                                |> List.chunkBySize 128
+                                |> List.map (fun batch ->
+                                    batch
+                                    |> List.map (fun (ty: TypeResponse) ->
+                                        async {
+                                            let leaf =
+                                                uint32 (
+                                                    (TypeFlags.Any
+                                                     ||| TypeFlags.Unknown
+                                                     ||| TypeFlags.String
+                                                     ||| TypeFlags.StringLiteral
+                                                     ||| TypeFlags.Number
+                                                     ||| TypeFlags.NumberLiteral
+                                                     ||| TypeFlags.Boolean
+                                                     ||| TypeFlags.BooleanLiteral
+                                                     ||| TypeFlags.BigInt
+                                                     ||| TypeFlags.BigIntLiteral
+                                                     ||| TypeFlags.NonPrimitive
+                                                     ||| TypeFlags.ESSymbol
+                                                     ||| TypeFlags.UniqueESSymbol
+                                                     ||| TypeFlags.Void
+                                                     ||| TypeFlags.Undefined
+                                                     ||| TypeFlags.Null
+                                                     ||| TypeFlags.Never)
+                                                    &&& ty.Flags
+                                                )
+                                                <> 0u
+
+                                            let identityReference =
+                                                ty.Target |> ValueOption.exists ((<>) ty.Id)
+                                                && ty.ObjectFlags
+                                                   |> ValueOption.exists (fun flags ->
+                                                       flags.HasFlag ObjectFlags.Reference)
+                                                && ty.IsTupleType <> ValueSome true
+                                                && not (registers.Structural.ContainsKey ty.TypeId)
+                                                && not (sourceContracts.Contains ty.TypeId)
+
+                                            if identityReference then
+                                                registers.IdentityOnly.TryAdd(ty.TypeId, true) |> ignore
+
+                                            let! canonical =
+                                                if
+                                                    leaf
+                                                    || identityReference
+                                                    || Map.containsKey ty.TypeId model.Types
+                                                    || ty.Flags.HasFlag TypeFlags.Union
+                                                    || sourceContracts.Contains ty.TypeId
+                                                then
+                                                    async.Return true
+                                                else
+                                                    canonicalSourceType ty
+
+                                            return ty, canonical
+                                        })
+                                    |> Async.Parallel)
+                                |> Async.Sequential
+
+                            return admitted |> Array.collect id |> Array.toList |> List.partition snd
+                        }
+
                     let rec walk table derived notFollowed findings frontier depth =
                         async {
+                            // A source owner can arrive after the burst that deferred its member.
+                            // Retry only newly proven contract edges, not the discarded expansion.
+                            let resumed =
+                                if deferredTypes.Count = 0 || depth > FollowDepth then
+                                    []
+                                else
+                                    let contracts = sourceContractIds table
+
+                                    deferredTypes.Values
+                                    |> Seq.filter (fun ty -> contracts.Contains ty.TypeId)
+                                    |> Seq.toList
+
+                            for ty in resumed do
+                                deferredTypes.Remove ty.TypeId |> ignore
+
+                            let frontier = frontier @ resumed
+
                             // An instantiation derived as identity that a union or an
                             // intersection has since read as an operand is derived again, in
                             // full; its table entry is replaced.
@@ -1598,7 +1796,37 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 for ty in fresh do
                                     trace.Generations.TryAdd(ty.TypeId, depth) |> ignore
 
-                            match fresh with
+                            let! selected, deferred =
+                                if fresh.Length > followWidth && depth <= FollowDepth then
+                                    async {
+                                        let! admitted, deferred = boundedFrontier table fresh
+                                        return List.map fst admitted, List.map fst deferred
+                                    }
+                                else
+                                    async.Return(fresh, [])
+
+                            for ty in deferred do
+                                deferredTypes[ty.TypeId] <- ty
+
+                            let notFollowed =
+                                deferred
+                                |> List.fold
+                                    (fun map ty ->
+                                        Map.add ty.TypeId $"beyond the frontier width cutoff ({followWidth})" map)
+                                    notFollowed
+
+                            let findings =
+                                if deferred.IsEmpty then
+                                    findings
+                                else
+                                    findings
+                                    @ [
+                                        Finding.make
+                                            "<type-table>"
+                                            (ResolveTypeTable.FrontierTooWide(fresh.Length, followWidth))
+                                    ]
+
+                            match selected with
                             | [] -> return table, notFollowed, findings
                             | fresh when depth > FollowDepth ->
                                 do! dumpFrontier ctx trace fresh
@@ -1620,33 +1848,6 @@ let resolveTypeTable: Pass<ResolveModel> =
                                         Finding.make
                                             "<type-table>"
                                             (ResolveTypeTable.FrontierNotResolved(fresh.Length, FollowDepth))
-                                    ]
-
-                                return table, notFollowed, findings
-                            | fresh when fresh.Length > FollowWidth ->
-                                // A generation whose own width outruns the cutoff: admitting a
-                                // prefix by id would pick a different subset run to run, because
-                                // a checker id is assigned in the order answers arrived (the same
-                                // reason the depth cutoff above keys no finding on one). So a
-                                // generation past the width cutoff is deferred whole, the same
-                                // all-or-nothing shape as the depth cutoff, and for the same
-                                // reason: no partial admission for a later generation to
-                                // rediscover under a different id.
-                                do! dumpFrontier ctx trace fresh
-
-                                let notFollowed =
-                                    fresh
-                                    |> List.fold
-                                        (fun map ty ->
-                                            Map.add ty.TypeId $"beyond the frontier width cutoff ({FollowWidth})" map)
-                                        notFollowed
-
-                                let findings =
-                                    findings
-                                    @ [
-                                        Finding.make
-                                            "<type-table>"
-                                            (ResolveTypeTable.FrontierTooWide(fresh.Length, FollowWidth))
                                     ]
 
                                 return table, notFollowed, findings
@@ -1703,7 +1904,9 @@ let resolveTypeTable: Pass<ResolveModel> =
                                         (fun map (ty, result) ->
                                             match result with
                                             | Error reason -> Map.add ty.TypeId reason map
-                                            | Ok _ -> map)
+                                            | Ok _ ->
+                                                deferredTypes.Remove ty.TypeId |> ignore
+                                                Map.remove ty.TypeId map)
                                         notFollowed
 
                                 let findings =
@@ -1759,6 +1962,8 @@ let resolveTypeTable: Pass<ResolveModel> =
                             Degraded(model, findings)
                 }
     }
+
+let resolveTypeTable = resolveTypeTableWithWidth FollowWidth
 
 /// The tier's pass list, in execution order.
 let resolveDeclarationIdentities: Pass<ResolveModel> =

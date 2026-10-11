@@ -183,3 +183,46 @@ let classifyTests =
             Expect.equal (Naming.identifierName "2fa") "N2fa" "a digit-led result takes a prefix"
             Expect.equal (Naming.identifierName "@/") "Item" "and a key of separators alone names a position"
     ]
+
+
+[<Tests>]
+let frontierDeclarationTests =
+    testCase "resolve oversized frontiers preserve source methods and terminate generic expansion" <| fun _ ->
+        use scratch = Scratch.directory "frontier-declarations"
+        let directory = scratch.Path
+        System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "package.json"), """{"name":"frontier-declarations-lab","version":"1.0.0","types":"index.d.ts"}""")
+        let declaration = """export interface Ordinary {
+    read(value: string): number;
+    map<T>(value:T): {kind:"ok";value:T} | {kind:"none"};
+}
+export interface Expanding<T> { next:Expanding<T[]>; run<U>(value:U):Expanding<U> }
+export const first:Expanding<string>;
+type Tree<S extends string> = {left:Tree<`${S}l`>;right:Tree<`${S}r`>} & {value:S};
+export interface Root {tree:Tree<"">}
+"""
+        System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "index.d.ts"), declaration)
+        let configFile = System.IO.Path.Combine(directory, "xantham.json")
+        System.IO.File.WriteAllText(configFile, """{"module":"Frontier","entry":"index.d.ts","lib":["esnext"],"types":[]}""")
+        let resolve = async {
+            let! mailbox, ctx = Bootstrap.start (GeneratorConfig.loadFile configFile) directory
+            use _ = mailbox :> System.IDisposable
+            let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+            let! resolved, _ = Pipeline.runTier ctx [ Resolve.resolveExportTypes; Resolve.resolveTypeTableWithWidth 1 ] (Pipeline.toResolve harvest)
+            return resolved
+        }
+        let resolved = Async.RunSynchronously resolve
+        let ordinary = resolved.Types |> Map.toList |> List.map snd |> List.find (fun facts -> facts.SymbolName |> Option.exists (fun name -> string name = "Ordinary"))
+        for name in ["read"; "map"] do
+            let member_ = ordinary.Members |> List.find (fun member_ -> member_.Symbol.Name = name)
+            let method_ = resolved.Types |> Map.tryFind member_.TypeId
+            Expect.isSome method_ ("source method survives the width cutoff: " + name)
+            Expect.isFalse (Map.containsKey member_.TypeId resolved.NotFollowed) "successful derivation clears stale deferral"
+            Expect.isNonEmpty method_.Value.CallSignatures "the method retains its signature"
+        let genericMethod = ordinary.Members |> List.find (fun member_ -> member_.Symbol.Name = "map")
+        let signature = resolved.Types[genericMethod.TypeId].CallSignatures.Head
+        let result = resolved.Types |> Map.tryFind signature.ReturnTypeId
+        Expect.isSome result "the generic method result is resolved"
+        Expect.equal result.Value.UnionMembers.Length 2 "both return arms survive"
+        let payload = result.Value.UnionMembers |> List.map (fun id -> resolved.Types[id]) |> List.collect _.Members |> List.find (fun member_ -> member_.Symbol.Name = "value")
+        Expect.equal payload.TypeId signature.TypeParameters.Head "the nested payload retains the method type parameter"
+        Expect.isLessThan resolved.Types.Count 1000 "generic expansion terminates under the bounded frontier"
