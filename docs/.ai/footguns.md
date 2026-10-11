@@ -293,3 +293,14 @@ it does not regenerate producer facts. The generation stamp `catalogue-inputs.js
 assembly's build record must match current inputs before packing. The package consumer test and full-library regeneration
 smoke are release evidence. Consumers need both the restored catalogue file and a PackageReference
 to the same Core.TS package version; the descriptor alone supplies no binding implementation.
+
+## Release markers after a squashed release
+
+PR #117 was squashed into master at `500a04a`, which is the repository commit recorded by all
+seven published 0.2.0/0.3.0 packages. The later history repair and release merge `78de2edf`
+join that squash with the original develop history. Its published payload inputs (`src/`,
+Directory.Build props/targets, SDK and npm pins) are unchanged from `500a04a`. A ShipIt baseline
+on either pre-join history counts the other copy of already released feature commits again.
+The release markers therefore use `78de2edf` as the verified joined-history baseline. Preview
+after this correction advances only Core.TS and its Node consumer to 0.2.1 for catalogue
+packaging. Preserve release merge commits to avoid recreating this duplicated history.

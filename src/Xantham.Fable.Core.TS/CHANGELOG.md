@@ -1,5 +1,5 @@
 ---
-last_commit_released: a48389cf5e9f499b0302abbd506bcdb5d6d21534
+last_commit_released: 78de2edf0c5370b8251f12ac47b81273d5639312
 name: Xantham.Fable.Core.TS
 include:
   - ../../tools/fable-core-ts-input/**
