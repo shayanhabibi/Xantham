@@ -1,5 +1,6 @@
 {
   "lib": ["esnext", "dom"],
+  "declarationCatalog": true,
   "groups": { "typescript/lib": "ship" },
   "compilerLib": {
     "module": "Fable.Core.TS",

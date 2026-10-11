@@ -36,6 +36,14 @@ function verifyChangedPaths(paths) {
   if (paths.some(file => !allowed.has(file))) throw new Error('ShipIt changed files outside package versions and changelogs.');
 }
 
+function normalizeProjectXml(xml) {
+  return xml
+    .replace(/<Version>[^<]+<\/Version>/g, '<Version>RELEASE</Version>')
+    .replace(/>\s+</g, '><')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function prepare({ github, context, core }) {
   const request = releaseRequest(context);
   core.setOutput('requested', 'false');
@@ -75,8 +83,9 @@ async function finish({ github, context, core, root, request, sshKey, push = pus
   for (const file of paths.filter(file => file.endsWith('.fsproj'))) {
     const before = git('show', `HEAD:${file}`);
     const after = fs.readFileSync(path.join(root, file), 'utf8').trim();
-    const stripVersion = xml => xml.replace(/<Version>[^<]+<\/Version>/, '<Version>RELEASE</Version>');
-    if (stripVersion(before) !== stripVersion(after)) throw new Error('Release preparation may only change Version inside project files.');
+    if (normalizeProjectXml(before) !== normalizeProjectXml(after)) {
+      throw new Error('Release preparation may only change Version inside project files.');
+    }
   }
   if (git('ls-files', '--others', '--exclude-standard').trim()) throw new Error('Release preparation created unexpected untracked files.');
   validateVersions(request.base, root);

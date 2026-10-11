@@ -283,3 +283,30 @@ siblings. The contract describes resolved values, not `exactOptionalPropertyType
 aliases the first selection's emitted types only after exact resolved-shape agreement.
 Each method still authenticates its own occurrence and source closure. Automatic value-set
 deduplication would silently merge independent contracts.
+
+## Core.TS packed catalogue
+
+Regenerate `compiler-lib` with its tracked `declarationCatalog: true` setting whenever changing
+the TypeScript pin, binding configuration or generated producer. Keep committed declarations
+and compiled bindings together. Pack creates a Brotli transport and version/ownership descriptor;
+it does not regenerate producer facts. The generation stamp `catalogue-inputs.json` and the
+assembly's build record must match current inputs before packing. The package consumer test and full-library regeneration
+smoke are release evidence. Consumers need both the restored catalogue file and a PackageReference
+to the same Core.TS package version; the descriptor alone supplies no binding implementation.
+
+The isolated local package test packs both Core.TS and its `Xantham.Fable.Core` dependency
+into its scratch feed. Its `PackageVersion` override propagates through project references,
+so both test packages use that override. Packing Core.TS alone can appear green while a
+published stable support version satisfies its prerelease range, then fail with NU1102 after
+the next Core.TS bump. Downloaded-package verification still restores real published dependencies.
+
+## Release markers after a squashed release
+
+PR #117 was squashed into master at `500a04a`, which is the repository commit recorded by all
+seven published 0.2.0/0.3.0 packages. The later history repair and release merge `78de2edf`
+join that squash with the original develop history. Its published payload inputs (`src/`,
+Directory.Build props/targets, SDK and npm pins) are unchanged from `500a04a`. A ShipIt baseline
+on either pre-join history counts the other copy of already released feature commits again.
+The release markers therefore use `78de2edf` as the verified joined-history baseline. Preview
+after this correction advances only Core.TS and its Node consumer to 0.2.1 for catalogue
+packaging. Preserve release merge commits to avoid recreating this duplicated history.

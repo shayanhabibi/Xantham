@@ -27,6 +27,7 @@
         <Compile Include="CatalogLibraryLab.fs" />
         <Compile Include="CatalogLibrary.test.fs" />
         <Compile Include="CatalogLibraryEntry.test.fs" />
+        <Compile Include="CoreTsPackage.test.fs" />
         <Compile Include="CatalogMember.test.fs" />
         <Compile Include="Pipeline.test.fs" />
         <Compile Include="Customization.test.fs" />
