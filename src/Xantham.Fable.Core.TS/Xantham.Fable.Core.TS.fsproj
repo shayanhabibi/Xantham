@@ -19,6 +19,7 @@
         <Compile Include="Fable.Core.TS.fs" />
         <Compile Include="Fable.Core.TS.Extensions.fs" />
         <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="obj/xantham/declarations.json.br;obj/xantham/catalogue.json" Pack="true" PackagePath="xantham/" />
     </ItemGroup>
 
     <ItemGroup>
@@ -26,5 +27,13 @@
         <PackageReference Include="Fable.Core" Version="5.2.0" />
         <PackageReference Include="Fable.Package.SDK" Version="1.4.1" PrivateAssets="all" />
     </ItemGroup>
+
+    <Target Name="RecordDeclarationCatalogBuild" AfterTargets="Build" Inputs="$(TargetPath);@(Compile);$(MSBuildProjectFullPath);$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx" Outputs="$(TargetPath).catalogue-build.json">
+        <Exec Command="dotnet fsi &quot;$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx&quot; -- record-build &quot;$(MSBuildProjectDirectory)&quot; &quot;$(TargetPath)&quot;" />
+    </Target>
+
+    <Target Name="PrepareDeclarationCatalog" BeforeTargets="GenerateNuspec">
+        <Exec Command="dotnet fsi &quot;$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx&quot; -- prepare &quot;$(MSBuildProjectDirectory)&quot; &quot;$(TargetPath)&quot; &quot;$(PackageVersion)&quot;" />
+    </Target>
 
 </Project>

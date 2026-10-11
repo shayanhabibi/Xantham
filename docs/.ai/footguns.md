@@ -283,3 +283,13 @@ siblings. The contract describes resolved values, not `exactOptionalPropertyType
 aliases the first selection's emitted types only after exact resolved-shape agreement.
 Each method still authenticates its own occurrence and source closure. Automatic value-set
 deduplication would silently merge independent contracts.
+
+## Core.TS packed catalogue
+
+Regenerate `compiler-lib` with its tracked `declarationCatalog: true` setting whenever changing
+the TypeScript pin, binding configuration or generated producer. Keep committed declarations
+and compiled bindings together. Pack creates a Brotli transport and version/ownership descriptor;
+it does not regenerate producer facts. The generation stamp `catalogue-inputs.json` and the
+assembly's build record must match current inputs before packing. The package consumer test and full-library regeneration
+smoke are release evidence. Consumers need both the restored catalogue file and a PackageReference
+to the same Core.TS package version; the descriptor alone supplies no binding implementation.
