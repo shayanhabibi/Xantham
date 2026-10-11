@@ -76,7 +76,7 @@ Replace the input with an installed package directory containing `package.json`.
 ## Preview the website
 
 ```bash frame=terminal
-dotnet run --project site/site.fsproj -- watch
+dotnet fsi build.fsx -- docs --watch
 ```
 
 Open `http://localhost:8080/Xantham/`.
@@ -84,11 +84,12 @@ Open `http://localhost:8080/Xantham/`.
 For a static build:
 
 ```bash frame=terminal
-dotnet run --project site/site.fsproj -- build
+dotnet fsi build.fsx -- docs
 ```
 
-Pages are written to `output/`. API reference pages use available Release
-assemblies; build those before checking reference changes.
+Pages are written to `output/`. The docs pipeline builds all six published library
+assemblies in Release before generating their API references. Missing assemblies
+fail the site build. The CLI is covered by the guide.
 
 ## Working in a worktree
 
