@@ -12,6 +12,9 @@ order: 4
 Use these alongside `Fable.Core` **5.2.0**, with Xantham package versions matching
 your generator release.
 
+Add the [temporary Cloudsmith source](installation.md#install-xantham) before
+installing these packages; current Xantham releases use that feed.
+
 ## Utility types
 
 **Xantham.Fable.Core**
@@ -90,6 +93,8 @@ open Node
 ```
 
 Every declaration sits under the top-level `Node` module.
+
+See the <a href="/Xantham/reference/xantham-fable-node/">Node API reference</a>.
 
 For a different `@types/node` version, generate from its installed declarations and
 review the resulting findings and compile errors.

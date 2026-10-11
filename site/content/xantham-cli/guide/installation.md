@@ -13,6 +13,16 @@ order: 1
 
 ## Install Xantham
 
+:::warning
+Current releases are published to a temporary Cloudsmith feed while NuGet.org
+package ownership is transferred. Add this source before installing or updating
+the tool and Xantham libraries. Keep NuGet.org enabled for their dependencies.
+:::
+
+```bash frame=terminal
+dotnet nuget add source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json --name xantham-temporary
+```
+
 ```bash frame=terminal
 dotnet tool install --global xantham
 xantham --version

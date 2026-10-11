@@ -60,9 +60,8 @@ Manual package verification on develop cannot publish. The wrapper runs from
 protected master. ShipIt runs in a separate read-only job; finalization applies
 its patch on a fresh runner without executing tools or hooks from develop.
 It checks the maintainer identity and current PR commits, and
-only commits approved package project files and changelogs. The trusted policy supports the
-six established packages and the incoming `Xantham.Generator.Myriad` package. Land this policy
-on master before preparing the first Myriad release; the wrapper always executes master's
-scripts against the release checkout. Develop's local release validation requires all seven
-adopted packages by name. The trusted master policy bootstrap is PR #116. It rejects stale
+only commits approved package project files and changelogs. Both master's trusted policy and
+develop's local release validation require all seven adopted packages by name, including
+`Xantham.Generator.Myriad`. The wrapper executes master's scripts against the release
+checkout. It rejects stale
 versions, unexpected file changes, and branches that moved during preparation.

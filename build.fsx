@@ -7,6 +7,7 @@
 #r "nuget: Fake.IO.FileSystem, 6.1.4"
 
 #load "tools/workspace.fsx"
+#load "site/ApiProjects.fs"
 
 open Partas.Build
 open Partas.TypeProvider.BuildHelper
@@ -265,10 +266,10 @@ module Stages =
                 }
         }
 
-    let build (projects: InputSpec<string list>) =
+    let buildWithConfig (configuration: InputSpec<string>) (projects: InputSpec<string list>) =
         input {
             let! projects = projects
-            and! config = Options.config
+            and! config = configuration
 
             return
                 stage "build" {
@@ -279,6 +280,8 @@ module Stages =
                         stage $"build-{project}" { run (cmd $"dotnet build {project} -c {config} --no-restore -v q") }
                 }
         }
+
+    let build projects = buildWithConfig Options.config projects
 
     let buildWithoutTests =
         input {
@@ -297,24 +300,55 @@ module Stages =
             let! watch = Options.watch
 
             and! buildStage =
-                build (
-                    Spec.srcProjects
-                    |> List.filter (function
-                        | { Name = "Xantham.TypeScript.Wire" }
-                        | { Name = "Xantham.Fable.Core" } -> true
-                        | _ -> false)
-                    |> List.map _.RelativePath
-                    |> InputSpec.ret
-                )
+                buildWithConfig
+                    (InputSpec.ret "Release")
+                    (Docs.ApiProjects.projects
+                     |> List.map (fun (name, _) ->
+                         Spec.srcProjects
+                         |> List.find (fun project -> project.Name = name)
+                         |> _.RelativePath)
+                     |> InputSpec.ret)
 
             return
                 stage "docs" {
+                    buildStage
+
                     if watch then
                         stage "watch" { run "dotnet run --project site/site.fsproj -- watch" }
                     else
                         stage "build" {
-                            buildStage
                             run "dotnet run --project site/site.fsproj -- build"
+
+                            run (fun _ ->
+                                let pages =
+                                    (Docs.ApiProjects.projects
+                                     |> List.map (fun (name, _) ->
+                                         name.ToLowerInvariant().Replace('.', '-') + "/index.html"))
+                                    @ [
+                                        "xantham-fable-core-ts/fable-core/ts/es/promise/index.html"
+                                        "xantham-fable-core-ts/fable-core/ts/dom/eventtarget/index.html"
+                                        "xantham-fable-node/global/node/buffer/index.html"
+                                        "xantham-generator-myriad/xantham-generator-myriad/operations/index.html"
+                                    ]
+
+                                let missing =
+                                    pages
+                                    |> List.filter (fun relativePath ->
+                                        let page =
+                                            System.IO.Path.Combine(
+                                                __SOURCE_DIRECTORY__,
+                                                "output",
+                                                "reference",
+                                                relativePath
+                                            )
+
+                                        not (System.IO.File.Exists page))
+
+                                match missing with
+                                | [] -> Ok()
+                                | missing ->
+                                    let names = String.concat ", " missing
+                                    Error $"Missing API reference pages: {names}")
                         }
 
                 }
