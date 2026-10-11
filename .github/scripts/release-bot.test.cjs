@@ -137,3 +137,11 @@ test('project changes outside Version cannot enter a release commit', async t =>
   assert.equal(f.git('rev-parse', 'HEAD'), f.head);
   assert.deepEqual(f.dispatched, []);
 });
+
+test('formatting-only xml changes are allowed in a release commit', async t => {
+  const f = fixture(t);
+  const formatted = '<Project>\n  <PropertyGroup>\n    <Version>1.0.1</Version>\n  </PropertyGroup>\n</Project>\n';
+  fs.writeFileSync(f.xml, formatted);
+  await bot.finish(f.input);
+  assert.notEqual(f.git('rev-parse', 'HEAD'), f.head);
+});
