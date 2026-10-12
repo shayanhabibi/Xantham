@@ -2,23 +2,25 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
-test('Publish waits for packages and every master test shard; PR packaging remains independent', () => {
+test('Publish consumes master Test evidence without owning a matrix; PR packaging remains independent', () => {
   const workflow = fs.readFileSync('.github/workflows/push_master.yml', 'utf8');
-  const packageJob = workflow.split('\n  package:')[1].split('\n  publish-tests:')[0];
-  const testJob = workflow.split('\n  publish-tests:')[1].split('\n  publish:')[0];
+  const packageJob = workflow.split('\n  package:')[1].split('\n  verification:')[0];
+  const testJob = workflow.split('\n  verification:')[1].split('\n  publish:')[0];
   const publish = workflow.split('\n  publish:')[1];
   assert.match(packageJob, /pack --ci --skip-tests/);
   assert.doesNotMatch(packageJob, /needs:/);
   assert.match(testJob, /needs: package/);
   assert.match(testJob, /github.event_name != 'pull_request'.*refs\/heads\/master.*needs.package.outputs.full == 'true'/);
-  assert.match(testJob, /uses: \.\/\.github\/workflows\/test-shards.yml/);
+  assert.doesNotMatch(workflow, /uses: \.\/\.github\/workflows\/test-shards.yml|--shard|matrix:/);
+  assert.match(testJob, /require-master-tests.cjs/);
   assert.doesNotMatch(workflow, /\n  test:|\n\s+name: test\s*\n/);
-  assert.match(packageJob, /reuse-develop-tests.cjs/);
-  assert.match(testJob, /needs.package.outputs.master-reused != 'true'/);
-  assert.match(publish, /needs: \[package, publish-tests\]/);
+  assert.doesNotMatch(packageJob, /reuse-develop-tests.cjs/);
+  assert.match(publish, /needs: \[package, verification\]/);
+  assert.match(publish, /if: always\(\) && !cancelled\(\)/);
   assert.match(publish, /Require verified packages and tests/);
   assert.match(publish, /node \.github\/scripts\/publish-matrix-status.cjs/);
-  assert.match(publish, /SHARDS_RESULT: \$\{\{ needs.publish-tests.result }}/);
+  assert.match(publish, /VERIFICATION_RESULT: \$\{\{ needs.verification.result }}/);
+  assert.match(publish, /VERIFIED: \$\{\{ needs.verification.outputs.verified }}/);
   assert.match(publish, /Download verified packages/);
   assert.match(publish, /publish artifacts/);
   const shared = fs.readFileSync('.github/workflows/test-shards.yml', 'utf8');
