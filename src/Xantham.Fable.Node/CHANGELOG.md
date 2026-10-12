@@ -1,5 +1,5 @@
 ---
-last_commit_released: f8ccbd9fcc59ac4a36adaafa3b31c24ece8aaec5
+last_commit_released: 0d9626867755b04d294c4313cd8a1ec299ccf543
 name: Xantham.Fable.Node
 include:
   - ../Xantham.Fable.Core/**
