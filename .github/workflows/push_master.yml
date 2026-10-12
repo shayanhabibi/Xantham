@@ -38,7 +38,6 @@ jobs:
   package:
     outputs:
       full: ${{ steps.scope.outputs.full }}
-      master-reused: ${{ steps.develop-tests.outputs.master-reused || 'false' }}
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -56,14 +55,6 @@ jobs:
             await verificationScope({ github, context, core });
       - name: Check CI policy
         run: node --test .github/scripts/*.test.cjs
-      - name: Reuse verified develop tests for identical master trees
-        if: steps.scope.outputs.full == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
-        id: develop-tests
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const reuseDevelopTests = require('./.github/scripts/reuse-develop-tests.cjs');
-            await reuseDevelopTests({ github, context, core });
       - name: Verify release versions and dependent packages
         run: node .github/scripts/release-versions.cjs
         env:
@@ -87,14 +78,28 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  publish-tests:
+  verification:
     needs: package
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && needs.package.outputs.full == 'true' && needs.package.outputs.master-reused != 'true'
-    uses: ./.github/workflows/test-shards.yml
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && needs.package.outputs.full == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    outputs:
+      verified: ${{ steps.tests.outputs.verified }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Require full Test evidence for this master commit
+        id: tests
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const requireMasterTests = require('./.github/scripts/require-master-tests.cjs');
+            await requireMasterTests({ github, context, core });
 
   publish:
     if: always() && !cancelled() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && needs.package.outputs.full == 'true'
-    needs: [package, publish-tests]
+    needs: [package, verification]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -105,8 +110,8 @@ jobs:
         env:
           PACKAGE_RESULT: ${{ needs.package.result }}
           FULL: ${{ needs.package.outputs.full }}
-          MASTER_REUSED: ${{ needs.package.outputs.master-reused }}
-          SHARDS_RESULT: ${{ needs.publish-tests.result }}
+          VERIFICATION_RESULT: ${{ needs.verification.result }}
+          VERIFIED: ${{ needs.verification.outputs.verified }}
         run: node .github/scripts/publish-matrix-status.cjs
       - uses: ./.github/actions/setup
         with:

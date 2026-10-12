@@ -50,28 +50,33 @@ Test workflow for the exact head commit, provided `master` is its ancestor. This
 the proposed merge has the same source tree as the tested commit. If that run is still
 pending, the check waits in five-minute intervals; absent, failed, or incompatible evidence
 falls back to the full suite. Other PRs run the full suite. Release PR packing builds and
-validates packages without duplicating the suite. Full Test and Publish verification use
-the same reusable workflow with eight disjoint Expecto shards and the Fable and Partas
+validates packages without duplicating the suite. The Test workflow owns full verification
+through a reusable workflow with eight disjoint Expecto shards and the Fable and Partas
 runtime gates in shard one. The required `test` check aggregates every shard and fails
 on failed, cancelled or missing full-run results. Quick and reused checks create no new
 full-test marker or golden artifact.
 Test names are discovered from each built suite; shards reject empty or mismatched
-selections. Publication requires both verified packages and every successful shard.
+selections. Publication requires both verified packages and successful full Test evidence.
 Each shard retains the 30-minute timeout; local tests run all suites unless `--shard
 INDEX/COUNT` is supplied.
 
 Master pushes and manual master runs also reuse develop's full verification when the
 master merge has two parents and its Git tree exactly matches the second parent.
 That parent must have a successful full Test run on develop in this repository.
-Both Test and Publish apply this proof; Publish still builds, validates and packs
-the release artifacts. Missing, failed, quick or mismatched evidence runs the shards.
+Test applies this proof; Publish still builds, validates and packs
+the release artifacts. Missing, failed, quick or mismatched develop evidence makes Test run the shards.
 Master reuse waits at most two minutes for pending evidence. Reused master verification
 records golden provenance for the identical checked-out tree; reused PR and quick
 checks create no golden artifact.
 
-The required `test` check belongs only to the Test workflow. Publish's reusable
-test job is named `publish-tests`, including when skipped, so it cannot satisfy that
-required check before the real aggregate finishes.
+The required `test` check belongs only to the Test workflow. Publish never runs a second
+matrix. Its `verification` job requires a successful push-triggered or manually dispatched
+Test workflow on master for the exact published commit in this repository, with the
+successful full `Test` marker in the aggregate `test` job. That marker covers fresh shards
+or authenticated identical-tree develop reuse; quick and PR runs cannot authorize publication.
+Publish waits for absent or pending evidence in ten-minute intervals for up to one hour.
+Failed, cancelled, skipped, incomplete or unavailable evidence blocks publication; rerun
+Test and then Publish to retry. Release PRs and quick Publish runs skip this evidence job.
 
 The comment workflow uses `github-actions[bot]` as the commit author and a
 repository deploy key for pushes, which trigger normal push and PR CI.
