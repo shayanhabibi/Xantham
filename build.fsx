@@ -192,6 +192,11 @@ module Options =
             "Also run the Fable run gate, much the slowest step. Required before a commit that touches a golden."
         |> Input.def false
 
+    let testShard =
+        Input.option<string> "--shard"
+        |> Input.description "Run a disjoint Expecto shard, INDEX/COUNT starting at 1. All tests by default."
+        |> Input.def ""
+
     /// `findings` reads the manifests, which is the only part of a large fixture worth reading:
     /// `symbols.jsonl` runs to thousands of lines, its aggregate is a page.
     let findingsFixture =
@@ -482,6 +487,7 @@ module Stages =
             and! filter = Options.testFilter
             and! runGate = Options.runGate
             and! isCI = Baked.Common.isCI
+            and! shard = Options.testShard
 
             // Each test project is an Expecto console app and runs as its built executable, with
             // output streamed as written. `--filter` is Expecto's own hint: a substring of the full test name.
@@ -491,6 +497,17 @@ module Stages =
 
             let suite (name: string) =
                 stage name {
+                    if not (System.String.IsNullOrWhiteSpace shard) then
+                        stage "sharded suites" {
+                            run (fun _ ->
+                                if update || not (System.String.IsNullOrWhiteSpace filter) then
+                                    Error "--shard cannot be combined with --filter or --update"
+                                else
+                                    Ok())
+
+                            run (cmd $"node tools/test-shards.mjs {config} {shard}")
+                        }
+
                     for project in suites do
                         let output =
                             System.IO.Path.Combine(
@@ -513,6 +530,7 @@ module Stages =
                                 cmd $"dotnet {assembly} --filter {filter}"
 
                         stage project.Name {
+                            when' (System.String.IsNullOrWhiteSpace shard)
                             workingDir output
                             run command
                         }

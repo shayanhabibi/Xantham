@@ -2183,3 +2183,48 @@ arity 1, native qualified names and ownership, and descriptor payload/assembly h
 `XANTHAM_CORE_TS_PACKAGE` to a downloaded nupkg exercises the same consumer against a published
 artifact without repacking the checkout. The existing full-library smoke still authenticates
 the regenerated semantic catalogue against the committed producer.
+
+## Delivery contract recovery (2026-10-09)
+
+Resolve retains source contracts when an unrelated generic expansion exceeds the frontier
+width. Admission uses source declaration identity and the existing type table's canonical
+nominal contract edges; it never queries a second recursively expanded structure for admission.
+Nested application arguments survive, while application members retain their ordinary
+identity/structural distinction. Width-deferred types can resume when a later owner proves
+they belong to its contract. The depth limit remains in force. Low-width compile regressions
+cover reordered promotion, nested conditional/default intersections and a late source owner,
+with a negative union-payload compile.
+
+DeclarationCatalog retains constructor parameter bounds in indexed alias fallback keys,
+preserving equivalent alpha-renamed constructors across producer/consumer generation.
+Shape's default-export naming rejects SourceFile absolute paths; secondary-alias anchoring
+uses the same sanitized identifier as Shape. Identity/API/inference contracts advance to
+6/5/3; policy and customization versions remain 1. Regenerate Core.TS and dependent producers
+together; old contracts reject before traversal.
+
+Audit excluded the proposed extension of bound hashing to every structural alias. It broke
+both JSON and Brotli consumer compilation for `Config<T>` when a caller constrained `T`:
+the alias declaration itself is unconstrained. Constructor-only fallback hashing passes those
+existing reuse cases. The separately reproduced `Direct<T,U> = Flatten<T,U>` versus
+`Infer<T extends Schema,U> = Flatten<T["output"],U>` collision remains deferred; resolving it
+must distinguish declared bounds from caller bounds. The original patch is preserved in the
+integration recovery stash. The deferred reproducer is:
+
+```typescript
+type Flatten<T, U = string> = { formErrors: U[]; fieldErrors: { [P in keyof T]?: U[] } };
+interface Schema { output: unknown }
+export type Direct<T, U = string> = Flatten<T, U>;
+export type Infer<T extends Schema, U = string> = Flatten<T["output"], U>;
+```
+
+The old literal-union ownership audit is also preserved in the recovery stash, but its
+coordinated-producer solution and tracked lab already exist on the remote branch.
+
+Validation on the updated remote branch: `build.fsx -- test --no-format --run-gate` passed
+1,341 Generator tests and 99 Wire tests, with one existing ignored case in each suite,
+528 Fable runtime checks and the real Partas plugin JSX gate. The Linux `solid-js` golden
+comparison remains the documented case-folding skip; its determinism check is retained.
+Targeted Fantomas checks passed. Committed golden bindings and findings are unchanged.
+Core.TS regeneration in catalogue mode preserves all 4,062 declaration identities, APIs,
+constraints and source sets, and the binding is byte-identical; only compatibility metadata
+and producer provenance change in its committed catalogue.

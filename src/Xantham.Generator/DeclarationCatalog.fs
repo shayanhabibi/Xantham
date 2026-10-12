@@ -609,6 +609,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         else
                             []
 
+                    let boundsComplete = complete
+
                     let signature (signature: ResolvedSignature) =
                         let signatureBindings =
                             signature.TypeParameters
@@ -698,7 +700,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
                                 arguments @ [ json ("declaration-arguments", owner, declarationArguments) ]
 
-                    if not complete || List.contains "" arguments then
+                    if not boundsComplete then
+                        None
+                    elif not complete || List.contains "" arguments then
                         let aliasArguments =
                             facts.DeclarationArguments
                             |> List.map (fun argument ->
@@ -713,7 +717,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             else
                                 None
                         else
-                            Some(identity "alias" facts.AliasDeclarations aliasArguments)
+                            Some(identity "alias" facts.AliasDeclarations (aliasArguments @ parameterBounds))
                     else
                         Some(identity role handles (arguments @ parameterBounds))
 
@@ -898,7 +902,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     export.Order.IsSome
                     && export.Order = order decl
                     && (qualified exportedName = name
-                        || qualified (Naming.pascalSegment exportedName) = name))
+                        || qualified (Naming.pascalSegment exportedName) = name
+                        || qualified (Naming.typeNameSegment exportedName) = name))
 
             match exported with
             | Some export ->

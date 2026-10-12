@@ -37,6 +37,7 @@
         <Compile Include="ExportLayoutPaths.test.fs" />
         <Compile Include="Bootstrap.test.fs" />
         <Compile Include="Cli.test.fs" />
+        <Compile Include="../TestInventory.fs" Link="TestInventory.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
 

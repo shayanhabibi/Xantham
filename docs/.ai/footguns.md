@@ -22,6 +22,16 @@ argument, so `Model<string>` reads as two type arguments. Read heritage nodes an
 
 **Expecto's `--filter` is a hierarchy prefix.** A fixture's tests are named `generator e2e.<fixture> generates the committed goldens` and its extra cases `generator e2e.<case name>`, so a bare fixture name selects zero tests and reports success.
 
+**The frontier width limit must not discard a source contract with an unrelated expansion.**
+Resolve admits explicit seeds, primitive leaves, union enumeration, ordinary nominal references,
+canonical source declarations and the nested contract edges of already-derived nominal owners.
+It retains deferred responses so an owner discovered later can prove an earlier omitted edge.
+Following an application's members again recreates substituted method binders indefinitely;
+follow its arguments instead, and keep explicit structural promotion separate. A conditional
+alias can reduce to an anonymous type literal carrying `Instantiated`; that flag alone does
+not invalidate a nested contract reached from a canonical owner. Mapped computations remain
+outside that traversal. Successful derivation removes both pending and `NotFollowed` entries.
+
 ## Declaration catalogs
 
 **TypeScript library ownership is logical, not a platform distribution.** Installed
@@ -85,6 +95,17 @@ another conventional install uses that physical install's metadata. An unrelated
 binary. Resolving away the install path before locating the wrapper loses valid package-store pairs.
 Decode compatibility and variants from the same JSON document and retain downstream source,
 manifest, API, arity, constraint, owner and variant authentication.
+
+**Constructor alias fallback identities retain their bound parameter contracts.** Two indexed
+constructor aliases can have the same declaration and argument positions while binding different
+nominal constraints. Include constructor parameter bounds in alias-fallback keys; an unavailable
+bound cannot authenticate through the fallback. Alpha-renamed equivalent binders still share.
+Ordinary alias applications retain declaration bounds rather than a caller's stronger constraint.
+
+**SourceFile symbols do not provide public F# names.** A default namespace export can resolve
+to a quoted absolute module path. Use the export's fallback name, not a sanitized checkout path.
+Secondary aliases use the same `Naming.typeNameSegment` normalization as Shape when recovering
+their source anchor, including names beginning with `$`.
 
 Each rule below was written against a catalog authentication failure between two real packages;
 the corresponding lab under `tests/fixtures/` is the reducer.
