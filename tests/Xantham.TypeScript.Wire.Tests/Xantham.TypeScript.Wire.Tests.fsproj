@@ -19,6 +19,7 @@
         <Compile Include="VirtualFile.test.fs" />
         <Compile Include="Session.test.fs" />
         <Compile Include="NodeHandle.test.fs" />
+        <Compile Include="../TestInventory.fs" Link="TestInventory.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
 

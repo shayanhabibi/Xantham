@@ -1,81 +1,76 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <Version>0.2.0</Version>
-        <FSharpCoreImplicitPackageVersion>9.0.100</FSharpCoreImplicitPackageVersion>
-        <AssemblyVersion>0.0.0.0</AssemblyVersion>
-        <IsPackable>true</IsPackable>
-        <PackageId>Xantham.Generator</PackageId>
-        <Authors>Shayan Habibi</Authors>
-        <Description>TypeScript-to-F# Fable bindings generator for customisations and applications that embed the generation pipeline.</Description>
-        <PackageTags>typescript;fsharp;fable;bindings;codegen</PackageTags>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <!-- The order is the pipeline's order: the model first, then one file per tier in the
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Version>0.2.1</Version>
+    <FSharpCoreImplicitPackageVersion>9.0.100</FSharpCoreImplicitPackageVersion>
+    <AssemblyVersion>0.0.0.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
+    <PackageId>Xantham.Generator</PackageId>
+    <Authors>Shayan Habibi</Authors>
+    <Description>TypeScript-to-F# Fable bindings generator for customisations and applications that embed the generation pipeline.</Description>
+    <PackageTags>typescript;fsharp;fable;bindings;codegen</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The order is the pipeline's order: the model first, then one file per tier in the
              order the tiers run, then the fold that sequences them. -->
-        <Compile Include="Measures.fs" />
-        <Compile Include="AssemblyInfo.fs" />
-        <Compile Include="Findings.fs" />
-        <Compile Include="Model.fs" />
-        <Compile Include="Bootstrap.fs" />
-        <Compile Include="ExportProvenance.fs" />
-        <Compile Include="Harvest.fs" />
-        <Compile Include="Resolve.fs" />
-        <!-- Tier 3 - Shape. `ExportLayout.fs` then `Spec.fs` first: the container allocation
+    <Compile Include="Measures.fs" />
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Findings.fs" />
+    <Compile Include="Model.fs" />
+    <Compile Include="Bootstrap.fs" />
+    <Compile Include="ExportProvenance.fs" />
+    <Compile Include="Harvest.fs" />
+    <Compile Include="Resolve.fs" />
+    <!-- Tier 3 - Shape. `ExportLayout.fs` then `Spec.fs` first: the container allocation
              and the vocabulary every pass is written against.
              The passes then follow in execution order, which is also the order they may
              refer to one another in, and `Passes.fs` closes the folder with the list the
              pipeline runs. -->
-        <Compile Include="Shape\ExportLayout.fs" />
-        <Compile Include="Shape\Spec.fs" />
-        <Compile Include="Shape\ExportNames.fs" />
-        <Compile Include="Shape\Anonymous.fs" />
-        <Compile Include="Shape\ConstructorObjects.fs" />
-        <Compile Include="Shape\FreeTypeParams.fs" />
-        <Compile Include="Shape\MixedUnionCensus.fs" />
-        <Compile Include="Shape\LiteralUnions.fs" />
-        <Compile Include="Shape\TaggedUnions.fs" />
-        <Compile Include="Shape\Callbacks.fs" />
-        <Compile Include="Shape\Interfaces.fs" />
-        <Compile Include="Shape\Aliases.fs" />
-        <Compile Include="Shape\Classes.fs" />
-        <Compile Include="Shape\Exports.fs" />
-        <Compile Include="Shape\ParamObjects.fs" />
-        <Compile Include="Shape\Inherited.fs" />
-        <Compile Include="Shape\Overloads.fs" />
-        <Compile Include="Shape\UnionArms.fs" />
-        <Compile Include="Shape\Arity.fs" />
-        <Compile Include="Shape\Ordering.fs" />
-        <Compile Include="Shape\ExportCollisions.fs" />
-        <Compile Include="Shape\Orphans.fs" />
-        <Compile Include="Shape\Coverage.fs" />
-        <Compile Include="Shape\Passes.fs" />
-        <Compile Include="Render.fs" />
-        <Compile Include="CatalogCompatibility.fs" />
-        <Compile Include="CatalogCompiler.fs" />
-        <Compile Include="CatalogLibrary.fs" />
-        <Compile Include="CatalogMember.fs" />
-        <Compile Include="CatalogTransport.fs" />
-        <Compile Include="DeclarationCatalog.fs" />
-        <Compile Include="Customization\Contract.fsi" />
-        <Compile Include="Customization\Contract.fs" />
-        <Compile Include="Customization\Semantics.fs" />
-        <Compile Include="Customization\Output.fs" />
-        <Compile Include="Customization\Apply.fs" />
-        <Compile Include="Customization\Provenance.fs" />
-        <Compile Include="Customization\Compile.fs" />
-        <Compile Include="Pipeline.fs" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Xantham.TypeScript.Wire\Xantham.TypeScript.Wire.fsproj" />
-    </ItemGroup>
-
+    <Compile Include="Shape\ExportLayout.fs" />
+    <Compile Include="Shape\Spec.fs" />
+    <Compile Include="Shape\ExportNames.fs" />
+    <Compile Include="Shape\Anonymous.fs" />
+    <Compile Include="Shape\ConstructorObjects.fs" />
+    <Compile Include="Shape\FreeTypeParams.fs" />
+    <Compile Include="Shape\MixedUnionCensus.fs" />
+    <Compile Include="Shape\LiteralUnions.fs" />
+    <Compile Include="Shape\TaggedUnions.fs" />
+    <Compile Include="Shape\Callbacks.fs" />
+    <Compile Include="Shape\Interfaces.fs" />
+    <Compile Include="Shape\Aliases.fs" />
+    <Compile Include="Shape\Classes.fs" />
+    <Compile Include="Shape\Exports.fs" />
+    <Compile Include="Shape\ParamObjects.fs" />
+    <Compile Include="Shape\Inherited.fs" />
+    <Compile Include="Shape\Overloads.fs" />
+    <Compile Include="Shape\UnionArms.fs" />
+    <Compile Include="Shape\Arity.fs" />
+    <Compile Include="Shape\Ordering.fs" />
+    <Compile Include="Shape\ExportCollisions.fs" />
+    <Compile Include="Shape\Orphans.fs" />
+    <Compile Include="Shape\Coverage.fs" />
+    <Compile Include="Shape\Passes.fs" />
+    <Compile Include="Render.fs" />
+    <Compile Include="CatalogCompatibility.fs" />
+    <Compile Include="CatalogCompiler.fs" />
+    <Compile Include="CatalogLibrary.fs" />
+    <Compile Include="CatalogMember.fs" />
+    <Compile Include="CatalogTransport.fs" />
+    <Compile Include="DeclarationCatalog.fs" />
+    <Compile Include="Customization\Contract.fsi" />
+    <Compile Include="Customization\Contract.fs" />
+    <Compile Include="Customization\Semantics.fs" />
+    <Compile Include="Customization\Output.fs" />
+    <Compile Include="Customization\Apply.fs" />
+    <Compile Include="Customization\Provenance.fs" />
+    <Compile Include="Customization\Compile.fs" />
+    <Compile Include="Pipeline.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xantham.TypeScript.Wire\Xantham.TypeScript.Wire.fsproj" />
+  </ItemGroup>
 </Project>

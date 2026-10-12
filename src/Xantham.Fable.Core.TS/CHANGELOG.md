@@ -1,5 +1,5 @@
 ---
-last_commit_released: f8ccbd9fcc59ac4a36adaafa3b31c24ece8aaec5
+last_commit_released: 2f70620ce9950438f4043662a5f964151d9614fb
 name: Xantham.Fable.Core.TS
 include:
   - ../../tools/fable-core-ts-input/**
@@ -15,6 +15,14 @@ updaters:
 ---
 
 # Changelog
+
+## 0.2.2 - 2026-10-12
+
+### 🐞 Bug Fixes
+
+* *(generator)* Preserve source contracts and shard CI validation (#123) ([2f70620](https://github.com/shayanhabibi/Xantham/commit/2f70620ce9950438f4043662a5f964151d9614fb))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/0d9626867755b04d294c4313cd8a1ec299ccf543..2f70620ce9950438f4043662a5f964151d9614fb)</small></strong>
 
 ## 0.2.1 - 2026-10-11
 

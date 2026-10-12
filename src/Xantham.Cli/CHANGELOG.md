@@ -1,5 +1,5 @@
 ---
-last_commit_released: 78de2edf0c5370b8251f12ac47b81273d5639312
+last_commit_released: 2f70620ce9950438f4043662a5f964151d9614fb
 name: xantham
 include:
   - ../Xantham.TypeScript.Wire/**
@@ -14,6 +14,14 @@ updaters:
 ---
 
 # Changelog
+
+## 0.3.1 - 2026-10-12
+
+### 🐞 Bug Fixes
+
+* *(generator)* Preserve source contracts and shard CI validation (#123) ([2f70620](https://github.com/shayanhabibi/Xantham/commit/2f70620ce9950438f4043662a5f964151d9614fb))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/0d9626867755b04d294c4313cd8a1ec299ccf543..2f70620ce9950438f4043662a5f964151d9614fb)</small></strong>
 
 ## 0.3.0 - 2026-10-10
 

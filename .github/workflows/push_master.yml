@@ -17,6 +17,7 @@ on:
       - '.node-version'
       - '.github/actions/**'
       - '.github/workflows/push_master.yml'
+      - '.github/workflows/test-shards.yml'
   workflow_dispatch:
 
 permissions:
@@ -66,15 +67,7 @@ jobs:
           node tools/verify-release.mjs
       - name: Verify and pack
         if: steps.scope.outputs.full == 'true'
-        run: |
-          if [ "$EVENT_NAME" = "pull_request" ] || [ "$BRANCH_REF" = "refs/heads/develop" ]; then
-            dotnet fsi build.fsx -- pack --ci --skip-tests
-          else
-            dotnet fsi build.fsx -- pack --ci --run-gate
-          fi
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BRANCH_REF: ${{ github.ref }}
+        run: dotnet fsi build.fsx -- pack --ci --skip-tests
       - name: Upload packages
         if: steps.scope.outputs.full == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -84,9 +77,14 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  test:
+    needs: package
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && needs.package.outputs.full == 'true'
+    uses: ./.github/workflows/test-shards.yml
+
   publish:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && needs.package.outputs.full == 'true'
-    needs: package
+    needs: [package, test]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

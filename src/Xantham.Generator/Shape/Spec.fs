@@ -34,7 +34,11 @@ let bindingOf (export: HarvestedExport) =
 let fsName (fallback: string) (export: HarvestedExport) =
     if export.ExportName <> "default" then
         export.ExportName
-    elif export.Symbol.Name = "default" || export.Symbol.Name.StartsWith "__" then
+    elif
+        export.Symbol.Name = "default"
+        || export.Symbol.Name.StartsWith "__"
+        || export.Symbol.Name.StartsWith "\""
+    then
         fallback
     else
         export.Symbol.Name

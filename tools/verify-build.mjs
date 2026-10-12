@@ -99,6 +99,18 @@ assert.equal(skipped.status, 0, skipped.output);
 assert.doesNotMatch(skipped.output, /build without tests\s+\(skipped\)/);
 assert.match(skipped.output, /test\s+\(skipped\)/);
 
+const shard = build("test", "--ci", "--shard", "3/8", "--explain");
+assert.equal(shard.status, 0, shard.output);
+assert.match(shard.output, /node tools\/test-shards\.mjs Release 3\/8/);
+assert.doesNotMatch(shard.output, /dotnet .*\.Tests\.dll/);
+assert.match(shard.output, /run gate\s+\(skipped\)/);
+assert.match(shard.output, /customization Partas gate\s+\(skipped\)/);
+
+const gateShard = build("test", "--ci", "--shard", "1/8", "--run-gate", "--explain");
+assert.equal(gateShard.status, 0, gateShard.output);
+assert.match(gateShard.output, /dotnet fable .*--run node/);
+assert.match(gateShard.output, /node tests\/Xantham.Generator.PartasGate\/verify.mjs/);
+
 const bump = build("bump", "--dry-run", "--explain");
 assert.equal(bump.status, 0, bump.output);
 assert.match(bump.output, /dotnet shipit --allow-branch develop --mode local --skip-merge-commit --dry-run/);

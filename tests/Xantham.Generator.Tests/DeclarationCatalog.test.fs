@@ -386,6 +386,127 @@ let keys (helpers: Identity.Root.Util) (value: obj): string[] = helpers.keys val
             if Directory.Exists directory then Directory.Delete(directory, true)
 
 [<Tests>]
+let sanitizedAliasIdentityTests =
+    testCase "declaration catalog authenticates sanitized secondary aliases" <| fun _ ->
+        use scratch = Scratch.directory "sanitized-catalog-alias"
+        let directory = scratch.Path
+        writePackageFile directory "package.json" """{"name":"sanitized-alias-lab","version":"1.0.0","types":"index.d.ts"}"""
+        writePackageFile directory "index.d.ts" """export type $First = unknown; export type $Second = unknown;"""
+        let output = Path.Combine(directory, "root")
+        Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory output
+        |> Async.RunSynchronously |> ignore
+        let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(output, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+        let first = catalog.Declarations |> Array.find (fun entry -> entry.FSharpName = "Identity.Root.First")
+        let second = catalog.Declarations |> Array.find (fun entry -> entry.FSharpName = "Identity.Root.Second")
+        Expect.notEqual first.Identity second.Identity "separate written aliases retain their declaration identities"
+        Expect.equal second.Role "alias" "the secondary alias uses its export declaration"
+
+[<Tests>]
+let constrainedConstructorAliasTests =
+    testCase "declaration catalog keeps bounds on indexed constructor aliases" <| fun _ ->
+        use scratch = Scratch.directory "constrained-constructor-alias"
+        let directory = scratch.Path
+        writePackageFile directory "package.json" """{"name":"constructor-alias-lab","version":"1.0.0","types":"index.d.ts"}"""
+        writePackageFile directory "index.d.ts" """interface A {kind:"a";def:{foo:string}}
+interface B {kind:"b";def:{bar:number}}
+type Constructor<T extends {def:object}> = {new(def:T["def"]):T};
+export function makeA<T extends A>(Class:Constructor<T>):T;
+export function makeB<T extends B>(Class:Constructor<T>):T;
+export function makeAgain<U extends A>(Class:Constructor<U>):U;
+"""
+        let output = Path.Combine(directory, "root")
+        Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory output
+        |> Async.RunSynchronously |> ignore
+        let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(output, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+        let constructors = catalog.Declarations |> Array.filter (fun entry -> entry.FSharpName.EndsWith("ClassConstructor"))
+        Expect.equal constructors.Length 2 "each operation keeps its constructor contract"
+        Expect.equal (constructors |> Array.map _.Identity |> Array.distinct |> Array.length) 2 "different bounds have different identities"
+
+        let adapter = configured directory "Adapter" "index.d.ts" [|Path.Combine(output, "declarations.json")|]
+        Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+        let code, output = compileConsumer directory ["root/Identity.Root.fs"; "adapter/Identity.Adapter.fs"] """module Consumer
+let same<'T when 'T :> Identity.Root.A> (constructor: Identity.Root.MakeA.ClassConstructor<'T>) : 'T =
+    Identity.Adapter.Exports.makeAgain constructor
+"""
+        Expect.equal code 0 output
+
+[<Tests>]
+let defaultModuleIdentityTests =
+    testCase "declaration catalog default module names are independent of the checkout path" <| fun _ ->
+        let generate () =
+            use scratch = Scratch.directory "default-module-catalog"
+            let directory = scratch.Path
+            writePackageFile directory "package.json" """{"name":"default-module-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile directory "external.d.ts" "export const version: string;"
+            writePackageFile directory "index.d.ts" """import * as api from "./external"; export { api as default };"""
+            let output = Path.Combine(directory, "root")
+            Pipeline.run (configured directory "Root" "index.d.ts" [||]) directory output
+            |> Async.RunSynchronously |> ignore
+            let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(output, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+            let source = File.ReadAllText(Path.Combine(output, "Identity.Root.fs"))
+            Expect.isFalse (source.Contains(Naming.identifierName directory)) "filesystem paths never name public types"
+            catalog.Declarations |> Array.map (fun entry -> entry.FSharpName, entry.Identity, entry.Api) |> Array.sort
+        let first = generate ()
+        let second = generate ()
+        Expect.equal first second "moving the package keeps names, catalog identities and API hashes"
+
+[<Tests>]
+let frontierContractCompileTests =
+    testTheory "width admission preserves a promoted generic union under reordered members" [false; true] <| fun reordered ->
+        use scratch = Scratch.directory "frontier-contract-compile"
+        let directory = scratch.Path
+        writePackageFile directory "package.json" """{"name":"frontier-contract-lab","version":"1.0.0","types":"index.d.ts"}"""
+        let lab = Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "instantiation-operand-lab", "index.d.ts")
+        let source = File.ReadAllText lab
+        let source = if reordered then source.Replace("    last: Ok<string>;\n    run(): Outcome;", "    run(): Outcome;\n    last: Ok<string>;") else source
+        let source = source + """
+type Location<T=unknown> = {metadata:T} & {country:string};
+interface Other {fallback:string}
+type Meta<T=unknown> = Location<T>|Other;
+interface Request<T=Meta> {cf:T}
+type Fetcher<T=undefined> = (T extends {run():void} ? T : unknown) & {fetch(input:Request):Request};
+export interface Nested {fetcher:Fetcher}
+type Part<T> = {value:T} & {extra:string};
+interface Holder<T> {prop:T}
+interface Owner {part:Part<string>|undefined}
+interface Middle {next:Owner}
+export type Early = Holder<Part<string>|undefined>;
+export interface Late {next:Middle}
+"""
+        writePackageFile directory "index.d.ts" source
+        let config = configured directory "Root" "index.d.ts" [||]
+        let generate = async {
+            let! mailbox, ctx = Bootstrap.start config directory
+            use _ = mailbox :> IDisposable
+            let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+            let! seeded, _ = Pipeline.runTier ctx [Resolve.resolveExportTypes] (Pipeline.toResolve harvest)
+            let seeded = { seeded with NotFollowed = seeded.Types |> Map.map (fun _ _ -> "fixture: previously deferred") }
+            let! resolved, _ = Pipeline.runTier ctx [Resolve.resolveTypeTableWithWidth 1] seeded
+            for id in seeded.Types |> Map.keys do
+                Expect.isFalse (Map.containsKey id resolved.NotFollowed) "re-derived source seeds clear stale deferrals"
+            let! shape, _ = Pipeline.runTier ctx Shape.Passes.passes (Pipeline.toShape (GeneratorConfig.runtimePackage config ctx.PackageName) resolved)
+            let! render, _ = Pipeline.runTier ctx [Render.renderSources (Pipeline.groupModules ctx shape)] (Pipeline.toRender ctx shape [])
+            return render.Files |> List.find (fst >> (=) "Identity.Root.fs") |> snd
+        }
+        writePackageFile directory "Identity.Root.fs" (Async.RunSynchronously generate)
+        let code, output = compileConsumer directory ["Identity.Root.fs"] """module Consumer
+let read (api: Identity.Root.Api) : string =
+    match api.run() with
+    | Identity.Root.Outcome.Ok value -> value
+    | Identity.Root.Outcome.Err message -> message
+let nested (value: Identity.Root.Nested) (request: Identity.Root.Request<Fable.Core.U2<Identity.Root.Other, Identity.Root.Location<obj>>>) : Fable.Core.U2<Identity.Root.Other, Identity.Root.Location<obj>> =
+    value.fetcher.fetch(request).cf
+let early (value: Identity.Root.Early) : string = value.prop.Value.value
+let late (value: Identity.Root.Late) : string = value.next.next.part.Value.value
+"""
+        Expect.equal code 0 output
+        let code, output = compileConsumer directory ["Identity.Root.fs"] """module Consumer
+let bad : Identity.Root.Outcome = Identity.Root.Outcome.Ok 42
+"""
+        Expect.notEqual code 0 "the payload cannot silently widen to obj"
+        Expect.stringContains output "FS0001" "the invalid payload is a type mismatch"
+
+[<Tests>]
 let namespaceIdentityTests =
     let read path =
         JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText path, JsonSerializerOptions(PropertyNameCaseInsensitive = true))
