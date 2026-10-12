@@ -24,6 +24,7 @@ jobs:
     outputs:
       full: ${{ steps.scope.outputs.full }}
       reused: ${{ steps.develop-tests.outputs.reused || 'false' }}
+      master-reused: ${{ steps.develop-tests.outputs.master-reused || 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -39,7 +40,7 @@ jobs:
             await verificationScope({ github, context, core });
       - name: Check CI policy and golden tooling
         run: node --test .github/scripts/*.test.cjs tools/golden-provenance.test.mjs tools/golden-tag.test.mjs
-      - name: Reuse exact-commit develop tests for release PRs
+      - name: Reuse verified develop tests for release PRs and identical master trees
         if: steps.scope.outputs.full == 'true'
         id: develop-tests
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -68,23 +69,27 @@ jobs:
       FULL: ${{ needs.scope.outputs.full }}
       REUSED: ${{ needs.scope.outputs.reused }}
       SHARDS_RESULT: ${{ needs.shards.result }}
+      MASTER_REUSED: ${{ needs.scope.outputs.master-reused }}
+      EVENT_NAME: ${{ github.event_name }}
+      BRANCH_REF: ${{ github.ref }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       - name: Require successful verification
         run: node .github/scripts/test-matrix-status.cjs
-      # Release PR reuse recognizes this marker only after all eight shards and both gates pass.
+      # Full evidence is fresh shards or a master tree identical to a fully tested develop parent.
+      # Reused release PR checks never create this marker or golden artifacts.
       - name: Test
-        if: needs.scope.outputs.full == 'true' && needs.scope.outputs.reused != 'true'
+        if: needs.scope.outputs.full == 'true' && (needs.scope.outputs.reused != 'true' || needs.scope.outputs.master-reused == 'true')
         run: node .github/scripts/test-matrix-status.cjs --require-full
       - name: Record golden provenance
-        if: needs.scope.outputs.full == 'true' && needs.scope.outputs.reused != 'true'
+        if: needs.scope.outputs.full == 'true' && (needs.scope.outputs.reused != 'true' || needs.scope.outputs.master-reused == 'true')
         env:
           SOURCE_COMMIT: ${{ github.sha }}
         run: node tools/golden-provenance.mjs --commit "$SOURCE_COMMIT"
       - name: Upload verified goldens
-        if: needs.scope.outputs.full == 'true' && needs.scope.outputs.reused != 'true'
+        if: needs.scope.outputs.full == 'true' && (needs.scope.outputs.reused != 'true' || needs.scope.outputs.master-reused == 'true')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: goldens-${{ github.sha }}

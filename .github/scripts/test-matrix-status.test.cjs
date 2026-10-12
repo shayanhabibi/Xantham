@@ -44,9 +44,10 @@ test('Test aggregate gates the release-reuse marker and golden artifacts on all 
     'REUSED: ${{ needs.scope.outputs.reused }}', 'SHARDS_RESULT: ${{ needs.shards.result }}'])
     assert.ok(aggregate.includes(binding), binding);
   assert.match(aggregate, /Require successful verification\n\s+run: node \.github\/scripts\/test-matrix-status.cjs/);
+  const verifiedOnly = "if: needs.scope.outputs.full == 'true' && (needs.scope.outputs.reused != 'true' || needs.scope.outputs.master-reused == 'true')";
   for (const name of ['Test', 'Record golden provenance', 'Upload verified goldens']) {
     const block = aggregate.split(`- name: ${name}\n`)[1].split('\n      - ')[0];
-    assert.ok(block.trimStart().startsWith(fullOnly), name);
+    assert.ok(block.trimStart().startsWith(verifiedOnly), name);
     assert.doesNotMatch(block, /always\(\)|continue-on-error:/);
   }
   assert.match(aggregate, /- name: Test\n[^\n]+\n\s+run: node \.github\/scripts\/test-matrix-status.cjs --require-full/);
@@ -57,4 +58,17 @@ test('Test aggregate gates the release-reuse marker and golden artifacts on all 
   assert.match(aggregate, /name: goldens-\$\{\{ github.sha }}/);
   assert.match(aggregate, /if-no-files-found: error/);
   assert.doesNotMatch(aggregate, /continue-on-error:/);
+});
+
+test('only trusted master-tree reuse can issue full evidence without fresh shards', () => {
+  for (const eventName of ['push', 'workflow_dispatch']) {
+    const proof = { scope: 'success', full: 'true', reused: 'true', shards: 'skipped',
+      masterReused: 'true', eventName, ref: 'refs/heads/master' };
+    assert.equal(verify(proof, true), true);
+    for (const invalid of [{ eventName: 'pull_request' }, { ref: 'refs/heads/develop' },
+      { full: 'false' }, { reused: 'false' }, { shards: 'success' }, { shards: 'failure' }])
+      assert.throws(() => verify({ ...proof, ...invalid }, true));
+    for (const masterReused of ['', undefined, 'maybe'])
+      assert.throws(() => verify({ ...proof, masterReused }, true));
+  }
 });
