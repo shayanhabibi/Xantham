@@ -107,10 +107,10 @@ let tests = testSequenced <| testList "catalog library identity" [
         "source bytes", "input source hash mismatch", fun (document: JsonNode) -> document["inputs"].AsArray() |> Seq.find (fun s -> s["file"].GetValue<string>() = "lib/lib.scripthost.d.ts") |> fun s -> s["sha256"] <- JsonValue.Create "changed"
         "release fingerprint", "package manifest mismatch", fun document -> document["inputs"].AsArray() |> Seq.find (fun s -> s["file"].GetValue<string>() = "lib/lib.scripthost.d.ts") |> fun s -> s["manifestSha256"] <- JsonValue.Create "changed"
         "API", "F# API mismatch", fun document -> document["declarations"].AsArray() |> Seq.find (fun d -> d["fSharpName"].GetValue<string>() = "Library.Owner.Dom.TextStreamReader") |> fun d -> d["api"] <- JsonValue.Create "changed"
-        "library source identity", "source hash mismatch", fun document -> document["declarations"].AsArray() |> Seq.find (fun d -> d["fSharpName"].GetValue<string>() = "Library.Owner.Dom.TextStreamReader") |> fun d -> d["sources"][0]["package"] <- JsonValue.Create "other-library"
-        "compiler release", "compiler version", fun document -> document["compatibility"]["compiler"]["version"] <- JsonValue.Create "other-version"
-        "compiler revision", "compiler revision", fun document -> document["compatibility"]["compiler"]["revision"] <- JsonValue.Create (String.replicate 40 "a")
-        "AST protocol", "AST protocol", fun document -> document["compatibility"]["compiler"]["astProtocolVersion"] <- JsonValue.Create 9
+        "library source identity", "source hash mismatch", fun document -> document["declarations"].AsArray() |> Seq.find (fun d -> d["fSharpName"].GetValue<string>() = "Library.Owner.Dom.TextStreamReader") |> fun d -> d["sources"].[0]["package"] <- JsonValue.Create "other-library"
+        "compiler release", "compiler version", fun document -> document["compatibility"].["compiler"]["version"] <- JsonValue.Create "other-version"
+        "compiler revision", "compiler revision", fun document -> document["compatibility"].["compiler"]["revision"] <- JsonValue.Create (String.replicate 40 "a")
+        "AST protocol", "AST protocol", fun document -> document["compatibility"].["compiler"]["astProtocolVersion"] <- JsonValue.Create 9
         "old platform identity contract", "identity version", fun document -> document["compatibility"]["identityVersion"] <- JsonValue.Create 2
     ] do
         testCase ("reader rejects changed " + label) <| fun () ->
