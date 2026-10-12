@@ -4,15 +4,21 @@ const fs = require('node:fs');
 
 test('Publish waits for packages and every master test shard; PR packaging remains independent', () => {
   const workflow = fs.readFileSync('.github/workflows/push_master.yml', 'utf8');
-  const packageJob = workflow.split('\n  package:')[1].split('\n  test:')[0];
-  const testJob = workflow.split('\n  test:')[1].split('\n  publish:')[0];
+  const packageJob = workflow.split('\n  package:')[1].split('\n  publish-tests:')[0];
+  const testJob = workflow.split('\n  publish-tests:')[1].split('\n  publish:')[0];
   const publish = workflow.split('\n  publish:')[1];
   assert.match(packageJob, /pack --ci --skip-tests/);
   assert.doesNotMatch(packageJob, /needs:/);
   assert.match(testJob, /needs: package/);
   assert.match(testJob, /github.event_name != 'pull_request'.*refs\/heads\/master.*needs.package.outputs.full == 'true'/);
   assert.match(testJob, /uses: \.\/\.github\/workflows\/test-shards.yml/);
-  assert.match(publish, /needs: \[package, test\]/);
+  assert.doesNotMatch(workflow, /\n  test:|\n\s+name: test\s*\n/);
+  assert.match(packageJob, /reuse-develop-tests.cjs/);
+  assert.match(testJob, /needs.package.outputs.master-reused != 'true'/);
+  assert.match(publish, /needs: \[package, publish-tests\]/);
+  assert.match(publish, /Require verified packages and tests/);
+  assert.match(publish, /node \.github\/scripts\/publish-matrix-status.cjs/);
+  assert.match(publish, /SHARDS_RESULT: \$\{\{ needs.publish-tests.result }}/);
   assert.match(publish, /Download verified packages/);
   assert.match(publish, /publish artifacts/);
   const shared = fs.readFileSync('.github/workflows/test-shards.yml', 'utf8');
