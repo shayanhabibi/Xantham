@@ -11,3 +11,6 @@ type Utils =
     static member toJSFunc(fn: FSharpFunc<_, _>) : Function = !!fn
 
 type ConstrainFunction< ^T when (^T or Utils): (static member toJSFunc: ^T -> Function)> = ^T
+
+[<Global>]
+let globalThis: GlobalThis = jsNative
