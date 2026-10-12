@@ -5,4 +5,4 @@ open Expecto
 [<EntryPoint>]
 let main argv =
     use _ = CatalogLibraryLab.lifetime ()
-    runTestsInAssemblyWithCLIArgs [] argv
+    Xantham.Tests.TestInventory.run argv
