@@ -6,10 +6,10 @@
     },
     {
       "file": "Fable.Core.TS.Extensions.fs",
-      "sha256": "076f87addcbd3dc3d9686e1ca3b4d77133fb4ea562aeed3a9c5b19c92db423ea"
+      "sha256": "a5fabb5b9f43d06b0b56507854f83dd6f5f90ce583c4085d490bf646b7cadfcf"
     }
   ],
-  "catalogueSha256": "192cc98aba6233c04e4b32f5bf28bed3d7fc8a77caaf3aab0d1024f11db7d65f",
+  "catalogueSha256": "0422f33721542fad82ec79a1b2701eebda0171cb102f448f372111b7f90f1590",
   "generationConfigurationSha256": "b0db3248c069008b7e89b4150ed405c75fd94fb7fa265e893b0b2cfb6db15107",
   "producer": [
     {
