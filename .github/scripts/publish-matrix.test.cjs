@@ -11,14 +11,19 @@ test('Publish waits for packages and every master test shard; PR packaging remai
   assert.doesNotMatch(packageJob, /needs:/);
   assert.match(testJob, /needs: package/);
   assert.match(testJob, /github.event_name != 'pull_request'.*refs\/heads\/master.*needs.package.outputs.full == 'true'/);
-  assert.match(testJob, /fail-fast: false/);
+  assert.match(testJob, /uses: \.\/\.github\/workflows\/test-shards.yml/);
   assert.match(publish, /needs: \[package, test\]/);
   assert.match(publish, /Download verified packages/);
   assert.match(publish, /publish artifacts/);
-  const shards = /shard: \[([^\]]+)\]/.exec(testJob)[1].split(',').map(Number);
-  const count = Number(/matrix.shard }}\/(\d+)/.exec(testJob)[1]);
+  const shared = fs.readFileSync('.github/workflows/test-shards.yml', 'utf8');
+  assert.match(shared, /workflow_call:/);
+  assert.match(shared, /fail-fast: false/);
+  const shards = /shard: \[([^\]]+)\]/.exec(shared)[1].split(',').map(Number);
+  const count = Number(/matrix.shard }}\/(\d+)/.exec(shared)[1]);
+  assert.equal(count, 8);
   assert.deepEqual(shards, Array.from({ length: count }, (_, index) => index + 1));
-  assert.match(testJob, /--run-gate \$\{\{ matrix.shard == 1 && 'true' \|\| 'false' }}/);
+  assert.match(shared, /--run-gate \$\{\{ matrix.shard == 1 && 'true' \|\| 'false' }}/);
+  assert.doesNotMatch(shared, /continue-on-error:|\n\s+if:/);
 });
 
 test('Test partition is exhaustive, disjoint, deterministic, and never silently empty', async () => {

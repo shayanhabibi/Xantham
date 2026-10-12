@@ -20,7 +20,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  scope:
+    outputs:
+      full: ${{ steps.scope.outputs.full }}
+      reused: ${{ steps.develop-tests.outputs.reused || 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -49,16 +52,39 @@ jobs:
       - name: Check build command behavior
         if: steps.scope.outputs.full == 'true' && steps.develop-tests.outputs.reused != 'true'
         run: node tools/verify-build.mjs
+
+  shards:
+    needs: scope
+    if: needs.scope.outputs.full == 'true' && needs.scope.outputs.reused != 'true'
+    uses: ./.github/workflows/test-shards.yml
+
+  test:
+    needs: [scope, shards]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SCOPE_RESULT: ${{ needs.scope.result }}
+      FULL: ${{ needs.scope.outputs.full }}
+      REUSED: ${{ needs.scope.outputs.reused }}
+      SHARDS_RESULT: ${{ needs.shards.result }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Require successful verification
+        run: node .github/scripts/test-matrix-status.cjs
+      # Release PR reuse recognizes this marker only after all eight shards and both gates pass.
       - name: Test
-        if: steps.scope.outputs.full == 'true' && steps.develop-tests.outputs.reused != 'true'
-        run: dotnet fsi build.fsx -- test --ci --run-gate
+        if: needs.scope.outputs.full == 'true' && needs.scope.outputs.reused != 'true'
+        run: node .github/scripts/test-matrix-status.cjs --require-full
       - name: Record golden provenance
-        if: steps.scope.outputs.full == 'true' && steps.develop-tests.outputs.reused != 'true'
+        if: needs.scope.outputs.full == 'true' && needs.scope.outputs.reused != 'true'
         env:
           SOURCE_COMMIT: ${{ github.sha }}
         run: node tools/golden-provenance.mjs --commit "$SOURCE_COMMIT"
       - name: Upload verified goldens
-        if: steps.scope.outputs.full == 'true' && steps.develop-tests.outputs.reused != 'true'
+        if: needs.scope.outputs.full == 'true' && needs.scope.outputs.reused != 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: goldens-${{ github.sha }}

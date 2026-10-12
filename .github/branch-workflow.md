@@ -50,8 +50,11 @@ Test workflow for the exact head commit, provided `master` is its ancestor. This
 the proposed merge has the same source tree as the tested commit. If that run is still
 pending, the check waits in five-minute intervals; absent, failed, or incompatible evidence
 falls back to the full suite. Other PRs run the full suite. Release PR packing builds and
-validates packages without duplicating the suite. Master publishing runs the full Expecto
-suite in eight disjoint matrix shards, with Fable and Partas runtime gates in shard one.
+validates packages without duplicating the suite. Full Test and Publish verification use
+the same reusable workflow with eight disjoint Expecto shards and the Fable and Partas
+runtime gates in shard one. The required `test` check aggregates every shard and fails
+on failed, cancelled or missing full-run results. Quick and reused checks create no new
+full-test marker or golden artifact.
 Test names are discovered from each built suite; shards reject empty or mismatched
 selections. Publication requires both verified packages and every successful shard.
 Each shard retains the 30-minute timeout; local tests run all suites unless `--shard
