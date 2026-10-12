@@ -1,5 +1,5 @@
 ---
-last_commit_released: 78de2edf0c5370b8251f12ac47b81273d5639312
+last_commit_released: 0d9626867755b04d294c4313cd8a1ec299ccf543
 name: Xantham.Generator
 include:
   - ../Xantham.TypeScript.Wire/**
