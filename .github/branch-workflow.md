@@ -60,6 +60,19 @@ selections. Publication requires both verified packages and every successful sha
 Each shard retains the 30-minute timeout; local tests run all suites unless `--shard
 INDEX/COUNT` is supplied.
 
+Master pushes and manual master runs also reuse develop's full verification when the
+master merge has two parents and its Git tree exactly matches the second parent.
+That parent must have a successful full Test run on develop in this repository.
+Both Test and Publish apply this proof; Publish still builds, validates and packs
+the release artifacts. Missing, failed, quick or mismatched evidence runs the shards.
+Master reuse waits at most two minutes for pending evidence. Reused master verification
+records golden provenance for the identical checked-out tree; reused PR and quick
+checks create no golden artifact.
+
+The required `test` check belongs only to the Test workflow. Publish's reusable
+test job is named `publish-tests`, including when skipped, so it cannot satisfy that
+required check before the real aggregate finishes.
+
 The comment workflow uses `github-actions[bot]` as the commit author and a
 repository deploy key for pushes, which trigger normal push and PR CI.
 The built-in token reads PR metadata and explicitly dispatches Test, package
