@@ -1,5 +1,5 @@
 ---
-last_commit_released: 2f70620ce9950438f4043662a5f964151d9614fb
+last_commit_released: 336800e22243e089e80b6ce406c6f257424569c3
 name: Xantham.Fable.Node
 include:
   - ../Xantham.Fable.Core/**
@@ -14,6 +14,14 @@ updaters:
 ---
 
 # Changelog
+
+## 0.3.0 - 2026-10-12
+
+### 🚀 Features
+
+* Expose 'globalThis' from Fable.Core (#125) ([336800e](https://github.com/shayanhabibi/Xantham/commit/336800e22243e089e80b6ce406c6f257424569c3))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/2f70620ce9950438f4043662a5f964151d9614fb..336800e22243e089e80b6ce406c6f257424569c3)</small></strong>
 
 ## 0.2.2 - 2026-10-12
 
