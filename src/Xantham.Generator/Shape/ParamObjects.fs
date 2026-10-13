@@ -28,6 +28,10 @@ module private Reason =
     let EntrypointClass =
         "the declaration is a class a consumer inherits, where `new` is the construction"
 
+    [<Literal>]
+    let SymbolKeyed =
+        "a required well-known symbol member has no key a ParamObject literal can write"
+
 let private isConstructor =
     function
     | FsConstructor _ -> true
@@ -60,6 +64,11 @@ let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
 
     if decl.Entrypoint.IsSome then
         Some Reason.EntrypointClass
+    elif
+        decl.Members |> List.exists isSymbolKeyed'
+        || decl.Inherits |> List.exists (sequenceElement >> Option.isSome)
+    then
+        Some Reason.SymbolKeyed
     elif List.isEmpty members then
         Some Reason.NoMembers
     elif members |> List.exists isIndexer then
@@ -127,9 +136,8 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                 && List.isEmpty decl.CreateOverloads
                                 ->
                                 // A hybrid's `Invoke` reads its own call signatures (§4.4); `Create`
-                                // binds only the string-keyed properties and methods beside it.
-                                let members =
-                                    decl.Members |> List.filter (fun m -> not (isInvoke m || isSymbolKeyed' m))
+                                // binds only the properties and methods beside it.
+                                let members = decl.Members |> List.filter (isInvoke >> not)
 
                                 match refusal decl members with
                                 | Some reason ->

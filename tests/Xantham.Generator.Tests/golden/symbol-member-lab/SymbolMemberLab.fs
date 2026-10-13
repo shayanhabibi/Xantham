@@ -20,33 +20,24 @@ type Disposable =
 /// <summary>
 /// An object whose <c>Object.prototype.toString</c> tag is its own.
 /// </summary>
-[<Interface>]
 type Tagged =
     abstract name: string
     [<Emit("$0[Symbol.toStringTag]")>]
     abstract SymbolToStringTag: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string) : Tagged = jsNative
 
 /// <summary>
 /// A finite list iterated by <c>for…of</c>.
 /// </summary>
-[<Interface>]
 type Bag =
     inherit seq<string>
     abstract size: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (size: float) : Bag = jsNative
 
 /// <summary>
 /// Iterates as its base does.
 /// </summary>
-[<Interface>]
 type LabelledBag =
     inherit Bag
     abstract label: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (label: string, size: float) : LabelledBag = jsNative
 
 /// <summary>
 /// Iterates its own type parameter.
@@ -112,6 +103,29 @@ type Keyed =
 type Impostor =
     interface end
 
+/// <summary>
+/// A writable well-known key, and a well-known method taking an optional argument.
+/// </summary>
+type Convertible =
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string with get
+    [<Emit("$0[Symbol.toStringTag] = $1")>]
+    abstract SymbolToStringTag: string with set
+    [<Emit("$0[Symbol.toPrimitive]($1...)")>]
+    abstract SymbolToPrimitive: ?hint: string -> string
+
+/// <summary>
+/// Narrows a lib iterable's element.
+/// </summary>
+type Narrowed =
+    inherit seq<string>
+
+/// <summary>
+/// Keyed by a package's augmentation of <c>SymbolConstructor</c>, absent without a polyfill.
+/// </summary>
+type Observed =
+    interface end
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -125,3 +139,5 @@ type Exports =
     static member tagged: Tagged = jsNative
     [<Import("bag", "symbol-member-lab")>]
     static member bag: Bag = jsNative
+    [<Import("convertible", "symbol-member-lab")>]
+    static member convertible: Convertible = jsNative

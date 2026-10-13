@@ -701,7 +701,7 @@ type Members =
     /// Wave sixteen. The member's key holds a backtick, which no F# identifier can carry even
     /// backticked: `RegExpConstructor`'s legacy `` $` ``.
     | [<Widened>] UnspellableMemberDropped
-    /// W4. The iterator object `[Symbol.iterator]` returns is not exposed.
+    /// W4. The iterator object returned by `[Symbol.iterator]` is hidden behind `seq`.
     | [<Ergonomic>] SymbolIteratorAsSeq of element: string
     /// W4. The member reads as `$0[Symbol.<symbol>]` through `[<Emit>]`.
     | [<Ergonomic>] SymbolKeyedMemberAsEmit of symbol: string * name: string

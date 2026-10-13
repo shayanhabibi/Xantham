@@ -5586,6 +5586,30 @@ let symbolKeyedMemberTests =
                 (Some(1 * uom<typeId>))
                 "a lib iterator takes its element first"
 
+        testCase "an iterator's findings are reported with the seq or member kept" <| fun _ ->
+            let wide = FsErasedUnion [ FsString; FsFloat ]
+            let raised symbol = Finding.make symbol Members.UnspellableMemberDropped
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ decl "Values" [] [ seqOf wide ] [ iterator FsObj ]
+                          decl "Strings" [] [ FsNamed "Values"; seqOf FsString ] [ iterator (FsNamed "Cursor") ] ]
+                        |> List.map FsInterface
+                    IteratorFindings =
+                        Map.ofList
+                            [ "Values", ([ raised "Values.[Symbol.iterator]" ], [ raised "Values.[Symbol.iterator]()" ])
+                              "Strings", ([ raised "Strings.[Symbol.iterator]" ], [ raised "Strings.[Symbol.iterator]()" ]) ] }
+
+            let settled, findings = Build.runPass SymbolMembers.settleSymbolMembers model
+
+            Expect.equal
+                (findings |> List.filter (fun f -> f.Key = "MB007") |> List.map _.Symbol)
+                [ "Values.[Symbol.iterator]"; "Strings.[Symbol.iterator]()" ]
+                "the kept seq's element and the kept member, not the removed ones"
+
+            Expect.isEmpty settled.IteratorFindings "each pending finding is settled once"
+
         testCase "a dispose member on an interface is kept as Emit" <| fun _ ->
             let decls, findings = settle [ decl "Resource" [] [] [ dispose ] ]
 

@@ -1461,8 +1461,8 @@ type FsMember =
     /// the receiver to the arguments, so it reaches JavaScript as `x(a)` (§4.4's counterpart for
     /// the call side). Shares `FsConstructorMember`'s shape - the name is fixed the same way.
     | FsInvoke of FsConstructorMember
-    /// A member keyed by a well-known symbol, declared under the F# name its inner member
-    /// carries and reached as `$0[Symbol.<symbol>]` through `[<Emit>]`. The inner member is an
+    /// A member keyed by a well-known symbol, declared under its inner member's F# name and
+    /// reached as `$0[Symbol.<symbol>]` through `[<Emit>]`. The inner member is an
     /// `FsProperty` or an `FsMethod`.
     | FsSymbolKeyed of symbol: string * FsMember
 
@@ -1765,6 +1765,10 @@ type ShapeModel =
         /// property or value currently being shaped (`anyReturnAsUnit`). Scoped like `TypeVars`.
         AnyReturnOwner: string option
         Decls: FsDecl list
+        /// Interface name -> the findings raised while shaping its `[Symbol.iterator]`: those of
+        /// the `seq` element, then those of the iterator member. `settle-symbol-members` reports
+        /// each list only where the `seq` or the member is kept.
+        IteratorFindings: Map<string, Finding list * Finding list>
         /// The specifier value exports import from; ambient modules under it are entry owners.
         RuntimePackage: string<importSpecifier>
     }

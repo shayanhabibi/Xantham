@@ -67,6 +67,29 @@ export interface Impostor {
     [iterator](): Iterator<string>;
 }
 
+/** A writable well-known key, and a well-known method taking an optional argument. */
+export interface Convertible {
+    [Symbol.toStringTag]: string;
+    [Symbol.toPrimitive](hint?: string): string;
+}
+
+/** Narrows a lib iterable's element. */
+export interface Narrowed extends Iterable<string | number> {
+    [Symbol.iterator](): Iterator<string>;
+}
+
+declare global {
+    interface SymbolConstructor {
+        readonly observable: symbol;
+    }
+}
+
+/** Keyed by a package's augmentation of `SymbolConstructor`, absent without a polyfill. */
+export interface Observed {
+    [Symbol.observable](): Observed;
+}
+
 export declare const resource: Disposable;
 export declare const tagged: Tagged;
 export declare const bag: Bag;
+export declare const convertible: Convertible;

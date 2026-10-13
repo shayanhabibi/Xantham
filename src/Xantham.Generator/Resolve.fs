@@ -605,8 +605,10 @@ let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : A
     }
 
 /// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
-/// `[Symbol.iterator]`. A key referencing a package's own `unique symbol` reads `None`, including
-/// one escaped as `__@iterator@<id>`.
+/// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
+/// `lib.*.d.ts` file. A key referencing a package's own `unique symbol` reads `None`, including
+/// one escaped as `__@iterator@<id>`, as does a `SymbolConstructor` property declared solely by a
+/// package's augmentation (`Symbol.observable`).
 let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<string option> =
     async {
         match
@@ -620,7 +622,7 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
         | Some handle ->
             let! file = sourceFile ctx handle.Path
 
-            return
+            let candidate =
                 match file with
                 | ValueNone -> None
                 | ValueSome file ->
@@ -659,10 +661,40 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
                                 && receiver.Text = ValueSome "Symbol"
                                 && key.Kind = SyntaxKind.Identifier
                                 ->
-                                ValueOption.toOption key.Text
+                                key.Text
+                                |> ValueOption.toOption
+                                |> Option.map (fun text -> text, Node.index key, key.Kind)
                             | _ -> None
                         | _ -> None
                     | _ -> None
+
+            match candidate with
+            | None -> return None
+            | Some(text, index, kind) ->
+                let! symbol =
+                    ctx.Session.getSymbolAtLocation (
+                        NodeHandle.format
+                            {
+                                Index = index
+                                Kind = kind
+                                Path = handle.Path
+                            }
+                    )
+
+                let declaredByLib =
+                    symbol
+                    |> ValueOption.bind _.Declarations
+                    |> ValueOption.defaultValue [||]
+                    |> Array.exists (fun declaration ->
+                        match NodeHandle.parse declaration with
+                        | ValueSome declaration ->
+                            let file = System.IO.Path.GetFileName declaration.Path
+
+                            file.StartsWith("lib.", System.StringComparison.Ordinal)
+                            && file.EndsWith(".d.ts", System.StringComparison.Ordinal)
+                        | ValueNone -> false)
+
+                return if declaredByLib then Some text else None
     }
 
 let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =

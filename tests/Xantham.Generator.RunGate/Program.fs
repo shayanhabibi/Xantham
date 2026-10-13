@@ -2133,6 +2133,24 @@ let private symbolMembers () =
 
     equal "an iterable iterates as seq without a cast" [ "a"; "b" ] (SymbolMemberLab.Exports.bag |> Seq.toList)
 
+    let convertible = SymbolMemberLab.Exports.convertible
+    equal "a writable symbol property reads the [Symbol.toStringTag] key" "Lab" convertible.SymbolToStringTag
+    convertible.SymbolToStringTag <- "Changed"
+
+    check
+        "an Emit-backed setter writes the [Symbol.toStringTag] key"
+        (emitJsExpr convertible "$0[Symbol.toStringTag] === 'Changed'")
+
+    equal
+        "an optional symbol argument passed as None reaches the call as absent"
+        "none"
+        (convertible.SymbolToPrimitive())
+
+    equal
+        "an optional symbol argument passed as Some reaches the call"
+        "number"
+        (convertible.SymbolToPrimitive "number")
+
 [<EntryPoint>]
 let main _ =
     dependencyEntrypoint ()

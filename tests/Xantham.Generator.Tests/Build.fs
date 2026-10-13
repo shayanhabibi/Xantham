@@ -113,6 +113,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         KeyVars = Map.empty
         AnyReturnOwner = None
         Decls = []
+        IteratorFindings = Map.empty
         RuntimePackage = "lab" * Measure.uom<Measure.importSpecifier>
     }
 

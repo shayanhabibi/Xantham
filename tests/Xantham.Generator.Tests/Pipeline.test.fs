@@ -5088,6 +5088,39 @@ let pipelineTests =
                       Expect.equal (inheritsOf source "Box") [ "seq<'T>" ] "the declaration's own parameter"
                       Expect.equal (inheritsOf source "LabelledBag") [ "Bag" ] "an inherited sequence is written once, on the base"
                       Expect.equal (inheritsOf source "Values") [ "seq<U2<string, float>>" ] "a union element"
+                      Expect.equal (inheritsOf source "Narrowed") [ "seq<string>" ] "a lib base is flattened, so its element is narrowed"
+
+                  testCase "symbol-member-lab: a writable key and an optional-argument method are Emit members" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.toStringTag] = $1\")>]" "the setter writes the symbol key"
+                      Expect.stringContains source "abstract SymbolToStringTag: string with set" "a writable property"
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.toPrimitive]($1...)\")>]" "the call spreads its arguments"
+                      Expect.stringContains source "abstract SymbolToPrimitive: ?hint: string -> string" "an optional argument"
+
+                  testCase "symbol-member-lab: a package-augmented SymbolConstructor key stays dropped" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.isFalse (source.Contains "Symbol.observable") "Symbol.observable is undefined without a polyfill"
+
+                  testCase "symbol-member-lab: a required symbol member refuses Create" <| fun _ ->
+                      let rendered = generate ()
+
+                      let refused =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SP003" && f.Kind.Message.Contains "well-known symbol")
+                          |> List.map _.Symbol
+                          |> List.sort
+
+                      Expect.equal
+                          refused
+                          [ "Bag"; "Box"; "Convertible"; "Disposable"; "LabelledBag"; "Narrowed"; "Strings"; "Tagged"; "Values" ]
+                          "a ParamObject literal cannot write a symbol key"
+
+                      let source = sourceOf rendered
+
+                      for name in [ "Bag"; "LabelledBag"; "Strings"; "Tagged" ] do
+                          Expect.isFalse (source.Contains $") : {name} = jsNative") $"{name} has no Create"
 
                   testCase "symbol-member-lab: a narrowed element keeps the base's seq and an Emit iterator" <| fun _ ->
                       let source = generate () |> sourceOf
@@ -5106,17 +5139,33 @@ let pipelineTests =
                           |> List.distinct
                           |> List.sort
 
-                      Expect.equal (symbolsOf "MB002") [ "Impostor.__@iterator"; "Keyed.__@key" ] "unique symbols stay dropped"
+                      Expect.equal
+                          (symbolsOf "MB002")
+                          [ "Impostor.__@iterator"; "Keyed.__@key"; "Observed.__@observable" ]
+                          "unique symbols and a package-augmented SymbolConstructor key stay dropped"
 
                       Expect.equal
                           (symbolsOf "MB008")
-                          [ "Bag.[Symbol.iterator]"; "Box.[Symbol.iterator]"; "Values.[Symbol.iterator]" ]
+                          [ "Bag.[Symbol.iterator]"
+                            "Box.[Symbol.iterator]"
+                            "Narrowed.[Symbol.iterator]"
+                            "Values.[Symbol.iterator]" ]
                           "one seq per declaring interface"
 
                       Expect.equal
                           (symbolsOf "MB009")
-                          [ "Disposable.[Symbol.dispose]"; "Strings.[Symbol.iterator]"; "Tagged.[Symbol.toStringTag]" ]
+                          [ "Convertible.[Symbol.toPrimitive]"
+                            "Convertible.[Symbol.toStringTag]"
+                            "Disposable.[Symbol.dispose]"
+                            "Strings.[Symbol.iterator]"
+                            "Tagged.[Symbol.toStringTag]" ]
                           "one Emit member per symbol"
+
+                      Expect.isEmpty
+                          (rendered.Findings
+                           |> List.map _.Symbol
+                           |> List.filter (fun symbol -> symbol.Contains ".[Symbol.iterator]("))
+                          "an iterator member settle-symbol-members removes leaves no finding behind"
 
                       Expect.isTrue
                           (rendered.Findings

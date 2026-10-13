@@ -46,8 +46,9 @@ let private symbolsOf (members: FsMember list) =
     |> List.distinctBy fst
 
 /// Settles every interface's `seq` inherit against its bases, and reports each well-known
-/// symbol member a declaration keeps. An `[<AbstractClass>]` entrypoint keeps neither, so a
-/// consumer subclass gains no abstract slot to implement.
+/// symbol member a declaration keeps. The findings raised while shaping a `[Symbol.iterator]`
+/// are reported with the `seq` or the member they describe. An `[<AbstractClass>]` entrypoint
+/// keeps neither, so a consumer subclass gains no abstract slot to implement.
 let settleSymbolMembers: Pass<ShapeModel> =
     {
         Name = "settle-symbol-members"
@@ -159,6 +160,17 @@ let settleSymbolMembers: Pass<ShapeModel> =
                                     emit (Finding.make $"{decl.Name}.__@iterator" Members.SymbolKeyedMemberDropped)
                                 | _ -> ()
 
+                                let elementFindings, memberFindings =
+                                    Map.tryFind decl.Name model.IteratorFindings |> Option.defaultValue ([], [])
+
+                                if keeps then
+                                    for finding in elementFindings do
+                                        emit finding
+
+                                if members |> List.exists isIterator then
+                                    for finding in memberFindings do
+                                        emit finding
+
                                 for symbol, inner in symbolsOf members do
                                     let name =
                                         match inner with
@@ -179,7 +191,11 @@ let settleSymbolMembers: Pass<ShapeModel> =
                                     }
                             | other -> other)
 
-                    let model = { model with Decls = decls }
+                    let model =
+                        { model with
+                            Decls = decls
+                            IteratorFindings = Map.empty
+                        }
 
                     return
                         if findings.IsEmpty then

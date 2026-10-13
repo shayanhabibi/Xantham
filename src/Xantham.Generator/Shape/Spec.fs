@@ -3097,9 +3097,8 @@ let internal callSignaturesOf (model: ShapeModel) (typeId: int<Measure.typeId>) 
         |> List.collect _.CallSignatures
     | Some _ -> []
 
-/// The element type an iterator method yields: the `value` of the `next` result arm that is not
-/// marked `done: true`, or else the first type argument of the iterator it returns, as every
-/// lib iterator takes its element first.
+/// The element type an iterator method yields: the `value` of the first `next` result arm whose
+/// `done` is absent or admits `false`; otherwise the returned iterator's first type argument.
 let internal iteratedElement (model: ShapeModel) (iteratorTypeId: int<Measure.typeId>) : int<Measure.typeId> option =
     callSignaturesOf model iteratorTypeId
     |> List.tryHead
