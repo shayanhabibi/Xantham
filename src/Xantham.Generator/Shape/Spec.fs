@@ -2242,6 +2242,12 @@ and internal appliedRefTo
 
     let satisfies = satisfiesNominally model
 
+    // `NodeListOf<'E>` holds under `'E :> Element`, because `Element` inherits `Node` (W7.4).
+    let variableSatisfies boundId bound argument =
+        match statedConstraint argument with
+        | Some(argumentBoundId, argumentBound) -> argumentBound = bound || satisfies boundId argumentBoundId
+        | None -> false
+
     // The forms F# seals against a `:>` constraint. The arms below decide the rest by name.
     let sealedForm =
         function
@@ -2272,7 +2278,7 @@ and internal appliedRefTo
                     ]
 
                 bound
-            | Some(boundId, bound), FsTypeVar variable when statedConstraint argument |> Option.map snd <> Some bound ->
+            | Some(boundId, bound), FsTypeVar variable when not (variableSatisfies boundId bound argument) ->
                 findings <-
                     findings
                     @ [
@@ -3229,6 +3235,15 @@ let internal iteratedElement (model: ShapeModel) (iteratorTypeId: int<Measure.ty
         | Some element -> Some element
         | None -> List.tryHead iterator.TypeArguments)
 
+/// Whether a member is written as a method: a method symbol, or a required `function`
+/// declaration of a namespace object, `globalThis` or a class's merged namespace whose type is a
+/// callback alone (W7.3).
+let internal emitsAsMethod (model: ShapeModel) (m: ResolvedMember) =
+    hasAny SymbolFlags.Method m.Symbol.Flags
+    || (m.ResolvesToFunction
+        && not m.Optional
+        && Map.tryFind m.TypeId model.Types |> Option.exists isPureCallback)
+
 /// A *lifecycle hook*: a method a declaration marks `?`, which the platform calls on an object
 /// that provides it. The name is identifier-shaped, because the emission names an interface
 /// after it.
@@ -3309,8 +3324,9 @@ let internal shapeHook
 
     decl, findings @ [ Finding.make owner (Members.OptionalHookAsInterface name) ]
 
-/// The interface members of an object type: methods for method symbols (each call signature an
-/// overload), properties otherwise, callbacks as delegate-typed properties (D5).
+/// The interface members of an object type: methods for method symbols and function declarations
+/// (each call signature an overload), properties otherwise, callbacks as delegate-typed
+/// properties (D5).
 ///
 /// `hooks` names the members `shape-interfaces` lifts out as opt-in interfaces of their own
 /// (`shapeHook`); the declaration carries none of them.
@@ -3448,7 +3464,7 @@ let internal shapeMembers
             let effectiveTypeId = agreed |> Option.defaultValue m.TypeId
 
             let methodFacts =
-                if not (hasAny SymbolFlags.Method m.Symbol.Flags) then
+                if not (emitsAsMethod model m) then
                     None
                 else
                     match Map.tryFind m.TypeId model.Types with

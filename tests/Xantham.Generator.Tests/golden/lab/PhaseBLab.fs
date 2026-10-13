@@ -164,20 +164,18 @@ type Keyed<'K> =
 
 type Mapper<'T> = ('T -> 'T)
 
-type Clamp = delegate of value: float * min: float * max: float -> float
-
 [<Interface>]
 type Utils =
     /// <summary>
     /// Clamps a value between bounds.
     /// </summary>
-    abstract clamp: Clamp with get, set
+    abstract clamp: value: float * min: float * max: float -> float
     /// <summary>
     /// A namespaced constant.
     /// </summary>
     abstract epsilon: float
     [<ParamObject; Emit("$0")>]
-    static member Create (clamp: Clamp, epsilon: float) : Utils = jsNative
+    static member Create (clamp: Func<float, float, float, float>, epsilon: float) : Utils = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

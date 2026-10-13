@@ -3,9 +3,9 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 52,
-    "ergonomic": 125,
-    "widened": 167,
+    "exact": 53,
+    "ergonomic": 224,
+    "widened": 68,
     "escape": 5
   },
   "passes": [
@@ -21,9 +21,9 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 305,
+      "total": 188,
       "ergonomic": 164,
-      "widened": 141
+      "widened": 24
     },
     {
       "pass": "SI - shape-interfaces",

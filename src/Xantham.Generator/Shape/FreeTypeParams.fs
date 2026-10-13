@@ -9,7 +9,7 @@ open Xantham.Generator.Shape.Spec
 
 /// The type-parameter ids a declaration reads without binding, in first-use order (§4.9). A
 /// signature's own parameters are bound inside it, and another named declaration binds its own,
-/// so the walk stops there; a hoisted anonymous declaration is walked into.
+/// so the walk reads only its arguments; a hoisted anonymous declaration is walked into.
 let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int<Measure.typeId> list =
     let mutable found = []
     let mutable visited = Set.empty
@@ -35,12 +35,11 @@ let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int
                     && Map.containsKey typeId model.DeclNames
                     && (facts.SymbolName |> Option.exists (isSyntheticName >> not))
                 then
-                    // A declaration of its own: it binds what it declares. Only an
-                    // instantiation carries arguments worth reading; the declared form's
-                    // arguments are its own parameters.
-                    if (ownArguments facts).IsEmpty then
-                        for argument in facts.TypeArguments do
-                            go bound argument
+                    // A declaration of its own binds what it declares; its arguments are read.
+                    // An instantiation's arguments belong to the enclosing scope, and a declared
+                    // form's arguments are the parameters of the declaration it is written inside.
+                    for argument in facts.TypeArguments do
+                        go bound argument
                 else
                     for m in facts.Members do
                         go bound m.TypeId
@@ -69,6 +68,13 @@ let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int
 
                     if flag TypeFlags.Index facts then
                         facts.Response.TargetTypeId |> ValueOption.iter (go bound)
+
+                    // `NoInfer<T>` is rendered over its operand (`indexedAccessRef`); an
+                    // unshadowed alias identity is rendered as nothing that reads it.
+                    match facts.AliasIdentity with
+                    | Some(name, operand) when Naming.SupportBindings.shadows (name / uom<symbolName>) ->
+                        go bound operand
+                    | _ -> ()
 
     match Map.tryFind root model.Types with
     | Some facts -> go (Set.ofList (declParamIds facts)) root
@@ -236,7 +242,10 @@ let bindFreeTypeParams: Pass<ShapeModel> =
                 match Map.tryFind typeId model.Types with
                 | Some facts when
                     (flag TypeFlags.Object facts
-                     && GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+                     // A hoisted anonymous type is declared by this run whatever group its node
+                     // sits in (`synthesize-anonymous`), so it binds what it reads here too.
+                     && (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+                         || facts.SymbolName |> Option.forall isSyntheticName)
                      && (arrayElement model facts).IsNone
                      && not (isTuple facts))
                     || isFlattenable model facts

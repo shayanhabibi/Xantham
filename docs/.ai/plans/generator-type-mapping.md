@@ -582,9 +582,12 @@ absence under the live compiler.
   (§4.10). `T extends string` → measure-tagged `string<'T>`? — open; probably drop.
   The head writes the parameters first and one `when` clause after the last, constraints
   joined by `and`. A constraint binds the application too: an argument that widened to `obj`,
-  or is a variable not bound with the same named constraint (a `typekeyof` result), is
-  written as the constraint itself, with a finding - F# rejects `Listener<obj>` against
-  `'E :> Event` outright (landed 2026-09-02).
+  or a variable whose written constraint neither is nor inherits the bound (a `typekeyof`
+  result, a structural-only bound), is written as the constraint itself, with a finding - F#
+  rejects `Listener<obj>` against `'E :> Event` outright (landed 2026-09-02). A variable
+  whose written constraint inherits the bound is applied as written:
+  `querySelectorAll<'E when 'E :> Element>: selectors: string -> NodeListOf<'E>` under
+  `NodeListOf<'TNode when 'TNode :> Node>` (W7.4, 2026-10-13).
   A constraint the run can see is unsatisfiable is not written at all. TypeScript's `extends`
   is structural and `:>` is nominal, so `class Geometry<Attributes extends Wide = Narrow>` -
   where `Narrow` and `Wide` are two `Record<string, …>` aliases with no `inherit` between them -
@@ -596,6 +599,11 @@ absence under the live compiler.
   (`extends keyof T`, `extends string`); this one has a form and is still not provable.
   `tests/fixtures/nominal-lab` pins it, with the two negatives - a bound the argument *is*, and
   a bound the argument `inherit`s - that must keep their `:>` (landed 2026-09-02, wave two).
+- A hoisted declaration (a delegate, an options object) binds the owner's parameters it reads,
+  including through the owner's own declared form (`grid: Grid<T>` inside `Grid<T>`) and
+  through `NoInfer<T>`: `BigInt64Array.Every.Predicate<'TArrayBuffer>`. It repeats a constraint
+  only where the owner's head writes one; an erased-union bound (`ArrayBufferLike`) stays off
+  both with `TP002` (W7.1, W7.2, 2026-10-13). `type-scope-lab` pins the forms.
 - A tagged union (§4.5(2)) binds type parameters like any other declaration, and an inline one hoisted out of a generic signature binds the signature's parameters it reads: `current<T>(): { kind: "ready"; payload: T } | ...` reads `Current.Result<'T>`, so `'T` stays live on the method. `generic-tag-lab` pins the forms (landed 2026-10-09).
 - **Default type arguments** (`interface Foo<T = string>`) — F# permits same-name types with
   different generic arity: emit `type Foo<'T> = ...` *and* `type Foo = Foo<string>` (an
@@ -775,6 +783,11 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   nothing. (This bit ts2fable hard; it falls out for free here.)
 - Re-exports / barrel files → follow `getAliasedSymbol` to the origin, emit once at the
   origin, alias elsewhere (F# module abbreviations / type abbreviations).
+- A required `function` declaration of a namespace object (`export * as ns`), of `globalThis`
+  or of a class's merged namespace is a method, one per signature, with its own type
+  parameters: `abstract measure<'T when 'T :> Shape>: shape: 'T -> 'T`. TypeScript rejects
+  assignment to a function declaration (TS2630), so no setter is lost. A `const` of a function
+  type stays a property (W7.3, 2026-10-13).
 
 ### 4.14 Names and docs
 
