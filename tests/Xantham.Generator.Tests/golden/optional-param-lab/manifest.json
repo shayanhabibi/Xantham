@@ -4,9 +4,9 @@
   "module": "OptionalParamLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 3,
+    "ergonomic": 4,
     "widened": 0,
-    "escape": 1
+    "escape": 0
   },
   "passes": [
     {
@@ -17,8 +17,7 @@
     {
       "pass": "SE - shape-exports",
       "total": 6,
-      "ergonomic": 5,
-      "escape": 1
+      "ergonomic": 6
     },
     {
       "pass": "SP - synthesize-paramobjects",

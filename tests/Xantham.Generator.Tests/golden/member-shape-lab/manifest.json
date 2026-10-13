@@ -5,16 +5,15 @@
   "counts": {
     "exact": 4,
     "ergonomic": 3,
-    "widened": 0,
-    "escape": 1
+    "widened": 1,
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 24,
-      "ergonomic": 21,
-      "widened": 1,
-      "escape": 2
+      "ergonomic": 23,
+      "widened": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",

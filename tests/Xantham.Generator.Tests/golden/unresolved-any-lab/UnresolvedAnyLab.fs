@@ -22,3 +22,16 @@ type Probe =
     abstract opaque: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (imported: obj, undeclared: obj, qualified: obj, elements: obj[], either: obj, written: obj, omitted: obj, opaque: obj) : Probe = jsNative
+
+[<Interface>]
+type Faithful =
+    abstract written: obj with get, set
+    abstract omitted: obj with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (written: obj, omitted: obj) : Faithful = jsNative
+
+/// <summary>The package's value exports, each bound to its import.</summary>
+[<Erase>]
+type Exports =
+    [<Import("listen", "unresolved-any-lab")>]
+    static member listen (listener: (obj[] -> unit)) : unit = jsNative

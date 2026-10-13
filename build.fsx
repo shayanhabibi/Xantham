@@ -490,7 +490,7 @@ module Stages =
             and! shard = Options.testShard
 
             // Each test project is an Expecto console app and runs as its built executable, with
-            // output streamed as written. `--filter` is Expecto's own hint: a substring of the full test name.
+            // output streamed as written. `--filter` is Expecto's own hint: a prefix of the `.`-joined full test name.
             // `cmd` quotes each interpolation hole as one argument, so the flag and its value
             // have to be part of the format string rather than a pre-baked `" --filter ..."` hole.
             let suites = Spec.testProjects |> List.filter _.Name.EndsWith(".Tests")
