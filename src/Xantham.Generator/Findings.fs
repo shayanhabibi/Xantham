@@ -145,6 +145,7 @@ module FindingCodes =
             "TR.CallbackOverloadsNotSeparable", "TR062"
             "TR.ErrorTypeToObj", "TR063"
             "TR.IntrinsicMarkerToObj", "TR064"
+            "TR.AnyReturnAsUnit", "TR065"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -516,6 +517,9 @@ type TypeReference =
     | [<Escape>] ErrorTypeToObj of written: string
     /// The `intrinsic` body of a compiler-implemented alias (`Uppercase`, `NoInfer`).
     | [<Escape>] IntrinsicMarkerToObj
+    /// The source `any` return of a callback typed directly at a property or value that
+    /// `anyReturnAsUnit` selects, written as `unit`.
+    | [<Ergonomic>] AnyReturnAsUnit
 
     interface IFindingKind with
         member this.Message =
@@ -637,6 +641,7 @@ type TypeReference =
             | ErrorTypeToObj "" -> "the checker resolved this reference to its error type; widened to obj"
             | ErrorTypeToObj written -> $"the checker could not resolve {written}; widened to obj"
             | IntrinsicMarkerToObj -> "intrinsic alias body is a compiler marker; widened to obj"
+            | AnyReturnAsUnit -> "any return of a selected callback written as unit"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]

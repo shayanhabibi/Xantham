@@ -389,11 +389,11 @@ than at a user's process exit.
 
 ## 15. Checker intrinsic names — loud for `any`, conservative for the rest
 
-**Where:** `Shape/Spec.fs`: `literalOf` matches `"true"` and `"false"`, and `typeRefOnPath`'s Any arm matches `"any"` and `"intrinsic"` on `TypeResponse.IntrinsicName`.
+**Where:** `Shape/Spec.fs`: `literalOf` matches `"true"` and `"false"`, and `typeRefOnPath`'s Any arm matches `"any"` and `"intrinsic"` on `TypeResponse.IntrinsicName`; `isSourceAny`, read by `delegateRef` for an `anyReturnAsUnit` return, also matches `"any"`.
 
 **What it reflects:** the names the checker gives its intrinsic types, at the pinned compiler (`checker.go`, the `newIntrinsicType` calls): `anyType`, `autoType`, `wildcardType`, `blockedStringType` and `nonInferrableAnyType` are `"any"`; `errorType` and the per-reference error types are `"error"`; an unresolved name's declared type is `"unresolved"`; the body of `type X = intrinsic` is `"intrinsic"`. The shipped API's `isErrorType` (`dist/api/sync/api.js`) reads `intrinsicName === "error"`. An unresolved qualified name is its rightmost identifier, each qualifier an unresolved parent symbol carrying `CheckFlags.Unresolved` (`getUnresolvedSymbolForEntityName`); `Resolve` reads the chain back as `NodeJS.Timeout`.
 
-**Failure mode:** a renamed `"any"` reads every written `any` as the error type, which `unresolved-any-lab`'s e2e test catches; a renamed `"intrinsic"` moves the `compiler-lib-ownership-lab` golden. `"error"` and `"unresolved"` are not matched by name: every Any the two names above miss is reported as the error type, so a new intrinsic surfaces as `TR063` rather than passing as a written `any`. A checker that stops chaining unresolved parents drops the qualifier, which `unresolved-any-lab`'s `Probe.qualified` catches.
+**Failure mode:** a renamed `"any"` reads every written `any` as the error type, which `unresolved-any-lab`'s e2e test catches, and leaves `handler-return-lab`'s selected returns at `obj`; a renamed `"intrinsic"` moves the `compiler-lib-ownership-lab` golden. `"error"` and `"unresolved"` are not matched by name: every Any the two names above miss is reported as the error type, so a new intrinsic surfaces as `TR063` rather than passing as a written `any`. A checker that stops chaining unresolved parents drops the qualifier, which `unresolved-any-lab`'s `Probe.qualified` catches.
 
 **To update:** on a compiler upgrade, re-read the intrinsic declarations in `checker.go` and `isErrorType` in `dist/api/sync/api.js`.
 

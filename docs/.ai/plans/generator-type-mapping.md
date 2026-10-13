@@ -184,6 +184,7 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 | `object` | `obj` | Widened | |
 | `unknown` | `obj` | Escape-ish | **Decided (D8):** `obj` for now. An erased `Unknown` wrapper forcing explicit narrowing may become a config toggle if it stays cheap to implement. |
 | `any` | `obj` | Ergonomic | `TR008`. Intrinsic name `any`: a written or omitted annotation, a shorthand ambient module, or a diagnosed circular return, accessor or import-alias annotation. A circular type alias is the error type (`TR063`). |
+| `any` as the return of a callback typed directly at a property or value `anyReturnAsUnit` selects | `unit` | Ergonomic | `TR065`, in place of `TR008`. Configured per package (W2); a nested callback, a method, a named callback alias and a delegate keep `obj`. |
 | the checker's error type | `obj` | Escape | `TR063`, with the name the checker keeps (qualified through unresolved parents; empty once a union or optional position reduces it). Intrinsic name `error` or `unresolved`: a reference the program leaves unresolved or invalid, not a source `any`. |
 | `intrinsic` alias body | `obj` | Escape | `TR064`. The marker behind `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`. |
 | `void` (return) | `unit` | Exact | |
@@ -446,6 +447,9 @@ always was.
   does not, and `TR055` naming the position at every retained site. The rule is a callback of one
   argument or none whose return is not itself a callback; wave seven's lane AK measured every
   other shape breaking, and `tests/fixtures/callback-function-lab` pins each measurement.
+  `anyReturnAsUnit`, a .NET regular expression over property and value names, writes the `any`
+  return of a callback typed directly at a matching name as `unit` (`TR065`, W2); the
+  compiler-library binding selects `^on` for DOM event-handler properties.
 - **Rest parameters and optionals** - `[<ParamArray>]` is required and last, so a signature
   with a rest parameter has no optional tail: `setTimeout(cb, delay?, ...args)` keeps `delay`
   required, of `option` type, where `?delay` ahead of the rest would be FS1212 (landed

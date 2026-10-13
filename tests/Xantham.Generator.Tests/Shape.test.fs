@@ -1048,6 +1048,66 @@ let typeRefTests =
                 ("TR055", "callback kept as a delegate: its return is itself a callback")
                 "TR055 names the nesting that refused the conversion"
 
+        // W2: `anyReturnAsUnit` selects an owner, and only the callback typed directly at that
+        // owner writes its source `any` return as `unit`. The error type is not a source `any`.
+        testCase "a selected owner's callback returns unit for a source any (W2)" <| fun _ ->
+            let any id name =
+                Build.facts { Build.typeResponse id TypeFlags.Any with IntrinsicName = name }
+
+            let ev = Build.resolvedMember (Build.symbol 300 "ev" SymbolFlags.FunctionScopedVariable) 1
+
+            let returning id returnId =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    CallSignatures = [ Build.signature [ ev ] returnId ] }
+
+            let model =
+                { Build.shapeModel
+                      (returning 20 10
+                       :: returning 21 11
+                       :: returning 22 1
+                       :: any 10 (ValueSome "any")
+                       :: any 11 (ValueSome "error")
+                       :: Build.primitives) with
+                    AnyReturnOwner = Some "Holder.onload" }
+
+            let read owner id =
+                let reference, findings = Spec.typeRef Build.context model None owner id
+                reference, findings |> List.map (fun f -> f.Symbol, f.Key, f.Tier)
+
+            Expect.equal
+                (read "Holder.onload" 20<typeId>)
+                (FsFunc(FsString, FsUnit), [ "Holder.onload()", "TR065", Ergonomic ])
+                "the selected owner's any return reads unit"
+
+            Expect.equal
+                (read "Holder.other" 20<typeId>)
+                (FsFunc(FsString, FsObj), [ "Holder.other()", "TR008", Ergonomic ])
+                "another owner keeps obj"
+
+            Expect.equal
+                (read "Holder.onload" 21<typeId>)
+                (FsFunc(FsString, FsObj), [ "Holder.onload()", "TR063", Escape ])
+                "the error type is not a source any"
+
+            Expect.equal
+                (read "Holder.onload" 22<typeId>)
+                (FsFunc(FsString, FsString), [])
+                "a stated return is unchanged"
+
+        testCase "anyReturnAsUnit scopes the model to a selected name's owner (W2)" <| fun _ ->
+            let ctx =
+                { Build.context with
+                    Config = { GeneratorConfig.Default with AnyReturnAsUnit = Some "^on" } }
+
+            let model = { Build.shapeModel Build.primitives with AnyReturnOwner = Some "Outer.onload" }
+
+            let selected (ctx: Context) name owner = (Spec.selectAnyReturn ctx model name owner).AnyReturnOwner
+
+            Expect.equal (selected ctx "onclick" "Holder.onclick") (Some "Holder.onclick") "a matching name"
+            Expect.equal (selected ctx "transform" "Holder.transform") None "an unmatched name clears the outer selection"
+            Expect.equal (selected ctx "Onclick" "Holder.Onclick") None "the match is case-sensitive"
+            Expect.equal (selected Build.context "onclick" "Holder.onclick") None "no pattern selects nothing"
+
         testCase "a polymorphic this return reads as the declaring type" <| fun _ ->
             let thisType =
                 Build.facts

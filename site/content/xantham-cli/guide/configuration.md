@@ -112,6 +112,25 @@ Record updates from `GeneratorConfig.Default` keep their previous behavior.
 `resolveNoInfer: true` maps TypeScript's `NoInfer<T>` directly to `T`.
 The default preserves `NoInfer<T>` through the support library.
 
+## Write handler returns as unit
+
+A DOM-style handler declared `onclick: ((ev: MouseEvent) => any) | null` binds as
+`(MouseEvent -> obj) option`, so every handler body has to end in a value. `anyReturnAsUnit` is
+a .NET regular expression over property and value names; a callback typed directly at a matching
+name returns `unit` where its source return is `any`.
+
+```json title="Write on* handler returns as unit"
+{
+  "anyReturnAsUnit": "^on"
+}
+```
+
+The match is case-sensitive and unanchored unless the pattern anchors itself. Each rewritten
+return is reported as `TR065`. These keep `obj`: method returns, a callback nested inside a
+selected one, a named callback alias, an anonymous callback of two or more arguments (declared as
+a delegate) and a stated return type. The compiler-library binding `Xantham.Fable.Core.TS`
+selects `^on`.
+
 ## Add overloads per union arm
 
 `unionArmOverloads` synthesizes one overload per arm beside a member whose parameter is an

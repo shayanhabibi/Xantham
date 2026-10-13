@@ -98,7 +98,12 @@ let shapeExports: Pass<ShapeModel> =
                                         })
                                 | Some facts ->
                                     let reference, refFindings =
-                                        typeRef ctx model None findingName facts.Response.TypeId
+                                        typeRef
+                                            ctx
+                                            (selectAnyReturn ctx model export.ExportName findingName)
+                                            None
+                                            findingName
+                                            facts.Response.TypeId
 
                                     findings <- findings @ refFindings
 
