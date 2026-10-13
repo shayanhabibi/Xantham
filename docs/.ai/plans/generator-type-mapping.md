@@ -495,8 +495,12 @@ Ergonomic finding; one carrying fewer is some other type wearing a familiar name
 as before. `PromiseLike`, `ReadonlyMap` and `ReadonlySet` map with a finding for the
 restriction F# has no binding for.
 
-One absence is deliberate: the *synchronous* iteration protocol (`Iterable`, `Iterator`) has
-no Fable.Core binding, and `seq<'T>` is not one however alike the two look.
+The *synchronous* iteration protocol (`Iterable`, `Iterator`) has no Fable.Core binding, and
+`seq<'T>` is not one however alike the two look. Under the default `widen` disposition it is
+written as Core.TS's own JS-iterable interface, `Fable.Core.TS.Es.Iterable<'T, 'TReturn,
+'TNext>`, as is every other ECMAScript declaration the table does not bind (2026-10-13, W3
+#134; `generator-architecture.md`, "ECMAScript consumer bindings"). `seq<'T>` is still not
+used; W4 owns `[Symbol.iterator]` → `inherit seq<'T>`.
 
 What it was worth on the workers-types rung: widened findings 528 -> 451, and 39 "type
 parameter is erased: every use of it widened away" findings gone, because a generic whose only

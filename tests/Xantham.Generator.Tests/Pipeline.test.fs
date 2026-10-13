@@ -1846,8 +1846,11 @@ let pipelineTests =
                           "emit (detail: Fable.Core.TS.Dom.CustomEvent<string>)"
                           "and the generic arity wins where the reference has an argument"
 
-                      // Unbound ECMAScript types still widen; all three DOM names are shipped.
-                      Expect.stringContains source "static member each (values: obj)" "the sync iteration protocol is unbound"
+                      // Core.TS binds the synchronous iteration protocol as a JS interface, not seq<'T>.
+                      Expect.stringContains
+                          source
+                          "static member each (values: Fable.Core.TS.Es.Iterable<string"
+                          "the sync iteration protocol is Core.TS's"
                       Expect.stringContains source "static member ``select`` (over: Fable.Core.TS.Dom.Range)" "Core.TS owns the DOM Range"
                       Expect.stringContains source "static member respond () : Fable.Core.TS.Dom.Response" "fetch types are shipped by Core.TS"
 
@@ -1890,6 +1893,43 @@ let pipelineTests =
                           Expect.isTrue
                               (says "in typescript/lib")
                               "the compiler's own lib is named as the group the discarded symbols came from" ])
+
+        // W3 (#134): ECMAScript compiler-lib names under widen are Core.TS's declarations; the
+        // compile gate compiles the golden against Xantham.Fable.Core.TS.
+        yield!
+            fixtureTests "es-reuse-lab" (handFixture "es-reuse-lab") (handConfig (handFixture "es-reuse-lab")) (fun package ->
+                let generate () =
+                    Async.RunSynchronously(Pipeline.generate (handConfig (Some package)) package)
+
+                [ testCase "es-reuse-lab: compiler ES names are written as Core.TS declarations" <| fun _ ->
+                      let source = generate().Files |> List.head |> snd
+
+                      for fragment in
+                          [ "static member fill (target: Fable.Core.TS.Es.ArrayLike<float>)"
+                            "static member share (buffer: Fable.Core.TS.Es.SharedArrayBuffer)"
+                            "static member words (values: Fable.Core.TS.Es.Iterable<string"
+                            ": Fable.Core.TS.Es.ArrayIterator<float>"
+                            "(pattern: Fable.Core.TS.Es.RegExp)"
+                            "Fable.Core.TS.Es.AsyncGeneratorFunction"
+                            "(options: Fable.Core.TS.Es.NumberFormatOptions)" ] do
+                          Expect.stringContains source fragment fragment
+
+                  testCase "es-reuse-lab: ArrayBufferLike keeps its SharedArrayBuffer arm" <| fun _ ->
+                      let source = generate().Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "static member wrap (buffer: U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>) : unit"
+                          "both arms are named"
+
+                  testCase "es-reuse-lab: a Fable.Core binding still answers first" <| fun _ ->
+                      let source = generate().Files |> List.head |> snd
+                      Expect.stringContains source "static member later () : JS.Promise<string>" "the ECMAScript table wins"
+
+                  testCase "es-reuse-lab: no ECMAScript name widens" <| fun _ ->
+                      let findings = generate().Findings
+                      Expect.isEmpty (findings |> List.filter (fun f -> f.Key = "TR023")) "no missing declaration"
+                      Expect.isEmpty (findings |> List.filter (fun f -> f.Key = "TR035")) "no union with an obj arm" ])
 
         yield!
             fixtureTests

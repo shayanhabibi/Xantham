@@ -1,0 +1,9 @@
+{"name":"Exports.fill","tier":"exact","findings":[]}
+{"name":"Exports.wrap","tier":"exact","findings":[]}
+{"name":"Exports.share","tier":"exact","findings":[]}
+{"name":"Exports.words","tier":"escape","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"Exports.words(values)","message":"any maps to obj"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"escape","symbol":"Exports.words(values)","message":"any maps to obj"}]}
+{"name":"Exports.entries","tier":"exact","findings":[]}
+{"name":"Exports.test","tier":"exact","findings":[]}
+{"name":"Exports.generatorFunction","tier":"exact","findings":[]}
+{"name":"Exports.format","tier":"exact","findings":[]}
+{"name":"Exports.later","tier":"exact","findings":[]}

@@ -18,6 +18,10 @@ standard libraries.
 <div class="card xantham-card"><span class="xantham-card__label">Accept a wider type</span><h3>widen</h3><p>Render the reference as <code>obj</code> and report a finding. This is the default for unlisted groups.</p></div>
 </div>
 
+For `typescript/lib`, `widen` writes the names that `Fable.Core.JS` binds in that form, and every
+other standard-library declaration as its `Xantham.Fable.Core.TS` name (`Fable.Core.TS.Es.*`,
+`Fable.Core.TS.Dom.*`). Compile the binding against `Xantham.Fable.Core.TS`.
+
 ```json title="xantham.json"
 {
   "namespace": "MyBindings",

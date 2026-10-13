@@ -52,8 +52,9 @@ type GroupDisposition =
     /// Resolve identity only; a name the table carries renders as its destination - a binding
     /// somebody already wrote by hand - and every other name of the group widens.
     | Map of names: Map<string, MappedName>
-    /// Resolve identity only; references widen to `obj` with a finding. The default for
-    /// non-entry groups until the shipped compiler-lib package exists.
+    /// Resolve identity only; references widen to `obj` with a finding. For `typescript/lib`, a
+    /// name `Fable.Core.JS` binds and every other library declaration are written as their
+    /// `Xantham.Fable.Core.TS` names (`Fable.Core.TS.Es`, `Fable.Core.TS.Dom`).
     | Widen
 
 /// The optional spelling controls for the combined compiler-library binding. Names remain
@@ -949,6 +950,7 @@ module Naming =
         /// loss to record. `seq`-shaped names (`Iterable`, `Iterator`) are absent on purpose -
         /// Fable.Core binds only the async ones, and pretending `seq<'T>` interoperates with a
         /// JS iterable is exactly the kind of claim this table exists not to make.
+        /// `Shape.libBinding` writes them as Core.TS's own JS-iterable interfaces.
         let tryFind (name: string) = Map.tryFind name table
 
     /// The JavaScript key a member symbol stands for. The checker escapes a name that begins
@@ -1867,6 +1869,11 @@ module Grouping =
         else
             "Es"
 
+    /// True for a compiler library file such as `lib.es2020.d.ts`, under any directory.
+    let isLibFile (file: string) =
+        let name = file.Substring(file.LastIndexOf '/' + 1)
+        name.StartsWith "lib." && name.EndsWith ".d.ts"
+
     /// Classifies a declaration's origin group (O7) from its file path: under the
     /// package directory and outside any `node_modules` below it is the entry package; the
     /// compiler's default libs are the compiler-lib group; under a `node_modules` entry is that
@@ -1883,8 +1890,7 @@ module Grouping =
     let classifyFile (packageDir: string<dirPath>) (filePath: string<filePath>) : PackageId =
         let path = (filePath / uom<filePath>).Replace('\\', '/')
         let root = (packageDir / uom<dirPath>).Replace('\\', '/').TrimEnd '/' + "/"
-        let file = path.Substring(path.LastIndexOf '/' + 1)
-        let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
+        let isLibFile = isLibFile path
         let installedAt = path.LastIndexOf "/node_modules/"
 
         // npm installs a package's dependencies under the package's own `node_modules`, so

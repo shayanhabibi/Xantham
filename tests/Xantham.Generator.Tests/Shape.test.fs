@@ -209,6 +209,62 @@ let shippedDomTests =
             Expect.isTrue (findings |> List.exists (fun finding -> finding.Message.Contains "Fable.Core.TS.Dom.NodeListOf")) "the repair reports its loss"
     ]
 
+/// A compiler ECMAScript type declared in `file`, under the compiler's lib directory.
+let private esType (id: int) (name: string) (file: string) (arguments: int list) =
+    { libType id name arguments with DeclFile = Some((fun value -> value * uom<declFile>) ("/compiler/" + file)) }
+
+let private compilerLibAs disposition =
+    { Build.context with
+        Config = { GeneratorConfig.Default with Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, disposition ] } }
+
+[<Tests>]
+let shippedEsTests =
+    testList "shipped ES" [
+        testTheory "compiler ES identities keep the shipped name and all arguments" [
+            "ArrayLike", "lib.es5.d.ts", [ 1 ], FsApp("Fable.Core.TS.Es.ArrayLike", [ FsString ])
+            "SharedArrayBuffer", "lib.es2017.sharedmemory.d.ts", [], FsNamed "Fable.Core.TS.Es.SharedArrayBuffer"
+            "RegExp", "lib.es5.d.ts", [], FsNamed "Fable.Core.TS.Es.RegExp"
+            "ArrayIterator", "lib.es2015.iterable.d.ts", [ 1 ], FsApp("Fable.Core.TS.Es.ArrayIterator", [ FsString ])
+            "AsyncGeneratorFunction", "lib.es2018.asyncgenerator.d.ts", [], FsNamed "Fable.Core.TS.Es.AsyncGeneratorFunction"
+        ] <| fun (name, file, arguments, expected) ->
+            let model = Build.shapeModel (esType 10 name file arguments :: Build.primitives)
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10<typeId>
+            Expect.equal actual expected "same pinned compiler declaration as Core.TS"
+            Expect.isEmpty findings "no missing declaration"
+
+        testCase "a Fable.Core binding answers before Core.TS" <| fun _ ->
+            let model = Build.shapeModel (esType 10 "Promise" "lib.es2015.promise.d.ts" [ 1 ] :: Build.primitives)
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10<typeId>
+            Expect.equal actual (FsApp("JS.Promise", [ FsString ])) "the ECMAScript table wins"
+            Expect.isEmpty findings "an exact binding"
+
+        testCase "a mapped compiler lib keeps its own table" <| fun _ ->
+            let ctx = compilerLibAs (Map(Map.ofList [ "WeakRef", { FSharpName = "System.WeakReference"; Arity = 1 } ]))
+            let actual, findings = Spec.typeRef ctx (Build.shapeModel [ esType 10 "RegExp" "lib.es5.d.ts" [] ]) None "consumer" 10<typeId>
+            Expect.equal actual FsObj "a name outside the table widens"
+            Expect.equal (findings |> List.map _.Key) [ "TR023" ] "as the rest of the group does"
+
+        testCase "a referenced compiler lib keeps the O7 template" <| fun _ ->
+            let actual = Spec.typeRef (compilerLibAs Reference) (Build.shapeModel [ esType 10 "RegExp" "lib.es5.d.ts" [] ]) None "consumer" 10<typeId>
+            Expect.equal actual (FsNamed "TypeScript.Lib.Es.RegExp", []) "the referenced producer's name"
+
+        testCase "a compiler-lib type outside a lib file still widens" <| fun _ ->
+            let actual, findings = Spec.typeRef Build.context (Build.shapeModel [ esType 10 "RegExp" "other.d.ts" [] ]) None "consumer" 10<typeId>
+            Expect.equal actual FsObj "no Core.TS declaration to name"
+            Expect.equal (findings |> List.map _.Key) [ "TR023" ] "the missing declaration is reported"
+
+        testCase "a checker placeholder name in a lib file is not written as a Core.TS name" <| fun _ ->
+            let actual, _ = Spec.typeRef Build.context (Build.shapeModel [ esType 10 "__type" "lib.es5.d.ts" [] ]) None "consumer" 10<typeId>
+            Expect.equal actual FsObj "an anonymous lib shape has no Core.TS declaration"
+
+        testCase "a package declaration keeps its local identity" <| fun _ ->
+            let local = { esType 10 "ArrayLike" "lib.es5.d.ts" [] with Origin = EntryPackage; DeclFile = Some((fun value -> value * uom<declFile>) "/pkg/index.d.ts") }
+            let model = { Build.shapeModel [ local ] with DeclNames = Map.ofList [ 10<typeId>, "ArrayLike" ] }
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10<typeId>
+            Expect.equal actual (FsNamed "ArrayLike") "the package owns this declaration"
+            Expect.isEmpty findings "no remapping"
+    ]
+
 [<Tests>]
 let functionConstraintTests =
     testList "function constraints" [

@@ -74,10 +74,10 @@ export declare function upload(body: Blob, to: URL): FormData;
 export declare function emit(detail: CustomEvent<string>): void;
 
 // ---------------------------------------------------------------------------
-// Not bound, and this fixture exists partly to hold that line.
+// Core.TS, not Fable.Core: written under their Xantham.Fable.Core.TS names.
 // ---------------------------------------------------------------------------
 
-/** `seq<'T>` is not a JS iterable, whatever the two have in common. Widened, and noted. */
+/** Core.TS binds the synchronous iteration protocol as its own JS interface, not as `seq<'T>`. */
 export declare function each(values: Iterable<string>): void;
 
 /** Core.TS supplies the DOM Range without the former Browser package ambiguity. */

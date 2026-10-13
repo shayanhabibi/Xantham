@@ -151,9 +151,11 @@ the corresponding lab under `tests/fixtures/` is the reducer.
   @types/node's program (es2020, through its own `/// <reference lib>`) differs from Core.TS's
   `esnext`/`dom` ship profile, so listing the catalogue alone fails validation. Under `widen`,
   `Shape.libBinding` is the only route from a compiler-lib type to a name: `Naming.LibBindings`
-  first, then Core.TS by bare symbol name for DOM files. An ECMAScript name outside the table
-  (`ArrayLike`, `SharedArrayBuffer`, `Iterable`, `RegExp`) widens to `obj` with TR023, and a union
-  holding one, such as `ArrayBufferLike`, reports TR035 (W3, #134).
+  first, then Core.TS by bare symbol name (`Fable.Core.TS.Dom` for DOM files and, since W3 #134,
+  `Fable.Core.TS.Es` for ECMAScript files). Namespace members take their bare name, as Core.TS
+  flattens them (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`). A name
+  Core.TS renamed on collision (`Iterator2`) is reachable only under the name it kept, and the
+  compile gate will not catch a same-arity wrong target.
 
 ## Generator passes
 

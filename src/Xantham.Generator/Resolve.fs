@@ -1242,14 +1242,22 @@ let private deriveFacts
             if shapeName.IsSome then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
-                // Core.TS preserves DOM generic bounds and heritage. Read that declaration
-                // metadata without walking members, so references can satisfy the same bounds.
+                // Core.TS preserves compiler-library generic bounds and heritage. Read that
+                // declaration metadata without walking members, so a reference written as a
+                // Core.TS name satisfies the same bounds.
+                let readsNominal =
+                    origin = CompilerLib
+                    && (match Grouping.declFile symbol with
+                        | Some file when Grouping.libFamily file = "Dom" -> true
+                        | Some file ->
+                            Grouping.isLibFile file
+                            && GeneratorConfig.disposition ctx.Config CompilerLib = Widen
+                            && shapeName
+                               |> Option.exists (fun name -> (Naming.LibBindings.tryFind name).IsNone)
+                        | None -> false)
+
                 let! nominal =
-                    if
-                        origin = CompilerLib
-                        && (Grouping.declFile symbol
-                            |> Option.exists (fun file -> Grouping.libFamily file = "Dom"))
-                    then
+                    if readsNominal then
                         async {
                             let! target =
                                 match ty.Target with

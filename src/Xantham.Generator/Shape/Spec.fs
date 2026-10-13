@@ -1969,9 +1969,10 @@ and internal objectRef
 
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
-/// A compiler-lib type a shipped Fable package already binds - `Promise` -> `JS.Promise<'T>`,
-/// DOM declarations use the same names and arguments as the shipped Core.TS producer.
-/// The ECMAScript table retains its explicit arity and loss rules.
+/// A compiler-lib type a shipped package binds: `Promise` -> `JS.Promise<'T>` through the
+/// ECMAScript table, with its explicit arity and loss rules; any other DOM declaration, and under
+/// `widen` any other ECMAScript declaration, under the name and arguments of the shipped Core.TS
+/// producer (`Fable.Core.TS.Dom`, `Fable.Core.TS.Es`).
 and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
     match facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
     | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
@@ -1986,18 +1987,24 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
                     None
                 else
                     Some(fsharpName, arity, Option.toList loss)
-            | None when
-                (facts.DeclFile |> Option.map (fun value -> value / uom<declFile>))
-                |> Option.exists (fun file -> Grouping.libFamily file = "Dom")
-                ->
-                Some($"Fable.Core.TS.Dom.{name}", arguments.Length, [])
-            | None -> None
+            | None ->
+                match facts.DeclFile |> Option.map (fun value -> value / uom<declFile>) with
+                | Some file when Grouping.libFamily file = "Dom" ->
+                    Some($"Fable.Core.TS.Dom.{name}", arguments.Length, [])
+                | Some file when
+                    Grouping.isLibFile file
+                    && name <> "globalThis"
+                    && not (isSyntheticName (name * uom<symbolName>))
+                    && GeneratorConfig.disposition ctx.Config CompilerLib = Widen
+                    ->
+                    Some($"Fable.Core.TS.Es.{name}", arguments.Length, [])
+                | _ -> None
 
         match bound with
         | None -> None
         | Some(fsharpName, arity, loss) ->
             let parameters =
-                if fsharpName.StartsWith "Fable.Core.TS.Dom." then
+                if fsharpName.StartsWith "Fable.Core.TS." then
                     facts.Response.TargetTypeId
                     |> ValueOption.toOption
                     |> Option.bind (fun target -> Map.tryFind target model.Types)

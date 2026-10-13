@@ -1340,6 +1340,61 @@ nominal `JS.Function` constraints: generic interfaces and abstract methods fail 
 an annotated inline function specializes to an F# function. The generator retains its existing
 function constraints. Reproduction details are in `../probes/constrain-function/README.md`.
 
+## ECMAScript consumer bindings (2026-10-13, W3 #134)
+
+Under the default `widen` disposition of `typescript/lib`, a compiler-lib ECMAScript declaration
+that `Naming.LibBindings` does not bind is written as `Fable.Core.TS.Es.{name}` with all of its
+checker type arguments, as the DOM half above already is. The table still answers first
+(`Promise` stays `JS.Promise<'T>`). Checker placeholders (`__type`) and `globalThis` keep the
+existing widening. Namespace members take their bare name, which is the name Core.TS flattens
+them to (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`).
+
+- **`widen` only.** A `map` disposition keeps its own table (group-map-lab maps `RegExp` to
+  `System.Text.RegularExpressions.Regex`), and `reference` keeps the O7 template
+  (`TypeScript.Lib.Es.RegExp`).
+- **Nominal metadata.** Resolve reads the target parameters and base types of these declarations
+  (not their members), as it does for DOM, so the constrained-argument repair applies to
+  `Fable.Core.TS.Es` references. Names the table binds are excluded from that read.
+- **No catalog contract bump.** Ship producers (Core.TS and every catalog lab) emit an unchanged
+  ABI, and a consumer under `widen` loads no catalogue. Bumping `CatalogCompatibility.current`
+  would reject Core.TS's committed catalogue for no change in its content.
+- **Why not catalog reuse.** Node lists no `declarationReferences`, and a catalogue is accepted
+  only under an equal inference profile. Making Node a catalogue consumer means switching it to
+  `lib: [esnext, dom]` with `typescript/lib: ship`, which changes its compiler program and is a
+  product decision (`docs/.ai/footguns.md`, "Declaration catalogs").
+- **lib-lab.** `each(values: Iterable<string>)` was pinned as `obj`. It is now
+  `Fable.Core.TS.Es.Iterable<string, obj, obj>`, Core.TS's JS-iterable interface and not
+  `seq<'T>`, so the reason for that pin still holds.
+- **Known gaps.** The `any` defaults of `Iterable`/`IterableIterator` (`TReturn`, `TNext`) render
+  as `obj` and raise TR008, graded escape until W1. Consumers write `ArrayBuffer` as
+  `JS.ArrayBuffer` (table) while Core.TS's own `ArrayBufferLike` uses
+  `Fable.Core.TS.Es.ArrayBuffer`, so a consumer's `U2<JS.ArrayBuffer, Es.SharedArrayBuffer>` is not
+  the same F# type as Core.TS's `ArrayBufferLike`. A name Core.TS renamed on collision
+  (`Iterator2`) is reachable only under the name it kept; the compile gate cannot detect a
+  same-arity wrong target.
+
+Measured on 2026-10-13:
+
+| Run | TR023 | TR035 | TR008 | Tiers (exact / ergonomic / widened / escape) |
+| --- | --- | --- | --- | --- |
+| es-reuse-lab (new) | 0 | 0 | 2 | 8 / 0 / 0 / 1 |
+| lib-lab | 1 → 0 | 0 | 0 → 2 | widened 2 → 1, escape 0 → 1 |
+| `@cloudflare/workers-types` | 37 → 9 | 11 → 6 | 168 → 218 | 412 / 1067 → 1068 / 374 → 361 / 111 → 123 |
+| `solid-js` | 6 → 0 | 35 → 35 | 78 → 78 | 69 / 146 → 147 / 85 → 84 / 42 |
+| `Xantham.Fable.Node` | 737 → 148 | 1725 → 1270 | 2668 → 2735 | 1247 → 1263 / 1772 → 1858 / 768 → 656 / 345 → 353 |
+
+In workers-types, TP006 5 → 3 and SP004 37 → 39: `SqlStorageCursor.raw<U>` and
+`SyncKvStorage.list<T>` now return `IterableIterator<'U>`, so the type parameter is used rather
+than dropped. Its remaining TR023 are `Module` (8) and `Env` (1), outside the compiler lib. Node's
+remaining TR023 come from undici and web-global names (`Headers`, `FormData`, `MessageEvent`,
+`SpecIterableIterator`) and module specifiers.
+
+Node was regenerated under the T4 override: the selected goldens hold 43 of W3's ~780 TR023 hits
+and none of `SharedArrayBuffer`, `ArrayLike`, `ArrayIterator`, `AsyncGeneratorFunction` or
+`RegExp`; Node holds the rest. Node's "before" figures come from a regeneration at the parent
+commit, not the committed 2026-10-06 output, which differs by 60 `symbols.jsonl` lines of
+earlier generator drift.
+
 ## Generator identity measures (2026-09-11)
 
 The generator keeps distinct measures for compiler symbol, type and node IDs, and for
