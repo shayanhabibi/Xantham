@@ -70,13 +70,15 @@ A binding is rooted in a generated F# module.
 - **Ambient modules** follow their import paths: `inspector/promises` becomes
   `Inspector.Promises`.
 - **Anonymous option objects and callbacks** are named under the member that uses them.
-- **Constants**: a readonly member typed by one literal (`readonly AT_TARGET: 2`) is also a
-  `[<Literal>]` in a module of the type's name, so the pattern in
+- **Constants**: a required readonly member typed by one string or numeric literal
+  (`readonly AT_TARGET: 2`) is also a `[<Literal>]` in a module of the type's name, so the
+  pattern in
   `match e.eventPhase with | Event.AT_TARGET -> ...` compiles to `e.eventPhase === 2`.
-  `Create` sets these members itself and takes no argument for them. In an expression,
-  `Event.AT_TARGET` names the interface's instance property instead; read the value
-  through a module abbreviation (`module EventConstants = Event`, then
-  `EventConstants.AT_TARGET`).
+  `Create` sets these members itself and takes no argument for them. After you open the
+  binding module, `Event.AT_TARGET` reads the value in an expression too. Fully qualified
+  (`MyBinding.Event.AT_TARGET`), an expression names the interface's instance property
+  instead; read the value there through a module abbreviation
+  (`module EventConstants = MyBinding.Event`, then `EventConstants.AT_TARGET`).
 
 The same type exported through several paths has a shared canonical location.
 Use the emitted signature to find it.

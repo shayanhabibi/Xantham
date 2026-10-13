@@ -1606,9 +1606,10 @@ type FsInterfaceDecl =
         /// Present where the declaration renders as an `[<AbstractClass>]` a consumer inherits;
         /// `None` where it renders as an `[<Interface>]`.
         Entrypoint: FsEntrypoint option
-        /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
-        /// parameter lists mirroring the members, so consumers never hand-build objects. Literal
-        /// members are written by the Emit rather than taken as parameters.
+        /// Create overloads for plain-data interfaces (D3), each an `Emit` building the object,
+        /// `[<ParamObject>]` where it takes parameters - parameter lists mirroring the members, so
+        /// consumers never hand-build objects. Literal members are written by the Emit rather
+        /// than taken as parameters.
         CreateOverloads: FsCreateOverload list
         /// A class's static members (§4.4): the properties of the constructor object. A get-only
         /// static is bound through a dotted selector of its own (`[<Import("Counter.MAX",

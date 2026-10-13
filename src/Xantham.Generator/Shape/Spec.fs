@@ -99,8 +99,8 @@ let typeScriptLiteral (literal: FsLiteral) =
     | LitNumber value -> value.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
     | LitBool value -> if value then "true" else "false"
 
-/// The value of a literal member: a required readonly property typed by one string or numeric
-/// literal that is not an enum member.
+/// The value of a literal member: a required readonly property typed by a single non-enum string
+/// or numeric literal type.
 let internal literalMemberValue (model: ShapeModel) (m: ResolvedMember) (typeId: int<Measure.typeId>) =
     if m.ReadOnly && not m.Optional then
         match Map.tryFind typeId model.Types with

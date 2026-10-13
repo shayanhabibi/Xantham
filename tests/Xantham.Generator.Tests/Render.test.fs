@@ -1210,7 +1210,7 @@ let literalMemberRenderTests =
 
         testCase "a JavaScript string escapes quotes, line breaks and Emit holes" <| fun _ ->
             Expect.equal
-                (Render.jsString "it's \"q\" \\ $0 {{x}}\n \u0001")
+                (Render.jsString "it's \"q\" \\ $0 {{x}}\n\u2028\u0001")
                 "'it\\'s \"q\" \\\\ \\x240 \\x7B\\x7Bx\\x7D\\x7D\\n\\u2028\\x01'"
                 "single-quoted"
 

@@ -2602,10 +2602,12 @@ from `TR007`/`TR006` (Widened) to `MB.LiteralMemberAsConstant` (`MB011`, Ergonom
   pinned compiler matches the committed `declarations.json` in every identity and API hash; only
   the generator hash moves. `catalog library identity` passes (27) against the committed
   Core.TS.
-- **Expression access.** In an expression, `Event.AT_TARGET` resolves to the interface's
-  instance property (FS0806), in `module rec` or not and in either declaration order; a pattern
-  resolves it to the literal. A module abbreviation (`module EventConstants = Event`) reads the
-  value (`docs/.ai/footguns.md`).
+- **Expression access.** In an expression, the fully qualified
+  `LiteralMemberLab.PhaseEvent.AT_TARGET` resolves to the interface's instance property
+  (FS0806); a pattern resolves it to the literal.
+  After `open LiteralMemberLab`, the unqualified `PhaseEvent.AT_TARGET` resolves to the literal
+  in both positions. A module abbreviation reads the value under qualified access
+  (`docs/.ai/footguns.md`).
 
 Lab `literal-member-lab`: `PhaseEvent` (methods beside `NONE`/`CAPTURING_PHASE`/`AT_TARGET`/
 `BUBBLING_PHASE`) gets `module PhaseEvent` and a `Create` writing the four constants;

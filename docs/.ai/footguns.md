@@ -301,13 +301,14 @@ keeps `Error` → `exn` (Fable compiles `System.Exception` to a JavaScript `Erro
 A future row needs a reason of one of those two kinds. The promise rows also bind under `ship`;
 a row that binds only for consumers splits a type between Core.TS and its consumers.
 
-**A same-named module loses expression lookup to an interface member.** `module Event` of
-`[<Literal>]` values beside `[<Interface>] type Event` resolves `Event.AT_TARGET` in a pattern
-to the literal, but in an expression to the interface's instance property (FS0806, "Property
-'AT_TARGET' is not static"), in `module rec` or not and in either declaration order. A module
-abbreviation (`module EventConstants = Event`) names the module alone. `Event.Create` resolves
-to the type's static, since the module declares no `Create`; W6 keeps a literal named `Create`
-out of the module.
+**A same-named module loses qualified expression lookup to an interface member.** `module
+Event` of `[<Literal>]` values beside `[<Interface>] type Event` in `module rec M` resolves the
+fully qualified `M.Event.AT_TARGET` in an expression to the interface's instance property
+(FS0806, "Property 'AT_TARGET' is not static"); a pattern resolves it to the literal. After
+`open M`, the unqualified `Event.AT_TARGET` resolves to the literal in both positions. A module
+abbreviation (`module EventConstants = M.Event`) names the module alone for qualified access.
+`Event.Create` resolves to the type's static, since the module declares no `Create`; W6 keeps a
+literal named `Create` out of the module.
 
 ## Build and test environment
 
