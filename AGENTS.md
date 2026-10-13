@@ -76,7 +76,8 @@ live `tsc --api` server.
   secret command arguments are masked.
 - `dotnet fsi build.fsx -- generate [--only ast|proto|session|compiler-lib|node-lib|schema]
   [--sync]` — routes to `tools/generate-wire.fsx`; `--sync` re-vendors upstream sources first
-  (network). `node-lib` regenerates `src/Xantham.Fable.Node` and runs only when named.
+  (network). `node-lib` regenerates `src/Xantham.Fable.Node` and runs only when named. Every
+  layer it writes is formatted with Fantomas unless `--no-format` is given.
 - `dotnet run --project src/Xantham.Cli -- generate <package-dir> [-o <dir>] [--config <path>]` —
   generate a binding outside the test harness.
 - `dotnet fsi tools/xantham-fixtures.fsx -- init` — install `tests/fixtures/` from `pins.json`;

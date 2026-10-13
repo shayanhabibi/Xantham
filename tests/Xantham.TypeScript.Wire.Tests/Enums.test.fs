@@ -37,7 +37,7 @@ let private recorded () =
         let doc = Regex.Match(line, @"^    /// <summary>.*</summary><returns><c>(\d+)u</c></returns>$")
         if doc.Success then expected <- uint32 doc.Groups[1].Value
 
-        let literal = Regex.Match(line, @"^    let (\w+) = ")
+        let literal = Regex.Match(line, @"^    let (\w+) =( |$)")
         if literal.Success then yield enumName, literal.Groups[1].Value, expected ]
 
 [<Tests>]
