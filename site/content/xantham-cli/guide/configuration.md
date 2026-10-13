@@ -129,7 +129,9 @@ The match is case-sensitive and unanchored unless the pattern anchors itself. Ea
 return is reported as `TR065`. These keep `obj`: method returns, a callback nested inside a
 selected one, a named callback alias, an anonymous callback of two or more arguments (declared as
 a delegate) and a stated return type. The compiler-library binding `Xantham.Fable.Core.TS`
-selects `^on`.
+selects `^on`, so a configuration that reuses its declaration catalogue sets
+`"anyReturnAsUnit": "^on"` too. The pattern is part of a catalogue's inference profile, so any
+other value fails the inference-profile check.
 
 ## Add overloads per union arm
 

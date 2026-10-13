@@ -131,6 +131,7 @@ consumer project and reference the file from that restored version:
 {
   "module": "MyBindings",
   "lib": ["esnext", "dom"],
+  "anyReturnAsUnit": "^on",
   "declarationReferences": ["/path/to/packages/xantham.fable.core.ts/<version>/xantham/declarations.json.br"]
 }
 ```
@@ -151,6 +152,8 @@ Source and configuration hashes normalize CRLF to LF across checkouts.
 This catalogue reuses qualified types such as `Fable.Core.TS.Dom.HTMLInputElement`,
 `Fable.Core.TS.Dom.FileList` and `Fable.Core.TS.Es.Promise<'T>`. Install the exact TypeScript
 release/source revision recorded in the catalogue and keep your library profile compatible.
+Core.TS writes `on*` event-handler returns as `unit`, so the consumer sets `anyReturnAsUnit` to
+`^on` as in the example; any other value fails the inference-profile check.
 
 ## Choose a shared owner before generating related libraries
 
@@ -186,7 +189,9 @@ Older catalogues are rejected before reuse.
 Custom compiler executables without verifiable package metadata require identical compiler
 binary hashes. Matching TypeScript major/minor versions alone is insufficient.
 
-Keep `lib`, `types`, group dispositions, and inference options compatible.
+Keep `lib`, `types`, group dispositions, and inference options compatible, including
+`resolveNoInfer` and `anyReturnAsUnit`: the inference profile records them, and a consumer whose
+profile differs from the producer's is rejected.
 Use separate catalogs for environments that need different globals.
 
 Upgrade consumers before regenerating producers: older Xantham builds reject schema 2.

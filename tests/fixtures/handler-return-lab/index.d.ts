@@ -13,6 +13,10 @@ export interface Upload {
     onclose(ev: ProgressEvent): any;
     // a named alias is a shared declaration and stays obj
     onnamed: Handler;
+    // a two-argument callback hoists to a delegate declaration and stays obj
+    onpair: (a: ProgressEvent, b: string) => any;
+    // selected, a callback arm of an erased union
+    onmixed: ((ev: ProgressEvent) => any) | string;
 }
 export type Handler = (ev: ProgressEvent) => any;
 // selected value export

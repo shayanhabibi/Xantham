@@ -4462,8 +4462,9 @@ let pipelineTests =
                       Expect.contains tiers ("Probe", Escape) "a faithful any beside a stated-type loss stays escape" ])
 
         // W2: a callback typed directly at a property or value `anyReturnAsUnit` selects returns
-        // unit for a source `any`, under `TR065`. An unselected name, a non-callback `any`, a
-        // nested callback, a method and a named callback alias keep `obj` under `TR008`.
+        // unit for a source `any`, under `TR065`, including a callback arm of an erased union. An
+        // unselected name, a non-callback `any`, a nested callback, a method, a named callback alias
+        // and a hoisted two-argument delegate keep `obj` under `TR008`.
         yield!
             fixtureTests "handler-return-lab" handlerReturnLab (handConfig handlerReturnLab) (fun package ->
                 [ testCase "handler-return-lab: a selected callback's any return reads unit and the rest keep obj" <| fun _ ->
@@ -4479,6 +4480,7 @@ let pipelineTests =
                       Expect.equal
                           (sites "TR065")
                           [ "Exports.onload()", Ergonomic
+                            "Upload.onmixed()", Ergonomic
                             "Upload.onprogress()", Ergonomic
                             "Upload.onready()", Ergonomic ]
                           "the selected callbacks"
@@ -4486,11 +4488,22 @@ let pipelineTests =
                       Expect.equal
                           (sites "TR008" |> List.map fst)
                           [ "Handler()"
+                            "Upload.Onpair()"
                             "Upload.onclose()"
                             "Upload.onregister(resolve)()"
                             "Upload.onstate"
                             "Upload.transform()" ]
                           "every unselected any stays obj"
+
+                      Expect.stringContains
+                          source
+                          "type Onpair = delegate of a: Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> * b: string -> obj"
+                          "a two-argument callback at a selected name hoists to a delegate and stays obj"
+
+                      Expect.stringContains
+                          source
+                          "abstract onmixed: U2<string, (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit)> with get, set"
+                          "a callback arm of an erased union at a selected name"
 
                       Expect.stringContains
                           source
