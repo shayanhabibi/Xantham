@@ -4,8 +4,8 @@
   "module": "SolidJs",
   "counts": {
     "exact": 69,
-    "ergonomic": 180,
-    "widened": 92,
+    "ergonomic": 188,
+    "widened": 84,
     "escape": 1
   },
   "passes": [
@@ -34,8 +34,8 @@
       "pass": "SI - shape-interfaces",
       "total": 986,
       "exact": 15,
-      "ergonomic": 765,
-      "widened": 206
+      "ergonomic": 824,
+      "widened": 147
     },
     {
       "pass": "SA - shape-aliases",
@@ -53,7 +53,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 166,
+      "total": 171,
+      "exact": 5,
       "ergonomic": 158,
       "widened": 8
     },

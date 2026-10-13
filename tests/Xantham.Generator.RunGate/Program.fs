@@ -2208,6 +2208,60 @@ let private literalMethods () =
     logger.logInfo ("a", "b")
     check "a rest argument spreads after the literal" (emitJsExpr logger "$0.lastArgs.join() === 'info,a,b'")
 
+module QuotedConstants = LiteralMemberLab.Quoted
+
+/// W6 (#137): a literal member is a `[<Literal>]` a pattern matches against, and `Create`
+/// writes it into the object it builds.
+let private literalMembers () =
+    let phaseOf =
+        fun (event: LiteralMemberLab.PhaseEvent) ->
+            match event.eventPhase with
+            | LiteralMemberLab.PhaseEvent.AT_TARGET -> "target"
+            | _ -> "other"
+
+    equal "a [<Literal>] matches the runtime value" "target" (phaseOf LiteralMemberLab.Exports.event)
+
+    let compiled: string = emitJsExpr phaseOf "String($0)"
+    check $"the literal pattern compiles to a comparison with 2: {compiled}" (compiled.Contains "=== 2")
+    check $"the literal is inlined, not read off a module: {compiled}" (not (compiled.Contains "AT_TARGET"))
+
+    // Statement position: the Emit's object literal is parenthesised, or `{` opens a block.
+    LiteralMemberLab.PhaseEvent.Create(eventPhase = 1.0, ``type`` = "x", stopPropagation = ignore)
+    |> ignore
+
+    let pointer =
+        LiteralMemberLab.PointerPhaseEvent.Create(
+            pointerId = 7.0,
+            eventPhase = 2.0,
+            ``type`` = "down",
+            stopPropagation = ignore
+        )
+
+    check
+        "a subtype's Create writes the constants it inherits"
+        (emitJsExpr pointer "$0.AT_TARGET === 2 && $0.NONE === 0 && $0.BUBBLING_PHASE === 3 && $0.pointerId === 7")
+
+    equal "a discriminant is written by Create" "method" (LiteralMemberLab.MethodSignal.Create(name = "n")).kind
+
+    equal
+        "a writable discriminant is written by Create"
+        "writable"
+        (LiteralMemberLab.WritableSignal.Create(name = "n")).kind
+
+    equal "a constants-only Create" """{"NONE":0,"DONE":1}""" (json (LiteralMemberLab.Phases.Create()))
+
+    // In an expression, `LiteralMemberLab.Quoted.marker` names the interface's instance
+    // property (FS0806); `QuotedConstants` abbreviates the module alone.
+    equal
+        "an escaped string literal round-trips through the Emit"
+        QuotedConstants.marker
+        (LiteralMemberLab.Quoted.Create()).marker
+
+    equal "an escaped string literal is the TypeScript value" "it's \"q\" \\ $0 {{x}}" QuotedConstants.marker
+
+
+    equal "a generic Create writes its discriminant" "tagged" (LiteralMemberLab.Tagged<string>.Create(value = "v")).kind
+
 [<EntryPoint>]
 let main _ =
     dependencyEntrypoint ()
@@ -2247,6 +2301,7 @@ let main _ =
     callableOverloads ()
     symbolMembers ()
     literalMethods ()
+    literalMembers ()
     patternParameters ()
     exportLayout ()
     subpathLab ()

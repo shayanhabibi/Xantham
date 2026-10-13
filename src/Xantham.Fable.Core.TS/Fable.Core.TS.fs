@@ -49,6 +49,7 @@ module Es =
         /// <summary>
         /// The kind of element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"class"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class.
@@ -77,11 +78,19 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ kind: 'class', ...$0 })")>]
         static member Create
-            (kind: string, addInitializer: ((unit -> unit) -> unit), metadata: obj, ?name: string)
+            (addInitializer: ((unit -> unit) -> unit), metadata: obj, ?name: string)
             : ClassDecoratorContext<'Class> =
             jsNative
+
+    module ClassDecoratorContext =
+        /// <summary>
+        /// The kind of element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"class"</c></remarks>
+        [<Literal>]
+        let kind = "class"
 
     /// <summary>
     /// Context provided to a class method decorator.
@@ -97,6 +106,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"method"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -144,10 +154,9 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ kind: 'method', ...$0 })")>]
         static member Create
             (
-                kind: string,
                 name: obj,
                 ``static``: bool,
                 ``private``: bool,
@@ -156,6 +165,29 @@ module Es =
                 metadata: obj
             ) : ClassMethodDecoratorContext<'This, 'Value> =
             jsNative
+
+    module ClassMethodDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"method"</c></remarks>
+        [<Literal>]
+        let kind = "method"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the current value of the method from the provided object.
+            /// </summary>
+            /// <example><c>let fn = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class getter decorator.
@@ -171,6 +203,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"getter"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -196,10 +229,9 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ kind: 'getter', ...$0 })")>]
         static member Create
             (
-                kind: string,
                 name: obj,
                 ``static``: bool,
                 ``private``: bool,
@@ -208,6 +240,29 @@ module Es =
                 metadata: obj
             ) : ClassGetterDecoratorContext<'This, 'Value> =
             jsNative
+
+    module ClassGetterDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"getter"</c></remarks>
+        [<Literal>]
+        let kind = "getter"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class setter decorator.
@@ -223,6 +278,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"setter"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -248,10 +304,9 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ kind: 'setter', ...$0 })")>]
         static member Create
             (
-                kind: string,
                 name: obj,
                 ``static``: bool,
                 ``private``: bool,
@@ -260,6 +315,29 @@ module Es =
                 metadata: obj
             ) : ClassSetterDecoratorContext<'This, 'Value> =
             jsNative
+
+    module ClassSetterDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"setter"</c></remarks>
+        [<Literal>]
+        let kind = "setter"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class <c>accessor</c> field decorator.
@@ -275,6 +353,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"accessor"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -299,10 +378,9 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ kind: 'accessor', ...$0 })")>]
         static member Create
             (
-                kind: string,
                 name: obj,
                 ``static``: bool,
                 ``private``: bool,
@@ -311,6 +389,37 @@ module Es =
                 metadata: obj
             ) : ClassAccessorDecoratorContext<'This, 'Value> =
             jsNative
+
+    module ClassAccessorDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"accessor"</c></remarks>
+        [<Literal>]
+        let kind = "accessor"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>)
+                : Access<'This, 'Value> =
+                jsNative
 
     /// <summary>
     /// Describes the target provided to class <c>accessor</c> field decorators.
@@ -378,6 +487,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"field"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -402,10 +512,9 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ kind: 'field', ...$0 })")>]
         static member Create
             (
-                kind: string,
                 name: obj,
                 ``static``: bool,
                 ``private``: bool,
@@ -414,6 +523,35 @@ module Es =
                 metadata: obj
             ) : ClassFieldDecoratorContext<'This, 'Value> =
             jsNative
+
+    module ClassFieldDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"field"</c></remarks>
+        [<Literal>]
+        let kind = "field"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the value of the field on the provided object.
+            /// </summary>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Sets the value of the field on the provided object.
+            /// </summary>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>)
+                : Access<'This, 'Value> =
+                jsNative
 
     type ClassDecorator<'TFunction when 'TFunction :> Function> = ('TFunction -> 'TFunction option)
 
@@ -972,13 +1110,18 @@ module Es =
 
     [<Interface>]
     type DurationFormatPart2 =
+        /// <remarks>TypeScript type: <c>"literal"</c></remarks>
         abstract ``type``: string with get, set
         abstract value: string with get, set
         abstract unit: DurationFormatUnitSingular option with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, value: string, ?unit: DurationFormatUnitSingular) : DurationFormatPart2 =
-            jsNative
+        [<ParamObject; Emit("({ type: 'literal', ...$0 })")>]
+        static member Create(value: string, ?unit: DurationFormatUnitSingular) : DurationFormatPart2 = jsNative
+
+    module DurationFormatPart2 =
+        /// <remarks>TypeScript type: <c>"literal"</c></remarks>
+        [<Literal>]
+        let ``type`` = "literal"
 
     [<Interface>]
     type DurationFormatPart3 =
@@ -8020,11 +8163,17 @@ module Es =
 
     [<Interface>]
     type RelativeTimeFormatPart2 =
+        /// <remarks>TypeScript type: <c>"literal"</c></remarks>
         abstract ``type``: string with get, set
         abstract value: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, value: string) : RelativeTimeFormatPart2 = jsNative
+        [<ParamObject; Emit("({ type: 'literal', ...$0 })")>]
+        static member Create(value: string) : RelativeTimeFormatPart2 = jsNative
+
+    module RelativeTimeFormatPart2 =
+        /// <remarks>TypeScript type: <c>"literal"</c></remarks>
+        [<Literal>]
+        let ``type`` = "literal"
 
     [<Interface>]
     type RelativeTimeFormatPart3 =
@@ -11800,19 +11949,31 @@ module Es =
 
     [<Interface>]
     type PromiseFulfilledResult<'T> =
+        /// <remarks>TypeScript type: <c>"fulfilled"</c></remarks>
         abstract status: string with get, set
         abstract value: 'T with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(status: string, value: 'T) : PromiseFulfilledResult<'T> = jsNative
+        [<ParamObject; Emit("({ status: 'fulfilled', ...$0 })")>]
+        static member Create(value: 'T) : PromiseFulfilledResult<'T> = jsNative
+
+    module PromiseFulfilledResult =
+        /// <remarks>TypeScript type: <c>"fulfilled"</c></remarks>
+        [<Literal>]
+        let status = "fulfilled"
 
     [<Interface>]
     type PromiseRejectedResult =
+        /// <remarks>TypeScript type: <c>"rejected"</c></remarks>
         abstract status: string with get, set
         abstract reason: obj with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(status: string, reason: obj) : PromiseRejectedResult = jsNative
+        [<ParamObject; Emit("({ status: 'rejected', ...$0 })")>]
+        static member Create(reason: obj) : PromiseRejectedResult = jsNative
+
+    module PromiseRejectedResult =
+        /// <remarks>TypeScript type: <c>"rejected"</c></remarks>
+        [<Literal>]
+        let status = "rejected"
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
     type PromiseSettledResult<'T> =
@@ -20923,100 +21084,6 @@ module Es =
 
             type Mapfn2<'T> = delegate of v: 'T * k: float -> bigint
 
-    module ClassAccessorDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>)
-                : Access<'This, 'Value> =
-                jsNative
-
-    module ClassFieldDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the value of the field on the provided object.
-            /// </summary>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Sets the value of the field on the provided object.
-            /// </summary>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>)
-                : Access<'This, 'Value> =
-                jsNative
-
-    module ClassGetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-
-            [<ParamObject; Emit("$0")>]
-            static member Create(has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
-    module ClassMethodDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the current value of the method from the provided object.
-            /// </summary>
-            /// <example><c>let fn = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-
-            [<ParamObject; Emit("$0")>]
-            static member Create(has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
-    module ClassSetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-
-            [<ParamObject; Emit("$0")>]
-            static member Create(has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
-
     module CollatorOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type CaseFirst =
@@ -28049,13 +28116,17 @@ module Dom =
     type PublicKeyCredentialDescriptor =
         abstract id: BufferSource with get, set
         abstract transports: AuthenticatorTransport[] option with get, set
+        /// <remarks>TypeScript type: <c>"public-key"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (id: BufferSource, ``type``: string, ?transports: AuthenticatorTransport[])
-            : PublicKeyCredentialDescriptor =
+        [<ParamObject; Emit("({ type: 'public-key', ...$0 })")>]
+        static member Create(id: BufferSource, ?transports: AuthenticatorTransport[]) : PublicKeyCredentialDescriptor =
             jsNative
+
+    module PublicKeyCredentialDescriptor =
+        /// <remarks>TypeScript type: <c>"public-key"</c></remarks>
+        [<Literal>]
+        let ``type`` = "public-key"
 
     [<Interface>]
     type PublicKeyCredentialDescriptorJSON =
@@ -28077,10 +28148,16 @@ module Dom =
     [<Interface>]
     type PublicKeyCredentialParameters =
         abstract alg: float with get, set
+        /// <remarks>TypeScript type: <c>"public-key"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(alg: float, ``type``: string) : PublicKeyCredentialParameters = jsNative
+        [<ParamObject; Emit("({ type: 'public-key', ...$0 })")>]
+        static member Create(alg: float) : PublicKeyCredentialParameters = jsNative
+
+    module PublicKeyCredentialParameters =
+        /// <remarks>TypeScript type: <c>"public-key"</c></remarks>
+        [<Literal>]
+        let ``type`` = "public-key"
 
     [<Interface>]
     type PublicKeyCredentialRequestOptions =
@@ -29863,18 +29940,23 @@ module Dom =
         abstract cancel: UnderlyingSourceCancelCallback option with get, set
         abstract pull: (ReadableByteStreamController -> JS.Promise<unit> option) option with get, set
         abstract start: (ReadableByteStreamController -> obj) option with get, set
+        /// <remarks>TypeScript type: <c>"bytes"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ type: 'bytes', ...$0 })")>]
         static member Create
             (
-                ``type``: string,
                 ?autoAllocateChunkSize: float,
                 ?cancel: UnderlyingSourceCancelCallback,
                 ?pull: (ReadableByteStreamController -> JS.Promise<unit> option),
                 ?start: (ReadableByteStreamController -> obj)
             ) : UnderlyingByteSource =
             jsNative
+
+    module UnderlyingByteSource =
+        /// <remarks>TypeScript type: <c>"bytes"</c></remarks>
+        [<Literal>]
+        let ``type`` = "bytes"
 
     [<Interface>]
     type UnderlyingDefaultSource<'R> =
@@ -30430,17 +30512,22 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/ANGLE_instanced_arrays/vertexAttribDivisorANGLE">MDN Reference</a>
         /// </summary>
         abstract vertexAttribDivisorANGLE: index: float * divisor: float -> unit
+        /// <remarks>TypeScript type: <c>35070</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE: 35070, ...$0 })")>]
         static member Create
             (
                 drawArraysInstancedANGLE: Action<float, float, float, float>,
                 drawElementsInstancedANGLE: Action<float, float, float, float, float>,
-                vertexAttribDivisorANGLE: Action<float, float>,
-                VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE: float
+                vertexAttribDivisorANGLE: Action<float, float>
             ) : ANGLE_instanced_arrays =
             jsNative
+
+    module ANGLE_instanced_arrays =
+        /// <remarks>TypeScript type: <c>35070</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE = 35070.0
 
     type ARIAMixin =
         /// <summary>
@@ -31182,6 +31269,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AnimationEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type AnimationEvent =
         inherit Event
         /// <summary>
@@ -31202,6 +31290,33 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/AnimationEvent/pseudoElement">MDN Reference</a>
         /// </summary>
         abstract pseudoElement: string
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                animationName: string,
+                elapsedTime: float,
+                pseudoElement: string,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : AnimationEvent =
+            jsNative
 
     type AnimationEventConstructor =
         [<EmitConstructor>]
@@ -31245,7 +31360,7 @@ module Dom =
         /// </summary>
         abstract timelineTime: CSSNumberish option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -31263,10 +31378,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTime: CSSNumberish,
                 ?timelineTime: CSSNumberish,
                 ?currentTarget: EventTarget,
@@ -32218,6 +32329,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/AudioProcessingEvent">MDN Reference</a>
     /// </remarks>
     /// <remarks>@deprecated</remarks>
+    [<Interface>]
     type AudioProcessingEvent =
         inherit Event
         /// <summary>
@@ -32235,6 +32347,33 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/AudioProcessingEvent/playbackTime">MDN Reference</a></remarks>
         abstract playbackTime: float
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                inputBuffer: AudioBuffer,
+                outputBuffer: AudioBuffer,
+                playbackTime: float,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : AudioProcessingEvent =
+            jsNative
 
     type AudioProcessingEventConstructor =
         [<EmitConstructor>]
@@ -32801,7 +32940,7 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/BeforeUnloadEvent/returnValue">MDN Reference</a></remarks>
         abstract returnValue: obj with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 returnValue: obj,
@@ -32819,10 +32958,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -32974,7 +33109,7 @@ module Dom =
         /// </summary>
         abstract timecode: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 data: Blob,
@@ -32994,10 +33129,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -33216,7 +33347,8 @@ module Dom =
         /// </summary>
         abstract conditionText: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 conditionText: string,
@@ -33225,19 +33357,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSConditionRule =
@@ -33280,7 +33399,8 @@ module Dom =
         /// </remarks>
         abstract containerQuery: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 containerName: string,
@@ -33291,19 +33411,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSContainerRule =
@@ -33322,6 +33429,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CSSCounterStyleRule">MDN Reference</a>
     /// </remarks>
+    [<Interface>]
     type CSSCounterStyleRule =
         inherit CSSRule
         /// <summary>
@@ -33391,6 +33499,28 @@ module Dom =
         /// </summary>
         abstract system: string with get, set
 
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+        static member Create
+            (
+                additiveSymbols: string,
+                fallback: string,
+                name: string,
+                negative: string,
+                pad: string,
+                prefix: string,
+                range: string,
+                speakAs: string,
+                suffix: string,
+                symbols: string,
+                system: string,
+                cssText: string,
+                ``type``: float,
+                ?parentRule: CSSRule,
+                ?parentStyleSheet: CSSStyleSheet
+            ) : CSSCounterStyleRule =
+            jsNative
+
     type CSSCounterStyleRuleConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> CSSCounterStyleRule
@@ -33418,25 +33548,13 @@ module Dom =
         /// </remarks>
         abstract style: CSSStyleDeclaration with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 style: CSSStyleDeclaration,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSFontFaceRule =
@@ -33465,25 +33583,13 @@ module Dom =
         /// </summary>
         abstract fontFamily: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 fontFamily: string,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSFontFeatureValuesRule =
@@ -33534,7 +33640,8 @@ module Dom =
         /// </summary>
         abstract overrideColors: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 basePalette: string,
@@ -33543,19 +33650,6 @@ module Dom =
                 overrideColors: string,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSFontPaletteValuesRule =
@@ -33592,7 +33686,8 @@ module Dom =
         /// </summary>
         abstract insertRule: rule: string * ?index: float -> float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 cssRules: CSSRuleList,
@@ -33600,19 +33695,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSGroupingRule =
@@ -33676,26 +33758,14 @@ module Dom =
         /// <remarks>@import ://developer.mozilla.org/docs/Web/API/CSSImportRule/supportsText)</remarks>
         abstract supportsText: string option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 href: string,
                 media: MediaList,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?layerName: string,
                 ?styleSheet: CSSStyleSheet,
                 ?supportsText: string,
@@ -33737,26 +33807,14 @@ module Dom =
         /// </remarks>
         abstract style: CSSStyleDeclaration with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 keyText: string,
                 style: CSSStyleDeclaration,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSKeyframeRule =
@@ -33863,7 +33921,8 @@ module Dom =
         /// </summary>
         abstract name: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 name: string,
@@ -33872,19 +33931,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSLayerBlockRule =
@@ -33913,25 +33959,13 @@ module Dom =
         /// </summary>
         abstract nameList: string[]
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 nameList: string[],
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSLayerStatementRule =
@@ -34286,7 +34320,8 @@ module Dom =
         /// </remarks>
         abstract media: MediaList with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 media: MediaList,
@@ -34296,19 +34331,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSMediaRule =
@@ -34343,26 +34365,14 @@ module Dom =
         /// </summary>
         abstract prefix: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 namespaceURI: string,
                 prefix: string,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSNamespaceRule =
@@ -34387,25 +34397,13 @@ module Dom =
         /// </summary>
         abstract style: CSSStyleDeclaration with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 style: CSSStyleDeclaration,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSNestedDeclarations =
@@ -34622,7 +34620,8 @@ module Dom =
         /// </remarks>
         abstract style: CSSPageDescriptors with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 selectorText: string,
@@ -34632,19 +34631,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSPageRule =
@@ -35008,26 +34994,14 @@ module Dom =
         /// </remarks>
         abstract style: CSSPositionTryDescriptors with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 name: string,
                 style: CSSPositionTryDescriptors,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSPositionTryRule =
@@ -35090,7 +35064,8 @@ module Dom =
         /// </remarks>
         abstract syntax: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 inherits: bool,
@@ -35098,19 +35073,6 @@ module Dom =
                 syntax: string,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?initialValue: string,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
@@ -35204,60 +35166,176 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/CSSRule/type">MDN Reference</a></remarks>
         abstract ``type``: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract STYLE_RULE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract CHARSET_RULE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract IMPORT_RULE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract MEDIA_RULE: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract FONT_FACE_RULE: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract PAGE_RULE: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract MARGIN_RULE: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract NAMESPACE_RULE: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract KEYFRAMES_RULE: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract KEYFRAME_RULE: float
+        /// <remarks>TypeScript type: <c>12</c></remarks>
         abstract SUPPORTS_RULE: float
+        /// <remarks>TypeScript type: <c>11</c></remarks>
         abstract COUNTER_STYLE_RULE: float
+        /// <remarks>TypeScript type: <c>14</c></remarks>
         abstract FONT_FEATURE_VALUES_RULE: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
-            (
-                cssText: string,
-                ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
-                ?parentRule: CSSRule,
-                ?parentStyleSheet: CSSStyleSheet
-            ) : CSSRule =
+            (cssText: string, ``type``: float, ?parentRule: CSSRule, ?parentStyleSheet: CSSStyleSheet)
+            : CSSRule =
             jsNative
 
+    module CSSRule =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let STYLE_RULE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let CHARSET_RULE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let IMPORT_RULE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let MEDIA_RULE = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let FONT_FACE_RULE = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let PAGE_RULE = 6.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let MARGIN_RULE = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let NAMESPACE_RULE = 10.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let KEYFRAMES_RULE = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let KEYFRAME_RULE = 8.0
+
+        /// <remarks>TypeScript type: <c>12</c></remarks>
+        [<Literal>]
+        let SUPPORTS_RULE = 12.0
+
+        /// <remarks>TypeScript type: <c>11</c></remarks>
+        [<Literal>]
+        let COUNTER_STYLE_RULE = 11.0
+
+        /// <remarks>TypeScript type: <c>14</c></remarks>
+        [<Literal>]
+        let FONT_FEATURE_VALUES_RULE = 14.0
+
     type CSSRuleConstructor =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract STYLE_RULE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract CHARSET_RULE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract IMPORT_RULE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract MEDIA_RULE: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract FONT_FACE_RULE: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract PAGE_RULE: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract MARGIN_RULE: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract NAMESPACE_RULE: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract KEYFRAMES_RULE: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract KEYFRAME_RULE: float
+        /// <remarks>TypeScript type: <c>12</c></remarks>
         abstract SUPPORTS_RULE: float
+        /// <remarks>TypeScript type: <c>11</c></remarks>
         abstract COUNTER_STYLE_RULE: float
+        /// <remarks>TypeScript type: <c>14</c></remarks>
         abstract FONT_FEATURE_VALUES_RULE: float
 
         [<EmitConstructor>]
         abstract Create: unit -> CSSRule
+
+    module CSSRuleConstructor =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let STYLE_RULE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let CHARSET_RULE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let IMPORT_RULE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let MEDIA_RULE = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let FONT_FACE_RULE = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let PAGE_RULE = 6.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let MARGIN_RULE = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let NAMESPACE_RULE = 10.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let KEYFRAMES_RULE = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let KEYFRAME_RULE = 8.0
+
+        /// <remarks>TypeScript type: <c>12</c></remarks>
+        [<Literal>]
+        let SUPPORTS_RULE = 12.0
+
+        /// <remarks>TypeScript type: <c>11</c></remarks>
+        [<Literal>]
+        let COUNTER_STYLE_RULE = 11.0
+
+        /// <remarks>TypeScript type: <c>14</c></remarks>
+        [<Literal>]
+        let FONT_FEATURE_VALUES_RULE = 14.0
 
     /// <summary>
     /// A <b><c>CSSRuleList</c></b> represents an ordered collection of read-only CSSRule objects.
@@ -35362,7 +35440,8 @@ module Dom =
         /// </remarks>
         abstract start: string option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 cssRules: CSSRuleList,
@@ -35370,19 +35449,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?``end``: string,
                 ?start: string,
                 ?parentRule: CSSRule,
@@ -35493,7 +35559,8 @@ module Dom =
     type CSSStartingStyleRule =
         inherit CSSGroupingRule
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 cssRules: CSSRuleList,
@@ -35501,19 +35568,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSStartingStyleRule =
@@ -38899,7 +38953,8 @@ module Dom =
         /// </summary>
         abstract styleMap: StylePropertyMap
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 selectorText: string,
@@ -38910,19 +38965,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSStyleRule =
@@ -39065,7 +39107,8 @@ module Dom =
     type CSSSupportsRule =
         inherit CSSConditionRule
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 conditionText: string,
@@ -39074,19 +39117,6 @@ module Dom =
                 insertRule: Func<string, float option, float>,
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSSupportsRule =
@@ -39356,26 +39386,14 @@ module Dom =
         /// </remarks>
         abstract types: string[]
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
                 navigation: string,
                 types: string[],
                 cssText: string,
                 ``type``: float,
-                STYLE_RULE: float,
-                CHARSET_RULE: float,
-                IMPORT_RULE: float,
-                MEDIA_RULE: float,
-                FONT_FACE_RULE: float,
-                PAGE_RULE: float,
-                MARGIN_RULE: float,
-                NAMESPACE_RULE: float,
-                KEYFRAMES_RULE: float,
-                KEYFRAME_RULE: float,
-                SUPPORTS_RULE: float,
-                COUNTER_STYLE_RULE: float,
-                FONT_FEATURE_VALUES_RULE: float,
                 ?parentRule: CSSRule,
                 ?parentStyleSheet: CSSStyleSheet
             ) : CSSViewTransitionRule =
@@ -40355,7 +40373,7 @@ module Dom =
         /// </summary>
         abstract clipboardData: DataTransfer option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -40373,10 +40391,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?clipboardData: DataTransfer,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -40439,6 +40453,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CloseEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type CloseEvent =
         inherit Event
         /// <summary>
@@ -40459,6 +40474,33 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CloseEvent/wasClean">MDN Reference</a>
         /// </summary>
         abstract wasClean: bool
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                code: float,
+                reason: string,
+                wasClean: bool,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : CloseEvent =
+            jsNative
 
     type CloseEventConstructor =
         [<EmitConstructor>]
@@ -40485,7 +40527,7 @@ module Dom =
         /// </summary>
         abstract source: Element option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 command: string,
@@ -40504,10 +40546,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?source: Element,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -40536,6 +40574,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CompositionEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type CompositionEvent =
         inherit UIEvent
         /// <summary>
@@ -40551,6 +40590,36 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/CompositionEvent/initCompositionEvent">MDN Reference</a></remarks>
         abstract initCompositionEvent:
             typeArg: string * ?bubblesArg: bool * ?cancelableArg: bool * ?viewArg: Window * ?dataArg: string -> unit
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                data: string,
+                initCompositionEvent: Action<string, bool option, bool option, Window option, string option>,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                detail: float,
+                which: float,
+                initUIEvent: Action<string, bool option, bool option, Window option, float option>,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget,
+                ?view: Window
+            ) : CompositionEvent =
+            jsNative
 
     type CompositionEventConstructor =
         [<EmitConstructor>]
@@ -40618,7 +40687,7 @@ module Dom =
         /// </summary>
         abstract skipped: bool
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 skipped: bool,
@@ -40637,10 +40706,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -40699,7 +40764,7 @@ module Dom =
         /// </summary>
         abstract deleted: CookieListItem[]
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 changed: CookieListItem[],
@@ -40719,10 +40784,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -41148,7 +41209,7 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/CustomEvent/initCustomEvent">MDN Reference</a></remarks>
         abstract initCustomEvent: ``type``: string * ?bubbles: bool * ?cancelable: bool * ?detail: 'T -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 detail: 'T,
@@ -41168,10 +41229,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -41234,6 +41291,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/DOMException">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type DOMException =
         inherit Fable.Core.TS.Es.Error
         /// <summary>
@@ -41253,61 +41311,318 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/DOMException/name">MDN Reference</a>
         /// </summary>
         abstract name: string
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract INDEX_SIZE_ERR: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DOMSTRING_SIZE_ERR: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract HIERARCHY_REQUEST_ERR: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract WRONG_DOCUMENT_ERR: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract INVALID_CHARACTER_ERR: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract NO_DATA_ALLOWED_ERR: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract NO_MODIFICATION_ALLOWED_ERR: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract NOT_FOUND_ERR: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract NOT_SUPPORTED_ERR: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract INUSE_ATTRIBUTE_ERR: float
+        /// <remarks>TypeScript type: <c>11</c></remarks>
         abstract INVALID_STATE_ERR: float
+        /// <remarks>TypeScript type: <c>12</c></remarks>
         abstract SYNTAX_ERR: float
+        /// <remarks>TypeScript type: <c>13</c></remarks>
         abstract INVALID_MODIFICATION_ERR: float
+        /// <remarks>TypeScript type: <c>14</c></remarks>
         abstract NAMESPACE_ERR: float
+        /// <remarks>TypeScript type: <c>15</c></remarks>
         abstract INVALID_ACCESS_ERR: float
+        /// <remarks>TypeScript type: <c>16</c></remarks>
         abstract VALIDATION_ERR: float
+        /// <remarks>TypeScript type: <c>17</c></remarks>
         abstract TYPE_MISMATCH_ERR: float
+        /// <remarks>TypeScript type: <c>18</c></remarks>
         abstract SECURITY_ERR: float
+        /// <remarks>TypeScript type: <c>19</c></remarks>
         abstract NETWORK_ERR: float
+        /// <remarks>TypeScript type: <c>20</c></remarks>
         abstract ABORT_ERR: float
+        /// <remarks>TypeScript type: <c>21</c></remarks>
         abstract URL_MISMATCH_ERR: float
+        /// <remarks>TypeScript type: <c>22</c></remarks>
         abstract QUOTA_EXCEEDED_ERR: float
+        /// <remarks>TypeScript type: <c>23</c></remarks>
         abstract TIMEOUT_ERR: float
+        /// <remarks>TypeScript type: <c>24</c></remarks>
         abstract INVALID_NODE_TYPE_ERR: float
+        /// <remarks>TypeScript type: <c>25</c></remarks>
         abstract DATA_CLONE_ERR: float
 
+        [<ParamObject;
+          Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+        static member Create(code: float, message: string, name: string, ?stack: string, ?cause: obj) : DOMException =
+            jsNative
+
+    module DOMException =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let INDEX_SIZE_ERR = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DOMSTRING_SIZE_ERR = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let HIERARCHY_REQUEST_ERR = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let WRONG_DOCUMENT_ERR = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let INVALID_CHARACTER_ERR = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let NO_DATA_ALLOWED_ERR = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let NO_MODIFICATION_ALLOWED_ERR = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let NOT_FOUND_ERR = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let NOT_SUPPORTED_ERR = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let INUSE_ATTRIBUTE_ERR = 10.0
+
+        /// <remarks>TypeScript type: <c>11</c></remarks>
+        [<Literal>]
+        let INVALID_STATE_ERR = 11.0
+
+        /// <remarks>TypeScript type: <c>12</c></remarks>
+        [<Literal>]
+        let SYNTAX_ERR = 12.0
+
+        /// <remarks>TypeScript type: <c>13</c></remarks>
+        [<Literal>]
+        let INVALID_MODIFICATION_ERR = 13.0
+
+        /// <remarks>TypeScript type: <c>14</c></remarks>
+        [<Literal>]
+        let NAMESPACE_ERR = 14.0
+
+        /// <remarks>TypeScript type: <c>15</c></remarks>
+        [<Literal>]
+        let INVALID_ACCESS_ERR = 15.0
+
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        [<Literal>]
+        let VALIDATION_ERR = 16.0
+
+        /// <remarks>TypeScript type: <c>17</c></remarks>
+        [<Literal>]
+        let TYPE_MISMATCH_ERR = 17.0
+
+        /// <remarks>TypeScript type: <c>18</c></remarks>
+        [<Literal>]
+        let SECURITY_ERR = 18.0
+
+        /// <remarks>TypeScript type: <c>19</c></remarks>
+        [<Literal>]
+        let NETWORK_ERR = 19.0
+
+        /// <remarks>TypeScript type: <c>20</c></remarks>
+        [<Literal>]
+        let ABORT_ERR = 20.0
+
+        /// <remarks>TypeScript type: <c>21</c></remarks>
+        [<Literal>]
+        let URL_MISMATCH_ERR = 21.0
+
+        /// <remarks>TypeScript type: <c>22</c></remarks>
+        [<Literal>]
+        let QUOTA_EXCEEDED_ERR = 22.0
+
+        /// <remarks>TypeScript type: <c>23</c></remarks>
+        [<Literal>]
+        let TIMEOUT_ERR = 23.0
+
+        /// <remarks>TypeScript type: <c>24</c></remarks>
+        [<Literal>]
+        let INVALID_NODE_TYPE_ERR = 24.0
+
+        /// <remarks>TypeScript type: <c>25</c></remarks>
+        [<Literal>]
+        let DATA_CLONE_ERR = 25.0
+
     type DOMExceptionConstructor =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract INDEX_SIZE_ERR: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DOMSTRING_SIZE_ERR: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract HIERARCHY_REQUEST_ERR: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract WRONG_DOCUMENT_ERR: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract INVALID_CHARACTER_ERR: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract NO_DATA_ALLOWED_ERR: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract NO_MODIFICATION_ALLOWED_ERR: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract NOT_FOUND_ERR: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract NOT_SUPPORTED_ERR: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract INUSE_ATTRIBUTE_ERR: float
+        /// <remarks>TypeScript type: <c>11</c></remarks>
         abstract INVALID_STATE_ERR: float
+        /// <remarks>TypeScript type: <c>12</c></remarks>
         abstract SYNTAX_ERR: float
+        /// <remarks>TypeScript type: <c>13</c></remarks>
         abstract INVALID_MODIFICATION_ERR: float
+        /// <remarks>TypeScript type: <c>14</c></remarks>
         abstract NAMESPACE_ERR: float
+        /// <remarks>TypeScript type: <c>15</c></remarks>
         abstract INVALID_ACCESS_ERR: float
+        /// <remarks>TypeScript type: <c>16</c></remarks>
         abstract VALIDATION_ERR: float
+        /// <remarks>TypeScript type: <c>17</c></remarks>
         abstract TYPE_MISMATCH_ERR: float
+        /// <remarks>TypeScript type: <c>18</c></remarks>
         abstract SECURITY_ERR: float
+        /// <remarks>TypeScript type: <c>19</c></remarks>
         abstract NETWORK_ERR: float
+        /// <remarks>TypeScript type: <c>20</c></remarks>
         abstract ABORT_ERR: float
+        /// <remarks>TypeScript type: <c>21</c></remarks>
         abstract URL_MISMATCH_ERR: float
+        /// <remarks>TypeScript type: <c>22</c></remarks>
         abstract QUOTA_EXCEEDED_ERR: float
+        /// <remarks>TypeScript type: <c>23</c></remarks>
         abstract TIMEOUT_ERR: float
+        /// <remarks>TypeScript type: <c>24</c></remarks>
         abstract INVALID_NODE_TYPE_ERR: float
+        /// <remarks>TypeScript type: <c>25</c></remarks>
         abstract DATA_CLONE_ERR: float
 
         [<EmitConstructor>]
         abstract Create: ?message: string * ?name: string -> DOMException
+
+    module DOMExceptionConstructor =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let INDEX_SIZE_ERR = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DOMSTRING_SIZE_ERR = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let HIERARCHY_REQUEST_ERR = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let WRONG_DOCUMENT_ERR = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let INVALID_CHARACTER_ERR = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let NO_DATA_ALLOWED_ERR = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let NO_MODIFICATION_ALLOWED_ERR = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let NOT_FOUND_ERR = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let NOT_SUPPORTED_ERR = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let INUSE_ATTRIBUTE_ERR = 10.0
+
+        /// <remarks>TypeScript type: <c>11</c></remarks>
+        [<Literal>]
+        let INVALID_STATE_ERR = 11.0
+
+        /// <remarks>TypeScript type: <c>12</c></remarks>
+        [<Literal>]
+        let SYNTAX_ERR = 12.0
+
+        /// <remarks>TypeScript type: <c>13</c></remarks>
+        [<Literal>]
+        let INVALID_MODIFICATION_ERR = 13.0
+
+        /// <remarks>TypeScript type: <c>14</c></remarks>
+        [<Literal>]
+        let NAMESPACE_ERR = 14.0
+
+        /// <remarks>TypeScript type: <c>15</c></remarks>
+        [<Literal>]
+        let INVALID_ACCESS_ERR = 15.0
+
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        [<Literal>]
+        let VALIDATION_ERR = 16.0
+
+        /// <remarks>TypeScript type: <c>17</c></remarks>
+        [<Literal>]
+        let TYPE_MISMATCH_ERR = 17.0
+
+        /// <remarks>TypeScript type: <c>18</c></remarks>
+        [<Literal>]
+        let SECURITY_ERR = 18.0
+
+        /// <remarks>TypeScript type: <c>19</c></remarks>
+        [<Literal>]
+        let NETWORK_ERR = 19.0
+
+        /// <remarks>TypeScript type: <c>20</c></remarks>
+        [<Literal>]
+        let ABORT_ERR = 20.0
+
+        /// <remarks>TypeScript type: <c>21</c></remarks>
+        [<Literal>]
+        let URL_MISMATCH_ERR = 21.0
+
+        /// <remarks>TypeScript type: <c>22</c></remarks>
+        [<Literal>]
+        let QUOTA_EXCEEDED_ERR = 22.0
+
+        /// <remarks>TypeScript type: <c>23</c></remarks>
+        [<Literal>]
+        let TIMEOUT_ERR = 23.0
+
+        /// <remarks>TypeScript type: <c>24</c></remarks>
+        [<Literal>]
+        let INVALID_NODE_TYPE_ERR = 24.0
+
+        /// <remarks>TypeScript type: <c>25</c></remarks>
+        [<Literal>]
+        let DATA_CLONE_ERR = 25.0
 
     /// <summary>
     /// The <b><c>DOMImplementation</c></b> interface represents an object providing methods which are not dependent on any particular document. Such an object is returned by the Document.implementation property.
@@ -42515,6 +42830,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/DeviceMotionEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type DeviceMotionEvent =
         inherit Event
         /// <summary>
@@ -42541,6 +42857,34 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/DeviceMotionEvent/rotationRate">MDN Reference</a>
         /// </summary>
         abstract rotationRate: DeviceMotionEventRotationRate option
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                interval: float,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?acceleration: DeviceMotionEventAcceleration,
+                ?accelerationIncludingGravity: DeviceMotionEventAcceleration,
+                ?rotationRate: DeviceMotionEventRotationRate,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : DeviceMotionEvent =
+            jsNative
 
     type DeviceMotionEventConstructor =
         [<EmitConstructor>]
@@ -42612,6 +42956,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/DeviceOrientationEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type DeviceOrientationEvent =
         inherit Event
         /// <summary>
@@ -42638,6 +42983,34 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/DeviceOrientationEvent/gamma">MDN Reference</a>
         /// </summary>
         abstract gamma: float option
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                absolute: bool,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?alpha: float,
+                ?beta: float,
+                ?gamma: float,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : DeviceOrientationEvent =
+            jsNative
 
     type DeviceOrientationEventConstructor =
         [<EmitConstructor>]
@@ -44419,11 +44792,22 @@ module Dom =
     /// </summary>
     [<Interface>]
     type EXT_blend_minmax =
+        /// <remarks>TypeScript type: <c>32775</c></remarks>
         abstract MIN_EXT: float
+        /// <remarks>TypeScript type: <c>32776</c></remarks>
         abstract MAX_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(MIN_EXT: float, MAX_EXT: float) : EXT_blend_minmax = jsNative
+        [<Emit("({ MIN_EXT: 32775, MAX_EXT: 32776 })")>]
+        static member Create() : EXT_blend_minmax = jsNative
+
+    module EXT_blend_minmax =
+        /// <remarks>TypeScript type: <c>32775</c></remarks>
+        [<Literal>]
+        let MIN_EXT = 32775.0
+
+        /// <remarks>TypeScript type: <c>32776</c></remarks>
+        [<Literal>]
+        let MAX_EXT = 32776.0
 
     /// <summary>
     /// The <b><c>EXT_color_buffer_float</c></b> extension is part of WebGL and adds the ability to render a variety of floating point formats.
@@ -44439,20 +44823,34 @@ module Dom =
     /// </summary>
     [<Interface>]
     type EXT_color_buffer_half_float =
+        /// <remarks>TypeScript type: <c>34842</c></remarks>
         abstract RGBA16F_EXT: float
+        /// <remarks>TypeScript type: <c>34843</c></remarks>
         abstract RGB16F_EXT: float
+        /// <remarks>TypeScript type: <c>33297</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT: float
+        /// <remarks>TypeScript type: <c>35863</c></remarks>
         abstract UNSIGNED_NORMALIZED_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                RGBA16F_EXT: float,
-                RGB16F_EXT: float,
-                FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT: float,
-                UNSIGNED_NORMALIZED_EXT: float
-            ) : EXT_color_buffer_half_float =
-            jsNative
+        [<Emit("({ RGBA16F_EXT: 34842, RGB16F_EXT: 34843, FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT: 33297, UNSIGNED_NORMALIZED_EXT: 35863 })")>]
+        static member Create() : EXT_color_buffer_half_float = jsNative
+
+    module EXT_color_buffer_half_float =
+        /// <remarks>TypeScript type: <c>34842</c></remarks>
+        [<Literal>]
+        let RGBA16F_EXT = 34842.0
+
+        /// <remarks>TypeScript type: <c>34843</c></remarks>
+        [<Literal>]
+        let RGB16F_EXT = 34843.0
+
+        /// <remarks>TypeScript type: <c>33297</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT = 33297.0
+
+        /// <remarks>TypeScript type: <c>35863</c></remarks>
+        [<Literal>]
+        let UNSIGNED_NORMALIZED_EXT = 35863.0
 
     /// <summary>
     /// The WebGL API's <b><c>EXT_float_blend</c></b> extension allows blending and draw buffers with 32-bit floating-point components.
@@ -44475,20 +44873,34 @@ module Dom =
     /// </summary>
     [<Interface>]
     type EXT_sRGB =
+        /// <remarks>TypeScript type: <c>35904</c></remarks>
         abstract SRGB_EXT: float
+        /// <remarks>TypeScript type: <c>35906</c></remarks>
         abstract SRGB_ALPHA_EXT: float
+        /// <remarks>TypeScript type: <c>35907</c></remarks>
         abstract SRGB8_ALPHA8_EXT: float
+        /// <remarks>TypeScript type: <c>33296</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                SRGB_EXT: float,
-                SRGB_ALPHA_EXT: float,
-                SRGB8_ALPHA8_EXT: float,
-                FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT: float
-            ) : EXT_sRGB =
-            jsNative
+        [<Emit("({ SRGB_EXT: 35904, SRGB_ALPHA_EXT: 35906, SRGB8_ALPHA8_EXT: 35907, FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT: 33296 })")>]
+        static member Create() : EXT_sRGB = jsNative
+
+    module EXT_sRGB =
+        /// <remarks>TypeScript type: <c>35904</c></remarks>
+        [<Literal>]
+        let SRGB_EXT = 35904.0
+
+        /// <remarks>TypeScript type: <c>35906</c></remarks>
+        [<Literal>]
+        let SRGB_ALPHA_EXT = 35906.0
+
+        /// <remarks>TypeScript type: <c>35907</c></remarks>
+        [<Literal>]
+        let SRGB8_ALPHA8_EXT = 35907.0
+
+        /// <remarks>TypeScript type: <c>33296</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT = 33296.0
 
     /// <summary>
     /// The <b><c>EXT_shader_texture_lod</c></b> extension is part of the WebGL API and adds additional texture functions to the OpenGL ES Shading Language which provide the shader writer with explicit control of LOD (Level of detail).
@@ -44504,20 +44916,34 @@ module Dom =
     /// </summary>
     [<Interface>]
     type EXT_texture_compression_bptc =
+        /// <remarks>TypeScript type: <c>36492</c></remarks>
         abstract COMPRESSED_RGBA_BPTC_UNORM_EXT: float
+        /// <remarks>TypeScript type: <c>36493</c></remarks>
         abstract COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT: float
+        /// <remarks>TypeScript type: <c>36494</c></remarks>
         abstract COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT: float
+        /// <remarks>TypeScript type: <c>36495</c></remarks>
         abstract COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                COMPRESSED_RGBA_BPTC_UNORM_EXT: float,
-                COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT: float,
-                COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT: float,
-                COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT: float
-            ) : EXT_texture_compression_bptc =
-            jsNative
+        [<Emit("({ COMPRESSED_RGBA_BPTC_UNORM_EXT: 36492, COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT: 36493, COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT: 36494, COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT: 36495 })")>]
+        static member Create() : EXT_texture_compression_bptc = jsNative
+
+    module EXT_texture_compression_bptc =
+        /// <remarks>TypeScript type: <c>36492</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_BPTC_UNORM_EXT = 36492.0
+
+        /// <remarks>TypeScript type: <c>36493</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT = 36493.0
+
+        /// <remarks>TypeScript type: <c>36494</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT = 36494.0
+
+        /// <remarks>TypeScript type: <c>36495</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT = 36495.0
 
     /// <summary>
     /// The <b><c>EXT_texture_compression_rgtc</c></b> extension is part of the WebGL API and exposes 4 RGTC compressed texture formats. RGTC is a block-based texture compression format suited for unsigned and signed red and red-green textures (Red-Green Texture Compression).
@@ -44526,20 +44952,34 @@ module Dom =
     /// </summary>
     [<Interface>]
     type EXT_texture_compression_rgtc =
+        /// <remarks>TypeScript type: <c>36283</c></remarks>
         abstract COMPRESSED_RED_RGTC1_EXT: float
+        /// <remarks>TypeScript type: <c>36284</c></remarks>
         abstract COMPRESSED_SIGNED_RED_RGTC1_EXT: float
+        /// <remarks>TypeScript type: <c>36285</c></remarks>
         abstract COMPRESSED_RED_GREEN_RGTC2_EXT: float
+        /// <remarks>TypeScript type: <c>36286</c></remarks>
         abstract COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                COMPRESSED_RED_RGTC1_EXT: float,
-                COMPRESSED_SIGNED_RED_RGTC1_EXT: float,
-                COMPRESSED_RED_GREEN_RGTC2_EXT: float,
-                COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT: float
-            ) : EXT_texture_compression_rgtc =
-            jsNative
+        [<Emit("({ COMPRESSED_RED_RGTC1_EXT: 36283, COMPRESSED_SIGNED_RED_RGTC1_EXT: 36284, COMPRESSED_RED_GREEN_RGTC2_EXT: 36285, COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT: 36286 })")>]
+        static member Create() : EXT_texture_compression_rgtc = jsNative
+
+    module EXT_texture_compression_rgtc =
+        /// <remarks>TypeScript type: <c>36283</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RED_RGTC1_EXT = 36283.0
+
+        /// <remarks>TypeScript type: <c>36284</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SIGNED_RED_RGTC1_EXT = 36284.0
+
+        /// <remarks>TypeScript type: <c>36285</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RED_GREEN_RGTC2_EXT = 36285.0
+
+        /// <remarks>TypeScript type: <c>36286</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT = 36286.0
 
     /// <summary>
     /// The <b><c>EXT_texture_filter_anisotropic</c></b> extension is part of the WebGL API and exposes two constants for anisotropic filtering (AF).
@@ -44548,14 +44988,22 @@ module Dom =
     /// </summary>
     [<Interface>]
     type EXT_texture_filter_anisotropic =
+        /// <remarks>TypeScript type: <c>34046</c></remarks>
         abstract TEXTURE_MAX_ANISOTROPY_EXT: float
+        /// <remarks>TypeScript type: <c>34047</c></remarks>
         abstract MAX_TEXTURE_MAX_ANISOTROPY_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (TEXTURE_MAX_ANISOTROPY_EXT: float, MAX_TEXTURE_MAX_ANISOTROPY_EXT: float)
-            : EXT_texture_filter_anisotropic =
-            jsNative
+        [<Emit("({ TEXTURE_MAX_ANISOTROPY_EXT: 34046, MAX_TEXTURE_MAX_ANISOTROPY_EXT: 34047 })")>]
+        static member Create() : EXT_texture_filter_anisotropic = jsNative
+
+    module EXT_texture_filter_anisotropic =
+        /// <remarks>TypeScript type: <c>34046</c></remarks>
+        [<Literal>]
+        let TEXTURE_MAX_ANISOTROPY_EXT = 34046.0
+
+        /// <remarks>TypeScript type: <c>34047</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_MAX_ANISOTROPY_EXT = 34047.0
 
     /// <summary>
     /// The <b><c>EXT_texture_norm16</c></b> extension is part of the WebGL API and provides a set of new 16-bit signed normalized and unsigned normalized formats (fixed-point texture, renderbuffer and texture buffer).
@@ -44564,28 +45012,58 @@ module Dom =
     /// </summary>
     [<Interface>]
     type EXT_texture_norm16 =
+        /// <remarks>TypeScript type: <c>33322</c></remarks>
         abstract R16_EXT: float
+        /// <remarks>TypeScript type: <c>33324</c></remarks>
         abstract RG16_EXT: float
+        /// <remarks>TypeScript type: <c>32852</c></remarks>
         abstract RGB16_EXT: float
+        /// <remarks>TypeScript type: <c>32859</c></remarks>
         abstract RGBA16_EXT: float
+        /// <remarks>TypeScript type: <c>36760</c></remarks>
         abstract R16_SNORM_EXT: float
+        /// <remarks>TypeScript type: <c>36761</c></remarks>
         abstract RG16_SNORM_EXT: float
+        /// <remarks>TypeScript type: <c>36762</c></remarks>
         abstract RGB16_SNORM_EXT: float
+        /// <remarks>TypeScript type: <c>36763</c></remarks>
         abstract RGBA16_SNORM_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                R16_EXT: float,
-                RG16_EXT: float,
-                RGB16_EXT: float,
-                RGBA16_EXT: float,
-                R16_SNORM_EXT: float,
-                RG16_SNORM_EXT: float,
-                RGB16_SNORM_EXT: float,
-                RGBA16_SNORM_EXT: float
-            ) : EXT_texture_norm16 =
-            jsNative
+        [<Emit("({ R16_EXT: 33322, RG16_EXT: 33324, RGB16_EXT: 32852, RGBA16_EXT: 32859, R16_SNORM_EXT: 36760, RG16_SNORM_EXT: 36761, RGB16_SNORM_EXT: 36762, RGBA16_SNORM_EXT: 36763 })")>]
+        static member Create() : EXT_texture_norm16 = jsNative
+
+    module EXT_texture_norm16 =
+        /// <remarks>TypeScript type: <c>33322</c></remarks>
+        [<Literal>]
+        let R16_EXT = 33322.0
+
+        /// <remarks>TypeScript type: <c>33324</c></remarks>
+        [<Literal>]
+        let RG16_EXT = 33324.0
+
+        /// <remarks>TypeScript type: <c>32852</c></remarks>
+        [<Literal>]
+        let RGB16_EXT = 32852.0
+
+        /// <remarks>TypeScript type: <c>32859</c></remarks>
+        [<Literal>]
+        let RGBA16_EXT = 32859.0
+
+        /// <remarks>TypeScript type: <c>36760</c></remarks>
+        [<Literal>]
+        let R16_SNORM_EXT = 36760.0
+
+        /// <remarks>TypeScript type: <c>36761</c></remarks>
+        [<Literal>]
+        let RG16_SNORM_EXT = 36761.0
+
+        /// <remarks>TypeScript type: <c>36762</c></remarks>
+        [<Literal>]
+        let RGB16_SNORM_EXT = 36762.0
+
+        /// <remarks>TypeScript type: <c>36763</c></remarks>
+        [<Literal>]
+        let RGBA16_SNORM_EXT = 36763.0
 
     [<Interface>]
     type ElementEventMap =
@@ -45413,6 +45891,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type ErrorEvent =
         inherit Event
         /// <summary>
@@ -45445,6 +45924,35 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent/message">MDN Reference</a>
         /// </summary>
         abstract message: string
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                colno: float,
+                error: obj,
+                filename: string,
+                lineno: float,
+                message: string,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : ErrorEvent =
+            jsNative
 
     type ErrorEventConstructor =
         [<EmitConstructor>]
@@ -45561,12 +46069,16 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Event/stopPropagation">MDN Reference</a>
         /// </summary>
         abstract stopPropagation: unit -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NONE: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract CAPTURING_PHASE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract AT_TARGET: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract BUBBLING_PHASE: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -45584,24 +46096,58 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
             ) : Event =
             jsNative
 
+    module Event =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NONE = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let CAPTURING_PHASE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let AT_TARGET = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let BUBBLING_PHASE = 3.0
+
     type EventConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NONE: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract CAPTURING_PHASE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract AT_TARGET: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract BUBBLING_PHASE: float
 
         [<EmitConstructor>]
         abstract Create: ``type``: string * ?eventInitDict: EventInit -> Event
+
+    module EventConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NONE = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let CAPTURING_PHASE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let AT_TARGET = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let BUBBLING_PHASE = 3.0
 
     /// <summary>
     /// The <b><c>EventCounts</c></b> interface of the Performance API provides the number of events that have been dispatched for each event type.
@@ -45691,8 +46237,11 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource/close">MDN Reference</a>
         /// </summary>
         abstract close: unit -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract CONNECTING: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract OPEN: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract CLOSED: float
 
         /// <summary>
@@ -45750,13 +46299,42 @@ module Dom =
             ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
                 unit
 
+    module EventSource =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let CONNECTING = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let OPEN = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let CLOSED = 2.0
+
     type EventSourceConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract CONNECTING: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract OPEN: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract CLOSED: float
 
         [<EmitConstructor>]
         abstract Create: url: U2<string, URL> * ?eventSourceInitDict: EventSourceInit -> EventSource
+
+    module EventSourceConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let CONNECTING = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let OPEN = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let CLOSED = 2.0
 
     /// <summary>
     /// The <b><c>EventTarget</c></b> interface is implemented by objects that can receive events and may have listeners for them. In other words, any target of events implements the three methods associated with this interface.
@@ -45997,8 +46575,11 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileReader/readAsText">MDN Reference</a>
         /// </summary>
         abstract readAsText: blob: Blob * ?encoding: string -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract EMPTY: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LOADING: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DONE: float
 
         /// <summary>
@@ -46039,13 +46620,47 @@ module Dom =
             ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
                 unit
 
+    module FileReader =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let EMPTY = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LOADING = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DONE = 2.0
+
+        type ReadyState =
+            | N0 = 0
+            | N1 = 1
+            | N2 = 2
+
     type FileReaderConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract EMPTY: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LOADING: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DONE: float
 
         [<EmitConstructor>]
         abstract Create: unit -> FileReader
+
+    module FileReaderConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let EMPTY = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LOADING = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DONE = 2.0
 
     /// <summary>
     /// The File and Directory Entries API interface <b><c>FileSystem</c></b> is used to represent a file system. These objects can be obtained from the filesystem property on any file system entry. Some browsers offer additional APIs to create and manage file systems, such as Chrome's requestFileSystem() method.
@@ -46147,6 +46762,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemHandle/kind">MDN Reference</a>
         /// </summary>
+        /// <remarks>TypeScript type: <c>"directory"</c></remarks>
         abstract kind: string
 
         /// <summary>
@@ -46189,6 +46805,16 @@ module Dom =
         abstract SymbolAsyncIterator:
             unit ->
                 FileSystemDirectoryHandleAsyncIterator<(string * U2<FileSystemDirectoryHandle, FileSystemFileHandle>)>
+
+    module FileSystemDirectoryHandle =
+        /// <summary>
+        /// The <b><c>kind</c></b> read-only property of the FileSystemHandle interface returns the type of entry. This is 'file' if the associated entry is a file or 'directory'. It is used to distinguish files from directories when iterating over the contents of a directory.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemHandle/kind">MDN Reference</a>
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"directory"</c></remarks>
+        [<Literal>]
+        let kind = "directory"
 
     type FileSystemDirectoryHandleConstructor =
         [<EmitConstructor>]
@@ -46324,6 +46950,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemHandle/kind">MDN Reference</a>
         /// </summary>
+        /// <remarks>TypeScript type: <c>"file"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The <b><c>createWritable()</c></b> method of the FileSystemFileHandle interface creates a FileSystemWritableFileStream that can be used to write to a file. The method returns a Promise which resolves to this created stream.
@@ -46338,16 +46965,25 @@ module Dom =
         /// </summary>
         abstract getFile: unit -> JS.Promise<File>
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ kind: 'file', ...$0 })")>]
         static member Create
             (
-                kind: string,
                 createWritable: (FileSystemCreateWritableOptions option -> JS.Promise<FileSystemWritableFileStream>),
                 getFile: (unit -> JS.Promise<File>),
                 name: string,
                 isSameEntry: (FileSystemHandle -> JS.Promise<bool>)
             ) : FileSystemFileHandle =
             jsNative
+
+    module FileSystemFileHandle =
+        /// <summary>
+        /// The <b><c>kind</c></b> read-only property of the FileSystemHandle interface returns the type of entry. This is 'file' if the associated entry is a file or 'directory'. It is used to distinguish files from directories when iterating over the contents of a directory.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemHandle/kind">MDN Reference</a>
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"file"</c></remarks>
+        [<Literal>]
+        let kind = "file"
 
     type FileSystemFileHandleConstructor =
         [<EmitConstructor>]
@@ -46446,6 +47082,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FocusEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type FocusEvent =
         inherit UIEvent
         /// <summary>
@@ -46454,6 +47091,35 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/FocusEvent/relatedTarget">MDN Reference</a>
         /// </summary>
         abstract relatedTarget: EventTarget option
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                detail: float,
+                which: float,
+                initUIEvent: Action<string, bool option, bool option, Window option, float option>,
+                ?relatedTarget: EventTarget,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget,
+                ?view: Window
+            ) : FocusEvent =
+            jsNative
 
     type FocusEventConstructor =
         [<EmitConstructor>]
@@ -46728,7 +47394,7 @@ module Dom =
         /// </summary>
         abstract fontfaces: FontFace[]
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 fontfaces: FontFace[],
@@ -46747,10 +47413,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -46871,7 +47533,7 @@ module Dom =
         /// </summary>
         abstract formData: FormData
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 formData: FormData,
@@ -46890,10 +47552,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -47882,6 +48540,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/GPUPipelineError">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type GPUPipelineError =
         inherit DOMException
         /// <summary>
@@ -47890,6 +48549,13 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUPipelineError/reason">MDN Reference</a>
         /// </summary>
         abstract reason: GPUPipelineErrorReason
+
+        [<ParamObject;
+          Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+        static member Create
+            (reason: GPUPipelineErrorReason, code: float, message: string, name: string, ?stack: string, ?cause: obj)
+            : GPUPipelineError =
+            jsNative
 
     type GPUPipelineErrorConstructor =
         [<EmitConstructor>]
@@ -48561,7 +49227,7 @@ module Dom =
         /// </summary>
         abstract error: GPUError
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 error: GPUError,
@@ -48580,10 +49246,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -48752,7 +49414,7 @@ module Dom =
         /// </summary>
         abstract gamepad: Gamepad
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 gamepad: Gamepad,
@@ -48771,10 +49433,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -49011,23 +49669,52 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/GeolocationPositionError/message">MDN Reference</a>
         /// </summary>
         abstract message: string
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract PERMISSION_DENIED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract POSITION_UNAVAILABLE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract TIMEOUT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (code: float, message: string, PERMISSION_DENIED: float, POSITION_UNAVAILABLE: float, TIMEOUT: float)
-            : GeolocationPositionError =
-            jsNative
+        [<ParamObject; Emit("({ PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, ...$0 })")>]
+        static member Create(code: float, message: string) : GeolocationPositionError = jsNative
+
+    module GeolocationPositionError =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let PERMISSION_DENIED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let POSITION_UNAVAILABLE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let TIMEOUT = 3.0
 
     type GeolocationPositionErrorConstructor =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract PERMISSION_DENIED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract POSITION_UNAVAILABLE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract TIMEOUT: float
 
         [<EmitConstructor>]
         abstract Create: unit -> GeolocationPositionError
+
+    module GeolocationPositionErrorConstructor =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let PERMISSION_DENIED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let POSITION_UNAVAILABLE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let TIMEOUT = 3.0
 
     type GlobalEventHandlersEventMap =
         abstract abort: UIEvent with get, set
@@ -52309,14 +52996,23 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/setSinkId">MDN Reference</a>
         /// </summary>
         abstract setSinkId: sinkId: string -> JS.Promise<unit>
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NETWORK_EMPTY: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract NETWORK_IDLE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract NETWORK_LOADING: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract NETWORK_NO_SOURCE: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract HAVE_NOTHING: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract HAVE_METADATA: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract HAVE_CURRENT_DATA: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract HAVE_FUTURE_DATA: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract HAVE_ENOUGH_DATA: float
 
         /// <summary>
@@ -52389,19 +53085,102 @@ module Dom =
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
+    module HTMLMediaElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NETWORK_EMPTY = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let NETWORK_IDLE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let NETWORK_LOADING = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let NETWORK_NO_SOURCE = 3.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let HAVE_NOTHING = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let HAVE_METADATA = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let HAVE_CURRENT_DATA = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let HAVE_FUTURE_DATA = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let HAVE_ENOUGH_DATA = 4.0
+
     type HTMLMediaElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NETWORK_EMPTY: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract NETWORK_IDLE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract NETWORK_LOADING: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract NETWORK_NO_SOURCE: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract HAVE_NOTHING: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract HAVE_METADATA: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract HAVE_CURRENT_DATA: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract HAVE_FUTURE_DATA: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract HAVE_ENOUGH_DATA: float
 
         [<EmitConstructor>]
         abstract Create: unit -> HTMLMediaElement
+
+    module HTMLMediaElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NETWORK_EMPTY = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let NETWORK_IDLE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let NETWORK_LOADING = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let NETWORK_NO_SOURCE = 3.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let HAVE_NOTHING = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let HAVE_METADATA = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let HAVE_CURRENT_DATA = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let HAVE_FUTURE_DATA = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let HAVE_ENOUGH_DATA = 4.0
 
     /// <summary>
     /// The <b><c>HTMLMenuElement</c></b> interface provides additional properties (beyond those inherited from the HTMLElement interface) for manipulating a &lt;menu&gt; element. &lt;menu&gt; is a semantic alternative to the &lt;ul&gt; element.
@@ -54208,19 +54987,61 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/track">MDN Reference</a>
         /// </summary>
         abstract track: TextTrack
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NONE: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LOADING: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract LOADED: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract ERROR: float
 
+    module HTMLTrackElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NONE = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LOADING = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let LOADED = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let ERROR = 3.0
+
     type HTMLTrackElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NONE: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LOADING: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract LOADED: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract ERROR: float
 
         [<EmitConstructor>]
         abstract Create: unit -> HTMLTrackElement
+
+    module HTMLTrackElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NONE = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LOADING = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let LOADED = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let ERROR = 3.0
 
     /// <summary>
     /// The <b><c>HTMLUListElement</c></b> interface provides special properties (beyond those defined on the regular HTMLElement interface it also has available to it by inheritance) for manipulating unordered list (&lt;ul&gt;) elements.
@@ -54432,7 +55253,7 @@ module Dom =
         /// </summary>
         abstract oldURL: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 newURL: string,
@@ -54452,10 +55273,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -55897,7 +56714,7 @@ module Dom =
         /// </summary>
         abstract oldVersion: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 oldVersion: float,
@@ -55916,10 +56733,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?newVersion: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -56522,10 +57335,16 @@ module Dom =
     /// </summary>
     [<Interface>]
     type KHR_parallel_shader_compile =
+        /// <remarks>TypeScript type: <c>37297</c></remarks>
         abstract COMPLETION_STATUS_KHR: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(COMPLETION_STATUS_KHR: float) : KHR_parallel_shader_compile = jsNative
+        [<Emit("({ COMPLETION_STATUS_KHR: 37297 })")>]
+        static member Create() : KHR_parallel_shader_compile = jsNative
+
+    module KHR_parallel_shader_compile =
+        /// <remarks>TypeScript type: <c>37297</c></remarks>
+        [<Literal>]
+        let COMPLETION_STATUS_KHR = 37297.0
 
     /// <summary>
     /// <b><c>KeyboardEvent</c></b> objects describe a user interaction with the keyboard; each event describes a single interaction between the user and a key (or combination of a key with modifier keys) on the keyboard. The event type (keydown, keypress, or keyup) identifies what kind of keyboard activity occurred.
@@ -56622,19 +57441,61 @@ module Dom =
             ?metaKey: bool ->
                 unit
 
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract DOM_KEY_LOCATION_STANDARD: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract DOM_KEY_LOCATION_LEFT: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DOM_KEY_LOCATION_RIGHT: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract DOM_KEY_LOCATION_NUMPAD: float
 
+    module KeyboardEvent =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let DOM_KEY_LOCATION_STANDARD = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let DOM_KEY_LOCATION_LEFT = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DOM_KEY_LOCATION_RIGHT = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let DOM_KEY_LOCATION_NUMPAD = 3.0
+
     type KeyboardEventConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract DOM_KEY_LOCATION_STANDARD: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract DOM_KEY_LOCATION_LEFT: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DOM_KEY_LOCATION_RIGHT: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract DOM_KEY_LOCATION_NUMPAD: float
 
         [<EmitConstructor>]
         abstract Create: ``type``: string * ?eventInitDict: KeyboardEventInit -> KeyboardEvent
+
+    module KeyboardEventConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let DOM_KEY_LOCATION_STANDARD = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let DOM_KEY_LOCATION_LEFT = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DOM_KEY_LOCATION_RIGHT = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let DOM_KEY_LOCATION_NUMPAD = 3.0
 
     /// <summary>
     /// The <b><c>KeyframeEffect</c></b> interface of the Web Animations API lets us create sets of animatable properties and values, called keyframes. These can then be played using the Animation() constructor.
@@ -57051,7 +57912,7 @@ module Dom =
         /// </summary>
         abstract port: MIDIPort option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -57069,10 +57930,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?port: MIDIPort,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -57176,7 +58033,7 @@ module Dom =
         /// </summary>
         abstract data: Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer> option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -57194,10 +58051,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?data: Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -57599,7 +58452,7 @@ module Dom =
         /// </summary>
         abstract initDataType: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 initDataType: string,
@@ -57618,10 +58471,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?initData: Fable.Core.TS.Es.ArrayBuffer,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -57652,31 +58501,65 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaError/message">MDN Reference</a>
         /// </summary>
         abstract message: string
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract MEDIA_ERR_ABORTED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract MEDIA_ERR_NETWORK: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract MEDIA_ERR_DECODE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract MEDIA_ERR_SRC_NOT_SUPPORTED: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                code: float,
-                message: string,
-                MEDIA_ERR_ABORTED: float,
-                MEDIA_ERR_NETWORK: float,
-                MEDIA_ERR_DECODE: float,
-                MEDIA_ERR_SRC_NOT_SUPPORTED: float
-            ) : MediaError =
-            jsNative
+        [<ParamObject;
+          Emit("({ MEDIA_ERR_ABORTED: 1, MEDIA_ERR_NETWORK: 2, MEDIA_ERR_DECODE: 3, MEDIA_ERR_SRC_NOT_SUPPORTED: 4, ...$0 })")>]
+        static member Create(code: float, message: string) : MediaError = jsNative
+
+    module MediaError =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let MEDIA_ERR_ABORTED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let MEDIA_ERR_NETWORK = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let MEDIA_ERR_DECODE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let MEDIA_ERR_SRC_NOT_SUPPORTED = 4.0
 
     type MediaErrorConstructor =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract MEDIA_ERR_ABORTED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract MEDIA_ERR_NETWORK: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract MEDIA_ERR_DECODE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract MEDIA_ERR_SRC_NOT_SUPPORTED: float
 
         [<EmitConstructor>]
         abstract Create: unit -> MediaError
+
+    module MediaErrorConstructor =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let MEDIA_ERR_ABORTED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let MEDIA_ERR_NETWORK = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let MEDIA_ERR_DECODE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let MEDIA_ERR_SRC_NOT_SUPPORTED = 4.0
 
     /// <summary>
     /// The <b><c>MediaKeyMessageEvent</c></b> interface of the Encrypted Media Extensions API contains the content and related data when the content decryption module generates a message for the session.
@@ -57700,7 +58583,7 @@ module Dom =
         /// </summary>
         abstract messageType: MediaKeyMessageType
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 message: Fable.Core.TS.Es.ArrayBuffer,
@@ -57720,10 +58603,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -58161,7 +59040,7 @@ module Dom =
         /// </summary>
         abstract media: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 matches: bool,
@@ -58181,10 +59060,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -58888,7 +59763,7 @@ module Dom =
         /// </summary>
         abstract track: MediaStreamTrack
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 track: MediaStreamTrack,
@@ -58907,10 +59782,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -59810,7 +60681,7 @@ module Dom =
         /// </summary>
         abstract navigationType: NavigationType option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 from: NavigationHistoryEntry,
@@ -59829,10 +60700,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?navigationType: NavigationType,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -60695,122 +61562,382 @@ module Dom =
         /// <summary>
         /// node is an element.
         /// </summary>
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract ELEMENT_NODE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract ATTRIBUTE_NODE: float
         /// <summary>
         /// node is a Text node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract TEXT_NODE: float
         /// <summary>
         /// node is a CDATASection node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract CDATA_SECTION_NODE: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract ENTITY_REFERENCE_NODE: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract ENTITY_NODE: float
         /// <summary>
         /// node is a ProcessingInstruction node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract PROCESSING_INSTRUCTION_NODE: float
         /// <summary>
         /// node is a Comment node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract COMMENT_NODE: float
         /// <summary>
         /// node is a document.
         /// </summary>
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract DOCUMENT_NODE: float
         /// <summary>
         /// node is a doctype.
         /// </summary>
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract DOCUMENT_TYPE_NODE: float
         /// <summary>
         /// node is a DocumentFragment node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>11</c></remarks>
         abstract DOCUMENT_FRAGMENT_NODE: float
+        /// <remarks>TypeScript type: <c>12</c></remarks>
         abstract NOTATION_NODE: float
         /// <summary>
         /// Set when node and other are not in the same tree.
         /// </summary>
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract DOCUMENT_POSITION_DISCONNECTED: float
         /// <summary>
         /// Set when other is preceding node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DOCUMENT_POSITION_PRECEDING: float
         /// <summary>
         /// Set when other is following node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract DOCUMENT_POSITION_FOLLOWING: float
         /// <summary>
         /// Set when other is an ancestor of node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract DOCUMENT_POSITION_CONTAINS: float
         /// <summary>
         /// Set when other is a descendant of node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>16</c></remarks>
         abstract DOCUMENT_POSITION_CONTAINED_BY: float
+        /// <remarks>TypeScript type: <c>32</c></remarks>
         abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
+
+    module Node =
+        /// <summary>
+        /// node is an element.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let ELEMENT_NODE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let ATTRIBUTE_NODE = 2.0
+
+        /// <summary>
+        /// node is a Text node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let TEXT_NODE = 3.0
+
+        /// <summary>
+        /// node is a CDATASection node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let CDATA_SECTION_NODE = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let ENTITY_REFERENCE_NODE = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let ENTITY_NODE = 6.0
+
+        /// <summary>
+        /// node is a ProcessingInstruction node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let PROCESSING_INSTRUCTION_NODE = 7.0
+
+        /// <summary>
+        /// node is a Comment node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let COMMENT_NODE = 8.0
+
+        /// <summary>
+        /// node is a document.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let DOCUMENT_NODE = 9.0
+
+        /// <summary>
+        /// node is a doctype.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let DOCUMENT_TYPE_NODE = 10.0
+
+        /// <summary>
+        /// node is a DocumentFragment node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>11</c></remarks>
+        [<Literal>]
+        let DOCUMENT_FRAGMENT_NODE = 11.0
+
+        /// <remarks>TypeScript type: <c>12</c></remarks>
+        [<Literal>]
+        let NOTATION_NODE = 12.0
+
+        /// <summary>
+        /// Set when node and other are not in the same tree.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_DISCONNECTED = 1.0
+
+        /// <summary>
+        /// Set when other is preceding node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_PRECEDING = 2.0
+
+        /// <summary>
+        /// Set when other is following node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_FOLLOWING = 4.0
+
+        /// <summary>
+        /// Set when other is an ancestor of node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_CONTAINS = 8.0
+
+        /// <summary>
+        /// Set when other is a descendant of node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_CONTAINED_BY = 16.0
+
+        /// <remarks>TypeScript type: <c>32</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32.0
 
     type NodeConstructor =
         /// <summary>
         /// node is an element.
         /// </summary>
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract ELEMENT_NODE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract ATTRIBUTE_NODE: float
         /// <summary>
         /// node is a Text node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract TEXT_NODE: float
         /// <summary>
         /// node is a CDATASection node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract CDATA_SECTION_NODE: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract ENTITY_REFERENCE_NODE: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract ENTITY_NODE: float
         /// <summary>
         /// node is a ProcessingInstruction node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract PROCESSING_INSTRUCTION_NODE: float
         /// <summary>
         /// node is a Comment node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract COMMENT_NODE: float
         /// <summary>
         /// node is a document.
         /// </summary>
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract DOCUMENT_NODE: float
         /// <summary>
         /// node is a doctype.
         /// </summary>
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract DOCUMENT_TYPE_NODE: float
         /// <summary>
         /// node is a DocumentFragment node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>11</c></remarks>
         abstract DOCUMENT_FRAGMENT_NODE: float
+        /// <remarks>TypeScript type: <c>12</c></remarks>
         abstract NOTATION_NODE: float
         /// <summary>
         /// Set when node and other are not in the same tree.
         /// </summary>
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract DOCUMENT_POSITION_DISCONNECTED: float
         /// <summary>
         /// Set when other is preceding node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DOCUMENT_POSITION_PRECEDING: float
         /// <summary>
         /// Set when other is following node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract DOCUMENT_POSITION_FOLLOWING: float
         /// <summary>
         /// Set when other is an ancestor of node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract DOCUMENT_POSITION_CONTAINS: float
         /// <summary>
         /// Set when other is a descendant of node.
         /// </summary>
+        /// <remarks>TypeScript type: <c>16</c></remarks>
         abstract DOCUMENT_POSITION_CONTAINED_BY: float
+        /// <remarks>TypeScript type: <c>32</c></remarks>
         abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
 
         [<EmitConstructor>]
         abstract Create: unit -> Node
+
+    module NodeConstructor =
+        /// <summary>
+        /// node is an element.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let ELEMENT_NODE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let ATTRIBUTE_NODE = 2.0
+
+        /// <summary>
+        /// node is a Text node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let TEXT_NODE = 3.0
+
+        /// <summary>
+        /// node is a CDATASection node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let CDATA_SECTION_NODE = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let ENTITY_REFERENCE_NODE = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let ENTITY_NODE = 6.0
+
+        /// <summary>
+        /// node is a ProcessingInstruction node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let PROCESSING_INSTRUCTION_NODE = 7.0
+
+        /// <summary>
+        /// node is a Comment node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let COMMENT_NODE = 8.0
+
+        /// <summary>
+        /// node is a document.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let DOCUMENT_NODE = 9.0
+
+        /// <summary>
+        /// node is a doctype.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let DOCUMENT_TYPE_NODE = 10.0
+
+        /// <summary>
+        /// node is a DocumentFragment node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>11</c></remarks>
+        [<Literal>]
+        let DOCUMENT_FRAGMENT_NODE = 11.0
+
+        /// <remarks>TypeScript type: <c>12</c></remarks>
+        [<Literal>]
+        let NOTATION_NODE = 12.0
+
+        /// <summary>
+        /// Set when node and other are not in the same tree.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_DISCONNECTED = 1.0
+
+        /// <summary>
+        /// Set when other is preceding node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_PRECEDING = 2.0
+
+        /// <summary>
+        /// Set when other is following node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_FOLLOWING = 4.0
+
+        /// <summary>
+        /// Set when other is an ancestor of node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_CONTAINS = 8.0
+
+        /// <summary>
+        /// Set when other is a descendant of node.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_CONTAINED_BY = 16.0
+
+        /// <remarks>TypeScript type: <c>32</c></remarks>
+        [<Literal>]
+        let DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32.0
 
     /// <summary>
     /// The <b><c>NodeIterator</c></b> interface represents an iterator to traverse nodes of a DOM subtree in document order.
@@ -61218,10 +62345,16 @@ module Dom =
     /// </summary>
     [<Interface>]
     type OES_standard_derivatives =
+        /// <remarks>TypeScript type: <c>35723</c></remarks>
         abstract FRAGMENT_SHADER_DERIVATIVE_HINT_OES: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(FRAGMENT_SHADER_DERIVATIVE_HINT_OES: float) : OES_standard_derivatives = jsNative
+        [<Emit("({ FRAGMENT_SHADER_DERIVATIVE_HINT_OES: 35723 })")>]
+        static member Create() : OES_standard_derivatives = jsNative
+
+    module OES_standard_derivatives =
+        /// <remarks>TypeScript type: <c>35723</c></remarks>
+        [<Literal>]
+        let FRAGMENT_SHADER_DERIVATIVE_HINT_OES = 35723.0
 
     /// <summary>
     /// The <b><c>OES_texture_float</c></b> extension is part of the WebGL API and exposes floating-point pixel types for textures.
@@ -61244,10 +62377,16 @@ module Dom =
     /// </summary>
     [<Interface>]
     type OES_texture_half_float =
+        /// <remarks>TypeScript type: <c>36193</c></remarks>
         abstract HALF_FLOAT_OES: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(HALF_FLOAT_OES: float) : OES_texture_half_float = jsNative
+        [<Emit("({ HALF_FLOAT_OES: 36193 })")>]
+        static member Create() : OES_texture_half_float = jsNative
+
+    module OES_texture_half_float =
+        /// <remarks>TypeScript type: <c>36193</c></remarks>
+        [<Literal>]
+        let HALF_FLOAT_OES = 36193.0
 
     /// <summary>
     /// The <b><c>OES_texture_half_float_linear</c></b> extension is part of the WebGL API and allows linear filtering with half floating-point pixel types for textures.
@@ -61287,18 +62426,23 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/OES_vertex_array_object/isVertexArrayOES">MDN Reference</a>
         /// </summary>
         abstract isVertexArrayOES: ?arrayObject: WebGLVertexArrayObjectOES -> bool
+        /// <remarks>TypeScript type: <c>34229</c></remarks>
         abstract VERTEX_ARRAY_BINDING_OES: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ VERTEX_ARRAY_BINDING_OES: 34229, ...$0 })")>]
         static member Create
             (
                 bindVertexArrayOES: (WebGLVertexArrayObjectOES option -> unit),
                 createVertexArrayOES: (unit -> WebGLVertexArrayObjectOES),
                 deleteVertexArrayOES: (WebGLVertexArrayObjectOES option -> unit),
-                isVertexArrayOES: (WebGLVertexArrayObjectOES option -> bool),
-                VERTEX_ARRAY_BINDING_OES: float
+                isVertexArrayOES: (WebGLVertexArrayObjectOES option -> bool)
             ) : OES_vertex_array_object =
             jsNative
+
+    module OES_vertex_array_object =
+        /// <remarks>TypeScript type: <c>34229</c></remarks>
+        [<Literal>]
+        let VERTEX_ARRAY_BINDING_OES = 34229.0
 
     /// <summary>
     /// The <b><c>OVR_multiview2</c></b> extension is part of the WebGL API and adds support for rendering into multiple views simultaneously. This especially useful for virtual reality (VR) and WebXR.
@@ -61321,21 +62465,38 @@ module Dom =
             numViews: float ->
                 unit
 
+        /// <remarks>TypeScript type: <c>38448</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_NUM_VIEWS_OVR: float
+        /// <remarks>TypeScript type: <c>38450</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_BASE_VIEW_INDEX_OVR: float
+        /// <remarks>TypeScript type: <c>38449</c></remarks>
         abstract MAX_VIEWS_OVR: float
+        /// <remarks>TypeScript type: <c>38451</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_VIEW_TARGETS_OVR: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ FRAMEBUFFER_ATTACHMENT_TEXTURE_NUM_VIEWS_OVR: 38448, FRAMEBUFFER_ATTACHMENT_TEXTURE_BASE_VIEW_INDEX_OVR: 38450, MAX_VIEWS_OVR: 38449, FRAMEBUFFER_INCOMPLETE_VIEW_TARGETS_OVR: 38451, ...$0 })")>]
         static member Create
-            (
-                framebufferTextureMultiviewOVR: Action<float, float, WebGLTexture option, float, float, float>,
-                FRAMEBUFFER_ATTACHMENT_TEXTURE_NUM_VIEWS_OVR: float,
-                FRAMEBUFFER_ATTACHMENT_TEXTURE_BASE_VIEW_INDEX_OVR: float,
-                MAX_VIEWS_OVR: float,
-                FRAMEBUFFER_INCOMPLETE_VIEW_TARGETS_OVR: float
-            ) : OVR_multiview2 =
+            (framebufferTextureMultiviewOVR: Action<float, float, WebGLTexture option, float, float, float>)
+            : OVR_multiview2 =
             jsNative
+
+    module OVR_multiview2 =
+        /// <remarks>TypeScript type: <c>38448</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_NUM_VIEWS_OVR = 38448.0
+
+        /// <remarks>TypeScript type: <c>38450</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_BASE_VIEW_INDEX_OVR = 38450.0
+
+        /// <remarks>TypeScript type: <c>38449</c></remarks>
+        [<Literal>]
+        let MAX_VIEWS_OVR = 38449.0
+
+        /// <remarks>TypeScript type: <c>38451</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_VIEW_TARGETS_OVR = 38451.0
 
     /// <summary>
     /// The Web Audio API <b><c>OfflineAudioCompletionEvent</c></b> interface represents events that occur when the processing of an OfflineAudioContext is terminated. The complete event uses this interface.
@@ -61352,7 +62513,7 @@ module Dom =
         /// </summary>
         abstract renderedBuffer: AudioBuffer
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 renderedBuffer: AudioBuffer,
@@ -61371,10 +62532,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -61661,6 +62818,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/OverconstrainedError">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type OverconstrainedError =
         inherit DOMException
         /// <summary>
@@ -61669,6 +62827,13 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/OverconstrainedError/constraint">MDN Reference</a>
         /// </summary>
         abstract ``constraint``: string
+
+        [<ParamObject;
+          Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+        static member Create
+            (``constraint``: string, code: float, message: string, name: string, ?stack: string, ?cause: obj)
+            : OverconstrainedError =
+            jsNative
 
     type OverconstrainedErrorConstructor =
         [<EmitConstructor>]
@@ -61689,7 +62854,7 @@ module Dom =
         /// </summary>
         abstract viewTransition: ViewTransition option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -61707,10 +62872,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?viewTransition: ViewTransition,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -61743,7 +62904,7 @@ module Dom =
         /// </summary>
         abstract viewTransition: ViewTransition option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -61761,10 +62922,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?activation: NavigationActivation,
                 ?viewTransition: ViewTransition,
                 ?currentTarget: EventTarget,
@@ -61792,7 +62949,7 @@ module Dom =
         /// </summary>
         abstract persisted: bool
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 persisted: bool,
@@ -61811,10 +62968,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -62207,6 +63360,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentMethodChangeEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type PaymentMethodChangeEvent =
         inherit PaymentRequestUpdateEvent
         /// <summary>
@@ -62221,6 +63375,33 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentMethodChangeEvent/methodName">MDN Reference</a>
         /// </summary>
         abstract methodName: string
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                methodDetails: obj,
+                methodName: string,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                updateWith: (U2<PaymentDetailsUpdate, JS.Promise<PaymentDetailsUpdate>> -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : PaymentMethodChangeEvent =
+            jsNative
 
     type PaymentMethodChangeEventConstructor =
         [<EmitConstructor>]
@@ -62362,7 +63543,7 @@ module Dom =
         /// </summary>
         abstract updateWith: detailsPromise: U2<PaymentDetailsUpdate, JS.Promise<PaymentDetailsUpdate>> -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 updateWith: (U2<PaymentDetailsUpdate, JS.Promise<PaymentDetailsUpdate>> -> unit),
@@ -62381,10 +63562,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -62864,32 +64041,65 @@ module Dom =
         /// </summary>
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/PerformanceNavigation/toJSON">MDN Reference</a></remarks>
         abstract toJSON: unit -> obj
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract TYPE_NAVIGATE: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract TYPE_RELOAD: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract TYPE_BACK_FORWARD: float
+        /// <remarks>TypeScript type: <c>255</c></remarks>
         abstract TYPE_RESERVED: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                redirectCount: float,
-                ``type``: float,
-                toJSON: (unit -> obj),
-                TYPE_NAVIGATE: float,
-                TYPE_RELOAD: float,
-                TYPE_BACK_FORWARD: float,
-                TYPE_RESERVED: float
-            ) : PerformanceNavigation =
+        [<ParamObject; Emit("({ TYPE_NAVIGATE: 0, TYPE_RELOAD: 1, TYPE_BACK_FORWARD: 2, TYPE_RESERVED: 255, ...$0 })")>]
+        static member Create(redirectCount: float, ``type``: float, toJSON: (unit -> obj)) : PerformanceNavigation =
             jsNative
 
+    module PerformanceNavigation =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let TYPE_NAVIGATE = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let TYPE_RELOAD = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let TYPE_BACK_FORWARD = 2.0
+
+        /// <remarks>TypeScript type: <c>255</c></remarks>
+        [<Literal>]
+        let TYPE_RESERVED = 255.0
+
     type PerformanceNavigationConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract TYPE_NAVIGATE: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract TYPE_RELOAD: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract TYPE_BACK_FORWARD: float
+        /// <remarks>TypeScript type: <c>255</c></remarks>
         abstract TYPE_RESERVED: float
 
         [<EmitConstructor>]
         abstract Create: unit -> PerformanceNavigation
+
+    module PerformanceNavigationConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let TYPE_NAVIGATE = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let TYPE_RELOAD = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let TYPE_BACK_FORWARD = 2.0
+
+        /// <remarks>TypeScript type: <c>255</c></remarks>
+        [<Literal>]
+        let TYPE_RESERVED = 255.0
 
     /// <summary>
     /// The <b><c>PerformanceNavigationTiming</c></b> interface provides methods and properties to store and retrieve metrics regarding the browser's document navigation events. For example, this interface can be used to determine how much time it takes to load or unload a document.
@@ -63547,7 +64757,7 @@ module Dom =
         /// </summary>
         abstract pictureInPictureWindow: PictureInPictureWindow
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 pictureInPictureWindow: PictureInPictureWindow,
@@ -63566,10 +64776,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -63840,7 +65046,7 @@ module Dom =
         /// </summary>
         abstract state: obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 hasUAVisualTransition: bool,
@@ -63860,10 +65066,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -63913,6 +65115,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ProgressEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type ProgressEvent<'T when 'T :> EventTarget> =
         inherit Event
         /// <summary>
@@ -63940,6 +65143,33 @@ module Dom =
         /// </summary>
         abstract total: float
 
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                lengthComputable: bool,
+                loaded: float,
+                total: float,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?target: 'T,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget
+            ) : ProgressEvent<'T> =
+            jsNative
+
     type ProgressEventConstructor =
         [<EmitConstructor>]
         abstract Create: ``type``: string * ?eventInitDict: ProgressEventInit -> ProgressEvent<EventTarget>
@@ -63965,7 +65195,7 @@ module Dom =
         /// </summary>
         abstract reason: obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 promise: JS.Promise<obj>,
@@ -63985,10 +65215,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -64383,7 +65609,7 @@ module Dom =
         /// </summary>
         abstract tone: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 tone: string,
@@ -64402,10 +65628,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -64626,7 +65848,7 @@ module Dom =
         /// </summary>
         abstract channel: RTCDataChannel
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 channel: RTCDataChannel,
@@ -64645,10 +65867,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -64825,6 +66043,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/RTCError">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type RTCError =
         inherit DOMException
         /// <summary>
@@ -64858,6 +66077,23 @@ module Dom =
         /// </summary>
         abstract sentAlert: float option
 
+        [<ParamObject;
+          Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+        static member Create
+            (
+                errorDetail: RTCErrorDetailType,
+                code: float,
+                message: string,
+                name: string,
+                ?receivedAlert: float,
+                ?sctpCauseCode: float,
+                ?sdpLineNumber: float,
+                ?sentAlert: float,
+                ?stack: string,
+                ?cause: obj
+            ) : RTCError =
+            jsNative
+
     type RTCErrorConstructor =
         [<EmitConstructor>]
         abstract Create: init: RTCErrorInit * ?message: string -> RTCError
@@ -64877,7 +66113,7 @@ module Dom =
         /// </summary>
         abstract error: RTCError
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 error: RTCError,
@@ -64896,10 +66132,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -65517,6 +66749,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnectionIceErrorEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type RTCPeerConnectionIceErrorEvent =
         inherit Event
         /// <summary>
@@ -65529,6 +66762,35 @@ module Dom =
         abstract errorText: string
         abstract port: float option
         abstract url: string
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                errorCode: float,
+                errorText: string,
+                url: string,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?address: string,
+                ?port: float,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : RTCPeerConnectionIceErrorEvent =
+            jsNative
 
     type RTCPeerConnectionIceErrorEventConstructor =
         [<EmitConstructor>]
@@ -65550,7 +66812,7 @@ module Dom =
         /// </summary>
         abstract candidate: RTCIceCandidate option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -65568,10 +66830,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?candidate: RTCIceCandidate,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -65971,6 +67229,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/RTCTrackEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type RTCTrackEvent =
         inherit Event
         /// <summary>
@@ -65997,6 +67256,34 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCTrackEvent/transceiver">MDN Reference</a>
         /// </summary>
         abstract transceiver: RTCRtpTransceiver
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                receiver: RTCRtpReceiver,
+                streams: MediaStream[],
+                track: MediaStreamTrack,
+                transceiver: RTCRtpTransceiver,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : RTCTrackEvent =
+            jsNative
 
     type RTCTrackEventConstructor =
         [<EmitConstructor>]
@@ -66195,19 +67482,61 @@ module Dom =
         /// Returns a string representation of an object.
         /// </summary>
         abstract toString: unit -> string
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract START_TO_START: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract START_TO_END: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract END_TO_END: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract END_TO_START: float
 
+    module Range =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let START_TO_START = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let START_TO_END = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let END_TO_END = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let END_TO_START = 3.0
+
     type RangeConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract START_TO_START: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract START_TO_END: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract END_TO_END: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract END_TO_START: float
 
         [<EmitConstructor>]
         abstract Create: unit -> Range
+
+    module RangeConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let START_TO_START = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let START_TO_END = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let END_TO_END = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let END_TO_START = 3.0
 
     /// <summary>
     /// The <b><c>ReadableByteStreamController</c></b> interface of the Streams API represents a controller for a readable byte stream. It allows control of the state and internal queue of a ReadableStream with an underlying byte source, and enables efficient zero-copy transfer of data from the underlying source to a consumer when the stream's internal queue is empty.
@@ -67093,13 +68422,19 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAngle/newValueSpecifiedUnits">MDN Reference</a>
         /// </summary>
         abstract newValueSpecifiedUnits: unitType: float * valueInSpecifiedUnits: float -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_ANGLETYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_ANGLETYPE_UNSPECIFIED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_ANGLETYPE_DEG: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_ANGLETYPE_RAD: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_ANGLETYPE_GRAD: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ SVG_ANGLETYPE_UNKNOWN: 0, SVG_ANGLETYPE_UNSPECIFIED: 1, SVG_ANGLETYPE_DEG: 2, SVG_ANGLETYPE_RAD: 3, SVG_ANGLETYPE_GRAD: 4, ...$0 })")>]
         static member Create
             (
                 unitType: float,
@@ -67107,24 +68442,66 @@ module Dom =
                 valueAsString: string,
                 valueInSpecifiedUnits: float,
                 convertToSpecifiedUnits: (float -> unit),
-                newValueSpecifiedUnits: Action<float, float>,
-                SVG_ANGLETYPE_UNKNOWN: float,
-                SVG_ANGLETYPE_UNSPECIFIED: float,
-                SVG_ANGLETYPE_DEG: float,
-                SVG_ANGLETYPE_RAD: float,
-                SVG_ANGLETYPE_GRAD: float
+                newValueSpecifiedUnits: Action<float, float>
             ) : SVGAngle =
             jsNative
 
+    module SVGAngle =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_UNSPECIFIED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_DEG = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_RAD = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_GRAD = 4.0
+
     type SVGAngleConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_ANGLETYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_ANGLETYPE_UNSPECIFIED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_ANGLETYPE_DEG: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_ANGLETYPE_RAD: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_ANGLETYPE_GRAD: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGAngle
+
+    module SVGAngleConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_UNSPECIFIED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_DEG = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_RAD = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_ANGLETYPE_GRAD = 4.0
 
     /// <summary>
     /// The <b><c>SVGAnimateElement</c></b> interface corresponds to the &lt;animate&gt; element.
@@ -67667,23 +69044,85 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGComponentTransferFunctionElement/type">MDN Reference</a>
         /// </summary>
         abstract ``type``: SVGAnimatedEnumeration
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_IDENTITY: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_TABLE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_DISCRETE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_LINEAR: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_GAMMA: float
 
+    module SVGComponentTransferFunctionElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_IDENTITY = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_TABLE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_DISCRETE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_LINEAR = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_GAMMA = 5.0
+
     type SVGComponentTransferFunctionElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_IDENTITY: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_TABLE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_DISCRETE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_LINEAR: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_FECOMPONENTTRANSFER_TYPE_GAMMA: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGComponentTransferFunctionElement
+
+    module SVGComponentTransferFunctionElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_IDENTITY = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_TABLE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_DISCRETE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_LINEAR = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPONENTTRANSFER_TYPE_GAMMA = 5.0
 
     /// <summary>
     /// The <b><c>SVGDefsElement</c></b> interface corresponds to the &lt;defs&gt; element.
@@ -67804,45 +69243,217 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEBlendElement/mode">MDN Reference</a>
         /// </summary>
         abstract mode: SVGAnimatedEnumeration
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_FEBLEND_MODE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_FEBLEND_MODE_NORMAL: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_FEBLEND_MODE_MULTIPLY: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_FEBLEND_MODE_SCREEN: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_FEBLEND_MODE_DARKEN: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_FEBLEND_MODE_LIGHTEN: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_FEBLEND_MODE_OVERLAY: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract SVG_FEBLEND_MODE_COLOR_DODGE: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract SVG_FEBLEND_MODE_COLOR_BURN: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract SVG_FEBLEND_MODE_HARD_LIGHT: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract SVG_FEBLEND_MODE_SOFT_LIGHT: float
+        /// <remarks>TypeScript type: <c>11</c></remarks>
         abstract SVG_FEBLEND_MODE_DIFFERENCE: float
+        /// <remarks>TypeScript type: <c>12</c></remarks>
         abstract SVG_FEBLEND_MODE_EXCLUSION: float
+        /// <remarks>TypeScript type: <c>13</c></remarks>
         abstract SVG_FEBLEND_MODE_HUE: float
+        /// <remarks>TypeScript type: <c>14</c></remarks>
         abstract SVG_FEBLEND_MODE_SATURATION: float
+        /// <remarks>TypeScript type: <c>15</c></remarks>
         abstract SVG_FEBLEND_MODE_COLOR: float
+        /// <remarks>TypeScript type: <c>16</c></remarks>
         abstract SVG_FEBLEND_MODE_LUMINOSITY: float
 
+    module SVGFEBlendElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_NORMAL = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_MULTIPLY = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_SCREEN = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_DARKEN = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_LIGHTEN = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_OVERLAY = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_COLOR_DODGE = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_COLOR_BURN = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_HARD_LIGHT = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_SOFT_LIGHT = 10.0
+
+        /// <remarks>TypeScript type: <c>11</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_DIFFERENCE = 11.0
+
+        /// <remarks>TypeScript type: <c>12</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_EXCLUSION = 12.0
+
+        /// <remarks>TypeScript type: <c>13</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_HUE = 13.0
+
+        /// <remarks>TypeScript type: <c>14</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_SATURATION = 14.0
+
+        /// <remarks>TypeScript type: <c>15</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_COLOR = 15.0
+
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_LUMINOSITY = 16.0
+
     type SVGFEBlendElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_FEBLEND_MODE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_FEBLEND_MODE_NORMAL: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_FEBLEND_MODE_MULTIPLY: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_FEBLEND_MODE_SCREEN: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_FEBLEND_MODE_DARKEN: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_FEBLEND_MODE_LIGHTEN: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_FEBLEND_MODE_OVERLAY: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract SVG_FEBLEND_MODE_COLOR_DODGE: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract SVG_FEBLEND_MODE_COLOR_BURN: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract SVG_FEBLEND_MODE_HARD_LIGHT: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract SVG_FEBLEND_MODE_SOFT_LIGHT: float
+        /// <remarks>TypeScript type: <c>11</c></remarks>
         abstract SVG_FEBLEND_MODE_DIFFERENCE: float
+        /// <remarks>TypeScript type: <c>12</c></remarks>
         abstract SVG_FEBLEND_MODE_EXCLUSION: float
+        /// <remarks>TypeScript type: <c>13</c></remarks>
         abstract SVG_FEBLEND_MODE_HUE: float
+        /// <remarks>TypeScript type: <c>14</c></remarks>
         abstract SVG_FEBLEND_MODE_SATURATION: float
+        /// <remarks>TypeScript type: <c>15</c></remarks>
         abstract SVG_FEBLEND_MODE_COLOR: float
+        /// <remarks>TypeScript type: <c>16</c></remarks>
         abstract SVG_FEBLEND_MODE_LUMINOSITY: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGFEBlendElement
+
+    module SVGFEBlendElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_NORMAL = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_MULTIPLY = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_SCREEN = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_DARKEN = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_LIGHTEN = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_OVERLAY = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_COLOR_DODGE = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_COLOR_BURN = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_HARD_LIGHT = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_SOFT_LIGHT = 10.0
+
+        /// <remarks>TypeScript type: <c>11</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_DIFFERENCE = 11.0
+
+        /// <remarks>TypeScript type: <c>12</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_EXCLUSION = 12.0
+
+        /// <remarks>TypeScript type: <c>13</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_HUE = 13.0
+
+        /// <remarks>TypeScript type: <c>14</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_SATURATION = 14.0
+
+        /// <remarks>TypeScript type: <c>15</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_COLOR = 15.0
+
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        [<Literal>]
+        let SVG_FEBLEND_MODE_LUMINOSITY = 16.0
 
     /// <summary>
     /// The <b><c>SVGFEColorMatrixElement</c></b> interface corresponds to the &lt;feColorMatrix&gt; element.
@@ -67870,21 +69481,73 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEColorMatrixElement/values">MDN Reference</a>
         /// </summary>
         abstract values: SVGAnimatedNumberList
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_MATRIX: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_SATURATE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_HUEROTATE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_LUMINANCETOALPHA: float
 
+    module SVGFEColorMatrixElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_MATRIX = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_SATURATE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_HUEROTATE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_LUMINANCETOALPHA = 4.0
+
     type SVGFEColorMatrixElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_MATRIX: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_SATURATE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_HUEROTATE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_FECOLORMATRIX_TYPE_LUMINANCETOALPHA: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGFEColorMatrixElement
+
+    module SVGFEColorMatrixElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_MATRIX = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_SATURATE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_HUEROTATE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_FECOLORMATRIX_TYPE_LUMINANCETOALPHA = 4.0
 
     /// <summary>
     /// The <b><c>SVGFEComponentTransferElement</c></b> interface corresponds to the &lt;feComponentTransfer&gt; element.
@@ -67955,25 +69618,97 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFECompositeElement/operator">MDN Reference</a>
         /// </summary>
         abstract operator: SVGAnimatedEnumeration
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_OVER: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_IN: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_OUT: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_ATOP: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_XOR: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_ARITHMETIC: float
 
+    module SVGFECompositeElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_OVER = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_IN = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_OUT = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_ATOP = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_XOR = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_ARITHMETIC = 6.0
+
     type SVGFECompositeElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_OVER: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_IN: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_OUT: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_ATOP: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_XOR: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_FECOMPOSITE_OPERATOR_ARITHMETIC: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGFECompositeElement
+
+    module SVGFECompositeElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_OVER = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_IN = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_OUT = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_ATOP = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_XOR = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_FECOMPOSITE_OPERATOR_ARITHMETIC = 6.0
 
     /// <summary>
     /// The <b><c>SVGFEConvolveMatrixElement</c></b> interface corresponds to the &lt;feConvolveMatrix&gt; element.
@@ -68055,19 +69790,61 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEConvolveMatrixElement/targetY">MDN Reference</a>
         /// </summary>
         abstract targetY: SVGAnimatedInteger
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_EDGEMODE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_EDGEMODE_DUPLICATE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_EDGEMODE_WRAP: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_EDGEMODE_NONE: float
 
+    module SVGFEConvolveMatrixElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_EDGEMODE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_EDGEMODE_DUPLICATE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_EDGEMODE_WRAP = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_EDGEMODE_NONE = 3.0
+
     type SVGFEConvolveMatrixElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_EDGEMODE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_EDGEMODE_DUPLICATE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_EDGEMODE_WRAP: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_EDGEMODE_NONE: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGFEConvolveMatrixElement
+
+    module SVGFEConvolveMatrixElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_EDGEMODE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_EDGEMODE_DUPLICATE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_EDGEMODE_WRAP = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_EDGEMODE_NONE = 3.0
 
     /// <summary>
     /// The <b><c>SVGFEDiffuseLightingElement</c></b> interface corresponds to the &lt;feDiffuseLighting&gt; element.
@@ -68150,21 +69927,73 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEDisplacementMapElement/yChannelSelector">MDN Reference</a>
         /// </summary>
         abstract yChannelSelector: SVGAnimatedEnumeration
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_CHANNEL_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_CHANNEL_R: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_CHANNEL_G: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_CHANNEL_B: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_CHANNEL_A: float
 
+    module SVGFEDisplacementMapElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_R = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_G = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_B = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_A = 4.0
+
     type SVGFEDisplacementMapElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_CHANNEL_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_CHANNEL_R: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_CHANNEL_G: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_CHANNEL_B: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_CHANNEL_A: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGFEDisplacementMapElement
+
+    module SVGFEDisplacementMapElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_R = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_G = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_B = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_CHANNEL_A = 4.0
 
     /// <summary>
     /// The <b><c>SVGFEDistantLightElement</c></b> interface corresponds to the &lt;feDistantLight&gt; element.
@@ -68420,17 +70249,49 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEMorphologyElement/radiusY">MDN Reference</a>
         /// </summary>
         abstract radiusY: SVGAnimatedNumber
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_MORPHOLOGY_OPERATOR_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_MORPHOLOGY_OPERATOR_ERODE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_MORPHOLOGY_OPERATOR_DILATE: float
 
+    module SVGFEMorphologyElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_MORPHOLOGY_OPERATOR_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_MORPHOLOGY_OPERATOR_ERODE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_MORPHOLOGY_OPERATOR_DILATE = 2.0
+
     type SVGFEMorphologyElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_MORPHOLOGY_OPERATOR_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_MORPHOLOGY_OPERATOR_ERODE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_MORPHOLOGY_OPERATOR_DILATE: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGFEMorphologyElement
+
+    module SVGFEMorphologyElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_MORPHOLOGY_OPERATOR_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_MORPHOLOGY_OPERATOR_ERODE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_MORPHOLOGY_OPERATOR_DILATE = 2.0
 
     /// <summary>
     /// The <b><c>SVGFEOffsetElement</c></b> interface corresponds to the &lt;feOffset&gt; element.
@@ -68665,23 +70526,85 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFETurbulenceElement/type">MDN Reference</a>
         /// </summary>
         abstract ``type``: SVGAnimatedEnumeration
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_TURBULENCE_TYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_TURBULENCE_TYPE_FRACTALNOISE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_TURBULENCE_TYPE_TURBULENCE: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_STITCHTYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_STITCHTYPE_STITCH: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_STITCHTYPE_NOSTITCH: float
 
+    module SVGFETurbulenceElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_TURBULENCE_TYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_TURBULENCE_TYPE_FRACTALNOISE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_TURBULENCE_TYPE_TURBULENCE = 2.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_STITCHTYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_STITCHTYPE_STITCH = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_STITCHTYPE_NOSTITCH = 2.0
+
     type SVGFETurbulenceElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_TURBULENCE_TYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_TURBULENCE_TYPE_FRACTALNOISE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_TURBULENCE_TYPE_TURBULENCE: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_STITCHTYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_STITCHTYPE_STITCH: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_STITCHTYPE_NOSTITCH: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGFETurbulenceElement
+
+    module SVGFETurbulenceElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_TURBULENCE_TYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_TURBULENCE_TYPE_FRACTALNOISE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_TURBULENCE_TYPE_TURBULENCE = 2.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_STITCHTYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_STITCHTYPE_STITCH = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_STITCHTYPE_NOSTITCH = 2.0
 
     /// <summary>
     /// The <b><c>SVGFilterElement</c></b> interface provides access to the properties of &lt;filter&gt; elements, as well as methods to manipulate them.
@@ -68899,19 +70822,61 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGradientElement/spreadMethod">MDN Reference</a>
         /// </summary>
         abstract spreadMethod: SVGAnimatedEnumeration
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_SPREADMETHOD_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_SPREADMETHOD_PAD: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_SPREADMETHOD_REFLECT: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_SPREADMETHOD_REPEAT: float
 
+    module SVGGradientElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_SPREADMETHOD_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_SPREADMETHOD_PAD = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_SPREADMETHOD_REFLECT = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_SPREADMETHOD_REPEAT = 3.0
+
     type SVGGradientElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_SPREADMETHOD_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_SPREADMETHOD_PAD: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_SPREADMETHOD_REFLECT: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_SPREADMETHOD_REPEAT: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGGradientElement
+
+    module SVGGradientElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_SPREADMETHOD_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_SPREADMETHOD_PAD = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_SPREADMETHOD_REFLECT = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_SPREADMETHOD_REPEAT = 3.0
 
     /// <summary>
     /// The <b><c>SVGGraphicsElement</c></b> interface represents SVG elements whose primary purpose is to directly render graphics into a group.
@@ -69042,19 +71007,31 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGLength/newValueSpecifiedUnits">MDN Reference</a>
         /// </summary>
         abstract newValueSpecifiedUnits: unitType: float * valueInSpecifiedUnits: float -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_LENGTHTYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_LENGTHTYPE_NUMBER: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_LENGTHTYPE_PERCENTAGE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_LENGTHTYPE_EMS: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_LENGTHTYPE_EXS: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_LENGTHTYPE_PX: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_LENGTHTYPE_CM: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract SVG_LENGTHTYPE_MM: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract SVG_LENGTHTYPE_IN: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract SVG_LENGTHTYPE_PT: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract SVG_LENGTHTYPE_PC: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ SVG_LENGTHTYPE_UNKNOWN: 0, SVG_LENGTHTYPE_NUMBER: 1, SVG_LENGTHTYPE_PERCENTAGE: 2, SVG_LENGTHTYPE_EMS: 3, SVG_LENGTHTYPE_EXS: 4, SVG_LENGTHTYPE_PX: 5, SVG_LENGTHTYPE_CM: 6, SVG_LENGTHTYPE_MM: 7, SVG_LENGTHTYPE_IN: 8, SVG_LENGTHTYPE_PT: 9, SVG_LENGTHTYPE_PC: 10, ...$0 })")>]
         static member Create
             (
                 unitType: float,
@@ -69062,36 +71039,126 @@ module Dom =
                 valueAsString: string,
                 valueInSpecifiedUnits: float,
                 convertToSpecifiedUnits: (float -> unit),
-                newValueSpecifiedUnits: Action<float, float>,
-                SVG_LENGTHTYPE_UNKNOWN: float,
-                SVG_LENGTHTYPE_NUMBER: float,
-                SVG_LENGTHTYPE_PERCENTAGE: float,
-                SVG_LENGTHTYPE_EMS: float,
-                SVG_LENGTHTYPE_EXS: float,
-                SVG_LENGTHTYPE_PX: float,
-                SVG_LENGTHTYPE_CM: float,
-                SVG_LENGTHTYPE_MM: float,
-                SVG_LENGTHTYPE_IN: float,
-                SVG_LENGTHTYPE_PT: float,
-                SVG_LENGTHTYPE_PC: float
+                newValueSpecifiedUnits: Action<float, float>
             ) : SVGLength =
             jsNative
 
+    module SVGLength =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_NUMBER = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_PERCENTAGE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_EMS = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_EXS = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_PX = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_CM = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_MM = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_IN = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_PT = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_PC = 10.0
+
     type SVGLengthConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_LENGTHTYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_LENGTHTYPE_NUMBER: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_LENGTHTYPE_PERCENTAGE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_LENGTHTYPE_EMS: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_LENGTHTYPE_EXS: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_LENGTHTYPE_PX: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_LENGTHTYPE_CM: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract SVG_LENGTHTYPE_MM: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract SVG_LENGTHTYPE_IN: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract SVG_LENGTHTYPE_PT: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract SVG_LENGTHTYPE_PC: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGLength
+
+    module SVGLengthConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_NUMBER = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_PERCENTAGE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_EMS = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_EXS = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_PX = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_CM = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_MM = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_IN = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_PT = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let SVG_LENGTHTYPE_PC = 10.0
 
     /// <summary>
     /// The <b><c>SVGLengthList</c></b> interface defines a list of SVGLength objects. It is used for the baseVal and animVal properties of SVGAnimatedLengthList.
@@ -69309,25 +71376,97 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGMarkerElement/setOrientToAuto">MDN Reference</a>
         /// </summary>
         abstract setOrientToAuto: unit -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_MARKERUNITS_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_MARKERUNITS_USERSPACEONUSE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_MARKERUNITS_STROKEWIDTH: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_MARKER_ORIENT_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_MARKER_ORIENT_AUTO: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_MARKER_ORIENT_ANGLE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_MARKER_ORIENT_AUTO_START_REVERSE: float
 
+    module SVGMarkerElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_MARKERUNITS_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_MARKERUNITS_USERSPACEONUSE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_MARKERUNITS_STROKEWIDTH = 2.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_MARKER_ORIENT_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_MARKER_ORIENT_AUTO = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_MARKER_ORIENT_ANGLE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_MARKER_ORIENT_AUTO_START_REVERSE = 3.0
+
     type SVGMarkerElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_MARKERUNITS_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_MARKERUNITS_USERSPACEONUSE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_MARKERUNITS_STROKEWIDTH: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_MARKER_ORIENT_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_MARKER_ORIENT_AUTO: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_MARKER_ORIENT_ANGLE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_MARKER_ORIENT_AUTO_START_REVERSE: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGMarkerElement
+
+    module SVGMarkerElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_MARKERUNITS_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_MARKERUNITS_USERSPACEONUSE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_MARKERUNITS_STROKEWIDTH = 2.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_MARKER_ORIENT_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_MARKER_ORIENT_AUTO = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_MARKER_ORIENT_ANGLE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_MARKER_ORIENT_AUTO_START_REVERSE = 3.0
 
     /// <summary>
     /// The <b><c>SVGMaskElement</c></b> interface provides access to the properties of &lt;mask&gt; elements, as well as methods to manipulate them.
@@ -69661,61 +71800,185 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPreserveAspectRatio/meetOrSlice">MDN Reference</a>
         /// </summary>
         abstract meetOrSlice: float with get, set
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_NONE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMINYMIN: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMIDYMIN: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMAXYMIN: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMINYMID: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMIDYMID: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMAXYMID: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMINYMAX: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMIDYMAX: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMAXYMAX: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_MEETORSLICE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_MEETORSLICE_MEET: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_MEETORSLICE_SLICE: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                align: float,
-                meetOrSlice: float,
-                SVG_PRESERVEASPECTRATIO_UNKNOWN: float,
-                SVG_PRESERVEASPECTRATIO_NONE: float,
-                SVG_PRESERVEASPECTRATIO_XMINYMIN: float,
-                SVG_PRESERVEASPECTRATIO_XMIDYMIN: float,
-                SVG_PRESERVEASPECTRATIO_XMAXYMIN: float,
-                SVG_PRESERVEASPECTRATIO_XMINYMID: float,
-                SVG_PRESERVEASPECTRATIO_XMIDYMID: float,
-                SVG_PRESERVEASPECTRATIO_XMAXYMID: float,
-                SVG_PRESERVEASPECTRATIO_XMINYMAX: float,
-                SVG_PRESERVEASPECTRATIO_XMIDYMAX: float,
-                SVG_PRESERVEASPECTRATIO_XMAXYMAX: float,
-                SVG_MEETORSLICE_UNKNOWN: float,
-                SVG_MEETORSLICE_MEET: float,
-                SVG_MEETORSLICE_SLICE: float
-            ) : SVGPreserveAspectRatio =
-            jsNative
+        [<ParamObject;
+          Emit("({ SVG_PRESERVEASPECTRATIO_UNKNOWN: 0, SVG_PRESERVEASPECTRATIO_NONE: 1, SVG_PRESERVEASPECTRATIO_XMINYMIN: 2, SVG_PRESERVEASPECTRATIO_XMIDYMIN: 3, SVG_PRESERVEASPECTRATIO_XMAXYMIN: 4, SVG_PRESERVEASPECTRATIO_XMINYMID: 5, SVG_PRESERVEASPECTRATIO_XMIDYMID: 6, SVG_PRESERVEASPECTRATIO_XMAXYMID: 7, SVG_PRESERVEASPECTRATIO_XMINYMAX: 8, SVG_PRESERVEASPECTRATIO_XMIDYMAX: 9, SVG_PRESERVEASPECTRATIO_XMAXYMAX: 10, SVG_MEETORSLICE_UNKNOWN: 0, SVG_MEETORSLICE_MEET: 1, SVG_MEETORSLICE_SLICE: 2, ...$0 })")>]
+        static member Create(align: float, meetOrSlice: float) : SVGPreserveAspectRatio = jsNative
+
+    module SVGPreserveAspectRatio =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_NONE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMINYMIN = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMIDYMIN = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMAXYMIN = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMINYMID = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMIDYMID = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMAXYMID = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMINYMAX = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMIDYMAX = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMAXYMAX = 10.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_MEETORSLICE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_MEETORSLICE_MEET = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_MEETORSLICE_SLICE = 2.0
 
     type SVGPreserveAspectRatioConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_NONE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMINYMIN: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMIDYMIN: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMAXYMIN: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMINYMID: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMIDYMID: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMAXYMID: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMINYMAX: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMIDYMAX: float
+        /// <remarks>TypeScript type: <c>10</c></remarks>
         abstract SVG_PRESERVEASPECTRATIO_XMAXYMAX: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_MEETORSLICE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_MEETORSLICE_MEET: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_MEETORSLICE_SLICE: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGPreserveAspectRatio
+
+    module SVGPreserveAspectRatioConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_NONE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMINYMIN = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMIDYMIN = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMAXYMIN = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMINYMID = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMIDYMID = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMAXYMID = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMINYMAX = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMIDYMAX = 9.0
+
+        /// <remarks>TypeScript type: <c>10</c></remarks>
+        [<Literal>]
+        let SVG_PRESERVEASPECTRATIO_XMAXYMAX = 10.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_MEETORSLICE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_MEETORSLICE_MEET = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_MEETORSLICE_SLICE = 2.0
 
     /// <summary>
     /// The <b><c>SVGRadialGradientElement</c></b> interface corresponds to the &lt;RadialGradient&gt; element.
@@ -70341,17 +72604,49 @@ module Dom =
         abstract getSubStringLength: charnum: float * nchars: float -> float
         /// <remarks>@deprecated</remarks>
         abstract selectSubString: charnum: float * nchars: float -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract LENGTHADJUST_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LENGTHADJUST_SPACING: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract LENGTHADJUST_SPACINGANDGLYPHS: float
 
+    module SVGTextContentElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let LENGTHADJUST_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LENGTHADJUST_SPACING = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let LENGTHADJUST_SPACINGANDGLYPHS = 2.0
+
     type SVGTextContentElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract LENGTHADJUST_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LENGTHADJUST_SPACING: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract LENGTHADJUST_SPACINGANDGLYPHS: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGTextContentElement
+
+    module SVGTextContentElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let LENGTHADJUST_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LENGTHADJUST_SPACING = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let LENGTHADJUST_SPACINGANDGLYPHS = 2.0
 
     /// <summary>
     /// The <b><c>SVGTextElement</c></b> interface corresponds to the &lt;text&gt; elements.
@@ -70391,23 +72686,85 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTextPathElement/startOffset">MDN Reference</a>
         /// </summary>
         abstract startOffset: SVGAnimatedLength
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract TEXTPATH_METHODTYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract TEXTPATH_METHODTYPE_ALIGN: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract TEXTPATH_METHODTYPE_STRETCH: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract TEXTPATH_SPACINGTYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract TEXTPATH_SPACINGTYPE_AUTO: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract TEXTPATH_SPACINGTYPE_EXACT: float
 
+    module SVGTextPathElement =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let TEXTPATH_METHODTYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let TEXTPATH_METHODTYPE_ALIGN = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let TEXTPATH_METHODTYPE_STRETCH = 2.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let TEXTPATH_SPACINGTYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let TEXTPATH_SPACINGTYPE_AUTO = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let TEXTPATH_SPACINGTYPE_EXACT = 2.0
+
     type SVGTextPathElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract TEXTPATH_METHODTYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract TEXTPATH_METHODTYPE_ALIGN: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract TEXTPATH_METHODTYPE_STRETCH: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract TEXTPATH_SPACINGTYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract TEXTPATH_SPACINGTYPE_AUTO: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract TEXTPATH_SPACINGTYPE_EXACT: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGTextPathElement
+
+    module SVGTextPathElementConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let TEXTPATH_METHODTYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let TEXTPATH_METHODTYPE_ALIGN = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let TEXTPATH_METHODTYPE_STRETCH = 2.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let TEXTPATH_SPACINGTYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let TEXTPATH_SPACINGTYPE_AUTO = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let TEXTPATH_SPACINGTYPE_EXACT = 2.0
 
     /// <summary>
     /// The <b><c>SVGTextPositioningElement</c></b> interface is implemented by elements that support attributes that position individual text glyphs. It is inherited by SVGTextElement and SVGTSpanElement.
@@ -70524,15 +72881,23 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTransform/setTranslate">MDN Reference</a>
         /// </summary>
         abstract setTranslate: tx: float * ty: float -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_TRANSFORM_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_TRANSFORM_MATRIX: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_TRANSFORM_TRANSLATE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_TRANSFORM_SCALE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_TRANSFORM_ROTATE: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_TRANSFORM_SKEWX: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_TRANSFORM_SKEWY: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ SVG_TRANSFORM_UNKNOWN: 0, SVG_TRANSFORM_MATRIX: 1, SVG_TRANSFORM_TRANSLATE: 2, SVG_TRANSFORM_SCALE: 3, SVG_TRANSFORM_ROTATE: 4, SVG_TRANSFORM_SKEWX: 5, SVG_TRANSFORM_SKEWY: 6, ...$0 })")>]
         static member Create
             (
                 angle: float,
@@ -70543,28 +72908,86 @@ module Dom =
                 setScale: Action<float, float>,
                 setSkewX: (float -> unit),
                 setSkewY: (float -> unit),
-                setTranslate: Action<float, float>,
-                SVG_TRANSFORM_UNKNOWN: float,
-                SVG_TRANSFORM_MATRIX: float,
-                SVG_TRANSFORM_TRANSLATE: float,
-                SVG_TRANSFORM_SCALE: float,
-                SVG_TRANSFORM_ROTATE: float,
-                SVG_TRANSFORM_SKEWX: float,
-                SVG_TRANSFORM_SKEWY: float
+                setTranslate: Action<float, float>
             ) : SVGTransform =
             jsNative
 
+    module SVGTransform =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_MATRIX = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_TRANSLATE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_SCALE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_ROTATE = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_SKEWX = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_SKEWY = 6.0
+
     type SVGTransformConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_TRANSFORM_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_TRANSFORM_MATRIX: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_TRANSFORM_TRANSLATE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract SVG_TRANSFORM_SCALE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract SVG_TRANSFORM_ROTATE: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract SVG_TRANSFORM_SKEWX: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract SVG_TRANSFORM_SKEWY: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGTransform
+
+    module SVGTransformConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_MATRIX = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_TRANSLATE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_SCALE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_ROTATE = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_SKEWX = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let SVG_TRANSFORM_SKEWY = 6.0
 
     /// <summary>
     /// The <b><c>SVGTransformList</c></b> interface defines a list of SVGTransform objects.
@@ -70664,23 +73087,52 @@ module Dom =
     /// </summary>
     [<Interface>]
     type SVGUnitTypes =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_UNIT_TYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_UNIT_TYPE_USERSPACEONUSE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_UNIT_TYPE_OBJECTBOUNDINGBOX: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (SVG_UNIT_TYPE_UNKNOWN: float, SVG_UNIT_TYPE_USERSPACEONUSE: float, SVG_UNIT_TYPE_OBJECTBOUNDINGBOX: float)
-            : SVGUnitTypes =
-            jsNative
+        [<Emit("({ SVG_UNIT_TYPE_UNKNOWN: 0, SVG_UNIT_TYPE_USERSPACEONUSE: 1, SVG_UNIT_TYPE_OBJECTBOUNDINGBOX: 2 })")>]
+        static member Create() : SVGUnitTypes = jsNative
+
+    module SVGUnitTypes =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_UNIT_TYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_UNIT_TYPE_USERSPACEONUSE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_UNIT_TYPE_OBJECTBOUNDINGBOX = 2.0
 
     type SVGUnitTypesConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract SVG_UNIT_TYPE_UNKNOWN: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SVG_UNIT_TYPE_USERSPACEONUSE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract SVG_UNIT_TYPE_OBJECTBOUNDINGBOX: float
 
         [<EmitConstructor>]
         abstract Create: unit -> SVGUnitTypes
+
+    module SVGUnitTypesConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let SVG_UNIT_TYPE_UNKNOWN = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SVG_UNIT_TYPE_USERSPACEONUSE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let SVG_UNIT_TYPE_OBJECTBOUNDINGBOX = 2.0
 
     /// <summary>
     /// The <b><c>SVGUseElement</c></b> interface corresponds to the &lt;use&gt; element.
@@ -72040,7 +74492,7 @@ module Dom =
         /// </summary>
         abstract message: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 error: SpeechRecognitionErrorCode,
@@ -72060,10 +74512,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -72097,7 +74545,7 @@ module Dom =
         /// </summary>
         abstract results: SpeechRecognitionResultList
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 resultIndex: float,
@@ -72117,10 +74565,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -72305,6 +74749,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisErrorEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type SpeechSynthesisErrorEvent =
         inherit SpeechSynthesisEvent
         /// <summary>
@@ -72313,6 +74758,36 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisErrorEvent/error">MDN Reference</a>
         /// </summary>
         abstract error: SpeechSynthesisErrorCode
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                error: SpeechSynthesisErrorCode,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                charIndex: float,
+                charLength: float,
+                elapsedTime: float,
+                name: string,
+                utterance: SpeechSynthesisUtterance,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : SpeechSynthesisErrorEvent =
+            jsNative
 
     type SpeechSynthesisErrorEventConstructor =
         [<EmitConstructor>]
@@ -72323,6 +74798,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type SpeechSynthesisEvent =
         inherit Event
         /// <summary>
@@ -72355,6 +74831,35 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisEvent/utterance">MDN Reference</a>
         /// </summary>
         abstract utterance: SpeechSynthesisUtterance
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                charIndex: float,
+                charLength: float,
+                elapsedTime: float,
+                name: string,
+                utterance: SpeechSynthesisUtterance,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : SpeechSynthesisEvent =
+            jsNative
 
     type SpeechSynthesisEventConstructor =
         [<EmitConstructor>]
@@ -72641,6 +75146,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/StorageEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type StorageEvent =
         inherit Event
         /// <summary>
@@ -72688,6 +75194,46 @@ module Dom =
             ?url: U2<string, URL> *
             ?storageArea: Storage ->
                 unit
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                url: string,
+                initStorageEvent:
+                    Action<
+                        string,
+                        bool option,
+                        bool option,
+                        string option,
+                        string option,
+                        string option,
+                        U2<string, URL> option,
+                        Storage option
+                     >,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?key: string,
+                ?newValue: string,
+                ?oldValue: string,
+                ?storageArea: Storage,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : StorageEvent =
+            jsNative
 
     type StorageEventConstructor =
         [<EmitConstructor>]
@@ -72928,7 +75474,7 @@ module Dom =
         /// </summary>
         abstract submitter: HTMLElement option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -72946,10 +75492,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?submitter: HTMLElement,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -73297,7 +75839,7 @@ module Dom =
         /// </summary>
         abstract previousPriority: TaskPriority
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 previousPriority: TaskPriority,
@@ -73316,10 +75858,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -73591,6 +76129,7 @@ module Dom =
     /// </summary>
     /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/TextEvent">MDN Reference</a></remarks>
     /// <remarks>@deprecated</remarks>
+    [<Interface>]
     type TextEvent =
         inherit UIEvent
         /// <summary>
@@ -73605,6 +76144,36 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/TextEvent/initTextEvent">MDN Reference</a></remarks>
         abstract initTextEvent:
             ``type``: string * ?bubbles: bool * ?cancelable: bool * ?view: Window * ?data: string -> unit
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                data: string,
+                initTextEvent: Action<string, bool option, bool option, Window option, string option>,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                detail: float,
+                which: float,
+                initUIEvent: Action<string, bool option, bool option, Window option, float option>,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget,
+                ?view: Window
+            ) : TextEvent =
+            jsNative
 
     type TextEventConstructor =
         [<EmitConstructor>]
@@ -74077,6 +76646,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ToggleEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type ToggleEvent =
         inherit Event
         /// <summary>
@@ -74097,6 +76667,33 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/ToggleEvent/source">MDN Reference</a>
         /// </summary>
         abstract source: Element option
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                newState: string,
+                oldState: string,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?source: Element,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : ToggleEvent =
+            jsNative
 
     type ToggleEventConstructor =
         [<EmitConstructor>]
@@ -74300,7 +76897,7 @@ module Dom =
         /// </summary>
         abstract track: TextTrack option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 bubbles: bool,
@@ -74318,10 +76915,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?track: TextTrack,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
@@ -74412,6 +77005,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransitionEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type TransitionEvent =
         inherit Event
         /// <summary>
@@ -74432,6 +77026,33 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/TransitionEvent/pseudoElement">MDN Reference</a>
         /// </summary>
         abstract pseudoElement: string
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                elapsedTime: float,
+                propertyName: string,
+                pseudoElement: string,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : TransitionEvent =
+            jsNative
 
     type TransitionEventConstructor =
         [<EmitConstructor>]
@@ -74537,6 +77158,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/UIEvent">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type UIEvent =
         inherit Event
         /// <summary>
@@ -74563,6 +77185,34 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/UIEvent/initUIEvent">MDN Reference</a></remarks>
         abstract initUIEvent:
             typeArg: string * ?bubblesArg: bool * ?cancelableArg: bool * ?viewArg: Window * ?detailArg: float -> unit
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                detail: float,
+                which: float,
+                initUIEvent: Action<string, bool option, bool option, Window option, float option>,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?view: Window,
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : UIEvent =
+            jsNative
 
     type UIEventConstructor =
         [<EmitConstructor>]
@@ -75797,21 +78447,35 @@ module Dom =
     /// </summary>
     [<Interface>]
     type WEBGL_color_buffer_float =
+        /// <remarks>TypeScript type: <c>34836</c></remarks>
         abstract RGBA32F_EXT: float
+        /// <remarks>TypeScript type: <c>33297</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT: float
+        /// <remarks>TypeScript type: <c>35863</c></remarks>
         abstract UNSIGNED_NORMALIZED_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (RGBA32F_EXT: float, FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT: float, UNSIGNED_NORMALIZED_EXT: float)
-            : WEBGL_color_buffer_float =
-            jsNative
+        [<Emit("({ RGBA32F_EXT: 34836, FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT: 33297, UNSIGNED_NORMALIZED_EXT: 35863 })")>]
+        static member Create() : WEBGL_color_buffer_float = jsNative
+
+    module WEBGL_color_buffer_float =
+        /// <remarks>TypeScript type: <c>34836</c></remarks>
+        [<Literal>]
+        let RGBA32F_EXT = 34836.0
+
+        /// <remarks>TypeScript type: <c>33297</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT = 33297.0
+
+        /// <remarks>TypeScript type: <c>35863</c></remarks>
+        [<Literal>]
+        let UNSIGNED_NORMALIZED_EXT = 35863.0
 
     /// <summary>
     /// The <b><c>WEBGL_compressed_texture_astc</c></b> extension is part of the WebGL API and exposes Adaptive Scalable Texture Compression (ASTC) compressed texture formats to WebGL.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_compressed_texture_astc">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type WEBGL_compressed_texture_astc =
         /// <summary>
         /// The <b><c>WEBGL_compressed_texture_astc.getSupportedProfiles()</c></b> method returns an array of strings containing the names of the ASTC profiles supported by the implementation.
@@ -75819,34 +78483,179 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_compressed_texture_astc/getSupportedProfiles">MDN Reference</a>
         /// </summary>
         abstract getSupportedProfiles: unit -> string[]
+        /// <remarks>TypeScript type: <c>37808</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_4x4_KHR: float
+        /// <remarks>TypeScript type: <c>37809</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_5x4_KHR: float
+        /// <remarks>TypeScript type: <c>37810</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_5x5_KHR: float
+        /// <remarks>TypeScript type: <c>37811</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_6x5_KHR: float
+        /// <remarks>TypeScript type: <c>37812</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_6x6_KHR: float
+        /// <remarks>TypeScript type: <c>37813</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_8x5_KHR: float
+        /// <remarks>TypeScript type: <c>37814</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_8x6_KHR: float
+        /// <remarks>TypeScript type: <c>37815</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_8x8_KHR: float
+        /// <remarks>TypeScript type: <c>37816</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_10x5_KHR: float
+        /// <remarks>TypeScript type: <c>37817</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_10x6_KHR: float
+        /// <remarks>TypeScript type: <c>37818</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_10x8_KHR: float
+        /// <remarks>TypeScript type: <c>37819</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_10x10_KHR: float
+        /// <remarks>TypeScript type: <c>37820</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_12x10_KHR: float
+        /// <remarks>TypeScript type: <c>37821</c></remarks>
         abstract COMPRESSED_RGBA_ASTC_12x12_KHR: float
+        /// <remarks>TypeScript type: <c>37840</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR: float
+        /// <remarks>TypeScript type: <c>37841</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR: float
+        /// <remarks>TypeScript type: <c>37842</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR: float
+        /// <remarks>TypeScript type: <c>37843</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR: float
+        /// <remarks>TypeScript type: <c>37844</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR: float
+        /// <remarks>TypeScript type: <c>37845</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR: float
+        /// <remarks>TypeScript type: <c>37846</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR: float
+        /// <remarks>TypeScript type: <c>37847</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR: float
+        /// <remarks>TypeScript type: <c>37848</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR: float
+        /// <remarks>TypeScript type: <c>37849</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR: float
+        /// <remarks>TypeScript type: <c>37850</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR: float
+        /// <remarks>TypeScript type: <c>37851</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR: float
+        /// <remarks>TypeScript type: <c>37852</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: float
+        /// <remarks>TypeScript type: <c>37853</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: float
+
+        [<ParamObject;
+          Emit("({ COMPRESSED_RGBA_ASTC_4x4_KHR: 37808, COMPRESSED_RGBA_ASTC_5x4_KHR: 37809, COMPRESSED_RGBA_ASTC_5x5_KHR: 37810, COMPRESSED_RGBA_ASTC_6x5_KHR: 37811, COMPRESSED_RGBA_ASTC_6x6_KHR: 37812, COMPRESSED_RGBA_ASTC_8x5_KHR: 37813, COMPRESSED_RGBA_ASTC_8x6_KHR: 37814, COMPRESSED_RGBA_ASTC_8x8_KHR: 37815, COMPRESSED_RGBA_ASTC_10x5_KHR: 37816, COMPRESSED_RGBA_ASTC_10x6_KHR: 37817, COMPRESSED_RGBA_ASTC_10x8_KHR: 37818, COMPRESSED_RGBA_ASTC_10x10_KHR: 37819, COMPRESSED_RGBA_ASTC_12x10_KHR: 37820, COMPRESSED_RGBA_ASTC_12x12_KHR: 37821, COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR: 37840, COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR: 37841, COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR: 37842, COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR: 37843, COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR: 37844, COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR: 37845, COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR: 37846, COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR: 37847, COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR: 37848, COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR: 37849, COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR: 37850, COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR: 37851, COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: 37852, COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: 37853, ...$0 })")>]
+        static member Create(getSupportedProfiles: (unit -> string[])) : WEBGL_compressed_texture_astc = jsNative
+
+    module WEBGL_compressed_texture_astc =
+        /// <remarks>TypeScript type: <c>37808</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_4x4_KHR = 37808.0
+
+        /// <remarks>TypeScript type: <c>37809</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_5x4_KHR = 37809.0
+
+        /// <remarks>TypeScript type: <c>37810</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_5x5_KHR = 37810.0
+
+        /// <remarks>TypeScript type: <c>37811</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_6x5_KHR = 37811.0
+
+        /// <remarks>TypeScript type: <c>37812</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_6x6_KHR = 37812.0
+
+        /// <remarks>TypeScript type: <c>37813</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_8x5_KHR = 37813.0
+
+        /// <remarks>TypeScript type: <c>37814</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_8x6_KHR = 37814.0
+
+        /// <remarks>TypeScript type: <c>37815</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_8x8_KHR = 37815.0
+
+        /// <remarks>TypeScript type: <c>37816</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_10x5_KHR = 37816.0
+
+        /// <remarks>TypeScript type: <c>37817</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_10x6_KHR = 37817.0
+
+        /// <remarks>TypeScript type: <c>37818</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_10x8_KHR = 37818.0
+
+        /// <remarks>TypeScript type: <c>37819</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_10x10_KHR = 37819.0
+
+        /// <remarks>TypeScript type: <c>37820</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_12x10_KHR = 37820.0
+
+        /// <remarks>TypeScript type: <c>37821</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_ASTC_12x12_KHR = 37821.0
+
+        /// <remarks>TypeScript type: <c>37840</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR = 37840.0
+
+        /// <remarks>TypeScript type: <c>37841</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR = 37841.0
+
+        /// <remarks>TypeScript type: <c>37842</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR = 37842.0
+
+        /// <remarks>TypeScript type: <c>37843</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR = 37843.0
+
+        /// <remarks>TypeScript type: <c>37844</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR = 37844.0
+
+        /// <remarks>TypeScript type: <c>37845</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR = 37845.0
+
+        /// <remarks>TypeScript type: <c>37846</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR = 37846.0
+
+        /// <remarks>TypeScript type: <c>37847</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR = 37847.0
+
+        /// <remarks>TypeScript type: <c>37848</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR = 37848.0
+
+        /// <remarks>TypeScript type: <c>37849</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR = 37849.0
+
+        /// <remarks>TypeScript type: <c>37850</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR = 37850.0
+
+        /// <remarks>TypeScript type: <c>37851</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR = 37851.0
+
+        /// <remarks>TypeScript type: <c>37852</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR = 37852.0
+
+        /// <remarks>TypeScript type: <c>37853</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR = 37853.0
 
     /// <summary>
     /// The <b><c>WEBGL_compressed_texture_etc</c></b> extension is part of the WebGL API and exposes 10 ETC/EAC compressed texture formats.
@@ -75855,32 +78664,70 @@ module Dom =
     /// </summary>
     [<Interface>]
     type WEBGL_compressed_texture_etc =
+        /// <remarks>TypeScript type: <c>37488</c></remarks>
         abstract COMPRESSED_R11_EAC: float
+        /// <remarks>TypeScript type: <c>37489</c></remarks>
         abstract COMPRESSED_SIGNED_R11_EAC: float
+        /// <remarks>TypeScript type: <c>37490</c></remarks>
         abstract COMPRESSED_RG11_EAC: float
+        /// <remarks>TypeScript type: <c>37491</c></remarks>
         abstract COMPRESSED_SIGNED_RG11_EAC: float
+        /// <remarks>TypeScript type: <c>37492</c></remarks>
         abstract COMPRESSED_RGB8_ETC2: float
+        /// <remarks>TypeScript type: <c>37493</c></remarks>
         abstract COMPRESSED_SRGB8_ETC2: float
+        /// <remarks>TypeScript type: <c>37494</c></remarks>
         abstract COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2: float
+        /// <remarks>TypeScript type: <c>37495</c></remarks>
         abstract COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2: float
+        /// <remarks>TypeScript type: <c>37496</c></remarks>
         abstract COMPRESSED_RGBA8_ETC2_EAC: float
+        /// <remarks>TypeScript type: <c>37497</c></remarks>
         abstract COMPRESSED_SRGB8_ALPHA8_ETC2_EAC: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                COMPRESSED_R11_EAC: float,
-                COMPRESSED_SIGNED_R11_EAC: float,
-                COMPRESSED_RG11_EAC: float,
-                COMPRESSED_SIGNED_RG11_EAC: float,
-                COMPRESSED_RGB8_ETC2: float,
-                COMPRESSED_SRGB8_ETC2: float,
-                COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2: float,
-                COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2: float,
-                COMPRESSED_RGBA8_ETC2_EAC: float,
-                COMPRESSED_SRGB8_ALPHA8_ETC2_EAC: float
-            ) : WEBGL_compressed_texture_etc =
-            jsNative
+        [<Emit("({ COMPRESSED_R11_EAC: 37488, COMPRESSED_SIGNED_R11_EAC: 37489, COMPRESSED_RG11_EAC: 37490, COMPRESSED_SIGNED_RG11_EAC: 37491, COMPRESSED_RGB8_ETC2: 37492, COMPRESSED_SRGB8_ETC2: 37493, COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2: 37494, COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2: 37495, COMPRESSED_RGBA8_ETC2_EAC: 37496, COMPRESSED_SRGB8_ALPHA8_ETC2_EAC: 37497 })")>]
+        static member Create() : WEBGL_compressed_texture_etc = jsNative
+
+    module WEBGL_compressed_texture_etc =
+        /// <remarks>TypeScript type: <c>37488</c></remarks>
+        [<Literal>]
+        let COMPRESSED_R11_EAC = 37488.0
+
+        /// <remarks>TypeScript type: <c>37489</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SIGNED_R11_EAC = 37489.0
+
+        /// <remarks>TypeScript type: <c>37490</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RG11_EAC = 37490.0
+
+        /// <remarks>TypeScript type: <c>37491</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SIGNED_RG11_EAC = 37491.0
+
+        /// <remarks>TypeScript type: <c>37492</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGB8_ETC2 = 37492.0
+
+        /// <remarks>TypeScript type: <c>37493</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ETC2 = 37493.0
+
+        /// <remarks>TypeScript type: <c>37494</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 = 37494.0
+
+        /// <remarks>TypeScript type: <c>37495</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 = 37495.0
+
+        /// <remarks>TypeScript type: <c>37496</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA8_ETC2_EAC = 37496.0
+
+        /// <remarks>TypeScript type: <c>37497</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB8_ALPHA8_ETC2_EAC = 37497.0
 
     /// <summary>
     /// The <b><c>WEBGL_compressed_texture_etc1</c></b> extension is part of the WebGL API and exposes the ETC1 compressed texture format.
@@ -75889,10 +78736,16 @@ module Dom =
     /// </summary>
     [<Interface>]
     type WEBGL_compressed_texture_etc1 =
+        /// <remarks>TypeScript type: <c>36196</c></remarks>
         abstract COMPRESSED_RGB_ETC1_WEBGL: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(COMPRESSED_RGB_ETC1_WEBGL: float) : WEBGL_compressed_texture_etc1 = jsNative
+        [<Emit("({ COMPRESSED_RGB_ETC1_WEBGL: 36196 })")>]
+        static member Create() : WEBGL_compressed_texture_etc1 = jsNative
+
+    module WEBGL_compressed_texture_etc1 =
+        /// <remarks>TypeScript type: <c>36196</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGB_ETC1_WEBGL = 36196.0
 
     /// <summary>
     /// The <b><c>WEBGL_compressed_texture_pvrtc</c></b> extension is part of the WebGL API and exposes four PVRTC compressed texture formats.
@@ -75901,20 +78754,34 @@ module Dom =
     /// </summary>
     [<Interface>]
     type WEBGL_compressed_texture_pvrtc =
+        /// <remarks>TypeScript type: <c>35840</c></remarks>
         abstract COMPRESSED_RGB_PVRTC_4BPPV1_IMG: float
+        /// <remarks>TypeScript type: <c>35841</c></remarks>
         abstract COMPRESSED_RGB_PVRTC_2BPPV1_IMG: float
+        /// <remarks>TypeScript type: <c>35842</c></remarks>
         abstract COMPRESSED_RGBA_PVRTC_4BPPV1_IMG: float
+        /// <remarks>TypeScript type: <c>35843</c></remarks>
         abstract COMPRESSED_RGBA_PVRTC_2BPPV1_IMG: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                COMPRESSED_RGB_PVRTC_4BPPV1_IMG: float,
-                COMPRESSED_RGB_PVRTC_2BPPV1_IMG: float,
-                COMPRESSED_RGBA_PVRTC_4BPPV1_IMG: float,
-                COMPRESSED_RGBA_PVRTC_2BPPV1_IMG: float
-            ) : WEBGL_compressed_texture_pvrtc =
-            jsNative
+        [<Emit("({ COMPRESSED_RGB_PVRTC_4BPPV1_IMG: 35840, COMPRESSED_RGB_PVRTC_2BPPV1_IMG: 35841, COMPRESSED_RGBA_PVRTC_4BPPV1_IMG: 35842, COMPRESSED_RGBA_PVRTC_2BPPV1_IMG: 35843 })")>]
+        static member Create() : WEBGL_compressed_texture_pvrtc = jsNative
+
+    module WEBGL_compressed_texture_pvrtc =
+        /// <remarks>TypeScript type: <c>35840</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGB_PVRTC_4BPPV1_IMG = 35840.0
+
+        /// <remarks>TypeScript type: <c>35841</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGB_PVRTC_2BPPV1_IMG = 35841.0
+
+        /// <remarks>TypeScript type: <c>35842</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = 35842.0
+
+        /// <remarks>TypeScript type: <c>35843</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = 35843.0
 
     /// <summary>
     /// The <b><c>WEBGL_compressed_texture_s3tc</c></b> extension is part of the WebGL API and exposes four S3TC compressed texture formats.
@@ -75923,20 +78790,34 @@ module Dom =
     /// </summary>
     [<Interface>]
     type WEBGL_compressed_texture_s3tc =
+        /// <remarks>TypeScript type: <c>33776</c></remarks>
         abstract COMPRESSED_RGB_S3TC_DXT1_EXT: float
+        /// <remarks>TypeScript type: <c>33777</c></remarks>
         abstract COMPRESSED_RGBA_S3TC_DXT1_EXT: float
+        /// <remarks>TypeScript type: <c>33778</c></remarks>
         abstract COMPRESSED_RGBA_S3TC_DXT3_EXT: float
+        /// <remarks>TypeScript type: <c>33779</c></remarks>
         abstract COMPRESSED_RGBA_S3TC_DXT5_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                COMPRESSED_RGB_S3TC_DXT1_EXT: float,
-                COMPRESSED_RGBA_S3TC_DXT1_EXT: float,
-                COMPRESSED_RGBA_S3TC_DXT3_EXT: float,
-                COMPRESSED_RGBA_S3TC_DXT5_EXT: float
-            ) : WEBGL_compressed_texture_s3tc =
-            jsNative
+        [<Emit("({ COMPRESSED_RGB_S3TC_DXT1_EXT: 33776, COMPRESSED_RGBA_S3TC_DXT1_EXT: 33777, COMPRESSED_RGBA_S3TC_DXT3_EXT: 33778, COMPRESSED_RGBA_S3TC_DXT5_EXT: 33779 })")>]
+        static member Create() : WEBGL_compressed_texture_s3tc = jsNative
+
+    module WEBGL_compressed_texture_s3tc =
+        /// <remarks>TypeScript type: <c>33776</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGB_S3TC_DXT1_EXT = 33776.0
+
+        /// <remarks>TypeScript type: <c>33777</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_S3TC_DXT1_EXT = 33777.0
+
+        /// <remarks>TypeScript type: <c>33778</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_S3TC_DXT3_EXT = 33778.0
+
+        /// <remarks>TypeScript type: <c>33779</c></remarks>
+        [<Literal>]
+        let COMPRESSED_RGBA_S3TC_DXT5_EXT = 33779.0
 
     /// <summary>
     /// The <b><c>WEBGL_compressed_texture_s3tc_srgb</c></b> extension is part of the WebGL API and exposes four S3TC compressed texture formats for the sRGB colorspace.
@@ -75945,20 +78826,34 @@ module Dom =
     /// </summary>
     [<Interface>]
     type WEBGL_compressed_texture_s3tc_srgb =
+        /// <remarks>TypeScript type: <c>35916</c></remarks>
         abstract COMPRESSED_SRGB_S3TC_DXT1_EXT: float
+        /// <remarks>TypeScript type: <c>35917</c></remarks>
         abstract COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT: float
+        /// <remarks>TypeScript type: <c>35918</c></remarks>
         abstract COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT: float
+        /// <remarks>TypeScript type: <c>35919</c></remarks>
         abstract COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                COMPRESSED_SRGB_S3TC_DXT1_EXT: float,
-                COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT: float,
-                COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT: float,
-                COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT: float
-            ) : WEBGL_compressed_texture_s3tc_srgb =
-            jsNative
+        [<Emit("({ COMPRESSED_SRGB_S3TC_DXT1_EXT: 35916, COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT: 35917, COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT: 35918, COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT: 35919 })")>]
+        static member Create() : WEBGL_compressed_texture_s3tc_srgb = jsNative
+
+    module WEBGL_compressed_texture_s3tc_srgb =
+        /// <remarks>TypeScript type: <c>35916</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB_S3TC_DXT1_EXT = 35916.0
+
+        /// <remarks>TypeScript type: <c>35917</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT = 35917.0
+
+        /// <remarks>TypeScript type: <c>35918</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT = 35918.0
+
+        /// <remarks>TypeScript type: <c>35919</c></remarks>
+        [<Literal>]
+        let COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT = 35919.0
 
     /// <summary>
     /// The <b><c>WEBGL_debug_renderer_info</c></b> extension is part of the WebGL API and exposes two constants with information about the graphics driver for debugging purposes.
@@ -75967,12 +78862,22 @@ module Dom =
     /// </summary>
     [<Interface>]
     type WEBGL_debug_renderer_info =
+        /// <remarks>TypeScript type: <c>37445</c></remarks>
         abstract UNMASKED_VENDOR_WEBGL: float
+        /// <remarks>TypeScript type: <c>37446</c></remarks>
         abstract UNMASKED_RENDERER_WEBGL: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(UNMASKED_VENDOR_WEBGL: float, UNMASKED_RENDERER_WEBGL: float) : WEBGL_debug_renderer_info =
-            jsNative
+        [<Emit("({ UNMASKED_VENDOR_WEBGL: 37445, UNMASKED_RENDERER_WEBGL: 37446 })")>]
+        static member Create() : WEBGL_debug_renderer_info = jsNative
+
+    module WEBGL_debug_renderer_info =
+        /// <remarks>TypeScript type: <c>37445</c></remarks>
+        [<Literal>]
+        let UNMASKED_VENDOR_WEBGL = 37445.0
+
+        /// <remarks>TypeScript type: <c>37446</c></remarks>
+        [<Literal>]
+        let UNMASKED_RENDERER_WEBGL = 37446.0
 
     /// <summary>
     /// The <b><c>WEBGL_debug_shaders</c></b> extension is part of the WebGL API and exposes a method to debug shaders from privileged contexts.
@@ -75998,10 +78903,16 @@ module Dom =
     /// </summary>
     [<Interface>]
     type WEBGL_depth_texture =
+        /// <remarks>TypeScript type: <c>34042</c></remarks>
         abstract UNSIGNED_INT_24_8_WEBGL: float
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(UNSIGNED_INT_24_8_WEBGL: float) : WEBGL_depth_texture = jsNative
+        [<Emit("({ UNSIGNED_INT_24_8_WEBGL: 34042 })")>]
+        static member Create() : WEBGL_depth_texture = jsNative
+
+    module WEBGL_depth_texture =
+        /// <remarks>TypeScript type: <c>34042</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_24_8_WEBGL = 34042.0
 
     /// <summary>
     /// The <b><c>WEBGL_draw_buffers</c></b> extension is part of the WebGL API and enables a fragment shader to write to several textures, which is useful for deferred shading, for example.
@@ -76021,40 +78932,211 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_draw_buffers/drawBuffersWEBGL">MDN Reference</a>
         /// </summary>
         abstract drawBuffersWEBGL: buffers: Fable.Core.TS.Es.Iterable<float, obj, obj> -> unit
+        /// <remarks>TypeScript type: <c>36064</c></remarks>
         abstract COLOR_ATTACHMENT0_WEBGL: float
+        /// <remarks>TypeScript type: <c>36065</c></remarks>
         abstract COLOR_ATTACHMENT1_WEBGL: float
+        /// <remarks>TypeScript type: <c>36066</c></remarks>
         abstract COLOR_ATTACHMENT2_WEBGL: float
+        /// <remarks>TypeScript type: <c>36067</c></remarks>
         abstract COLOR_ATTACHMENT3_WEBGL: float
+        /// <remarks>TypeScript type: <c>36068</c></remarks>
         abstract COLOR_ATTACHMENT4_WEBGL: float
+        /// <remarks>TypeScript type: <c>36069</c></remarks>
         abstract COLOR_ATTACHMENT5_WEBGL: float
+        /// <remarks>TypeScript type: <c>36070</c></remarks>
         abstract COLOR_ATTACHMENT6_WEBGL: float
+        /// <remarks>TypeScript type: <c>36071</c></remarks>
         abstract COLOR_ATTACHMENT7_WEBGL: float
+        /// <remarks>TypeScript type: <c>36072</c></remarks>
         abstract COLOR_ATTACHMENT8_WEBGL: float
+        /// <remarks>TypeScript type: <c>36073</c></remarks>
         abstract COLOR_ATTACHMENT9_WEBGL: float
+        /// <remarks>TypeScript type: <c>36074</c></remarks>
         abstract COLOR_ATTACHMENT10_WEBGL: float
+        /// <remarks>TypeScript type: <c>36075</c></remarks>
         abstract COLOR_ATTACHMENT11_WEBGL: float
+        /// <remarks>TypeScript type: <c>36076</c></remarks>
         abstract COLOR_ATTACHMENT12_WEBGL: float
+        /// <remarks>TypeScript type: <c>36077</c></remarks>
         abstract COLOR_ATTACHMENT13_WEBGL: float
+        /// <remarks>TypeScript type: <c>36078</c></remarks>
         abstract COLOR_ATTACHMENT14_WEBGL: float
+        /// <remarks>TypeScript type: <c>36079</c></remarks>
         abstract COLOR_ATTACHMENT15_WEBGL: float
+        /// <remarks>TypeScript type: <c>34853</c></remarks>
         abstract DRAW_BUFFER0_WEBGL: float
+        /// <remarks>TypeScript type: <c>34854</c></remarks>
         abstract DRAW_BUFFER1_WEBGL: float
+        /// <remarks>TypeScript type: <c>34855</c></remarks>
         abstract DRAW_BUFFER2_WEBGL: float
+        /// <remarks>TypeScript type: <c>34856</c></remarks>
         abstract DRAW_BUFFER3_WEBGL: float
+        /// <remarks>TypeScript type: <c>34857</c></remarks>
         abstract DRAW_BUFFER4_WEBGL: float
+        /// <remarks>TypeScript type: <c>34858</c></remarks>
         abstract DRAW_BUFFER5_WEBGL: float
+        /// <remarks>TypeScript type: <c>34859</c></remarks>
         abstract DRAW_BUFFER6_WEBGL: float
+        /// <remarks>TypeScript type: <c>34860</c></remarks>
         abstract DRAW_BUFFER7_WEBGL: float
+        /// <remarks>TypeScript type: <c>34861</c></remarks>
         abstract DRAW_BUFFER8_WEBGL: float
+        /// <remarks>TypeScript type: <c>34862</c></remarks>
         abstract DRAW_BUFFER9_WEBGL: float
+        /// <remarks>TypeScript type: <c>34863</c></remarks>
         abstract DRAW_BUFFER10_WEBGL: float
+        /// <remarks>TypeScript type: <c>34864</c></remarks>
         abstract DRAW_BUFFER11_WEBGL: float
+        /// <remarks>TypeScript type: <c>34865</c></remarks>
         abstract DRAW_BUFFER12_WEBGL: float
+        /// <remarks>TypeScript type: <c>34866</c></remarks>
         abstract DRAW_BUFFER13_WEBGL: float
+        /// <remarks>TypeScript type: <c>34867</c></remarks>
         abstract DRAW_BUFFER14_WEBGL: float
+        /// <remarks>TypeScript type: <c>34868</c></remarks>
         abstract DRAW_BUFFER15_WEBGL: float
+        /// <remarks>TypeScript type: <c>36063</c></remarks>
         abstract MAX_COLOR_ATTACHMENTS_WEBGL: float
+        /// <remarks>TypeScript type: <c>34852</c></remarks>
         abstract MAX_DRAW_BUFFERS_WEBGL: float
+
+    module WEBGL_draw_buffers =
+        /// <remarks>TypeScript type: <c>36064</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT0_WEBGL = 36064.0
+
+        /// <remarks>TypeScript type: <c>36065</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT1_WEBGL = 36065.0
+
+        /// <remarks>TypeScript type: <c>36066</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT2_WEBGL = 36066.0
+
+        /// <remarks>TypeScript type: <c>36067</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT3_WEBGL = 36067.0
+
+        /// <remarks>TypeScript type: <c>36068</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT4_WEBGL = 36068.0
+
+        /// <remarks>TypeScript type: <c>36069</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT5_WEBGL = 36069.0
+
+        /// <remarks>TypeScript type: <c>36070</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT6_WEBGL = 36070.0
+
+        /// <remarks>TypeScript type: <c>36071</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT7_WEBGL = 36071.0
+
+        /// <remarks>TypeScript type: <c>36072</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT8_WEBGL = 36072.0
+
+        /// <remarks>TypeScript type: <c>36073</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT9_WEBGL = 36073.0
+
+        /// <remarks>TypeScript type: <c>36074</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT10_WEBGL = 36074.0
+
+        /// <remarks>TypeScript type: <c>36075</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT11_WEBGL = 36075.0
+
+        /// <remarks>TypeScript type: <c>36076</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT12_WEBGL = 36076.0
+
+        /// <remarks>TypeScript type: <c>36077</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT13_WEBGL = 36077.0
+
+        /// <remarks>TypeScript type: <c>36078</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT14_WEBGL = 36078.0
+
+        /// <remarks>TypeScript type: <c>36079</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT15_WEBGL = 36079.0
+
+        /// <remarks>TypeScript type: <c>34853</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER0_WEBGL = 34853.0
+
+        /// <remarks>TypeScript type: <c>34854</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER1_WEBGL = 34854.0
+
+        /// <remarks>TypeScript type: <c>34855</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER2_WEBGL = 34855.0
+
+        /// <remarks>TypeScript type: <c>34856</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER3_WEBGL = 34856.0
+
+        /// <remarks>TypeScript type: <c>34857</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER4_WEBGL = 34857.0
+
+        /// <remarks>TypeScript type: <c>34858</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER5_WEBGL = 34858.0
+
+        /// <remarks>TypeScript type: <c>34859</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER6_WEBGL = 34859.0
+
+        /// <remarks>TypeScript type: <c>34860</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER7_WEBGL = 34860.0
+
+        /// <remarks>TypeScript type: <c>34861</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER8_WEBGL = 34861.0
+
+        /// <remarks>TypeScript type: <c>34862</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER9_WEBGL = 34862.0
+
+        /// <remarks>TypeScript type: <c>34863</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER10_WEBGL = 34863.0
+
+        /// <remarks>TypeScript type: <c>34864</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER11_WEBGL = 34864.0
+
+        /// <remarks>TypeScript type: <c>34865</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER12_WEBGL = 34865.0
+
+        /// <remarks>TypeScript type: <c>34866</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER13_WEBGL = 34866.0
+
+        /// <remarks>TypeScript type: <c>34867</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER14_WEBGL = 34867.0
+
+        /// <remarks>TypeScript type: <c>34868</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER15_WEBGL = 34868.0
+
+        /// <remarks>TypeScript type: <c>36063</c></remarks>
+        [<Literal>]
+        let MAX_COLOR_ATTACHMENTS_WEBGL = 36063.0
+
+        /// <remarks>TypeScript type: <c>34852</c></remarks>
+        [<Literal>]
+        let MAX_DRAW_BUFFERS_WEBGL = 34852.0
 
     /// <summary>
     /// The <b><c>WEBGL_lose_context</c></b> extension is part of the WebGL API and exposes functions to simulate losing and restoring a WebGLRenderingContext.
@@ -76341,6 +79423,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WakeLockSentinel/type">MDN Reference</a>
         /// </summary>
+        /// <remarks>TypeScript type: <c>"screen"</c></remarks>
         abstract ``type``: string
         /// <summary>
         /// The <b><c>release()</c></b> method of the WakeLockSentinel interface releases the WakeLockSentinel, returning a Promise that is resolved once the sentinel has been successfully released.
@@ -76385,6 +79468,16 @@ module Dom =
             ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
                 unit
 
+    module WakeLockSentinel =
+        /// <summary>
+        /// The <b><c>type</c></b> read-only property of the WakeLockSentinel interface returns a string representation of the currently acquired WakeLockSentinel type.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WakeLockSentinel/type">MDN Reference</a>
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"screen"</c></remarks>
+        [<Literal>]
+        let ``type`` = "screen"
+
     type WakeLockSentinelConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> WakeLockSentinel
@@ -76424,568 +79517,3364 @@ module Dom =
         inherit WebGLRenderingContextBase
 
     type WebGL2RenderingContextConstructor =
+        /// <remarks>TypeScript type: <c>3074</c></remarks>
         abstract READ_BUFFER: float
+        /// <remarks>TypeScript type: <c>3314</c></remarks>
         abstract UNPACK_ROW_LENGTH: float
+        /// <remarks>TypeScript type: <c>3315</c></remarks>
         abstract UNPACK_SKIP_ROWS: float
+        /// <remarks>TypeScript type: <c>3316</c></remarks>
         abstract UNPACK_SKIP_PIXELS: float
+        /// <remarks>TypeScript type: <c>3330</c></remarks>
         abstract PACK_ROW_LENGTH: float
+        /// <remarks>TypeScript type: <c>3331</c></remarks>
         abstract PACK_SKIP_ROWS: float
+        /// <remarks>TypeScript type: <c>3332</c></remarks>
         abstract PACK_SKIP_PIXELS: float
+        /// <remarks>TypeScript type: <c>6144</c></remarks>
         abstract COLOR: float
+        /// <remarks>TypeScript type: <c>6145</c></remarks>
         abstract DEPTH: float
+        /// <remarks>TypeScript type: <c>6146</c></remarks>
         abstract STENCIL: float
+        /// <remarks>TypeScript type: <c>6403</c></remarks>
         abstract RED: float
+        /// <remarks>TypeScript type: <c>32849</c></remarks>
         abstract RGB8: float
+        /// <remarks>TypeScript type: <c>32857</c></remarks>
         abstract RGB10_A2: float
+        /// <remarks>TypeScript type: <c>32874</c></remarks>
         abstract TEXTURE_BINDING_3D: float
+        /// <remarks>TypeScript type: <c>32877</c></remarks>
         abstract UNPACK_SKIP_IMAGES: float
+        /// <remarks>TypeScript type: <c>32878</c></remarks>
         abstract UNPACK_IMAGE_HEIGHT: float
+        /// <remarks>TypeScript type: <c>32879</c></remarks>
         abstract TEXTURE_3D: float
+        /// <remarks>TypeScript type: <c>32882</c></remarks>
         abstract TEXTURE_WRAP_R: float
+        /// <remarks>TypeScript type: <c>32883</c></remarks>
         abstract MAX_3D_TEXTURE_SIZE: float
+        /// <remarks>TypeScript type: <c>33640</c></remarks>
         abstract UNSIGNED_INT_2_10_10_10_REV: float
+        /// <remarks>TypeScript type: <c>33000</c></remarks>
         abstract MAX_ELEMENTS_VERTICES: float
+        /// <remarks>TypeScript type: <c>33001</c></remarks>
         abstract MAX_ELEMENTS_INDICES: float
+        /// <remarks>TypeScript type: <c>33082</c></remarks>
         abstract TEXTURE_MIN_LOD: float
+        /// <remarks>TypeScript type: <c>33083</c></remarks>
         abstract TEXTURE_MAX_LOD: float
+        /// <remarks>TypeScript type: <c>33084</c></remarks>
         abstract TEXTURE_BASE_LEVEL: float
+        /// <remarks>TypeScript type: <c>33085</c></remarks>
         abstract TEXTURE_MAX_LEVEL: float
+        /// <remarks>TypeScript type: <c>32775</c></remarks>
         abstract MIN: float
+        /// <remarks>TypeScript type: <c>32776</c></remarks>
         abstract MAX: float
+        /// <remarks>TypeScript type: <c>33190</c></remarks>
         abstract DEPTH_COMPONENT24: float
+        /// <remarks>TypeScript type: <c>34045</c></remarks>
         abstract MAX_TEXTURE_LOD_BIAS: float
+        /// <remarks>TypeScript type: <c>34892</c></remarks>
         abstract TEXTURE_COMPARE_MODE: float
+        /// <remarks>TypeScript type: <c>34893</c></remarks>
         abstract TEXTURE_COMPARE_FUNC: float
+        /// <remarks>TypeScript type: <c>34917</c></remarks>
         abstract CURRENT_QUERY: float
+        /// <remarks>TypeScript type: <c>34918</c></remarks>
         abstract QUERY_RESULT: float
+        /// <remarks>TypeScript type: <c>34919</c></remarks>
         abstract QUERY_RESULT_AVAILABLE: float
+        /// <remarks>TypeScript type: <c>35041</c></remarks>
         abstract STREAM_READ: float
+        /// <remarks>TypeScript type: <c>35042</c></remarks>
         abstract STREAM_COPY: float
+        /// <remarks>TypeScript type: <c>35045</c></remarks>
         abstract STATIC_READ: float
+        /// <remarks>TypeScript type: <c>35046</c></remarks>
         abstract STATIC_COPY: float
+        /// <remarks>TypeScript type: <c>35049</c></remarks>
         abstract DYNAMIC_READ: float
+        /// <remarks>TypeScript type: <c>35050</c></remarks>
         abstract DYNAMIC_COPY: float
+        /// <remarks>TypeScript type: <c>34852</c></remarks>
         abstract MAX_DRAW_BUFFERS: float
+        /// <remarks>TypeScript type: <c>34853</c></remarks>
         abstract DRAW_BUFFER0: float
+        /// <remarks>TypeScript type: <c>34854</c></remarks>
         abstract DRAW_BUFFER1: float
+        /// <remarks>TypeScript type: <c>34855</c></remarks>
         abstract DRAW_BUFFER2: float
+        /// <remarks>TypeScript type: <c>34856</c></remarks>
         abstract DRAW_BUFFER3: float
+        /// <remarks>TypeScript type: <c>34857</c></remarks>
         abstract DRAW_BUFFER4: float
+        /// <remarks>TypeScript type: <c>34858</c></remarks>
         abstract DRAW_BUFFER5: float
+        /// <remarks>TypeScript type: <c>34859</c></remarks>
         abstract DRAW_BUFFER6: float
+        /// <remarks>TypeScript type: <c>34860</c></remarks>
         abstract DRAW_BUFFER7: float
+        /// <remarks>TypeScript type: <c>34861</c></remarks>
         abstract DRAW_BUFFER8: float
+        /// <remarks>TypeScript type: <c>34862</c></remarks>
         abstract DRAW_BUFFER9: float
+        /// <remarks>TypeScript type: <c>34863</c></remarks>
         abstract DRAW_BUFFER10: float
+        /// <remarks>TypeScript type: <c>34864</c></remarks>
         abstract DRAW_BUFFER11: float
+        /// <remarks>TypeScript type: <c>34865</c></remarks>
         abstract DRAW_BUFFER12: float
+        /// <remarks>TypeScript type: <c>34866</c></remarks>
         abstract DRAW_BUFFER13: float
+        /// <remarks>TypeScript type: <c>34867</c></remarks>
         abstract DRAW_BUFFER14: float
+        /// <remarks>TypeScript type: <c>34868</c></remarks>
         abstract DRAW_BUFFER15: float
+        /// <remarks>TypeScript type: <c>35657</c></remarks>
         abstract MAX_FRAGMENT_UNIFORM_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35658</c></remarks>
         abstract MAX_VERTEX_UNIFORM_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35679</c></remarks>
         abstract SAMPLER_3D: float
+        /// <remarks>TypeScript type: <c>35682</c></remarks>
         abstract SAMPLER_2D_SHADOW: float
+        /// <remarks>TypeScript type: <c>35723</c></remarks>
         abstract FRAGMENT_SHADER_DERIVATIVE_HINT: float
+        /// <remarks>TypeScript type: <c>35051</c></remarks>
         abstract PIXEL_PACK_BUFFER: float
+        /// <remarks>TypeScript type: <c>35052</c></remarks>
         abstract PIXEL_UNPACK_BUFFER: float
+        /// <remarks>TypeScript type: <c>35053</c></remarks>
         abstract PIXEL_PACK_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35055</c></remarks>
         abstract PIXEL_UNPACK_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35685</c></remarks>
         abstract FLOAT_MAT2x3: float
+        /// <remarks>TypeScript type: <c>35686</c></remarks>
         abstract FLOAT_MAT2x4: float
+        /// <remarks>TypeScript type: <c>35687</c></remarks>
         abstract FLOAT_MAT3x2: float
+        /// <remarks>TypeScript type: <c>35688</c></remarks>
         abstract FLOAT_MAT3x4: float
+        /// <remarks>TypeScript type: <c>35689</c></remarks>
         abstract FLOAT_MAT4x2: float
+        /// <remarks>TypeScript type: <c>35690</c></remarks>
         abstract FLOAT_MAT4x3: float
+        /// <remarks>TypeScript type: <c>35904</c></remarks>
         abstract SRGB: float
+        /// <remarks>TypeScript type: <c>35905</c></remarks>
         abstract SRGB8: float
+        /// <remarks>TypeScript type: <c>35907</c></remarks>
         abstract SRGB8_ALPHA8: float
+        /// <remarks>TypeScript type: <c>34894</c></remarks>
         abstract COMPARE_REF_TO_TEXTURE: float
+        /// <remarks>TypeScript type: <c>34836</c></remarks>
         abstract RGBA32F: float
+        /// <remarks>TypeScript type: <c>34837</c></remarks>
         abstract RGB32F: float
+        /// <remarks>TypeScript type: <c>34842</c></remarks>
         abstract RGBA16F: float
+        /// <remarks>TypeScript type: <c>34843</c></remarks>
         abstract RGB16F: float
+        /// <remarks>TypeScript type: <c>35069</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_INTEGER: float
+        /// <remarks>TypeScript type: <c>35071</c></remarks>
         abstract MAX_ARRAY_TEXTURE_LAYERS: float
+        /// <remarks>TypeScript type: <c>35076</c></remarks>
         abstract MIN_PROGRAM_TEXEL_OFFSET: float
+        /// <remarks>TypeScript type: <c>35077</c></remarks>
         abstract MAX_PROGRAM_TEXEL_OFFSET: float
+        /// <remarks>TypeScript type: <c>35659</c></remarks>
         abstract MAX_VARYING_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35866</c></remarks>
         abstract TEXTURE_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>35869</c></remarks>
         abstract TEXTURE_BINDING_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>35898</c></remarks>
         abstract R11F_G11F_B10F: float
+        /// <remarks>TypeScript type: <c>35899</c></remarks>
         abstract UNSIGNED_INT_10F_11F_11F_REV: float
+        /// <remarks>TypeScript type: <c>35901</c></remarks>
         abstract RGB9_E5: float
+        /// <remarks>TypeScript type: <c>35902</c></remarks>
         abstract UNSIGNED_INT_5_9_9_9_REV: float
+        /// <remarks>TypeScript type: <c>35967</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER_MODE: float
+        /// <remarks>TypeScript type: <c>35968</c></remarks>
         abstract MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35971</c></remarks>
         abstract TRANSFORM_FEEDBACK_VARYINGS: float
+        /// <remarks>TypeScript type: <c>35972</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER_START: float
+        /// <remarks>TypeScript type: <c>35973</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>35976</c></remarks>
         abstract TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN: float
+        /// <remarks>TypeScript type: <c>35977</c></remarks>
         abstract RASTERIZER_DISCARD: float
+        /// <remarks>TypeScript type: <c>35978</c></remarks>
         abstract MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35979</c></remarks>
         abstract MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>35980</c></remarks>
         abstract INTERLEAVED_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>35981</c></remarks>
         abstract SEPARATE_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>35982</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER: float
+        /// <remarks>TypeScript type: <c>35983</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36208</c></remarks>
         abstract RGBA32UI: float
+        /// <remarks>TypeScript type: <c>36209</c></remarks>
         abstract RGB32UI: float
+        /// <remarks>TypeScript type: <c>36214</c></remarks>
         abstract RGBA16UI: float
+        /// <remarks>TypeScript type: <c>36215</c></remarks>
         abstract RGB16UI: float
+        /// <remarks>TypeScript type: <c>36220</c></remarks>
         abstract RGBA8UI: float
+        /// <remarks>TypeScript type: <c>36221</c></remarks>
         abstract RGB8UI: float
+        /// <remarks>TypeScript type: <c>36226</c></remarks>
         abstract RGBA32I: float
+        /// <remarks>TypeScript type: <c>36227</c></remarks>
         abstract RGB32I: float
+        /// <remarks>TypeScript type: <c>36232</c></remarks>
         abstract RGBA16I: float
+        /// <remarks>TypeScript type: <c>36233</c></remarks>
         abstract RGB16I: float
+        /// <remarks>TypeScript type: <c>36238</c></remarks>
         abstract RGBA8I: float
+        /// <remarks>TypeScript type: <c>36239</c></remarks>
         abstract RGB8I: float
+        /// <remarks>TypeScript type: <c>36244</c></remarks>
         abstract RED_INTEGER: float
+        /// <remarks>TypeScript type: <c>36248</c></remarks>
         abstract RGB_INTEGER: float
+        /// <remarks>TypeScript type: <c>36249</c></remarks>
         abstract RGBA_INTEGER: float
+        /// <remarks>TypeScript type: <c>36289</c></remarks>
         abstract SAMPLER_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>36292</c></remarks>
         abstract SAMPLER_2D_ARRAY_SHADOW: float
+        /// <remarks>TypeScript type: <c>36293</c></remarks>
         abstract SAMPLER_CUBE_SHADOW: float
+        /// <remarks>TypeScript type: <c>36294</c></remarks>
         abstract UNSIGNED_INT_VEC2: float
+        /// <remarks>TypeScript type: <c>36295</c></remarks>
         abstract UNSIGNED_INT_VEC3: float
+        /// <remarks>TypeScript type: <c>36296</c></remarks>
         abstract UNSIGNED_INT_VEC4: float
+        /// <remarks>TypeScript type: <c>36298</c></remarks>
         abstract INT_SAMPLER_2D: float
+        /// <remarks>TypeScript type: <c>36299</c></remarks>
         abstract INT_SAMPLER_3D: float
+        /// <remarks>TypeScript type: <c>36300</c></remarks>
         abstract INT_SAMPLER_CUBE: float
+        /// <remarks>TypeScript type: <c>36303</c></remarks>
         abstract INT_SAMPLER_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>36306</c></remarks>
         abstract UNSIGNED_INT_SAMPLER_2D: float
+        /// <remarks>TypeScript type: <c>36307</c></remarks>
         abstract UNSIGNED_INT_SAMPLER_3D: float
+        /// <remarks>TypeScript type: <c>36308</c></remarks>
         abstract UNSIGNED_INT_SAMPLER_CUBE: float
+        /// <remarks>TypeScript type: <c>36311</c></remarks>
         abstract UNSIGNED_INT_SAMPLER_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>36012</c></remarks>
         abstract DEPTH_COMPONENT32F: float
+        /// <remarks>TypeScript type: <c>36013</c></remarks>
         abstract DEPTH32F_STENCIL8: float
+        /// <remarks>TypeScript type: <c>36269</c></remarks>
         abstract FLOAT_32_UNSIGNED_INT_24_8_REV: float
+        /// <remarks>TypeScript type: <c>33296</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING: float
+        /// <remarks>TypeScript type: <c>33297</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE: float
+        /// <remarks>TypeScript type: <c>33298</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_RED_SIZE: float
+        /// <remarks>TypeScript type: <c>33299</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_GREEN_SIZE: float
+        /// <remarks>TypeScript type: <c>33300</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_BLUE_SIZE: float
+        /// <remarks>TypeScript type: <c>33301</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE: float
+        /// <remarks>TypeScript type: <c>33302</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE: float
+        /// <remarks>TypeScript type: <c>33303</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE: float
+        /// <remarks>TypeScript type: <c>33304</c></remarks>
         abstract FRAMEBUFFER_DEFAULT: float
+        /// <remarks>TypeScript type: <c>34042</c></remarks>
         abstract UNSIGNED_INT_24_8: float
+        /// <remarks>TypeScript type: <c>35056</c></remarks>
         abstract DEPTH24_STENCIL8: float
+        /// <remarks>TypeScript type: <c>35863</c></remarks>
         abstract UNSIGNED_NORMALIZED: float
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
         abstract DRAW_FRAMEBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36008</c></remarks>
         abstract READ_FRAMEBUFFER: float
+        /// <remarks>TypeScript type: <c>36009</c></remarks>
         abstract DRAW_FRAMEBUFFER: float
+        /// <remarks>TypeScript type: <c>36010</c></remarks>
         abstract READ_FRAMEBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36011</c></remarks>
         abstract RENDERBUFFER_SAMPLES: float
+        /// <remarks>TypeScript type: <c>36052</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER: float
+        /// <remarks>TypeScript type: <c>36063</c></remarks>
         abstract MAX_COLOR_ATTACHMENTS: float
+        /// <remarks>TypeScript type: <c>36065</c></remarks>
         abstract COLOR_ATTACHMENT1: float
+        /// <remarks>TypeScript type: <c>36066</c></remarks>
         abstract COLOR_ATTACHMENT2: float
+        /// <remarks>TypeScript type: <c>36067</c></remarks>
         abstract COLOR_ATTACHMENT3: float
+        /// <remarks>TypeScript type: <c>36068</c></remarks>
         abstract COLOR_ATTACHMENT4: float
+        /// <remarks>TypeScript type: <c>36069</c></remarks>
         abstract COLOR_ATTACHMENT5: float
+        /// <remarks>TypeScript type: <c>36070</c></remarks>
         abstract COLOR_ATTACHMENT6: float
+        /// <remarks>TypeScript type: <c>36071</c></remarks>
         abstract COLOR_ATTACHMENT7: float
+        /// <remarks>TypeScript type: <c>36072</c></remarks>
         abstract COLOR_ATTACHMENT8: float
+        /// <remarks>TypeScript type: <c>36073</c></remarks>
         abstract COLOR_ATTACHMENT9: float
+        /// <remarks>TypeScript type: <c>36074</c></remarks>
         abstract COLOR_ATTACHMENT10: float
+        /// <remarks>TypeScript type: <c>36075</c></remarks>
         abstract COLOR_ATTACHMENT11: float
+        /// <remarks>TypeScript type: <c>36076</c></remarks>
         abstract COLOR_ATTACHMENT12: float
+        /// <remarks>TypeScript type: <c>36077</c></remarks>
         abstract COLOR_ATTACHMENT13: float
+        /// <remarks>TypeScript type: <c>36078</c></remarks>
         abstract COLOR_ATTACHMENT14: float
+        /// <remarks>TypeScript type: <c>36079</c></remarks>
         abstract COLOR_ATTACHMENT15: float
+        /// <remarks>TypeScript type: <c>36182</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: float
+        /// <remarks>TypeScript type: <c>36183</c></remarks>
         abstract MAX_SAMPLES: float
+        /// <remarks>TypeScript type: <c>5131</c></remarks>
         abstract HALF_FLOAT: float
+        /// <remarks>TypeScript type: <c>33319</c></remarks>
         abstract RG: float
+        /// <remarks>TypeScript type: <c>33320</c></remarks>
         abstract RG_INTEGER: float
+        /// <remarks>TypeScript type: <c>33321</c></remarks>
         abstract R8: float
+        /// <remarks>TypeScript type: <c>33323</c></remarks>
         abstract RG8: float
+        /// <remarks>TypeScript type: <c>33325</c></remarks>
         abstract R16F: float
+        /// <remarks>TypeScript type: <c>33326</c></remarks>
         abstract R32F: float
+        /// <remarks>TypeScript type: <c>33327</c></remarks>
         abstract RG16F: float
+        /// <remarks>TypeScript type: <c>33328</c></remarks>
         abstract RG32F: float
+        /// <remarks>TypeScript type: <c>33329</c></remarks>
         abstract R8I: float
+        /// <remarks>TypeScript type: <c>33330</c></remarks>
         abstract R8UI: float
+        /// <remarks>TypeScript type: <c>33331</c></remarks>
         abstract R16I: float
+        /// <remarks>TypeScript type: <c>33332</c></remarks>
         abstract R16UI: float
+        /// <remarks>TypeScript type: <c>33333</c></remarks>
         abstract R32I: float
+        /// <remarks>TypeScript type: <c>33334</c></remarks>
         abstract R32UI: float
+        /// <remarks>TypeScript type: <c>33335</c></remarks>
         abstract RG8I: float
+        /// <remarks>TypeScript type: <c>33336</c></remarks>
         abstract RG8UI: float
+        /// <remarks>TypeScript type: <c>33337</c></remarks>
         abstract RG16I: float
+        /// <remarks>TypeScript type: <c>33338</c></remarks>
         abstract RG16UI: float
+        /// <remarks>TypeScript type: <c>33339</c></remarks>
         abstract RG32I: float
+        /// <remarks>TypeScript type: <c>33340</c></remarks>
         abstract RG32UI: float
+        /// <remarks>TypeScript type: <c>34229</c></remarks>
         abstract VERTEX_ARRAY_BINDING: float
+        /// <remarks>TypeScript type: <c>36756</c></remarks>
         abstract R8_SNORM: float
+        /// <remarks>TypeScript type: <c>36757</c></remarks>
         abstract RG8_SNORM: float
+        /// <remarks>TypeScript type: <c>36758</c></remarks>
         abstract RGB8_SNORM: float
+        /// <remarks>TypeScript type: <c>36759</c></remarks>
         abstract RGBA8_SNORM: float
+        /// <remarks>TypeScript type: <c>36764</c></remarks>
         abstract SIGNED_NORMALIZED: float
+        /// <remarks>TypeScript type: <c>36662</c></remarks>
         abstract COPY_READ_BUFFER: float
+        /// <remarks>TypeScript type: <c>36663</c></remarks>
         abstract COPY_WRITE_BUFFER: float
+        /// <remarks>TypeScript type: <c>36662</c></remarks>
         abstract COPY_READ_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36663</c></remarks>
         abstract COPY_WRITE_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35345</c></remarks>
         abstract UNIFORM_BUFFER: float
+        /// <remarks>TypeScript type: <c>35368</c></remarks>
         abstract UNIFORM_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35369</c></remarks>
         abstract UNIFORM_BUFFER_START: float
+        /// <remarks>TypeScript type: <c>35370</c></remarks>
         abstract UNIFORM_BUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>35371</c></remarks>
         abstract MAX_VERTEX_UNIFORM_BLOCKS: float
+        /// <remarks>TypeScript type: <c>35373</c></remarks>
         abstract MAX_FRAGMENT_UNIFORM_BLOCKS: float
+        /// <remarks>TypeScript type: <c>35374</c></remarks>
         abstract MAX_COMBINED_UNIFORM_BLOCKS: float
+        /// <remarks>TypeScript type: <c>35375</c></remarks>
         abstract MAX_UNIFORM_BUFFER_BINDINGS: float
+        /// <remarks>TypeScript type: <c>35376</c></remarks>
         abstract MAX_UNIFORM_BLOCK_SIZE: float
+        /// <remarks>TypeScript type: <c>35377</c></remarks>
         abstract MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35379</c></remarks>
         abstract MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35380</c></remarks>
         abstract UNIFORM_BUFFER_OFFSET_ALIGNMENT: float
+        /// <remarks>TypeScript type: <c>35382</c></remarks>
         abstract ACTIVE_UNIFORM_BLOCKS: float
+        /// <remarks>TypeScript type: <c>35383</c></remarks>
         abstract UNIFORM_TYPE: float
+        /// <remarks>TypeScript type: <c>35384</c></remarks>
         abstract UNIFORM_SIZE: float
+        /// <remarks>TypeScript type: <c>35386</c></remarks>
         abstract UNIFORM_BLOCK_INDEX: float
+        /// <remarks>TypeScript type: <c>35387</c></remarks>
         abstract UNIFORM_OFFSET: float
+        /// <remarks>TypeScript type: <c>35388</c></remarks>
         abstract UNIFORM_ARRAY_STRIDE: float
+        /// <remarks>TypeScript type: <c>35389</c></remarks>
         abstract UNIFORM_MATRIX_STRIDE: float
+        /// <remarks>TypeScript type: <c>35390</c></remarks>
         abstract UNIFORM_IS_ROW_MAJOR: float
+        /// <remarks>TypeScript type: <c>35391</c></remarks>
         abstract UNIFORM_BLOCK_BINDING: float
+        /// <remarks>TypeScript type: <c>35392</c></remarks>
         abstract UNIFORM_BLOCK_DATA_SIZE: float
+        /// <remarks>TypeScript type: <c>35394</c></remarks>
         abstract UNIFORM_BLOCK_ACTIVE_UNIFORMS: float
+        /// <remarks>TypeScript type: <c>35395</c></remarks>
         abstract UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES: float
+        /// <remarks>TypeScript type: <c>35396</c></remarks>
         abstract UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER: float
+        /// <remarks>TypeScript type: <c>35398</c></remarks>
         abstract UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER: float
+        /// <remarks>TypeScript type: <c>4294967295</c></remarks>
         abstract INVALID_INDEX: float
+        /// <remarks>TypeScript type: <c>37154</c></remarks>
         abstract MAX_VERTEX_OUTPUT_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>37157</c></remarks>
         abstract MAX_FRAGMENT_INPUT_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>37137</c></remarks>
         abstract MAX_SERVER_WAIT_TIMEOUT: float
+        /// <remarks>TypeScript type: <c>37138</c></remarks>
         abstract OBJECT_TYPE: float
+        /// <remarks>TypeScript type: <c>37139</c></remarks>
         abstract SYNC_CONDITION: float
+        /// <remarks>TypeScript type: <c>37140</c></remarks>
         abstract SYNC_STATUS: float
+        /// <remarks>TypeScript type: <c>37141</c></remarks>
         abstract SYNC_FLAGS: float
+        /// <remarks>TypeScript type: <c>37142</c></remarks>
         abstract SYNC_FENCE: float
+        /// <remarks>TypeScript type: <c>37143</c></remarks>
         abstract SYNC_GPU_COMMANDS_COMPLETE: float
+        /// <remarks>TypeScript type: <c>37144</c></remarks>
         abstract UNSIGNALED: float
+        /// <remarks>TypeScript type: <c>37145</c></remarks>
         abstract SIGNALED: float
+        /// <remarks>TypeScript type: <c>37146</c></remarks>
         abstract ALREADY_SIGNALED: float
+        /// <remarks>TypeScript type: <c>37147</c></remarks>
         abstract TIMEOUT_EXPIRED: float
+        /// <remarks>TypeScript type: <c>37148</c></remarks>
         abstract CONDITION_SATISFIED: float
+        /// <remarks>TypeScript type: <c>37149</c></remarks>
         abstract WAIT_FAILED: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SYNC_FLUSH_COMMANDS_BIT: float
+        /// <remarks>TypeScript type: <c>35070</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_DIVISOR: float
+        /// <remarks>TypeScript type: <c>35887</c></remarks>
         abstract ANY_SAMPLES_PASSED: float
+        /// <remarks>TypeScript type: <c>36202</c></remarks>
         abstract ANY_SAMPLES_PASSED_CONSERVATIVE: float
+        /// <remarks>TypeScript type: <c>35097</c></remarks>
         abstract SAMPLER_BINDING: float
+        /// <remarks>TypeScript type: <c>36975</c></remarks>
         abstract RGB10_A2UI: float
+        /// <remarks>TypeScript type: <c>36255</c></remarks>
         abstract INT_2_10_10_10_REV: float
+        /// <remarks>TypeScript type: <c>36386</c></remarks>
         abstract TRANSFORM_FEEDBACK: float
+        /// <remarks>TypeScript type: <c>36387</c></remarks>
         abstract TRANSFORM_FEEDBACK_PAUSED: float
+        /// <remarks>TypeScript type: <c>36388</c></remarks>
         abstract TRANSFORM_FEEDBACK_ACTIVE: float
+        /// <remarks>TypeScript type: <c>36389</c></remarks>
         abstract TRANSFORM_FEEDBACK_BINDING: float
+        /// <remarks>TypeScript type: <c>37167</c></remarks>
         abstract TEXTURE_IMMUTABLE_FORMAT: float
+        /// <remarks>TypeScript type: <c>36203</c></remarks>
         abstract MAX_ELEMENT_INDEX: float
+        /// <remarks>TypeScript type: <c>33503</c></remarks>
         abstract TEXTURE_IMMUTABLE_LEVELS: float
+        /// <remarks>TypeScript type: <c>-1</c></remarks>
         abstract TIMEOUT_IGNORED: float
+        /// <remarks>TypeScript type: <c>37447</c></remarks>
         abstract MAX_CLIENT_WAIT_TIMEOUT_WEBGL: float
+        /// <remarks>TypeScript type: <c>256</c></remarks>
         abstract DEPTH_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>1024</c></remarks>
         abstract STENCIL_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>16384</c></remarks>
         abstract COLOR_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract POINTS: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LINES: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract LINE_LOOP: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract LINE_STRIP: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract TRIANGLES: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract TRIANGLE_STRIP: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract TRIANGLE_FAN: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract ZERO: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract ONE: float
+        /// <remarks>TypeScript type: <c>768</c></remarks>
         abstract SRC_COLOR: float
+        /// <remarks>TypeScript type: <c>769</c></remarks>
         abstract ONE_MINUS_SRC_COLOR: float
+        /// <remarks>TypeScript type: <c>770</c></remarks>
         abstract SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>771</c></remarks>
         abstract ONE_MINUS_SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>772</c></remarks>
         abstract DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>773</c></remarks>
         abstract ONE_MINUS_DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>774</c></remarks>
         abstract DST_COLOR: float
+        /// <remarks>TypeScript type: <c>775</c></remarks>
         abstract ONE_MINUS_DST_COLOR: float
+        /// <remarks>TypeScript type: <c>776</c></remarks>
         abstract SRC_ALPHA_SATURATE: float
+        /// <remarks>TypeScript type: <c>32774</c></remarks>
         abstract FUNC_ADD: float
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
         abstract BLEND_EQUATION: float
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
         abstract BLEND_EQUATION_RGB: float
+        /// <remarks>TypeScript type: <c>34877</c></remarks>
         abstract BLEND_EQUATION_ALPHA: float
+        /// <remarks>TypeScript type: <c>32778</c></remarks>
         abstract FUNC_SUBTRACT: float
+        /// <remarks>TypeScript type: <c>32779</c></remarks>
         abstract FUNC_REVERSE_SUBTRACT: float
+        /// <remarks>TypeScript type: <c>32968</c></remarks>
         abstract BLEND_DST_RGB: float
+        /// <remarks>TypeScript type: <c>32969</c></remarks>
         abstract BLEND_SRC_RGB: float
+        /// <remarks>TypeScript type: <c>32970</c></remarks>
         abstract BLEND_DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>32971</c></remarks>
         abstract BLEND_SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>32769</c></remarks>
         abstract CONSTANT_COLOR: float
+        /// <remarks>TypeScript type: <c>32770</c></remarks>
         abstract ONE_MINUS_CONSTANT_COLOR: float
+        /// <remarks>TypeScript type: <c>32771</c></remarks>
         abstract CONSTANT_ALPHA: float
+        /// <remarks>TypeScript type: <c>32772</c></remarks>
         abstract ONE_MINUS_CONSTANT_ALPHA: float
+        /// <remarks>TypeScript type: <c>32773</c></remarks>
         abstract BLEND_COLOR: float
+        /// <remarks>TypeScript type: <c>34962</c></remarks>
         abstract ARRAY_BUFFER: float
+        /// <remarks>TypeScript type: <c>34963</c></remarks>
         abstract ELEMENT_ARRAY_BUFFER: float
+        /// <remarks>TypeScript type: <c>34964</c></remarks>
         abstract ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>34965</c></remarks>
         abstract ELEMENT_ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35040</c></remarks>
         abstract STREAM_DRAW: float
+        /// <remarks>TypeScript type: <c>35044</c></remarks>
         abstract STATIC_DRAW: float
+        /// <remarks>TypeScript type: <c>35048</c></remarks>
         abstract DYNAMIC_DRAW: float
+        /// <remarks>TypeScript type: <c>34660</c></remarks>
         abstract BUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>34661</c></remarks>
         abstract BUFFER_USAGE: float
+        /// <remarks>TypeScript type: <c>34342</c></remarks>
         abstract CURRENT_VERTEX_ATTRIB: float
+        /// <remarks>TypeScript type: <c>1028</c></remarks>
         abstract FRONT: float
+        /// <remarks>TypeScript type: <c>1029</c></remarks>
         abstract BACK: float
+        /// <remarks>TypeScript type: <c>1032</c></remarks>
         abstract FRONT_AND_BACK: float
+        /// <remarks>TypeScript type: <c>2884</c></remarks>
         abstract CULL_FACE: float
+        /// <remarks>TypeScript type: <c>3042</c></remarks>
         abstract BLEND: float
+        /// <remarks>TypeScript type: <c>3024</c></remarks>
         abstract DITHER: float
+        /// <remarks>TypeScript type: <c>2960</c></remarks>
         abstract STENCIL_TEST: float
+        /// <remarks>TypeScript type: <c>2929</c></remarks>
         abstract DEPTH_TEST: float
+        /// <remarks>TypeScript type: <c>3089</c></remarks>
         abstract SCISSOR_TEST: float
+        /// <remarks>TypeScript type: <c>32823</c></remarks>
         abstract POLYGON_OFFSET_FILL: float
+        /// <remarks>TypeScript type: <c>32926</c></remarks>
         abstract SAMPLE_ALPHA_TO_COVERAGE: float
+        /// <remarks>TypeScript type: <c>32928</c></remarks>
         abstract SAMPLE_COVERAGE: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NO_ERROR: float
+        /// <remarks>TypeScript type: <c>1280</c></remarks>
         abstract INVALID_ENUM: float
+        /// <remarks>TypeScript type: <c>1281</c></remarks>
         abstract INVALID_VALUE: float
+        /// <remarks>TypeScript type: <c>1282</c></remarks>
         abstract INVALID_OPERATION: float
+        /// <remarks>TypeScript type: <c>1285</c></remarks>
         abstract OUT_OF_MEMORY: float
+        /// <remarks>TypeScript type: <c>2304</c></remarks>
         abstract CW: float
+        /// <remarks>TypeScript type: <c>2305</c></remarks>
         abstract CCW: float
+        /// <remarks>TypeScript type: <c>2849</c></remarks>
         abstract LINE_WIDTH: float
+        /// <remarks>TypeScript type: <c>33901</c></remarks>
         abstract ALIASED_POINT_SIZE_RANGE: float
+        /// <remarks>TypeScript type: <c>33902</c></remarks>
         abstract ALIASED_LINE_WIDTH_RANGE: float
+        /// <remarks>TypeScript type: <c>2885</c></remarks>
         abstract CULL_FACE_MODE: float
+        /// <remarks>TypeScript type: <c>2886</c></remarks>
         abstract FRONT_FACE: float
+        /// <remarks>TypeScript type: <c>2928</c></remarks>
         abstract DEPTH_RANGE: float
+        /// <remarks>TypeScript type: <c>2930</c></remarks>
         abstract DEPTH_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>2931</c></remarks>
         abstract DEPTH_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>2932</c></remarks>
         abstract DEPTH_FUNC: float
+        /// <remarks>TypeScript type: <c>2961</c></remarks>
         abstract STENCIL_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>2962</c></remarks>
         abstract STENCIL_FUNC: float
+        /// <remarks>TypeScript type: <c>2964</c></remarks>
         abstract STENCIL_FAIL: float
+        /// <remarks>TypeScript type: <c>2965</c></remarks>
         abstract STENCIL_PASS_DEPTH_FAIL: float
+        /// <remarks>TypeScript type: <c>2966</c></remarks>
         abstract STENCIL_PASS_DEPTH_PASS: float
+        /// <remarks>TypeScript type: <c>2967</c></remarks>
         abstract STENCIL_REF: float
+        /// <remarks>TypeScript type: <c>2963</c></remarks>
         abstract STENCIL_VALUE_MASK: float
+        /// <remarks>TypeScript type: <c>2968</c></remarks>
         abstract STENCIL_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>34816</c></remarks>
         abstract STENCIL_BACK_FUNC: float
+        /// <remarks>TypeScript type: <c>34817</c></remarks>
         abstract STENCIL_BACK_FAIL: float
+        /// <remarks>TypeScript type: <c>34818</c></remarks>
         abstract STENCIL_BACK_PASS_DEPTH_FAIL: float
+        /// <remarks>TypeScript type: <c>34819</c></remarks>
         abstract STENCIL_BACK_PASS_DEPTH_PASS: float
+        /// <remarks>TypeScript type: <c>36003</c></remarks>
         abstract STENCIL_BACK_REF: float
+        /// <remarks>TypeScript type: <c>36004</c></remarks>
         abstract STENCIL_BACK_VALUE_MASK: float
+        /// <remarks>TypeScript type: <c>36005</c></remarks>
         abstract STENCIL_BACK_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>2978</c></remarks>
         abstract VIEWPORT: float
+        /// <remarks>TypeScript type: <c>3088</c></remarks>
         abstract SCISSOR_BOX: float
+        /// <remarks>TypeScript type: <c>3106</c></remarks>
         abstract COLOR_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>3107</c></remarks>
         abstract COLOR_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>3317</c></remarks>
         abstract UNPACK_ALIGNMENT: float
+        /// <remarks>TypeScript type: <c>3333</c></remarks>
         abstract PACK_ALIGNMENT: float
+        /// <remarks>TypeScript type: <c>3379</c></remarks>
         abstract MAX_TEXTURE_SIZE: float
+        /// <remarks>TypeScript type: <c>3386</c></remarks>
         abstract MAX_VIEWPORT_DIMS: float
+        /// <remarks>TypeScript type: <c>3408</c></remarks>
         abstract SUBPIXEL_BITS: float
+        /// <remarks>TypeScript type: <c>3410</c></remarks>
         abstract RED_BITS: float
+        /// <remarks>TypeScript type: <c>3411</c></remarks>
         abstract GREEN_BITS: float
+        /// <remarks>TypeScript type: <c>3412</c></remarks>
         abstract BLUE_BITS: float
+        /// <remarks>TypeScript type: <c>3413</c></remarks>
         abstract ALPHA_BITS: float
+        /// <remarks>TypeScript type: <c>3414</c></remarks>
         abstract DEPTH_BITS: float
+        /// <remarks>TypeScript type: <c>3415</c></remarks>
         abstract STENCIL_BITS: float
+        /// <remarks>TypeScript type: <c>10752</c></remarks>
         abstract POLYGON_OFFSET_UNITS: float
+        /// <remarks>TypeScript type: <c>32824</c></remarks>
         abstract POLYGON_OFFSET_FACTOR: float
+        /// <remarks>TypeScript type: <c>32873</c></remarks>
         abstract TEXTURE_BINDING_2D: float
+        /// <remarks>TypeScript type: <c>32936</c></remarks>
         abstract SAMPLE_BUFFERS: float
+        /// <remarks>TypeScript type: <c>32937</c></remarks>
         abstract SAMPLES: float
+        /// <remarks>TypeScript type: <c>32938</c></remarks>
         abstract SAMPLE_COVERAGE_VALUE: float
+        /// <remarks>TypeScript type: <c>32939</c></remarks>
         abstract SAMPLE_COVERAGE_INVERT: float
+        /// <remarks>TypeScript type: <c>34467</c></remarks>
         abstract COMPRESSED_TEXTURE_FORMATS: float
+        /// <remarks>TypeScript type: <c>4352</c></remarks>
         abstract DONT_CARE: float
+        /// <remarks>TypeScript type: <c>4353</c></remarks>
         abstract FASTEST: float
+        /// <remarks>TypeScript type: <c>4354</c></remarks>
         abstract NICEST: float
+        /// <remarks>TypeScript type: <c>33170</c></remarks>
         abstract GENERATE_MIPMAP_HINT: float
+        /// <remarks>TypeScript type: <c>5120</c></remarks>
         abstract BYTE: float
+        /// <remarks>TypeScript type: <c>5121</c></remarks>
         abstract UNSIGNED_BYTE: float
+        /// <remarks>TypeScript type: <c>5122</c></remarks>
         abstract SHORT: float
+        /// <remarks>TypeScript type: <c>5123</c></remarks>
         abstract UNSIGNED_SHORT: float
+        /// <remarks>TypeScript type: <c>5124</c></remarks>
         abstract INT: float
+        /// <remarks>TypeScript type: <c>5125</c></remarks>
         abstract UNSIGNED_INT: float
+        /// <remarks>TypeScript type: <c>5126</c></remarks>
         abstract FLOAT: float
+        /// <remarks>TypeScript type: <c>6402</c></remarks>
         abstract DEPTH_COMPONENT: float
+        /// <remarks>TypeScript type: <c>6406</c></remarks>
         abstract ALPHA: float
+        /// <remarks>TypeScript type: <c>6407</c></remarks>
         abstract RGB: float
+        /// <remarks>TypeScript type: <c>6408</c></remarks>
         abstract RGBA: float
+        /// <remarks>TypeScript type: <c>6409</c></remarks>
         abstract LUMINANCE: float
+        /// <remarks>TypeScript type: <c>6410</c></remarks>
         abstract LUMINANCE_ALPHA: float
+        /// <remarks>TypeScript type: <c>32819</c></remarks>
         abstract UNSIGNED_SHORT_4_4_4_4: float
+        /// <remarks>TypeScript type: <c>32820</c></remarks>
         abstract UNSIGNED_SHORT_5_5_5_1: float
+        /// <remarks>TypeScript type: <c>33635</c></remarks>
         abstract UNSIGNED_SHORT_5_6_5: float
+        /// <remarks>TypeScript type: <c>35632</c></remarks>
         abstract FRAGMENT_SHADER: float
+        /// <remarks>TypeScript type: <c>35633</c></remarks>
         abstract VERTEX_SHADER: float
+        /// <remarks>TypeScript type: <c>34921</c></remarks>
         abstract MAX_VERTEX_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>36347</c></remarks>
         abstract MAX_VERTEX_UNIFORM_VECTORS: float
+        /// <remarks>TypeScript type: <c>36348</c></remarks>
         abstract MAX_VARYING_VECTORS: float
+        /// <remarks>TypeScript type: <c>35661</c></remarks>
         abstract MAX_COMBINED_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>35660</c></remarks>
         abstract MAX_VERTEX_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>34930</c></remarks>
         abstract MAX_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>36349</c></remarks>
         abstract MAX_FRAGMENT_UNIFORM_VECTORS: float
+        /// <remarks>TypeScript type: <c>35663</c></remarks>
         abstract SHADER_TYPE: float
+        /// <remarks>TypeScript type: <c>35712</c></remarks>
         abstract DELETE_STATUS: float
+        /// <remarks>TypeScript type: <c>35714</c></remarks>
         abstract LINK_STATUS: float
+        /// <remarks>TypeScript type: <c>35715</c></remarks>
         abstract VALIDATE_STATUS: float
+        /// <remarks>TypeScript type: <c>35717</c></remarks>
         abstract ATTACHED_SHADERS: float
+        /// <remarks>TypeScript type: <c>35718</c></remarks>
         abstract ACTIVE_UNIFORMS: float
+        /// <remarks>TypeScript type: <c>35721</c></remarks>
         abstract ACTIVE_ATTRIBUTES: float
+        /// <remarks>TypeScript type: <c>35724</c></remarks>
         abstract SHADING_LANGUAGE_VERSION: float
+        /// <remarks>TypeScript type: <c>35725</c></remarks>
         abstract CURRENT_PROGRAM: float
+        /// <remarks>TypeScript type: <c>512</c></remarks>
         abstract NEVER: float
+        /// <remarks>TypeScript type: <c>513</c></remarks>
         abstract LESS: float
+        /// <remarks>TypeScript type: <c>514</c></remarks>
         abstract EQUAL: float
+        /// <remarks>TypeScript type: <c>515</c></remarks>
         abstract LEQUAL: float
+        /// <remarks>TypeScript type: <c>516</c></remarks>
         abstract GREATER: float
+        /// <remarks>TypeScript type: <c>517</c></remarks>
         abstract NOTEQUAL: float
+        /// <remarks>TypeScript type: <c>518</c></remarks>
         abstract GEQUAL: float
+        /// <remarks>TypeScript type: <c>519</c></remarks>
         abstract ALWAYS: float
+        /// <remarks>TypeScript type: <c>7680</c></remarks>
         abstract KEEP: float
+        /// <remarks>TypeScript type: <c>7681</c></remarks>
         abstract REPLACE: float
+        /// <remarks>TypeScript type: <c>7682</c></remarks>
         abstract INCR: float
+        /// <remarks>TypeScript type: <c>7683</c></remarks>
         abstract DECR: float
+        /// <remarks>TypeScript type: <c>5386</c></remarks>
         abstract INVERT: float
+        /// <remarks>TypeScript type: <c>34055</c></remarks>
         abstract INCR_WRAP: float
+        /// <remarks>TypeScript type: <c>34056</c></remarks>
         abstract DECR_WRAP: float
+        /// <remarks>TypeScript type: <c>7936</c></remarks>
         abstract VENDOR: float
+        /// <remarks>TypeScript type: <c>7937</c></remarks>
         abstract RENDERER: float
+        /// <remarks>TypeScript type: <c>7938</c></remarks>
         abstract VERSION: float
+        /// <remarks>TypeScript type: <c>9728</c></remarks>
         abstract NEAREST: float
+        /// <remarks>TypeScript type: <c>9729</c></remarks>
         abstract LINEAR: float
+        /// <remarks>TypeScript type: <c>9984</c></remarks>
         abstract NEAREST_MIPMAP_NEAREST: float
+        /// <remarks>TypeScript type: <c>9985</c></remarks>
         abstract LINEAR_MIPMAP_NEAREST: float
+        /// <remarks>TypeScript type: <c>9986</c></remarks>
         abstract NEAREST_MIPMAP_LINEAR: float
+        /// <remarks>TypeScript type: <c>9987</c></remarks>
         abstract LINEAR_MIPMAP_LINEAR: float
+        /// <remarks>TypeScript type: <c>10240</c></remarks>
         abstract TEXTURE_MAG_FILTER: float
+        /// <remarks>TypeScript type: <c>10241</c></remarks>
         abstract TEXTURE_MIN_FILTER: float
+        /// <remarks>TypeScript type: <c>10242</c></remarks>
         abstract TEXTURE_WRAP_S: float
+        /// <remarks>TypeScript type: <c>10243</c></remarks>
         abstract TEXTURE_WRAP_T: float
+        /// <remarks>TypeScript type: <c>3553</c></remarks>
         abstract TEXTURE_2D: float
+        /// <remarks>TypeScript type: <c>5890</c></remarks>
         abstract TEXTURE: float
+        /// <remarks>TypeScript type: <c>34067</c></remarks>
         abstract TEXTURE_CUBE_MAP: float
+        /// <remarks>TypeScript type: <c>34068</c></remarks>
         abstract TEXTURE_BINDING_CUBE_MAP: float
+        /// <remarks>TypeScript type: <c>34069</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_X: float
+        /// <remarks>TypeScript type: <c>34070</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_X: float
+        /// <remarks>TypeScript type: <c>34071</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_Y: float
+        /// <remarks>TypeScript type: <c>34072</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_Y: float
+        /// <remarks>TypeScript type: <c>34073</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_Z: float
+        /// <remarks>TypeScript type: <c>34074</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_Z: float
+        /// <remarks>TypeScript type: <c>34076</c></remarks>
         abstract MAX_CUBE_MAP_TEXTURE_SIZE: float
+        /// <remarks>TypeScript type: <c>33984</c></remarks>
         abstract TEXTURE0: float
+        /// <remarks>TypeScript type: <c>33985</c></remarks>
         abstract TEXTURE1: float
+        /// <remarks>TypeScript type: <c>33986</c></remarks>
         abstract TEXTURE2: float
+        /// <remarks>TypeScript type: <c>33987</c></remarks>
         abstract TEXTURE3: float
+        /// <remarks>TypeScript type: <c>33988</c></remarks>
         abstract TEXTURE4: float
+        /// <remarks>TypeScript type: <c>33989</c></remarks>
         abstract TEXTURE5: float
+        /// <remarks>TypeScript type: <c>33990</c></remarks>
         abstract TEXTURE6: float
+        /// <remarks>TypeScript type: <c>33991</c></remarks>
         abstract TEXTURE7: float
+        /// <remarks>TypeScript type: <c>33992</c></remarks>
         abstract TEXTURE8: float
+        /// <remarks>TypeScript type: <c>33993</c></remarks>
         abstract TEXTURE9: float
+        /// <remarks>TypeScript type: <c>33994</c></remarks>
         abstract TEXTURE10: float
+        /// <remarks>TypeScript type: <c>33995</c></remarks>
         abstract TEXTURE11: float
+        /// <remarks>TypeScript type: <c>33996</c></remarks>
         abstract TEXTURE12: float
+        /// <remarks>TypeScript type: <c>33997</c></remarks>
         abstract TEXTURE13: float
+        /// <remarks>TypeScript type: <c>33998</c></remarks>
         abstract TEXTURE14: float
+        /// <remarks>TypeScript type: <c>33999</c></remarks>
         abstract TEXTURE15: float
+        /// <remarks>TypeScript type: <c>34000</c></remarks>
         abstract TEXTURE16: float
+        /// <remarks>TypeScript type: <c>34001</c></remarks>
         abstract TEXTURE17: float
+        /// <remarks>TypeScript type: <c>34002</c></remarks>
         abstract TEXTURE18: float
+        /// <remarks>TypeScript type: <c>34003</c></remarks>
         abstract TEXTURE19: float
+        /// <remarks>TypeScript type: <c>34004</c></remarks>
         abstract TEXTURE20: float
+        /// <remarks>TypeScript type: <c>34005</c></remarks>
         abstract TEXTURE21: float
+        /// <remarks>TypeScript type: <c>34006</c></remarks>
         abstract TEXTURE22: float
+        /// <remarks>TypeScript type: <c>34007</c></remarks>
         abstract TEXTURE23: float
+        /// <remarks>TypeScript type: <c>34008</c></remarks>
         abstract TEXTURE24: float
+        /// <remarks>TypeScript type: <c>34009</c></remarks>
         abstract TEXTURE25: float
+        /// <remarks>TypeScript type: <c>34010</c></remarks>
         abstract TEXTURE26: float
+        /// <remarks>TypeScript type: <c>34011</c></remarks>
         abstract TEXTURE27: float
+        /// <remarks>TypeScript type: <c>34012</c></remarks>
         abstract TEXTURE28: float
+        /// <remarks>TypeScript type: <c>34013</c></remarks>
         abstract TEXTURE29: float
+        /// <remarks>TypeScript type: <c>34014</c></remarks>
         abstract TEXTURE30: float
+        /// <remarks>TypeScript type: <c>34015</c></remarks>
         abstract TEXTURE31: float
+        /// <remarks>TypeScript type: <c>34016</c></remarks>
         abstract ACTIVE_TEXTURE: float
+        /// <remarks>TypeScript type: <c>10497</c></remarks>
         abstract REPEAT: float
+        /// <remarks>TypeScript type: <c>33071</c></remarks>
         abstract CLAMP_TO_EDGE: float
+        /// <remarks>TypeScript type: <c>33648</c></remarks>
         abstract MIRRORED_REPEAT: float
+        /// <remarks>TypeScript type: <c>35664</c></remarks>
         abstract FLOAT_VEC2: float
+        /// <remarks>TypeScript type: <c>35665</c></remarks>
         abstract FLOAT_VEC3: float
+        /// <remarks>TypeScript type: <c>35666</c></remarks>
         abstract FLOAT_VEC4: float
+        /// <remarks>TypeScript type: <c>35667</c></remarks>
         abstract INT_VEC2: float
+        /// <remarks>TypeScript type: <c>35668</c></remarks>
         abstract INT_VEC3: float
+        /// <remarks>TypeScript type: <c>35669</c></remarks>
         abstract INT_VEC4: float
+        /// <remarks>TypeScript type: <c>35670</c></remarks>
         abstract BOOL: float
+        /// <remarks>TypeScript type: <c>35671</c></remarks>
         abstract BOOL_VEC2: float
+        /// <remarks>TypeScript type: <c>35672</c></remarks>
         abstract BOOL_VEC3: float
+        /// <remarks>TypeScript type: <c>35673</c></remarks>
         abstract BOOL_VEC4: float
+        /// <remarks>TypeScript type: <c>35674</c></remarks>
         abstract FLOAT_MAT2: float
+        /// <remarks>TypeScript type: <c>35675</c></remarks>
         abstract FLOAT_MAT3: float
+        /// <remarks>TypeScript type: <c>35676</c></remarks>
         abstract FLOAT_MAT4: float
+        /// <remarks>TypeScript type: <c>35678</c></remarks>
         abstract SAMPLER_2D: float
+        /// <remarks>TypeScript type: <c>35680</c></remarks>
         abstract SAMPLER_CUBE: float
+        /// <remarks>TypeScript type: <c>34338</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_ENABLED: float
+        /// <remarks>TypeScript type: <c>34339</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_SIZE: float
+        /// <remarks>TypeScript type: <c>34340</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_STRIDE: float
+        /// <remarks>TypeScript type: <c>34341</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_TYPE: float
+        /// <remarks>TypeScript type: <c>34922</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_NORMALIZED: float
+        /// <remarks>TypeScript type: <c>34373</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_POINTER: float
+        /// <remarks>TypeScript type: <c>34975</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35738</c></remarks>
         abstract IMPLEMENTATION_COLOR_READ_TYPE: float
+        /// <remarks>TypeScript type: <c>35739</c></remarks>
         abstract IMPLEMENTATION_COLOR_READ_FORMAT: float
+        /// <remarks>TypeScript type: <c>35713</c></remarks>
         abstract COMPILE_STATUS: float
+        /// <remarks>TypeScript type: <c>36336</c></remarks>
         abstract LOW_FLOAT: float
+        /// <remarks>TypeScript type: <c>36337</c></remarks>
         abstract MEDIUM_FLOAT: float
+        /// <remarks>TypeScript type: <c>36338</c></remarks>
         abstract HIGH_FLOAT: float
+        /// <remarks>TypeScript type: <c>36339</c></remarks>
         abstract LOW_INT: float
+        /// <remarks>TypeScript type: <c>36340</c></remarks>
         abstract MEDIUM_INT: float
+        /// <remarks>TypeScript type: <c>36341</c></remarks>
         abstract HIGH_INT: float
+        /// <remarks>TypeScript type: <c>36160</c></remarks>
         abstract FRAMEBUFFER: float
+        /// <remarks>TypeScript type: <c>36161</c></remarks>
         abstract RENDERBUFFER: float
+        /// <remarks>TypeScript type: <c>32854</c></remarks>
         abstract RGBA4: float
+        /// <remarks>TypeScript type: <c>32855</c></remarks>
         abstract RGB5_A1: float
+        /// <remarks>TypeScript type: <c>32856</c></remarks>
         abstract RGBA8: float
+        /// <remarks>TypeScript type: <c>36194</c></remarks>
         abstract RGB565: float
+        /// <remarks>TypeScript type: <c>33189</c></remarks>
         abstract DEPTH_COMPONENT16: float
+        /// <remarks>TypeScript type: <c>36168</c></remarks>
         abstract STENCIL_INDEX8: float
+        /// <remarks>TypeScript type: <c>34041</c></remarks>
         abstract DEPTH_STENCIL: float
+        /// <remarks>TypeScript type: <c>36162</c></remarks>
         abstract RENDERBUFFER_WIDTH: float
+        /// <remarks>TypeScript type: <c>36163</c></remarks>
         abstract RENDERBUFFER_HEIGHT: float
+        /// <remarks>TypeScript type: <c>36164</c></remarks>
         abstract RENDERBUFFER_INTERNAL_FORMAT: float
+        /// <remarks>TypeScript type: <c>36176</c></remarks>
         abstract RENDERBUFFER_RED_SIZE: float
+        /// <remarks>TypeScript type: <c>36177</c></remarks>
         abstract RENDERBUFFER_GREEN_SIZE: float
+        /// <remarks>TypeScript type: <c>36178</c></remarks>
         abstract RENDERBUFFER_BLUE_SIZE: float
+        /// <remarks>TypeScript type: <c>36179</c></remarks>
         abstract RENDERBUFFER_ALPHA_SIZE: float
+        /// <remarks>TypeScript type: <c>36180</c></remarks>
         abstract RENDERBUFFER_DEPTH_SIZE: float
+        /// <remarks>TypeScript type: <c>36181</c></remarks>
         abstract RENDERBUFFER_STENCIL_SIZE: float
+        /// <remarks>TypeScript type: <c>36048</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE: float
+        /// <remarks>TypeScript type: <c>36049</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_OBJECT_NAME: float
+        /// <remarks>TypeScript type: <c>36050</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL: float
+        /// <remarks>TypeScript type: <c>36051</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE: float
+        /// <remarks>TypeScript type: <c>36064</c></remarks>
         abstract COLOR_ATTACHMENT0: float
+        /// <remarks>TypeScript type: <c>36096</c></remarks>
         abstract DEPTH_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36128</c></remarks>
         abstract STENCIL_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>33306</c></remarks>
         abstract DEPTH_STENCIL_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NONE: float
+        /// <remarks>TypeScript type: <c>36053</c></remarks>
         abstract FRAMEBUFFER_COMPLETE: float
+        /// <remarks>TypeScript type: <c>36054</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36055</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36057</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_DIMENSIONS: float
+        /// <remarks>TypeScript type: <c>36061</c></remarks>
         abstract FRAMEBUFFER_UNSUPPORTED: float
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
         abstract FRAMEBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36007</c></remarks>
         abstract RENDERBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>34024</c></remarks>
         abstract MAX_RENDERBUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>1286</c></remarks>
         abstract INVALID_FRAMEBUFFER_OPERATION: float
+        /// <remarks>TypeScript type: <c>37440</c></remarks>
         abstract UNPACK_FLIP_Y_WEBGL: float
+        /// <remarks>TypeScript type: <c>37441</c></remarks>
         abstract UNPACK_PREMULTIPLY_ALPHA_WEBGL: float
+        /// <remarks>TypeScript type: <c>37442</c></remarks>
         abstract CONTEXT_LOST_WEBGL: float
+        /// <remarks>TypeScript type: <c>37443</c></remarks>
         abstract UNPACK_COLORSPACE_CONVERSION_WEBGL: float
+        /// <remarks>TypeScript type: <c>37444</c></remarks>
         abstract BROWSER_DEFAULT_WEBGL: float
 
         [<EmitConstructor>]
         abstract Create: unit -> WebGL2RenderingContext
+
+    module WebGL2RenderingContextConstructor =
+        /// <remarks>TypeScript type: <c>3074</c></remarks>
+        [<Literal>]
+        let READ_BUFFER = 3074.0
+
+        /// <remarks>TypeScript type: <c>3314</c></remarks>
+        [<Literal>]
+        let UNPACK_ROW_LENGTH = 3314.0
+
+        /// <remarks>TypeScript type: <c>3315</c></remarks>
+        [<Literal>]
+        let UNPACK_SKIP_ROWS = 3315.0
+
+        /// <remarks>TypeScript type: <c>3316</c></remarks>
+        [<Literal>]
+        let UNPACK_SKIP_PIXELS = 3316.0
+
+        /// <remarks>TypeScript type: <c>3330</c></remarks>
+        [<Literal>]
+        let PACK_ROW_LENGTH = 3330.0
+
+        /// <remarks>TypeScript type: <c>3331</c></remarks>
+        [<Literal>]
+        let PACK_SKIP_ROWS = 3331.0
+
+        /// <remarks>TypeScript type: <c>3332</c></remarks>
+        [<Literal>]
+        let PACK_SKIP_PIXELS = 3332.0
+
+        /// <remarks>TypeScript type: <c>6144</c></remarks>
+        [<Literal>]
+        let COLOR = 6144.0
+
+        /// <remarks>TypeScript type: <c>6145</c></remarks>
+        [<Literal>]
+        let DEPTH = 6145.0
+
+        /// <remarks>TypeScript type: <c>6146</c></remarks>
+        [<Literal>]
+        let STENCIL = 6146.0
+
+        /// <remarks>TypeScript type: <c>6403</c></remarks>
+        [<Literal>]
+        let RED = 6403.0
+
+        /// <remarks>TypeScript type: <c>32849</c></remarks>
+        [<Literal>]
+        let RGB8 = 32849.0
+
+        /// <remarks>TypeScript type: <c>32857</c></remarks>
+        [<Literal>]
+        let RGB10_A2 = 32857.0
+
+        /// <remarks>TypeScript type: <c>32874</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_3D = 32874.0
+
+        /// <remarks>TypeScript type: <c>32877</c></remarks>
+        [<Literal>]
+        let UNPACK_SKIP_IMAGES = 32877.0
+
+        /// <remarks>TypeScript type: <c>32878</c></remarks>
+        [<Literal>]
+        let UNPACK_IMAGE_HEIGHT = 32878.0
+
+        /// <remarks>TypeScript type: <c>32879</c></remarks>
+        [<Literal>]
+        let TEXTURE_3D = 32879.0
+
+        /// <remarks>TypeScript type: <c>32882</c></remarks>
+        [<Literal>]
+        let TEXTURE_WRAP_R = 32882.0
+
+        /// <remarks>TypeScript type: <c>32883</c></remarks>
+        [<Literal>]
+        let MAX_3D_TEXTURE_SIZE = 32883.0
+
+        /// <remarks>TypeScript type: <c>33640</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_2_10_10_10_REV = 33640.0
+
+        /// <remarks>TypeScript type: <c>33000</c></remarks>
+        [<Literal>]
+        let MAX_ELEMENTS_VERTICES = 33000.0
+
+        /// <remarks>TypeScript type: <c>33001</c></remarks>
+        [<Literal>]
+        let MAX_ELEMENTS_INDICES = 33001.0
+
+        /// <remarks>TypeScript type: <c>33082</c></remarks>
+        [<Literal>]
+        let TEXTURE_MIN_LOD = 33082.0
+
+        /// <remarks>TypeScript type: <c>33083</c></remarks>
+        [<Literal>]
+        let TEXTURE_MAX_LOD = 33083.0
+
+        /// <remarks>TypeScript type: <c>33084</c></remarks>
+        [<Literal>]
+        let TEXTURE_BASE_LEVEL = 33084.0
+
+        /// <remarks>TypeScript type: <c>33085</c></remarks>
+        [<Literal>]
+        let TEXTURE_MAX_LEVEL = 33085.0
+
+        /// <remarks>TypeScript type: <c>32775</c></remarks>
+        [<Literal>]
+        let MIN = 32775.0
+
+        /// <remarks>TypeScript type: <c>32776</c></remarks>
+        [<Literal>]
+        let MAX = 32776.0
+
+        /// <remarks>TypeScript type: <c>33190</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT24 = 33190.0
+
+        /// <remarks>TypeScript type: <c>34045</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_LOD_BIAS = 34045.0
+
+        /// <remarks>TypeScript type: <c>34892</c></remarks>
+        [<Literal>]
+        let TEXTURE_COMPARE_MODE = 34892.0
+
+        /// <remarks>TypeScript type: <c>34893</c></remarks>
+        [<Literal>]
+        let TEXTURE_COMPARE_FUNC = 34893.0
+
+        /// <remarks>TypeScript type: <c>34917</c></remarks>
+        [<Literal>]
+        let CURRENT_QUERY = 34917.0
+
+        /// <remarks>TypeScript type: <c>34918</c></remarks>
+        [<Literal>]
+        let QUERY_RESULT = 34918.0
+
+        /// <remarks>TypeScript type: <c>34919</c></remarks>
+        [<Literal>]
+        let QUERY_RESULT_AVAILABLE = 34919.0
+
+        /// <remarks>TypeScript type: <c>35041</c></remarks>
+        [<Literal>]
+        let STREAM_READ = 35041.0
+
+        /// <remarks>TypeScript type: <c>35042</c></remarks>
+        [<Literal>]
+        let STREAM_COPY = 35042.0
+
+        /// <remarks>TypeScript type: <c>35045</c></remarks>
+        [<Literal>]
+        let STATIC_READ = 35045.0
+
+        /// <remarks>TypeScript type: <c>35046</c></remarks>
+        [<Literal>]
+        let STATIC_COPY = 35046.0
+
+        /// <remarks>TypeScript type: <c>35049</c></remarks>
+        [<Literal>]
+        let DYNAMIC_READ = 35049.0
+
+        /// <remarks>TypeScript type: <c>35050</c></remarks>
+        [<Literal>]
+        let DYNAMIC_COPY = 35050.0
+
+        /// <remarks>TypeScript type: <c>34852</c></remarks>
+        [<Literal>]
+        let MAX_DRAW_BUFFERS = 34852.0
+
+        /// <remarks>TypeScript type: <c>34853</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER0 = 34853.0
+
+        /// <remarks>TypeScript type: <c>34854</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER1 = 34854.0
+
+        /// <remarks>TypeScript type: <c>34855</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER2 = 34855.0
+
+        /// <remarks>TypeScript type: <c>34856</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER3 = 34856.0
+
+        /// <remarks>TypeScript type: <c>34857</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER4 = 34857.0
+
+        /// <remarks>TypeScript type: <c>34858</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER5 = 34858.0
+
+        /// <remarks>TypeScript type: <c>34859</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER6 = 34859.0
+
+        /// <remarks>TypeScript type: <c>34860</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER7 = 34860.0
+
+        /// <remarks>TypeScript type: <c>34861</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER8 = 34861.0
+
+        /// <remarks>TypeScript type: <c>34862</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER9 = 34862.0
+
+        /// <remarks>TypeScript type: <c>34863</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER10 = 34863.0
+
+        /// <remarks>TypeScript type: <c>34864</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER11 = 34864.0
+
+        /// <remarks>TypeScript type: <c>34865</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER12 = 34865.0
+
+        /// <remarks>TypeScript type: <c>34866</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER13 = 34866.0
+
+        /// <remarks>TypeScript type: <c>34867</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER14 = 34867.0
+
+        /// <remarks>TypeScript type: <c>34868</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER15 = 34868.0
+
+        /// <remarks>TypeScript type: <c>35657</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_UNIFORM_COMPONENTS = 35657.0
+
+        /// <remarks>TypeScript type: <c>35658</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_UNIFORM_COMPONENTS = 35658.0
+
+        /// <remarks>TypeScript type: <c>35679</c></remarks>
+        [<Literal>]
+        let SAMPLER_3D = 35679.0
+
+        /// <remarks>TypeScript type: <c>35682</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D_SHADOW = 35682.0
+
+        /// <remarks>TypeScript type: <c>35723</c></remarks>
+        [<Literal>]
+        let FRAGMENT_SHADER_DERIVATIVE_HINT = 35723.0
+
+        /// <remarks>TypeScript type: <c>35051</c></remarks>
+        [<Literal>]
+        let PIXEL_PACK_BUFFER = 35051.0
+
+        /// <remarks>TypeScript type: <c>35052</c></remarks>
+        [<Literal>]
+        let PIXEL_UNPACK_BUFFER = 35052.0
+
+        /// <remarks>TypeScript type: <c>35053</c></remarks>
+        [<Literal>]
+        let PIXEL_PACK_BUFFER_BINDING = 35053.0
+
+        /// <remarks>TypeScript type: <c>35055</c></remarks>
+        [<Literal>]
+        let PIXEL_UNPACK_BUFFER_BINDING = 35055.0
+
+        /// <remarks>TypeScript type: <c>35685</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT2x3 = 35685.0
+
+        /// <remarks>TypeScript type: <c>35686</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT2x4 = 35686.0
+
+        /// <remarks>TypeScript type: <c>35687</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT3x2 = 35687.0
+
+        /// <remarks>TypeScript type: <c>35688</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT3x4 = 35688.0
+
+        /// <remarks>TypeScript type: <c>35689</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT4x2 = 35689.0
+
+        /// <remarks>TypeScript type: <c>35690</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT4x3 = 35690.0
+
+        /// <remarks>TypeScript type: <c>35904</c></remarks>
+        [<Literal>]
+        let SRGB = 35904.0
+
+        /// <remarks>TypeScript type: <c>35905</c></remarks>
+        [<Literal>]
+        let SRGB8 = 35905.0
+
+        /// <remarks>TypeScript type: <c>35907</c></remarks>
+        [<Literal>]
+        let SRGB8_ALPHA8 = 35907.0
+
+        /// <remarks>TypeScript type: <c>34894</c></remarks>
+        [<Literal>]
+        let COMPARE_REF_TO_TEXTURE = 34894.0
+
+        /// <remarks>TypeScript type: <c>34836</c></remarks>
+        [<Literal>]
+        let RGBA32F = 34836.0
+
+        /// <remarks>TypeScript type: <c>34837</c></remarks>
+        [<Literal>]
+        let RGB32F = 34837.0
+
+        /// <remarks>TypeScript type: <c>34842</c></remarks>
+        [<Literal>]
+        let RGBA16F = 34842.0
+
+        /// <remarks>TypeScript type: <c>34843</c></remarks>
+        [<Literal>]
+        let RGB16F = 34843.0
+
+        /// <remarks>TypeScript type: <c>35069</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_INTEGER = 35069.0
+
+        /// <remarks>TypeScript type: <c>35071</c></remarks>
+        [<Literal>]
+        let MAX_ARRAY_TEXTURE_LAYERS = 35071.0
+
+        /// <remarks>TypeScript type: <c>35076</c></remarks>
+        [<Literal>]
+        let MIN_PROGRAM_TEXEL_OFFSET = 35076.0
+
+        /// <remarks>TypeScript type: <c>35077</c></remarks>
+        [<Literal>]
+        let MAX_PROGRAM_TEXEL_OFFSET = 35077.0
+
+        /// <remarks>TypeScript type: <c>35659</c></remarks>
+        [<Literal>]
+        let MAX_VARYING_COMPONENTS = 35659.0
+
+        /// <remarks>TypeScript type: <c>35866</c></remarks>
+        [<Literal>]
+        let TEXTURE_2D_ARRAY = 35866.0
+
+        /// <remarks>TypeScript type: <c>35869</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_2D_ARRAY = 35869.0
+
+        /// <remarks>TypeScript type: <c>35898</c></remarks>
+        [<Literal>]
+        let R11F_G11F_B10F = 35898.0
+
+        /// <remarks>TypeScript type: <c>35899</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_10F_11F_11F_REV = 35899.0
+
+        /// <remarks>TypeScript type: <c>35901</c></remarks>
+        [<Literal>]
+        let RGB9_E5 = 35901.0
+
+        /// <remarks>TypeScript type: <c>35902</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_5_9_9_9_REV = 35902.0
+
+        /// <remarks>TypeScript type: <c>35967</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER_MODE = 35967.0
+
+        /// <remarks>TypeScript type: <c>35968</c></remarks>
+        [<Literal>]
+        let MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS = 35968.0
+
+        /// <remarks>TypeScript type: <c>35971</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_VARYINGS = 35971.0
+
+        /// <remarks>TypeScript type: <c>35972</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER_START = 35972.0
+
+        /// <remarks>TypeScript type: <c>35973</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER_SIZE = 35973.0
+
+        /// <remarks>TypeScript type: <c>35976</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN = 35976.0
+
+        /// <remarks>TypeScript type: <c>35977</c></remarks>
+        [<Literal>]
+        let RASTERIZER_DISCARD = 35977.0
+
+        /// <remarks>TypeScript type: <c>35978</c></remarks>
+        [<Literal>]
+        let MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS = 35978.0
+
+        /// <remarks>TypeScript type: <c>35979</c></remarks>
+        [<Literal>]
+        let MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS = 35979.0
+
+        /// <remarks>TypeScript type: <c>35980</c></remarks>
+        [<Literal>]
+        let INTERLEAVED_ATTRIBS = 35980.0
+
+        /// <remarks>TypeScript type: <c>35981</c></remarks>
+        [<Literal>]
+        let SEPARATE_ATTRIBS = 35981.0
+
+        /// <remarks>TypeScript type: <c>35982</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER = 35982.0
+
+        /// <remarks>TypeScript type: <c>35983</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER_BINDING = 35983.0
+
+        /// <remarks>TypeScript type: <c>36208</c></remarks>
+        [<Literal>]
+        let RGBA32UI = 36208.0
+
+        /// <remarks>TypeScript type: <c>36209</c></remarks>
+        [<Literal>]
+        let RGB32UI = 36209.0
+
+        /// <remarks>TypeScript type: <c>36214</c></remarks>
+        [<Literal>]
+        let RGBA16UI = 36214.0
+
+        /// <remarks>TypeScript type: <c>36215</c></remarks>
+        [<Literal>]
+        let RGB16UI = 36215.0
+
+        /// <remarks>TypeScript type: <c>36220</c></remarks>
+        [<Literal>]
+        let RGBA8UI = 36220.0
+
+        /// <remarks>TypeScript type: <c>36221</c></remarks>
+        [<Literal>]
+        let RGB8UI = 36221.0
+
+        /// <remarks>TypeScript type: <c>36226</c></remarks>
+        [<Literal>]
+        let RGBA32I = 36226.0
+
+        /// <remarks>TypeScript type: <c>36227</c></remarks>
+        [<Literal>]
+        let RGB32I = 36227.0
+
+        /// <remarks>TypeScript type: <c>36232</c></remarks>
+        [<Literal>]
+        let RGBA16I = 36232.0
+
+        /// <remarks>TypeScript type: <c>36233</c></remarks>
+        [<Literal>]
+        let RGB16I = 36233.0
+
+        /// <remarks>TypeScript type: <c>36238</c></remarks>
+        [<Literal>]
+        let RGBA8I = 36238.0
+
+        /// <remarks>TypeScript type: <c>36239</c></remarks>
+        [<Literal>]
+        let RGB8I = 36239.0
+
+        /// <remarks>TypeScript type: <c>36244</c></remarks>
+        [<Literal>]
+        let RED_INTEGER = 36244.0
+
+        /// <remarks>TypeScript type: <c>36248</c></remarks>
+        [<Literal>]
+        let RGB_INTEGER = 36248.0
+
+        /// <remarks>TypeScript type: <c>36249</c></remarks>
+        [<Literal>]
+        let RGBA_INTEGER = 36249.0
+
+        /// <remarks>TypeScript type: <c>36289</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D_ARRAY = 36289.0
+
+        /// <remarks>TypeScript type: <c>36292</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D_ARRAY_SHADOW = 36292.0
+
+        /// <remarks>TypeScript type: <c>36293</c></remarks>
+        [<Literal>]
+        let SAMPLER_CUBE_SHADOW = 36293.0
+
+        /// <remarks>TypeScript type: <c>36294</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_VEC2 = 36294.0
+
+        /// <remarks>TypeScript type: <c>36295</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_VEC3 = 36295.0
+
+        /// <remarks>TypeScript type: <c>36296</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_VEC4 = 36296.0
+
+        /// <remarks>TypeScript type: <c>36298</c></remarks>
+        [<Literal>]
+        let INT_SAMPLER_2D = 36298.0
+
+        /// <remarks>TypeScript type: <c>36299</c></remarks>
+        [<Literal>]
+        let INT_SAMPLER_3D = 36299.0
+
+        /// <remarks>TypeScript type: <c>36300</c></remarks>
+        [<Literal>]
+        let INT_SAMPLER_CUBE = 36300.0
+
+        /// <remarks>TypeScript type: <c>36303</c></remarks>
+        [<Literal>]
+        let INT_SAMPLER_2D_ARRAY = 36303.0
+
+        /// <remarks>TypeScript type: <c>36306</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_SAMPLER_2D = 36306.0
+
+        /// <remarks>TypeScript type: <c>36307</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_SAMPLER_3D = 36307.0
+
+        /// <remarks>TypeScript type: <c>36308</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_SAMPLER_CUBE = 36308.0
+
+        /// <remarks>TypeScript type: <c>36311</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_SAMPLER_2D_ARRAY = 36311.0
+
+        /// <remarks>TypeScript type: <c>36012</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT32F = 36012.0
+
+        /// <remarks>TypeScript type: <c>36013</c></remarks>
+        [<Literal>]
+        let DEPTH32F_STENCIL8 = 36013.0
+
+        /// <remarks>TypeScript type: <c>36269</c></remarks>
+        [<Literal>]
+        let FLOAT_32_UNSIGNED_INT_24_8_REV = 36269.0
+
+        /// <remarks>TypeScript type: <c>33296</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING = 33296.0
+
+        /// <remarks>TypeScript type: <c>33297</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE = 33297.0
+
+        /// <remarks>TypeScript type: <c>33298</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_RED_SIZE = 33298.0
+
+        /// <remarks>TypeScript type: <c>33299</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_GREEN_SIZE = 33299.0
+
+        /// <remarks>TypeScript type: <c>33300</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_BLUE_SIZE = 33300.0
+
+        /// <remarks>TypeScript type: <c>33301</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE = 33301.0
+
+        /// <remarks>TypeScript type: <c>33302</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE = 33302.0
+
+        /// <remarks>TypeScript type: <c>33303</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE = 33303.0
+
+        /// <remarks>TypeScript type: <c>33304</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_DEFAULT = 33304.0
+
+        /// <remarks>TypeScript type: <c>34042</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_24_8 = 34042.0
+
+        /// <remarks>TypeScript type: <c>35056</c></remarks>
+        [<Literal>]
+        let DEPTH24_STENCIL8 = 35056.0
+
+        /// <remarks>TypeScript type: <c>35863</c></remarks>
+        [<Literal>]
+        let UNSIGNED_NORMALIZED = 35863.0
+
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
+        [<Literal>]
+        let DRAW_FRAMEBUFFER_BINDING = 36006.0
+
+        /// <remarks>TypeScript type: <c>36008</c></remarks>
+        [<Literal>]
+        let READ_FRAMEBUFFER = 36008.0
+
+        /// <remarks>TypeScript type: <c>36009</c></remarks>
+        [<Literal>]
+        let DRAW_FRAMEBUFFER = 36009.0
+
+        /// <remarks>TypeScript type: <c>36010</c></remarks>
+        [<Literal>]
+        let READ_FRAMEBUFFER_BINDING = 36010.0
+
+        /// <remarks>TypeScript type: <c>36011</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_SAMPLES = 36011.0
+
+        /// <remarks>TypeScript type: <c>36052</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER = 36052.0
+
+        /// <remarks>TypeScript type: <c>36063</c></remarks>
+        [<Literal>]
+        let MAX_COLOR_ATTACHMENTS = 36063.0
+
+        /// <remarks>TypeScript type: <c>36065</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT1 = 36065.0
+
+        /// <remarks>TypeScript type: <c>36066</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT2 = 36066.0
+
+        /// <remarks>TypeScript type: <c>36067</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT3 = 36067.0
+
+        /// <remarks>TypeScript type: <c>36068</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT4 = 36068.0
+
+        /// <remarks>TypeScript type: <c>36069</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT5 = 36069.0
+
+        /// <remarks>TypeScript type: <c>36070</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT6 = 36070.0
+
+        /// <remarks>TypeScript type: <c>36071</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT7 = 36071.0
+
+        /// <remarks>TypeScript type: <c>36072</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT8 = 36072.0
+
+        /// <remarks>TypeScript type: <c>36073</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT9 = 36073.0
+
+        /// <remarks>TypeScript type: <c>36074</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT10 = 36074.0
+
+        /// <remarks>TypeScript type: <c>36075</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT11 = 36075.0
+
+        /// <remarks>TypeScript type: <c>36076</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT12 = 36076.0
+
+        /// <remarks>TypeScript type: <c>36077</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT13 = 36077.0
+
+        /// <remarks>TypeScript type: <c>36078</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT14 = 36078.0
+
+        /// <remarks>TypeScript type: <c>36079</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT15 = 36079.0
+
+        /// <remarks>TypeScript type: <c>36182</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_MULTISAMPLE = 36182.0
+
+        /// <remarks>TypeScript type: <c>36183</c></remarks>
+        [<Literal>]
+        let MAX_SAMPLES = 36183.0
+
+        /// <remarks>TypeScript type: <c>5131</c></remarks>
+        [<Literal>]
+        let HALF_FLOAT = 5131.0
+
+        /// <remarks>TypeScript type: <c>33319</c></remarks>
+        [<Literal>]
+        let RG = 33319.0
+
+        /// <remarks>TypeScript type: <c>33320</c></remarks>
+        [<Literal>]
+        let RG_INTEGER = 33320.0
+
+        /// <remarks>TypeScript type: <c>33321</c></remarks>
+        [<Literal>]
+        let R8 = 33321.0
+
+        /// <remarks>TypeScript type: <c>33323</c></remarks>
+        [<Literal>]
+        let RG8 = 33323.0
+
+        /// <remarks>TypeScript type: <c>33325</c></remarks>
+        [<Literal>]
+        let R16F = 33325.0
+
+        /// <remarks>TypeScript type: <c>33326</c></remarks>
+        [<Literal>]
+        let R32F = 33326.0
+
+        /// <remarks>TypeScript type: <c>33327</c></remarks>
+        [<Literal>]
+        let RG16F = 33327.0
+
+        /// <remarks>TypeScript type: <c>33328</c></remarks>
+        [<Literal>]
+        let RG32F = 33328.0
+
+        /// <remarks>TypeScript type: <c>33329</c></remarks>
+        [<Literal>]
+        let R8I = 33329.0
+
+        /// <remarks>TypeScript type: <c>33330</c></remarks>
+        [<Literal>]
+        let R8UI = 33330.0
+
+        /// <remarks>TypeScript type: <c>33331</c></remarks>
+        [<Literal>]
+        let R16I = 33331.0
+
+        /// <remarks>TypeScript type: <c>33332</c></remarks>
+        [<Literal>]
+        let R16UI = 33332.0
+
+        /// <remarks>TypeScript type: <c>33333</c></remarks>
+        [<Literal>]
+        let R32I = 33333.0
+
+        /// <remarks>TypeScript type: <c>33334</c></remarks>
+        [<Literal>]
+        let R32UI = 33334.0
+
+        /// <remarks>TypeScript type: <c>33335</c></remarks>
+        [<Literal>]
+        let RG8I = 33335.0
+
+        /// <remarks>TypeScript type: <c>33336</c></remarks>
+        [<Literal>]
+        let RG8UI = 33336.0
+
+        /// <remarks>TypeScript type: <c>33337</c></remarks>
+        [<Literal>]
+        let RG16I = 33337.0
+
+        /// <remarks>TypeScript type: <c>33338</c></remarks>
+        [<Literal>]
+        let RG16UI = 33338.0
+
+        /// <remarks>TypeScript type: <c>33339</c></remarks>
+        [<Literal>]
+        let RG32I = 33339.0
+
+        /// <remarks>TypeScript type: <c>33340</c></remarks>
+        [<Literal>]
+        let RG32UI = 33340.0
+
+        /// <remarks>TypeScript type: <c>34229</c></remarks>
+        [<Literal>]
+        let VERTEX_ARRAY_BINDING = 34229.0
+
+        /// <remarks>TypeScript type: <c>36756</c></remarks>
+        [<Literal>]
+        let R8_SNORM = 36756.0
+
+        /// <remarks>TypeScript type: <c>36757</c></remarks>
+        [<Literal>]
+        let RG8_SNORM = 36757.0
+
+        /// <remarks>TypeScript type: <c>36758</c></remarks>
+        [<Literal>]
+        let RGB8_SNORM = 36758.0
+
+        /// <remarks>TypeScript type: <c>36759</c></remarks>
+        [<Literal>]
+        let RGBA8_SNORM = 36759.0
+
+        /// <remarks>TypeScript type: <c>36764</c></remarks>
+        [<Literal>]
+        let SIGNED_NORMALIZED = 36764.0
+
+        /// <remarks>TypeScript type: <c>36662</c></remarks>
+        [<Literal>]
+        let COPY_READ_BUFFER = 36662.0
+
+        /// <remarks>TypeScript type: <c>36663</c></remarks>
+        [<Literal>]
+        let COPY_WRITE_BUFFER = 36663.0
+
+        /// <remarks>TypeScript type: <c>36662</c></remarks>
+        [<Literal>]
+        let COPY_READ_BUFFER_BINDING = 36662.0
+
+        /// <remarks>TypeScript type: <c>36663</c></remarks>
+        [<Literal>]
+        let COPY_WRITE_BUFFER_BINDING = 36663.0
+
+        /// <remarks>TypeScript type: <c>35345</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER = 35345.0
+
+        /// <remarks>TypeScript type: <c>35368</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER_BINDING = 35368.0
+
+        /// <remarks>TypeScript type: <c>35369</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER_START = 35369.0
+
+        /// <remarks>TypeScript type: <c>35370</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER_SIZE = 35370.0
+
+        /// <remarks>TypeScript type: <c>35371</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_UNIFORM_BLOCKS = 35371.0
+
+        /// <remarks>TypeScript type: <c>35373</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_UNIFORM_BLOCKS = 35373.0
+
+        /// <remarks>TypeScript type: <c>35374</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_UNIFORM_BLOCKS = 35374.0
+
+        /// <remarks>TypeScript type: <c>35375</c></remarks>
+        [<Literal>]
+        let MAX_UNIFORM_BUFFER_BINDINGS = 35375.0
+
+        /// <remarks>TypeScript type: <c>35376</c></remarks>
+        [<Literal>]
+        let MAX_UNIFORM_BLOCK_SIZE = 35376.0
+
+        /// <remarks>TypeScript type: <c>35377</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS = 35377.0
+
+        /// <remarks>TypeScript type: <c>35379</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS = 35379.0
+
+        /// <remarks>TypeScript type: <c>35380</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER_OFFSET_ALIGNMENT = 35380.0
+
+        /// <remarks>TypeScript type: <c>35382</c></remarks>
+        [<Literal>]
+        let ACTIVE_UNIFORM_BLOCKS = 35382.0
+
+        /// <remarks>TypeScript type: <c>35383</c></remarks>
+        [<Literal>]
+        let UNIFORM_TYPE = 35383.0
+
+        /// <remarks>TypeScript type: <c>35384</c></remarks>
+        [<Literal>]
+        let UNIFORM_SIZE = 35384.0
+
+        /// <remarks>TypeScript type: <c>35386</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_INDEX = 35386.0
+
+        /// <remarks>TypeScript type: <c>35387</c></remarks>
+        [<Literal>]
+        let UNIFORM_OFFSET = 35387.0
+
+        /// <remarks>TypeScript type: <c>35388</c></remarks>
+        [<Literal>]
+        let UNIFORM_ARRAY_STRIDE = 35388.0
+
+        /// <remarks>TypeScript type: <c>35389</c></remarks>
+        [<Literal>]
+        let UNIFORM_MATRIX_STRIDE = 35389.0
+
+        /// <remarks>TypeScript type: <c>35390</c></remarks>
+        [<Literal>]
+        let UNIFORM_IS_ROW_MAJOR = 35390.0
+
+        /// <remarks>TypeScript type: <c>35391</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_BINDING = 35391.0
+
+        /// <remarks>TypeScript type: <c>35392</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_DATA_SIZE = 35392.0
+
+        /// <remarks>TypeScript type: <c>35394</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_ACTIVE_UNIFORMS = 35394.0
+
+        /// <remarks>TypeScript type: <c>35395</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES = 35395.0
+
+        /// <remarks>TypeScript type: <c>35396</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER = 35396.0
+
+        /// <remarks>TypeScript type: <c>35398</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER = 35398.0
+
+        /// <remarks>TypeScript type: <c>4294967295</c></remarks>
+        [<Literal>]
+        let INVALID_INDEX = 4294967295.0
+
+        /// <remarks>TypeScript type: <c>37154</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_OUTPUT_COMPONENTS = 37154.0
+
+        /// <remarks>TypeScript type: <c>37157</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_INPUT_COMPONENTS = 37157.0
+
+        /// <remarks>TypeScript type: <c>37137</c></remarks>
+        [<Literal>]
+        let MAX_SERVER_WAIT_TIMEOUT = 37137.0
+
+        /// <remarks>TypeScript type: <c>37138</c></remarks>
+        [<Literal>]
+        let OBJECT_TYPE = 37138.0
+
+        /// <remarks>TypeScript type: <c>37139</c></remarks>
+        [<Literal>]
+        let SYNC_CONDITION = 37139.0
+
+        /// <remarks>TypeScript type: <c>37140</c></remarks>
+        [<Literal>]
+        let SYNC_STATUS = 37140.0
+
+        /// <remarks>TypeScript type: <c>37141</c></remarks>
+        [<Literal>]
+        let SYNC_FLAGS = 37141.0
+
+        /// <remarks>TypeScript type: <c>37142</c></remarks>
+        [<Literal>]
+        let SYNC_FENCE = 37142.0
+
+        /// <remarks>TypeScript type: <c>37143</c></remarks>
+        [<Literal>]
+        let SYNC_GPU_COMMANDS_COMPLETE = 37143.0
+
+        /// <remarks>TypeScript type: <c>37144</c></remarks>
+        [<Literal>]
+        let UNSIGNALED = 37144.0
+
+        /// <remarks>TypeScript type: <c>37145</c></remarks>
+        [<Literal>]
+        let SIGNALED = 37145.0
+
+        /// <remarks>TypeScript type: <c>37146</c></remarks>
+        [<Literal>]
+        let ALREADY_SIGNALED = 37146.0
+
+        /// <remarks>TypeScript type: <c>37147</c></remarks>
+        [<Literal>]
+        let TIMEOUT_EXPIRED = 37147.0
+
+        /// <remarks>TypeScript type: <c>37148</c></remarks>
+        [<Literal>]
+        let CONDITION_SATISFIED = 37148.0
+
+        /// <remarks>TypeScript type: <c>37149</c></remarks>
+        [<Literal>]
+        let WAIT_FAILED = 37149.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SYNC_FLUSH_COMMANDS_BIT = 1.0
+
+        /// <remarks>TypeScript type: <c>35070</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_DIVISOR = 35070.0
+
+        /// <remarks>TypeScript type: <c>35887</c></remarks>
+        [<Literal>]
+        let ANY_SAMPLES_PASSED = 35887.0
+
+        /// <remarks>TypeScript type: <c>36202</c></remarks>
+        [<Literal>]
+        let ANY_SAMPLES_PASSED_CONSERVATIVE = 36202.0
+
+        /// <remarks>TypeScript type: <c>35097</c></remarks>
+        [<Literal>]
+        let SAMPLER_BINDING = 35097.0
+
+        /// <remarks>TypeScript type: <c>36975</c></remarks>
+        [<Literal>]
+        let RGB10_A2UI = 36975.0
+
+        /// <remarks>TypeScript type: <c>36255</c></remarks>
+        [<Literal>]
+        let INT_2_10_10_10_REV = 36255.0
+
+        /// <remarks>TypeScript type: <c>36386</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK = 36386.0
+
+        /// <remarks>TypeScript type: <c>36387</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_PAUSED = 36387.0
+
+        /// <remarks>TypeScript type: <c>36388</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_ACTIVE = 36388.0
+
+        /// <remarks>TypeScript type: <c>36389</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BINDING = 36389.0
+
+        /// <remarks>TypeScript type: <c>37167</c></remarks>
+        [<Literal>]
+        let TEXTURE_IMMUTABLE_FORMAT = 37167.0
+
+        /// <remarks>TypeScript type: <c>36203</c></remarks>
+        [<Literal>]
+        let MAX_ELEMENT_INDEX = 36203.0
+
+        /// <remarks>TypeScript type: <c>33503</c></remarks>
+        [<Literal>]
+        let TEXTURE_IMMUTABLE_LEVELS = 33503.0
+
+        /// <remarks>TypeScript type: <c>-1</c></remarks>
+        [<Literal>]
+        let TIMEOUT_IGNORED = -1.0
+
+        /// <remarks>TypeScript type: <c>37447</c></remarks>
+        [<Literal>]
+        let MAX_CLIENT_WAIT_TIMEOUT_WEBGL = 37447.0
+
+        /// <remarks>TypeScript type: <c>256</c></remarks>
+        [<Literal>]
+        let DEPTH_BUFFER_BIT = 256.0
+
+        /// <remarks>TypeScript type: <c>1024</c></remarks>
+        [<Literal>]
+        let STENCIL_BUFFER_BIT = 1024.0
+
+        /// <remarks>TypeScript type: <c>16384</c></remarks>
+        [<Literal>]
+        let COLOR_BUFFER_BIT = 16384.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let POINTS = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LINES = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let LINE_LOOP = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let LINE_STRIP = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let TRIANGLES = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let TRIANGLE_STRIP = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let TRIANGLE_FAN = 6.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let ZERO = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let ONE = 1.0
+
+        /// <remarks>TypeScript type: <c>768</c></remarks>
+        [<Literal>]
+        let SRC_COLOR = 768.0
+
+        /// <remarks>TypeScript type: <c>769</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_SRC_COLOR = 769.0
+
+        /// <remarks>TypeScript type: <c>770</c></remarks>
+        [<Literal>]
+        let SRC_ALPHA = 770.0
+
+        /// <remarks>TypeScript type: <c>771</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_SRC_ALPHA = 771.0
+
+        /// <remarks>TypeScript type: <c>772</c></remarks>
+        [<Literal>]
+        let DST_ALPHA = 772.0
+
+        /// <remarks>TypeScript type: <c>773</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_DST_ALPHA = 773.0
+
+        /// <remarks>TypeScript type: <c>774</c></remarks>
+        [<Literal>]
+        let DST_COLOR = 774.0
+
+        /// <remarks>TypeScript type: <c>775</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_DST_COLOR = 775.0
+
+        /// <remarks>TypeScript type: <c>776</c></remarks>
+        [<Literal>]
+        let SRC_ALPHA_SATURATE = 776.0
+
+        /// <remarks>TypeScript type: <c>32774</c></remarks>
+        [<Literal>]
+        let FUNC_ADD = 32774.0
+
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION = 32777.0
+
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION_RGB = 32777.0
+
+        /// <remarks>TypeScript type: <c>34877</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION_ALPHA = 34877.0
+
+        /// <remarks>TypeScript type: <c>32778</c></remarks>
+        [<Literal>]
+        let FUNC_SUBTRACT = 32778.0
+
+        /// <remarks>TypeScript type: <c>32779</c></remarks>
+        [<Literal>]
+        let FUNC_REVERSE_SUBTRACT = 32779.0
+
+        /// <remarks>TypeScript type: <c>32968</c></remarks>
+        [<Literal>]
+        let BLEND_DST_RGB = 32968.0
+
+        /// <remarks>TypeScript type: <c>32969</c></remarks>
+        [<Literal>]
+        let BLEND_SRC_RGB = 32969.0
+
+        /// <remarks>TypeScript type: <c>32970</c></remarks>
+        [<Literal>]
+        let BLEND_DST_ALPHA = 32970.0
+
+        /// <remarks>TypeScript type: <c>32971</c></remarks>
+        [<Literal>]
+        let BLEND_SRC_ALPHA = 32971.0
+
+        /// <remarks>TypeScript type: <c>32769</c></remarks>
+        [<Literal>]
+        let CONSTANT_COLOR = 32769.0
+
+        /// <remarks>TypeScript type: <c>32770</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_CONSTANT_COLOR = 32770.0
+
+        /// <remarks>TypeScript type: <c>32771</c></remarks>
+        [<Literal>]
+        let CONSTANT_ALPHA = 32771.0
+
+        /// <remarks>TypeScript type: <c>32772</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_CONSTANT_ALPHA = 32772.0
+
+        /// <remarks>TypeScript type: <c>32773</c></remarks>
+        [<Literal>]
+        let BLEND_COLOR = 32773.0
+
+        /// <remarks>TypeScript type: <c>34962</c></remarks>
+        [<Literal>]
+        let ARRAY_BUFFER = 34962.0
+
+        /// <remarks>TypeScript type: <c>34963</c></remarks>
+        [<Literal>]
+        let ELEMENT_ARRAY_BUFFER = 34963.0
+
+        /// <remarks>TypeScript type: <c>34964</c></remarks>
+        [<Literal>]
+        let ARRAY_BUFFER_BINDING = 34964.0
+
+        /// <remarks>TypeScript type: <c>34965</c></remarks>
+        [<Literal>]
+        let ELEMENT_ARRAY_BUFFER_BINDING = 34965.0
+
+        /// <remarks>TypeScript type: <c>35040</c></remarks>
+        [<Literal>]
+        let STREAM_DRAW = 35040.0
+
+        /// <remarks>TypeScript type: <c>35044</c></remarks>
+        [<Literal>]
+        let STATIC_DRAW = 35044.0
+
+        /// <remarks>TypeScript type: <c>35048</c></remarks>
+        [<Literal>]
+        let DYNAMIC_DRAW = 35048.0
+
+        /// <remarks>TypeScript type: <c>34660</c></remarks>
+        [<Literal>]
+        let BUFFER_SIZE = 34660.0
+
+        /// <remarks>TypeScript type: <c>34661</c></remarks>
+        [<Literal>]
+        let BUFFER_USAGE = 34661.0
+
+        /// <remarks>TypeScript type: <c>34342</c></remarks>
+        [<Literal>]
+        let CURRENT_VERTEX_ATTRIB = 34342.0
+
+        /// <remarks>TypeScript type: <c>1028</c></remarks>
+        [<Literal>]
+        let FRONT = 1028.0
+
+        /// <remarks>TypeScript type: <c>1029</c></remarks>
+        [<Literal>]
+        let BACK = 1029.0
+
+        /// <remarks>TypeScript type: <c>1032</c></remarks>
+        [<Literal>]
+        let FRONT_AND_BACK = 1032.0
+
+        /// <remarks>TypeScript type: <c>2884</c></remarks>
+        [<Literal>]
+        let CULL_FACE = 2884.0
+
+        /// <remarks>TypeScript type: <c>3042</c></remarks>
+        [<Literal>]
+        let BLEND = 3042.0
+
+        /// <remarks>TypeScript type: <c>3024</c></remarks>
+        [<Literal>]
+        let DITHER = 3024.0
+
+        /// <remarks>TypeScript type: <c>2960</c></remarks>
+        [<Literal>]
+        let STENCIL_TEST = 2960.0
+
+        /// <remarks>TypeScript type: <c>2929</c></remarks>
+        [<Literal>]
+        let DEPTH_TEST = 2929.0
+
+        /// <remarks>TypeScript type: <c>3089</c></remarks>
+        [<Literal>]
+        let SCISSOR_TEST = 3089.0
+
+        /// <remarks>TypeScript type: <c>32823</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_FILL = 32823.0
+
+        /// <remarks>TypeScript type: <c>32926</c></remarks>
+        [<Literal>]
+        let SAMPLE_ALPHA_TO_COVERAGE = 32926.0
+
+        /// <remarks>TypeScript type: <c>32928</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE = 32928.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NO_ERROR = 0.0
+
+        /// <remarks>TypeScript type: <c>1280</c></remarks>
+        [<Literal>]
+        let INVALID_ENUM = 1280.0
+
+        /// <remarks>TypeScript type: <c>1281</c></remarks>
+        [<Literal>]
+        let INVALID_VALUE = 1281.0
+
+        /// <remarks>TypeScript type: <c>1282</c></remarks>
+        [<Literal>]
+        let INVALID_OPERATION = 1282.0
+
+        /// <remarks>TypeScript type: <c>1285</c></remarks>
+        [<Literal>]
+        let OUT_OF_MEMORY = 1285.0
+
+        /// <remarks>TypeScript type: <c>2304</c></remarks>
+        [<Literal>]
+        let CW = 2304.0
+
+        /// <remarks>TypeScript type: <c>2305</c></remarks>
+        [<Literal>]
+        let CCW = 2305.0
+
+        /// <remarks>TypeScript type: <c>2849</c></remarks>
+        [<Literal>]
+        let LINE_WIDTH = 2849.0
+
+        /// <remarks>TypeScript type: <c>33901</c></remarks>
+        [<Literal>]
+        let ALIASED_POINT_SIZE_RANGE = 33901.0
+
+        /// <remarks>TypeScript type: <c>33902</c></remarks>
+        [<Literal>]
+        let ALIASED_LINE_WIDTH_RANGE = 33902.0
+
+        /// <remarks>TypeScript type: <c>2885</c></remarks>
+        [<Literal>]
+        let CULL_FACE_MODE = 2885.0
+
+        /// <remarks>TypeScript type: <c>2886</c></remarks>
+        [<Literal>]
+        let FRONT_FACE = 2886.0
+
+        /// <remarks>TypeScript type: <c>2928</c></remarks>
+        [<Literal>]
+        let DEPTH_RANGE = 2928.0
+
+        /// <remarks>TypeScript type: <c>2930</c></remarks>
+        [<Literal>]
+        let DEPTH_WRITEMASK = 2930.0
+
+        /// <remarks>TypeScript type: <c>2931</c></remarks>
+        [<Literal>]
+        let DEPTH_CLEAR_VALUE = 2931.0
+
+        /// <remarks>TypeScript type: <c>2932</c></remarks>
+        [<Literal>]
+        let DEPTH_FUNC = 2932.0
+
+        /// <remarks>TypeScript type: <c>2961</c></remarks>
+        [<Literal>]
+        let STENCIL_CLEAR_VALUE = 2961.0
+
+        /// <remarks>TypeScript type: <c>2962</c></remarks>
+        [<Literal>]
+        let STENCIL_FUNC = 2962.0
+
+        /// <remarks>TypeScript type: <c>2964</c></remarks>
+        [<Literal>]
+        let STENCIL_FAIL = 2964.0
+
+        /// <remarks>TypeScript type: <c>2965</c></remarks>
+        [<Literal>]
+        let STENCIL_PASS_DEPTH_FAIL = 2965.0
+
+        /// <remarks>TypeScript type: <c>2966</c></remarks>
+        [<Literal>]
+        let STENCIL_PASS_DEPTH_PASS = 2966.0
+
+        /// <remarks>TypeScript type: <c>2967</c></remarks>
+        [<Literal>]
+        let STENCIL_REF = 2967.0
+
+        /// <remarks>TypeScript type: <c>2963</c></remarks>
+        [<Literal>]
+        let STENCIL_VALUE_MASK = 2963.0
+
+        /// <remarks>TypeScript type: <c>2968</c></remarks>
+        [<Literal>]
+        let STENCIL_WRITEMASK = 2968.0
+
+        /// <remarks>TypeScript type: <c>34816</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_FUNC = 34816.0
+
+        /// <remarks>TypeScript type: <c>34817</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_FAIL = 34817.0
+
+        /// <remarks>TypeScript type: <c>34818</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_PASS_DEPTH_FAIL = 34818.0
+
+        /// <remarks>TypeScript type: <c>34819</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_PASS_DEPTH_PASS = 34819.0
+
+        /// <remarks>TypeScript type: <c>36003</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_REF = 36003.0
+
+        /// <remarks>TypeScript type: <c>36004</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_VALUE_MASK = 36004.0
+
+        /// <remarks>TypeScript type: <c>36005</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_WRITEMASK = 36005.0
+
+        /// <remarks>TypeScript type: <c>2978</c></remarks>
+        [<Literal>]
+        let VIEWPORT = 2978.0
+
+        /// <remarks>TypeScript type: <c>3088</c></remarks>
+        [<Literal>]
+        let SCISSOR_BOX = 3088.0
+
+        /// <remarks>TypeScript type: <c>3106</c></remarks>
+        [<Literal>]
+        let COLOR_CLEAR_VALUE = 3106.0
+
+        /// <remarks>TypeScript type: <c>3107</c></remarks>
+        [<Literal>]
+        let COLOR_WRITEMASK = 3107.0
+
+        /// <remarks>TypeScript type: <c>3317</c></remarks>
+        [<Literal>]
+        let UNPACK_ALIGNMENT = 3317.0
+
+        /// <remarks>TypeScript type: <c>3333</c></remarks>
+        [<Literal>]
+        let PACK_ALIGNMENT = 3333.0
+
+        /// <remarks>TypeScript type: <c>3379</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_SIZE = 3379.0
+
+        /// <remarks>TypeScript type: <c>3386</c></remarks>
+        [<Literal>]
+        let MAX_VIEWPORT_DIMS = 3386.0
+
+        /// <remarks>TypeScript type: <c>3408</c></remarks>
+        [<Literal>]
+        let SUBPIXEL_BITS = 3408.0
+
+        /// <remarks>TypeScript type: <c>3410</c></remarks>
+        [<Literal>]
+        let RED_BITS = 3410.0
+
+        /// <remarks>TypeScript type: <c>3411</c></remarks>
+        [<Literal>]
+        let GREEN_BITS = 3411.0
+
+        /// <remarks>TypeScript type: <c>3412</c></remarks>
+        [<Literal>]
+        let BLUE_BITS = 3412.0
+
+        /// <remarks>TypeScript type: <c>3413</c></remarks>
+        [<Literal>]
+        let ALPHA_BITS = 3413.0
+
+        /// <remarks>TypeScript type: <c>3414</c></remarks>
+        [<Literal>]
+        let DEPTH_BITS = 3414.0
+
+        /// <remarks>TypeScript type: <c>3415</c></remarks>
+        [<Literal>]
+        let STENCIL_BITS = 3415.0
+
+        /// <remarks>TypeScript type: <c>10752</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_UNITS = 10752.0
+
+        /// <remarks>TypeScript type: <c>32824</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_FACTOR = 32824.0
+
+        /// <remarks>TypeScript type: <c>32873</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_2D = 32873.0
+
+        /// <remarks>TypeScript type: <c>32936</c></remarks>
+        [<Literal>]
+        let SAMPLE_BUFFERS = 32936.0
+
+        /// <remarks>TypeScript type: <c>32937</c></remarks>
+        [<Literal>]
+        let SAMPLES = 32937.0
+
+        /// <remarks>TypeScript type: <c>32938</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE_VALUE = 32938.0
+
+        /// <remarks>TypeScript type: <c>32939</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE_INVERT = 32939.0
+
+        /// <remarks>TypeScript type: <c>34467</c></remarks>
+        [<Literal>]
+        let COMPRESSED_TEXTURE_FORMATS = 34467.0
+
+        /// <remarks>TypeScript type: <c>4352</c></remarks>
+        [<Literal>]
+        let DONT_CARE = 4352.0
+
+        /// <remarks>TypeScript type: <c>4353</c></remarks>
+        [<Literal>]
+        let FASTEST = 4353.0
+
+        /// <remarks>TypeScript type: <c>4354</c></remarks>
+        [<Literal>]
+        let NICEST = 4354.0
+
+        /// <remarks>TypeScript type: <c>33170</c></remarks>
+        [<Literal>]
+        let GENERATE_MIPMAP_HINT = 33170.0
+
+        /// <remarks>TypeScript type: <c>5120</c></remarks>
+        [<Literal>]
+        let BYTE = 5120.0
+
+        /// <remarks>TypeScript type: <c>5121</c></remarks>
+        [<Literal>]
+        let UNSIGNED_BYTE = 5121.0
+
+        /// <remarks>TypeScript type: <c>5122</c></remarks>
+        [<Literal>]
+        let SHORT = 5122.0
+
+        /// <remarks>TypeScript type: <c>5123</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT = 5123.0
+
+        /// <remarks>TypeScript type: <c>5124</c></remarks>
+        [<Literal>]
+        let INT = 5124.0
+
+        /// <remarks>TypeScript type: <c>5125</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT = 5125.0
+
+        /// <remarks>TypeScript type: <c>5126</c></remarks>
+        [<Literal>]
+        let FLOAT = 5126.0
+
+        /// <remarks>TypeScript type: <c>6402</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT = 6402.0
+
+        /// <remarks>TypeScript type: <c>6406</c></remarks>
+        [<Literal>]
+        let ALPHA = 6406.0
+
+        /// <remarks>TypeScript type: <c>6407</c></remarks>
+        [<Literal>]
+        let RGB = 6407.0
+
+        /// <remarks>TypeScript type: <c>6408</c></remarks>
+        [<Literal>]
+        let RGBA = 6408.0
+
+        /// <remarks>TypeScript type: <c>6409</c></remarks>
+        [<Literal>]
+        let LUMINANCE = 6409.0
+
+        /// <remarks>TypeScript type: <c>6410</c></remarks>
+        [<Literal>]
+        let LUMINANCE_ALPHA = 6410.0
+
+        /// <remarks>TypeScript type: <c>32819</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_4_4_4_4 = 32819.0
+
+        /// <remarks>TypeScript type: <c>32820</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_5_5_5_1 = 32820.0
+
+        /// <remarks>TypeScript type: <c>33635</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_5_6_5 = 33635.0
+
+        /// <remarks>TypeScript type: <c>35632</c></remarks>
+        [<Literal>]
+        let FRAGMENT_SHADER = 35632.0
+
+        /// <remarks>TypeScript type: <c>35633</c></remarks>
+        [<Literal>]
+        let VERTEX_SHADER = 35633.0
+
+        /// <remarks>TypeScript type: <c>34921</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_ATTRIBS = 34921.0
+
+        /// <remarks>TypeScript type: <c>36347</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_UNIFORM_VECTORS = 36347.0
+
+        /// <remarks>TypeScript type: <c>36348</c></remarks>
+        [<Literal>]
+        let MAX_VARYING_VECTORS = 36348.0
+
+        /// <remarks>TypeScript type: <c>35661</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661.0
+
+        /// <remarks>TypeScript type: <c>35660</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660.0
+
+        /// <remarks>TypeScript type: <c>34930</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_IMAGE_UNITS = 34930.0
+
+        /// <remarks>TypeScript type: <c>36349</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_UNIFORM_VECTORS = 36349.0
+
+        /// <remarks>TypeScript type: <c>35663</c></remarks>
+        [<Literal>]
+        let SHADER_TYPE = 35663.0
+
+        /// <remarks>TypeScript type: <c>35712</c></remarks>
+        [<Literal>]
+        let DELETE_STATUS = 35712.0
+
+        /// <remarks>TypeScript type: <c>35714</c></remarks>
+        [<Literal>]
+        let LINK_STATUS = 35714.0
+
+        /// <remarks>TypeScript type: <c>35715</c></remarks>
+        [<Literal>]
+        let VALIDATE_STATUS = 35715.0
+
+        /// <remarks>TypeScript type: <c>35717</c></remarks>
+        [<Literal>]
+        let ATTACHED_SHADERS = 35717.0
+
+        /// <remarks>TypeScript type: <c>35718</c></remarks>
+        [<Literal>]
+        let ACTIVE_UNIFORMS = 35718.0
+
+        /// <remarks>TypeScript type: <c>35721</c></remarks>
+        [<Literal>]
+        let ACTIVE_ATTRIBUTES = 35721.0
+
+        /// <remarks>TypeScript type: <c>35724</c></remarks>
+        [<Literal>]
+        let SHADING_LANGUAGE_VERSION = 35724.0
+
+        /// <remarks>TypeScript type: <c>35725</c></remarks>
+        [<Literal>]
+        let CURRENT_PROGRAM = 35725.0
+
+        /// <remarks>TypeScript type: <c>512</c></remarks>
+        [<Literal>]
+        let NEVER = 512.0
+
+        /// <remarks>TypeScript type: <c>513</c></remarks>
+        [<Literal>]
+        let LESS = 513.0
+
+        /// <remarks>TypeScript type: <c>514</c></remarks>
+        [<Literal>]
+        let EQUAL = 514.0
+
+        /// <remarks>TypeScript type: <c>515</c></remarks>
+        [<Literal>]
+        let LEQUAL = 515.0
+
+        /// <remarks>TypeScript type: <c>516</c></remarks>
+        [<Literal>]
+        let GREATER = 516.0
+
+        /// <remarks>TypeScript type: <c>517</c></remarks>
+        [<Literal>]
+        let NOTEQUAL = 517.0
+
+        /// <remarks>TypeScript type: <c>518</c></remarks>
+        [<Literal>]
+        let GEQUAL = 518.0
+
+        /// <remarks>TypeScript type: <c>519</c></remarks>
+        [<Literal>]
+        let ALWAYS = 519.0
+
+        /// <remarks>TypeScript type: <c>7680</c></remarks>
+        [<Literal>]
+        let KEEP = 7680.0
+
+        /// <remarks>TypeScript type: <c>7681</c></remarks>
+        [<Literal>]
+        let REPLACE = 7681.0
+
+        /// <remarks>TypeScript type: <c>7682</c></remarks>
+        [<Literal>]
+        let INCR = 7682.0
+
+        /// <remarks>TypeScript type: <c>7683</c></remarks>
+        [<Literal>]
+        let DECR = 7683.0
+
+        /// <remarks>TypeScript type: <c>5386</c></remarks>
+        [<Literal>]
+        let INVERT = 5386.0
+
+        /// <remarks>TypeScript type: <c>34055</c></remarks>
+        [<Literal>]
+        let INCR_WRAP = 34055.0
+
+        /// <remarks>TypeScript type: <c>34056</c></remarks>
+        [<Literal>]
+        let DECR_WRAP = 34056.0
+
+        /// <remarks>TypeScript type: <c>7936</c></remarks>
+        [<Literal>]
+        let VENDOR = 7936.0
+
+        /// <remarks>TypeScript type: <c>7937</c></remarks>
+        [<Literal>]
+        let RENDERER = 7937.0
+
+        /// <remarks>TypeScript type: <c>7938</c></remarks>
+        [<Literal>]
+        let VERSION = 7938.0
+
+        /// <remarks>TypeScript type: <c>9728</c></remarks>
+        [<Literal>]
+        let NEAREST = 9728.0
+
+        /// <remarks>TypeScript type: <c>9729</c></remarks>
+        [<Literal>]
+        let LINEAR = 9729.0
+
+        /// <remarks>TypeScript type: <c>9984</c></remarks>
+        [<Literal>]
+        let NEAREST_MIPMAP_NEAREST = 9984.0
+
+        /// <remarks>TypeScript type: <c>9985</c></remarks>
+        [<Literal>]
+        let LINEAR_MIPMAP_NEAREST = 9985.0
+
+        /// <remarks>TypeScript type: <c>9986</c></remarks>
+        [<Literal>]
+        let NEAREST_MIPMAP_LINEAR = 9986.0
+
+        /// <remarks>TypeScript type: <c>9987</c></remarks>
+        [<Literal>]
+        let LINEAR_MIPMAP_LINEAR = 9987.0
+
+        /// <remarks>TypeScript type: <c>10240</c></remarks>
+        [<Literal>]
+        let TEXTURE_MAG_FILTER = 10240.0
+
+        /// <remarks>TypeScript type: <c>10241</c></remarks>
+        [<Literal>]
+        let TEXTURE_MIN_FILTER = 10241.0
+
+        /// <remarks>TypeScript type: <c>10242</c></remarks>
+        [<Literal>]
+        let TEXTURE_WRAP_S = 10242.0
+
+        /// <remarks>TypeScript type: <c>10243</c></remarks>
+        [<Literal>]
+        let TEXTURE_WRAP_T = 10243.0
+
+        /// <remarks>TypeScript type: <c>3553</c></remarks>
+        [<Literal>]
+        let TEXTURE_2D = 3553.0
+
+        /// <remarks>TypeScript type: <c>5890</c></remarks>
+        [<Literal>]
+        let TEXTURE = 5890.0
+
+        /// <remarks>TypeScript type: <c>34067</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP = 34067.0
+
+        /// <remarks>TypeScript type: <c>34068</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_CUBE_MAP = 34068.0
+
+        /// <remarks>TypeScript type: <c>34069</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_X = 34069.0
+
+        /// <remarks>TypeScript type: <c>34070</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_X = 34070.0
+
+        /// <remarks>TypeScript type: <c>34071</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_Y = 34071.0
+
+        /// <remarks>TypeScript type: <c>34072</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072.0
+
+        /// <remarks>TypeScript type: <c>34073</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_Z = 34073.0
+
+        /// <remarks>TypeScript type: <c>34074</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074.0
+
+        /// <remarks>TypeScript type: <c>34076</c></remarks>
+        [<Literal>]
+        let MAX_CUBE_MAP_TEXTURE_SIZE = 34076.0
+
+        /// <remarks>TypeScript type: <c>33984</c></remarks>
+        [<Literal>]
+        let TEXTURE0 = 33984.0
+
+        /// <remarks>TypeScript type: <c>33985</c></remarks>
+        [<Literal>]
+        let TEXTURE1 = 33985.0
+
+        /// <remarks>TypeScript type: <c>33986</c></remarks>
+        [<Literal>]
+        let TEXTURE2 = 33986.0
+
+        /// <remarks>TypeScript type: <c>33987</c></remarks>
+        [<Literal>]
+        let TEXTURE3 = 33987.0
+
+        /// <remarks>TypeScript type: <c>33988</c></remarks>
+        [<Literal>]
+        let TEXTURE4 = 33988.0
+
+        /// <remarks>TypeScript type: <c>33989</c></remarks>
+        [<Literal>]
+        let TEXTURE5 = 33989.0
+
+        /// <remarks>TypeScript type: <c>33990</c></remarks>
+        [<Literal>]
+        let TEXTURE6 = 33990.0
+
+        /// <remarks>TypeScript type: <c>33991</c></remarks>
+        [<Literal>]
+        let TEXTURE7 = 33991.0
+
+        /// <remarks>TypeScript type: <c>33992</c></remarks>
+        [<Literal>]
+        let TEXTURE8 = 33992.0
+
+        /// <remarks>TypeScript type: <c>33993</c></remarks>
+        [<Literal>]
+        let TEXTURE9 = 33993.0
+
+        /// <remarks>TypeScript type: <c>33994</c></remarks>
+        [<Literal>]
+        let TEXTURE10 = 33994.0
+
+        /// <remarks>TypeScript type: <c>33995</c></remarks>
+        [<Literal>]
+        let TEXTURE11 = 33995.0
+
+        /// <remarks>TypeScript type: <c>33996</c></remarks>
+        [<Literal>]
+        let TEXTURE12 = 33996.0
+
+        /// <remarks>TypeScript type: <c>33997</c></remarks>
+        [<Literal>]
+        let TEXTURE13 = 33997.0
+
+        /// <remarks>TypeScript type: <c>33998</c></remarks>
+        [<Literal>]
+        let TEXTURE14 = 33998.0
+
+        /// <remarks>TypeScript type: <c>33999</c></remarks>
+        [<Literal>]
+        let TEXTURE15 = 33999.0
+
+        /// <remarks>TypeScript type: <c>34000</c></remarks>
+        [<Literal>]
+        let TEXTURE16 = 34000.0
+
+        /// <remarks>TypeScript type: <c>34001</c></remarks>
+        [<Literal>]
+        let TEXTURE17 = 34001.0
+
+        /// <remarks>TypeScript type: <c>34002</c></remarks>
+        [<Literal>]
+        let TEXTURE18 = 34002.0
+
+        /// <remarks>TypeScript type: <c>34003</c></remarks>
+        [<Literal>]
+        let TEXTURE19 = 34003.0
+
+        /// <remarks>TypeScript type: <c>34004</c></remarks>
+        [<Literal>]
+        let TEXTURE20 = 34004.0
+
+        /// <remarks>TypeScript type: <c>34005</c></remarks>
+        [<Literal>]
+        let TEXTURE21 = 34005.0
+
+        /// <remarks>TypeScript type: <c>34006</c></remarks>
+        [<Literal>]
+        let TEXTURE22 = 34006.0
+
+        /// <remarks>TypeScript type: <c>34007</c></remarks>
+        [<Literal>]
+        let TEXTURE23 = 34007.0
+
+        /// <remarks>TypeScript type: <c>34008</c></remarks>
+        [<Literal>]
+        let TEXTURE24 = 34008.0
+
+        /// <remarks>TypeScript type: <c>34009</c></remarks>
+        [<Literal>]
+        let TEXTURE25 = 34009.0
+
+        /// <remarks>TypeScript type: <c>34010</c></remarks>
+        [<Literal>]
+        let TEXTURE26 = 34010.0
+
+        /// <remarks>TypeScript type: <c>34011</c></remarks>
+        [<Literal>]
+        let TEXTURE27 = 34011.0
+
+        /// <remarks>TypeScript type: <c>34012</c></remarks>
+        [<Literal>]
+        let TEXTURE28 = 34012.0
+
+        /// <remarks>TypeScript type: <c>34013</c></remarks>
+        [<Literal>]
+        let TEXTURE29 = 34013.0
+
+        /// <remarks>TypeScript type: <c>34014</c></remarks>
+        [<Literal>]
+        let TEXTURE30 = 34014.0
+
+        /// <remarks>TypeScript type: <c>34015</c></remarks>
+        [<Literal>]
+        let TEXTURE31 = 34015.0
+
+        /// <remarks>TypeScript type: <c>34016</c></remarks>
+        [<Literal>]
+        let ACTIVE_TEXTURE = 34016.0
+
+        /// <remarks>TypeScript type: <c>10497</c></remarks>
+        [<Literal>]
+        let REPEAT = 10497.0
+
+        /// <remarks>TypeScript type: <c>33071</c></remarks>
+        [<Literal>]
+        let CLAMP_TO_EDGE = 33071.0
+
+        /// <remarks>TypeScript type: <c>33648</c></remarks>
+        [<Literal>]
+        let MIRRORED_REPEAT = 33648.0
+
+        /// <remarks>TypeScript type: <c>35664</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC2 = 35664.0
+
+        /// <remarks>TypeScript type: <c>35665</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC3 = 35665.0
+
+        /// <remarks>TypeScript type: <c>35666</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC4 = 35666.0
+
+        /// <remarks>TypeScript type: <c>35667</c></remarks>
+        [<Literal>]
+        let INT_VEC2 = 35667.0
+
+        /// <remarks>TypeScript type: <c>35668</c></remarks>
+        [<Literal>]
+        let INT_VEC3 = 35668.0
+
+        /// <remarks>TypeScript type: <c>35669</c></remarks>
+        [<Literal>]
+        let INT_VEC4 = 35669.0
+
+        /// <remarks>TypeScript type: <c>35670</c></remarks>
+        [<Literal>]
+        let BOOL = 35670.0
+
+        /// <remarks>TypeScript type: <c>35671</c></remarks>
+        [<Literal>]
+        let BOOL_VEC2 = 35671.0
+
+        /// <remarks>TypeScript type: <c>35672</c></remarks>
+        [<Literal>]
+        let BOOL_VEC3 = 35672.0
+
+        /// <remarks>TypeScript type: <c>35673</c></remarks>
+        [<Literal>]
+        let BOOL_VEC4 = 35673.0
+
+        /// <remarks>TypeScript type: <c>35674</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT2 = 35674.0
+
+        /// <remarks>TypeScript type: <c>35675</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT3 = 35675.0
+
+        /// <remarks>TypeScript type: <c>35676</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT4 = 35676.0
+
+        /// <remarks>TypeScript type: <c>35678</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D = 35678.0
+
+        /// <remarks>TypeScript type: <c>35680</c></remarks>
+        [<Literal>]
+        let SAMPLER_CUBE = 35680.0
+
+        /// <remarks>TypeScript type: <c>34338</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_ENABLED = 34338.0
+
+        /// <remarks>TypeScript type: <c>34339</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_SIZE = 34339.0
+
+        /// <remarks>TypeScript type: <c>34340</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_STRIDE = 34340.0
+
+        /// <remarks>TypeScript type: <c>34341</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_TYPE = 34341.0
+
+        /// <remarks>TypeScript type: <c>34922</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922.0
+
+        /// <remarks>TypeScript type: <c>34373</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_POINTER = 34373.0
+
+        /// <remarks>TypeScript type: <c>34975</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975.0
+
+        /// <remarks>TypeScript type: <c>35738</c></remarks>
+        [<Literal>]
+        let IMPLEMENTATION_COLOR_READ_TYPE = 35738.0
+
+        /// <remarks>TypeScript type: <c>35739</c></remarks>
+        [<Literal>]
+        let IMPLEMENTATION_COLOR_READ_FORMAT = 35739.0
+
+        /// <remarks>TypeScript type: <c>35713</c></remarks>
+        [<Literal>]
+        let COMPILE_STATUS = 35713.0
+
+        /// <remarks>TypeScript type: <c>36336</c></remarks>
+        [<Literal>]
+        let LOW_FLOAT = 36336.0
+
+        /// <remarks>TypeScript type: <c>36337</c></remarks>
+        [<Literal>]
+        let MEDIUM_FLOAT = 36337.0
+
+        /// <remarks>TypeScript type: <c>36338</c></remarks>
+        [<Literal>]
+        let HIGH_FLOAT = 36338.0
+
+        /// <remarks>TypeScript type: <c>36339</c></remarks>
+        [<Literal>]
+        let LOW_INT = 36339.0
+
+        /// <remarks>TypeScript type: <c>36340</c></remarks>
+        [<Literal>]
+        let MEDIUM_INT = 36340.0
+
+        /// <remarks>TypeScript type: <c>36341</c></remarks>
+        [<Literal>]
+        let HIGH_INT = 36341.0
+
+        /// <remarks>TypeScript type: <c>36160</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER = 36160.0
+
+        /// <remarks>TypeScript type: <c>36161</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER = 36161.0
+
+        /// <remarks>TypeScript type: <c>32854</c></remarks>
+        [<Literal>]
+        let RGBA4 = 32854.0
+
+        /// <remarks>TypeScript type: <c>32855</c></remarks>
+        [<Literal>]
+        let RGB5_A1 = 32855.0
+
+        /// <remarks>TypeScript type: <c>32856</c></remarks>
+        [<Literal>]
+        let RGBA8 = 32856.0
+
+        /// <remarks>TypeScript type: <c>36194</c></remarks>
+        [<Literal>]
+        let RGB565 = 36194.0
+
+        /// <remarks>TypeScript type: <c>33189</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT16 = 33189.0
+
+        /// <remarks>TypeScript type: <c>36168</c></remarks>
+        [<Literal>]
+        let STENCIL_INDEX8 = 36168.0
+
+        /// <remarks>TypeScript type: <c>34041</c></remarks>
+        [<Literal>]
+        let DEPTH_STENCIL = 34041.0
+
+        /// <remarks>TypeScript type: <c>36162</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_WIDTH = 36162.0
+
+        /// <remarks>TypeScript type: <c>36163</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_HEIGHT = 36163.0
+
+        /// <remarks>TypeScript type: <c>36164</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_INTERNAL_FORMAT = 36164.0
+
+        /// <remarks>TypeScript type: <c>36176</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_RED_SIZE = 36176.0
+
+        /// <remarks>TypeScript type: <c>36177</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_GREEN_SIZE = 36177.0
+
+        /// <remarks>TypeScript type: <c>36178</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_BLUE_SIZE = 36178.0
+
+        /// <remarks>TypeScript type: <c>36179</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_ALPHA_SIZE = 36179.0
+
+        /// <remarks>TypeScript type: <c>36180</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_DEPTH_SIZE = 36180.0
+
+        /// <remarks>TypeScript type: <c>36181</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_STENCIL_SIZE = 36181.0
+
+        /// <remarks>TypeScript type: <c>36048</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048.0
+
+        /// <remarks>TypeScript type: <c>36049</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049.0
+
+        /// <remarks>TypeScript type: <c>36050</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050.0
+
+        /// <remarks>TypeScript type: <c>36051</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051.0
+
+        /// <remarks>TypeScript type: <c>36064</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT0 = 36064.0
+
+        /// <remarks>TypeScript type: <c>36096</c></remarks>
+        [<Literal>]
+        let DEPTH_ATTACHMENT = 36096.0
+
+        /// <remarks>TypeScript type: <c>36128</c></remarks>
+        [<Literal>]
+        let STENCIL_ATTACHMENT = 36128.0
+
+        /// <remarks>TypeScript type: <c>33306</c></remarks>
+        [<Literal>]
+        let DEPTH_STENCIL_ATTACHMENT = 33306.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NONE = 0.0
+
+        /// <remarks>TypeScript type: <c>36053</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_COMPLETE = 36053.0
+
+        /// <remarks>TypeScript type: <c>36054</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054.0
+
+        /// <remarks>TypeScript type: <c>36055</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055.0
+
+        /// <remarks>TypeScript type: <c>36057</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057.0
+
+        /// <remarks>TypeScript type: <c>36061</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_UNSUPPORTED = 36061.0
+
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_BINDING = 36006.0
+
+        /// <remarks>TypeScript type: <c>36007</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_BINDING = 36007.0
+
+        /// <remarks>TypeScript type: <c>34024</c></remarks>
+        [<Literal>]
+        let MAX_RENDERBUFFER_SIZE = 34024.0
+
+        /// <remarks>TypeScript type: <c>1286</c></remarks>
+        [<Literal>]
+        let INVALID_FRAMEBUFFER_OPERATION = 1286.0
+
+        /// <remarks>TypeScript type: <c>37440</c></remarks>
+        [<Literal>]
+        let UNPACK_FLIP_Y_WEBGL = 37440.0
+
+        /// <remarks>TypeScript type: <c>37441</c></remarks>
+        [<Literal>]
+        let UNPACK_PREMULTIPLY_ALPHA_WEBGL = 37441.0
+
+        /// <remarks>TypeScript type: <c>37442</c></remarks>
+        [<Literal>]
+        let CONTEXT_LOST_WEBGL = 37442.0
+
+        /// <remarks>TypeScript type: <c>37443</c></remarks>
+        [<Literal>]
+        let UNPACK_COLORSPACE_CONVERSION_WEBGL = 37443.0
+
+        /// <remarks>TypeScript type: <c>37444</c></remarks>
+        [<Literal>]
+        let BROWSER_DEFAULT_WEBGL = 37444.0
 
     type WebGL2RenderingContextBase =
         /// <summary>
@@ -77802,268 +83691,1579 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebGL2RenderingContext/waitSync">MDN Reference</a>
         /// </summary>
         abstract waitSync: sync: WebGLSync * flags: float * timeout: float -> unit
+        /// <remarks>TypeScript type: <c>3074</c></remarks>
         abstract READ_BUFFER: float
+        /// <remarks>TypeScript type: <c>3314</c></remarks>
         abstract UNPACK_ROW_LENGTH: float
+        /// <remarks>TypeScript type: <c>3315</c></remarks>
         abstract UNPACK_SKIP_ROWS: float
+        /// <remarks>TypeScript type: <c>3316</c></remarks>
         abstract UNPACK_SKIP_PIXELS: float
+        /// <remarks>TypeScript type: <c>3330</c></remarks>
         abstract PACK_ROW_LENGTH: float
+        /// <remarks>TypeScript type: <c>3331</c></remarks>
         abstract PACK_SKIP_ROWS: float
+        /// <remarks>TypeScript type: <c>3332</c></remarks>
         abstract PACK_SKIP_PIXELS: float
+        /// <remarks>TypeScript type: <c>6144</c></remarks>
         abstract COLOR: float
+        /// <remarks>TypeScript type: <c>6145</c></remarks>
         abstract DEPTH: float
+        /// <remarks>TypeScript type: <c>6146</c></remarks>
         abstract STENCIL: float
+        /// <remarks>TypeScript type: <c>6403</c></remarks>
         abstract RED: float
+        /// <remarks>TypeScript type: <c>32849</c></remarks>
         abstract RGB8: float
+        /// <remarks>TypeScript type: <c>32857</c></remarks>
         abstract RGB10_A2: float
+        /// <remarks>TypeScript type: <c>32874</c></remarks>
         abstract TEXTURE_BINDING_3D: float
+        /// <remarks>TypeScript type: <c>32877</c></remarks>
         abstract UNPACK_SKIP_IMAGES: float
+        /// <remarks>TypeScript type: <c>32878</c></remarks>
         abstract UNPACK_IMAGE_HEIGHT: float
+        /// <remarks>TypeScript type: <c>32879</c></remarks>
         abstract TEXTURE_3D: float
+        /// <remarks>TypeScript type: <c>32882</c></remarks>
         abstract TEXTURE_WRAP_R: float
+        /// <remarks>TypeScript type: <c>32883</c></remarks>
         abstract MAX_3D_TEXTURE_SIZE: float
+        /// <remarks>TypeScript type: <c>33640</c></remarks>
         abstract UNSIGNED_INT_2_10_10_10_REV: float
+        /// <remarks>TypeScript type: <c>33000</c></remarks>
         abstract MAX_ELEMENTS_VERTICES: float
+        /// <remarks>TypeScript type: <c>33001</c></remarks>
         abstract MAX_ELEMENTS_INDICES: float
+        /// <remarks>TypeScript type: <c>33082</c></remarks>
         abstract TEXTURE_MIN_LOD: float
+        /// <remarks>TypeScript type: <c>33083</c></remarks>
         abstract TEXTURE_MAX_LOD: float
+        /// <remarks>TypeScript type: <c>33084</c></remarks>
         abstract TEXTURE_BASE_LEVEL: float
+        /// <remarks>TypeScript type: <c>33085</c></remarks>
         abstract TEXTURE_MAX_LEVEL: float
+        /// <remarks>TypeScript type: <c>32775</c></remarks>
         abstract MIN: float
+        /// <remarks>TypeScript type: <c>32776</c></remarks>
         abstract MAX: float
+        /// <remarks>TypeScript type: <c>33190</c></remarks>
         abstract DEPTH_COMPONENT24: float
+        /// <remarks>TypeScript type: <c>34045</c></remarks>
         abstract MAX_TEXTURE_LOD_BIAS: float
+        /// <remarks>TypeScript type: <c>34892</c></remarks>
         abstract TEXTURE_COMPARE_MODE: float
+        /// <remarks>TypeScript type: <c>34893</c></remarks>
         abstract TEXTURE_COMPARE_FUNC: float
+        /// <remarks>TypeScript type: <c>34917</c></remarks>
         abstract CURRENT_QUERY: float
+        /// <remarks>TypeScript type: <c>34918</c></remarks>
         abstract QUERY_RESULT: float
+        /// <remarks>TypeScript type: <c>34919</c></remarks>
         abstract QUERY_RESULT_AVAILABLE: float
+        /// <remarks>TypeScript type: <c>35041</c></remarks>
         abstract STREAM_READ: float
+        /// <remarks>TypeScript type: <c>35042</c></remarks>
         abstract STREAM_COPY: float
+        /// <remarks>TypeScript type: <c>35045</c></remarks>
         abstract STATIC_READ: float
+        /// <remarks>TypeScript type: <c>35046</c></remarks>
         abstract STATIC_COPY: float
+        /// <remarks>TypeScript type: <c>35049</c></remarks>
         abstract DYNAMIC_READ: float
+        /// <remarks>TypeScript type: <c>35050</c></remarks>
         abstract DYNAMIC_COPY: float
+        /// <remarks>TypeScript type: <c>34852</c></remarks>
         abstract MAX_DRAW_BUFFERS: float
+        /// <remarks>TypeScript type: <c>34853</c></remarks>
         abstract DRAW_BUFFER0: float
+        /// <remarks>TypeScript type: <c>34854</c></remarks>
         abstract DRAW_BUFFER1: float
+        /// <remarks>TypeScript type: <c>34855</c></remarks>
         abstract DRAW_BUFFER2: float
+        /// <remarks>TypeScript type: <c>34856</c></remarks>
         abstract DRAW_BUFFER3: float
+        /// <remarks>TypeScript type: <c>34857</c></remarks>
         abstract DRAW_BUFFER4: float
+        /// <remarks>TypeScript type: <c>34858</c></remarks>
         abstract DRAW_BUFFER5: float
+        /// <remarks>TypeScript type: <c>34859</c></remarks>
         abstract DRAW_BUFFER6: float
+        /// <remarks>TypeScript type: <c>34860</c></remarks>
         abstract DRAW_BUFFER7: float
+        /// <remarks>TypeScript type: <c>34861</c></remarks>
         abstract DRAW_BUFFER8: float
+        /// <remarks>TypeScript type: <c>34862</c></remarks>
         abstract DRAW_BUFFER9: float
+        /// <remarks>TypeScript type: <c>34863</c></remarks>
         abstract DRAW_BUFFER10: float
+        /// <remarks>TypeScript type: <c>34864</c></remarks>
         abstract DRAW_BUFFER11: float
+        /// <remarks>TypeScript type: <c>34865</c></remarks>
         abstract DRAW_BUFFER12: float
+        /// <remarks>TypeScript type: <c>34866</c></remarks>
         abstract DRAW_BUFFER13: float
+        /// <remarks>TypeScript type: <c>34867</c></remarks>
         abstract DRAW_BUFFER14: float
+        /// <remarks>TypeScript type: <c>34868</c></remarks>
         abstract DRAW_BUFFER15: float
+        /// <remarks>TypeScript type: <c>35657</c></remarks>
         abstract MAX_FRAGMENT_UNIFORM_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35658</c></remarks>
         abstract MAX_VERTEX_UNIFORM_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35679</c></remarks>
         abstract SAMPLER_3D: float
+        /// <remarks>TypeScript type: <c>35682</c></remarks>
         abstract SAMPLER_2D_SHADOW: float
+        /// <remarks>TypeScript type: <c>35723</c></remarks>
         abstract FRAGMENT_SHADER_DERIVATIVE_HINT: float
+        /// <remarks>TypeScript type: <c>35051</c></remarks>
         abstract PIXEL_PACK_BUFFER: float
+        /// <remarks>TypeScript type: <c>35052</c></remarks>
         abstract PIXEL_UNPACK_BUFFER: float
+        /// <remarks>TypeScript type: <c>35053</c></remarks>
         abstract PIXEL_PACK_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35055</c></remarks>
         abstract PIXEL_UNPACK_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35685</c></remarks>
         abstract FLOAT_MAT2x3: float
+        /// <remarks>TypeScript type: <c>35686</c></remarks>
         abstract FLOAT_MAT2x4: float
+        /// <remarks>TypeScript type: <c>35687</c></remarks>
         abstract FLOAT_MAT3x2: float
+        /// <remarks>TypeScript type: <c>35688</c></remarks>
         abstract FLOAT_MAT3x4: float
+        /// <remarks>TypeScript type: <c>35689</c></remarks>
         abstract FLOAT_MAT4x2: float
+        /// <remarks>TypeScript type: <c>35690</c></remarks>
         abstract FLOAT_MAT4x3: float
+        /// <remarks>TypeScript type: <c>35904</c></remarks>
         abstract SRGB: float
+        /// <remarks>TypeScript type: <c>35905</c></remarks>
         abstract SRGB8: float
+        /// <remarks>TypeScript type: <c>35907</c></remarks>
         abstract SRGB8_ALPHA8: float
+        /// <remarks>TypeScript type: <c>34894</c></remarks>
         abstract COMPARE_REF_TO_TEXTURE: float
+        /// <remarks>TypeScript type: <c>34836</c></remarks>
         abstract RGBA32F: float
+        /// <remarks>TypeScript type: <c>34837</c></remarks>
         abstract RGB32F: float
+        /// <remarks>TypeScript type: <c>34842</c></remarks>
         abstract RGBA16F: float
+        /// <remarks>TypeScript type: <c>34843</c></remarks>
         abstract RGB16F: float
+        /// <remarks>TypeScript type: <c>35069</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_INTEGER: float
+        /// <remarks>TypeScript type: <c>35071</c></remarks>
         abstract MAX_ARRAY_TEXTURE_LAYERS: float
+        /// <remarks>TypeScript type: <c>35076</c></remarks>
         abstract MIN_PROGRAM_TEXEL_OFFSET: float
+        /// <remarks>TypeScript type: <c>35077</c></remarks>
         abstract MAX_PROGRAM_TEXEL_OFFSET: float
+        /// <remarks>TypeScript type: <c>35659</c></remarks>
         abstract MAX_VARYING_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35866</c></remarks>
         abstract TEXTURE_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>35869</c></remarks>
         abstract TEXTURE_BINDING_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>35898</c></remarks>
         abstract R11F_G11F_B10F: float
+        /// <remarks>TypeScript type: <c>35899</c></remarks>
         abstract UNSIGNED_INT_10F_11F_11F_REV: float
+        /// <remarks>TypeScript type: <c>35901</c></remarks>
         abstract RGB9_E5: float
+        /// <remarks>TypeScript type: <c>35902</c></remarks>
         abstract UNSIGNED_INT_5_9_9_9_REV: float
+        /// <remarks>TypeScript type: <c>35967</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER_MODE: float
+        /// <remarks>TypeScript type: <c>35968</c></remarks>
         abstract MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35971</c></remarks>
         abstract TRANSFORM_FEEDBACK_VARYINGS: float
+        /// <remarks>TypeScript type: <c>35972</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER_START: float
+        /// <remarks>TypeScript type: <c>35973</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>35976</c></remarks>
         abstract TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN: float
+        /// <remarks>TypeScript type: <c>35977</c></remarks>
         abstract RASTERIZER_DISCARD: float
+        /// <remarks>TypeScript type: <c>35978</c></remarks>
         abstract MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35979</c></remarks>
         abstract MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>35980</c></remarks>
         abstract INTERLEAVED_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>35981</c></remarks>
         abstract SEPARATE_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>35982</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER: float
+        /// <remarks>TypeScript type: <c>35983</c></remarks>
         abstract TRANSFORM_FEEDBACK_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36208</c></remarks>
         abstract RGBA32UI: float
+        /// <remarks>TypeScript type: <c>36209</c></remarks>
         abstract RGB32UI: float
+        /// <remarks>TypeScript type: <c>36214</c></remarks>
         abstract RGBA16UI: float
+        /// <remarks>TypeScript type: <c>36215</c></remarks>
         abstract RGB16UI: float
+        /// <remarks>TypeScript type: <c>36220</c></remarks>
         abstract RGBA8UI: float
+        /// <remarks>TypeScript type: <c>36221</c></remarks>
         abstract RGB8UI: float
+        /// <remarks>TypeScript type: <c>36226</c></remarks>
         abstract RGBA32I: float
+        /// <remarks>TypeScript type: <c>36227</c></remarks>
         abstract RGB32I: float
+        /// <remarks>TypeScript type: <c>36232</c></remarks>
         abstract RGBA16I: float
+        /// <remarks>TypeScript type: <c>36233</c></remarks>
         abstract RGB16I: float
+        /// <remarks>TypeScript type: <c>36238</c></remarks>
         abstract RGBA8I: float
+        /// <remarks>TypeScript type: <c>36239</c></remarks>
         abstract RGB8I: float
+        /// <remarks>TypeScript type: <c>36244</c></remarks>
         abstract RED_INTEGER: float
+        /// <remarks>TypeScript type: <c>36248</c></remarks>
         abstract RGB_INTEGER: float
+        /// <remarks>TypeScript type: <c>36249</c></remarks>
         abstract RGBA_INTEGER: float
+        /// <remarks>TypeScript type: <c>36289</c></remarks>
         abstract SAMPLER_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>36292</c></remarks>
         abstract SAMPLER_2D_ARRAY_SHADOW: float
+        /// <remarks>TypeScript type: <c>36293</c></remarks>
         abstract SAMPLER_CUBE_SHADOW: float
+        /// <remarks>TypeScript type: <c>36294</c></remarks>
         abstract UNSIGNED_INT_VEC2: float
+        /// <remarks>TypeScript type: <c>36295</c></remarks>
         abstract UNSIGNED_INT_VEC3: float
+        /// <remarks>TypeScript type: <c>36296</c></remarks>
         abstract UNSIGNED_INT_VEC4: float
+        /// <remarks>TypeScript type: <c>36298</c></remarks>
         abstract INT_SAMPLER_2D: float
+        /// <remarks>TypeScript type: <c>36299</c></remarks>
         abstract INT_SAMPLER_3D: float
+        /// <remarks>TypeScript type: <c>36300</c></remarks>
         abstract INT_SAMPLER_CUBE: float
+        /// <remarks>TypeScript type: <c>36303</c></remarks>
         abstract INT_SAMPLER_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>36306</c></remarks>
         abstract UNSIGNED_INT_SAMPLER_2D: float
+        /// <remarks>TypeScript type: <c>36307</c></remarks>
         abstract UNSIGNED_INT_SAMPLER_3D: float
+        /// <remarks>TypeScript type: <c>36308</c></remarks>
         abstract UNSIGNED_INT_SAMPLER_CUBE: float
+        /// <remarks>TypeScript type: <c>36311</c></remarks>
         abstract UNSIGNED_INT_SAMPLER_2D_ARRAY: float
+        /// <remarks>TypeScript type: <c>36012</c></remarks>
         abstract DEPTH_COMPONENT32F: float
+        /// <remarks>TypeScript type: <c>36013</c></remarks>
         abstract DEPTH32F_STENCIL8: float
+        /// <remarks>TypeScript type: <c>36269</c></remarks>
         abstract FLOAT_32_UNSIGNED_INT_24_8_REV: float
+        /// <remarks>TypeScript type: <c>33296</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING: float
+        /// <remarks>TypeScript type: <c>33297</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE: float
+        /// <remarks>TypeScript type: <c>33298</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_RED_SIZE: float
+        /// <remarks>TypeScript type: <c>33299</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_GREEN_SIZE: float
+        /// <remarks>TypeScript type: <c>33300</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_BLUE_SIZE: float
+        /// <remarks>TypeScript type: <c>33301</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE: float
+        /// <remarks>TypeScript type: <c>33302</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE: float
+        /// <remarks>TypeScript type: <c>33303</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE: float
+        /// <remarks>TypeScript type: <c>33304</c></remarks>
         abstract FRAMEBUFFER_DEFAULT: float
+        /// <remarks>TypeScript type: <c>34042</c></remarks>
         abstract UNSIGNED_INT_24_8: float
+        /// <remarks>TypeScript type: <c>35056</c></remarks>
         abstract DEPTH24_STENCIL8: float
+        /// <remarks>TypeScript type: <c>35863</c></remarks>
         abstract UNSIGNED_NORMALIZED: float
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
         abstract DRAW_FRAMEBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36008</c></remarks>
         abstract READ_FRAMEBUFFER: float
+        /// <remarks>TypeScript type: <c>36009</c></remarks>
         abstract DRAW_FRAMEBUFFER: float
+        /// <remarks>TypeScript type: <c>36010</c></remarks>
         abstract READ_FRAMEBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36011</c></remarks>
         abstract RENDERBUFFER_SAMPLES: float
+        /// <remarks>TypeScript type: <c>36052</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER: float
+        /// <remarks>TypeScript type: <c>36063</c></remarks>
         abstract MAX_COLOR_ATTACHMENTS: float
+        /// <remarks>TypeScript type: <c>36065</c></remarks>
         abstract COLOR_ATTACHMENT1: float
+        /// <remarks>TypeScript type: <c>36066</c></remarks>
         abstract COLOR_ATTACHMENT2: float
+        /// <remarks>TypeScript type: <c>36067</c></remarks>
         abstract COLOR_ATTACHMENT3: float
+        /// <remarks>TypeScript type: <c>36068</c></remarks>
         abstract COLOR_ATTACHMENT4: float
+        /// <remarks>TypeScript type: <c>36069</c></remarks>
         abstract COLOR_ATTACHMENT5: float
+        /// <remarks>TypeScript type: <c>36070</c></remarks>
         abstract COLOR_ATTACHMENT6: float
+        /// <remarks>TypeScript type: <c>36071</c></remarks>
         abstract COLOR_ATTACHMENT7: float
+        /// <remarks>TypeScript type: <c>36072</c></remarks>
         abstract COLOR_ATTACHMENT8: float
+        /// <remarks>TypeScript type: <c>36073</c></remarks>
         abstract COLOR_ATTACHMENT9: float
+        /// <remarks>TypeScript type: <c>36074</c></remarks>
         abstract COLOR_ATTACHMENT10: float
+        /// <remarks>TypeScript type: <c>36075</c></remarks>
         abstract COLOR_ATTACHMENT11: float
+        /// <remarks>TypeScript type: <c>36076</c></remarks>
         abstract COLOR_ATTACHMENT12: float
+        /// <remarks>TypeScript type: <c>36077</c></remarks>
         abstract COLOR_ATTACHMENT13: float
+        /// <remarks>TypeScript type: <c>36078</c></remarks>
         abstract COLOR_ATTACHMENT14: float
+        /// <remarks>TypeScript type: <c>36079</c></remarks>
         abstract COLOR_ATTACHMENT15: float
+        /// <remarks>TypeScript type: <c>36182</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: float
+        /// <remarks>TypeScript type: <c>36183</c></remarks>
         abstract MAX_SAMPLES: float
+        /// <remarks>TypeScript type: <c>5131</c></remarks>
         abstract HALF_FLOAT: float
+        /// <remarks>TypeScript type: <c>33319</c></remarks>
         abstract RG: float
+        /// <remarks>TypeScript type: <c>33320</c></remarks>
         abstract RG_INTEGER: float
+        /// <remarks>TypeScript type: <c>33321</c></remarks>
         abstract R8: float
+        /// <remarks>TypeScript type: <c>33323</c></remarks>
         abstract RG8: float
+        /// <remarks>TypeScript type: <c>33325</c></remarks>
         abstract R16F: float
+        /// <remarks>TypeScript type: <c>33326</c></remarks>
         abstract R32F: float
+        /// <remarks>TypeScript type: <c>33327</c></remarks>
         abstract RG16F: float
+        /// <remarks>TypeScript type: <c>33328</c></remarks>
         abstract RG32F: float
+        /// <remarks>TypeScript type: <c>33329</c></remarks>
         abstract R8I: float
+        /// <remarks>TypeScript type: <c>33330</c></remarks>
         abstract R8UI: float
+        /// <remarks>TypeScript type: <c>33331</c></remarks>
         abstract R16I: float
+        /// <remarks>TypeScript type: <c>33332</c></remarks>
         abstract R16UI: float
+        /// <remarks>TypeScript type: <c>33333</c></remarks>
         abstract R32I: float
+        /// <remarks>TypeScript type: <c>33334</c></remarks>
         abstract R32UI: float
+        /// <remarks>TypeScript type: <c>33335</c></remarks>
         abstract RG8I: float
+        /// <remarks>TypeScript type: <c>33336</c></remarks>
         abstract RG8UI: float
+        /// <remarks>TypeScript type: <c>33337</c></remarks>
         abstract RG16I: float
+        /// <remarks>TypeScript type: <c>33338</c></remarks>
         abstract RG16UI: float
+        /// <remarks>TypeScript type: <c>33339</c></remarks>
         abstract RG32I: float
+        /// <remarks>TypeScript type: <c>33340</c></remarks>
         abstract RG32UI: float
+        /// <remarks>TypeScript type: <c>34229</c></remarks>
         abstract VERTEX_ARRAY_BINDING: float
+        /// <remarks>TypeScript type: <c>36756</c></remarks>
         abstract R8_SNORM: float
+        /// <remarks>TypeScript type: <c>36757</c></remarks>
         abstract RG8_SNORM: float
+        /// <remarks>TypeScript type: <c>36758</c></remarks>
         abstract RGB8_SNORM: float
+        /// <remarks>TypeScript type: <c>36759</c></remarks>
         abstract RGBA8_SNORM: float
+        /// <remarks>TypeScript type: <c>36764</c></remarks>
         abstract SIGNED_NORMALIZED: float
+        /// <remarks>TypeScript type: <c>36662</c></remarks>
         abstract COPY_READ_BUFFER: float
+        /// <remarks>TypeScript type: <c>36663</c></remarks>
         abstract COPY_WRITE_BUFFER: float
+        /// <remarks>TypeScript type: <c>36662</c></remarks>
         abstract COPY_READ_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36663</c></remarks>
         abstract COPY_WRITE_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35345</c></remarks>
         abstract UNIFORM_BUFFER: float
+        /// <remarks>TypeScript type: <c>35368</c></remarks>
         abstract UNIFORM_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35369</c></remarks>
         abstract UNIFORM_BUFFER_START: float
+        /// <remarks>TypeScript type: <c>35370</c></remarks>
         abstract UNIFORM_BUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>35371</c></remarks>
         abstract MAX_VERTEX_UNIFORM_BLOCKS: float
+        /// <remarks>TypeScript type: <c>35373</c></remarks>
         abstract MAX_FRAGMENT_UNIFORM_BLOCKS: float
+        /// <remarks>TypeScript type: <c>35374</c></remarks>
         abstract MAX_COMBINED_UNIFORM_BLOCKS: float
+        /// <remarks>TypeScript type: <c>35375</c></remarks>
         abstract MAX_UNIFORM_BUFFER_BINDINGS: float
+        /// <remarks>TypeScript type: <c>35376</c></remarks>
         abstract MAX_UNIFORM_BLOCK_SIZE: float
+        /// <remarks>TypeScript type: <c>35377</c></remarks>
         abstract MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35379</c></remarks>
         abstract MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>35380</c></remarks>
         abstract UNIFORM_BUFFER_OFFSET_ALIGNMENT: float
+        /// <remarks>TypeScript type: <c>35382</c></remarks>
         abstract ACTIVE_UNIFORM_BLOCKS: float
+        /// <remarks>TypeScript type: <c>35383</c></remarks>
         abstract UNIFORM_TYPE: float
+        /// <remarks>TypeScript type: <c>35384</c></remarks>
         abstract UNIFORM_SIZE: float
+        /// <remarks>TypeScript type: <c>35386</c></remarks>
         abstract UNIFORM_BLOCK_INDEX: float
+        /// <remarks>TypeScript type: <c>35387</c></remarks>
         abstract UNIFORM_OFFSET: float
+        /// <remarks>TypeScript type: <c>35388</c></remarks>
         abstract UNIFORM_ARRAY_STRIDE: float
+        /// <remarks>TypeScript type: <c>35389</c></remarks>
         abstract UNIFORM_MATRIX_STRIDE: float
+        /// <remarks>TypeScript type: <c>35390</c></remarks>
         abstract UNIFORM_IS_ROW_MAJOR: float
+        /// <remarks>TypeScript type: <c>35391</c></remarks>
         abstract UNIFORM_BLOCK_BINDING: float
+        /// <remarks>TypeScript type: <c>35392</c></remarks>
         abstract UNIFORM_BLOCK_DATA_SIZE: float
+        /// <remarks>TypeScript type: <c>35394</c></remarks>
         abstract UNIFORM_BLOCK_ACTIVE_UNIFORMS: float
+        /// <remarks>TypeScript type: <c>35395</c></remarks>
         abstract UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES: float
+        /// <remarks>TypeScript type: <c>35396</c></remarks>
         abstract UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER: float
+        /// <remarks>TypeScript type: <c>35398</c></remarks>
         abstract UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER: float
+        /// <remarks>TypeScript type: <c>4294967295</c></remarks>
         abstract INVALID_INDEX: float
+        /// <remarks>TypeScript type: <c>37154</c></remarks>
         abstract MAX_VERTEX_OUTPUT_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>37157</c></remarks>
         abstract MAX_FRAGMENT_INPUT_COMPONENTS: float
+        /// <remarks>TypeScript type: <c>37137</c></remarks>
         abstract MAX_SERVER_WAIT_TIMEOUT: float
+        /// <remarks>TypeScript type: <c>37138</c></remarks>
         abstract OBJECT_TYPE: float
+        /// <remarks>TypeScript type: <c>37139</c></remarks>
         abstract SYNC_CONDITION: float
+        /// <remarks>TypeScript type: <c>37140</c></remarks>
         abstract SYNC_STATUS: float
+        /// <remarks>TypeScript type: <c>37141</c></remarks>
         abstract SYNC_FLAGS: float
+        /// <remarks>TypeScript type: <c>37142</c></remarks>
         abstract SYNC_FENCE: float
+        /// <remarks>TypeScript type: <c>37143</c></remarks>
         abstract SYNC_GPU_COMMANDS_COMPLETE: float
+        /// <remarks>TypeScript type: <c>37144</c></remarks>
         abstract UNSIGNALED: float
+        /// <remarks>TypeScript type: <c>37145</c></remarks>
         abstract SIGNALED: float
+        /// <remarks>TypeScript type: <c>37146</c></remarks>
         abstract ALREADY_SIGNALED: float
+        /// <remarks>TypeScript type: <c>37147</c></remarks>
         abstract TIMEOUT_EXPIRED: float
+        /// <remarks>TypeScript type: <c>37148</c></remarks>
         abstract CONDITION_SATISFIED: float
+        /// <remarks>TypeScript type: <c>37149</c></remarks>
         abstract WAIT_FAILED: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract SYNC_FLUSH_COMMANDS_BIT: float
+        /// <remarks>TypeScript type: <c>35070</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_DIVISOR: float
+        /// <remarks>TypeScript type: <c>35887</c></remarks>
         abstract ANY_SAMPLES_PASSED: float
+        /// <remarks>TypeScript type: <c>36202</c></remarks>
         abstract ANY_SAMPLES_PASSED_CONSERVATIVE: float
+        /// <remarks>TypeScript type: <c>35097</c></remarks>
         abstract SAMPLER_BINDING: float
+        /// <remarks>TypeScript type: <c>36975</c></remarks>
         abstract RGB10_A2UI: float
+        /// <remarks>TypeScript type: <c>36255</c></remarks>
         abstract INT_2_10_10_10_REV: float
+        /// <remarks>TypeScript type: <c>36386</c></remarks>
         abstract TRANSFORM_FEEDBACK: float
+        /// <remarks>TypeScript type: <c>36387</c></remarks>
         abstract TRANSFORM_FEEDBACK_PAUSED: float
+        /// <remarks>TypeScript type: <c>36388</c></remarks>
         abstract TRANSFORM_FEEDBACK_ACTIVE: float
+        /// <remarks>TypeScript type: <c>36389</c></remarks>
         abstract TRANSFORM_FEEDBACK_BINDING: float
+        /// <remarks>TypeScript type: <c>37167</c></remarks>
         abstract TEXTURE_IMMUTABLE_FORMAT: float
+        /// <remarks>TypeScript type: <c>36203</c></remarks>
         abstract MAX_ELEMENT_INDEX: float
+        /// <remarks>TypeScript type: <c>33503</c></remarks>
         abstract TEXTURE_IMMUTABLE_LEVELS: float
+        /// <remarks>TypeScript type: <c>-1</c></remarks>
         abstract TIMEOUT_IGNORED: float
+        /// <remarks>TypeScript type: <c>37447</c></remarks>
         abstract MAX_CLIENT_WAIT_TIMEOUT_WEBGL: float
+
+    module WebGL2RenderingContextBase =
+        /// <remarks>TypeScript type: <c>3074</c></remarks>
+        [<Literal>]
+        let READ_BUFFER = 3074.0
+
+        /// <remarks>TypeScript type: <c>3314</c></remarks>
+        [<Literal>]
+        let UNPACK_ROW_LENGTH = 3314.0
+
+        /// <remarks>TypeScript type: <c>3315</c></remarks>
+        [<Literal>]
+        let UNPACK_SKIP_ROWS = 3315.0
+
+        /// <remarks>TypeScript type: <c>3316</c></remarks>
+        [<Literal>]
+        let UNPACK_SKIP_PIXELS = 3316.0
+
+        /// <remarks>TypeScript type: <c>3330</c></remarks>
+        [<Literal>]
+        let PACK_ROW_LENGTH = 3330.0
+
+        /// <remarks>TypeScript type: <c>3331</c></remarks>
+        [<Literal>]
+        let PACK_SKIP_ROWS = 3331.0
+
+        /// <remarks>TypeScript type: <c>3332</c></remarks>
+        [<Literal>]
+        let PACK_SKIP_PIXELS = 3332.0
+
+        /// <remarks>TypeScript type: <c>6144</c></remarks>
+        [<Literal>]
+        let COLOR = 6144.0
+
+        /// <remarks>TypeScript type: <c>6145</c></remarks>
+        [<Literal>]
+        let DEPTH = 6145.0
+
+        /// <remarks>TypeScript type: <c>6146</c></remarks>
+        [<Literal>]
+        let STENCIL = 6146.0
+
+        /// <remarks>TypeScript type: <c>6403</c></remarks>
+        [<Literal>]
+        let RED = 6403.0
+
+        /// <remarks>TypeScript type: <c>32849</c></remarks>
+        [<Literal>]
+        let RGB8 = 32849.0
+
+        /// <remarks>TypeScript type: <c>32857</c></remarks>
+        [<Literal>]
+        let RGB10_A2 = 32857.0
+
+        /// <remarks>TypeScript type: <c>32874</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_3D = 32874.0
+
+        /// <remarks>TypeScript type: <c>32877</c></remarks>
+        [<Literal>]
+        let UNPACK_SKIP_IMAGES = 32877.0
+
+        /// <remarks>TypeScript type: <c>32878</c></remarks>
+        [<Literal>]
+        let UNPACK_IMAGE_HEIGHT = 32878.0
+
+        /// <remarks>TypeScript type: <c>32879</c></remarks>
+        [<Literal>]
+        let TEXTURE_3D = 32879.0
+
+        /// <remarks>TypeScript type: <c>32882</c></remarks>
+        [<Literal>]
+        let TEXTURE_WRAP_R = 32882.0
+
+        /// <remarks>TypeScript type: <c>32883</c></remarks>
+        [<Literal>]
+        let MAX_3D_TEXTURE_SIZE = 32883.0
+
+        /// <remarks>TypeScript type: <c>33640</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_2_10_10_10_REV = 33640.0
+
+        /// <remarks>TypeScript type: <c>33000</c></remarks>
+        [<Literal>]
+        let MAX_ELEMENTS_VERTICES = 33000.0
+
+        /// <remarks>TypeScript type: <c>33001</c></remarks>
+        [<Literal>]
+        let MAX_ELEMENTS_INDICES = 33001.0
+
+        /// <remarks>TypeScript type: <c>33082</c></remarks>
+        [<Literal>]
+        let TEXTURE_MIN_LOD = 33082.0
+
+        /// <remarks>TypeScript type: <c>33083</c></remarks>
+        [<Literal>]
+        let TEXTURE_MAX_LOD = 33083.0
+
+        /// <remarks>TypeScript type: <c>33084</c></remarks>
+        [<Literal>]
+        let TEXTURE_BASE_LEVEL = 33084.0
+
+        /// <remarks>TypeScript type: <c>33085</c></remarks>
+        [<Literal>]
+        let TEXTURE_MAX_LEVEL = 33085.0
+
+        /// <remarks>TypeScript type: <c>32775</c></remarks>
+        [<Literal>]
+        let MIN = 32775.0
+
+        /// <remarks>TypeScript type: <c>32776</c></remarks>
+        [<Literal>]
+        let MAX = 32776.0
+
+        /// <remarks>TypeScript type: <c>33190</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT24 = 33190.0
+
+        /// <remarks>TypeScript type: <c>34045</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_LOD_BIAS = 34045.0
+
+        /// <remarks>TypeScript type: <c>34892</c></remarks>
+        [<Literal>]
+        let TEXTURE_COMPARE_MODE = 34892.0
+
+        /// <remarks>TypeScript type: <c>34893</c></remarks>
+        [<Literal>]
+        let TEXTURE_COMPARE_FUNC = 34893.0
+
+        /// <remarks>TypeScript type: <c>34917</c></remarks>
+        [<Literal>]
+        let CURRENT_QUERY = 34917.0
+
+        /// <remarks>TypeScript type: <c>34918</c></remarks>
+        [<Literal>]
+        let QUERY_RESULT = 34918.0
+
+        /// <remarks>TypeScript type: <c>34919</c></remarks>
+        [<Literal>]
+        let QUERY_RESULT_AVAILABLE = 34919.0
+
+        /// <remarks>TypeScript type: <c>35041</c></remarks>
+        [<Literal>]
+        let STREAM_READ = 35041.0
+
+        /// <remarks>TypeScript type: <c>35042</c></remarks>
+        [<Literal>]
+        let STREAM_COPY = 35042.0
+
+        /// <remarks>TypeScript type: <c>35045</c></remarks>
+        [<Literal>]
+        let STATIC_READ = 35045.0
+
+        /// <remarks>TypeScript type: <c>35046</c></remarks>
+        [<Literal>]
+        let STATIC_COPY = 35046.0
+
+        /// <remarks>TypeScript type: <c>35049</c></remarks>
+        [<Literal>]
+        let DYNAMIC_READ = 35049.0
+
+        /// <remarks>TypeScript type: <c>35050</c></remarks>
+        [<Literal>]
+        let DYNAMIC_COPY = 35050.0
+
+        /// <remarks>TypeScript type: <c>34852</c></remarks>
+        [<Literal>]
+        let MAX_DRAW_BUFFERS = 34852.0
+
+        /// <remarks>TypeScript type: <c>34853</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER0 = 34853.0
+
+        /// <remarks>TypeScript type: <c>34854</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER1 = 34854.0
+
+        /// <remarks>TypeScript type: <c>34855</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER2 = 34855.0
+
+        /// <remarks>TypeScript type: <c>34856</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER3 = 34856.0
+
+        /// <remarks>TypeScript type: <c>34857</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER4 = 34857.0
+
+        /// <remarks>TypeScript type: <c>34858</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER5 = 34858.0
+
+        /// <remarks>TypeScript type: <c>34859</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER6 = 34859.0
+
+        /// <remarks>TypeScript type: <c>34860</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER7 = 34860.0
+
+        /// <remarks>TypeScript type: <c>34861</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER8 = 34861.0
+
+        /// <remarks>TypeScript type: <c>34862</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER9 = 34862.0
+
+        /// <remarks>TypeScript type: <c>34863</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER10 = 34863.0
+
+        /// <remarks>TypeScript type: <c>34864</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER11 = 34864.0
+
+        /// <remarks>TypeScript type: <c>34865</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER12 = 34865.0
+
+        /// <remarks>TypeScript type: <c>34866</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER13 = 34866.0
+
+        /// <remarks>TypeScript type: <c>34867</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER14 = 34867.0
+
+        /// <remarks>TypeScript type: <c>34868</c></remarks>
+        [<Literal>]
+        let DRAW_BUFFER15 = 34868.0
+
+        /// <remarks>TypeScript type: <c>35657</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_UNIFORM_COMPONENTS = 35657.0
+
+        /// <remarks>TypeScript type: <c>35658</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_UNIFORM_COMPONENTS = 35658.0
+
+        /// <remarks>TypeScript type: <c>35679</c></remarks>
+        [<Literal>]
+        let SAMPLER_3D = 35679.0
+
+        /// <remarks>TypeScript type: <c>35682</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D_SHADOW = 35682.0
+
+        /// <remarks>TypeScript type: <c>35723</c></remarks>
+        [<Literal>]
+        let FRAGMENT_SHADER_DERIVATIVE_HINT = 35723.0
+
+        /// <remarks>TypeScript type: <c>35051</c></remarks>
+        [<Literal>]
+        let PIXEL_PACK_BUFFER = 35051.0
+
+        /// <remarks>TypeScript type: <c>35052</c></remarks>
+        [<Literal>]
+        let PIXEL_UNPACK_BUFFER = 35052.0
+
+        /// <remarks>TypeScript type: <c>35053</c></remarks>
+        [<Literal>]
+        let PIXEL_PACK_BUFFER_BINDING = 35053.0
+
+        /// <remarks>TypeScript type: <c>35055</c></remarks>
+        [<Literal>]
+        let PIXEL_UNPACK_BUFFER_BINDING = 35055.0
+
+        /// <remarks>TypeScript type: <c>35685</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT2x3 = 35685.0
+
+        /// <remarks>TypeScript type: <c>35686</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT2x4 = 35686.0
+
+        /// <remarks>TypeScript type: <c>35687</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT3x2 = 35687.0
+
+        /// <remarks>TypeScript type: <c>35688</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT3x4 = 35688.0
+
+        /// <remarks>TypeScript type: <c>35689</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT4x2 = 35689.0
+
+        /// <remarks>TypeScript type: <c>35690</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT4x3 = 35690.0
+
+        /// <remarks>TypeScript type: <c>35904</c></remarks>
+        [<Literal>]
+        let SRGB = 35904.0
+
+        /// <remarks>TypeScript type: <c>35905</c></remarks>
+        [<Literal>]
+        let SRGB8 = 35905.0
+
+        /// <remarks>TypeScript type: <c>35907</c></remarks>
+        [<Literal>]
+        let SRGB8_ALPHA8 = 35907.0
+
+        /// <remarks>TypeScript type: <c>34894</c></remarks>
+        [<Literal>]
+        let COMPARE_REF_TO_TEXTURE = 34894.0
+
+        /// <remarks>TypeScript type: <c>34836</c></remarks>
+        [<Literal>]
+        let RGBA32F = 34836.0
+
+        /// <remarks>TypeScript type: <c>34837</c></remarks>
+        [<Literal>]
+        let RGB32F = 34837.0
+
+        /// <remarks>TypeScript type: <c>34842</c></remarks>
+        [<Literal>]
+        let RGBA16F = 34842.0
+
+        /// <remarks>TypeScript type: <c>34843</c></remarks>
+        [<Literal>]
+        let RGB16F = 34843.0
+
+        /// <remarks>TypeScript type: <c>35069</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_INTEGER = 35069.0
+
+        /// <remarks>TypeScript type: <c>35071</c></remarks>
+        [<Literal>]
+        let MAX_ARRAY_TEXTURE_LAYERS = 35071.0
+
+        /// <remarks>TypeScript type: <c>35076</c></remarks>
+        [<Literal>]
+        let MIN_PROGRAM_TEXEL_OFFSET = 35076.0
+
+        /// <remarks>TypeScript type: <c>35077</c></remarks>
+        [<Literal>]
+        let MAX_PROGRAM_TEXEL_OFFSET = 35077.0
+
+        /// <remarks>TypeScript type: <c>35659</c></remarks>
+        [<Literal>]
+        let MAX_VARYING_COMPONENTS = 35659.0
+
+        /// <remarks>TypeScript type: <c>35866</c></remarks>
+        [<Literal>]
+        let TEXTURE_2D_ARRAY = 35866.0
+
+        /// <remarks>TypeScript type: <c>35869</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_2D_ARRAY = 35869.0
+
+        /// <remarks>TypeScript type: <c>35898</c></remarks>
+        [<Literal>]
+        let R11F_G11F_B10F = 35898.0
+
+        /// <remarks>TypeScript type: <c>35899</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_10F_11F_11F_REV = 35899.0
+
+        /// <remarks>TypeScript type: <c>35901</c></remarks>
+        [<Literal>]
+        let RGB9_E5 = 35901.0
+
+        /// <remarks>TypeScript type: <c>35902</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_5_9_9_9_REV = 35902.0
+
+        /// <remarks>TypeScript type: <c>35967</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER_MODE = 35967.0
+
+        /// <remarks>TypeScript type: <c>35968</c></remarks>
+        [<Literal>]
+        let MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS = 35968.0
+
+        /// <remarks>TypeScript type: <c>35971</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_VARYINGS = 35971.0
+
+        /// <remarks>TypeScript type: <c>35972</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER_START = 35972.0
+
+        /// <remarks>TypeScript type: <c>35973</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER_SIZE = 35973.0
+
+        /// <remarks>TypeScript type: <c>35976</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN = 35976.0
+
+        /// <remarks>TypeScript type: <c>35977</c></remarks>
+        [<Literal>]
+        let RASTERIZER_DISCARD = 35977.0
+
+        /// <remarks>TypeScript type: <c>35978</c></remarks>
+        [<Literal>]
+        let MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS = 35978.0
+
+        /// <remarks>TypeScript type: <c>35979</c></remarks>
+        [<Literal>]
+        let MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS = 35979.0
+
+        /// <remarks>TypeScript type: <c>35980</c></remarks>
+        [<Literal>]
+        let INTERLEAVED_ATTRIBS = 35980.0
+
+        /// <remarks>TypeScript type: <c>35981</c></remarks>
+        [<Literal>]
+        let SEPARATE_ATTRIBS = 35981.0
+
+        /// <remarks>TypeScript type: <c>35982</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER = 35982.0
+
+        /// <remarks>TypeScript type: <c>35983</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BUFFER_BINDING = 35983.0
+
+        /// <remarks>TypeScript type: <c>36208</c></remarks>
+        [<Literal>]
+        let RGBA32UI = 36208.0
+
+        /// <remarks>TypeScript type: <c>36209</c></remarks>
+        [<Literal>]
+        let RGB32UI = 36209.0
+
+        /// <remarks>TypeScript type: <c>36214</c></remarks>
+        [<Literal>]
+        let RGBA16UI = 36214.0
+
+        /// <remarks>TypeScript type: <c>36215</c></remarks>
+        [<Literal>]
+        let RGB16UI = 36215.0
+
+        /// <remarks>TypeScript type: <c>36220</c></remarks>
+        [<Literal>]
+        let RGBA8UI = 36220.0
+
+        /// <remarks>TypeScript type: <c>36221</c></remarks>
+        [<Literal>]
+        let RGB8UI = 36221.0
+
+        /// <remarks>TypeScript type: <c>36226</c></remarks>
+        [<Literal>]
+        let RGBA32I = 36226.0
+
+        /// <remarks>TypeScript type: <c>36227</c></remarks>
+        [<Literal>]
+        let RGB32I = 36227.0
+
+        /// <remarks>TypeScript type: <c>36232</c></remarks>
+        [<Literal>]
+        let RGBA16I = 36232.0
+
+        /// <remarks>TypeScript type: <c>36233</c></remarks>
+        [<Literal>]
+        let RGB16I = 36233.0
+
+        /// <remarks>TypeScript type: <c>36238</c></remarks>
+        [<Literal>]
+        let RGBA8I = 36238.0
+
+        /// <remarks>TypeScript type: <c>36239</c></remarks>
+        [<Literal>]
+        let RGB8I = 36239.0
+
+        /// <remarks>TypeScript type: <c>36244</c></remarks>
+        [<Literal>]
+        let RED_INTEGER = 36244.0
+
+        /// <remarks>TypeScript type: <c>36248</c></remarks>
+        [<Literal>]
+        let RGB_INTEGER = 36248.0
+
+        /// <remarks>TypeScript type: <c>36249</c></remarks>
+        [<Literal>]
+        let RGBA_INTEGER = 36249.0
+
+        /// <remarks>TypeScript type: <c>36289</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D_ARRAY = 36289.0
+
+        /// <remarks>TypeScript type: <c>36292</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D_ARRAY_SHADOW = 36292.0
+
+        /// <remarks>TypeScript type: <c>36293</c></remarks>
+        [<Literal>]
+        let SAMPLER_CUBE_SHADOW = 36293.0
+
+        /// <remarks>TypeScript type: <c>36294</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_VEC2 = 36294.0
+
+        /// <remarks>TypeScript type: <c>36295</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_VEC3 = 36295.0
+
+        /// <remarks>TypeScript type: <c>36296</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_VEC4 = 36296.0
+
+        /// <remarks>TypeScript type: <c>36298</c></remarks>
+        [<Literal>]
+        let INT_SAMPLER_2D = 36298.0
+
+        /// <remarks>TypeScript type: <c>36299</c></remarks>
+        [<Literal>]
+        let INT_SAMPLER_3D = 36299.0
+
+        /// <remarks>TypeScript type: <c>36300</c></remarks>
+        [<Literal>]
+        let INT_SAMPLER_CUBE = 36300.0
+
+        /// <remarks>TypeScript type: <c>36303</c></remarks>
+        [<Literal>]
+        let INT_SAMPLER_2D_ARRAY = 36303.0
+
+        /// <remarks>TypeScript type: <c>36306</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_SAMPLER_2D = 36306.0
+
+        /// <remarks>TypeScript type: <c>36307</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_SAMPLER_3D = 36307.0
+
+        /// <remarks>TypeScript type: <c>36308</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_SAMPLER_CUBE = 36308.0
+
+        /// <remarks>TypeScript type: <c>36311</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_SAMPLER_2D_ARRAY = 36311.0
+
+        /// <remarks>TypeScript type: <c>36012</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT32F = 36012.0
+
+        /// <remarks>TypeScript type: <c>36013</c></remarks>
+        [<Literal>]
+        let DEPTH32F_STENCIL8 = 36013.0
+
+        /// <remarks>TypeScript type: <c>36269</c></remarks>
+        [<Literal>]
+        let FLOAT_32_UNSIGNED_INT_24_8_REV = 36269.0
+
+        /// <remarks>TypeScript type: <c>33296</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING = 33296.0
+
+        /// <remarks>TypeScript type: <c>33297</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE = 33297.0
+
+        /// <remarks>TypeScript type: <c>33298</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_RED_SIZE = 33298.0
+
+        /// <remarks>TypeScript type: <c>33299</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_GREEN_SIZE = 33299.0
+
+        /// <remarks>TypeScript type: <c>33300</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_BLUE_SIZE = 33300.0
+
+        /// <remarks>TypeScript type: <c>33301</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE = 33301.0
+
+        /// <remarks>TypeScript type: <c>33302</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE = 33302.0
+
+        /// <remarks>TypeScript type: <c>33303</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE = 33303.0
+
+        /// <remarks>TypeScript type: <c>33304</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_DEFAULT = 33304.0
+
+        /// <remarks>TypeScript type: <c>34042</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT_24_8 = 34042.0
+
+        /// <remarks>TypeScript type: <c>35056</c></remarks>
+        [<Literal>]
+        let DEPTH24_STENCIL8 = 35056.0
+
+        /// <remarks>TypeScript type: <c>35863</c></remarks>
+        [<Literal>]
+        let UNSIGNED_NORMALIZED = 35863.0
+
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
+        [<Literal>]
+        let DRAW_FRAMEBUFFER_BINDING = 36006.0
+
+        /// <remarks>TypeScript type: <c>36008</c></remarks>
+        [<Literal>]
+        let READ_FRAMEBUFFER = 36008.0
+
+        /// <remarks>TypeScript type: <c>36009</c></remarks>
+        [<Literal>]
+        let DRAW_FRAMEBUFFER = 36009.0
+
+        /// <remarks>TypeScript type: <c>36010</c></remarks>
+        [<Literal>]
+        let READ_FRAMEBUFFER_BINDING = 36010.0
+
+        /// <remarks>TypeScript type: <c>36011</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_SAMPLES = 36011.0
+
+        /// <remarks>TypeScript type: <c>36052</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER = 36052.0
+
+        /// <remarks>TypeScript type: <c>36063</c></remarks>
+        [<Literal>]
+        let MAX_COLOR_ATTACHMENTS = 36063.0
+
+        /// <remarks>TypeScript type: <c>36065</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT1 = 36065.0
+
+        /// <remarks>TypeScript type: <c>36066</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT2 = 36066.0
+
+        /// <remarks>TypeScript type: <c>36067</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT3 = 36067.0
+
+        /// <remarks>TypeScript type: <c>36068</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT4 = 36068.0
+
+        /// <remarks>TypeScript type: <c>36069</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT5 = 36069.0
+
+        /// <remarks>TypeScript type: <c>36070</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT6 = 36070.0
+
+        /// <remarks>TypeScript type: <c>36071</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT7 = 36071.0
+
+        /// <remarks>TypeScript type: <c>36072</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT8 = 36072.0
+
+        /// <remarks>TypeScript type: <c>36073</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT9 = 36073.0
+
+        /// <remarks>TypeScript type: <c>36074</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT10 = 36074.0
+
+        /// <remarks>TypeScript type: <c>36075</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT11 = 36075.0
+
+        /// <remarks>TypeScript type: <c>36076</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT12 = 36076.0
+
+        /// <remarks>TypeScript type: <c>36077</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT13 = 36077.0
+
+        /// <remarks>TypeScript type: <c>36078</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT14 = 36078.0
+
+        /// <remarks>TypeScript type: <c>36079</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT15 = 36079.0
+
+        /// <remarks>TypeScript type: <c>36182</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_MULTISAMPLE = 36182.0
+
+        /// <remarks>TypeScript type: <c>36183</c></remarks>
+        [<Literal>]
+        let MAX_SAMPLES = 36183.0
+
+        /// <remarks>TypeScript type: <c>5131</c></remarks>
+        [<Literal>]
+        let HALF_FLOAT = 5131.0
+
+        /// <remarks>TypeScript type: <c>33319</c></remarks>
+        [<Literal>]
+        let RG = 33319.0
+
+        /// <remarks>TypeScript type: <c>33320</c></remarks>
+        [<Literal>]
+        let RG_INTEGER = 33320.0
+
+        /// <remarks>TypeScript type: <c>33321</c></remarks>
+        [<Literal>]
+        let R8 = 33321.0
+
+        /// <remarks>TypeScript type: <c>33323</c></remarks>
+        [<Literal>]
+        let RG8 = 33323.0
+
+        /// <remarks>TypeScript type: <c>33325</c></remarks>
+        [<Literal>]
+        let R16F = 33325.0
+
+        /// <remarks>TypeScript type: <c>33326</c></remarks>
+        [<Literal>]
+        let R32F = 33326.0
+
+        /// <remarks>TypeScript type: <c>33327</c></remarks>
+        [<Literal>]
+        let RG16F = 33327.0
+
+        /// <remarks>TypeScript type: <c>33328</c></remarks>
+        [<Literal>]
+        let RG32F = 33328.0
+
+        /// <remarks>TypeScript type: <c>33329</c></remarks>
+        [<Literal>]
+        let R8I = 33329.0
+
+        /// <remarks>TypeScript type: <c>33330</c></remarks>
+        [<Literal>]
+        let R8UI = 33330.0
+
+        /// <remarks>TypeScript type: <c>33331</c></remarks>
+        [<Literal>]
+        let R16I = 33331.0
+
+        /// <remarks>TypeScript type: <c>33332</c></remarks>
+        [<Literal>]
+        let R16UI = 33332.0
+
+        /// <remarks>TypeScript type: <c>33333</c></remarks>
+        [<Literal>]
+        let R32I = 33333.0
+
+        /// <remarks>TypeScript type: <c>33334</c></remarks>
+        [<Literal>]
+        let R32UI = 33334.0
+
+        /// <remarks>TypeScript type: <c>33335</c></remarks>
+        [<Literal>]
+        let RG8I = 33335.0
+
+        /// <remarks>TypeScript type: <c>33336</c></remarks>
+        [<Literal>]
+        let RG8UI = 33336.0
+
+        /// <remarks>TypeScript type: <c>33337</c></remarks>
+        [<Literal>]
+        let RG16I = 33337.0
+
+        /// <remarks>TypeScript type: <c>33338</c></remarks>
+        [<Literal>]
+        let RG16UI = 33338.0
+
+        /// <remarks>TypeScript type: <c>33339</c></remarks>
+        [<Literal>]
+        let RG32I = 33339.0
+
+        /// <remarks>TypeScript type: <c>33340</c></remarks>
+        [<Literal>]
+        let RG32UI = 33340.0
+
+        /// <remarks>TypeScript type: <c>34229</c></remarks>
+        [<Literal>]
+        let VERTEX_ARRAY_BINDING = 34229.0
+
+        /// <remarks>TypeScript type: <c>36756</c></remarks>
+        [<Literal>]
+        let R8_SNORM = 36756.0
+
+        /// <remarks>TypeScript type: <c>36757</c></remarks>
+        [<Literal>]
+        let RG8_SNORM = 36757.0
+
+        /// <remarks>TypeScript type: <c>36758</c></remarks>
+        [<Literal>]
+        let RGB8_SNORM = 36758.0
+
+        /// <remarks>TypeScript type: <c>36759</c></remarks>
+        [<Literal>]
+        let RGBA8_SNORM = 36759.0
+
+        /// <remarks>TypeScript type: <c>36764</c></remarks>
+        [<Literal>]
+        let SIGNED_NORMALIZED = 36764.0
+
+        /// <remarks>TypeScript type: <c>36662</c></remarks>
+        [<Literal>]
+        let COPY_READ_BUFFER = 36662.0
+
+        /// <remarks>TypeScript type: <c>36663</c></remarks>
+        [<Literal>]
+        let COPY_WRITE_BUFFER = 36663.0
+
+        /// <remarks>TypeScript type: <c>36662</c></remarks>
+        [<Literal>]
+        let COPY_READ_BUFFER_BINDING = 36662.0
+
+        /// <remarks>TypeScript type: <c>36663</c></remarks>
+        [<Literal>]
+        let COPY_WRITE_BUFFER_BINDING = 36663.0
+
+        /// <remarks>TypeScript type: <c>35345</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER = 35345.0
+
+        /// <remarks>TypeScript type: <c>35368</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER_BINDING = 35368.0
+
+        /// <remarks>TypeScript type: <c>35369</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER_START = 35369.0
+
+        /// <remarks>TypeScript type: <c>35370</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER_SIZE = 35370.0
+
+        /// <remarks>TypeScript type: <c>35371</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_UNIFORM_BLOCKS = 35371.0
+
+        /// <remarks>TypeScript type: <c>35373</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_UNIFORM_BLOCKS = 35373.0
+
+        /// <remarks>TypeScript type: <c>35374</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_UNIFORM_BLOCKS = 35374.0
+
+        /// <remarks>TypeScript type: <c>35375</c></remarks>
+        [<Literal>]
+        let MAX_UNIFORM_BUFFER_BINDINGS = 35375.0
+
+        /// <remarks>TypeScript type: <c>35376</c></remarks>
+        [<Literal>]
+        let MAX_UNIFORM_BLOCK_SIZE = 35376.0
+
+        /// <remarks>TypeScript type: <c>35377</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS = 35377.0
+
+        /// <remarks>TypeScript type: <c>35379</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS = 35379.0
+
+        /// <remarks>TypeScript type: <c>35380</c></remarks>
+        [<Literal>]
+        let UNIFORM_BUFFER_OFFSET_ALIGNMENT = 35380.0
+
+        /// <remarks>TypeScript type: <c>35382</c></remarks>
+        [<Literal>]
+        let ACTIVE_UNIFORM_BLOCKS = 35382.0
+
+        /// <remarks>TypeScript type: <c>35383</c></remarks>
+        [<Literal>]
+        let UNIFORM_TYPE = 35383.0
+
+        /// <remarks>TypeScript type: <c>35384</c></remarks>
+        [<Literal>]
+        let UNIFORM_SIZE = 35384.0
+
+        /// <remarks>TypeScript type: <c>35386</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_INDEX = 35386.0
+
+        /// <remarks>TypeScript type: <c>35387</c></remarks>
+        [<Literal>]
+        let UNIFORM_OFFSET = 35387.0
+
+        /// <remarks>TypeScript type: <c>35388</c></remarks>
+        [<Literal>]
+        let UNIFORM_ARRAY_STRIDE = 35388.0
+
+        /// <remarks>TypeScript type: <c>35389</c></remarks>
+        [<Literal>]
+        let UNIFORM_MATRIX_STRIDE = 35389.0
+
+        /// <remarks>TypeScript type: <c>35390</c></remarks>
+        [<Literal>]
+        let UNIFORM_IS_ROW_MAJOR = 35390.0
+
+        /// <remarks>TypeScript type: <c>35391</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_BINDING = 35391.0
+
+        /// <remarks>TypeScript type: <c>35392</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_DATA_SIZE = 35392.0
+
+        /// <remarks>TypeScript type: <c>35394</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_ACTIVE_UNIFORMS = 35394.0
+
+        /// <remarks>TypeScript type: <c>35395</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES = 35395.0
+
+        /// <remarks>TypeScript type: <c>35396</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER = 35396.0
+
+        /// <remarks>TypeScript type: <c>35398</c></remarks>
+        [<Literal>]
+        let UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER = 35398.0
+
+        /// <remarks>TypeScript type: <c>4294967295</c></remarks>
+        [<Literal>]
+        let INVALID_INDEX = 4294967295.0
+
+        /// <remarks>TypeScript type: <c>37154</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_OUTPUT_COMPONENTS = 37154.0
+
+        /// <remarks>TypeScript type: <c>37157</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_INPUT_COMPONENTS = 37157.0
+
+        /// <remarks>TypeScript type: <c>37137</c></remarks>
+        [<Literal>]
+        let MAX_SERVER_WAIT_TIMEOUT = 37137.0
+
+        /// <remarks>TypeScript type: <c>37138</c></remarks>
+        [<Literal>]
+        let OBJECT_TYPE = 37138.0
+
+        /// <remarks>TypeScript type: <c>37139</c></remarks>
+        [<Literal>]
+        let SYNC_CONDITION = 37139.0
+
+        /// <remarks>TypeScript type: <c>37140</c></remarks>
+        [<Literal>]
+        let SYNC_STATUS = 37140.0
+
+        /// <remarks>TypeScript type: <c>37141</c></remarks>
+        [<Literal>]
+        let SYNC_FLAGS = 37141.0
+
+        /// <remarks>TypeScript type: <c>37142</c></remarks>
+        [<Literal>]
+        let SYNC_FENCE = 37142.0
+
+        /// <remarks>TypeScript type: <c>37143</c></remarks>
+        [<Literal>]
+        let SYNC_GPU_COMMANDS_COMPLETE = 37143.0
+
+        /// <remarks>TypeScript type: <c>37144</c></remarks>
+        [<Literal>]
+        let UNSIGNALED = 37144.0
+
+        /// <remarks>TypeScript type: <c>37145</c></remarks>
+        [<Literal>]
+        let SIGNALED = 37145.0
+
+        /// <remarks>TypeScript type: <c>37146</c></remarks>
+        [<Literal>]
+        let ALREADY_SIGNALED = 37146.0
+
+        /// <remarks>TypeScript type: <c>37147</c></remarks>
+        [<Literal>]
+        let TIMEOUT_EXPIRED = 37147.0
+
+        /// <remarks>TypeScript type: <c>37148</c></remarks>
+        [<Literal>]
+        let CONDITION_SATISFIED = 37148.0
+
+        /// <remarks>TypeScript type: <c>37149</c></remarks>
+        [<Literal>]
+        let WAIT_FAILED = 37149.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let SYNC_FLUSH_COMMANDS_BIT = 1.0
+
+        /// <remarks>TypeScript type: <c>35070</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_DIVISOR = 35070.0
+
+        /// <remarks>TypeScript type: <c>35887</c></remarks>
+        [<Literal>]
+        let ANY_SAMPLES_PASSED = 35887.0
+
+        /// <remarks>TypeScript type: <c>36202</c></remarks>
+        [<Literal>]
+        let ANY_SAMPLES_PASSED_CONSERVATIVE = 36202.0
+
+        /// <remarks>TypeScript type: <c>35097</c></remarks>
+        [<Literal>]
+        let SAMPLER_BINDING = 35097.0
+
+        /// <remarks>TypeScript type: <c>36975</c></remarks>
+        [<Literal>]
+        let RGB10_A2UI = 36975.0
+
+        /// <remarks>TypeScript type: <c>36255</c></remarks>
+        [<Literal>]
+        let INT_2_10_10_10_REV = 36255.0
+
+        /// <remarks>TypeScript type: <c>36386</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK = 36386.0
+
+        /// <remarks>TypeScript type: <c>36387</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_PAUSED = 36387.0
+
+        /// <remarks>TypeScript type: <c>36388</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_ACTIVE = 36388.0
+
+        /// <remarks>TypeScript type: <c>36389</c></remarks>
+        [<Literal>]
+        let TRANSFORM_FEEDBACK_BINDING = 36389.0
+
+        /// <remarks>TypeScript type: <c>37167</c></remarks>
+        [<Literal>]
+        let TEXTURE_IMMUTABLE_FORMAT = 37167.0
+
+        /// <remarks>TypeScript type: <c>36203</c></remarks>
+        [<Literal>]
+        let MAX_ELEMENT_INDEX = 36203.0
+
+        /// <remarks>TypeScript type: <c>33503</c></remarks>
+        [<Literal>]
+        let TEXTURE_IMMUTABLE_LEVELS = 33503.0
+
+        /// <remarks>TypeScript type: <c>-1</c></remarks>
+        [<Literal>]
+        let TIMEOUT_IGNORED = -1.0
+
+        /// <remarks>TypeScript type: <c>37447</c></remarks>
+        [<Literal>]
+        let MAX_CLIENT_WAIT_TIMEOUT_WEBGL = 37447.0
 
     type WebGL2RenderingContextOverloads =
         /// <summary>
@@ -78595,7 +85795,7 @@ module Dom =
         /// </summary>
         abstract statusMessage: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
         static member Create
             (
                 statusMessage: string,
@@ -78614,10 +85814,6 @@ module Dom =
                 preventDefault: (unit -> unit),
                 stopImmediatePropagation: (unit -> unit),
                 stopPropagation: (unit -> unit),
-                NONE: float,
-                CAPTURING_PHASE: float,
-                AT_TARGET: float,
-                BUBBLING_PHASE: float,
                 ?currentTarget: EventTarget,
                 ?srcElement: EventTarget,
                 ?target: EventTarget
@@ -78682,306 +85878,1792 @@ module Dom =
         inherit WebGLRenderingContextOverloads
 
     type WebGLRenderingContextConstructor =
+        /// <remarks>TypeScript type: <c>256</c></remarks>
         abstract DEPTH_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>1024</c></remarks>
         abstract STENCIL_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>16384</c></remarks>
         abstract COLOR_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract POINTS: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LINES: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract LINE_LOOP: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract LINE_STRIP: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract TRIANGLES: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract TRIANGLE_STRIP: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract TRIANGLE_FAN: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract ZERO: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract ONE: float
+        /// <remarks>TypeScript type: <c>768</c></remarks>
         abstract SRC_COLOR: float
+        /// <remarks>TypeScript type: <c>769</c></remarks>
         abstract ONE_MINUS_SRC_COLOR: float
+        /// <remarks>TypeScript type: <c>770</c></remarks>
         abstract SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>771</c></remarks>
         abstract ONE_MINUS_SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>772</c></remarks>
         abstract DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>773</c></remarks>
         abstract ONE_MINUS_DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>774</c></remarks>
         abstract DST_COLOR: float
+        /// <remarks>TypeScript type: <c>775</c></remarks>
         abstract ONE_MINUS_DST_COLOR: float
+        /// <remarks>TypeScript type: <c>776</c></remarks>
         abstract SRC_ALPHA_SATURATE: float
+        /// <remarks>TypeScript type: <c>32774</c></remarks>
         abstract FUNC_ADD: float
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
         abstract BLEND_EQUATION: float
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
         abstract BLEND_EQUATION_RGB: float
+        /// <remarks>TypeScript type: <c>34877</c></remarks>
         abstract BLEND_EQUATION_ALPHA: float
+        /// <remarks>TypeScript type: <c>32778</c></remarks>
         abstract FUNC_SUBTRACT: float
+        /// <remarks>TypeScript type: <c>32779</c></remarks>
         abstract FUNC_REVERSE_SUBTRACT: float
+        /// <remarks>TypeScript type: <c>32968</c></remarks>
         abstract BLEND_DST_RGB: float
+        /// <remarks>TypeScript type: <c>32969</c></remarks>
         abstract BLEND_SRC_RGB: float
+        /// <remarks>TypeScript type: <c>32970</c></remarks>
         abstract BLEND_DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>32971</c></remarks>
         abstract BLEND_SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>32769</c></remarks>
         abstract CONSTANT_COLOR: float
+        /// <remarks>TypeScript type: <c>32770</c></remarks>
         abstract ONE_MINUS_CONSTANT_COLOR: float
+        /// <remarks>TypeScript type: <c>32771</c></remarks>
         abstract CONSTANT_ALPHA: float
+        /// <remarks>TypeScript type: <c>32772</c></remarks>
         abstract ONE_MINUS_CONSTANT_ALPHA: float
+        /// <remarks>TypeScript type: <c>32773</c></remarks>
         abstract BLEND_COLOR: float
+        /// <remarks>TypeScript type: <c>34962</c></remarks>
         abstract ARRAY_BUFFER: float
+        /// <remarks>TypeScript type: <c>34963</c></remarks>
         abstract ELEMENT_ARRAY_BUFFER: float
+        /// <remarks>TypeScript type: <c>34964</c></remarks>
         abstract ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>34965</c></remarks>
         abstract ELEMENT_ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35040</c></remarks>
         abstract STREAM_DRAW: float
+        /// <remarks>TypeScript type: <c>35044</c></remarks>
         abstract STATIC_DRAW: float
+        /// <remarks>TypeScript type: <c>35048</c></remarks>
         abstract DYNAMIC_DRAW: float
+        /// <remarks>TypeScript type: <c>34660</c></remarks>
         abstract BUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>34661</c></remarks>
         abstract BUFFER_USAGE: float
+        /// <remarks>TypeScript type: <c>34342</c></remarks>
         abstract CURRENT_VERTEX_ATTRIB: float
+        /// <remarks>TypeScript type: <c>1028</c></remarks>
         abstract FRONT: float
+        /// <remarks>TypeScript type: <c>1029</c></remarks>
         abstract BACK: float
+        /// <remarks>TypeScript type: <c>1032</c></remarks>
         abstract FRONT_AND_BACK: float
+        /// <remarks>TypeScript type: <c>2884</c></remarks>
         abstract CULL_FACE: float
+        /// <remarks>TypeScript type: <c>3042</c></remarks>
         abstract BLEND: float
+        /// <remarks>TypeScript type: <c>3024</c></remarks>
         abstract DITHER: float
+        /// <remarks>TypeScript type: <c>2960</c></remarks>
         abstract STENCIL_TEST: float
+        /// <remarks>TypeScript type: <c>2929</c></remarks>
         abstract DEPTH_TEST: float
+        /// <remarks>TypeScript type: <c>3089</c></remarks>
         abstract SCISSOR_TEST: float
+        /// <remarks>TypeScript type: <c>32823</c></remarks>
         abstract POLYGON_OFFSET_FILL: float
+        /// <remarks>TypeScript type: <c>32926</c></remarks>
         abstract SAMPLE_ALPHA_TO_COVERAGE: float
+        /// <remarks>TypeScript type: <c>32928</c></remarks>
         abstract SAMPLE_COVERAGE: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NO_ERROR: float
+        /// <remarks>TypeScript type: <c>1280</c></remarks>
         abstract INVALID_ENUM: float
+        /// <remarks>TypeScript type: <c>1281</c></remarks>
         abstract INVALID_VALUE: float
+        /// <remarks>TypeScript type: <c>1282</c></remarks>
         abstract INVALID_OPERATION: float
+        /// <remarks>TypeScript type: <c>1285</c></remarks>
         abstract OUT_OF_MEMORY: float
+        /// <remarks>TypeScript type: <c>2304</c></remarks>
         abstract CW: float
+        /// <remarks>TypeScript type: <c>2305</c></remarks>
         abstract CCW: float
+        /// <remarks>TypeScript type: <c>2849</c></remarks>
         abstract LINE_WIDTH: float
+        /// <remarks>TypeScript type: <c>33901</c></remarks>
         abstract ALIASED_POINT_SIZE_RANGE: float
+        /// <remarks>TypeScript type: <c>33902</c></remarks>
         abstract ALIASED_LINE_WIDTH_RANGE: float
+        /// <remarks>TypeScript type: <c>2885</c></remarks>
         abstract CULL_FACE_MODE: float
+        /// <remarks>TypeScript type: <c>2886</c></remarks>
         abstract FRONT_FACE: float
+        /// <remarks>TypeScript type: <c>2928</c></remarks>
         abstract DEPTH_RANGE: float
+        /// <remarks>TypeScript type: <c>2930</c></remarks>
         abstract DEPTH_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>2931</c></remarks>
         abstract DEPTH_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>2932</c></remarks>
         abstract DEPTH_FUNC: float
+        /// <remarks>TypeScript type: <c>2961</c></remarks>
         abstract STENCIL_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>2962</c></remarks>
         abstract STENCIL_FUNC: float
+        /// <remarks>TypeScript type: <c>2964</c></remarks>
         abstract STENCIL_FAIL: float
+        /// <remarks>TypeScript type: <c>2965</c></remarks>
         abstract STENCIL_PASS_DEPTH_FAIL: float
+        /// <remarks>TypeScript type: <c>2966</c></remarks>
         abstract STENCIL_PASS_DEPTH_PASS: float
+        /// <remarks>TypeScript type: <c>2967</c></remarks>
         abstract STENCIL_REF: float
+        /// <remarks>TypeScript type: <c>2963</c></remarks>
         abstract STENCIL_VALUE_MASK: float
+        /// <remarks>TypeScript type: <c>2968</c></remarks>
         abstract STENCIL_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>34816</c></remarks>
         abstract STENCIL_BACK_FUNC: float
+        /// <remarks>TypeScript type: <c>34817</c></remarks>
         abstract STENCIL_BACK_FAIL: float
+        /// <remarks>TypeScript type: <c>34818</c></remarks>
         abstract STENCIL_BACK_PASS_DEPTH_FAIL: float
+        /// <remarks>TypeScript type: <c>34819</c></remarks>
         abstract STENCIL_BACK_PASS_DEPTH_PASS: float
+        /// <remarks>TypeScript type: <c>36003</c></remarks>
         abstract STENCIL_BACK_REF: float
+        /// <remarks>TypeScript type: <c>36004</c></remarks>
         abstract STENCIL_BACK_VALUE_MASK: float
+        /// <remarks>TypeScript type: <c>36005</c></remarks>
         abstract STENCIL_BACK_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>2978</c></remarks>
         abstract VIEWPORT: float
+        /// <remarks>TypeScript type: <c>3088</c></remarks>
         abstract SCISSOR_BOX: float
+        /// <remarks>TypeScript type: <c>3106</c></remarks>
         abstract COLOR_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>3107</c></remarks>
         abstract COLOR_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>3317</c></remarks>
         abstract UNPACK_ALIGNMENT: float
+        /// <remarks>TypeScript type: <c>3333</c></remarks>
         abstract PACK_ALIGNMENT: float
+        /// <remarks>TypeScript type: <c>3379</c></remarks>
         abstract MAX_TEXTURE_SIZE: float
+        /// <remarks>TypeScript type: <c>3386</c></remarks>
         abstract MAX_VIEWPORT_DIMS: float
+        /// <remarks>TypeScript type: <c>3408</c></remarks>
         abstract SUBPIXEL_BITS: float
+        /// <remarks>TypeScript type: <c>3410</c></remarks>
         abstract RED_BITS: float
+        /// <remarks>TypeScript type: <c>3411</c></remarks>
         abstract GREEN_BITS: float
+        /// <remarks>TypeScript type: <c>3412</c></remarks>
         abstract BLUE_BITS: float
+        /// <remarks>TypeScript type: <c>3413</c></remarks>
         abstract ALPHA_BITS: float
+        /// <remarks>TypeScript type: <c>3414</c></remarks>
         abstract DEPTH_BITS: float
+        /// <remarks>TypeScript type: <c>3415</c></remarks>
         abstract STENCIL_BITS: float
+        /// <remarks>TypeScript type: <c>10752</c></remarks>
         abstract POLYGON_OFFSET_UNITS: float
+        /// <remarks>TypeScript type: <c>32824</c></remarks>
         abstract POLYGON_OFFSET_FACTOR: float
+        /// <remarks>TypeScript type: <c>32873</c></remarks>
         abstract TEXTURE_BINDING_2D: float
+        /// <remarks>TypeScript type: <c>32936</c></remarks>
         abstract SAMPLE_BUFFERS: float
+        /// <remarks>TypeScript type: <c>32937</c></remarks>
         abstract SAMPLES: float
+        /// <remarks>TypeScript type: <c>32938</c></remarks>
         abstract SAMPLE_COVERAGE_VALUE: float
+        /// <remarks>TypeScript type: <c>32939</c></remarks>
         abstract SAMPLE_COVERAGE_INVERT: float
+        /// <remarks>TypeScript type: <c>34467</c></remarks>
         abstract COMPRESSED_TEXTURE_FORMATS: float
+        /// <remarks>TypeScript type: <c>4352</c></remarks>
         abstract DONT_CARE: float
+        /// <remarks>TypeScript type: <c>4353</c></remarks>
         abstract FASTEST: float
+        /// <remarks>TypeScript type: <c>4354</c></remarks>
         abstract NICEST: float
+        /// <remarks>TypeScript type: <c>33170</c></remarks>
         abstract GENERATE_MIPMAP_HINT: float
+        /// <remarks>TypeScript type: <c>5120</c></remarks>
         abstract BYTE: float
+        /// <remarks>TypeScript type: <c>5121</c></remarks>
         abstract UNSIGNED_BYTE: float
+        /// <remarks>TypeScript type: <c>5122</c></remarks>
         abstract SHORT: float
+        /// <remarks>TypeScript type: <c>5123</c></remarks>
         abstract UNSIGNED_SHORT: float
+        /// <remarks>TypeScript type: <c>5124</c></remarks>
         abstract INT: float
+        /// <remarks>TypeScript type: <c>5125</c></remarks>
         abstract UNSIGNED_INT: float
+        /// <remarks>TypeScript type: <c>5126</c></remarks>
         abstract FLOAT: float
+        /// <remarks>TypeScript type: <c>6402</c></remarks>
         abstract DEPTH_COMPONENT: float
+        /// <remarks>TypeScript type: <c>6406</c></remarks>
         abstract ALPHA: float
+        /// <remarks>TypeScript type: <c>6407</c></remarks>
         abstract RGB: float
+        /// <remarks>TypeScript type: <c>6408</c></remarks>
         abstract RGBA: float
+        /// <remarks>TypeScript type: <c>6409</c></remarks>
         abstract LUMINANCE: float
+        /// <remarks>TypeScript type: <c>6410</c></remarks>
         abstract LUMINANCE_ALPHA: float
+        /// <remarks>TypeScript type: <c>32819</c></remarks>
         abstract UNSIGNED_SHORT_4_4_4_4: float
+        /// <remarks>TypeScript type: <c>32820</c></remarks>
         abstract UNSIGNED_SHORT_5_5_5_1: float
+        /// <remarks>TypeScript type: <c>33635</c></remarks>
         abstract UNSIGNED_SHORT_5_6_5: float
+        /// <remarks>TypeScript type: <c>35632</c></remarks>
         abstract FRAGMENT_SHADER: float
+        /// <remarks>TypeScript type: <c>35633</c></remarks>
         abstract VERTEX_SHADER: float
+        /// <remarks>TypeScript type: <c>34921</c></remarks>
         abstract MAX_VERTEX_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>36347</c></remarks>
         abstract MAX_VERTEX_UNIFORM_VECTORS: float
+        /// <remarks>TypeScript type: <c>36348</c></remarks>
         abstract MAX_VARYING_VECTORS: float
+        /// <remarks>TypeScript type: <c>35661</c></remarks>
         abstract MAX_COMBINED_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>35660</c></remarks>
         abstract MAX_VERTEX_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>34930</c></remarks>
         abstract MAX_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>36349</c></remarks>
         abstract MAX_FRAGMENT_UNIFORM_VECTORS: float
+        /// <remarks>TypeScript type: <c>35663</c></remarks>
         abstract SHADER_TYPE: float
+        /// <remarks>TypeScript type: <c>35712</c></remarks>
         abstract DELETE_STATUS: float
+        /// <remarks>TypeScript type: <c>35714</c></remarks>
         abstract LINK_STATUS: float
+        /// <remarks>TypeScript type: <c>35715</c></remarks>
         abstract VALIDATE_STATUS: float
+        /// <remarks>TypeScript type: <c>35717</c></remarks>
         abstract ATTACHED_SHADERS: float
+        /// <remarks>TypeScript type: <c>35718</c></remarks>
         abstract ACTIVE_UNIFORMS: float
+        /// <remarks>TypeScript type: <c>35721</c></remarks>
         abstract ACTIVE_ATTRIBUTES: float
+        /// <remarks>TypeScript type: <c>35724</c></remarks>
         abstract SHADING_LANGUAGE_VERSION: float
+        /// <remarks>TypeScript type: <c>35725</c></remarks>
         abstract CURRENT_PROGRAM: float
+        /// <remarks>TypeScript type: <c>512</c></remarks>
         abstract NEVER: float
+        /// <remarks>TypeScript type: <c>513</c></remarks>
         abstract LESS: float
+        /// <remarks>TypeScript type: <c>514</c></remarks>
         abstract EQUAL: float
+        /// <remarks>TypeScript type: <c>515</c></remarks>
         abstract LEQUAL: float
+        /// <remarks>TypeScript type: <c>516</c></remarks>
         abstract GREATER: float
+        /// <remarks>TypeScript type: <c>517</c></remarks>
         abstract NOTEQUAL: float
+        /// <remarks>TypeScript type: <c>518</c></remarks>
         abstract GEQUAL: float
+        /// <remarks>TypeScript type: <c>519</c></remarks>
         abstract ALWAYS: float
+        /// <remarks>TypeScript type: <c>7680</c></remarks>
         abstract KEEP: float
+        /// <remarks>TypeScript type: <c>7681</c></remarks>
         abstract REPLACE: float
+        /// <remarks>TypeScript type: <c>7682</c></remarks>
         abstract INCR: float
+        /// <remarks>TypeScript type: <c>7683</c></remarks>
         abstract DECR: float
+        /// <remarks>TypeScript type: <c>5386</c></remarks>
         abstract INVERT: float
+        /// <remarks>TypeScript type: <c>34055</c></remarks>
         abstract INCR_WRAP: float
+        /// <remarks>TypeScript type: <c>34056</c></remarks>
         abstract DECR_WRAP: float
+        /// <remarks>TypeScript type: <c>7936</c></remarks>
         abstract VENDOR: float
+        /// <remarks>TypeScript type: <c>7937</c></remarks>
         abstract RENDERER: float
+        /// <remarks>TypeScript type: <c>7938</c></remarks>
         abstract VERSION: float
+        /// <remarks>TypeScript type: <c>9728</c></remarks>
         abstract NEAREST: float
+        /// <remarks>TypeScript type: <c>9729</c></remarks>
         abstract LINEAR: float
+        /// <remarks>TypeScript type: <c>9984</c></remarks>
         abstract NEAREST_MIPMAP_NEAREST: float
+        /// <remarks>TypeScript type: <c>9985</c></remarks>
         abstract LINEAR_MIPMAP_NEAREST: float
+        /// <remarks>TypeScript type: <c>9986</c></remarks>
         abstract NEAREST_MIPMAP_LINEAR: float
+        /// <remarks>TypeScript type: <c>9987</c></remarks>
         abstract LINEAR_MIPMAP_LINEAR: float
+        /// <remarks>TypeScript type: <c>10240</c></remarks>
         abstract TEXTURE_MAG_FILTER: float
+        /// <remarks>TypeScript type: <c>10241</c></remarks>
         abstract TEXTURE_MIN_FILTER: float
+        /// <remarks>TypeScript type: <c>10242</c></remarks>
         abstract TEXTURE_WRAP_S: float
+        /// <remarks>TypeScript type: <c>10243</c></remarks>
         abstract TEXTURE_WRAP_T: float
+        /// <remarks>TypeScript type: <c>3553</c></remarks>
         abstract TEXTURE_2D: float
+        /// <remarks>TypeScript type: <c>5890</c></remarks>
         abstract TEXTURE: float
+        /// <remarks>TypeScript type: <c>34067</c></remarks>
         abstract TEXTURE_CUBE_MAP: float
+        /// <remarks>TypeScript type: <c>34068</c></remarks>
         abstract TEXTURE_BINDING_CUBE_MAP: float
+        /// <remarks>TypeScript type: <c>34069</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_X: float
+        /// <remarks>TypeScript type: <c>34070</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_X: float
+        /// <remarks>TypeScript type: <c>34071</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_Y: float
+        /// <remarks>TypeScript type: <c>34072</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_Y: float
+        /// <remarks>TypeScript type: <c>34073</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_Z: float
+        /// <remarks>TypeScript type: <c>34074</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_Z: float
+        /// <remarks>TypeScript type: <c>34076</c></remarks>
         abstract MAX_CUBE_MAP_TEXTURE_SIZE: float
+        /// <remarks>TypeScript type: <c>33984</c></remarks>
         abstract TEXTURE0: float
+        /// <remarks>TypeScript type: <c>33985</c></remarks>
         abstract TEXTURE1: float
+        /// <remarks>TypeScript type: <c>33986</c></remarks>
         abstract TEXTURE2: float
+        /// <remarks>TypeScript type: <c>33987</c></remarks>
         abstract TEXTURE3: float
+        /// <remarks>TypeScript type: <c>33988</c></remarks>
         abstract TEXTURE4: float
+        /// <remarks>TypeScript type: <c>33989</c></remarks>
         abstract TEXTURE5: float
+        /// <remarks>TypeScript type: <c>33990</c></remarks>
         abstract TEXTURE6: float
+        /// <remarks>TypeScript type: <c>33991</c></remarks>
         abstract TEXTURE7: float
+        /// <remarks>TypeScript type: <c>33992</c></remarks>
         abstract TEXTURE8: float
+        /// <remarks>TypeScript type: <c>33993</c></remarks>
         abstract TEXTURE9: float
+        /// <remarks>TypeScript type: <c>33994</c></remarks>
         abstract TEXTURE10: float
+        /// <remarks>TypeScript type: <c>33995</c></remarks>
         abstract TEXTURE11: float
+        /// <remarks>TypeScript type: <c>33996</c></remarks>
         abstract TEXTURE12: float
+        /// <remarks>TypeScript type: <c>33997</c></remarks>
         abstract TEXTURE13: float
+        /// <remarks>TypeScript type: <c>33998</c></remarks>
         abstract TEXTURE14: float
+        /// <remarks>TypeScript type: <c>33999</c></remarks>
         abstract TEXTURE15: float
+        /// <remarks>TypeScript type: <c>34000</c></remarks>
         abstract TEXTURE16: float
+        /// <remarks>TypeScript type: <c>34001</c></remarks>
         abstract TEXTURE17: float
+        /// <remarks>TypeScript type: <c>34002</c></remarks>
         abstract TEXTURE18: float
+        /// <remarks>TypeScript type: <c>34003</c></remarks>
         abstract TEXTURE19: float
+        /// <remarks>TypeScript type: <c>34004</c></remarks>
         abstract TEXTURE20: float
+        /// <remarks>TypeScript type: <c>34005</c></remarks>
         abstract TEXTURE21: float
+        /// <remarks>TypeScript type: <c>34006</c></remarks>
         abstract TEXTURE22: float
+        /// <remarks>TypeScript type: <c>34007</c></remarks>
         abstract TEXTURE23: float
+        /// <remarks>TypeScript type: <c>34008</c></remarks>
         abstract TEXTURE24: float
+        /// <remarks>TypeScript type: <c>34009</c></remarks>
         abstract TEXTURE25: float
+        /// <remarks>TypeScript type: <c>34010</c></remarks>
         abstract TEXTURE26: float
+        /// <remarks>TypeScript type: <c>34011</c></remarks>
         abstract TEXTURE27: float
+        /// <remarks>TypeScript type: <c>34012</c></remarks>
         abstract TEXTURE28: float
+        /// <remarks>TypeScript type: <c>34013</c></remarks>
         abstract TEXTURE29: float
+        /// <remarks>TypeScript type: <c>34014</c></remarks>
         abstract TEXTURE30: float
+        /// <remarks>TypeScript type: <c>34015</c></remarks>
         abstract TEXTURE31: float
+        /// <remarks>TypeScript type: <c>34016</c></remarks>
         abstract ACTIVE_TEXTURE: float
+        /// <remarks>TypeScript type: <c>10497</c></remarks>
         abstract REPEAT: float
+        /// <remarks>TypeScript type: <c>33071</c></remarks>
         abstract CLAMP_TO_EDGE: float
+        /// <remarks>TypeScript type: <c>33648</c></remarks>
         abstract MIRRORED_REPEAT: float
+        /// <remarks>TypeScript type: <c>35664</c></remarks>
         abstract FLOAT_VEC2: float
+        /// <remarks>TypeScript type: <c>35665</c></remarks>
         abstract FLOAT_VEC3: float
+        /// <remarks>TypeScript type: <c>35666</c></remarks>
         abstract FLOAT_VEC4: float
+        /// <remarks>TypeScript type: <c>35667</c></remarks>
         abstract INT_VEC2: float
+        /// <remarks>TypeScript type: <c>35668</c></remarks>
         abstract INT_VEC3: float
+        /// <remarks>TypeScript type: <c>35669</c></remarks>
         abstract INT_VEC4: float
+        /// <remarks>TypeScript type: <c>35670</c></remarks>
         abstract BOOL: float
+        /// <remarks>TypeScript type: <c>35671</c></remarks>
         abstract BOOL_VEC2: float
+        /// <remarks>TypeScript type: <c>35672</c></remarks>
         abstract BOOL_VEC3: float
+        /// <remarks>TypeScript type: <c>35673</c></remarks>
         abstract BOOL_VEC4: float
+        /// <remarks>TypeScript type: <c>35674</c></remarks>
         abstract FLOAT_MAT2: float
+        /// <remarks>TypeScript type: <c>35675</c></remarks>
         abstract FLOAT_MAT3: float
+        /// <remarks>TypeScript type: <c>35676</c></remarks>
         abstract FLOAT_MAT4: float
+        /// <remarks>TypeScript type: <c>35678</c></remarks>
         abstract SAMPLER_2D: float
+        /// <remarks>TypeScript type: <c>35680</c></remarks>
         abstract SAMPLER_CUBE: float
+        /// <remarks>TypeScript type: <c>34338</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_ENABLED: float
+        /// <remarks>TypeScript type: <c>34339</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_SIZE: float
+        /// <remarks>TypeScript type: <c>34340</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_STRIDE: float
+        /// <remarks>TypeScript type: <c>34341</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_TYPE: float
+        /// <remarks>TypeScript type: <c>34922</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_NORMALIZED: float
+        /// <remarks>TypeScript type: <c>34373</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_POINTER: float
+        /// <remarks>TypeScript type: <c>34975</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35738</c></remarks>
         abstract IMPLEMENTATION_COLOR_READ_TYPE: float
+        /// <remarks>TypeScript type: <c>35739</c></remarks>
         abstract IMPLEMENTATION_COLOR_READ_FORMAT: float
+        /// <remarks>TypeScript type: <c>35713</c></remarks>
         abstract COMPILE_STATUS: float
+        /// <remarks>TypeScript type: <c>36336</c></remarks>
         abstract LOW_FLOAT: float
+        /// <remarks>TypeScript type: <c>36337</c></remarks>
         abstract MEDIUM_FLOAT: float
+        /// <remarks>TypeScript type: <c>36338</c></remarks>
         abstract HIGH_FLOAT: float
+        /// <remarks>TypeScript type: <c>36339</c></remarks>
         abstract LOW_INT: float
+        /// <remarks>TypeScript type: <c>36340</c></remarks>
         abstract MEDIUM_INT: float
+        /// <remarks>TypeScript type: <c>36341</c></remarks>
         abstract HIGH_INT: float
+        /// <remarks>TypeScript type: <c>36160</c></remarks>
         abstract FRAMEBUFFER: float
+        /// <remarks>TypeScript type: <c>36161</c></remarks>
         abstract RENDERBUFFER: float
+        /// <remarks>TypeScript type: <c>32854</c></remarks>
         abstract RGBA4: float
+        /// <remarks>TypeScript type: <c>32855</c></remarks>
         abstract RGB5_A1: float
+        /// <remarks>TypeScript type: <c>32856</c></remarks>
         abstract RGBA8: float
+        /// <remarks>TypeScript type: <c>36194</c></remarks>
         abstract RGB565: float
+        /// <remarks>TypeScript type: <c>33189</c></remarks>
         abstract DEPTH_COMPONENT16: float
+        /// <remarks>TypeScript type: <c>36168</c></remarks>
         abstract STENCIL_INDEX8: float
+        /// <remarks>TypeScript type: <c>34041</c></remarks>
         abstract DEPTH_STENCIL: float
+        /// <remarks>TypeScript type: <c>36162</c></remarks>
         abstract RENDERBUFFER_WIDTH: float
+        /// <remarks>TypeScript type: <c>36163</c></remarks>
         abstract RENDERBUFFER_HEIGHT: float
+        /// <remarks>TypeScript type: <c>36164</c></remarks>
         abstract RENDERBUFFER_INTERNAL_FORMAT: float
+        /// <remarks>TypeScript type: <c>36176</c></remarks>
         abstract RENDERBUFFER_RED_SIZE: float
+        /// <remarks>TypeScript type: <c>36177</c></remarks>
         abstract RENDERBUFFER_GREEN_SIZE: float
+        /// <remarks>TypeScript type: <c>36178</c></remarks>
         abstract RENDERBUFFER_BLUE_SIZE: float
+        /// <remarks>TypeScript type: <c>36179</c></remarks>
         abstract RENDERBUFFER_ALPHA_SIZE: float
+        /// <remarks>TypeScript type: <c>36180</c></remarks>
         abstract RENDERBUFFER_DEPTH_SIZE: float
+        /// <remarks>TypeScript type: <c>36181</c></remarks>
         abstract RENDERBUFFER_STENCIL_SIZE: float
+        /// <remarks>TypeScript type: <c>36048</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE: float
+        /// <remarks>TypeScript type: <c>36049</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_OBJECT_NAME: float
+        /// <remarks>TypeScript type: <c>36050</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL: float
+        /// <remarks>TypeScript type: <c>36051</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE: float
+        /// <remarks>TypeScript type: <c>36064</c></remarks>
         abstract COLOR_ATTACHMENT0: float
+        /// <remarks>TypeScript type: <c>36096</c></remarks>
         abstract DEPTH_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36128</c></remarks>
         abstract STENCIL_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>33306</c></remarks>
         abstract DEPTH_STENCIL_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NONE: float
+        /// <remarks>TypeScript type: <c>36053</c></remarks>
         abstract FRAMEBUFFER_COMPLETE: float
+        /// <remarks>TypeScript type: <c>36054</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36055</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36057</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_DIMENSIONS: float
+        /// <remarks>TypeScript type: <c>36061</c></remarks>
         abstract FRAMEBUFFER_UNSUPPORTED: float
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
         abstract FRAMEBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36007</c></remarks>
         abstract RENDERBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>34024</c></remarks>
         abstract MAX_RENDERBUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>1286</c></remarks>
         abstract INVALID_FRAMEBUFFER_OPERATION: float
+        /// <remarks>TypeScript type: <c>37440</c></remarks>
         abstract UNPACK_FLIP_Y_WEBGL: float
+        /// <remarks>TypeScript type: <c>37441</c></remarks>
         abstract UNPACK_PREMULTIPLY_ALPHA_WEBGL: float
+        /// <remarks>TypeScript type: <c>37442</c></remarks>
         abstract CONTEXT_LOST_WEBGL: float
+        /// <remarks>TypeScript type: <c>37443</c></remarks>
         abstract UNPACK_COLORSPACE_CONVERSION_WEBGL: float
+        /// <remarks>TypeScript type: <c>37444</c></remarks>
         abstract BROWSER_DEFAULT_WEBGL: float
 
         [<EmitConstructor>]
         abstract Create: unit -> WebGLRenderingContext
+
+    module WebGLRenderingContextConstructor =
+        /// <remarks>TypeScript type: <c>256</c></remarks>
+        [<Literal>]
+        let DEPTH_BUFFER_BIT = 256.0
+
+        /// <remarks>TypeScript type: <c>1024</c></remarks>
+        [<Literal>]
+        let STENCIL_BUFFER_BIT = 1024.0
+
+        /// <remarks>TypeScript type: <c>16384</c></remarks>
+        [<Literal>]
+        let COLOR_BUFFER_BIT = 16384.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let POINTS = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LINES = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let LINE_LOOP = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let LINE_STRIP = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let TRIANGLES = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let TRIANGLE_STRIP = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let TRIANGLE_FAN = 6.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let ZERO = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let ONE = 1.0
+
+        /// <remarks>TypeScript type: <c>768</c></remarks>
+        [<Literal>]
+        let SRC_COLOR = 768.0
+
+        /// <remarks>TypeScript type: <c>769</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_SRC_COLOR = 769.0
+
+        /// <remarks>TypeScript type: <c>770</c></remarks>
+        [<Literal>]
+        let SRC_ALPHA = 770.0
+
+        /// <remarks>TypeScript type: <c>771</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_SRC_ALPHA = 771.0
+
+        /// <remarks>TypeScript type: <c>772</c></remarks>
+        [<Literal>]
+        let DST_ALPHA = 772.0
+
+        /// <remarks>TypeScript type: <c>773</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_DST_ALPHA = 773.0
+
+        /// <remarks>TypeScript type: <c>774</c></remarks>
+        [<Literal>]
+        let DST_COLOR = 774.0
+
+        /// <remarks>TypeScript type: <c>775</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_DST_COLOR = 775.0
+
+        /// <remarks>TypeScript type: <c>776</c></remarks>
+        [<Literal>]
+        let SRC_ALPHA_SATURATE = 776.0
+
+        /// <remarks>TypeScript type: <c>32774</c></remarks>
+        [<Literal>]
+        let FUNC_ADD = 32774.0
+
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION = 32777.0
+
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION_RGB = 32777.0
+
+        /// <remarks>TypeScript type: <c>34877</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION_ALPHA = 34877.0
+
+        /// <remarks>TypeScript type: <c>32778</c></remarks>
+        [<Literal>]
+        let FUNC_SUBTRACT = 32778.0
+
+        /// <remarks>TypeScript type: <c>32779</c></remarks>
+        [<Literal>]
+        let FUNC_REVERSE_SUBTRACT = 32779.0
+
+        /// <remarks>TypeScript type: <c>32968</c></remarks>
+        [<Literal>]
+        let BLEND_DST_RGB = 32968.0
+
+        /// <remarks>TypeScript type: <c>32969</c></remarks>
+        [<Literal>]
+        let BLEND_SRC_RGB = 32969.0
+
+        /// <remarks>TypeScript type: <c>32970</c></remarks>
+        [<Literal>]
+        let BLEND_DST_ALPHA = 32970.0
+
+        /// <remarks>TypeScript type: <c>32971</c></remarks>
+        [<Literal>]
+        let BLEND_SRC_ALPHA = 32971.0
+
+        /// <remarks>TypeScript type: <c>32769</c></remarks>
+        [<Literal>]
+        let CONSTANT_COLOR = 32769.0
+
+        /// <remarks>TypeScript type: <c>32770</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_CONSTANT_COLOR = 32770.0
+
+        /// <remarks>TypeScript type: <c>32771</c></remarks>
+        [<Literal>]
+        let CONSTANT_ALPHA = 32771.0
+
+        /// <remarks>TypeScript type: <c>32772</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_CONSTANT_ALPHA = 32772.0
+
+        /// <remarks>TypeScript type: <c>32773</c></remarks>
+        [<Literal>]
+        let BLEND_COLOR = 32773.0
+
+        /// <remarks>TypeScript type: <c>34962</c></remarks>
+        [<Literal>]
+        let ARRAY_BUFFER = 34962.0
+
+        /// <remarks>TypeScript type: <c>34963</c></remarks>
+        [<Literal>]
+        let ELEMENT_ARRAY_BUFFER = 34963.0
+
+        /// <remarks>TypeScript type: <c>34964</c></remarks>
+        [<Literal>]
+        let ARRAY_BUFFER_BINDING = 34964.0
+
+        /// <remarks>TypeScript type: <c>34965</c></remarks>
+        [<Literal>]
+        let ELEMENT_ARRAY_BUFFER_BINDING = 34965.0
+
+        /// <remarks>TypeScript type: <c>35040</c></remarks>
+        [<Literal>]
+        let STREAM_DRAW = 35040.0
+
+        /// <remarks>TypeScript type: <c>35044</c></remarks>
+        [<Literal>]
+        let STATIC_DRAW = 35044.0
+
+        /// <remarks>TypeScript type: <c>35048</c></remarks>
+        [<Literal>]
+        let DYNAMIC_DRAW = 35048.0
+
+        /// <remarks>TypeScript type: <c>34660</c></remarks>
+        [<Literal>]
+        let BUFFER_SIZE = 34660.0
+
+        /// <remarks>TypeScript type: <c>34661</c></remarks>
+        [<Literal>]
+        let BUFFER_USAGE = 34661.0
+
+        /// <remarks>TypeScript type: <c>34342</c></remarks>
+        [<Literal>]
+        let CURRENT_VERTEX_ATTRIB = 34342.0
+
+        /// <remarks>TypeScript type: <c>1028</c></remarks>
+        [<Literal>]
+        let FRONT = 1028.0
+
+        /// <remarks>TypeScript type: <c>1029</c></remarks>
+        [<Literal>]
+        let BACK = 1029.0
+
+        /// <remarks>TypeScript type: <c>1032</c></remarks>
+        [<Literal>]
+        let FRONT_AND_BACK = 1032.0
+
+        /// <remarks>TypeScript type: <c>2884</c></remarks>
+        [<Literal>]
+        let CULL_FACE = 2884.0
+
+        /// <remarks>TypeScript type: <c>3042</c></remarks>
+        [<Literal>]
+        let BLEND = 3042.0
+
+        /// <remarks>TypeScript type: <c>3024</c></remarks>
+        [<Literal>]
+        let DITHER = 3024.0
+
+        /// <remarks>TypeScript type: <c>2960</c></remarks>
+        [<Literal>]
+        let STENCIL_TEST = 2960.0
+
+        /// <remarks>TypeScript type: <c>2929</c></remarks>
+        [<Literal>]
+        let DEPTH_TEST = 2929.0
+
+        /// <remarks>TypeScript type: <c>3089</c></remarks>
+        [<Literal>]
+        let SCISSOR_TEST = 3089.0
+
+        /// <remarks>TypeScript type: <c>32823</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_FILL = 32823.0
+
+        /// <remarks>TypeScript type: <c>32926</c></remarks>
+        [<Literal>]
+        let SAMPLE_ALPHA_TO_COVERAGE = 32926.0
+
+        /// <remarks>TypeScript type: <c>32928</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE = 32928.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NO_ERROR = 0.0
+
+        /// <remarks>TypeScript type: <c>1280</c></remarks>
+        [<Literal>]
+        let INVALID_ENUM = 1280.0
+
+        /// <remarks>TypeScript type: <c>1281</c></remarks>
+        [<Literal>]
+        let INVALID_VALUE = 1281.0
+
+        /// <remarks>TypeScript type: <c>1282</c></remarks>
+        [<Literal>]
+        let INVALID_OPERATION = 1282.0
+
+        /// <remarks>TypeScript type: <c>1285</c></remarks>
+        [<Literal>]
+        let OUT_OF_MEMORY = 1285.0
+
+        /// <remarks>TypeScript type: <c>2304</c></remarks>
+        [<Literal>]
+        let CW = 2304.0
+
+        /// <remarks>TypeScript type: <c>2305</c></remarks>
+        [<Literal>]
+        let CCW = 2305.0
+
+        /// <remarks>TypeScript type: <c>2849</c></remarks>
+        [<Literal>]
+        let LINE_WIDTH = 2849.0
+
+        /// <remarks>TypeScript type: <c>33901</c></remarks>
+        [<Literal>]
+        let ALIASED_POINT_SIZE_RANGE = 33901.0
+
+        /// <remarks>TypeScript type: <c>33902</c></remarks>
+        [<Literal>]
+        let ALIASED_LINE_WIDTH_RANGE = 33902.0
+
+        /// <remarks>TypeScript type: <c>2885</c></remarks>
+        [<Literal>]
+        let CULL_FACE_MODE = 2885.0
+
+        /// <remarks>TypeScript type: <c>2886</c></remarks>
+        [<Literal>]
+        let FRONT_FACE = 2886.0
+
+        /// <remarks>TypeScript type: <c>2928</c></remarks>
+        [<Literal>]
+        let DEPTH_RANGE = 2928.0
+
+        /// <remarks>TypeScript type: <c>2930</c></remarks>
+        [<Literal>]
+        let DEPTH_WRITEMASK = 2930.0
+
+        /// <remarks>TypeScript type: <c>2931</c></remarks>
+        [<Literal>]
+        let DEPTH_CLEAR_VALUE = 2931.0
+
+        /// <remarks>TypeScript type: <c>2932</c></remarks>
+        [<Literal>]
+        let DEPTH_FUNC = 2932.0
+
+        /// <remarks>TypeScript type: <c>2961</c></remarks>
+        [<Literal>]
+        let STENCIL_CLEAR_VALUE = 2961.0
+
+        /// <remarks>TypeScript type: <c>2962</c></remarks>
+        [<Literal>]
+        let STENCIL_FUNC = 2962.0
+
+        /// <remarks>TypeScript type: <c>2964</c></remarks>
+        [<Literal>]
+        let STENCIL_FAIL = 2964.0
+
+        /// <remarks>TypeScript type: <c>2965</c></remarks>
+        [<Literal>]
+        let STENCIL_PASS_DEPTH_FAIL = 2965.0
+
+        /// <remarks>TypeScript type: <c>2966</c></remarks>
+        [<Literal>]
+        let STENCIL_PASS_DEPTH_PASS = 2966.0
+
+        /// <remarks>TypeScript type: <c>2967</c></remarks>
+        [<Literal>]
+        let STENCIL_REF = 2967.0
+
+        /// <remarks>TypeScript type: <c>2963</c></remarks>
+        [<Literal>]
+        let STENCIL_VALUE_MASK = 2963.0
+
+        /// <remarks>TypeScript type: <c>2968</c></remarks>
+        [<Literal>]
+        let STENCIL_WRITEMASK = 2968.0
+
+        /// <remarks>TypeScript type: <c>34816</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_FUNC = 34816.0
+
+        /// <remarks>TypeScript type: <c>34817</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_FAIL = 34817.0
+
+        /// <remarks>TypeScript type: <c>34818</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_PASS_DEPTH_FAIL = 34818.0
+
+        /// <remarks>TypeScript type: <c>34819</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_PASS_DEPTH_PASS = 34819.0
+
+        /// <remarks>TypeScript type: <c>36003</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_REF = 36003.0
+
+        /// <remarks>TypeScript type: <c>36004</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_VALUE_MASK = 36004.0
+
+        /// <remarks>TypeScript type: <c>36005</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_WRITEMASK = 36005.0
+
+        /// <remarks>TypeScript type: <c>2978</c></remarks>
+        [<Literal>]
+        let VIEWPORT = 2978.0
+
+        /// <remarks>TypeScript type: <c>3088</c></remarks>
+        [<Literal>]
+        let SCISSOR_BOX = 3088.0
+
+        /// <remarks>TypeScript type: <c>3106</c></remarks>
+        [<Literal>]
+        let COLOR_CLEAR_VALUE = 3106.0
+
+        /// <remarks>TypeScript type: <c>3107</c></remarks>
+        [<Literal>]
+        let COLOR_WRITEMASK = 3107.0
+
+        /// <remarks>TypeScript type: <c>3317</c></remarks>
+        [<Literal>]
+        let UNPACK_ALIGNMENT = 3317.0
+
+        /// <remarks>TypeScript type: <c>3333</c></remarks>
+        [<Literal>]
+        let PACK_ALIGNMENT = 3333.0
+
+        /// <remarks>TypeScript type: <c>3379</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_SIZE = 3379.0
+
+        /// <remarks>TypeScript type: <c>3386</c></remarks>
+        [<Literal>]
+        let MAX_VIEWPORT_DIMS = 3386.0
+
+        /// <remarks>TypeScript type: <c>3408</c></remarks>
+        [<Literal>]
+        let SUBPIXEL_BITS = 3408.0
+
+        /// <remarks>TypeScript type: <c>3410</c></remarks>
+        [<Literal>]
+        let RED_BITS = 3410.0
+
+        /// <remarks>TypeScript type: <c>3411</c></remarks>
+        [<Literal>]
+        let GREEN_BITS = 3411.0
+
+        /// <remarks>TypeScript type: <c>3412</c></remarks>
+        [<Literal>]
+        let BLUE_BITS = 3412.0
+
+        /// <remarks>TypeScript type: <c>3413</c></remarks>
+        [<Literal>]
+        let ALPHA_BITS = 3413.0
+
+        /// <remarks>TypeScript type: <c>3414</c></remarks>
+        [<Literal>]
+        let DEPTH_BITS = 3414.0
+
+        /// <remarks>TypeScript type: <c>3415</c></remarks>
+        [<Literal>]
+        let STENCIL_BITS = 3415.0
+
+        /// <remarks>TypeScript type: <c>10752</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_UNITS = 10752.0
+
+        /// <remarks>TypeScript type: <c>32824</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_FACTOR = 32824.0
+
+        /// <remarks>TypeScript type: <c>32873</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_2D = 32873.0
+
+        /// <remarks>TypeScript type: <c>32936</c></remarks>
+        [<Literal>]
+        let SAMPLE_BUFFERS = 32936.0
+
+        /// <remarks>TypeScript type: <c>32937</c></remarks>
+        [<Literal>]
+        let SAMPLES = 32937.0
+
+        /// <remarks>TypeScript type: <c>32938</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE_VALUE = 32938.0
+
+        /// <remarks>TypeScript type: <c>32939</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE_INVERT = 32939.0
+
+        /// <remarks>TypeScript type: <c>34467</c></remarks>
+        [<Literal>]
+        let COMPRESSED_TEXTURE_FORMATS = 34467.0
+
+        /// <remarks>TypeScript type: <c>4352</c></remarks>
+        [<Literal>]
+        let DONT_CARE = 4352.0
+
+        /// <remarks>TypeScript type: <c>4353</c></remarks>
+        [<Literal>]
+        let FASTEST = 4353.0
+
+        /// <remarks>TypeScript type: <c>4354</c></remarks>
+        [<Literal>]
+        let NICEST = 4354.0
+
+        /// <remarks>TypeScript type: <c>33170</c></remarks>
+        [<Literal>]
+        let GENERATE_MIPMAP_HINT = 33170.0
+
+        /// <remarks>TypeScript type: <c>5120</c></remarks>
+        [<Literal>]
+        let BYTE = 5120.0
+
+        /// <remarks>TypeScript type: <c>5121</c></remarks>
+        [<Literal>]
+        let UNSIGNED_BYTE = 5121.0
+
+        /// <remarks>TypeScript type: <c>5122</c></remarks>
+        [<Literal>]
+        let SHORT = 5122.0
+
+        /// <remarks>TypeScript type: <c>5123</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT = 5123.0
+
+        /// <remarks>TypeScript type: <c>5124</c></remarks>
+        [<Literal>]
+        let INT = 5124.0
+
+        /// <remarks>TypeScript type: <c>5125</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT = 5125.0
+
+        /// <remarks>TypeScript type: <c>5126</c></remarks>
+        [<Literal>]
+        let FLOAT = 5126.0
+
+        /// <remarks>TypeScript type: <c>6402</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT = 6402.0
+
+        /// <remarks>TypeScript type: <c>6406</c></remarks>
+        [<Literal>]
+        let ALPHA = 6406.0
+
+        /// <remarks>TypeScript type: <c>6407</c></remarks>
+        [<Literal>]
+        let RGB = 6407.0
+
+        /// <remarks>TypeScript type: <c>6408</c></remarks>
+        [<Literal>]
+        let RGBA = 6408.0
+
+        /// <remarks>TypeScript type: <c>6409</c></remarks>
+        [<Literal>]
+        let LUMINANCE = 6409.0
+
+        /// <remarks>TypeScript type: <c>6410</c></remarks>
+        [<Literal>]
+        let LUMINANCE_ALPHA = 6410.0
+
+        /// <remarks>TypeScript type: <c>32819</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_4_4_4_4 = 32819.0
+
+        /// <remarks>TypeScript type: <c>32820</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_5_5_5_1 = 32820.0
+
+        /// <remarks>TypeScript type: <c>33635</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_5_6_5 = 33635.0
+
+        /// <remarks>TypeScript type: <c>35632</c></remarks>
+        [<Literal>]
+        let FRAGMENT_SHADER = 35632.0
+
+        /// <remarks>TypeScript type: <c>35633</c></remarks>
+        [<Literal>]
+        let VERTEX_SHADER = 35633.0
+
+        /// <remarks>TypeScript type: <c>34921</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_ATTRIBS = 34921.0
+
+        /// <remarks>TypeScript type: <c>36347</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_UNIFORM_VECTORS = 36347.0
+
+        /// <remarks>TypeScript type: <c>36348</c></remarks>
+        [<Literal>]
+        let MAX_VARYING_VECTORS = 36348.0
+
+        /// <remarks>TypeScript type: <c>35661</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661.0
+
+        /// <remarks>TypeScript type: <c>35660</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660.0
+
+        /// <remarks>TypeScript type: <c>34930</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_IMAGE_UNITS = 34930.0
+
+        /// <remarks>TypeScript type: <c>36349</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_UNIFORM_VECTORS = 36349.0
+
+        /// <remarks>TypeScript type: <c>35663</c></remarks>
+        [<Literal>]
+        let SHADER_TYPE = 35663.0
+
+        /// <remarks>TypeScript type: <c>35712</c></remarks>
+        [<Literal>]
+        let DELETE_STATUS = 35712.0
+
+        /// <remarks>TypeScript type: <c>35714</c></remarks>
+        [<Literal>]
+        let LINK_STATUS = 35714.0
+
+        /// <remarks>TypeScript type: <c>35715</c></remarks>
+        [<Literal>]
+        let VALIDATE_STATUS = 35715.0
+
+        /// <remarks>TypeScript type: <c>35717</c></remarks>
+        [<Literal>]
+        let ATTACHED_SHADERS = 35717.0
+
+        /// <remarks>TypeScript type: <c>35718</c></remarks>
+        [<Literal>]
+        let ACTIVE_UNIFORMS = 35718.0
+
+        /// <remarks>TypeScript type: <c>35721</c></remarks>
+        [<Literal>]
+        let ACTIVE_ATTRIBUTES = 35721.0
+
+        /// <remarks>TypeScript type: <c>35724</c></remarks>
+        [<Literal>]
+        let SHADING_LANGUAGE_VERSION = 35724.0
+
+        /// <remarks>TypeScript type: <c>35725</c></remarks>
+        [<Literal>]
+        let CURRENT_PROGRAM = 35725.0
+
+        /// <remarks>TypeScript type: <c>512</c></remarks>
+        [<Literal>]
+        let NEVER = 512.0
+
+        /// <remarks>TypeScript type: <c>513</c></remarks>
+        [<Literal>]
+        let LESS = 513.0
+
+        /// <remarks>TypeScript type: <c>514</c></remarks>
+        [<Literal>]
+        let EQUAL = 514.0
+
+        /// <remarks>TypeScript type: <c>515</c></remarks>
+        [<Literal>]
+        let LEQUAL = 515.0
+
+        /// <remarks>TypeScript type: <c>516</c></remarks>
+        [<Literal>]
+        let GREATER = 516.0
+
+        /// <remarks>TypeScript type: <c>517</c></remarks>
+        [<Literal>]
+        let NOTEQUAL = 517.0
+
+        /// <remarks>TypeScript type: <c>518</c></remarks>
+        [<Literal>]
+        let GEQUAL = 518.0
+
+        /// <remarks>TypeScript type: <c>519</c></remarks>
+        [<Literal>]
+        let ALWAYS = 519.0
+
+        /// <remarks>TypeScript type: <c>7680</c></remarks>
+        [<Literal>]
+        let KEEP = 7680.0
+
+        /// <remarks>TypeScript type: <c>7681</c></remarks>
+        [<Literal>]
+        let REPLACE = 7681.0
+
+        /// <remarks>TypeScript type: <c>7682</c></remarks>
+        [<Literal>]
+        let INCR = 7682.0
+
+        /// <remarks>TypeScript type: <c>7683</c></remarks>
+        [<Literal>]
+        let DECR = 7683.0
+
+        /// <remarks>TypeScript type: <c>5386</c></remarks>
+        [<Literal>]
+        let INVERT = 5386.0
+
+        /// <remarks>TypeScript type: <c>34055</c></remarks>
+        [<Literal>]
+        let INCR_WRAP = 34055.0
+
+        /// <remarks>TypeScript type: <c>34056</c></remarks>
+        [<Literal>]
+        let DECR_WRAP = 34056.0
+
+        /// <remarks>TypeScript type: <c>7936</c></remarks>
+        [<Literal>]
+        let VENDOR = 7936.0
+
+        /// <remarks>TypeScript type: <c>7937</c></remarks>
+        [<Literal>]
+        let RENDERER = 7937.0
+
+        /// <remarks>TypeScript type: <c>7938</c></remarks>
+        [<Literal>]
+        let VERSION = 7938.0
+
+        /// <remarks>TypeScript type: <c>9728</c></remarks>
+        [<Literal>]
+        let NEAREST = 9728.0
+
+        /// <remarks>TypeScript type: <c>9729</c></remarks>
+        [<Literal>]
+        let LINEAR = 9729.0
+
+        /// <remarks>TypeScript type: <c>9984</c></remarks>
+        [<Literal>]
+        let NEAREST_MIPMAP_NEAREST = 9984.0
+
+        /// <remarks>TypeScript type: <c>9985</c></remarks>
+        [<Literal>]
+        let LINEAR_MIPMAP_NEAREST = 9985.0
+
+        /// <remarks>TypeScript type: <c>9986</c></remarks>
+        [<Literal>]
+        let NEAREST_MIPMAP_LINEAR = 9986.0
+
+        /// <remarks>TypeScript type: <c>9987</c></remarks>
+        [<Literal>]
+        let LINEAR_MIPMAP_LINEAR = 9987.0
+
+        /// <remarks>TypeScript type: <c>10240</c></remarks>
+        [<Literal>]
+        let TEXTURE_MAG_FILTER = 10240.0
+
+        /// <remarks>TypeScript type: <c>10241</c></remarks>
+        [<Literal>]
+        let TEXTURE_MIN_FILTER = 10241.0
+
+        /// <remarks>TypeScript type: <c>10242</c></remarks>
+        [<Literal>]
+        let TEXTURE_WRAP_S = 10242.0
+
+        /// <remarks>TypeScript type: <c>10243</c></remarks>
+        [<Literal>]
+        let TEXTURE_WRAP_T = 10243.0
+
+        /// <remarks>TypeScript type: <c>3553</c></remarks>
+        [<Literal>]
+        let TEXTURE_2D = 3553.0
+
+        /// <remarks>TypeScript type: <c>5890</c></remarks>
+        [<Literal>]
+        let TEXTURE = 5890.0
+
+        /// <remarks>TypeScript type: <c>34067</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP = 34067.0
+
+        /// <remarks>TypeScript type: <c>34068</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_CUBE_MAP = 34068.0
+
+        /// <remarks>TypeScript type: <c>34069</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_X = 34069.0
+
+        /// <remarks>TypeScript type: <c>34070</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_X = 34070.0
+
+        /// <remarks>TypeScript type: <c>34071</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_Y = 34071.0
+
+        /// <remarks>TypeScript type: <c>34072</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072.0
+
+        /// <remarks>TypeScript type: <c>34073</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_Z = 34073.0
+
+        /// <remarks>TypeScript type: <c>34074</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074.0
+
+        /// <remarks>TypeScript type: <c>34076</c></remarks>
+        [<Literal>]
+        let MAX_CUBE_MAP_TEXTURE_SIZE = 34076.0
+
+        /// <remarks>TypeScript type: <c>33984</c></remarks>
+        [<Literal>]
+        let TEXTURE0 = 33984.0
+
+        /// <remarks>TypeScript type: <c>33985</c></remarks>
+        [<Literal>]
+        let TEXTURE1 = 33985.0
+
+        /// <remarks>TypeScript type: <c>33986</c></remarks>
+        [<Literal>]
+        let TEXTURE2 = 33986.0
+
+        /// <remarks>TypeScript type: <c>33987</c></remarks>
+        [<Literal>]
+        let TEXTURE3 = 33987.0
+
+        /// <remarks>TypeScript type: <c>33988</c></remarks>
+        [<Literal>]
+        let TEXTURE4 = 33988.0
+
+        /// <remarks>TypeScript type: <c>33989</c></remarks>
+        [<Literal>]
+        let TEXTURE5 = 33989.0
+
+        /// <remarks>TypeScript type: <c>33990</c></remarks>
+        [<Literal>]
+        let TEXTURE6 = 33990.0
+
+        /// <remarks>TypeScript type: <c>33991</c></remarks>
+        [<Literal>]
+        let TEXTURE7 = 33991.0
+
+        /// <remarks>TypeScript type: <c>33992</c></remarks>
+        [<Literal>]
+        let TEXTURE8 = 33992.0
+
+        /// <remarks>TypeScript type: <c>33993</c></remarks>
+        [<Literal>]
+        let TEXTURE9 = 33993.0
+
+        /// <remarks>TypeScript type: <c>33994</c></remarks>
+        [<Literal>]
+        let TEXTURE10 = 33994.0
+
+        /// <remarks>TypeScript type: <c>33995</c></remarks>
+        [<Literal>]
+        let TEXTURE11 = 33995.0
+
+        /// <remarks>TypeScript type: <c>33996</c></remarks>
+        [<Literal>]
+        let TEXTURE12 = 33996.0
+
+        /// <remarks>TypeScript type: <c>33997</c></remarks>
+        [<Literal>]
+        let TEXTURE13 = 33997.0
+
+        /// <remarks>TypeScript type: <c>33998</c></remarks>
+        [<Literal>]
+        let TEXTURE14 = 33998.0
+
+        /// <remarks>TypeScript type: <c>33999</c></remarks>
+        [<Literal>]
+        let TEXTURE15 = 33999.0
+
+        /// <remarks>TypeScript type: <c>34000</c></remarks>
+        [<Literal>]
+        let TEXTURE16 = 34000.0
+
+        /// <remarks>TypeScript type: <c>34001</c></remarks>
+        [<Literal>]
+        let TEXTURE17 = 34001.0
+
+        /// <remarks>TypeScript type: <c>34002</c></remarks>
+        [<Literal>]
+        let TEXTURE18 = 34002.0
+
+        /// <remarks>TypeScript type: <c>34003</c></remarks>
+        [<Literal>]
+        let TEXTURE19 = 34003.0
+
+        /// <remarks>TypeScript type: <c>34004</c></remarks>
+        [<Literal>]
+        let TEXTURE20 = 34004.0
+
+        /// <remarks>TypeScript type: <c>34005</c></remarks>
+        [<Literal>]
+        let TEXTURE21 = 34005.0
+
+        /// <remarks>TypeScript type: <c>34006</c></remarks>
+        [<Literal>]
+        let TEXTURE22 = 34006.0
+
+        /// <remarks>TypeScript type: <c>34007</c></remarks>
+        [<Literal>]
+        let TEXTURE23 = 34007.0
+
+        /// <remarks>TypeScript type: <c>34008</c></remarks>
+        [<Literal>]
+        let TEXTURE24 = 34008.0
+
+        /// <remarks>TypeScript type: <c>34009</c></remarks>
+        [<Literal>]
+        let TEXTURE25 = 34009.0
+
+        /// <remarks>TypeScript type: <c>34010</c></remarks>
+        [<Literal>]
+        let TEXTURE26 = 34010.0
+
+        /// <remarks>TypeScript type: <c>34011</c></remarks>
+        [<Literal>]
+        let TEXTURE27 = 34011.0
+
+        /// <remarks>TypeScript type: <c>34012</c></remarks>
+        [<Literal>]
+        let TEXTURE28 = 34012.0
+
+        /// <remarks>TypeScript type: <c>34013</c></remarks>
+        [<Literal>]
+        let TEXTURE29 = 34013.0
+
+        /// <remarks>TypeScript type: <c>34014</c></remarks>
+        [<Literal>]
+        let TEXTURE30 = 34014.0
+
+        /// <remarks>TypeScript type: <c>34015</c></remarks>
+        [<Literal>]
+        let TEXTURE31 = 34015.0
+
+        /// <remarks>TypeScript type: <c>34016</c></remarks>
+        [<Literal>]
+        let ACTIVE_TEXTURE = 34016.0
+
+        /// <remarks>TypeScript type: <c>10497</c></remarks>
+        [<Literal>]
+        let REPEAT = 10497.0
+
+        /// <remarks>TypeScript type: <c>33071</c></remarks>
+        [<Literal>]
+        let CLAMP_TO_EDGE = 33071.0
+
+        /// <remarks>TypeScript type: <c>33648</c></remarks>
+        [<Literal>]
+        let MIRRORED_REPEAT = 33648.0
+
+        /// <remarks>TypeScript type: <c>35664</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC2 = 35664.0
+
+        /// <remarks>TypeScript type: <c>35665</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC3 = 35665.0
+
+        /// <remarks>TypeScript type: <c>35666</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC4 = 35666.0
+
+        /// <remarks>TypeScript type: <c>35667</c></remarks>
+        [<Literal>]
+        let INT_VEC2 = 35667.0
+
+        /// <remarks>TypeScript type: <c>35668</c></remarks>
+        [<Literal>]
+        let INT_VEC3 = 35668.0
+
+        /// <remarks>TypeScript type: <c>35669</c></remarks>
+        [<Literal>]
+        let INT_VEC4 = 35669.0
+
+        /// <remarks>TypeScript type: <c>35670</c></remarks>
+        [<Literal>]
+        let BOOL = 35670.0
+
+        /// <remarks>TypeScript type: <c>35671</c></remarks>
+        [<Literal>]
+        let BOOL_VEC2 = 35671.0
+
+        /// <remarks>TypeScript type: <c>35672</c></remarks>
+        [<Literal>]
+        let BOOL_VEC3 = 35672.0
+
+        /// <remarks>TypeScript type: <c>35673</c></remarks>
+        [<Literal>]
+        let BOOL_VEC4 = 35673.0
+
+        /// <remarks>TypeScript type: <c>35674</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT2 = 35674.0
+
+        /// <remarks>TypeScript type: <c>35675</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT3 = 35675.0
+
+        /// <remarks>TypeScript type: <c>35676</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT4 = 35676.0
+
+        /// <remarks>TypeScript type: <c>35678</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D = 35678.0
+
+        /// <remarks>TypeScript type: <c>35680</c></remarks>
+        [<Literal>]
+        let SAMPLER_CUBE = 35680.0
+
+        /// <remarks>TypeScript type: <c>34338</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_ENABLED = 34338.0
+
+        /// <remarks>TypeScript type: <c>34339</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_SIZE = 34339.0
+
+        /// <remarks>TypeScript type: <c>34340</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_STRIDE = 34340.0
+
+        /// <remarks>TypeScript type: <c>34341</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_TYPE = 34341.0
+
+        /// <remarks>TypeScript type: <c>34922</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922.0
+
+        /// <remarks>TypeScript type: <c>34373</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_POINTER = 34373.0
+
+        /// <remarks>TypeScript type: <c>34975</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975.0
+
+        /// <remarks>TypeScript type: <c>35738</c></remarks>
+        [<Literal>]
+        let IMPLEMENTATION_COLOR_READ_TYPE = 35738.0
+
+        /// <remarks>TypeScript type: <c>35739</c></remarks>
+        [<Literal>]
+        let IMPLEMENTATION_COLOR_READ_FORMAT = 35739.0
+
+        /// <remarks>TypeScript type: <c>35713</c></remarks>
+        [<Literal>]
+        let COMPILE_STATUS = 35713.0
+
+        /// <remarks>TypeScript type: <c>36336</c></remarks>
+        [<Literal>]
+        let LOW_FLOAT = 36336.0
+
+        /// <remarks>TypeScript type: <c>36337</c></remarks>
+        [<Literal>]
+        let MEDIUM_FLOAT = 36337.0
+
+        /// <remarks>TypeScript type: <c>36338</c></remarks>
+        [<Literal>]
+        let HIGH_FLOAT = 36338.0
+
+        /// <remarks>TypeScript type: <c>36339</c></remarks>
+        [<Literal>]
+        let LOW_INT = 36339.0
+
+        /// <remarks>TypeScript type: <c>36340</c></remarks>
+        [<Literal>]
+        let MEDIUM_INT = 36340.0
+
+        /// <remarks>TypeScript type: <c>36341</c></remarks>
+        [<Literal>]
+        let HIGH_INT = 36341.0
+
+        /// <remarks>TypeScript type: <c>36160</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER = 36160.0
+
+        /// <remarks>TypeScript type: <c>36161</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER = 36161.0
+
+        /// <remarks>TypeScript type: <c>32854</c></remarks>
+        [<Literal>]
+        let RGBA4 = 32854.0
+
+        /// <remarks>TypeScript type: <c>32855</c></remarks>
+        [<Literal>]
+        let RGB5_A1 = 32855.0
+
+        /// <remarks>TypeScript type: <c>32856</c></remarks>
+        [<Literal>]
+        let RGBA8 = 32856.0
+
+        /// <remarks>TypeScript type: <c>36194</c></remarks>
+        [<Literal>]
+        let RGB565 = 36194.0
+
+        /// <remarks>TypeScript type: <c>33189</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT16 = 33189.0
+
+        /// <remarks>TypeScript type: <c>36168</c></remarks>
+        [<Literal>]
+        let STENCIL_INDEX8 = 36168.0
+
+        /// <remarks>TypeScript type: <c>34041</c></remarks>
+        [<Literal>]
+        let DEPTH_STENCIL = 34041.0
+
+        /// <remarks>TypeScript type: <c>36162</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_WIDTH = 36162.0
+
+        /// <remarks>TypeScript type: <c>36163</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_HEIGHT = 36163.0
+
+        /// <remarks>TypeScript type: <c>36164</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_INTERNAL_FORMAT = 36164.0
+
+        /// <remarks>TypeScript type: <c>36176</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_RED_SIZE = 36176.0
+
+        /// <remarks>TypeScript type: <c>36177</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_GREEN_SIZE = 36177.0
+
+        /// <remarks>TypeScript type: <c>36178</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_BLUE_SIZE = 36178.0
+
+        /// <remarks>TypeScript type: <c>36179</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_ALPHA_SIZE = 36179.0
+
+        /// <remarks>TypeScript type: <c>36180</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_DEPTH_SIZE = 36180.0
+
+        /// <remarks>TypeScript type: <c>36181</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_STENCIL_SIZE = 36181.0
+
+        /// <remarks>TypeScript type: <c>36048</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048.0
+
+        /// <remarks>TypeScript type: <c>36049</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049.0
+
+        /// <remarks>TypeScript type: <c>36050</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050.0
+
+        /// <remarks>TypeScript type: <c>36051</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051.0
+
+        /// <remarks>TypeScript type: <c>36064</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT0 = 36064.0
+
+        /// <remarks>TypeScript type: <c>36096</c></remarks>
+        [<Literal>]
+        let DEPTH_ATTACHMENT = 36096.0
+
+        /// <remarks>TypeScript type: <c>36128</c></remarks>
+        [<Literal>]
+        let STENCIL_ATTACHMENT = 36128.0
+
+        /// <remarks>TypeScript type: <c>33306</c></remarks>
+        [<Literal>]
+        let DEPTH_STENCIL_ATTACHMENT = 33306.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NONE = 0.0
+
+        /// <remarks>TypeScript type: <c>36053</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_COMPLETE = 36053.0
+
+        /// <remarks>TypeScript type: <c>36054</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054.0
+
+        /// <remarks>TypeScript type: <c>36055</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055.0
+
+        /// <remarks>TypeScript type: <c>36057</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057.0
+
+        /// <remarks>TypeScript type: <c>36061</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_UNSUPPORTED = 36061.0
+
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_BINDING = 36006.0
+
+        /// <remarks>TypeScript type: <c>36007</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_BINDING = 36007.0
+
+        /// <remarks>TypeScript type: <c>34024</c></remarks>
+        [<Literal>]
+        let MAX_RENDERBUFFER_SIZE = 34024.0
+
+        /// <remarks>TypeScript type: <c>1286</c></remarks>
+        [<Literal>]
+        let INVALID_FRAMEBUFFER_OPERATION = 1286.0
+
+        /// <remarks>TypeScript type: <c>37440</c></remarks>
+        [<Literal>]
+        let UNPACK_FLIP_Y_WEBGL = 37440.0
+
+        /// <remarks>TypeScript type: <c>37441</c></remarks>
+        [<Literal>]
+        let UNPACK_PREMULTIPLY_ALPHA_WEBGL = 37441.0
+
+        /// <remarks>TypeScript type: <c>37442</c></remarks>
+        [<Literal>]
+        let CONTEXT_LOST_WEBGL = 37442.0
+
+        /// <remarks>TypeScript type: <c>37443</c></remarks>
+        [<Literal>]
+        let UNPACK_COLORSPACE_CONVERSION_WEBGL = 37443.0
+
+        /// <remarks>TypeScript type: <c>37444</c></remarks>
+        [<Literal>]
+        let BROWSER_DEFAULT_WEBGL = 37444.0
 
     type WebGLRenderingContextBase =
         /// <summary>
@@ -79794,303 +88476,1789 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext/viewport">MDN Reference</a>
         /// </summary>
         abstract viewport: x: float * y: float * width: float * height: float -> unit
+        /// <remarks>TypeScript type: <c>256</c></remarks>
         abstract DEPTH_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>1024</c></remarks>
         abstract STENCIL_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>16384</c></remarks>
         abstract COLOR_BUFFER_BIT: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract POINTS: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract LINES: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract LINE_LOOP: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract LINE_STRIP: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract TRIANGLES: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract TRIANGLE_STRIP: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract TRIANGLE_FAN: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract ZERO: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract ONE: float
+        /// <remarks>TypeScript type: <c>768</c></remarks>
         abstract SRC_COLOR: float
+        /// <remarks>TypeScript type: <c>769</c></remarks>
         abstract ONE_MINUS_SRC_COLOR: float
+        /// <remarks>TypeScript type: <c>770</c></remarks>
         abstract SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>771</c></remarks>
         abstract ONE_MINUS_SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>772</c></remarks>
         abstract DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>773</c></remarks>
         abstract ONE_MINUS_DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>774</c></remarks>
         abstract DST_COLOR: float
+        /// <remarks>TypeScript type: <c>775</c></remarks>
         abstract ONE_MINUS_DST_COLOR: float
+        /// <remarks>TypeScript type: <c>776</c></remarks>
         abstract SRC_ALPHA_SATURATE: float
+        /// <remarks>TypeScript type: <c>32774</c></remarks>
         abstract FUNC_ADD: float
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
         abstract BLEND_EQUATION: float
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
         abstract BLEND_EQUATION_RGB: float
+        /// <remarks>TypeScript type: <c>34877</c></remarks>
         abstract BLEND_EQUATION_ALPHA: float
+        /// <remarks>TypeScript type: <c>32778</c></remarks>
         abstract FUNC_SUBTRACT: float
+        /// <remarks>TypeScript type: <c>32779</c></remarks>
         abstract FUNC_REVERSE_SUBTRACT: float
+        /// <remarks>TypeScript type: <c>32968</c></remarks>
         abstract BLEND_DST_RGB: float
+        /// <remarks>TypeScript type: <c>32969</c></remarks>
         abstract BLEND_SRC_RGB: float
+        /// <remarks>TypeScript type: <c>32970</c></remarks>
         abstract BLEND_DST_ALPHA: float
+        /// <remarks>TypeScript type: <c>32971</c></remarks>
         abstract BLEND_SRC_ALPHA: float
+        /// <remarks>TypeScript type: <c>32769</c></remarks>
         abstract CONSTANT_COLOR: float
+        /// <remarks>TypeScript type: <c>32770</c></remarks>
         abstract ONE_MINUS_CONSTANT_COLOR: float
+        /// <remarks>TypeScript type: <c>32771</c></remarks>
         abstract CONSTANT_ALPHA: float
+        /// <remarks>TypeScript type: <c>32772</c></remarks>
         abstract ONE_MINUS_CONSTANT_ALPHA: float
+        /// <remarks>TypeScript type: <c>32773</c></remarks>
         abstract BLEND_COLOR: float
+        /// <remarks>TypeScript type: <c>34962</c></remarks>
         abstract ARRAY_BUFFER: float
+        /// <remarks>TypeScript type: <c>34963</c></remarks>
         abstract ELEMENT_ARRAY_BUFFER: float
+        /// <remarks>TypeScript type: <c>34964</c></remarks>
         abstract ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>34965</c></remarks>
         abstract ELEMENT_ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35040</c></remarks>
         abstract STREAM_DRAW: float
+        /// <remarks>TypeScript type: <c>35044</c></remarks>
         abstract STATIC_DRAW: float
+        /// <remarks>TypeScript type: <c>35048</c></remarks>
         abstract DYNAMIC_DRAW: float
+        /// <remarks>TypeScript type: <c>34660</c></remarks>
         abstract BUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>34661</c></remarks>
         abstract BUFFER_USAGE: float
+        /// <remarks>TypeScript type: <c>34342</c></remarks>
         abstract CURRENT_VERTEX_ATTRIB: float
+        /// <remarks>TypeScript type: <c>1028</c></remarks>
         abstract FRONT: float
+        /// <remarks>TypeScript type: <c>1029</c></remarks>
         abstract BACK: float
+        /// <remarks>TypeScript type: <c>1032</c></remarks>
         abstract FRONT_AND_BACK: float
+        /// <remarks>TypeScript type: <c>2884</c></remarks>
         abstract CULL_FACE: float
+        /// <remarks>TypeScript type: <c>3042</c></remarks>
         abstract BLEND: float
+        /// <remarks>TypeScript type: <c>3024</c></remarks>
         abstract DITHER: float
+        /// <remarks>TypeScript type: <c>2960</c></remarks>
         abstract STENCIL_TEST: float
+        /// <remarks>TypeScript type: <c>2929</c></remarks>
         abstract DEPTH_TEST: float
+        /// <remarks>TypeScript type: <c>3089</c></remarks>
         abstract SCISSOR_TEST: float
+        /// <remarks>TypeScript type: <c>32823</c></remarks>
         abstract POLYGON_OFFSET_FILL: float
+        /// <remarks>TypeScript type: <c>32926</c></remarks>
         abstract SAMPLE_ALPHA_TO_COVERAGE: float
+        /// <remarks>TypeScript type: <c>32928</c></remarks>
         abstract SAMPLE_COVERAGE: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NO_ERROR: float
+        /// <remarks>TypeScript type: <c>1280</c></remarks>
         abstract INVALID_ENUM: float
+        /// <remarks>TypeScript type: <c>1281</c></remarks>
         abstract INVALID_VALUE: float
+        /// <remarks>TypeScript type: <c>1282</c></remarks>
         abstract INVALID_OPERATION: float
+        /// <remarks>TypeScript type: <c>1285</c></remarks>
         abstract OUT_OF_MEMORY: float
+        /// <remarks>TypeScript type: <c>2304</c></remarks>
         abstract CW: float
+        /// <remarks>TypeScript type: <c>2305</c></remarks>
         abstract CCW: float
+        /// <remarks>TypeScript type: <c>2849</c></remarks>
         abstract LINE_WIDTH: float
+        /// <remarks>TypeScript type: <c>33901</c></remarks>
         abstract ALIASED_POINT_SIZE_RANGE: float
+        /// <remarks>TypeScript type: <c>33902</c></remarks>
         abstract ALIASED_LINE_WIDTH_RANGE: float
+        /// <remarks>TypeScript type: <c>2885</c></remarks>
         abstract CULL_FACE_MODE: float
+        /// <remarks>TypeScript type: <c>2886</c></remarks>
         abstract FRONT_FACE: float
+        /// <remarks>TypeScript type: <c>2928</c></remarks>
         abstract DEPTH_RANGE: float
+        /// <remarks>TypeScript type: <c>2930</c></remarks>
         abstract DEPTH_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>2931</c></remarks>
         abstract DEPTH_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>2932</c></remarks>
         abstract DEPTH_FUNC: float
+        /// <remarks>TypeScript type: <c>2961</c></remarks>
         abstract STENCIL_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>2962</c></remarks>
         abstract STENCIL_FUNC: float
+        /// <remarks>TypeScript type: <c>2964</c></remarks>
         abstract STENCIL_FAIL: float
+        /// <remarks>TypeScript type: <c>2965</c></remarks>
         abstract STENCIL_PASS_DEPTH_FAIL: float
+        /// <remarks>TypeScript type: <c>2966</c></remarks>
         abstract STENCIL_PASS_DEPTH_PASS: float
+        /// <remarks>TypeScript type: <c>2967</c></remarks>
         abstract STENCIL_REF: float
+        /// <remarks>TypeScript type: <c>2963</c></remarks>
         abstract STENCIL_VALUE_MASK: float
+        /// <remarks>TypeScript type: <c>2968</c></remarks>
         abstract STENCIL_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>34816</c></remarks>
         abstract STENCIL_BACK_FUNC: float
+        /// <remarks>TypeScript type: <c>34817</c></remarks>
         abstract STENCIL_BACK_FAIL: float
+        /// <remarks>TypeScript type: <c>34818</c></remarks>
         abstract STENCIL_BACK_PASS_DEPTH_FAIL: float
+        /// <remarks>TypeScript type: <c>34819</c></remarks>
         abstract STENCIL_BACK_PASS_DEPTH_PASS: float
+        /// <remarks>TypeScript type: <c>36003</c></remarks>
         abstract STENCIL_BACK_REF: float
+        /// <remarks>TypeScript type: <c>36004</c></remarks>
         abstract STENCIL_BACK_VALUE_MASK: float
+        /// <remarks>TypeScript type: <c>36005</c></remarks>
         abstract STENCIL_BACK_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>2978</c></remarks>
         abstract VIEWPORT: float
+        /// <remarks>TypeScript type: <c>3088</c></remarks>
         abstract SCISSOR_BOX: float
+        /// <remarks>TypeScript type: <c>3106</c></remarks>
         abstract COLOR_CLEAR_VALUE: float
+        /// <remarks>TypeScript type: <c>3107</c></remarks>
         abstract COLOR_WRITEMASK: float
+        /// <remarks>TypeScript type: <c>3317</c></remarks>
         abstract UNPACK_ALIGNMENT: float
+        /// <remarks>TypeScript type: <c>3333</c></remarks>
         abstract PACK_ALIGNMENT: float
+        /// <remarks>TypeScript type: <c>3379</c></remarks>
         abstract MAX_TEXTURE_SIZE: float
+        /// <remarks>TypeScript type: <c>3386</c></remarks>
         abstract MAX_VIEWPORT_DIMS: float
+        /// <remarks>TypeScript type: <c>3408</c></remarks>
         abstract SUBPIXEL_BITS: float
+        /// <remarks>TypeScript type: <c>3410</c></remarks>
         abstract RED_BITS: float
+        /// <remarks>TypeScript type: <c>3411</c></remarks>
         abstract GREEN_BITS: float
+        /// <remarks>TypeScript type: <c>3412</c></remarks>
         abstract BLUE_BITS: float
+        /// <remarks>TypeScript type: <c>3413</c></remarks>
         abstract ALPHA_BITS: float
+        /// <remarks>TypeScript type: <c>3414</c></remarks>
         abstract DEPTH_BITS: float
+        /// <remarks>TypeScript type: <c>3415</c></remarks>
         abstract STENCIL_BITS: float
+        /// <remarks>TypeScript type: <c>10752</c></remarks>
         abstract POLYGON_OFFSET_UNITS: float
+        /// <remarks>TypeScript type: <c>32824</c></remarks>
         abstract POLYGON_OFFSET_FACTOR: float
+        /// <remarks>TypeScript type: <c>32873</c></remarks>
         abstract TEXTURE_BINDING_2D: float
+        /// <remarks>TypeScript type: <c>32936</c></remarks>
         abstract SAMPLE_BUFFERS: float
+        /// <remarks>TypeScript type: <c>32937</c></remarks>
         abstract SAMPLES: float
+        /// <remarks>TypeScript type: <c>32938</c></remarks>
         abstract SAMPLE_COVERAGE_VALUE: float
+        /// <remarks>TypeScript type: <c>32939</c></remarks>
         abstract SAMPLE_COVERAGE_INVERT: float
+        /// <remarks>TypeScript type: <c>34467</c></remarks>
         abstract COMPRESSED_TEXTURE_FORMATS: float
+        /// <remarks>TypeScript type: <c>4352</c></remarks>
         abstract DONT_CARE: float
+        /// <remarks>TypeScript type: <c>4353</c></remarks>
         abstract FASTEST: float
+        /// <remarks>TypeScript type: <c>4354</c></remarks>
         abstract NICEST: float
+        /// <remarks>TypeScript type: <c>33170</c></remarks>
         abstract GENERATE_MIPMAP_HINT: float
+        /// <remarks>TypeScript type: <c>5120</c></remarks>
         abstract BYTE: float
+        /// <remarks>TypeScript type: <c>5121</c></remarks>
         abstract UNSIGNED_BYTE: float
+        /// <remarks>TypeScript type: <c>5122</c></remarks>
         abstract SHORT: float
+        /// <remarks>TypeScript type: <c>5123</c></remarks>
         abstract UNSIGNED_SHORT: float
+        /// <remarks>TypeScript type: <c>5124</c></remarks>
         abstract INT: float
+        /// <remarks>TypeScript type: <c>5125</c></remarks>
         abstract UNSIGNED_INT: float
+        /// <remarks>TypeScript type: <c>5126</c></remarks>
         abstract FLOAT: float
+        /// <remarks>TypeScript type: <c>6402</c></remarks>
         abstract DEPTH_COMPONENT: float
+        /// <remarks>TypeScript type: <c>6406</c></remarks>
         abstract ALPHA: float
+        /// <remarks>TypeScript type: <c>6407</c></remarks>
         abstract RGB: float
+        /// <remarks>TypeScript type: <c>6408</c></remarks>
         abstract RGBA: float
+        /// <remarks>TypeScript type: <c>6409</c></remarks>
         abstract LUMINANCE: float
+        /// <remarks>TypeScript type: <c>6410</c></remarks>
         abstract LUMINANCE_ALPHA: float
+        /// <remarks>TypeScript type: <c>32819</c></remarks>
         abstract UNSIGNED_SHORT_4_4_4_4: float
+        /// <remarks>TypeScript type: <c>32820</c></remarks>
         abstract UNSIGNED_SHORT_5_5_5_1: float
+        /// <remarks>TypeScript type: <c>33635</c></remarks>
         abstract UNSIGNED_SHORT_5_6_5: float
+        /// <remarks>TypeScript type: <c>35632</c></remarks>
         abstract FRAGMENT_SHADER: float
+        /// <remarks>TypeScript type: <c>35633</c></remarks>
         abstract VERTEX_SHADER: float
+        /// <remarks>TypeScript type: <c>34921</c></remarks>
         abstract MAX_VERTEX_ATTRIBS: float
+        /// <remarks>TypeScript type: <c>36347</c></remarks>
         abstract MAX_VERTEX_UNIFORM_VECTORS: float
+        /// <remarks>TypeScript type: <c>36348</c></remarks>
         abstract MAX_VARYING_VECTORS: float
+        /// <remarks>TypeScript type: <c>35661</c></remarks>
         abstract MAX_COMBINED_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>35660</c></remarks>
         abstract MAX_VERTEX_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>34930</c></remarks>
         abstract MAX_TEXTURE_IMAGE_UNITS: float
+        /// <remarks>TypeScript type: <c>36349</c></remarks>
         abstract MAX_FRAGMENT_UNIFORM_VECTORS: float
+        /// <remarks>TypeScript type: <c>35663</c></remarks>
         abstract SHADER_TYPE: float
+        /// <remarks>TypeScript type: <c>35712</c></remarks>
         abstract DELETE_STATUS: float
+        /// <remarks>TypeScript type: <c>35714</c></remarks>
         abstract LINK_STATUS: float
+        /// <remarks>TypeScript type: <c>35715</c></remarks>
         abstract VALIDATE_STATUS: float
+        /// <remarks>TypeScript type: <c>35717</c></remarks>
         abstract ATTACHED_SHADERS: float
+        /// <remarks>TypeScript type: <c>35718</c></remarks>
         abstract ACTIVE_UNIFORMS: float
+        /// <remarks>TypeScript type: <c>35721</c></remarks>
         abstract ACTIVE_ATTRIBUTES: float
+        /// <remarks>TypeScript type: <c>35724</c></remarks>
         abstract SHADING_LANGUAGE_VERSION: float
+        /// <remarks>TypeScript type: <c>35725</c></remarks>
         abstract CURRENT_PROGRAM: float
+        /// <remarks>TypeScript type: <c>512</c></remarks>
         abstract NEVER: float
+        /// <remarks>TypeScript type: <c>513</c></remarks>
         abstract LESS: float
+        /// <remarks>TypeScript type: <c>514</c></remarks>
         abstract EQUAL: float
+        /// <remarks>TypeScript type: <c>515</c></remarks>
         abstract LEQUAL: float
+        /// <remarks>TypeScript type: <c>516</c></remarks>
         abstract GREATER: float
+        /// <remarks>TypeScript type: <c>517</c></remarks>
         abstract NOTEQUAL: float
+        /// <remarks>TypeScript type: <c>518</c></remarks>
         abstract GEQUAL: float
+        /// <remarks>TypeScript type: <c>519</c></remarks>
         abstract ALWAYS: float
+        /// <remarks>TypeScript type: <c>7680</c></remarks>
         abstract KEEP: float
+        /// <remarks>TypeScript type: <c>7681</c></remarks>
         abstract REPLACE: float
+        /// <remarks>TypeScript type: <c>7682</c></remarks>
         abstract INCR: float
+        /// <remarks>TypeScript type: <c>7683</c></remarks>
         abstract DECR: float
+        /// <remarks>TypeScript type: <c>5386</c></remarks>
         abstract INVERT: float
+        /// <remarks>TypeScript type: <c>34055</c></remarks>
         abstract INCR_WRAP: float
+        /// <remarks>TypeScript type: <c>34056</c></remarks>
         abstract DECR_WRAP: float
+        /// <remarks>TypeScript type: <c>7936</c></remarks>
         abstract VENDOR: float
+        /// <remarks>TypeScript type: <c>7937</c></remarks>
         abstract RENDERER: float
+        /// <remarks>TypeScript type: <c>7938</c></remarks>
         abstract VERSION: float
+        /// <remarks>TypeScript type: <c>9728</c></remarks>
         abstract NEAREST: float
+        /// <remarks>TypeScript type: <c>9729</c></remarks>
         abstract LINEAR: float
+        /// <remarks>TypeScript type: <c>9984</c></remarks>
         abstract NEAREST_MIPMAP_NEAREST: float
+        /// <remarks>TypeScript type: <c>9985</c></remarks>
         abstract LINEAR_MIPMAP_NEAREST: float
+        /// <remarks>TypeScript type: <c>9986</c></remarks>
         abstract NEAREST_MIPMAP_LINEAR: float
+        /// <remarks>TypeScript type: <c>9987</c></remarks>
         abstract LINEAR_MIPMAP_LINEAR: float
+        /// <remarks>TypeScript type: <c>10240</c></remarks>
         abstract TEXTURE_MAG_FILTER: float
+        /// <remarks>TypeScript type: <c>10241</c></remarks>
         abstract TEXTURE_MIN_FILTER: float
+        /// <remarks>TypeScript type: <c>10242</c></remarks>
         abstract TEXTURE_WRAP_S: float
+        /// <remarks>TypeScript type: <c>10243</c></remarks>
         abstract TEXTURE_WRAP_T: float
+        /// <remarks>TypeScript type: <c>3553</c></remarks>
         abstract TEXTURE_2D: float
+        /// <remarks>TypeScript type: <c>5890</c></remarks>
         abstract TEXTURE: float
+        /// <remarks>TypeScript type: <c>34067</c></remarks>
         abstract TEXTURE_CUBE_MAP: float
+        /// <remarks>TypeScript type: <c>34068</c></remarks>
         abstract TEXTURE_BINDING_CUBE_MAP: float
+        /// <remarks>TypeScript type: <c>34069</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_X: float
+        /// <remarks>TypeScript type: <c>34070</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_X: float
+        /// <remarks>TypeScript type: <c>34071</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_Y: float
+        /// <remarks>TypeScript type: <c>34072</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_Y: float
+        /// <remarks>TypeScript type: <c>34073</c></remarks>
         abstract TEXTURE_CUBE_MAP_POSITIVE_Z: float
+        /// <remarks>TypeScript type: <c>34074</c></remarks>
         abstract TEXTURE_CUBE_MAP_NEGATIVE_Z: float
+        /// <remarks>TypeScript type: <c>34076</c></remarks>
         abstract MAX_CUBE_MAP_TEXTURE_SIZE: float
+        /// <remarks>TypeScript type: <c>33984</c></remarks>
         abstract TEXTURE0: float
+        /// <remarks>TypeScript type: <c>33985</c></remarks>
         abstract TEXTURE1: float
+        /// <remarks>TypeScript type: <c>33986</c></remarks>
         abstract TEXTURE2: float
+        /// <remarks>TypeScript type: <c>33987</c></remarks>
         abstract TEXTURE3: float
+        /// <remarks>TypeScript type: <c>33988</c></remarks>
         abstract TEXTURE4: float
+        /// <remarks>TypeScript type: <c>33989</c></remarks>
         abstract TEXTURE5: float
+        /// <remarks>TypeScript type: <c>33990</c></remarks>
         abstract TEXTURE6: float
+        /// <remarks>TypeScript type: <c>33991</c></remarks>
         abstract TEXTURE7: float
+        /// <remarks>TypeScript type: <c>33992</c></remarks>
         abstract TEXTURE8: float
+        /// <remarks>TypeScript type: <c>33993</c></remarks>
         abstract TEXTURE9: float
+        /// <remarks>TypeScript type: <c>33994</c></remarks>
         abstract TEXTURE10: float
+        /// <remarks>TypeScript type: <c>33995</c></remarks>
         abstract TEXTURE11: float
+        /// <remarks>TypeScript type: <c>33996</c></remarks>
         abstract TEXTURE12: float
+        /// <remarks>TypeScript type: <c>33997</c></remarks>
         abstract TEXTURE13: float
+        /// <remarks>TypeScript type: <c>33998</c></remarks>
         abstract TEXTURE14: float
+        /// <remarks>TypeScript type: <c>33999</c></remarks>
         abstract TEXTURE15: float
+        /// <remarks>TypeScript type: <c>34000</c></remarks>
         abstract TEXTURE16: float
+        /// <remarks>TypeScript type: <c>34001</c></remarks>
         abstract TEXTURE17: float
+        /// <remarks>TypeScript type: <c>34002</c></remarks>
         abstract TEXTURE18: float
+        /// <remarks>TypeScript type: <c>34003</c></remarks>
         abstract TEXTURE19: float
+        /// <remarks>TypeScript type: <c>34004</c></remarks>
         abstract TEXTURE20: float
+        /// <remarks>TypeScript type: <c>34005</c></remarks>
         abstract TEXTURE21: float
+        /// <remarks>TypeScript type: <c>34006</c></remarks>
         abstract TEXTURE22: float
+        /// <remarks>TypeScript type: <c>34007</c></remarks>
         abstract TEXTURE23: float
+        /// <remarks>TypeScript type: <c>34008</c></remarks>
         abstract TEXTURE24: float
+        /// <remarks>TypeScript type: <c>34009</c></remarks>
         abstract TEXTURE25: float
+        /// <remarks>TypeScript type: <c>34010</c></remarks>
         abstract TEXTURE26: float
+        /// <remarks>TypeScript type: <c>34011</c></remarks>
         abstract TEXTURE27: float
+        /// <remarks>TypeScript type: <c>34012</c></remarks>
         abstract TEXTURE28: float
+        /// <remarks>TypeScript type: <c>34013</c></remarks>
         abstract TEXTURE29: float
+        /// <remarks>TypeScript type: <c>34014</c></remarks>
         abstract TEXTURE30: float
+        /// <remarks>TypeScript type: <c>34015</c></remarks>
         abstract TEXTURE31: float
+        /// <remarks>TypeScript type: <c>34016</c></remarks>
         abstract ACTIVE_TEXTURE: float
+        /// <remarks>TypeScript type: <c>10497</c></remarks>
         abstract REPEAT: float
+        /// <remarks>TypeScript type: <c>33071</c></remarks>
         abstract CLAMP_TO_EDGE: float
+        /// <remarks>TypeScript type: <c>33648</c></remarks>
         abstract MIRRORED_REPEAT: float
+        /// <remarks>TypeScript type: <c>35664</c></remarks>
         abstract FLOAT_VEC2: float
+        /// <remarks>TypeScript type: <c>35665</c></remarks>
         abstract FLOAT_VEC3: float
+        /// <remarks>TypeScript type: <c>35666</c></remarks>
         abstract FLOAT_VEC4: float
+        /// <remarks>TypeScript type: <c>35667</c></remarks>
         abstract INT_VEC2: float
+        /// <remarks>TypeScript type: <c>35668</c></remarks>
         abstract INT_VEC3: float
+        /// <remarks>TypeScript type: <c>35669</c></remarks>
         abstract INT_VEC4: float
+        /// <remarks>TypeScript type: <c>35670</c></remarks>
         abstract BOOL: float
+        /// <remarks>TypeScript type: <c>35671</c></remarks>
         abstract BOOL_VEC2: float
+        /// <remarks>TypeScript type: <c>35672</c></remarks>
         abstract BOOL_VEC3: float
+        /// <remarks>TypeScript type: <c>35673</c></remarks>
         abstract BOOL_VEC4: float
+        /// <remarks>TypeScript type: <c>35674</c></remarks>
         abstract FLOAT_MAT2: float
+        /// <remarks>TypeScript type: <c>35675</c></remarks>
         abstract FLOAT_MAT3: float
+        /// <remarks>TypeScript type: <c>35676</c></remarks>
         abstract FLOAT_MAT4: float
+        /// <remarks>TypeScript type: <c>35678</c></remarks>
         abstract SAMPLER_2D: float
+        /// <remarks>TypeScript type: <c>35680</c></remarks>
         abstract SAMPLER_CUBE: float
+        /// <remarks>TypeScript type: <c>34338</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_ENABLED: float
+        /// <remarks>TypeScript type: <c>34339</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_SIZE: float
+        /// <remarks>TypeScript type: <c>34340</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_STRIDE: float
+        /// <remarks>TypeScript type: <c>34341</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_TYPE: float
+        /// <remarks>TypeScript type: <c>34922</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_NORMALIZED: float
+        /// <remarks>TypeScript type: <c>34373</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_POINTER: float
+        /// <remarks>TypeScript type: <c>34975</c></remarks>
         abstract VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>35738</c></remarks>
         abstract IMPLEMENTATION_COLOR_READ_TYPE: float
+        /// <remarks>TypeScript type: <c>35739</c></remarks>
         abstract IMPLEMENTATION_COLOR_READ_FORMAT: float
+        /// <remarks>TypeScript type: <c>35713</c></remarks>
         abstract COMPILE_STATUS: float
+        /// <remarks>TypeScript type: <c>36336</c></remarks>
         abstract LOW_FLOAT: float
+        /// <remarks>TypeScript type: <c>36337</c></remarks>
         abstract MEDIUM_FLOAT: float
+        /// <remarks>TypeScript type: <c>36338</c></remarks>
         abstract HIGH_FLOAT: float
+        /// <remarks>TypeScript type: <c>36339</c></remarks>
         abstract LOW_INT: float
+        /// <remarks>TypeScript type: <c>36340</c></remarks>
         abstract MEDIUM_INT: float
+        /// <remarks>TypeScript type: <c>36341</c></remarks>
         abstract HIGH_INT: float
+        /// <remarks>TypeScript type: <c>36160</c></remarks>
         abstract FRAMEBUFFER: float
+        /// <remarks>TypeScript type: <c>36161</c></remarks>
         abstract RENDERBUFFER: float
+        /// <remarks>TypeScript type: <c>32854</c></remarks>
         abstract RGBA4: float
+        /// <remarks>TypeScript type: <c>32855</c></remarks>
         abstract RGB5_A1: float
+        /// <remarks>TypeScript type: <c>32856</c></remarks>
         abstract RGBA8: float
+        /// <remarks>TypeScript type: <c>36194</c></remarks>
         abstract RGB565: float
+        /// <remarks>TypeScript type: <c>33189</c></remarks>
         abstract DEPTH_COMPONENT16: float
+        /// <remarks>TypeScript type: <c>36168</c></remarks>
         abstract STENCIL_INDEX8: float
+        /// <remarks>TypeScript type: <c>34041</c></remarks>
         abstract DEPTH_STENCIL: float
+        /// <remarks>TypeScript type: <c>36162</c></remarks>
         abstract RENDERBUFFER_WIDTH: float
+        /// <remarks>TypeScript type: <c>36163</c></remarks>
         abstract RENDERBUFFER_HEIGHT: float
+        /// <remarks>TypeScript type: <c>36164</c></remarks>
         abstract RENDERBUFFER_INTERNAL_FORMAT: float
+        /// <remarks>TypeScript type: <c>36176</c></remarks>
         abstract RENDERBUFFER_RED_SIZE: float
+        /// <remarks>TypeScript type: <c>36177</c></remarks>
         abstract RENDERBUFFER_GREEN_SIZE: float
+        /// <remarks>TypeScript type: <c>36178</c></remarks>
         abstract RENDERBUFFER_BLUE_SIZE: float
+        /// <remarks>TypeScript type: <c>36179</c></remarks>
         abstract RENDERBUFFER_ALPHA_SIZE: float
+        /// <remarks>TypeScript type: <c>36180</c></remarks>
         abstract RENDERBUFFER_DEPTH_SIZE: float
+        /// <remarks>TypeScript type: <c>36181</c></remarks>
         abstract RENDERBUFFER_STENCIL_SIZE: float
+        /// <remarks>TypeScript type: <c>36048</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE: float
+        /// <remarks>TypeScript type: <c>36049</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_OBJECT_NAME: float
+        /// <remarks>TypeScript type: <c>36050</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL: float
+        /// <remarks>TypeScript type: <c>36051</c></remarks>
         abstract FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE: float
+        /// <remarks>TypeScript type: <c>36064</c></remarks>
         abstract COLOR_ATTACHMENT0: float
+        /// <remarks>TypeScript type: <c>36096</c></remarks>
         abstract DEPTH_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36128</c></remarks>
         abstract STENCIL_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>33306</c></remarks>
         abstract DEPTH_STENCIL_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract NONE: float
+        /// <remarks>TypeScript type: <c>36053</c></remarks>
         abstract FRAMEBUFFER_COMPLETE: float
+        /// <remarks>TypeScript type: <c>36054</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36055</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>36057</c></remarks>
         abstract FRAMEBUFFER_INCOMPLETE_DIMENSIONS: float
+        /// <remarks>TypeScript type: <c>36061</c></remarks>
         abstract FRAMEBUFFER_UNSUPPORTED: float
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
         abstract FRAMEBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>36007</c></remarks>
         abstract RENDERBUFFER_BINDING: float
+        /// <remarks>TypeScript type: <c>34024</c></remarks>
         abstract MAX_RENDERBUFFER_SIZE: float
+        /// <remarks>TypeScript type: <c>1286</c></remarks>
         abstract INVALID_FRAMEBUFFER_OPERATION: float
+        /// <remarks>TypeScript type: <c>37440</c></remarks>
         abstract UNPACK_FLIP_Y_WEBGL: float
+        /// <remarks>TypeScript type: <c>37441</c></remarks>
         abstract UNPACK_PREMULTIPLY_ALPHA_WEBGL: float
+        /// <remarks>TypeScript type: <c>37442</c></remarks>
         abstract CONTEXT_LOST_WEBGL: float
+        /// <remarks>TypeScript type: <c>37443</c></remarks>
         abstract UNPACK_COLORSPACE_CONVERSION_WEBGL: float
+        /// <remarks>TypeScript type: <c>37444</c></remarks>
         abstract BROWSER_DEFAULT_WEBGL: float
+
+    module WebGLRenderingContextBase =
+        /// <remarks>TypeScript type: <c>256</c></remarks>
+        [<Literal>]
+        let DEPTH_BUFFER_BIT = 256.0
+
+        /// <remarks>TypeScript type: <c>1024</c></remarks>
+        [<Literal>]
+        let STENCIL_BUFFER_BIT = 1024.0
+
+        /// <remarks>TypeScript type: <c>16384</c></remarks>
+        [<Literal>]
+        let COLOR_BUFFER_BIT = 16384.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let POINTS = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let LINES = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let LINE_LOOP = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let LINE_STRIP = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let TRIANGLES = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let TRIANGLE_STRIP = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let TRIANGLE_FAN = 6.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let ZERO = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let ONE = 1.0
+
+        /// <remarks>TypeScript type: <c>768</c></remarks>
+        [<Literal>]
+        let SRC_COLOR = 768.0
+
+        /// <remarks>TypeScript type: <c>769</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_SRC_COLOR = 769.0
+
+        /// <remarks>TypeScript type: <c>770</c></remarks>
+        [<Literal>]
+        let SRC_ALPHA = 770.0
+
+        /// <remarks>TypeScript type: <c>771</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_SRC_ALPHA = 771.0
+
+        /// <remarks>TypeScript type: <c>772</c></remarks>
+        [<Literal>]
+        let DST_ALPHA = 772.0
+
+        /// <remarks>TypeScript type: <c>773</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_DST_ALPHA = 773.0
+
+        /// <remarks>TypeScript type: <c>774</c></remarks>
+        [<Literal>]
+        let DST_COLOR = 774.0
+
+        /// <remarks>TypeScript type: <c>775</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_DST_COLOR = 775.0
+
+        /// <remarks>TypeScript type: <c>776</c></remarks>
+        [<Literal>]
+        let SRC_ALPHA_SATURATE = 776.0
+
+        /// <remarks>TypeScript type: <c>32774</c></remarks>
+        [<Literal>]
+        let FUNC_ADD = 32774.0
+
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION = 32777.0
+
+        /// <remarks>TypeScript type: <c>32777</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION_RGB = 32777.0
+
+        /// <remarks>TypeScript type: <c>34877</c></remarks>
+        [<Literal>]
+        let BLEND_EQUATION_ALPHA = 34877.0
+
+        /// <remarks>TypeScript type: <c>32778</c></remarks>
+        [<Literal>]
+        let FUNC_SUBTRACT = 32778.0
+
+        /// <remarks>TypeScript type: <c>32779</c></remarks>
+        [<Literal>]
+        let FUNC_REVERSE_SUBTRACT = 32779.0
+
+        /// <remarks>TypeScript type: <c>32968</c></remarks>
+        [<Literal>]
+        let BLEND_DST_RGB = 32968.0
+
+        /// <remarks>TypeScript type: <c>32969</c></remarks>
+        [<Literal>]
+        let BLEND_SRC_RGB = 32969.0
+
+        /// <remarks>TypeScript type: <c>32970</c></remarks>
+        [<Literal>]
+        let BLEND_DST_ALPHA = 32970.0
+
+        /// <remarks>TypeScript type: <c>32971</c></remarks>
+        [<Literal>]
+        let BLEND_SRC_ALPHA = 32971.0
+
+        /// <remarks>TypeScript type: <c>32769</c></remarks>
+        [<Literal>]
+        let CONSTANT_COLOR = 32769.0
+
+        /// <remarks>TypeScript type: <c>32770</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_CONSTANT_COLOR = 32770.0
+
+        /// <remarks>TypeScript type: <c>32771</c></remarks>
+        [<Literal>]
+        let CONSTANT_ALPHA = 32771.0
+
+        /// <remarks>TypeScript type: <c>32772</c></remarks>
+        [<Literal>]
+        let ONE_MINUS_CONSTANT_ALPHA = 32772.0
+
+        /// <remarks>TypeScript type: <c>32773</c></remarks>
+        [<Literal>]
+        let BLEND_COLOR = 32773.0
+
+        /// <remarks>TypeScript type: <c>34962</c></remarks>
+        [<Literal>]
+        let ARRAY_BUFFER = 34962.0
+
+        /// <remarks>TypeScript type: <c>34963</c></remarks>
+        [<Literal>]
+        let ELEMENT_ARRAY_BUFFER = 34963.0
+
+        /// <remarks>TypeScript type: <c>34964</c></remarks>
+        [<Literal>]
+        let ARRAY_BUFFER_BINDING = 34964.0
+
+        /// <remarks>TypeScript type: <c>34965</c></remarks>
+        [<Literal>]
+        let ELEMENT_ARRAY_BUFFER_BINDING = 34965.0
+
+        /// <remarks>TypeScript type: <c>35040</c></remarks>
+        [<Literal>]
+        let STREAM_DRAW = 35040.0
+
+        /// <remarks>TypeScript type: <c>35044</c></remarks>
+        [<Literal>]
+        let STATIC_DRAW = 35044.0
+
+        /// <remarks>TypeScript type: <c>35048</c></remarks>
+        [<Literal>]
+        let DYNAMIC_DRAW = 35048.0
+
+        /// <remarks>TypeScript type: <c>34660</c></remarks>
+        [<Literal>]
+        let BUFFER_SIZE = 34660.0
+
+        /// <remarks>TypeScript type: <c>34661</c></remarks>
+        [<Literal>]
+        let BUFFER_USAGE = 34661.0
+
+        /// <remarks>TypeScript type: <c>34342</c></remarks>
+        [<Literal>]
+        let CURRENT_VERTEX_ATTRIB = 34342.0
+
+        /// <remarks>TypeScript type: <c>1028</c></remarks>
+        [<Literal>]
+        let FRONT = 1028.0
+
+        /// <remarks>TypeScript type: <c>1029</c></remarks>
+        [<Literal>]
+        let BACK = 1029.0
+
+        /// <remarks>TypeScript type: <c>1032</c></remarks>
+        [<Literal>]
+        let FRONT_AND_BACK = 1032.0
+
+        /// <remarks>TypeScript type: <c>2884</c></remarks>
+        [<Literal>]
+        let CULL_FACE = 2884.0
+
+        /// <remarks>TypeScript type: <c>3042</c></remarks>
+        [<Literal>]
+        let BLEND = 3042.0
+
+        /// <remarks>TypeScript type: <c>3024</c></remarks>
+        [<Literal>]
+        let DITHER = 3024.0
+
+        /// <remarks>TypeScript type: <c>2960</c></remarks>
+        [<Literal>]
+        let STENCIL_TEST = 2960.0
+
+        /// <remarks>TypeScript type: <c>2929</c></remarks>
+        [<Literal>]
+        let DEPTH_TEST = 2929.0
+
+        /// <remarks>TypeScript type: <c>3089</c></remarks>
+        [<Literal>]
+        let SCISSOR_TEST = 3089.0
+
+        /// <remarks>TypeScript type: <c>32823</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_FILL = 32823.0
+
+        /// <remarks>TypeScript type: <c>32926</c></remarks>
+        [<Literal>]
+        let SAMPLE_ALPHA_TO_COVERAGE = 32926.0
+
+        /// <remarks>TypeScript type: <c>32928</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE = 32928.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NO_ERROR = 0.0
+
+        /// <remarks>TypeScript type: <c>1280</c></remarks>
+        [<Literal>]
+        let INVALID_ENUM = 1280.0
+
+        /// <remarks>TypeScript type: <c>1281</c></remarks>
+        [<Literal>]
+        let INVALID_VALUE = 1281.0
+
+        /// <remarks>TypeScript type: <c>1282</c></remarks>
+        [<Literal>]
+        let INVALID_OPERATION = 1282.0
+
+        /// <remarks>TypeScript type: <c>1285</c></remarks>
+        [<Literal>]
+        let OUT_OF_MEMORY = 1285.0
+
+        /// <remarks>TypeScript type: <c>2304</c></remarks>
+        [<Literal>]
+        let CW = 2304.0
+
+        /// <remarks>TypeScript type: <c>2305</c></remarks>
+        [<Literal>]
+        let CCW = 2305.0
+
+        /// <remarks>TypeScript type: <c>2849</c></remarks>
+        [<Literal>]
+        let LINE_WIDTH = 2849.0
+
+        /// <remarks>TypeScript type: <c>33901</c></remarks>
+        [<Literal>]
+        let ALIASED_POINT_SIZE_RANGE = 33901.0
+
+        /// <remarks>TypeScript type: <c>33902</c></remarks>
+        [<Literal>]
+        let ALIASED_LINE_WIDTH_RANGE = 33902.0
+
+        /// <remarks>TypeScript type: <c>2885</c></remarks>
+        [<Literal>]
+        let CULL_FACE_MODE = 2885.0
+
+        /// <remarks>TypeScript type: <c>2886</c></remarks>
+        [<Literal>]
+        let FRONT_FACE = 2886.0
+
+        /// <remarks>TypeScript type: <c>2928</c></remarks>
+        [<Literal>]
+        let DEPTH_RANGE = 2928.0
+
+        /// <remarks>TypeScript type: <c>2930</c></remarks>
+        [<Literal>]
+        let DEPTH_WRITEMASK = 2930.0
+
+        /// <remarks>TypeScript type: <c>2931</c></remarks>
+        [<Literal>]
+        let DEPTH_CLEAR_VALUE = 2931.0
+
+        /// <remarks>TypeScript type: <c>2932</c></remarks>
+        [<Literal>]
+        let DEPTH_FUNC = 2932.0
+
+        /// <remarks>TypeScript type: <c>2961</c></remarks>
+        [<Literal>]
+        let STENCIL_CLEAR_VALUE = 2961.0
+
+        /// <remarks>TypeScript type: <c>2962</c></remarks>
+        [<Literal>]
+        let STENCIL_FUNC = 2962.0
+
+        /// <remarks>TypeScript type: <c>2964</c></remarks>
+        [<Literal>]
+        let STENCIL_FAIL = 2964.0
+
+        /// <remarks>TypeScript type: <c>2965</c></remarks>
+        [<Literal>]
+        let STENCIL_PASS_DEPTH_FAIL = 2965.0
+
+        /// <remarks>TypeScript type: <c>2966</c></remarks>
+        [<Literal>]
+        let STENCIL_PASS_DEPTH_PASS = 2966.0
+
+        /// <remarks>TypeScript type: <c>2967</c></remarks>
+        [<Literal>]
+        let STENCIL_REF = 2967.0
+
+        /// <remarks>TypeScript type: <c>2963</c></remarks>
+        [<Literal>]
+        let STENCIL_VALUE_MASK = 2963.0
+
+        /// <remarks>TypeScript type: <c>2968</c></remarks>
+        [<Literal>]
+        let STENCIL_WRITEMASK = 2968.0
+
+        /// <remarks>TypeScript type: <c>34816</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_FUNC = 34816.0
+
+        /// <remarks>TypeScript type: <c>34817</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_FAIL = 34817.0
+
+        /// <remarks>TypeScript type: <c>34818</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_PASS_DEPTH_FAIL = 34818.0
+
+        /// <remarks>TypeScript type: <c>34819</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_PASS_DEPTH_PASS = 34819.0
+
+        /// <remarks>TypeScript type: <c>36003</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_REF = 36003.0
+
+        /// <remarks>TypeScript type: <c>36004</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_VALUE_MASK = 36004.0
+
+        /// <remarks>TypeScript type: <c>36005</c></remarks>
+        [<Literal>]
+        let STENCIL_BACK_WRITEMASK = 36005.0
+
+        /// <remarks>TypeScript type: <c>2978</c></remarks>
+        [<Literal>]
+        let VIEWPORT = 2978.0
+
+        /// <remarks>TypeScript type: <c>3088</c></remarks>
+        [<Literal>]
+        let SCISSOR_BOX = 3088.0
+
+        /// <remarks>TypeScript type: <c>3106</c></remarks>
+        [<Literal>]
+        let COLOR_CLEAR_VALUE = 3106.0
+
+        /// <remarks>TypeScript type: <c>3107</c></remarks>
+        [<Literal>]
+        let COLOR_WRITEMASK = 3107.0
+
+        /// <remarks>TypeScript type: <c>3317</c></remarks>
+        [<Literal>]
+        let UNPACK_ALIGNMENT = 3317.0
+
+        /// <remarks>TypeScript type: <c>3333</c></remarks>
+        [<Literal>]
+        let PACK_ALIGNMENT = 3333.0
+
+        /// <remarks>TypeScript type: <c>3379</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_SIZE = 3379.0
+
+        /// <remarks>TypeScript type: <c>3386</c></remarks>
+        [<Literal>]
+        let MAX_VIEWPORT_DIMS = 3386.0
+
+        /// <remarks>TypeScript type: <c>3408</c></remarks>
+        [<Literal>]
+        let SUBPIXEL_BITS = 3408.0
+
+        /// <remarks>TypeScript type: <c>3410</c></remarks>
+        [<Literal>]
+        let RED_BITS = 3410.0
+
+        /// <remarks>TypeScript type: <c>3411</c></remarks>
+        [<Literal>]
+        let GREEN_BITS = 3411.0
+
+        /// <remarks>TypeScript type: <c>3412</c></remarks>
+        [<Literal>]
+        let BLUE_BITS = 3412.0
+
+        /// <remarks>TypeScript type: <c>3413</c></remarks>
+        [<Literal>]
+        let ALPHA_BITS = 3413.0
+
+        /// <remarks>TypeScript type: <c>3414</c></remarks>
+        [<Literal>]
+        let DEPTH_BITS = 3414.0
+
+        /// <remarks>TypeScript type: <c>3415</c></remarks>
+        [<Literal>]
+        let STENCIL_BITS = 3415.0
+
+        /// <remarks>TypeScript type: <c>10752</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_UNITS = 10752.0
+
+        /// <remarks>TypeScript type: <c>32824</c></remarks>
+        [<Literal>]
+        let POLYGON_OFFSET_FACTOR = 32824.0
+
+        /// <remarks>TypeScript type: <c>32873</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_2D = 32873.0
+
+        /// <remarks>TypeScript type: <c>32936</c></remarks>
+        [<Literal>]
+        let SAMPLE_BUFFERS = 32936.0
+
+        /// <remarks>TypeScript type: <c>32937</c></remarks>
+        [<Literal>]
+        let SAMPLES = 32937.0
+
+        /// <remarks>TypeScript type: <c>32938</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE_VALUE = 32938.0
+
+        /// <remarks>TypeScript type: <c>32939</c></remarks>
+        [<Literal>]
+        let SAMPLE_COVERAGE_INVERT = 32939.0
+
+        /// <remarks>TypeScript type: <c>34467</c></remarks>
+        [<Literal>]
+        let COMPRESSED_TEXTURE_FORMATS = 34467.0
+
+        /// <remarks>TypeScript type: <c>4352</c></remarks>
+        [<Literal>]
+        let DONT_CARE = 4352.0
+
+        /// <remarks>TypeScript type: <c>4353</c></remarks>
+        [<Literal>]
+        let FASTEST = 4353.0
+
+        /// <remarks>TypeScript type: <c>4354</c></remarks>
+        [<Literal>]
+        let NICEST = 4354.0
+
+        /// <remarks>TypeScript type: <c>33170</c></remarks>
+        [<Literal>]
+        let GENERATE_MIPMAP_HINT = 33170.0
+
+        /// <remarks>TypeScript type: <c>5120</c></remarks>
+        [<Literal>]
+        let BYTE = 5120.0
+
+        /// <remarks>TypeScript type: <c>5121</c></remarks>
+        [<Literal>]
+        let UNSIGNED_BYTE = 5121.0
+
+        /// <remarks>TypeScript type: <c>5122</c></remarks>
+        [<Literal>]
+        let SHORT = 5122.0
+
+        /// <remarks>TypeScript type: <c>5123</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT = 5123.0
+
+        /// <remarks>TypeScript type: <c>5124</c></remarks>
+        [<Literal>]
+        let INT = 5124.0
+
+        /// <remarks>TypeScript type: <c>5125</c></remarks>
+        [<Literal>]
+        let UNSIGNED_INT = 5125.0
+
+        /// <remarks>TypeScript type: <c>5126</c></remarks>
+        [<Literal>]
+        let FLOAT = 5126.0
+
+        /// <remarks>TypeScript type: <c>6402</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT = 6402.0
+
+        /// <remarks>TypeScript type: <c>6406</c></remarks>
+        [<Literal>]
+        let ALPHA = 6406.0
+
+        /// <remarks>TypeScript type: <c>6407</c></remarks>
+        [<Literal>]
+        let RGB = 6407.0
+
+        /// <remarks>TypeScript type: <c>6408</c></remarks>
+        [<Literal>]
+        let RGBA = 6408.0
+
+        /// <remarks>TypeScript type: <c>6409</c></remarks>
+        [<Literal>]
+        let LUMINANCE = 6409.0
+
+        /// <remarks>TypeScript type: <c>6410</c></remarks>
+        [<Literal>]
+        let LUMINANCE_ALPHA = 6410.0
+
+        /// <remarks>TypeScript type: <c>32819</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_4_4_4_4 = 32819.0
+
+        /// <remarks>TypeScript type: <c>32820</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_5_5_5_1 = 32820.0
+
+        /// <remarks>TypeScript type: <c>33635</c></remarks>
+        [<Literal>]
+        let UNSIGNED_SHORT_5_6_5 = 33635.0
+
+        /// <remarks>TypeScript type: <c>35632</c></remarks>
+        [<Literal>]
+        let FRAGMENT_SHADER = 35632.0
+
+        /// <remarks>TypeScript type: <c>35633</c></remarks>
+        [<Literal>]
+        let VERTEX_SHADER = 35633.0
+
+        /// <remarks>TypeScript type: <c>34921</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_ATTRIBS = 34921.0
+
+        /// <remarks>TypeScript type: <c>36347</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_UNIFORM_VECTORS = 36347.0
+
+        /// <remarks>TypeScript type: <c>36348</c></remarks>
+        [<Literal>]
+        let MAX_VARYING_VECTORS = 36348.0
+
+        /// <remarks>TypeScript type: <c>35661</c></remarks>
+        [<Literal>]
+        let MAX_COMBINED_TEXTURE_IMAGE_UNITS = 35661.0
+
+        /// <remarks>TypeScript type: <c>35660</c></remarks>
+        [<Literal>]
+        let MAX_VERTEX_TEXTURE_IMAGE_UNITS = 35660.0
+
+        /// <remarks>TypeScript type: <c>34930</c></remarks>
+        [<Literal>]
+        let MAX_TEXTURE_IMAGE_UNITS = 34930.0
+
+        /// <remarks>TypeScript type: <c>36349</c></remarks>
+        [<Literal>]
+        let MAX_FRAGMENT_UNIFORM_VECTORS = 36349.0
+
+        /// <remarks>TypeScript type: <c>35663</c></remarks>
+        [<Literal>]
+        let SHADER_TYPE = 35663.0
+
+        /// <remarks>TypeScript type: <c>35712</c></remarks>
+        [<Literal>]
+        let DELETE_STATUS = 35712.0
+
+        /// <remarks>TypeScript type: <c>35714</c></remarks>
+        [<Literal>]
+        let LINK_STATUS = 35714.0
+
+        /// <remarks>TypeScript type: <c>35715</c></remarks>
+        [<Literal>]
+        let VALIDATE_STATUS = 35715.0
+
+        /// <remarks>TypeScript type: <c>35717</c></remarks>
+        [<Literal>]
+        let ATTACHED_SHADERS = 35717.0
+
+        /// <remarks>TypeScript type: <c>35718</c></remarks>
+        [<Literal>]
+        let ACTIVE_UNIFORMS = 35718.0
+
+        /// <remarks>TypeScript type: <c>35721</c></remarks>
+        [<Literal>]
+        let ACTIVE_ATTRIBUTES = 35721.0
+
+        /// <remarks>TypeScript type: <c>35724</c></remarks>
+        [<Literal>]
+        let SHADING_LANGUAGE_VERSION = 35724.0
+
+        /// <remarks>TypeScript type: <c>35725</c></remarks>
+        [<Literal>]
+        let CURRENT_PROGRAM = 35725.0
+
+        /// <remarks>TypeScript type: <c>512</c></remarks>
+        [<Literal>]
+        let NEVER = 512.0
+
+        /// <remarks>TypeScript type: <c>513</c></remarks>
+        [<Literal>]
+        let LESS = 513.0
+
+        /// <remarks>TypeScript type: <c>514</c></remarks>
+        [<Literal>]
+        let EQUAL = 514.0
+
+        /// <remarks>TypeScript type: <c>515</c></remarks>
+        [<Literal>]
+        let LEQUAL = 515.0
+
+        /// <remarks>TypeScript type: <c>516</c></remarks>
+        [<Literal>]
+        let GREATER = 516.0
+
+        /// <remarks>TypeScript type: <c>517</c></remarks>
+        [<Literal>]
+        let NOTEQUAL = 517.0
+
+        /// <remarks>TypeScript type: <c>518</c></remarks>
+        [<Literal>]
+        let GEQUAL = 518.0
+
+        /// <remarks>TypeScript type: <c>519</c></remarks>
+        [<Literal>]
+        let ALWAYS = 519.0
+
+        /// <remarks>TypeScript type: <c>7680</c></remarks>
+        [<Literal>]
+        let KEEP = 7680.0
+
+        /// <remarks>TypeScript type: <c>7681</c></remarks>
+        [<Literal>]
+        let REPLACE = 7681.0
+
+        /// <remarks>TypeScript type: <c>7682</c></remarks>
+        [<Literal>]
+        let INCR = 7682.0
+
+        /// <remarks>TypeScript type: <c>7683</c></remarks>
+        [<Literal>]
+        let DECR = 7683.0
+
+        /// <remarks>TypeScript type: <c>5386</c></remarks>
+        [<Literal>]
+        let INVERT = 5386.0
+
+        /// <remarks>TypeScript type: <c>34055</c></remarks>
+        [<Literal>]
+        let INCR_WRAP = 34055.0
+
+        /// <remarks>TypeScript type: <c>34056</c></remarks>
+        [<Literal>]
+        let DECR_WRAP = 34056.0
+
+        /// <remarks>TypeScript type: <c>7936</c></remarks>
+        [<Literal>]
+        let VENDOR = 7936.0
+
+        /// <remarks>TypeScript type: <c>7937</c></remarks>
+        [<Literal>]
+        let RENDERER = 7937.0
+
+        /// <remarks>TypeScript type: <c>7938</c></remarks>
+        [<Literal>]
+        let VERSION = 7938.0
+
+        /// <remarks>TypeScript type: <c>9728</c></remarks>
+        [<Literal>]
+        let NEAREST = 9728.0
+
+        /// <remarks>TypeScript type: <c>9729</c></remarks>
+        [<Literal>]
+        let LINEAR = 9729.0
+
+        /// <remarks>TypeScript type: <c>9984</c></remarks>
+        [<Literal>]
+        let NEAREST_MIPMAP_NEAREST = 9984.0
+
+        /// <remarks>TypeScript type: <c>9985</c></remarks>
+        [<Literal>]
+        let LINEAR_MIPMAP_NEAREST = 9985.0
+
+        /// <remarks>TypeScript type: <c>9986</c></remarks>
+        [<Literal>]
+        let NEAREST_MIPMAP_LINEAR = 9986.0
+
+        /// <remarks>TypeScript type: <c>9987</c></remarks>
+        [<Literal>]
+        let LINEAR_MIPMAP_LINEAR = 9987.0
+
+        /// <remarks>TypeScript type: <c>10240</c></remarks>
+        [<Literal>]
+        let TEXTURE_MAG_FILTER = 10240.0
+
+        /// <remarks>TypeScript type: <c>10241</c></remarks>
+        [<Literal>]
+        let TEXTURE_MIN_FILTER = 10241.0
+
+        /// <remarks>TypeScript type: <c>10242</c></remarks>
+        [<Literal>]
+        let TEXTURE_WRAP_S = 10242.0
+
+        /// <remarks>TypeScript type: <c>10243</c></remarks>
+        [<Literal>]
+        let TEXTURE_WRAP_T = 10243.0
+
+        /// <remarks>TypeScript type: <c>3553</c></remarks>
+        [<Literal>]
+        let TEXTURE_2D = 3553.0
+
+        /// <remarks>TypeScript type: <c>5890</c></remarks>
+        [<Literal>]
+        let TEXTURE = 5890.0
+
+        /// <remarks>TypeScript type: <c>34067</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP = 34067.0
+
+        /// <remarks>TypeScript type: <c>34068</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING_CUBE_MAP = 34068.0
+
+        /// <remarks>TypeScript type: <c>34069</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_X = 34069.0
+
+        /// <remarks>TypeScript type: <c>34070</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_X = 34070.0
+
+        /// <remarks>TypeScript type: <c>34071</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_Y = 34071.0
+
+        /// <remarks>TypeScript type: <c>34072</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_Y = 34072.0
+
+        /// <remarks>TypeScript type: <c>34073</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_POSITIVE_Z = 34073.0
+
+        /// <remarks>TypeScript type: <c>34074</c></remarks>
+        [<Literal>]
+        let TEXTURE_CUBE_MAP_NEGATIVE_Z = 34074.0
+
+        /// <remarks>TypeScript type: <c>34076</c></remarks>
+        [<Literal>]
+        let MAX_CUBE_MAP_TEXTURE_SIZE = 34076.0
+
+        /// <remarks>TypeScript type: <c>33984</c></remarks>
+        [<Literal>]
+        let TEXTURE0 = 33984.0
+
+        /// <remarks>TypeScript type: <c>33985</c></remarks>
+        [<Literal>]
+        let TEXTURE1 = 33985.0
+
+        /// <remarks>TypeScript type: <c>33986</c></remarks>
+        [<Literal>]
+        let TEXTURE2 = 33986.0
+
+        /// <remarks>TypeScript type: <c>33987</c></remarks>
+        [<Literal>]
+        let TEXTURE3 = 33987.0
+
+        /// <remarks>TypeScript type: <c>33988</c></remarks>
+        [<Literal>]
+        let TEXTURE4 = 33988.0
+
+        /// <remarks>TypeScript type: <c>33989</c></remarks>
+        [<Literal>]
+        let TEXTURE5 = 33989.0
+
+        /// <remarks>TypeScript type: <c>33990</c></remarks>
+        [<Literal>]
+        let TEXTURE6 = 33990.0
+
+        /// <remarks>TypeScript type: <c>33991</c></remarks>
+        [<Literal>]
+        let TEXTURE7 = 33991.0
+
+        /// <remarks>TypeScript type: <c>33992</c></remarks>
+        [<Literal>]
+        let TEXTURE8 = 33992.0
+
+        /// <remarks>TypeScript type: <c>33993</c></remarks>
+        [<Literal>]
+        let TEXTURE9 = 33993.0
+
+        /// <remarks>TypeScript type: <c>33994</c></remarks>
+        [<Literal>]
+        let TEXTURE10 = 33994.0
+
+        /// <remarks>TypeScript type: <c>33995</c></remarks>
+        [<Literal>]
+        let TEXTURE11 = 33995.0
+
+        /// <remarks>TypeScript type: <c>33996</c></remarks>
+        [<Literal>]
+        let TEXTURE12 = 33996.0
+
+        /// <remarks>TypeScript type: <c>33997</c></remarks>
+        [<Literal>]
+        let TEXTURE13 = 33997.0
+
+        /// <remarks>TypeScript type: <c>33998</c></remarks>
+        [<Literal>]
+        let TEXTURE14 = 33998.0
+
+        /// <remarks>TypeScript type: <c>33999</c></remarks>
+        [<Literal>]
+        let TEXTURE15 = 33999.0
+
+        /// <remarks>TypeScript type: <c>34000</c></remarks>
+        [<Literal>]
+        let TEXTURE16 = 34000.0
+
+        /// <remarks>TypeScript type: <c>34001</c></remarks>
+        [<Literal>]
+        let TEXTURE17 = 34001.0
+
+        /// <remarks>TypeScript type: <c>34002</c></remarks>
+        [<Literal>]
+        let TEXTURE18 = 34002.0
+
+        /// <remarks>TypeScript type: <c>34003</c></remarks>
+        [<Literal>]
+        let TEXTURE19 = 34003.0
+
+        /// <remarks>TypeScript type: <c>34004</c></remarks>
+        [<Literal>]
+        let TEXTURE20 = 34004.0
+
+        /// <remarks>TypeScript type: <c>34005</c></remarks>
+        [<Literal>]
+        let TEXTURE21 = 34005.0
+
+        /// <remarks>TypeScript type: <c>34006</c></remarks>
+        [<Literal>]
+        let TEXTURE22 = 34006.0
+
+        /// <remarks>TypeScript type: <c>34007</c></remarks>
+        [<Literal>]
+        let TEXTURE23 = 34007.0
+
+        /// <remarks>TypeScript type: <c>34008</c></remarks>
+        [<Literal>]
+        let TEXTURE24 = 34008.0
+
+        /// <remarks>TypeScript type: <c>34009</c></remarks>
+        [<Literal>]
+        let TEXTURE25 = 34009.0
+
+        /// <remarks>TypeScript type: <c>34010</c></remarks>
+        [<Literal>]
+        let TEXTURE26 = 34010.0
+
+        /// <remarks>TypeScript type: <c>34011</c></remarks>
+        [<Literal>]
+        let TEXTURE27 = 34011.0
+
+        /// <remarks>TypeScript type: <c>34012</c></remarks>
+        [<Literal>]
+        let TEXTURE28 = 34012.0
+
+        /// <remarks>TypeScript type: <c>34013</c></remarks>
+        [<Literal>]
+        let TEXTURE29 = 34013.0
+
+        /// <remarks>TypeScript type: <c>34014</c></remarks>
+        [<Literal>]
+        let TEXTURE30 = 34014.0
+
+        /// <remarks>TypeScript type: <c>34015</c></remarks>
+        [<Literal>]
+        let TEXTURE31 = 34015.0
+
+        /// <remarks>TypeScript type: <c>34016</c></remarks>
+        [<Literal>]
+        let ACTIVE_TEXTURE = 34016.0
+
+        /// <remarks>TypeScript type: <c>10497</c></remarks>
+        [<Literal>]
+        let REPEAT = 10497.0
+
+        /// <remarks>TypeScript type: <c>33071</c></remarks>
+        [<Literal>]
+        let CLAMP_TO_EDGE = 33071.0
+
+        /// <remarks>TypeScript type: <c>33648</c></remarks>
+        [<Literal>]
+        let MIRRORED_REPEAT = 33648.0
+
+        /// <remarks>TypeScript type: <c>35664</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC2 = 35664.0
+
+        /// <remarks>TypeScript type: <c>35665</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC3 = 35665.0
+
+        /// <remarks>TypeScript type: <c>35666</c></remarks>
+        [<Literal>]
+        let FLOAT_VEC4 = 35666.0
+
+        /// <remarks>TypeScript type: <c>35667</c></remarks>
+        [<Literal>]
+        let INT_VEC2 = 35667.0
+
+        /// <remarks>TypeScript type: <c>35668</c></remarks>
+        [<Literal>]
+        let INT_VEC3 = 35668.0
+
+        /// <remarks>TypeScript type: <c>35669</c></remarks>
+        [<Literal>]
+        let INT_VEC4 = 35669.0
+
+        /// <remarks>TypeScript type: <c>35670</c></remarks>
+        [<Literal>]
+        let BOOL = 35670.0
+
+        /// <remarks>TypeScript type: <c>35671</c></remarks>
+        [<Literal>]
+        let BOOL_VEC2 = 35671.0
+
+        /// <remarks>TypeScript type: <c>35672</c></remarks>
+        [<Literal>]
+        let BOOL_VEC3 = 35672.0
+
+        /// <remarks>TypeScript type: <c>35673</c></remarks>
+        [<Literal>]
+        let BOOL_VEC4 = 35673.0
+
+        /// <remarks>TypeScript type: <c>35674</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT2 = 35674.0
+
+        /// <remarks>TypeScript type: <c>35675</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT3 = 35675.0
+
+        /// <remarks>TypeScript type: <c>35676</c></remarks>
+        [<Literal>]
+        let FLOAT_MAT4 = 35676.0
+
+        /// <remarks>TypeScript type: <c>35678</c></remarks>
+        [<Literal>]
+        let SAMPLER_2D = 35678.0
+
+        /// <remarks>TypeScript type: <c>35680</c></remarks>
+        [<Literal>]
+        let SAMPLER_CUBE = 35680.0
+
+        /// <remarks>TypeScript type: <c>34338</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_ENABLED = 34338.0
+
+        /// <remarks>TypeScript type: <c>34339</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_SIZE = 34339.0
+
+        /// <remarks>TypeScript type: <c>34340</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_STRIDE = 34340.0
+
+        /// <remarks>TypeScript type: <c>34341</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_TYPE = 34341.0
+
+        /// <remarks>TypeScript type: <c>34922</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_NORMALIZED = 34922.0
+
+        /// <remarks>TypeScript type: <c>34373</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_POINTER = 34373.0
+
+        /// <remarks>TypeScript type: <c>34975</c></remarks>
+        [<Literal>]
+        let VERTEX_ATTRIB_ARRAY_BUFFER_BINDING = 34975.0
+
+        /// <remarks>TypeScript type: <c>35738</c></remarks>
+        [<Literal>]
+        let IMPLEMENTATION_COLOR_READ_TYPE = 35738.0
+
+        /// <remarks>TypeScript type: <c>35739</c></remarks>
+        [<Literal>]
+        let IMPLEMENTATION_COLOR_READ_FORMAT = 35739.0
+
+        /// <remarks>TypeScript type: <c>35713</c></remarks>
+        [<Literal>]
+        let COMPILE_STATUS = 35713.0
+
+        /// <remarks>TypeScript type: <c>36336</c></remarks>
+        [<Literal>]
+        let LOW_FLOAT = 36336.0
+
+        /// <remarks>TypeScript type: <c>36337</c></remarks>
+        [<Literal>]
+        let MEDIUM_FLOAT = 36337.0
+
+        /// <remarks>TypeScript type: <c>36338</c></remarks>
+        [<Literal>]
+        let HIGH_FLOAT = 36338.0
+
+        /// <remarks>TypeScript type: <c>36339</c></remarks>
+        [<Literal>]
+        let LOW_INT = 36339.0
+
+        /// <remarks>TypeScript type: <c>36340</c></remarks>
+        [<Literal>]
+        let MEDIUM_INT = 36340.0
+
+        /// <remarks>TypeScript type: <c>36341</c></remarks>
+        [<Literal>]
+        let HIGH_INT = 36341.0
+
+        /// <remarks>TypeScript type: <c>36160</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER = 36160.0
+
+        /// <remarks>TypeScript type: <c>36161</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER = 36161.0
+
+        /// <remarks>TypeScript type: <c>32854</c></remarks>
+        [<Literal>]
+        let RGBA4 = 32854.0
+
+        /// <remarks>TypeScript type: <c>32855</c></remarks>
+        [<Literal>]
+        let RGB5_A1 = 32855.0
+
+        /// <remarks>TypeScript type: <c>32856</c></remarks>
+        [<Literal>]
+        let RGBA8 = 32856.0
+
+        /// <remarks>TypeScript type: <c>36194</c></remarks>
+        [<Literal>]
+        let RGB565 = 36194.0
+
+        /// <remarks>TypeScript type: <c>33189</c></remarks>
+        [<Literal>]
+        let DEPTH_COMPONENT16 = 33189.0
+
+        /// <remarks>TypeScript type: <c>36168</c></remarks>
+        [<Literal>]
+        let STENCIL_INDEX8 = 36168.0
+
+        /// <remarks>TypeScript type: <c>34041</c></remarks>
+        [<Literal>]
+        let DEPTH_STENCIL = 34041.0
+
+        /// <remarks>TypeScript type: <c>36162</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_WIDTH = 36162.0
+
+        /// <remarks>TypeScript type: <c>36163</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_HEIGHT = 36163.0
+
+        /// <remarks>TypeScript type: <c>36164</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_INTERNAL_FORMAT = 36164.0
+
+        /// <remarks>TypeScript type: <c>36176</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_RED_SIZE = 36176.0
+
+        /// <remarks>TypeScript type: <c>36177</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_GREEN_SIZE = 36177.0
+
+        /// <remarks>TypeScript type: <c>36178</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_BLUE_SIZE = 36178.0
+
+        /// <remarks>TypeScript type: <c>36179</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_ALPHA_SIZE = 36179.0
+
+        /// <remarks>TypeScript type: <c>36180</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_DEPTH_SIZE = 36180.0
+
+        /// <remarks>TypeScript type: <c>36181</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_STENCIL_SIZE = 36181.0
+
+        /// <remarks>TypeScript type: <c>36048</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 36048.0
+
+        /// <remarks>TypeScript type: <c>36049</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 36049.0
+
+        /// <remarks>TypeScript type: <c>36050</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL = 36050.0
+
+        /// <remarks>TypeScript type: <c>36051</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE = 36051.0
+
+        /// <remarks>TypeScript type: <c>36064</c></remarks>
+        [<Literal>]
+        let COLOR_ATTACHMENT0 = 36064.0
+
+        /// <remarks>TypeScript type: <c>36096</c></remarks>
+        [<Literal>]
+        let DEPTH_ATTACHMENT = 36096.0
+
+        /// <remarks>TypeScript type: <c>36128</c></remarks>
+        [<Literal>]
+        let STENCIL_ATTACHMENT = 36128.0
+
+        /// <remarks>TypeScript type: <c>33306</c></remarks>
+        [<Literal>]
+        let DEPTH_STENCIL_ATTACHMENT = 33306.0
+
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let NONE = 0.0
+
+        /// <remarks>TypeScript type: <c>36053</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_COMPLETE = 36053.0
+
+        /// <remarks>TypeScript type: <c>36054</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_ATTACHMENT = 36054.0
+
+        /// <remarks>TypeScript type: <c>36055</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055.0
+
+        /// <remarks>TypeScript type: <c>36057</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_INCOMPLETE_DIMENSIONS = 36057.0
+
+        /// <remarks>TypeScript type: <c>36061</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_UNSUPPORTED = 36061.0
+
+        /// <remarks>TypeScript type: <c>36006</c></remarks>
+        [<Literal>]
+        let FRAMEBUFFER_BINDING = 36006.0
+
+        /// <remarks>TypeScript type: <c>36007</c></remarks>
+        [<Literal>]
+        let RENDERBUFFER_BINDING = 36007.0
+
+        /// <remarks>TypeScript type: <c>34024</c></remarks>
+        [<Literal>]
+        let MAX_RENDERBUFFER_SIZE = 34024.0
+
+        /// <remarks>TypeScript type: <c>1286</c></remarks>
+        [<Literal>]
+        let INVALID_FRAMEBUFFER_OPERATION = 1286.0
+
+        /// <remarks>TypeScript type: <c>37440</c></remarks>
+        [<Literal>]
+        let UNPACK_FLIP_Y_WEBGL = 37440.0
+
+        /// <remarks>TypeScript type: <c>37441</c></remarks>
+        [<Literal>]
+        let UNPACK_PREMULTIPLY_ALPHA_WEBGL = 37441.0
+
+        /// <remarks>TypeScript type: <c>37442</c></remarks>
+        [<Literal>]
+        let CONTEXT_LOST_WEBGL = 37442.0
+
+        /// <remarks>TypeScript type: <c>37443</c></remarks>
+        [<Literal>]
+        let UNPACK_COLORSPACE_CONVERSION_WEBGL = 37443.0
+
+        /// <remarks>TypeScript type: <c>37444</c></remarks>
+        [<Literal>]
+        let BROWSER_DEFAULT_WEBGL = 37444.0
 
     type WebGLRenderingContextOverloads =
         /// <summary>
@@ -80524,9 +90692,13 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
         /// </summary>
         abstract send: data: BlobPart -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract CONNECTING: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract OPEN: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract CLOSING: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract CLOSED: float
 
         /// <summary>
@@ -80571,14 +90743,58 @@ module Dom =
             ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
                 unit
 
+    module WebSocket =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let CONNECTING = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let OPEN = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let CLOSING = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let CLOSED = 3.0
+
+        type ReadyState =
+            | N0 = 0
+            | N1 = 1
+            | N2 = 2
+            | N3 = 3
+
     type WebSocketConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract CONNECTING: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract OPEN: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract CLOSING: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract CLOSED: float
 
         [<EmitConstructor>]
         abstract Create: url: U2<string, URL> * ?protocols: U2<string, string[]> -> WebSocket
+
+    module WebSocketConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let CONNECTING = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let OPEN = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let CLOSING = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let CLOSED = 3.0
 
     /// <summary>
     /// The <b><c>WebTransport</c></b> interface of the WebTransport API provides functionality to enable a user agent to connect to an HTTP/3 server, initiate reliable and unreliable transport in either or both directions, and close the connection once it is no longer needed.
@@ -80764,6 +90980,7 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportError">MDN Reference</a>
     /// </summary>
+    [<Interface>]
     type WebTransportError =
         inherit DOMException
         /// <summary>
@@ -80778,6 +90995,20 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportError/streamErrorCode">MDN Reference</a>
         /// </summary>
         abstract streamErrorCode: float option
+
+        [<ParamObject;
+          Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+        static member Create
+            (
+                source: WebTransportErrorSource,
+                code: float,
+                message: string,
+                name: string,
+                ?streamErrorCode: float,
+                ?stack: string,
+                ?cause: obj
+            ) : WebTransportError =
+            jsNative
 
     type WebTransportErrorConstructor =
         [<EmitConstructor>]
@@ -80814,17 +91045,49 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WheelEvent/deltaZ">MDN Reference</a>
         /// </summary>
         abstract deltaZ: float
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract DOM_DELTA_PIXEL: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract DOM_DELTA_LINE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DOM_DELTA_PAGE: float
 
+    module WheelEvent =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let DOM_DELTA_PIXEL = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let DOM_DELTA_LINE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DOM_DELTA_PAGE = 2.0
+
     type WheelEventConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract DOM_DELTA_PIXEL: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract DOM_DELTA_LINE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract DOM_DELTA_PAGE: float
 
         [<EmitConstructor>]
         abstract Create: ``type``: string * ?eventInitDict: WheelEventInit -> WheelEvent
+
+    module WheelEventConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let DOM_DELTA_PIXEL = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let DOM_DELTA_LINE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let DOM_DELTA_PAGE = 2.0
 
     type WindowEventMap =
         inherit GlobalEventHandlersEventMap
@@ -82084,10 +92347,15 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/XMLHttpRequest/setRequestHeader">MDN Reference</a>
         /// </summary>
         abstract setRequestHeader: name: string * value: string -> unit
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract UNSENT: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract OPENED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract HEADERS_RECEIVED: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract LOADING: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract DONE: float
 
         /// <summary>
@@ -82112,15 +92380,62 @@ module Dom =
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
+    module XMLHttpRequest =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let UNSENT = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let OPENED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let HEADERS_RECEIVED = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let LOADING = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let DONE = 4.0
+
     type XMLHttpRequestConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract UNSENT: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract OPENED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract HEADERS_RECEIVED: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract LOADING: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract DONE: float
 
         [<EmitConstructor>]
         abstract Create: unit -> XMLHttpRequest
+
+    module XMLHttpRequestConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let UNSENT = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let OPENED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let HEADERS_RECEIVED = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let LOADING = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let DONE = 4.0
 
     [<Interface>]
     type XMLHttpRequestEventTargetEventMap =
@@ -82373,18 +92688,29 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/XPathResult/snapshotItem">MDN Reference</a>
         /// </summary>
         abstract snapshotItem: index: float -> Node option
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract ANY_TYPE: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract NUMBER_TYPE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract STRING_TYPE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract BOOLEAN_TYPE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract UNORDERED_NODE_ITERATOR_TYPE: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract ORDERED_NODE_ITERATOR_TYPE: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract UNORDERED_NODE_SNAPSHOT_TYPE: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract ORDERED_NODE_SNAPSHOT_TYPE: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract ANY_UNORDERED_NODE_TYPE: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract FIRST_ORDERED_NODE_TYPE: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("({ ANY_TYPE: 0, NUMBER_TYPE: 1, STRING_TYPE: 2, BOOLEAN_TYPE: 3, UNORDERED_NODE_ITERATOR_TYPE: 4, ORDERED_NODE_ITERATOR_TYPE: 5, UNORDERED_NODE_SNAPSHOT_TYPE: 6, ORDERED_NODE_SNAPSHOT_TYPE: 7, ANY_UNORDERED_NODE_TYPE: 8, FIRST_ORDERED_NODE_TYPE: 9, ...$0 })")>]
         static member Create
             (
                 booleanValue: bool,
@@ -82395,34 +92721,116 @@ module Dom =
                 stringValue: string,
                 iterateNext: (unit -> Node option),
                 snapshotItem: (float -> Node option),
-                ANY_TYPE: float,
-                NUMBER_TYPE: float,
-                STRING_TYPE: float,
-                BOOLEAN_TYPE: float,
-                UNORDERED_NODE_ITERATOR_TYPE: float,
-                ORDERED_NODE_ITERATOR_TYPE: float,
-                UNORDERED_NODE_SNAPSHOT_TYPE: float,
-                ORDERED_NODE_SNAPSHOT_TYPE: float,
-                ANY_UNORDERED_NODE_TYPE: float,
-                FIRST_ORDERED_NODE_TYPE: float,
                 ?singleNodeValue: Node
             ) : XPathResult =
             jsNative
 
+    module XPathResult =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let ANY_TYPE = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let NUMBER_TYPE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let STRING_TYPE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let BOOLEAN_TYPE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let UNORDERED_NODE_ITERATOR_TYPE = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let ORDERED_NODE_ITERATOR_TYPE = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let UNORDERED_NODE_SNAPSHOT_TYPE = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let ORDERED_NODE_SNAPSHOT_TYPE = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let ANY_UNORDERED_NODE_TYPE = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let FIRST_ORDERED_NODE_TYPE = 9.0
+
     type XPathResultConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract ANY_TYPE: float
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract NUMBER_TYPE: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract STRING_TYPE: float
+        /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract BOOLEAN_TYPE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
         abstract UNORDERED_NODE_ITERATOR_TYPE: float
+        /// <remarks>TypeScript type: <c>5</c></remarks>
         abstract ORDERED_NODE_ITERATOR_TYPE: float
+        /// <remarks>TypeScript type: <c>6</c></remarks>
         abstract UNORDERED_NODE_SNAPSHOT_TYPE: float
+        /// <remarks>TypeScript type: <c>7</c></remarks>
         abstract ORDERED_NODE_SNAPSHOT_TYPE: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
         abstract ANY_UNORDERED_NODE_TYPE: float
+        /// <remarks>TypeScript type: <c>9</c></remarks>
         abstract FIRST_ORDERED_NODE_TYPE: float
 
         [<EmitConstructor>]
         abstract Create: unit -> XPathResult
+
+    module XPathResultConstructor =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let ANY_TYPE = 0.0
+
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let NUMBER_TYPE = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let STRING_TYPE = 2.0
+
+        /// <remarks>TypeScript type: <c>3</c></remarks>
+        [<Literal>]
+        let BOOLEAN_TYPE = 3.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let UNORDERED_NODE_ITERATOR_TYPE = 4.0
+
+        /// <remarks>TypeScript type: <c>5</c></remarks>
+        [<Literal>]
+        let ORDERED_NODE_ITERATOR_TYPE = 5.0
+
+        /// <remarks>TypeScript type: <c>6</c></remarks>
+        [<Literal>]
+        let UNORDERED_NODE_SNAPSHOT_TYPE = 6.0
+
+        /// <remarks>TypeScript type: <c>7</c></remarks>
+        [<Literal>]
+        let ORDERED_NODE_SNAPSHOT_TYPE = 7.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let ANY_UNORDERED_NODE_TYPE = 8.0
+
+        /// <remarks>TypeScript type: <c>9</c></remarks>
+        [<Literal>]
+        let FIRST_ORDERED_NODE_TYPE = 9.0
 
     /// <summary>
     /// An <b><c>XSLTProcessor</c></b> applies an XSLT stylesheet transformation to an XML document to produce a new XML document as output. It has methods to load the XSLT stylesheet, to manipulate &lt;xsl:param&gt; parameter values, and to apply the transformation to documents.
@@ -85848,12 +96256,6 @@ module Dom =
         module ForEach =
             type Callbackfn = delegate of value: float * key: string * parent: EventCounts -> unit
 
-    module FileReader =
-        type ReadyState =
-            | N0 = 0
-            | N1 = 1
-            | N2 = 2
-
     module FontFaceSet =
         module ForEach =
             type Callbackfn = delegate of value: FontFace * key: FontFace * parent: FontFaceSet -> unit
@@ -85958,10 +96360,16 @@ module Dom =
         module GetReader =
             [<Interface>]
             type Options =
+                /// <remarks>TypeScript type: <c>"byob"</c></remarks>
                 abstract mode: string with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(mode: string) : Options = jsNative
+                [<Emit("({ mode: 'byob' })")>]
+                static member Create() : Options = jsNative
+
+            module Options =
+                /// <remarks>TypeScript type: <c>"byob"</c></remarks>
+                [<Literal>]
+                let mode = "byob"
 
     module StylePropertyMapReadOnly =
         module ForEach =
@@ -85979,31 +96387,55 @@ module Dom =
         module GenerateKey =
             [<Interface>]
             type Algorithm =
+                /// <remarks>TypeScript type: <c>"Ed25519"</c></remarks>
                 abstract name: string with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(name: string) : Algorithm = jsNative
+                [<Emit("({ name: 'Ed25519' })")>]
+                static member Create() : Algorithm = jsNative
+
+            module Algorithm =
+                /// <remarks>TypeScript type: <c>"Ed25519"</c></remarks>
+                [<Literal>]
+                let name = "Ed25519"
 
             [<Interface>]
             type Algorithm2 =
+                /// <remarks>TypeScript type: <c>"X25519"</c></remarks>
                 abstract name: string with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(name: string) : Algorithm2 = jsNative
+                [<Emit("({ name: 'X25519' })")>]
+                static member Create() : Algorithm2 = jsNative
+
+            module Algorithm2 =
+                /// <remarks>TypeScript type: <c>"X25519"</c></remarks>
+                [<Literal>]
+                let name = "X25519"
 
             [<Interface>]
             type Algorithm3 =
+                /// <remarks>TypeScript type: <c>"Ed25519"</c></remarks>
                 abstract name: string with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(name: string) : Algorithm3 = jsNative
+                [<Emit("({ name: 'Ed25519' })")>]
+                static member Create() : Algorithm3 = jsNative
+
+            module Algorithm3 =
+                /// <remarks>TypeScript type: <c>"Ed25519"</c></remarks>
+                [<Literal>]
+                let name = "Ed25519"
 
             [<Interface>]
             type Algorithm4 =
+                /// <remarks>TypeScript type: <c>"X25519"</c></remarks>
                 abstract name: string with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(name: string) : Algorithm4 = jsNative
+                [<Emit("({ name: 'X25519' })")>]
+                static member Create() : Algorithm4 = jsNative
+
+            module Algorithm4 =
+                /// <remarks>TypeScript type: <c>"X25519"</c></remarks>
+                [<Literal>]
+                let name = "X25519"
 
             module KeyUsages =
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -86068,13 +96500,6 @@ module Dom =
                     | [<CompiledName("i64")>] I64
                     | [<CompiledName("v128")>] V128
 
-    module WebSocket =
-        type ReadyState =
-            | N0 = 0
-            | N1 = 1
-            | N2 = 2
-            | N3 = 3
-
     module Window =
         type Self =
             inherit Window
@@ -86083,44 +96508,106 @@ module Dom =
         module Self =
             [<Interface>]
             type NodeFilter =
+                /// <remarks>TypeScript type: <c>1</c></remarks>
                 abstract FILTER_ACCEPT: float
+                /// <remarks>TypeScript type: <c>2</c></remarks>
                 abstract FILTER_REJECT: float
+                /// <remarks>TypeScript type: <c>3</c></remarks>
                 abstract FILTER_SKIP: float
+                /// <remarks>TypeScript type: <c>4294967295</c></remarks>
                 abstract SHOW_ALL: float
+                /// <remarks>TypeScript type: <c>1</c></remarks>
                 abstract SHOW_ELEMENT: float
+                /// <remarks>TypeScript type: <c>2</c></remarks>
                 abstract SHOW_ATTRIBUTE: float
+                /// <remarks>TypeScript type: <c>4</c></remarks>
                 abstract SHOW_TEXT: float
+                /// <remarks>TypeScript type: <c>8</c></remarks>
                 abstract SHOW_CDATA_SECTION: float
+                /// <remarks>TypeScript type: <c>16</c></remarks>
                 abstract SHOW_ENTITY_REFERENCE: float
+                /// <remarks>TypeScript type: <c>32</c></remarks>
                 abstract SHOW_ENTITY: float
+                /// <remarks>TypeScript type: <c>64</c></remarks>
                 abstract SHOW_PROCESSING_INSTRUCTION: float
+                /// <remarks>TypeScript type: <c>128</c></remarks>
                 abstract SHOW_COMMENT: float
+                /// <remarks>TypeScript type: <c>256</c></remarks>
                 abstract SHOW_DOCUMENT: float
+                /// <remarks>TypeScript type: <c>512</c></remarks>
                 abstract SHOW_DOCUMENT_TYPE: float
+                /// <remarks>TypeScript type: <c>1024</c></remarks>
                 abstract SHOW_DOCUMENT_FRAGMENT: float
+                /// <remarks>TypeScript type: <c>2048</c></remarks>
                 abstract SHOW_NOTATION: float
 
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        FILTER_ACCEPT: float,
-                        FILTER_REJECT: float,
-                        FILTER_SKIP: float,
-                        SHOW_ALL: float,
-                        SHOW_ELEMENT: float,
-                        SHOW_ATTRIBUTE: float,
-                        SHOW_TEXT: float,
-                        SHOW_CDATA_SECTION: float,
-                        SHOW_ENTITY_REFERENCE: float,
-                        SHOW_ENTITY: float,
-                        SHOW_PROCESSING_INSTRUCTION: float,
-                        SHOW_COMMENT: float,
-                        SHOW_DOCUMENT: float,
-                        SHOW_DOCUMENT_TYPE: float,
-                        SHOW_DOCUMENT_FRAGMENT: float,
-                        SHOW_NOTATION: float
-                    ) : NodeFilter =
-                    jsNative
+                [<Emit("({ FILTER_ACCEPT: 1, FILTER_REJECT: 2, FILTER_SKIP: 3, SHOW_ALL: 4294967295, SHOW_ELEMENT: 1, SHOW_ATTRIBUTE: 2, SHOW_TEXT: 4, SHOW_CDATA_SECTION: 8, SHOW_ENTITY_REFERENCE: 16, SHOW_ENTITY: 32, SHOW_PROCESSING_INSTRUCTION: 64, SHOW_COMMENT: 128, SHOW_DOCUMENT: 256, SHOW_DOCUMENT_TYPE: 512, SHOW_DOCUMENT_FRAGMENT: 1024, SHOW_NOTATION: 2048 })")>]
+                static member Create() : NodeFilter = jsNative
+
+            module NodeFilter =
+                /// <remarks>TypeScript type: <c>1</c></remarks>
+                [<Literal>]
+                let FILTER_ACCEPT = 1.0
+
+                /// <remarks>TypeScript type: <c>2</c></remarks>
+                [<Literal>]
+                let FILTER_REJECT = 2.0
+
+                /// <remarks>TypeScript type: <c>3</c></remarks>
+                [<Literal>]
+                let FILTER_SKIP = 3.0
+
+                /// <remarks>TypeScript type: <c>4294967295</c></remarks>
+                [<Literal>]
+                let SHOW_ALL = 4294967295.0
+
+                /// <remarks>TypeScript type: <c>1</c></remarks>
+                [<Literal>]
+                let SHOW_ELEMENT = 1.0
+
+                /// <remarks>TypeScript type: <c>2</c></remarks>
+                [<Literal>]
+                let SHOW_ATTRIBUTE = 2.0
+
+                /// <remarks>TypeScript type: <c>4</c></remarks>
+                [<Literal>]
+                let SHOW_TEXT = 4.0
+
+                /// <remarks>TypeScript type: <c>8</c></remarks>
+                [<Literal>]
+                let SHOW_CDATA_SECTION = 8.0
+
+                /// <remarks>TypeScript type: <c>16</c></remarks>
+                [<Literal>]
+                let SHOW_ENTITY_REFERENCE = 16.0
+
+                /// <remarks>TypeScript type: <c>32</c></remarks>
+                [<Literal>]
+                let SHOW_ENTITY = 32.0
+
+                /// <remarks>TypeScript type: <c>64</c></remarks>
+                [<Literal>]
+                let SHOW_PROCESSING_INSTRUCTION = 64.0
+
+                /// <remarks>TypeScript type: <c>128</c></remarks>
+                [<Literal>]
+                let SHOW_COMMENT = 128.0
+
+                /// <remarks>TypeScript type: <c>256</c></remarks>
+                [<Literal>]
+                let SHOW_DOCUMENT = 256.0
+
+                /// <remarks>TypeScript type: <c>512</c></remarks>
+                [<Literal>]
+                let SHOW_DOCUMENT_TYPE = 512.0
+
+                /// <remarks>TypeScript type: <c>1024</c></remarks>
+                [<Literal>]
+                let SHOW_DOCUMENT_FRAGMENT = 1024.0
+
+                /// <remarks>TypeScript type: <c>2048</c></remarks>
+                [<Literal>]
+                let SHOW_NOTATION = 2048.0
 
             module ReadableStream =
                 [<Interface>]

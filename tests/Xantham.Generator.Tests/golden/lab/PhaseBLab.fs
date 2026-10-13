@@ -95,22 +95,34 @@ type Anything = U5<string, float, bool, Timer, TimerOptions>
 /// </summary>
 [<Interface>]
 type CircleShape =
+    /// <remarks>TypeScript type: <c>"circle"</c></remarks>
     abstract kind: string with get, set
     abstract radius: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, radius: float) : CircleShape = jsNative
+    [<ParamObject; Emit("({ kind: 'circle', ...$0 })")>]
+    static member Create (radius: float) : CircleShape = jsNative
+
+module CircleShape =
+    /// <remarks>TypeScript type: <c>"circle"</c></remarks>
+    [<Literal>]
+    let kind = "circle"
 
 /// <summary>
 /// Another arm, whose tag needs a CompiledName.
 /// </summary>
 [<Interface>]
 type RoundRectShape =
+    /// <remarks>TypeScript type: <c>"round-rect"</c></remarks>
     abstract kind: string with get, set
     abstract width: float with get, set
     abstract height: float with get, set
     abstract radius: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, width: float, height: float, radius: float) : RoundRectShape = jsNative
+    [<ParamObject; Emit("({ kind: 'round-rect', ...$0 })")>]
+    static member Create (width: float, height: float, radius: float) : RoundRectShape = jsNative
+
+module RoundRectShape =
+    /// <remarks>TypeScript type: <c>"round-rect"</c></remarks>
+    [<Literal>]
+    let kind = "round-rect"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Shape =

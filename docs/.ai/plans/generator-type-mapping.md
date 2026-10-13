@@ -208,7 +208,10 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
   exists; else the literal's base primitive, Widened, with the literal recorded in the doc
   comment. In tagged-union positions the tag is consumed by `[<TypeScriptTaggedUnion>]`
   instead. A required literal parameter of a method overload set is a method of its own
-  (§4.8).
+  (§4.8). A required member, readonly or writable, typed by one string or numeric literal
+  (`readonly AT_TARGET: 2`) reads its primitive with the literal in an XML doc remark, is a
+  `[<Literal>]` in a module of the declaration's name (`Event.AT_TARGET = 2.0`), and is
+  written by `Create` rather than passed to it: Ergonomic, `MB011`/`SP005` (W6).
 - `boolean` literals `true`/`false` → `bool`, Widened, doc-noted.
 
 Wire: `TypeFlags` distinguishes every literal kind; `Value` carries the payload (bigint as

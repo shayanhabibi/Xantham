@@ -57,6 +57,14 @@ let private isLiteralKeyed' =
     | FsLiteralKeyed _ -> true
     | _ -> false
 
+/// The JavaScript key and value of a literal member.
+let private literalMember =
+    function
+    | FsProperty p -> p.Literal |> Option.map (fun value -> p.Name, value)
+    | _ -> None
+
+let private isLiteralMember (m: FsMember) = (literalMember m).IsSome
+
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
 /// and carries no `Create` parameter of its own.
@@ -84,7 +92,7 @@ let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
         || members |> List.exists isLiteralKeyed'
     then
         Some Reason.OverloadedMethod
-    elif members.Length > CreateParameterBudget then
+    elif (members |> List.filter (isLiteralMember >> not)).Length > CreateParameterBudget then
         Some Reason.OverBudget
     else
         None
@@ -124,7 +132,8 @@ let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list 
 /// Construction ergonomics (D3, §4.4): an interface gains a `[<ParamObject; Emit("$0")>]`
 /// Create overload mirroring its members, required members first, so consumers never hand-build
 /// objects. A method member reads as a delegate-typed parameter (§3 of the Fable 5 workarounds
-/// document): the delegate receives no `this`.
+/// document): the delegate receives no `this`. A literal member, inherited ones included, is
+/// written by the Emit and binds no parameter.
 let synthesizeParamObjects: Pass<ShapeModel> =
     {
         Name = "synthesize-paramobjects"
@@ -159,13 +168,15 @@ let synthesizeParamObjects: Pass<ShapeModel> =
 
                                     FsInterface decl
                                 | None ->
-                                    let parameters, callbacks =
-                                        members |> List.map (parameterFor decl.Name) |> List.unzip
+                                    let literals = members |> List.choose literalMember
+                                    let bound = members |> List.filter (isLiteralMember >> not)
+
+                                    let parameters, callbacks = bound |> List.map (parameterFor decl.Name) |> List.unzip
 
                                     let required, optional = parameters |> List.partition (fun p -> not p.Optional)
 
                                     let carried =
-                                        members
+                                        bound
                                         |> List.collect (function
                                             | FsMethod method' ->
                                                 let symbol = $"{decl.Name}.{method'.Name}"
@@ -187,15 +198,34 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                 ]
                                             | _ -> [])
 
+                                    let written =
+                                        if literals.IsEmpty then
+                                            []
+                                        else
+                                            [
+                                                Finding.make
+                                                    decl.Name
+                                                    (SynthesizeParamObjects.LiteralMembersWrittenByCreate(
+                                                        literals |> List.map fst |> String.concat ", "
+                                                    ))
+                                            ]
+
                                     findings <-
                                         findings
                                         @ [ Finding.make decl.Name SynthesizeParamObjects.ParamObjectSynthesized ]
+                                        @ written
                                         @ carried
                                         @ List.concat callbacks
 
                                     FsInterface
                                         { decl with
-                                            CreateOverloads = [ required @ optional ]
+                                            CreateOverloads =
+                                                [
+                                                    {
+                                                        Parameters = required @ optional
+                                                        Literals = literals
+                                                    }
+                                                ]
                                         }
                             | decl -> decl)
 

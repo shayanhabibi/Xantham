@@ -2563,3 +2563,96 @@ Node also loses its one `LU002` (`WorkerThreads.Worker.Error`, a retained litera
 change (`createEvent("AnimationEvent")` is `createEventAnimationEvent()`) and ApiVersion 8
 rejects the committed catalogue, so `catalog library identity` and `core-ts package` fail until
 it is regenerated; Node carries the `TR006`/`DO001` reduction.
+
+## Literal members (2026-10-13, W6 #137)
+
+A literal member is a property that `shapeMembers` reads as required and typed by one string
+or numeric literal, readonly or writable, where the literal is not an enum member or a union
+(`Spec.literalMemberValue`). A writable single-literal property can hold only that value, so it
+is a literal member too (lead amendment, 2026-10-14). Optional literal members, boolean literals,
+enum members, symbol-keyed members, methods and the exclusive-arm fold's members keep their earlier
+mapping. The member carries its value on `FsPropertyMember.Literal`, and its findings change
+from `TR007`/`TR006` (Widened) to `MB.LiteralMemberAsConstant` (`MB011`, Ergonomic).
+
+- **Instance (W6.2).** The interface still declares the primitive (`abstract AT_TARGET:
+  float`), with `/// <remarks>TypeScript type: <c>2</c></remarks>` after its own docs.
+- **Module (W6.1).** `renderBody` follows each interface with a block of `[<Literal>]` values
+  for the literal members it declares after `drop-inherited`: a numeric literal is a `float`
+  (`2.0`), a string literal a `string`. The block sits at `<declaration path>`, so
+  `nestedBlocks` opens `module <leaf> =` at whichever of the block and the declaration's nested
+  declarations comes first and merges the rest into it: one module per name. A subtype's module
+  holds its own literal members only; its inherited ones are read through the base's module.
+  Three names stay out of the module: `Create`, a static's name, and a name that opens a module
+  nested under the declaration (`<declaration>.<name>.*`). A declaration rendered from
+  customization source gets no module.
+- **Create (W6.3).** `synthesize-paramobjects` runs before `drop-inherited`, so a subtype's
+  members still include inherited literal members. They bind no parameter and do not count
+  against the 24-parameter budget; `FsCreateOverload.Literals` carries them in member order, and
+  `SP.LiteralMembersWrittenByCreate` (`SP005`, Exact) names them. A declaration of literal
+  members alone gets a parameterless `Create`. The Emit forms are
+  `[<ParamObject; Emit("({ kind: 'method', ...$0 })")>]` with parameters,
+  `[<Emit("({ NONE: 0, DONE: 1 })")>]` without, and `({kind: 'method', "None": $0})` where a
+  pattern-case parameter is renamed. Without literals, every form is unchanged.
+- **Escaping (W6.4).** A key is bare where it matches `[A-Za-z_][A-Za-z0-9_]*`, otherwise a
+  string. `Render.jsString` writes a single-quoted string with `\\`, `\'`, `\n`, `\r`, `\t`,
+  `\u2028`, `\u2029` and `\xHH` for other control characters, and writes `$`, `{` and `}` as
+  `\x24`, `\x7B` and `\x7D`, which Fable's Emit macro would otherwise read.
+- **Catalog.** The canonical declaration API text hashes a property as name, readonly and type,
+  and leaves out `Create`. Neither `Literal` nor `FsCreateOverload.Literals` joins it, so W6
+  needs no `CatalogCompatibility.ApiVersion` bump of its own (W5 took it to 8).
+- **Expression access.** In an expression, the fully qualified
+  `LiteralMemberLab.PhaseEvent.AT_TARGET` resolves to the interface's instance property
+  (FS0806); a pattern resolves it to the literal.
+  After `open LiteralMemberLab`, the unqualified `PhaseEvent.AT_TARGET` resolves to the literal
+  in both positions. A module abbreviation reads the value under qualified access
+  (`docs/.ai/footguns.md`).
+
+Lab `literal-member-lab`: `PhaseEvent` (methods beside `NONE`/`CAPTURING_PHASE`/`AT_TARGET`/
+`BUBBLING_PHASE`) gets `module PhaseEvent` and a `Create` writing the four constants;
+`PointerPhaseEvent` gets no module and a `Create` writing the inherited four; `MethodSignal`,
+`Tagged<T>` and `Phases` (literals alone, parameterless `Create`) carry their discriminant or
+constants; `WritableSignal`'s writable `kind: "writable"` is a literal member like a readonly
+one; `Quoted` pins the escaped marker, `-1` and `0.5`. `MB011` stands on all sixteen
+literal members (the inherited four of `PointerPhaseEvent` included), `SP005` on the seven
+`Create`s. In `NotLiterals`, the optional writable `mode` keeps `TR006`, the optional readonly
+`optional` keeps `TR007`, `level: Level.High` keeps `TR004`, `flag: true` is `bool`, and all
+four stay `Create` parameters under `Emit("$0")`. The RunGate matches `event.eventPhase` against
+`PhaseEvent.AT_TARGET` (compiled to `event.eventPhase === 2`, with no `AT_TARGET` read), runs a
+statement-position `Create`, reads the inherited constants off `PointerPhaseEvent.Create`, the
+discriminants of `MethodSignal`, `WritableSignal` and `Tagged<string>`, the JSON of `Phases.Create()`, and the
+escaped marker through a module abbreviation.
+
+Measured at integration on `integ/w6` (2026-10-14), over W5, with the lead amendment:
+
+| Golden | `TR007` | `TR006` | `MB011` | `SP005` | exact / ergonomic / widened / escape |
+| --- | --- | --- | --- | --- | --- |
+| `solid-js` | 54 → 0 | 6 → 1 | 0 → 59 | 0 → 5 | 69/180/92/1 → 69/188/84/1 |
+| `animejs` | 18 → 0 | 20 → 20 | 0 → 18 | 0 → 0 | 126/190/26/6 → 126/190/26/6 |
+| `@cloudflare/workers-types` | 0 → 0 | 221 → 77 | 0 → 144 | 0 → 121 | 417/1154/390/1 → 417/1259/285/1 |
+
+The readonly-only branch measured 54 `MB011` on `solid-js`, every one a DOM `Node` constant
+flattened into `H.JsxDevRuntime.Jsx.Result` and `Result.Item`, which gain `module Result =` and a
+merged `module Item =`; the other five are writable discriminants. Every `animejs` hit is on
+`DrawableSVGGeometry`, whose existing module now opens at its constants, so its nested string
+enums move up beside them; it carries an index signature and so no `Create`.
+
+Required string discriminants, readonly or writable, move to `MB011`, with each `Create`
+dropping the `kind` parameter and writing it in the Emit. The readonly-only branch moved
+`workers-types` `TR006` 228 → 196; the writable discriminants take it to 77. In the labs,
+`TR006` falls in `generic-tag-lab` 23 → 0, `shared-tag-lab` 31 → 2,
+`compiler-lib-ownership-lab` 6 → 0 (the `ClassDecoratorContext` family),
+`catalog-alias-api-lab` 4 → 0, `projection-lab` 4 → 2, `literal-overload-lab` 4 → 3, and 2 or
+1 → 0 in `nominal-lab`, `instantiation-operand-lab`, `catalog-recursive-json-lab`, `lab`,
+`customization-lab`, `flags-lab`, `inherit-lab` and `subpath-lab`.
+
+Core.TS and Node are regenerated under the T4 override and compile against each other:
+
+| Binding | `TR007` | `MB011` | `TR006` | `SP005` | `SP001` / `SP003` | tiers |
+| --- | --- | --- | --- | --- | --- | --- |
+| Core.TS | 6,494 → 0 | 0 → 6,515 | 89 → 68 | 0 → 138 | 1,098/519 → 1,124/493 | 1302/2203/785/5 → 1302/2397/591/5 |
+| Node | 86 → 0 | 0 → 182 | 673 → 577 | 0 → 70 | 1,120/215 → 1,122/213 | 775/2025/829/5 → 775/2094/760/5 |
+
+In Core.TS, `Event.Create` writes `NONE`, `CAPTURING_PHASE`, `AT_TARGET` and `BUBBLING_PHASE`
+rather than taking them, and 26 interfaces refused for the parameter budget (`UIEvent`,
+`ProgressEvent` and `DOMException` among them) now carry a `Create`, raising `SP002` 884 → 988
+and `TR055` 678 → 704 with their method parameters. The catalogue's API hashes are unchanged.

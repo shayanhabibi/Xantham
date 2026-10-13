@@ -3103,7 +3103,8 @@ let shapePassTests =
                                 Docs = ""
                                 Tags = []
                                 ReadOnly = false
-                                Type = FsFloat } ]
+                                Type = FsFloat
+                                Literal = None } ]
                       Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
@@ -3305,7 +3306,8 @@ let shapePassTests =
                                     Docs = ""
                                     Tags = []
                                     ReadOnly = true
-                                    Type = FsString } ]
+                                    Type = FsString
+                                    Literal = None } ]
                           Entrypoint = None
                           CreateOverloads = []
                           Statics = [] }
@@ -3394,7 +3396,8 @@ let shapePassTests =
                                     Docs = ""
                                     Tags = []
                                     ReadOnly = true
-                                    Type = FsFloat } ]
+                                    Type = FsFloat
+                                    Literal = None } ]
                           Entrypoint = None
                           CreateOverloads = []
                           Statics = [] }
@@ -3566,13 +3569,15 @@ let shapePassTests =
                                 Docs = ""
                                 Tags = []
                                 ReadOnly = false
-                                Type = FsOption FsFloat }
+                                Type = FsOption FsFloat
+                                Literal = None }
                           FsProperty
                               { Name = "target"
                                 Docs = ""
                                 Tags = []
                                 ReadOnly = false
-                                Type = FsString } ]
+                                Type = FsString
+                                Literal = None } ]
                       Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
@@ -3585,7 +3590,7 @@ let shapePassTests =
             match shaped.Decls with
             | [ FsInterface decl ] ->
                 match decl.CreateOverloads with
-                | [ [ target; delay ] ] ->
+                | [ { Parameters = [ target; delay ]; Literals = [] } ] ->
                     Expect.equal (target.Name, target.Optional) ("target", false) "required first"
                     Expect.equal (delay.Name, delay.Optional) ("delay", true) "optional after"
                 | overloads -> failtest $"expected one two-parameter overload, got %A{overloads}"
@@ -3612,7 +3617,8 @@ let shapePassTests =
                   Docs = ""
                   Tags = []
                   ReadOnly = false
-                  Type = reference }
+                  Type = reference
+                  Literal = None }
 
         let paramObjectMethod name parameters returns =
             FsMethod
@@ -3649,7 +3655,7 @@ let shapePassTests =
             match shaped.Decls with
             | [ FsInterface decl ] ->
                 match decl.CreateOverloads with
-                | [ [ label; play; seek; tag ] ] ->
+                | [ { Parameters = [ label; play; seek; tag ]; Literals = [] } ] ->
                     Expect.equal (label.Name, label.Type) ("label", FsString) "the property is unchanged"
                     Expect.equal play.Type (FsFunc(FsUnit, FsUnit)) "a void method binds unit -> unit"
                     Expect.equal seek.Type (FsFunc(FsFloat, FsBool)) "and a returning one float -> bool"
@@ -3731,6 +3737,148 @@ let shapePassTests =
                      | FsInterface d when not d.CreateOverloads.IsEmpty -> Some d.Name
                      | _ -> None))
                 "and none of them gained a Create"
+
+        // W6 (#137). A literal member is written by the Create Emit rather than bound.
+        let literalProperty name literal =
+            FsProperty
+                { Name = name
+                  Docs = ""
+                  Tags = []
+                  ReadOnly = true
+                  Type =
+                    match literal with
+                    | LitString _ -> FsString
+                    | _ -> FsFloat
+                  Literal = Some literal }
+
+        testCase "a literal member is written by Create, not bound as a parameter" <| fun _ ->
+            let decl =
+                paramObjectDecl "Signal" [
+                    paramObjectProperty "label" FsString
+                    literalProperty "kind" (LitString "method")
+                ]
+
+            let model = { Build.shapeModel [] with Decls = [ decl ] }
+            let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Key, f.Symbol, f.Tier))
+                [ "SP001", "Signal", Ergonomic; "SP005", "Signal", Exact ]
+                "the synthesis, then the literals it writes"
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                match decl.CreateOverloads with
+                | [ { Parameters = [ label ]; Literals = literals } ] ->
+                    Expect.equal label.Name "label" "the other member stays a parameter"
+                    Expect.equal literals [ "kind", LitString "method" ] "the literal is written by the Emit"
+                | overloads -> failtest $"expected one one-parameter overload, got %A{overloads}"
+            | decls -> failtest $"expected the interface back, got %A{decls}"
+
+        testCase "a declaration of literal members alone gets a parameterless Create" <| fun _ ->
+            let decl =
+                paramObjectDecl "Phases" [
+                    literalProperty "NONE" (LitNumber 0.0)
+                    literalProperty "DONE" (LitNumber 1.0)
+                ]
+
+            let model = { Build.shapeModel [] with Decls = [ decl ] }
+            let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
+
+            Expect.equal (findings |> List.map _.Key) [ "SP001"; "SP005" ] "synthesized, not refused for having no members"
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal
+                    decl.CreateOverloads
+                    [ { Parameters = []
+                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ] } ]
+                    "every member is written"
+            | decls -> failtest $"expected the interface back, got %A{decls}"
+
+        testCase "literal members do not count against the Create parameter budget" <| fun _ ->
+            let wide count =
+                paramObjectDecl $"Wide{count}" [
+                    for i in 1..count do
+                        yield paramObjectProperty $"a{i}" FsFloat
+
+                    yield literalProperty "ONE" (LitNumber 1.0)
+                    yield literalProperty "TWO" (LitNumber 2.0)
+                ]
+
+            let model = { Build.shapeModel [] with Decls = [ wide 24; wide 25 ] }
+            let _, findings = Build.runPass ParamObjects.synthesizeParamObjects model
+
+            Expect.equal
+                (findings |> List.filter (fun f -> f.Key = "SP003") |> List.map _.Symbol)
+                [ "Wide25" ]
+                "twenty-four parameters and two literals fit; twenty-five parameters do not"
+
+        testCase "drop-inherited drops a literal member its base declares" <| fun _ ->
+            let atTarget = literalProperty "AT_TARGET" (LitNumber 2.0)
+
+            let derived =
+                match paramObjectDecl "Derived" [ atTarget; paramObjectProperty "pointerId" FsFloat ] with
+                | FsInterface d -> FsInterface { d with Inherits = [ FsNamed "Base" ] }
+                | other -> other
+
+            let model = { Build.shapeModel [] with Decls = [ paramObjectDecl "Base" [ atTarget ]; derived ] }
+            let shaped, _ = Build.runPass Inherited.dropInherited model
+
+            match shaped.Decls with
+            | [ FsInterface base'; FsInterface derived ] ->
+                Expect.equal base'.Members [ atTarget ] "the base keeps it"
+                Expect.equal derived.Members [ paramObjectProperty "pointerId" FsFloat ] "the derived copy drops"
+            | decls -> failtest $"expected both interfaces back, got %A{decls}"
+
+        testCase "shape-interfaces marks a required single-literal member, readonly or writable" <| fun _ ->
+            // `interface Event { readonly AT_TARGET: 2; level: 2; readonly optional?: 2 }`
+            let eventSymbol = Build.symbol 110 "Event" SymbolFlags.Interface
+
+            let eventType =
+                { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
+                    SymbolName = Some((fun value -> value * uom<symbolName>) "Event")
+                    Members =
+                        [ { Build.resolvedMember (Build.symbol 111 "AT_TARGET" SymbolFlags.Property) 40 with
+                              ReadOnly = true }
+                          Build.resolvedMember (Build.symbol 112 "level" SymbolFlags.Property) 40
+                          { Build.resolvedMember (Build.symbol 113 "optional" SymbolFlags.Property) 40 with
+                              ReadOnly = true
+                              Optional = true } ] }
+
+            let model =
+                { Build.shapeModel (eventType :: numberLiteral 40 2.0 :: Build.primitives) with
+                    Harvest = { Exports = [ Build.export "Event" eventSymbol ]
+                                AmbientClasses = []
+                                Namespaces = Map.empty
+                                ShadowedByLib = 0
+                              }
+                    ExportTypes = Map.ofList [ 110<symbolId>, { Declared = Some 20<typeId>; Value = None } ] }
+
+            let named, _ = Build.runPass ExportNames.nameExports model
+            let shaped, findings = Build.runPass Interfaces.shapeInterfaces named
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal
+                    (decl.Members
+                     |> List.choose (function
+                         | FsProperty p -> Some(p.Name, p.Type, p.Literal)
+                         | _ -> None))
+                    [ "AT_TARGET", FsFloat, Some(LitNumber 2.0)
+                      "level", FsFloat, Some(LitNumber 2.0)
+                      "optional", FsOption FsFloat, None ]
+                    "only the optional member lacks its literal"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.equal
+                (findings
+                 |> List.filter (fun f -> f.Key = "MB011" || f.Key = "TR007")
+                 |> List.map (fun f -> f.Key, f.Symbol, f.Message))
+                [ "MB011", "Event.AT_TARGET", "literal member 2: read as its primitive, declared as a [<Literal>], written by Create"
+                  "MB011", "Event.level", "literal member 2: read as its primitive, declared as a [<Literal>], written by Create"
+                  "TR007", "Event.optional", (Finding.make "" TypeReference.NumericLiteralToFloat).Message ]
+                "a literal member replaces its widening; the optional one keeps it"
 
         testCase "a constructor object keeps its own Create and reports nothing" <| fun _ ->
             let decl =
@@ -4331,7 +4479,7 @@ let shapePassTests =
 
         testCase "repair-arity widens a bare or mis-applied reference to a generic tagged union" <| fun _ ->
             let property name reference =
-                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference }
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None }
 
             let model =
                 { Build.shapeModel [] with
@@ -4891,7 +5039,8 @@ let shapePassTests =
                                             Docs = ""
                                             Tags = []
                                             ReadOnly = true
-                                            Type = FsApp("Params", [ FsString ]) } ]
+                                            Type = FsApp("Params", [ FsString ])
+                                            Literal = None } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -4943,7 +5092,8 @@ let shapePassTests =
                                             Docs = ""
                                             Tags = []
                                             ReadOnly = true
-                                            Type = FsApp("ExcludeStrict", [ FsString; FsFloat ]) } ]
+                                            Type = FsApp("ExcludeStrict", [ FsString; FsFloat ])
+                                            Literal = None } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -5112,7 +5262,8 @@ let shapePassTests =
                                             Docs = ""
                                             Tags = []
                                             ReadOnly = false
-                                            Type = FsUnit } ]
+                                            Type = FsUnit
+                                            Literal = None } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }

@@ -38,8 +38,15 @@ type Derived =
 [<Interface>]
 type Narrowed =
     inherit Base
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, at: float) : Narrowed = jsNative
+    /// <remarks>TypeScript type: <c>"fixed"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'fixed', ...$0 })")>]
+    static member Create (at: float) : Narrowed = jsNative
+
+module Narrowed =
+    /// <remarks>TypeScript type: <c>"fixed"</c></remarks>
+    [<Literal>]
+    let name = "fixed"
 
 /// <summary>
 /// The diamond: <c>Both</c> extends an interface that already extends the other, and both operands

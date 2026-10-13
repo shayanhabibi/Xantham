@@ -35,13 +35,25 @@ module Client =
         module Options =
             [<Interface>]
             type Choice =
+                /// <remarks>TypeScript type: <c>"auto"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string) : Choice = jsNative
+                [<Emit("({ type: 'auto' })")>]
+                static member Create () : Choice = jsNative
+
+            module Choice =
+                /// <remarks>TypeScript type: <c>"auto"</c></remarks>
+                [<Literal>]
+                let ``type`` = "auto"
 
             [<Interface>]
             type Choice2 =
+                /// <remarks>TypeScript type: <c>"tool"</c></remarks>
                 abstract ``type``: string with get, set
                 abstract toolName: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, toolName: string) : Choice2 = jsNative
+                [<ParamObject; Emit("({ type: 'tool', ...$0 })")>]
+                static member Create (toolName: string) : Choice2 = jsNative
+
+            module Choice2 =
+                /// <remarks>TypeScript type: <c>"tool"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool"

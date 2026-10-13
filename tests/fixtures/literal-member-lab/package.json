@@ -1,0 +1,8 @@
+{
+    "name": "literal-member-lab",
+    "version": "1.0.0",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for literal members (W6, #137): a same-named [<Literal>] module, XML docs giving the literal type, and a Create that writes literal members, inherited ones included, in a parenthesised Emit. Tracked in git, no npm install."
+}

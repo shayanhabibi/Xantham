@@ -123,7 +123,7 @@ let renderTests =
                   ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "EsName"
-                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName" } ] ] }
+                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName"; Literal = None } ] ] }
 
             let dom: Render.GroupModule =
                 { Group = "typescript/lib" * uom<npmDependency>
@@ -135,7 +135,7 @@ let renderTests =
                   ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "DomName"
-                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName" } ] ] }
+                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName"; Literal = None } ] ] }
 
             let files = renderGroups ctx [ es; dom ] baseModel
             Expect.equal (files |> Map.keys |> Seq.toList) [ "groups/Fable.Core.TS.fs" ] "one combined source file"
@@ -202,7 +202,7 @@ let renderTests =
                       Statics = [] }
 
             let property name reference =
-                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference }
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None }
 
             let model =
                 { baseModel with
@@ -338,13 +338,16 @@ let renderTests =
                                         Docs = ""
                                         Tags = []
                                         ReadOnly = false
-                                        Type = FsTypeVar "T" } ]
+                                        Type = FsTypeVar "T"
+                                        Literal = None } ]
                                 Entrypoint = None
                                 CreateOverloads =
-                                  [ [ { Name = "held"
-                                        Type = FsTypeVar "T"
-                                        Optional = false
-                                        Rest = false } ] ]
+                                  [ { Parameters =
+                                        [ { Name = "held"
+                                            Type = FsTypeVar "T"
+                                            Optional = false
+                                            Rest = false } ]
+                                      Literals = [] } ]
                                 Statics = [] }
                           FsAbbrev
                               { Value = None; Name = "Mapper"
@@ -457,13 +460,15 @@ let renderTests =
                                           Docs = ""
                                           Tags = []
                                           ReadOnly = true
-                                          Type = FsBool }
+                                          Type = FsBool
+                                          Literal = None }
                                     FsProperty
                                         { Name = "count"
                                           Docs = ""
                                           Tags = []
                                           ReadOnly = false
-                                          Type = FsOption FsFloat }
+                                          Type = FsOption FsFloat
+                                          Literal = None }
                                     FsMethod
                                         { Name = "reset"
                                           Docs = ""
@@ -477,14 +482,16 @@ let renderTests =
                                           Return = FsNamed "Options" } ]
                                 Entrypoint = None
                                 CreateOverloads =
-                                  [ [ { Name = "onlyFirst"
-                                        Optional = false
-                                        Rest = false
-                                        Type = FsBool }
-                                      { Name = "count"
-                                        Optional = true
-                                        Rest = false
-                                        Type = FsOption FsFloat } ] ]
+                                  [ { Parameters =
+                                        [ { Name = "onlyFirst"
+                                            Optional = false
+                                            Rest = false
+                                            Type = FsBool }
+                                          { Name = "count"
+                                            Optional = true
+                                            Rest = false
+                                            Type = FsOption FsFloat } ]
+                                      Literals = [] } ]
                                 Statics = [] }
                           FsStringEnum
                               { Name = "TimeUnit"
@@ -948,7 +955,7 @@ let symbolKeyedRenderTests =
         )
 
     let property symbol name readOnly reference =
-        FsSymbolKeyed(symbol, FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = readOnly; Type = reference })
+        FsSymbolKeyed(symbol, FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = readOnly; Type = reference; Literal = None })
 
     testList "render symbol-keyed members" [
         testCase "an inherited seq renders as an inherit line" <| fun _ ->
@@ -1059,4 +1066,156 @@ let literalKeyedRenderTests =
                 source
                 "    [<Emit(\"$0.on('close', $1)\")>]\n    member _.onClose(listener: string) : unit = jsNative"
                 "no abstract slot for a derived class to fill"
+    ]
+
+/// W6 (#137): a literal member is a `[<Literal>]` in a module of its declaration's name, carries
+/// its TypeScript type in an XML doc, and is written by `Create`.
+[<Tests>]
+let literalMemberRenderTests =
+    let interface' name members creates =
+        FsInterface
+            { Name = name
+              Docs = ""
+              Tags = []
+              Order = None
+              TypeParameters = []
+              Inherits = []
+              Members = members
+              Entrypoint = None
+              CreateOverloads = creates
+              Statics = [] }
+
+    let literal name value =
+        FsProperty
+            { Name = name
+              Docs = ""
+              Tags = []
+              ReadOnly = true
+              Type =
+                match value with
+                | LitString _ -> FsString
+                | _ -> FsFloat
+              Literal = Some value }
+
+    let property name reference =
+        FsProperty
+            { Name = name
+              Docs = ""
+              Tags = []
+              ReadOnly = true
+              Type = reference
+              Literal = None }
+
+    let parameter name reference =
+        { Name = name
+          Optional = false
+          Rest = false
+          Type = reference }
+
+    let render decls =
+        renderAll { baseModel with Decls = decls } |> Map.find "TestPkg.fs"
+
+    testList "render literal members" [
+        testCase "a literal member is a [<Literal>], documented, and written by Create" <| fun _ ->
+            let source =
+                render
+                    [ interface'
+                          "Event"
+                          [ property "eventPhase" FsFloat; literal "AT_TARGET" (LitNumber 2.0) ]
+                          [ { Parameters = [ parameter "eventPhase" FsFloat ]
+                              Literals = [ "AT_TARGET", LitNumber 2.0 ] } ] ]
+
+            Expect.stringContains
+                source
+                "    /// <remarks>TypeScript type: <c>2</c></remarks>\n    abstract AT_TARGET: float\n"
+                "the instance member keeps its primitive"
+
+            Expect.stringContains
+                source
+                "    [<ParamObject; Emit(\"({ AT_TARGET: 2, ...$0 })\")>]\n    static member Create (eventPhase: float) : Event = jsNative"
+                "Create spreads its parameters after the literals"
+
+            Expect.stringContains
+                source
+                "module Event =\n    /// <remarks>TypeScript type: <c>2</c></remarks>\n    [<Literal>]\n    let AT_TARGET = 2.0"
+                "the module declares the value"
+
+        testCase "a Create of literals alone takes no ParamObject" <| fun _ ->
+            let source =
+                render
+                    [ interface'
+                          "Phases"
+                          [ literal "NONE" (LitNumber 0.0) ]
+                          [ { Parameters = []; Literals = [ "NONE", LitNumber 0.0 ] } ] ]
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"({ NONE: 0 })\")>]\n    static member Create () : Phases = jsNative"
+                "the Emit is the whole object"
+
+        testCase "a nested declaration shares the constants module" <| fun _ ->
+            let source =
+                render
+                    [ interface' "Event" [ literal "AT_TARGET" (LitNumber 2.0) ] []
+                      interface' "Event.Options" [ property "capture" FsBool ] [] ]
+
+            let modules =
+                System.Text.RegularExpressions.Regex.Matches(source, "module Event =").Count
+
+            Expect.equal modules 1 "one module"
+            let at = source.IndexOf "module Event ="
+            Expect.isGreaterThan (source.IndexOf("let AT_TARGET = 2.0", at)) at "the constant is in it"
+            Expect.isGreaterThan (source.IndexOf("type Options =", at)) at "and so is the nested declaration"
+
+        testCase "a literal named Create, a static's name or a nested module's name is left out" <| fun _ ->
+            let gauge =
+                match interface' "Gauge" [ literal "UNIT" (LitString "mm"); literal "Create" (LitNumber 1.0) ] [] with
+                | FsInterface d ->
+                    FsInterface
+                        { d with
+                            Statics =
+                                [ exportValue "UNIT" (ImportFrom("Gauge.UNIT", "test-pkg" * uom<importSpecifier>)) false FsString ] }
+                | other -> other
+
+            let source =
+                render
+                    [ gauge
+                      interface' "Event" [ literal "kind" (LitString "e"); literal "AT_TARGET" (LitNumber 2.0) ] []
+                      interface' "Event.kind.Detail" [ property "x" FsFloat ] [] ]
+
+            Expect.isFalse (source.Contains "module Gauge =") "neither of Gauge's literals reaches a module"
+            Expect.isFalse (source.Contains "let kind") "kind would collide with module kind"
+            Expect.stringContains source "    let AT_TARGET = 2.0" "the other literal stays"
+
+        testCase "a renamed parameter keeps the literals in the object" <| fun _ ->
+            // The rename reports `EmitGroups.ParameterNameEscaped`, so this reads the files
+            // without `renderAll`'s no-findings check.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ interface'
+                              "Signal"
+                              [ literal "kind" (LitString "method"); property "None" FsString ]
+                              [ { Parameters = [ parameter "None" FsString ]
+                                  Literals = [ "kind", LitString "method" ] } ] ] }
+
+            let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
+            let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
+
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"({kind: 'method', \\\"None\\\": $0})\")>]"
+                "the literal precedes the renamed field"
+
+        testCase "a JavaScript string escapes quotes, line breaks and Emit holes" <| fun _ ->
+            Expect.equal
+                (Render.jsString "it's \"q\" \\ $0 {{x}}\n\u2028\u0001")
+                "'it\\'s \"q\" \\\\ \\x240 \\x7B\\x7Bx\\x7D\\x7D\\n\\u2028\\x01'"
+                "single-quoted"
+
+            Expect.equal (Render.jsKey "data-x") "'data-x'" "a key that is not an identifier is quoted"
+            Expect.equal (Render.jsKey "AT_TARGET") "AT_TARGET" "an identifier is bare"
+            Expect.equal (Render.fsLiteralValue (LitNumber -1.0)) "-1.0" "a float literal"
+            Expect.equal (Render.fsLiteralValue (LitNumber 0.5)) "0.5" "a fraction"
     ]

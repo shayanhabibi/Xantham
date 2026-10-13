@@ -12,15 +12,27 @@ open Fable.Core.TS.Dom
 
 [<Interface>]
 type Attr =
+    /// <remarks>TypeScript type: <c>"attr"</c></remarks>
     abstract kind: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string) : Attr = jsNative
+    [<Emit("({ kind: 'attr' })")>]
+    static member Create () : Attr = jsNative
+
+module Attr =
+    /// <remarks>TypeScript type: <c>"attr"</c></remarks>
+    [<Literal>]
+    let kind = "attr"
 
 [<Interface>]
 type GLAttr =
+    /// <remarks>TypeScript type: <c>"gl"</c></remarks>
     abstract kind: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string) : GLAttr = jsNative
+    [<Emit("({ kind: 'gl' })")>]
+    static member Create () : GLAttr = jsNative
+
+module GLAttr =
+    /// <remarks>TypeScript type: <c>"gl"</c></remarks>
+    [<Literal>]
+    let kind = "gl"
 
 type Narrow = JS.Record<string, Attr>
 

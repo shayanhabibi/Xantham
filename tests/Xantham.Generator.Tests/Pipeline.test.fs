@@ -5424,6 +5424,156 @@ let pipelineTests =
                           refused
                           [ "Choice"; "Dialog"; "Drawable"; "Emitter"; "Logger"; "Socket"; "Store" ]
                           "a literal-keyed member refuses Create as an overload does" ])
+
+        // W6 (#137): a required member typed by one string or numeric literal reads its
+        // primitive, is a `[<Literal>]` in the declaration's same-named module, and is written by
+        // `Create` rather than passed to it.
+        let literalMemberLab = handFixture "literal-member-lab"
+        let literalMemberConfig = handConfig literalMemberLab
+
+        yield!
+            fixtureTests "literal-member-lab" literalMemberLab literalMemberConfig (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate literalMemberConfig package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                /// The attribute line and the signature line of a declaration's `Create`.
+                let createOf (source: string) (name: string) =
+                    let lines = source.Replace("\r\n", "\n").Split '\n'
+
+                    match
+                        lines
+                        |> Array.tryFindIndex (fun line ->
+                            line.TrimStart().StartsWith "static member Create"
+                            && (line.Contains $") : {name} = jsNative" || line.Contains $") : {name}<"))
+                    with
+                    | Some at -> lines[at - 1].Trim(), lines[at].Trim()
+                    | None -> failtest $"no Create for {name} in the rendered source"
+
+                [ testCase "literal-member-lab: literal members are [<Literal>] values in a same-named module" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "module PhaseEvent =" "a type with methods gets a module"
+                      Expect.stringContains source "    [<Literal>]\n    let AT_TARGET = 2.0" "a numeric literal is a float"
+                      Expect.stringContains source "    let NONE = 0.0" "every constant is declared"
+                      Expect.stringContains source "module MethodSignal =" "a discriminant gets a module"
+                      Expect.stringContains source "    let kind = \"method\"" "a string literal is a string"
+                      Expect.stringContains source "module WritableSignal =" "a writable discriminant gets a module"
+                      Expect.stringContains source "    let kind = \"writable\"" "a writable literal is declared"
+                      Expect.stringContains source "module Tagged =" "a generic declaration gets a module"
+                      Expect.stringContains source "    let NEGATIVE = -1.0" "a negative literal"
+                      Expect.stringContains source "    let HALF = 0.5" "a fractional literal"
+                      Expect.stringContains source "    let marker = \"it's \\\"q\\\" \\\\ $0 {{x}}\"" "an F# string literal"
+                      Expect.stringContains source "abstract AT_TARGET: float" "the instance keeps the member"
+                      Expect.isFalse (source.Contains "module PointerPhaseEvent =") "inherited constants stay on the base"
+                      Expect.isFalse (source.Contains "module NotLiterals =") "no literal member, no module"
+
+                  testCase "literal-member-lab: a literal member's doc gives its TypeScript type" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "    /// <remarks>TypeScript type: <c>2</c></remarks>\n    abstract AT_TARGET: float"
+                          "the numeric literal"
+
+                      Expect.stringContains source "<remarks>TypeScript type: <c>\"method\"</c></remarks>" "the string literal"
+
+                  testCase "literal-member-lab: Create writes literal members, inherited ones included" <| fun _ ->
+                      let source = generate () |> sourceOf
+                      let constants = "({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })"
+
+                      for name in [ "PhaseEvent"; "PointerPhaseEvent" ] do
+                          let attribute, create = createOf source name
+                          Expect.equal attribute $"[<ParamObject; Emit(\"{constants}\")>]" $"{name} writes the constants"
+
+                          for constant in [ "NONE"; "CAPTURING_PHASE"; "AT_TARGET"; "BUBBLING_PHASE" ] do
+                              Expect.isFalse (create.Contains $"{constant}:") $"{name}.Create takes no {constant}"
+
+                      Expect.equal
+                          (fst (createOf source "MethodSignal"))
+                          "[<ParamObject; Emit(\"({ kind: 'method', ...$0 })\")>]"
+                          "a discriminant"
+
+                      Expect.equal
+                          (createOf source "WritableSignal")
+                          ("[<ParamObject; Emit(\"({ kind: 'writable', ...$0 })\")>]",
+                           "static member Create (name: string) : WritableSignal = jsNative")
+                          "a writable discriminant is written, not passed"
+
+                      Expect.equal
+                          (createOf source "Phases")
+                          ("[<Emit(\"({ NONE: 0, DONE: 1 })\")>]", "static member Create () : Phases = jsNative")
+                          "a constants-only Create takes no parameters"
+
+                      Expect.equal
+                          (createOf source "Tagged")
+                          ("[<ParamObject; Emit(\"({ kind: 'tagged', ...$0 })\")>]",
+                           "static member Create (value: 'T) : Tagged<'T> = jsNative")
+                          "a generic Create"
+
+                  testCase "literal-member-lab: a string literal is an escaped JavaScript string in the Emit" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.equal
+                          (fst (createOf source "Quoted"))
+                          "[<ParamObject; Emit(\"({ marker: 'it\\\\'s \\\"q\\\" \\\\\\\\ \\\\x240 \\\\x7B\\\\x7Bx\\\\x7D\\\\x7D', NEGATIVE: -1, HALF: 0.5, ...$0 })\")>]"
+                          "quotes, backslashes, $ and braces are escaped"
+
+                  testCase "literal-member-lab: findings name each literal member and each negative" <| fun _ ->
+                      let rendered = generate ()
+
+                      let symbolsOf key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      Expect.equal
+                          (symbolsOf "MB011")
+                          ([ "MethodSignal.kind"
+                             "Phases.DONE"
+                             "Phases.NONE"
+                             "PhaseEvent.AT_TARGET"
+                             "PhaseEvent.BUBBLING_PHASE"
+                             "PhaseEvent.CAPTURING_PHASE"
+                             "PhaseEvent.NONE"
+                             "PointerPhaseEvent.AT_TARGET"
+                             "PointerPhaseEvent.BUBBLING_PHASE"
+                             "PointerPhaseEvent.CAPTURING_PHASE"
+                             "PointerPhaseEvent.NONE"
+                             "Quoted.HALF"
+                             "Quoted.NEGATIVE"
+                             "Quoted.marker"
+                             "Tagged.kind"
+                             "WritableSignal.kind" ]
+                           |> List.sort)
+                          "every required single-literal member, readonly or writable"
+
+                      Expect.equal (symbolsOf "TR007") [ "NotLiterals.optional" ] "an optional readonly literal member widens"
+                      Expect.equal (symbolsOf "TR006") [ "NotLiterals.mode" ] "an optional writable literal member widens"
+                      Expect.contains (symbolsOf "TR004") "NotLiterals.level" "an enum member is not a literal member"
+
+                      Expect.equal
+                          (symbolsOf "SP005")
+                          [ "MethodSignal"; "PhaseEvent"; "Phases"; "PointerPhaseEvent"; "Quoted"; "Tagged"; "WritableSignal" ]
+                          "every Create that writes a literal"
+
+                      Expect.isTrue
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "MB011") |> List.forall (fun f -> f.Tier = Ergonomic))
+                          "MB011 is ergonomic"
+
+                      Expect.isTrue
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "SP005") |> List.forall (fun f -> f.Tier = Exact))
+                          "SP005 is exact"
+
+                  testCase "literal-member-lab: a member that is not a literal member stays a Create parameter" <| fun _ ->
+                      let source = generate () |> sourceOf
+                      let attribute, create = createOf source "NotLiterals"
+
+                      Expect.equal attribute "[<ParamObject; Emit(\"$0\")>]" "no literal is written"
+
+                      for parameter in [ "?mode"; "flag: bool"; "?optional" ] do
+                          Expect.stringContains create parameter $"{parameter} stays a parameter" ])
     ]
 
 [<Tests>]

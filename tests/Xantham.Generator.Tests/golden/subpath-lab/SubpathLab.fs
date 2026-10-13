@@ -24,9 +24,15 @@ type Payload =
 
 [<Interface>]
 type RootSession =
+    /// <remarks>TypeScript type: <c>"session"</c></remarks>
     abstract kind: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string) : RootSession = jsNative
+    [<Emit("({ kind: 'session' })")>]
+    static member Create () : RootSession = jsNative
+
+module RootSession =
+    /// <remarks>TypeScript type: <c>"session"</c></remarks>
+    [<Literal>]
+    let kind = "session"
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -72,9 +78,15 @@ module Client =
     module Deep =
         [<Interface>]
         type DeepOnly =
+            /// <remarks>TypeScript type: <c>2</c></remarks>
             abstract level: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (level: float) : DeepOnly = jsNative
+            [<Emit("({ level: 2 })")>]
+            static member Create () : DeepOnly = jsNative
+
+        module DeepOnly =
+            /// <remarks>TypeScript type: <c>2</c></remarks>
+            [<Literal>]
+            let level = 2.0
 
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

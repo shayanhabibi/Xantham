@@ -1140,6 +1140,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
                                             Tags = member_.Tags
                                             ReadOnly = not member_.Settable
                                             Type = reference
+                                            Literal = None
                                         }
                                 | ExportConstructor(parameters, returns) ->
                                     FsConstructor

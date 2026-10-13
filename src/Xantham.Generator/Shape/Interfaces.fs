@@ -399,6 +399,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 Tags = m.Tags
                                 ReadOnly = m.ReadOnly
                                 Type = optionalRef optional reference
+                                Literal = None
                             },
                         refFindings
 
@@ -430,7 +431,10 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         let required, optional =
                                             (sharedParams @ ownParams) |> List.partition (fun p -> not p.Optional)
 
-                                        required @ optional,
+                                        {
+                                            Parameters = required @ optional
+                                            Literals = []
+                                        },
                                         List.concat sharedParamFindings @ List.concat ownParamFindings)
                                     |> List.unzip
 

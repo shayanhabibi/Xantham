@@ -175,6 +175,7 @@ module Es =
         /// <summary>
         /// The kind of element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"class"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class.
@@ -202,8 +203,16 @@ module Es =
         /// </example>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, addInitializer: ((unit -> unit) -> unit), ?name: string, ?metadata: obj) : ClassDecoratorContext<'Class> = jsNative
+        [<ParamObject; Emit("({ kind: 'class', ...$0 })")>]
+        static member Create (addInitializer: ((unit -> unit) -> unit), ?name: string, ?metadata: obj) : ClassDecoratorContext<'Class> = jsNative
+
+    module ClassDecoratorContext =
+        /// <summary>
+        /// The kind of element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"class"</c></remarks>
+        [<Literal>]
+        let kind = "class"
 
     /// <summary>
     /// Context provided to a class method decorator.
@@ -219,6 +228,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"method"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -265,8 +275,30 @@ module Es =
         /// </example>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassMethodDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassMethodDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'method', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassMethodDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassMethodDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassMethodDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"method"</c></remarks>
+        [<Literal>]
+        let kind = "method"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the current value of the method from the provided object.
+            /// </summary>
+            /// <example><c>let fn = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class getter decorator.
@@ -282,6 +314,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"getter"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -306,8 +339,30 @@ module Es =
         /// </summary>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassGetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassGetterDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'getter', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassGetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassGetterDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassGetterDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"getter"</c></remarks>
+        [<Literal>]
+        let kind = "getter"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class setter decorator.
@@ -323,6 +378,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"setter"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -347,8 +403,30 @@ module Es =
         /// </summary>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassSetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassSetterDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'setter', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassSetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassSetterDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassSetterDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"setter"</c></remarks>
+        [<Literal>]
+        let kind = "setter"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class <c>accessor</c> field decorator.
@@ -364,6 +442,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"accessor"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -387,8 +466,35 @@ module Es =
         /// </summary>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassAccessorDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassAccessorDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'accessor', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassAccessorDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassAccessorDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassAccessorDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"accessor"</c></remarks>
+        [<Literal>]
+        let kind = "accessor"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Describes the target provided to class <c>accessor</c> field decorators.
@@ -448,6 +554,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"field"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -471,8 +578,33 @@ module Es =
         /// </summary>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassFieldDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassFieldDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'field', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassFieldDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassFieldDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassFieldDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"field"</c></remarks>
+        [<Literal>]
+        let kind = "field"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the value of the field on the provided object.
+            /// </summary>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Sets the value of the field on the provided object.
+            /// </summary>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     type ClassDecorator<'TFunction when 'TFunction :> Function> = ('TFunction -> 'TFunction option)
 
@@ -5637,89 +5769,6 @@ module Es =
         abstract Create: buffer: ArrayBuffer * ?byteOffset: float * ?length: float -> Float64Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: array: U2<ArrayBuffer, ArrayLike<float>> -> Float64Array<ArrayBuffer>
-
-    module ClassAccessorDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
-
-    module ClassFieldDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the value of the field on the provided object.
-            /// </summary>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Sets the value of the field on the provided object.
-            /// </summary>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
-
-    module ClassGetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
-    module ClassMethodDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the current value of the method from the provided object.
-            /// </summary>
-            /// <example><c>let fn = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
-    module ClassSetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     module CollatorOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

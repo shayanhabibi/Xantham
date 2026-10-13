@@ -66,7 +66,7 @@ let internal readNames (decl: FsDecl) : string list =
                paramNames e.Parameters
                @ (e.Inherits |> Option.map namesOf |> Option.defaultValue []))
            |> Option.defaultValue [])
-        @ List.collect paramNames i.CreateOverloads
+        @ List.collect (fun (overload: FsCreateOverload) -> paramNames overload.Parameters) i.CreateOverloads
         @ List.collect exportMemberNames i.Statics
     | FsAbbrev a ->
         typeParamNames a.TypeParameters
