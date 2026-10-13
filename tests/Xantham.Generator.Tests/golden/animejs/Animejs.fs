@@ -2551,20 +2551,26 @@ type DrawableSVGGeometry =
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+    /// <code lang="ts">
+    /// getElementsByTagNameNS(namespaceURI: "http://www.w3.org/1999/xhtml", localName: string): HTMLCollectionOf&lt;HTMLElement&gt;
+    /// </code>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1999Xhtml * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.HTMLElement>
+    [<Emit("$0.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', $1)")>]
+    abstract getElementsByTagNameNSHttpWwwW3Org1999Xhtml: localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.HTMLElement>
     /// <summary>
-    /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+    /// <code lang="ts">
+    /// getElementsByTagNameNS(namespaceURI: "http://www.w3.org/2000/svg", localName: string): HTMLCollectionOf&lt;SVGElement&gt;
+    /// </code>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org2000Svg * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.SVGElement>
+    [<Emit("$0.getElementsByTagNameNS('http://www.w3.org/2000/svg', $1)")>]
+    abstract getElementsByTagNameNSHttpWwwW3Org2000Svg: localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.SVGElement>
     /// <summary>
-    /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+    /// <code lang="ts">
+    /// getElementsByTagNameNS(namespaceURI: "http://www.w3.org/1998/Math/MathML", localName: string): HTMLCollectionOf&lt;MathMLElement&gt;
+    /// </code>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1998MathMathML * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.MathMLElement>
+    [<Emit("$0.getElementsByTagNameNS('http://www.w3.org/1998/Math/MathML', $1)")>]
+    abstract getElementsByTagNameNSHttpWwwW3Org1998MathMathML: localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.MathMLElement>
     /// <summary>
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     /// <br /><br />
@@ -2715,6 +2721,13 @@ type DrawableSVGGeometry =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttribute">MDN Reference</a>
     /// </summary>
     abstract setAttribute: qualifiedName: string * value: string -> unit
+    /// <summary>
+    /// <code lang="ts">
+    /// setAttribute(name: "draw", value: `${number} ${number}`): void
+    /// </code>
+    /// </summary>
+    [<Emit("$0.setAttribute('draw', $1)")>]
+    abstract setAttributeDraw: value: string -> unit
     /// <summary>
     /// The <b><c>setAttributeNS()</c></b> method of the Element interface adds a new attribute or changes the value of an attribute with the given namespace and name.
     /// <br /><br />
@@ -4567,18 +4580,6 @@ module Draggable =
         static member createDraggable (target: TargetsParam, ?parameters: DraggableParams) : Draggable = jsNative
 
 module DrawableSVGGeometry =
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org1998MathMathML =
-        | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
-
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org1999Xhtml =
-        | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
-
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org2000Svg =
-        | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
-
     module InsertAdjacentElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Where =

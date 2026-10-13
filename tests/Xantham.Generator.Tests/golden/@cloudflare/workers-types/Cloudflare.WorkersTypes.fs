@@ -2919,32 +2919,104 @@ type KVNamespaceListResult3<'Metadata, 'Key> =
 
 type KVNamespace<'Key> =
     abstract get: key: 'Key * ?options: KVNamespace.Get.Options -> JS.Promise<string option>
-    abstract get: key: 'Key * ``type``: KVNamespace.Text -> JS.Promise<string option>
-    abstract get<'ExpectedValue>: key: 'Key * ``type``: KVNamespace.Json -> JS.Promise<'ExpectedValue option>
-    abstract get: key: 'Key * ``type``: KVNamespace.ArrayBuffer -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>
-    abstract get: key: 'Key * ``type``: KVNamespace.Stream -> JS.Promise<ReadableStream<obj> option>
+    /// <summary>
+    /// <code lang="ts">
+    /// get(key: Key, type: "text"): Promise&lt;string | null&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.get($1, 'text')")>]
+    abstract getText: key: 'Key -> JS.Promise<string option>
+    /// <summary>
+    /// <code lang="ts">
+    /// get&lt;ExpectedValue = unknown&gt;(key: Key, type: "json"): Promise&lt;ExpectedValue | null&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.get($1, 'json')")>]
+    abstract getJson<'ExpectedValue>: key: 'Key -> JS.Promise<'ExpectedValue option>
+    /// <summary>
+    /// <code lang="ts">
+    /// get(key: Key, type: "arrayBuffer"): Promise&lt;ArrayBuffer | null&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.get($1, 'arrayBuffer')")>]
+    abstract getArrayBuffer: key: 'Key -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>
+    /// <summary>
+    /// <code lang="ts">
+    /// get(key: Key, type: "stream"): Promise&lt;ReadableStream | null&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.get($1, 'stream')")>]
+    abstract getStream: key: 'Key -> JS.Promise<ReadableStream<obj> option>
     abstract get: key: 'Key * ?options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<string option>
     abstract get<'ExpectedValue>: key: 'Key * ?options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<'ExpectedValue option>
     abstract get: key: 'Key * ?options: KVNamespaceGetOptions<KVNamespace.ArrayBuffer> -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>
     abstract get: key: 'Key * ?options: KVNamespaceGetOptions<KVNamespace.Stream> -> JS.Promise<ReadableStream<obj> option>
-    abstract get: key: 'Key[] * ``type``: KVNamespace.Text -> JS.Promise<Fable.Core.TS.Es.Map<string, string option>>
-    abstract get<'ExpectedValue>: key: 'Key[] * ``type``: KVNamespace.Json -> JS.Promise<Fable.Core.TS.Es.Map<string, 'ExpectedValue option>>
+    /// <summary>
+    /// <code lang="ts">
+    /// get(key: Array&lt;Key&gt;, type: "text"): Promise&lt;Map&lt;string, string | null&gt;&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.get($1, 'text')")>]
+    abstract getText: key: 'Key[] -> JS.Promise<Fable.Core.TS.Es.Map<string, string option>>
+    /// <summary>
+    /// <code lang="ts">
+    /// get&lt;ExpectedValue = unknown&gt;(key: Array&lt;Key&gt;, type: "json"): Promise&lt;Map&lt;string, ExpectedValue | null&gt;&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.get($1, 'json')")>]
+    abstract getJson<'ExpectedValue>: key: 'Key[] -> JS.Promise<Fable.Core.TS.Es.Map<string, 'ExpectedValue option>>
     abstract get: key: 'Key[] * ?options: KVNamespace.Get.Options -> JS.Promise<Fable.Core.TS.Es.Map<string, string option>>
     abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<Fable.Core.TS.Es.Map<string, string option>>
     abstract get<'ExpectedValue>: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<Fable.Core.TS.Es.Map<string, 'ExpectedValue option>>
     abstract list<'Metadata>: ?options: KVNamespaceListOptions -> JS.Promise<U2<KVNamespace.List.Result.Item<'Metadata, 'Key>, KVNamespace.List.Result.Item2<'Metadata, 'Key>>>
     abstract put: key: 'Key * value: U4<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, ReadableStream<obj>> * ?options: KVNamespacePutOptions -> JS.Promise<unit>
     abstract getWithMetadata<'Metadata>: key: 'Key * ?options: KVNamespace.Get.Options -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
-    abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: KVNamespace.Text -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
-    abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key * ``type``: KVNamespace.Json -> JS.Promise<KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>
-    abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: KVNamespace.ArrayBuffer -> JS.Promise<KVNamespaceGetWithMetadataResult<Fable.Core.TS.Es.ArrayBuffer, 'Metadata>>
-    abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: KVNamespace.Stream -> JS.Promise<KVNamespaceGetWithMetadataResult<ReadableStream<obj>, 'Metadata>>
+    /// <summary>
+    /// <code lang="ts">
+    /// getWithMetadata&lt;Metadata = unknown&gt;(key: Key, type: "text"): Promise&lt;KVNamespaceGetWithMetadataResult&lt;string, Metadata&gt;&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.getWithMetadata($1, 'text')")>]
+    abstract getWithMetadataText<'Metadata>: key: 'Key -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
+    /// <summary>
+    /// <code lang="ts">
+    /// getWithMetadata&lt;ExpectedValue = unknown, Metadata = unknown&gt;(key: Key, type: "json"): Promise&lt;KVNamespaceGetWithMetadataResult&lt;ExpectedValue, Metadata&gt;&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.getWithMetadata($1, 'json')")>]
+    abstract getWithMetadataJson<'ExpectedValue, 'Metadata>: key: 'Key -> JS.Promise<KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>
+    /// <summary>
+    /// <code lang="ts">
+    /// getWithMetadata&lt;Metadata = unknown&gt;(key: Key, type: "arrayBuffer"): Promise&lt;KVNamespaceGetWithMetadataResult&lt;ArrayBuffer, Metadata&gt;&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.getWithMetadata($1, 'arrayBuffer')")>]
+    abstract getWithMetadataArrayBuffer<'Metadata>: key: 'Key -> JS.Promise<KVNamespaceGetWithMetadataResult<Fable.Core.TS.Es.ArrayBuffer, 'Metadata>>
+    /// <summary>
+    /// <code lang="ts">
+    /// getWithMetadata&lt;Metadata = unknown&gt;(key: Key, type: "stream"): Promise&lt;KVNamespaceGetWithMetadataResult&lt;ReadableStream, Metadata&gt;&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.getWithMetadata($1, 'stream')")>]
+    abstract getWithMetadataStream<'Metadata>: key: 'Key -> JS.Promise<KVNamespaceGetWithMetadataResult<ReadableStream<obj>, 'Metadata>>
     abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
     abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key * options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>
     abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<KVNamespace.ArrayBuffer> -> JS.Promise<KVNamespaceGetWithMetadataResult<Fable.Core.TS.Es.ArrayBuffer, 'Metadata>>
     abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<KVNamespace.Stream> -> JS.Promise<KVNamespaceGetWithMetadataResult<ReadableStream<obj>, 'Metadata>>
-    abstract getWithMetadata<'Metadata>: key: 'Key[] * ``type``: KVNamespace.Text -> JS.Promise<Fable.Core.TS.Es.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
-    abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key[] * ``type``: KVNamespace.Json -> JS.Promise<Fable.Core.TS.Es.Map<string, KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>>
+    /// <summary>
+    /// <code lang="ts">
+    /// getWithMetadata&lt;Metadata = unknown&gt;(key: Array&lt;Key&gt;, type: "text"): Promise&lt;Map&lt;string, KVNamespaceGetWithMetadataResult&lt;string, Metadata&gt;&gt;&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.getWithMetadata($1, 'text')")>]
+    abstract getWithMetadataText<'Metadata>: key: 'Key[] -> JS.Promise<Fable.Core.TS.Es.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    /// <summary>
+    /// <code lang="ts">
+    /// getWithMetadata&lt;ExpectedValue = unknown, Metadata = unknown&gt;(key: Array&lt;Key&gt;, type: "json"): Promise&lt; Map&lt;string, KVNamespaceGetWithMetadataResult&lt;ExpectedValue, Metadata&gt;&gt; &gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.getWithMetadata($1, 'json')")>]
+    abstract getWithMetadataJson<'ExpectedValue, 'Metadata>: key: 'Key[] -> JS.Promise<Fable.Core.TS.Es.Map<string, KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>>
     abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: KVNamespace.Get.Options -> JS.Promise<Fable.Core.TS.Es.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
     abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Text> -> JS.Promise<Fable.Core.TS.Es.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
     abstract getWithMetadata<'ExpectedValue, 'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions<KVNamespace.Json> -> JS.Promise<Fable.Core.TS.Es.Map<string, KVNamespaceGetWithMetadataResult<'ExpectedValue, 'Metadata>>>
@@ -13074,16 +13146,10 @@ type BrowserRun =
     abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
-    /// Generate a PDF of a web page.
-    /// Get the HTML content of a web page.
-    /// Scrape elements from a web page by CSS selector.
-    /// Extract all links from a web page.
-    /// Get several representations of a web page in one request.
-    /// Extract structured JSON data from a web page using AI.
-    /// Convert a web page to Markdown.
-    /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "screenshot", options: BrowserRunScreenshotOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13098,7 +13164,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13112,7 +13177,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13126,7 +13190,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13140,7 +13203,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13154,7 +13216,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -13171,7 +13232,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13187,7 +13247,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13202,7 +13261,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -13222,19 +13280,14 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: string * options: BrowserRunScreenshotOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('screenshot', $1)")>]
+    abstract quickActionScreenshot: options: BrowserRunScreenshotOptions -> JS.Promise<Response>
     /// <summary>
-    /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
-    /// Get the HTML content of a web page.
-    /// Scrape elements from a web page by CSS selector.
-    /// Extract all links from a web page.
-    /// Get several representations of a web page in one request.
-    /// Extract structured JSON data from a web page using AI.
-    /// Convert a web page to Markdown.
-    /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "pdf", options: BrowserRunPDFOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13249,7 +13302,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13263,7 +13315,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13277,7 +13328,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13291,7 +13341,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13305,7 +13354,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -13322,7 +13370,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13338,7 +13385,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13353,7 +13399,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -13373,19 +13418,14 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: string * options: BrowserRunPDFOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('pdf', $1)")>]
+    abstract quickActionPdf: options: BrowserRunPDFOptions -> JS.Promise<Response>
     /// <summary>
-    /// Take a screenshot of a web page.
-    /// Generate a PDF of a web page.
     /// Get the HTML content of a web page.
-    /// Scrape elements from a web page by CSS selector.
-    /// Extract all links from a web page.
-    /// Get several representations of a web page in one request.
-    /// Extract structured JSON data from a web page using AI.
-    /// Convert a web page to Markdown.
-    /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "content", options: BrowserRunContentOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13400,7 +13440,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13414,7 +13453,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13428,7 +13466,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13442,7 +13479,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13456,7 +13492,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -13473,7 +13508,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13489,7 +13523,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13504,7 +13537,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -13524,19 +13556,14 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: BrowserRun.Content * options: BrowserRunContentOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('content', $1)")>]
+    abstract quickActionContent: options: BrowserRunContentOptions -> JS.Promise<Response>
     /// <summary>
-    /// Take a screenshot of a web page.
-    /// Generate a PDF of a web page.
-    /// Get the HTML content of a web page.
     /// Scrape elements from a web page by CSS selector.
-    /// Extract all links from a web page.
-    /// Get several representations of a web page in one request.
-    /// Extract structured JSON data from a web page using AI.
-    /// Convert a web page to Markdown.
-    /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "scrape", options: BrowserRunScrapeOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13551,7 +13578,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13565,7 +13591,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13579,7 +13604,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13593,7 +13617,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13607,7 +13630,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -13624,7 +13646,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13640,7 +13661,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13655,7 +13675,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -13675,19 +13694,14 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: string * options: BrowserRunScrapeOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('scrape', $1)")>]
+    abstract quickActionScrape: options: BrowserRunScrapeOptions -> JS.Promise<Response>
     /// <summary>
-    /// Take a screenshot of a web page.
-    /// Generate a PDF of a web page.
-    /// Get the HTML content of a web page.
-    /// Scrape elements from a web page by CSS selector.
     /// Extract all links from a web page.
-    /// Get several representations of a web page in one request.
-    /// Extract structured JSON data from a web page using AI.
-    /// Convert a web page to Markdown.
-    /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "links", options: BrowserRunLinksOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13702,7 +13716,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13716,7 +13729,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13730,7 +13742,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13744,7 +13755,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13758,7 +13768,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -13775,7 +13784,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13791,7 +13799,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13806,7 +13813,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -13826,19 +13832,14 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: string * options: BrowserRunLinksOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('links', $1)")>]
+    abstract quickActionLinks: options: BrowserRunLinksOptions -> JS.Promise<Response>
     /// <summary>
-    /// Take a screenshot of a web page.
-    /// Generate a PDF of a web page.
-    /// Get the HTML content of a web page.
-    /// Scrape elements from a web page by CSS selector.
-    /// Extract all links from a web page.
     /// Get several representations of a web page in one request.
-    /// Extract structured JSON data from a web page using AI.
-    /// Convert a web page to Markdown.
-    /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "snapshot", options: BrowserRunSnapshotOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13853,7 +13854,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13867,7 +13867,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13881,7 +13880,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13895,7 +13893,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13909,7 +13906,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -13926,7 +13922,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13942,7 +13937,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -13957,7 +13951,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -13977,19 +13970,14 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: string * options: BrowserRunSnapshotOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('snapshot', $1)")>]
+    abstract quickActionSnapshot: options: BrowserRunSnapshotOptions -> JS.Promise<Response>
     /// <summary>
-    /// Take a screenshot of a web page.
-    /// Generate a PDF of a web page.
-    /// Get the HTML content of a web page.
-    /// Scrape elements from a web page by CSS selector.
-    /// Extract all links from a web page.
-    /// Get several representations of a web page in one request.
     /// Extract structured JSON data from a web page using AI.
-    /// Convert a web page to Markdown.
-    /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "json", options: BrowserRunJsonOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14004,7 +13992,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14018,7 +14005,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14032,7 +14018,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14046,7 +14031,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14060,7 +14044,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -14077,7 +14060,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14093,7 +14075,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14108,7 +14089,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -14128,19 +14108,14 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: string * options: BrowserRunJsonOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('json', $1)")>]
+    abstract quickActionJson: options: BrowserRunJsonOptions -> JS.Promise<Response>
     /// <summary>
-    /// Take a screenshot of a web page.
-    /// Generate a PDF of a web page.
-    /// Get the HTML content of a web page.
-    /// Scrape elements from a web page by CSS selector.
-    /// Extract all links from a web page.
-    /// Get several representations of a web page in one request.
-    /// Extract structured JSON data from a web page using AI.
     /// Convert a web page to Markdown.
-    /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "markdown", options: BrowserRunMarkdownOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14155,7 +14130,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14169,7 +14143,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14183,7 +14156,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14197,7 +14169,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14211,7 +14182,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -14228,7 +14198,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14244,7 +14213,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14259,7 +14227,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -14279,19 +14246,14 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: BrowserRun.Markdown * options: BrowserRunMarkdownOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('markdown', $1)")>]
+    abstract quickActionMarkdown: options: BrowserRunMarkdownOptions -> JS.Promise<Response>
     /// <summary>
-    /// Take a screenshot of a web page.
-    /// Generate a PDF of a web page.
-    /// Get the HTML content of a web page.
-    /// Scrape elements from a web page by CSS selector.
-    /// Extract all links from a web page.
-    /// Get several representations of a web page in one request.
-    /// Extract structured JSON data from a web page using AI.
-    /// Convert a web page to Markdown.
     /// Get the accessibility tree of a web page.
+    /// <code lang="ts">
+    /// quickAction(action: "accessibilityTree", options: BrowserRunAccessibilityTreeOptions): Promise&lt;Response&gt;
+    /// </code>
     /// </summary>
-    /// <param name="action">- Must be <c>'screenshot'</c>.</param>
     /// <param name="options">- Screenshot options including viewport, selectors, and image format.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14306,7 +14268,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'pdf'</c>.</param>
     /// <param name="options">- PDF generation options including page size, margins, and headers/footers.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14320,7 +14281,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'content'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14334,7 +14294,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'scrape'</c>.</param>
     /// <param name="options">- Scrape options with CSS selectors for elements to extract.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14348,7 +14307,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'links'</c>.</param>
     /// <param name="options">- Options to filter visible or internal links only.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14362,7 +14320,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'snapshot'</c>.</param>
     /// <param name="options">
     /// - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
@@ -14379,7 +14336,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'json'</c>.</param>
     /// <param name="options">- JSON extraction options with prompt or response_format schema.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14395,7 +14351,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'markdown'</c>.</param>
     /// <param name="options">- Navigation and page interaction options.</param>
     /// <returns>
     /// A <c>Response</c> containing one of:
@@ -14410,7 +14365,6 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    /// <param name="action">- Must be <c>'accessibilityTree'</c>.</param>
     /// <param name="options">
     /// - Options to scope the tree to a subtree and to control
     /// whether semantically uninteresting nodes are pruned.
@@ -14430,7 +14384,8 @@ type BrowserRun =
     /// <b>Headers:</b>
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </returns>
-    abstract quickAction: action: string * options: BrowserRunAccessibilityTreeOptions -> JS.Promise<Response>
+    [<Emit("$0.quickAction('accessibilityTree', $1)")>]
+    abstract quickActionAccessibilityTree: options: BrowserRunAccessibilityTreeOptions -> JS.Promise<Response>
 
 /// <summary>
 /// In addition to the properties you can set in the RequestInit dict
@@ -23446,15 +23401,6 @@ module BasicImageTransformationsGravityCoordinates =
     type Mode =
         | [<CompiledName("box-center")>] BoxCenter
         | [<CompiledName("remainder")>] Remainder
-
-module BrowserRun =
-    [<StringEnum(CaseRules.None)>]
-    type Content =
-        | [<CompiledName("content")>] Content
-
-    [<StringEnum(CaseRules.None)>]
-    type Markdown =
-        | [<CompiledName("markdown")>] Markdown
 
 module BrowserRunAccessibilityTreeSuccessResponse =
     [<Interface>]
