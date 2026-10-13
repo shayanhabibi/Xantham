@@ -28,10 +28,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1931,
+      "total": 1906,
       "exact": 24,
       "ergonomic": 1826,
-      "widened": 72,
+      "widened": 47,
       "escape": 9
     },
     {
@@ -57,11 +57,6 @@
       "pass": "SP - synthesize-paramobjects",
       "total": 165,
       "ergonomic": 165
-    },
-    {
-      "pass": "DO - dedupe-overloads",
-      "total": 13,
-      "widened": 13
     }
   ]
 }

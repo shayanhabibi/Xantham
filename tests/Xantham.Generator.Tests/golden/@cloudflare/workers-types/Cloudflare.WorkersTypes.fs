@@ -19421,9 +19421,9 @@ type Exports =
     [<Global("WebAssembly")>]
     static member WebAssembly: WebAssembly = jsNative
     [<Global("addEventListener")>]
-    static member addEventListener<'Type> (``type``: 'Type, handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>>, ?options: U2<bool, EventTargetAddEventListenerOptions>) : unit = jsNative
+    static member addEventListener<'E when 'E :> Event> (``type``: typekeyof<WorkerGlobalScopeEventMap, 'E>, handler: U2<('E -> unit), EventListenerObject<'E>>, ?options: U2<bool, EventTargetAddEventListenerOptions>) : unit = jsNative
     [<Global("removeEventListener")>]
-    static member removeEventListener<'Type> (``type``: 'Type, handler: U2<(U4<FetchEvent, QueueEvent<obj>, PromiseRejectionEvent, ScheduledEvent> -> unit), EventListenerObject<Event>>, ?options: U2<bool, EventTargetEventListenerOptions>) : unit = jsNative
+    static member removeEventListener<'E when 'E :> Event> (``type``: typekeyof<WorkerGlobalScopeEventMap, 'E>, handler: U2<('E -> unit), EventListenerObject<'E>>, ?options: U2<bool, EventTargetEventListenerOptions>) : unit = jsNative
     /// <summary>
     /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
     /// <br /><br />
