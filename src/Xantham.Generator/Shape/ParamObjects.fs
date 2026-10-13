@@ -43,6 +43,11 @@ let private isInvoke =
     | FsInvoke _ -> true
     | _ -> false
 
+let private isSymbolKeyed' =
+    function
+    | FsSymbolKeyed _ -> true
+    | _ -> false
+
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
 /// and carries no `Create` parameter of its own.
@@ -94,7 +99,8 @@ let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list 
         findings
     | FsIndexer _
     | FsConstructor _
-    | FsInvoke _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
+    | FsInvoke _
+    | FsSymbolKeyed _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
 
 /// Construction ergonomics (D3, §4.4): an interface gains a `[<ParamObject; Emit("$0")>]`
 /// Create overload mirroring its members, required members first, so consumers never hand-build
@@ -121,8 +127,9 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                 && List.isEmpty decl.CreateOverloads
                                 ->
                                 // A hybrid's `Invoke` reads its own call signatures (§4.4); `Create`
-                                // binds only the properties and methods beside it.
-                                let members = decl.Members |> List.filter (isInvoke >> not)
+                                // binds only the string-keyed properties and methods beside it.
+                                let members =
+                                    decl.Members |> List.filter (fun m -> not (isInvoke m || isSymbolKeyed' m))
 
                                 match refusal decl members with
                                 | Some reason ->

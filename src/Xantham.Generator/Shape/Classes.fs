@@ -9,13 +9,14 @@ open Xantham.Generator.Shape.ExportLayout
 
 /// The F# name an already-shaped member answers to, for the collision test below. An indexer is
 /// spelled `Item` (§4.10), which is a name a static could carry too.
-let private shapedMemberName (m: FsMember) =
+let rec private shapedMemberName (m: FsMember) =
     match m with
     | FsProperty p -> p.Name
     | FsMethod m -> m.Name
     | FsIndexer _ -> "Item"
     | FsConstructor _ -> "Create"
     | FsInvoke _ -> "Invoke"
+    | FsSymbolKeyed(_, inner) -> shapedMemberName inner
 
 /// Whether F# admits a static beside an instance member of the same name. Only between two
 /// methods (`Response.json` is both): property over property is FS0441, method over property
@@ -26,7 +27,8 @@ let private staticFitsBeside (instance: FsMember) (isMethod: bool) =
     | FsProperty _
     | FsIndexer _
     | FsConstructor _
-    | FsInvoke _ -> false
+    | FsInvoke _
+    | FsSymbolKeyed _ -> false
 
 /// A class's static, bound through a dotted selector off whatever the class itself binds to:
 /// `[<Import("Counter.MAX", "pkg")>]` is `import { Counter }` then `Counter.MAX`, and

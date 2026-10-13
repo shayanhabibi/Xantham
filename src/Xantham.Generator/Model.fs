@@ -1154,6 +1154,9 @@ type ResolvedMember =
         Optional: bool
         ReadOnly: bool
         TypeId: int<typeId>
+        /// The well-known symbol keying the member, as `Symbol.<name>` spells it: `Some "iterator"`
+        /// for `[Symbol.iterator]`.
+        WellKnownSymbol: string option
     }
 
 /// One index signature (`[key: string]: V`) as the resolve tier records it. These are
@@ -1458,6 +1461,10 @@ type FsMember =
     /// the receiver to the arguments, so it reaches JavaScript as `x(a)` (§4.4's counterpart for
     /// the call side). Shares `FsConstructorMember`'s shape - the name is fixed the same way.
     | FsInvoke of FsConstructorMember
+    /// A member keyed by a well-known symbol, declared under the F# name its inner member
+    /// carries and reached as `$0[Symbol.<symbol>]` through `[<Emit>]`. The inner member is an
+    /// `FsProperty` or an `FsMethod`.
+    | FsSymbolKeyed of symbol: string * FsMember
 
 /// How a value export is bound to its JavaScript module.
 type ImportBinding =

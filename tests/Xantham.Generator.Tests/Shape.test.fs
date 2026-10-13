@@ -5418,3 +5418,177 @@ let compiledSignatureOverlapTests =
                 (Spec.CompiledSignature.overlaps Map.empty ([ { Name = "A"; Constraint = None } ], parameters) ([], parameters))
                 "F# resolves the call to the non-generic overload"
     ]
+
+/// W4 (#135): `settle-symbol-members` over hand-built interfaces. Each declaration arrives as
+/// `shape-interfaces` writes it: an own `seq` beside the `[Symbol.iterator]` member it came from.
+[<Tests>]
+let symbolKeyedMemberTests =
+    let iterator (returns: FsTypeRef) =
+        FsSymbolKeyed(
+            "iterator",
+            FsMethod
+                { Name = "SymbolIterator"
+                  Docs = ""
+                  Tags = []
+                  TypeParameters = []
+                  Parameters = []
+                  Return = returns }
+        )
+
+    let dispose =
+        FsSymbolKeyed(
+            "dispose",
+            FsMethod
+                { Name = "SymbolDispose"
+                  Docs = ""
+                  Tags = []
+                  TypeParameters = []
+                  Parameters = []
+                  Return = FsUnit }
+        )
+
+    let decl name typeParameters inherits members =
+        { Name = name
+          Docs = ""
+          Tags = []
+          Order = None
+          TypeParameters = typeParameters |> List.map (fun p -> { Name = p; Constraint = None })
+          Inherits = inherits
+          Members = members
+          Entrypoint = None
+          CreateOverloads = []
+          Statics = [] }
+
+    let seqOf element = FsApp("seq", [ element ])
+
+    let settle (decls: FsInterfaceDecl list) =
+        let model = { Build.shapeModel [] with Decls = decls |> List.map FsInterface }
+        let settled, findings = Build.runPass SymbolMembers.settleSymbolMembers model
+
+        let byName =
+            settled.Decls
+            |> List.choose (function
+                | FsInterface d -> Some(d.Name, d)
+                | _ -> None)
+            |> Map.ofList
+
+        byName, findings |> List.map (fun f -> f.Key, f.Symbol)
+
+    testList "symbol-keyed members" [
+        testCase "an own seq with no base iterator is kept, and its member removed" <| fun _ ->
+            let decls, findings = settle [ decl "Bag" [] [ seqOf FsString ] [ iterator FsObj ] ]
+
+            Expect.equal decls["Bag"].Inherits [ seqOf FsString ] "the sequence stays"
+            Expect.isEmpty decls["Bag"].Members "the iterator member is the sequence"
+            Expect.equal findings [ "MB008", "Bag.[Symbol.iterator]" ] "one MB008"
+
+        testCase "a derived declaration at its base's element inherits the base's seq" <| fun _ ->
+            let decls, findings =
+                settle
+                    [ decl "Bag" [] [ seqOf FsString ] [ iterator FsObj ]
+                      decl "Labelled" [] [ FsNamed "Bag"; seqOf FsString ] [ iterator (FsNamed "Cursor") ] ]
+
+            Expect.equal decls["Labelled"].Inherits [ FsNamed "Bag" ] "the own seq is written once, on the base"
+            Expect.isEmpty decls["Labelled"].Members "and so is the member"
+            Expect.equal findings [ "MB008", "Bag.[Symbol.iterator]" ] "the derived declaration reports nothing"
+
+        testCase "a generic base's seq is compared at the derived declaration's arguments" <| fun _ ->
+            let decls, findings =
+                settle
+                    [ decl "Box" [ "T" ] [ seqOf (FsTypeVar "T") ] [ iterator FsObj ]
+                      decl "Strings" [] [ FsApp("Box", [ FsString ]); seqOf FsString ] [ iterator FsObj ] ]
+
+            Expect.equal decls["Strings"].Inherits [ FsApp("Box", [ FsString ]) ] "Box<string> already iterates strings"
+            Expect.equal findings [ "MB008", "Box.[Symbol.iterator]" ] "the derived declaration reports nothing"
+
+        testCase "a narrowed element keeps the base's seq and the member as Emit" <| fun _ ->
+            let wide = FsErasedUnion [ FsString; FsFloat ]
+
+            let decls, findings =
+                settle
+                    [ decl "Values" [] [ seqOf wide ] [ iterator FsObj ]
+                      decl "Strings" [] [ FsNamed "Values"; seqOf FsString ] [ iterator (FsNamed "Cursor") ] ]
+
+            Expect.equal decls["Strings"].Inherits [ FsNamed "Values" ] "F# admits one seq instantiation (FS3360)"
+            Expect.equal decls["Strings"].Members [ iterator (FsNamed "Cursor") ] "the narrowed iterator stays reachable"
+
+            Expect.equal
+                findings
+                [ "MB008", "Values.[Symbol.iterator]"; "MB009", "Strings.[Symbol.iterator]" ]
+                "MB009 on the narrowed declaration"
+
+        testCase "a narrowed element without a member reads at the base's element" <| fun _ ->
+            let decls, findings =
+                settle
+                    [ decl "Values" [] [ seqOf (FsErasedUnion [ FsString; FsFloat ]) ] [ iterator FsObj ]
+                      decl "Strings" [] [ FsNamed "Values"; seqOf FsString ] [] ]
+
+            Expect.equal decls["Strings"].Inherits [ FsNamed "Values" ] "the base's seq alone"
+            Expect.contains findings ("MB002", "Strings.__@iterator") "the narrowing is reported as dropped"
+
+        testCase "an entrypoint class keeps neither a seq nor a symbol member" <| fun _ ->
+            let entrypoint =
+                { Binding = ImportNamed "Client"
+                  Parameters = []
+                  Inherits = None }
+
+            let decls, findings =
+                settle
+                    [ { decl "Client" [] [ seqOf FsString ] [ iterator FsObj; dispose ] with
+                          Entrypoint = Some entrypoint } ]
+
+            Expect.isEmpty decls["Client"].Inherits "no seq on an abstract class"
+            Expect.isEmpty decls["Client"].Members "no abstract slot a subclass must fill"
+
+            Expect.equal
+                findings
+                [ "MB002", "Client.__@iterator"; "MB002", "Client.__@dispose" ]
+                "each symbol reported as dropped"
+
+        testCase "the iterated element is the value of the next result arm not done" <| fun _ ->
+            let objectType id = Build.facts (Build.typeResponse id TypeFlags.Object)
+            let field id name typeId = Build.resolvedMember (Build.symbol id name SymbolFlags.Property) typeId
+
+            let literal id value =
+                Build.facts
+                    { Build.typeResponse id TypeFlags.BooleanLiteral with
+                        IntrinsicName = ValueSome value }
+
+            let table =
+                Build.primitives
+                @ [ { objectType 10 with CallSignatures = [ Build.signature [] 11 ] }
+                    { objectType 11 with
+                        Members = [ Build.resolvedMember (Build.symbol 100 "next" SymbolFlags.Method) 12 ]
+                        TypeArguments = [ 1 * uom<typeId> ] }
+                    { objectType 12 with CallSignatures = [ Build.signature [] 13 ] }
+                    { Build.facts (Build.typeResponse 13 TypeFlags.Union) with
+                        UnionMembers = [ 14 * uom<typeId>; 15 * uom<typeId> ] }
+                    { objectType 14 with Members = [ field 101 "done" 16; field 102 "value" 5 ] }
+                    { objectType 15 with Members = [ field 103 "done" 17; field 104 "value" 2 ] }
+                    literal 16 "true"
+                    literal 17 "false" ]
+
+            Expect.equal
+                (Spec.iteratedElement (Build.shapeModel table) (10 * uom<typeId>))
+                (Some(2 * uom<typeId>))
+                "the yielded arm's value, not the iterator's first argument"
+
+        testCase "the iterated element falls back to the iterator's first type argument" <| fun _ ->
+            let objectType id = Build.facts (Build.typeResponse id TypeFlags.Object)
+
+            let table =
+                Build.primitives
+                @ [ { objectType 10 with CallSignatures = [ Build.signature [] 11 ] }
+                    { objectType 11 with TypeArguments = [ 1 * uom<typeId>; 2 * uom<typeId> ] } ]
+
+            Expect.equal
+                (Spec.iteratedElement (Build.shapeModel table) (10 * uom<typeId>))
+                (Some(1 * uom<typeId>))
+                "a lib iterator takes its element first"
+
+        testCase "a dispose member on an interface is kept as Emit" <| fun _ ->
+            let decls, findings = settle [ decl "Resource" [] [] [ dispose ] ]
+
+            Expect.equal decls["Resource"].Members [ dispose ] "the member stays"
+            Expect.equal findings [ "MB009", "Resource.[Symbol.dispose]" ] "one MB009"
+    ]

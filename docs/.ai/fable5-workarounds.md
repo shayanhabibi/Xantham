@@ -479,7 +479,7 @@ Rejected, with the count each would otherwise have ranked at.
 
 | Finding | Sites | Why it is a gap |
 | --- | --- | --- |
-| `MB002` symbol-keyed member dropped | 12 | `[<Emit("$0[Symbol.iterator]()")>]` on a renamed member reaches it. Verified against these pins: a `[Symbol.toStringTag]` read and a `[Symbol.iterator]()` call both landed. F# has no identifier form for the key, so any emission must rename - a generator decision, not a Fable limit. |
+| `MB002` symbol-keyed member dropped | 12 | `[<Emit("$0[Symbol.iterator]()")>]` on a renamed member reaches it. Verified against these pins: a `[Symbol.toStringTag]` read and a `[Symbol.iterator]()` call both landed. F# has no identifier form for the key, so any emission must rename - a generator decision, not a Fable limit. The generator takes this route since W4 (2026-10-13): `Symbol<Name>` members under Emit (`MB009`) and `[Symbol.iterator]` as `inherit seq` (`MB008`); `MB002` remains for unique-symbol keys. |
 | `SI001` hybrid loses call signatures | 10 | `docs/.ai/plans/generator-type-mapping.md` §4.4 already names the mapping: an `[<Emit "$0($1...)">]` `Invoke` member beside the properties. |
 
 ## Suspected, unproven

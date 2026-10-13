@@ -10574,6 +10574,8 @@ module Globals =
     [<Interface>]
     type ObservableLike<'ValueType> =
         abstract subscribe: ?observer: ObservableLike.Subscribe.Observer -> Unsubscribable
+        [<Emit("$0[Symbol.observable]()")>]
+        abstract SymbolObservable: unit -> ObservableLike<'ValueType>
         [<ParamObject; Emit("$0")>]
         static member Create (subscribe: (ObservableLike.Subscribe.Observer option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
 

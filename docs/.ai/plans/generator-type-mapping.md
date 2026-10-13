@@ -285,6 +285,15 @@ Policy question with a recommended default:
     concrete on the instance interface.
 - **Callable + properties hybrids** (function with attached props) → interface with an
   `[<Emit "$0($1...)">]` `Invoke` member plus the properties. Ergonomic.
+- **Well-known symbol members** (W4, 2026-10-13) → `[Symbol.iterator]` is `inherit seq<'T>` at
+  the element its iterator yields (`MB008`, Ergonomic); the iterator object is not exposed. Every
+  other well-known key is a named member `Symbol<Name>` under `[<Emit("$0[Symbol.<name>]")>]`
+  (a call adds `()` or `($1...)`, a writable property adds a setter Emit; `MB009`, Ergonomic).
+  An interface whose base already iterates keeps the base's `seq` alone, because F# admits one
+  `seq` instantiation per interface (FS3360); a narrowed iterator stays an Emit member. A key
+  naming the package's own `unique symbol`, an optional member, a class static and a member of
+  an `[<AbstractClass>]` entrypoint stay dropped (`MB002`, Widened). `Create` binds
+  string-keyed members only.
 
 *Landed (2026-09-02, phase E).* Bases and intersection operands go through one gate: a base is
 inherited exactly when its reference resolves to a name this run declares as an interface, and

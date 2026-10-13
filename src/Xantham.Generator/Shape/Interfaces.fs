@@ -244,6 +244,24 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                 inheritGraph <- Map.add name (inherits |> List.map fst) inheritGraph
 
+                                // `[Symbol.iterator]` reads as `inherit seq<element>` (W4); whether
+                                // the declaration keeps it is settled once every base is shaped.
+                                let sequence =
+                                    facts.Members
+                                    |> List.tryFind (fun m -> emittedSymbol facts m = Some "iterator")
+                                    |> Option.bind (fun m -> iteratedElement model m.TypeId)
+                                    |> Option.map (fun elementId ->
+                                        let element, elementFindings =
+                                            typeRef
+                                                ctx
+                                                { model with TypeVars = scope }
+                                                (Some name)
+                                                $"{name}.[Symbol.iterator]"
+                                                elementId
+
+                                        findings <- findings @ elementFindings
+                                        FsApp("seq", [ element ]))
+
                                 if isConstructorObject facts then
                                     findings <-
                                         findings
@@ -266,7 +284,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         | FsMethod m -> m.Name = "Invoke"
                                         | FsIndexer _
                                         | FsConstructor _
-                                        | FsInvoke _ -> false)
+                                        | FsInvoke _
+                                        | FsSymbolKeyed _ -> false)
 
                                 let invokes =
                                     if invokeCollides then
@@ -325,7 +344,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         Tags = tags
                                         Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
                                         TypeParameters = typeParameters
-                                        Inherits = inherits |> List.map snd
+                                        Inherits = (inherits |> List.map snd) @ Option.toList sequence
                                         Members = members @ invokes
                                         Entrypoint = None
                                         CreateOverloads = []

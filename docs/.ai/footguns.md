@@ -152,6 +152,17 @@ ambient modules are harvested alphabetically. "The declaring module wins" is uni
 `Shape/Classes.fs` uses the class's own binding specifier instead, falling back to the first
 harvested occurrence, and reports `SC010` per dropped member.
 
+**`__@<name>@<id>` does not identify a well-known symbol.** A package's own `declare const
+iterator: unique symbol` escapes to the same `__@iterator@<id>` as `[Symbol.iterator]`. Resolve
+reads the declaration's computed name `Symbol.<name>` into `ResolvedMember.WellKnownSymbol`; a
+pass that decides on the escaped name alone emits the impostor as `[Symbol.iterator]`.
+
+**F# admits one `seq` instantiation per interface.** `NodeListOf<'TNode>` inheriting
+`NodeList`'s `seq<Node>` beside its own `seq<'TNode>` is FS3360 ("may unify"). Only
+`settle-symbol-members` settles which `seq` a declaration keeps, bases first: the base's
+wins, and a narrowed iterator becomes an Emit member. A pass that adds a `seq` inherit after it
+reopens the error.
+
 **`drop-orphan-delegates` has a failure mode on each side.** The first version retained nothing
 and pushed `AC001` from 8 to 22; the second retained anything whose name fuzzily matched an export
 and dropped nothing corpus-wide. The shipped rule checks representation the way `audit-coverage`

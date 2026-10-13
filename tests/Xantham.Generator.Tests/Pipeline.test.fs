@@ -5056,6 +5056,73 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.isFalse (source.Contains "[<AutoOpen>]") "the default config emits no [<AutoOpen>]" ])
+
+        // W4 (#135): members keyed by well-known symbols. `[Symbol.iterator]` inherits `seq` at
+        // its element, other well-known keys read as named members under `[<Emit>]`, and a
+        // package's own unique symbol stays dropped.
+        let symbolMemberLab = handFixture "symbol-member-lab"
+        let symbolMemberConfig = handConfig symbolMemberLab
+
+        yield!
+            fixtureTests "symbol-member-lab" symbolMemberLab symbolMemberConfig (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate symbolMemberConfig package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                [ testCase "symbol-member-lab: [Symbol.dispose] is a named method under Emit" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.dispose]()\")>]" "the call reaches the symbol key"
+                      Expect.stringContains source "abstract SymbolDispose: unit -> unit" "under a Symbol-prefixed name"
+                      Expect.isFalse (source.Contains "type Disposable =\n    interface end") "Disposable is not empty"
+
+                  testCase "symbol-member-lab: [Symbol.toStringTag] is a getter under Emit" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.toStringTag]\")>]" "the getter reads the symbol key"
+                      Expect.stringContains source "abstract SymbolToStringTag: string" "read-only, under a Symbol-prefixed name"
+
+                  testCase "symbol-member-lab: [Symbol.iterator] inherits seq at its element" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.equal (inheritsOf source "Bag") [ "seq<string>" ] "a concrete element"
+                      Expect.equal (inheritsOf source "Box") [ "seq<'T>" ] "the declaration's own parameter"
+                      Expect.equal (inheritsOf source "LabelledBag") [ "Bag" ] "an inherited sequence is written once, on the base"
+                      Expect.equal (inheritsOf source "Values") [ "seq<U2<string, float>>" ] "a union element"
+
+                  testCase "symbol-member-lab: a narrowed element keeps the base's seq and an Emit iterator" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.equal (inheritsOf source "Strings") [ "Values" ] "one seq instantiation per interface"
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.iterator]()\")>]" "the narrowed iterator is reachable"
+                      Expect.stringContains source "abstract SymbolIterator: unit -> StringCursor" "under a Symbol-prefixed name"
+
+                  testCase "symbol-member-lab: findings name each mapping and each drop" <| fun _ ->
+                      let rendered = generate ()
+
+                      let symbolsOf key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      Expect.equal (symbolsOf "MB002") [ "Impostor.__@iterator"; "Keyed.__@key" ] "unique symbols stay dropped"
+
+                      Expect.equal
+                          (symbolsOf "MB008")
+                          [ "Bag.[Symbol.iterator]"; "Box.[Symbol.iterator]"; "Values.[Symbol.iterator]" ]
+                          "one seq per declaring interface"
+
+                      Expect.equal
+                          (symbolsOf "MB009")
+                          [ "Disposable.[Symbol.dispose]"; "Strings.[Symbol.iterator]"; "Tagged.[Symbol.toStringTag]" ]
+                          "one Emit member per symbol"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "MB008" || f.Key = "MB009")
+                           |> List.forall (fun f -> f.Tier = Ergonomic))
+                          "both mappings are ergonomic" ])
     ]
 
 [<Tests>]

@@ -80,6 +80,7 @@ let resolvedMember (sym: SymbolResponse) (typeId: int) : ResolvedMember =
         Optional = false
         ReadOnly = false
         TypeId = typeId * Measure.uom<Measure.typeId>
+        WellKnownSymbol = None
     }
 
 let export (name: string) (sym: SymbolResponse) : HarvestedExport =

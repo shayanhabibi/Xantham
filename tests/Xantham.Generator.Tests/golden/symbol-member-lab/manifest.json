@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "package": "symbol-member-lab",
+  "module": "SymbolMemberLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 6,
+    "widened": 8,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 8,
+      "exact": 2,
+      "widened": 6
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 2,
+      "widened": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 13,
+      "ergonomic": 13
+    },
+    {
+      "pass": "settle-symbol-members",
+      "total": 6,
+      "ergonomic": 6
+    }
+  ]
+}

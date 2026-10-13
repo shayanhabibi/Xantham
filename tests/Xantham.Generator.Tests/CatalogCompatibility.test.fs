@@ -44,8 +44,13 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 6, 5, 3, 1)
-                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 5 stabilizes default names; inference 3 preserves source contracts at the width cutoff"
+                (1, 6, 6, 3, 1)
+                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 6 emits well-known symbol members; inference 3 preserves source contracts at the width cutoff"
+
+        testCase "the API contract rejects catalogues built before well-known symbol members" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 5 }))
 
         for label, identityVersion, apiVersion, inferenceVersion in [
             "early projections before delivery contract recovery", 5, 4, 2
