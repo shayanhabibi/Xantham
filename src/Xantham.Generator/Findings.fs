@@ -685,7 +685,7 @@ type TypeParameters =
             | DuplicateTypeParameterCollapsed(name, declared) ->
                 $"'{name}' is declared by {declared} signatures of the same alias; the head writes one variable"
             | FunctionConstraintDropped name ->
-                $"JS.Function constraint on '{name}' is dropped so F# functions can be type arguments; callability is no longer checked"
+                $"Function constraint on '{name}' is dropped so F# functions can be type arguments; callability is no longer checked"
 
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]

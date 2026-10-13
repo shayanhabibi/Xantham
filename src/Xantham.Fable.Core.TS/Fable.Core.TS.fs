@@ -6640,7 +6640,7 @@ module Es =
         /// </summary>
         abstract createImageBitmap:
             image: Fable.Core.TS.Dom.ImageBitmapSource * ?options: Fable.Core.TS.Dom.ImageBitmapOptions ->
-                Promise<Fable.Core.TS.Dom.ImageBitmap>
+                JS.Promise<Fable.Core.TS.Dom.ImageBitmap>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/createImageBitmap">MDN Reference</a>
@@ -6652,7 +6652,7 @@ module Es =
             sw: float *
             sh: float *
             ?options: Fable.Core.TS.Dom.ImageBitmapOptions ->
-                Promise<Fable.Core.TS.Dom.ImageBitmap>
+                JS.Promise<Fable.Core.TS.Dom.ImageBitmap>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/fetch">MDN Reference</a>
@@ -6661,7 +6661,7 @@ module Es =
             Func<
                 U3<string, Fable.Core.TS.Dom.Request, Fable.Core.TS.Dom.URL>,
                 Fable.Core.TS.Dom.RequestInit option,
-                Promise<Fable.Core.TS.Dom.Response>
+                JS.Promise<Fable.Core.TS.Dom.Response>
              > with get, set
 
         /// <summary>
@@ -9842,7 +9842,7 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract all<'T> : values: Iterable<U2<'T, PromiseLike<'T>>, obj, obj> -> Promise<obj[]>
+        abstract all<'T> : values: Iterable<U2<'T, JS.Promise<'T>>, obj, obj> -> JS.Promise<obj[]>
         /// <summary>
         /// Creates a Promise that is resolved with an array of results when all of the provided Promises
         /// resolve, or rejected when any Promise is rejected.
@@ -9851,7 +9851,7 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract all<'T> : values: 'T -> Promise<obj[]>
+        abstract all<'T> : values: 'T -> JS.Promise<obj[]>
         /// <summary>
         /// Creates a Promise that is resolved or rejected when any of the provided Promises are resolved
         /// or rejected.
@@ -9860,7 +9860,7 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract race<'T> : values: Iterable<U2<'T, PromiseLike<'T>>, obj, obj> -> Promise<obj>
+        abstract race<'T> : values: Iterable<U2<'T, JS.Promise<'T>>, obj, obj> -> JS.Promise<obj>
         /// <summary>
         /// Creates a Promise that is resolved or rejected when any of the provided Promises are resolved
         /// or rejected.
@@ -9869,13 +9869,13 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract race<'T> : values: 'T -> Promise<obj>
+        abstract race<'T> : values: 'T -> JS.Promise<obj>
         /// <summary>
         /// Creates a new rejected promise for the provided reason.
         /// </summary>
         /// <param name="reason">The reason the promise was rejected.</param>
         /// <returns>A new rejected Promise.</returns>
-        abstract reject<'T> : ?reason: obj -> Promise<'T>
+        abstract reject<'T> : ?reason: obj -> JS.Promise<'T>
         /// <summary>
         /// Creates a new resolved promise.
         /// Creates a new resolved promise for the provided value.
@@ -9885,7 +9885,7 @@ module Es =
         /// <returns>A promise whose internal state matches the provided promise.</returns>
         /// <param name="value">A promise.</param>
         /// <returns>A promise whose internal state matches the provided promise.</returns>
-        abstract resolve: unit -> Promise<unit>
+        abstract resolve: unit -> JS.Promise<unit>
         /// <summary>
         /// Creates a new resolved promise.
         /// Creates a new resolved promise for the provided value.
@@ -9895,7 +9895,7 @@ module Es =
         /// <returns>A promise whose internal state matches the provided promise.</returns>
         /// <param name="value">A promise.</param>
         /// <returns>A promise whose internal state matches the provided promise.</returns>
-        abstract resolve<'T> : value: 'T -> Promise<obj>
+        abstract resolve<'T> : value: 'T -> JS.Promise<obj>
         /// <summary>
         /// Creates a new resolved promise.
         /// Creates a new resolved promise for the provided value.
@@ -9905,7 +9905,7 @@ module Es =
         /// <returns>A promise whose internal state matches the provided promise.</returns>
         /// <param name="value">A promise.</param>
         /// <returns>A promise whose internal state matches the provided promise.</returns>
-        abstract resolve<'T> : value: U2<'T, PromiseLike<'T>> -> Promise<obj>
+        abstract resolve<'T> : value: U2<'T, JS.Promise<'T>> -> JS.Promise<obj>
         /// <summary>
         /// Creates a Promise that is resolved with an array of results when all
         /// of the provided Promises resolve or reject.
@@ -9914,7 +9914,7 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract allSettled<'T> : values: 'T -> Promise<PromiseSettledResult<obj>[]>
+        abstract allSettled<'T> : values: 'T -> JS.Promise<PromiseSettledResult<obj>[]>
 
         /// <summary>
         /// Creates a Promise that is resolved with an array of results when all
@@ -9925,7 +9925,7 @@ module Es =
         /// <param name="values">An array of Promises.</param>
         /// <returns>A new Promise.</returns>
         abstract allSettled<'T> :
-            values: Iterable<U2<'T, PromiseLike<'T>>, obj, obj> -> Promise<PromiseSettledResult<obj>[]>
+            values: Iterable<U2<'T, JS.Promise<'T>>, obj, obj> -> JS.Promise<PromiseSettledResult<obj>[]>
 
         /// <summary>
         /// The any function returns a promise that is fulfilled by the first given promise to be fulfilled, or rejected with an AggregateError containing an array of rejection reasons if all of the given promises are rejected. It resolves all elements of the passed iterable to promises as it runs this algorithm.
@@ -9934,7 +9934,7 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array or iterable of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract any<'T> : values: 'T -> Promise<obj>
+        abstract any<'T> : values: 'T -> JS.Promise<obj>
         /// <summary>
         /// The any function returns a promise that is fulfilled by the first given promise to be fulfilled, or rejected with an AggregateError containing an array of rejection reasons if all of the given promises are rejected. It resolves all elements of the passed iterable to promises as it runs this algorithm.
         /// </summary>
@@ -9942,7 +9942,7 @@ module Es =
         /// <returns>A new Promise.</returns>
         /// <param name="values">An array or iterable of Promises.</param>
         /// <returns>A new Promise.</returns>
-        abstract any<'T> : values: Iterable<U2<'T, PromiseLike<'T>>, obj, obj> -> Promise<obj>
+        abstract any<'T> : values: Iterable<U2<'T, JS.Promise<'T>>, obj, obj> -> JS.Promise<obj>
         /// <summary>
         /// Creates a new Promise and returns it in an object, along with its resolve and reject functions.
         /// </summary>
@@ -9953,6 +9953,7 @@ module Es =
         /// </code>
         /// </returns>
         abstract withResolvers<'T> : unit -> PromiseWithResolvers<'T>
+
         /// <summary>
         /// Takes a callback of any kind (returns or throws, synchronously or asynchronously) and wraps its result
         /// in a Promise.
@@ -9968,13 +9969,14 @@ module Es =
         /// - Already rejected, if the callback synchronously throws an error.
         /// - Asynchronously fulfilled or rejected, if the callback returns a promise.
         /// </returns>
-        abstract ``try``<'T, 'U> : callbackFn: ('U -> U2<'T, PromiseLike<'T>>) * [<ParamArray>] args: 'U -> Promise<obj>
+        abstract ``try``<'T, 'U> :
+            callbackFn: ('U -> U2<'T, JS.Promise<'T>>) * [<ParamArray>] args: 'U -> JS.Promise<obj>
 
         [<Emit("$0[Symbol.species]")>]
         abstract SymbolSpecies: PromiseConstructor
 
         [<EmitConstructor>]
-        abstract Create<'T> : executor: PromiseConstructor.Executor<'T> -> Promise<'T>
+        abstract Create<'T> : executor: PromiseConstructor.Executor<'T> -> JS.Promise<'T>
 
     type StringIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
@@ -10594,10 +10596,10 @@ module Es =
         inherit AsyncIteratorObject<'T, 'TReturn, 'TNext>
 
         abstract ``return``:
-            value: U2<'TReturn, PromiseLike<'TReturn>> ->
-                Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
+            value: U2<'TReturn, JS.Promise<'TReturn>> ->
+                JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
 
-        abstract throw: e: obj -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
+        abstract throw: e: obj -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
 
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> AsyncGenerator<'T, 'TReturn, 'TNext>
@@ -10638,22 +10640,22 @@ module Es =
     type AsyncIterator<'T, 'TReturn, 'TNext> =
         abstract next:
             [<ParamArray>] __0: U2<obj[], 'TNext[]> ->
-                Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
+                JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
 
         abstract ``return``:
-            (U2<'TReturn, PromiseLike<'TReturn>> option
-                    -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>) option with get, set
+            (U2<'TReturn, JS.Promise<'TReturn>> option
+                    -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>) option with get, set
 
-        abstract throw: (obj option -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>) option with get, set
+        abstract throw: (obj option -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>) option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                next: (U2<obj[], 'TNext[]> -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
+                next: (U2<obj[], 'TNext[]> -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
                 ?``return``:
-                    (U2<'TReturn, PromiseLike<'TReturn>> option
-                            -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                ?throw: (obj option -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>)
+                    (U2<'TReturn, JS.Promise<'TReturn>> option
+                            -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
+                ?throw: (obj option -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>)
             ) : AsyncIterator<'T, 'TReturn, 'TNext> =
             jsNative
 
@@ -12006,13 +12008,13 @@ module Es =
 
     [<Interface>]
     type PromiseWithResolvers<'T> =
-        abstract promise: Promise<'T> with get, set
-        abstract resolve: (U2<'T, PromiseLike<'T>> -> unit) with get, set
+        abstract promise: JS.Promise<'T> with get, set
+        abstract resolve: (U2<'T, JS.Promise<'T>> -> unit) with get, set
         abstract reject: (obj option -> unit) with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (promise: Promise<'T>, resolve: (U2<'T, PromiseLike<'T>> -> unit), reject: (obj option -> unit))
+            (promise: JS.Promise<'T>, resolve: (U2<'T, JS.Promise<'T>> -> unit), reject: (obj option -> unit))
             : PromiseWithResolvers<'T> =
             jsNative
 
@@ -14895,11 +14897,11 @@ module Es =
         abstract fromAsync<'T> :
             iterableOrArrayLike:
                 U3<
-                    ArrayLike<U2<'T, PromiseLike<'T>>>,
+                    ArrayLike<U2<'T, JS.Promise<'T>>>,
                     AsyncIterable<'T, obj, obj>,
-                    Iterable<U2<'T, PromiseLike<'T>>, obj, obj>
+                    Iterable<U2<'T, JS.Promise<'T>>, obj, obj>
                  > ->
-                Promise<'T[]>
+                JS.Promise<'T[]>
 
         /// <summary>
         /// Creates an array from an async iterator or iterable object.
@@ -14915,7 +14917,7 @@ module Es =
             iterableOrArrayLike: U3<ArrayLike<'T>, AsyncIterable<'T, obj, obj>, Iterable<'T, obj, obj>> *
             mapFn: ArrayConstructor.FromAsync.MapFn<'T, 'U> *
             ?thisArg: obj ->
-                Promise<obj[]>
+                JS.Promise<obj[]>
 
         [<Emit("$0[Symbol.species]")>]
         abstract SymbolSpecies: ArrayConstructor
@@ -14957,7 +14959,7 @@ module Es =
 
     type PromiseConstructorLike =
         [<EmitConstructor>]
-        abstract Create<'T> : executor: PromiseConstructorLike.Executor<'T> -> PromiseLike<'T>
+        abstract Create<'T> : executor: PromiseConstructorLike.Executor<'T> -> JS.Promise<'T>
 
     [<Interface>]
     type PromiseLike<'T> =
@@ -14968,17 +14970,17 @@ module Es =
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of which ever callback is executed.</returns>
         abstract ``then``<'TResult1, 'TResult2> :
-            ?onfulfilled: ('T -> U2<'TResult1, PromiseLike<'TResult1>>) *
-            ?onrejected: (obj -> U2<'TResult2, PromiseLike<'TResult2>>) ->
-                PromiseLike<U2<'TResult1, 'TResult2>>
+            ?onfulfilled: ('T -> U2<'TResult1, JS.Promise<'TResult1>>) *
+            ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) ->
+                JS.Promise<U2<'TResult1, 'TResult2>>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (``then``:
                 Func<
-                    ('T -> U2<'TResult1, PromiseLike<'TResult1>>) option,
-                    (obj -> U2<'TResult2, PromiseLike<'TResult2>>) option,
-                    PromiseLike<U2<'TResult1, 'TResult2>>
+                    ('T -> U2<'TResult1, JS.Promise<'TResult1>>) option,
+                    (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option,
+                    JS.Promise<U2<'TResult1, 'TResult2>>
                  >)
             : PromiseLike<'T> =
             jsNative
@@ -14994,9 +14996,9 @@ module Es =
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of which ever callback is executed.</returns>
         abstract ``then``<'TResult1, 'TResult2> :
-            ?onfulfilled: ('T -> U2<'TResult1, PromiseLike<'TResult1>>) *
-            ?onrejected: (obj -> U2<'TResult2, PromiseLike<'TResult2>>) ->
-                Promise<U2<'TResult1, 'TResult2>>
+            ?onfulfilled: ('T -> U2<'TResult1, JS.Promise<'TResult1>>) *
+            ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) ->
+                JS.Promise<U2<'TResult1, 'TResult2>>
 
         /// <summary>
         /// Attaches a callback for only the rejection of the Promise.
@@ -15004,7 +15006,7 @@ module Es =
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of the callback.</returns>
         abstract catch<'TResult> :
-            ?onrejected: (obj -> U2<'TResult, PromiseLike<'TResult>>) -> Promise<U2<'T, 'TResult>>
+            ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'T, 'TResult>>
 
         /// <summary>
         /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
@@ -15012,7 +15014,7 @@ module Es =
         /// </summary>
         /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
         /// <returns>A Promise for the completion of the callback.</returns>
-        abstract ``finally``: ?onfinally: (unit -> unit) -> Promise<'T>
+        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<'T>
 
         [<Emit("$0[Symbol.toStringTag]")>]
         abstract SymbolToStringTag: string
@@ -20445,7 +20447,7 @@ module Es =
 
     type AsyncDisposable =
         [<Emit("$0[Symbol.asyncDispose]()")>]
-        abstract SymbolAsyncDispose: unit -> PromiseLike<unit>
+        abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
 
     [<Interface>]
     type SuppressedError =
@@ -20548,7 +20550,7 @@ module Es =
         /// <summary>
         /// Disposes each resource in the stack in the reverse order that they were added.
         /// </summary>
-        abstract disposeAsync: unit -> Promise<unit>
+        abstract disposeAsync: unit -> JS.Promise<unit>
         /// <summary>
         /// Adds a disposable resource to the stack, returning the resource.
         /// </summary>
@@ -20564,11 +20566,11 @@ module Es =
         /// as the first parameter.
         /// </param>
         /// <returns>The provided {@link value}.</returns>
-        abstract adopt<'T> : value: 'T * onDisposeAsync: ('T -> PromiseLike<unit> option) -> 'T
+        abstract adopt<'T> : value: 'T * onDisposeAsync: ('T -> JS.Promise<unit> option) -> 'T
         /// <summary>
         /// Adds a callback to be invoked when the stack is disposed.
         /// </summary>
-        abstract defer: onDisposeAsync: (unit -> PromiseLike<unit> option) -> unit
+        abstract defer: onDisposeAsync: (unit -> JS.Promise<unit> option) -> unit
         /// <summary>
         /// Move all resources out of this stack and into a new <c>DisposableStack</c>, and marks this stack as disposed.
         /// </summary>
@@ -20605,7 +20607,7 @@ module Es =
         abstract move: unit -> AsyncDisposableStack
 
         [<Emit("$0[Symbol.asyncDispose]()")>]
-        abstract SymbolAsyncDispose: unit -> Promise<unit>
+        abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
 
         [<Emit("$0[Symbol.toStringTag]")>]
         abstract SymbolToStringTag: string
@@ -20685,10 +20687,10 @@ module Es =
             [<Interface>]
             type Result2 =
                 abstract async: bool with get, set
-                abstract value: Promise<Atomics.WaitAsync.Result2.Value.Item> with get, set
+                abstract value: JS.Promise<Atomics.WaitAsync.Result2.Value.Item> with get, set
 
                 [<ParamObject; Emit("$0")>]
-                static member Create(async: bool, value: Promise<Atomics.WaitAsync.Result2.Value.Item>) : Result2 =
+                static member Create(async: bool, value: JS.Promise<Atomics.WaitAsync.Result2.Value.Item>) : Result2 =
                     jsNative
 
             [<Interface>]
@@ -20702,10 +20704,10 @@ module Es =
             [<Interface>]
             type Result4 =
                 abstract async: bool with get, set
-                abstract value: Promise<Atomics.WaitAsync.Result2.Value.Item> with get, set
+                abstract value: JS.Promise<Atomics.WaitAsync.Result2.Value.Item> with get, set
 
                 [<ParamObject; Emit("$0")>]
-                static member Create(async: bool, value: Promise<Atomics.WaitAsync.Result2.Value.Item>) : Result4 =
+                static member Create(async: bool, value: JS.Promise<Atomics.WaitAsync.Result2.Value.Item>) : Result4 =
                     jsNative
 
             module Result =
@@ -22259,12 +22261,10 @@ module Es =
                     jsNative
 
     module PromiseConstructor =
-        type Executor<'T> =
-            delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
+        type Executor<'T> = delegate of resolve: (U2<'T, JS.Promise<'T>> -> unit) * reject: (obj option -> unit) -> unit
 
     module PromiseConstructorLike =
-        type Executor<'T> =
-            delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
+        type Executor<'T> = delegate of resolve: (U2<'T, JS.Promise<'T>> -> unit) * reject: (obj option -> unit) -> unit
 
     module ProxyConstructor =
         module Revocable =
@@ -24065,8 +24065,7 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create(?shadowRoots: ShadowRoot[]) : CaretPositionFromPointOptions = jsNative
 
-    type Compile =
-        delegate of bytes: BufferSource * options: WebAssemblyCompileOptions option -> Fable.Core.TS.Es.Promise<obj>
+    type Compile = delegate of bytes: BufferSource * options: WebAssemblyCompileOptions option -> JS.Promise<obj>
 
     [<Interface>]
     type CompileError =
@@ -24084,8 +24083,7 @@ module Dom =
 
     type CompileStreaming =
         delegate of
-            source: U2<Fable.Core.TS.Es.PromiseLike<Response>, Response> * options: WebAssemblyCompileOptions option ->
-                Fable.Core.TS.Es.Promise<obj>
+            source: U2<JS.Promise<Response>, Response> * options: WebAssemblyCompileOptions option -> JS.Promise<obj>
 
     [<Interface>]
     type Exception =
@@ -24172,10 +24170,10 @@ module Dom =
 
     type InstantiateStreaming =
         delegate of
-            source: U2<Fable.Core.TS.Es.PromiseLike<Response>, Response> *
+            source: U2<JS.Promise<Response>, Response> *
             importObject: JS.Record<string, JS.Record<string, ImportValue>> option *
             options: WebAssemblyCompileOptions option ->
-                Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
+                JS.Promise<WebAssemblyInstantiatedSource>
 
     [<Interface>]
     type LinkError =
@@ -24408,14 +24406,13 @@ module Dom =
             bytes: BufferSource *
             ?importObject: JS.Record<string, JS.Record<string, ImportValue>> *
             ?options: WebAssemblyCompileOptions ->
-                Fable.Core.TS.Es.Promise<WebAssemblyInstantiatedSource>
+                JS.Promise<WebAssemblyInstantiatedSource>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiate_static">MDN Reference</a>
         /// </summary>
         abstract instantiate:
-            moduleObject: obj * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> ->
-                Fable.Core.TS.Es.Promise<Instance>
+            moduleObject: obj * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> -> JS.Promise<Instance>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiateStreaming_static">MDN Reference</a>
@@ -27401,15 +27398,13 @@ module Dom =
 
     [<Interface>]
     type NavigationResult =
-        abstract committed: Fable.Core.TS.Es.Promise<NavigationHistoryEntry> option with get, set
-        abstract finished: Fable.Core.TS.Es.Promise<NavigationHistoryEntry> option with get, set
+        abstract committed: JS.Promise<NavigationHistoryEntry> option with get, set
+        abstract finished: JS.Promise<NavigationHistoryEntry> option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (
-                ?committed: Fable.Core.TS.Es.Promise<NavigationHistoryEntry>,
-                ?finished: Fable.Core.TS.Es.Promise<NavigationHistoryEntry>
-            ) : NavigationResult =
+            (?committed: JS.Promise<NavigationHistoryEntry>, ?finished: JS.Promise<NavigationHistoryEntry>)
+            : NavigationResult =
             jsNative
 
     [<Interface>]
@@ -27964,12 +27959,12 @@ module Dom =
     [<Interface>]
     type PromiseRejectionEventInit =
         inherit EventInit
-        abstract promise: Fable.Core.TS.Es.Promise<obj> with get, set
+        abstract promise: JS.Promise<obj> with get, set
         abstract reason: obj option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (promise: Fable.Core.TS.Es.Promise<obj>, ?reason: obj, ?bubbles: bool, ?cancelable: bool, ?composed: bool)
+            (promise: JS.Promise<obj>, ?reason: obj, ?bubbles: bool, ?cancelable: bool, ?composed: bool)
             : PromiseRejectionEventInit =
             jsNative
 
@@ -29734,22 +29729,19 @@ module Dom =
 
     [<Interface>]
     type Transformer<'I, 'O> =
-        abstract flush: (TransformStreamDefaultController<'O> -> Fable.Core.TS.Es.PromiseLike<unit> option) option with get, set
+        abstract flush: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option) option with get, set
         abstract readableType: unit option with get, set
         abstract start: (TransformStreamDefaultController<'O> -> obj) option with get, set
-
-        abstract transform:
-            Func<'I, TransformStreamDefaultController<'O>, Fable.Core.TS.Es.PromiseLike<unit> option> option with get, set
-
+        abstract transform: Func<'I, TransformStreamDefaultController<'O>, JS.Promise<unit> option> option with get, set
         abstract writableType: unit option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                ?flush: (TransformStreamDefaultController<'O> -> Fable.Core.TS.Es.PromiseLike<unit> option),
+                ?flush: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option),
                 ?readableType: unit,
                 ?start: (TransformStreamDefaultController<'O> -> obj),
-                ?transform: Func<'I, TransformStreamDefaultController<'O>, Fable.Core.TS.Es.PromiseLike<unit> option>,
+                ?transform: Func<'I, TransformStreamDefaultController<'O>, JS.Promise<unit> option>,
                 ?writableType: unit
             ) : Transformer<'I, 'O> =
             jsNative
@@ -29869,7 +29861,7 @@ module Dom =
     type UnderlyingByteSource =
         abstract autoAllocateChunkSize: float option with get, set
         abstract cancel: UnderlyingSourceCancelCallback option with get, set
-        abstract pull: (ReadableByteStreamController -> Fable.Core.TS.Es.PromiseLike<unit> option) option with get, set
+        abstract pull: (ReadableByteStreamController -> JS.Promise<unit> option) option with get, set
         abstract start: (ReadableByteStreamController -> obj) option with get, set
         abstract ``type``: string with get, set
 
@@ -29879,7 +29871,7 @@ module Dom =
                 ``type``: string,
                 ?autoAllocateChunkSize: float,
                 ?cancel: UnderlyingSourceCancelCallback,
-                ?pull: (ReadableByteStreamController -> Fable.Core.TS.Es.PromiseLike<unit> option),
+                ?pull: (ReadableByteStreamController -> JS.Promise<unit> option),
                 ?start: (ReadableByteStreamController -> obj)
             ) : UnderlyingByteSource =
             jsNative
@@ -29887,7 +29879,7 @@ module Dom =
     [<Interface>]
     type UnderlyingDefaultSource<'R> =
         abstract cancel: UnderlyingSourceCancelCallback option with get, set
-        abstract pull: (ReadableStreamDefaultController<'R> -> Fable.Core.TS.Es.PromiseLike<unit> option) option with get, set
+        abstract pull: (ReadableStreamDefaultController<'R> -> JS.Promise<unit> option) option with get, set
         abstract start: (ReadableStreamDefaultController<'R> -> obj) option with get, set
         abstract ``type``: unit option with get, set
 
@@ -29895,7 +29887,7 @@ module Dom =
         static member Create
             (
                 ?cancel: UnderlyingSourceCancelCallback,
-                ?pull: (ReadableStreamDefaultController<'R> -> Fable.Core.TS.Es.PromiseLike<unit> option),
+                ?pull: (ReadableStreamDefaultController<'R> -> JS.Promise<unit> option),
                 ?start: (ReadableStreamDefaultController<'R> -> obj),
                 ?``type``: unit
             ) : UnderlyingDefaultSource<'R> =
@@ -29907,7 +29899,7 @@ module Dom =
         abstract close: UnderlyingSinkCloseCallback option with get, set
         abstract start: UnderlyingSinkStartCallback option with get, set
         abstract ``type``: unit option with get, set
-        abstract write: Func<'W, WritableStreamDefaultController, Fable.Core.TS.Es.PromiseLike<unit> option> option with get, set
+        abstract write: Func<'W, WritableStreamDefaultController, JS.Promise<unit> option> option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -29916,7 +29908,7 @@ module Dom =
                 ?close: UnderlyingSinkCloseCallback,
                 ?start: UnderlyingSinkStartCallback,
                 ?``type``: unit,
-                ?write: Func<'W, WritableStreamDefaultController, Fable.Core.TS.Es.PromiseLike<unit> option>
+                ?write: Func<'W, WritableStreamDefaultController, JS.Promise<unit> option>
             ) : UnderlyingSink<'W> =
             jsNative
 
@@ -29926,8 +29918,7 @@ module Dom =
         abstract cancel: UnderlyingSourceCancelCallback option with get, set
 
         abstract pull:
-            (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>>
-                    -> Fable.Core.TS.Es.PromiseLike<unit> option) option with get, set
+            (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> JS.Promise<unit> option) option with get, set
 
         abstract start: (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> obj) option with get, set
         abstract ``type``: string option with get, set
@@ -29938,8 +29929,7 @@ module Dom =
                 ?autoAllocateChunkSize: float,
                 ?cancel: UnderlyingSourceCancelCallback,
                 ?pull:
-                    (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>>
-                            -> Fable.Core.TS.Es.PromiseLike<unit> option),
+                    (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> JS.Promise<unit> option),
                 ?start: (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> obj),
                 ?``type``: string
             ) : UnderlyingSource<'R> =
@@ -30991,7 +30981,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Animation/finished">MDN Reference</a>
         /// </summary>
-        abstract finished: Fable.Core.TS.Es.Promise<Animation>
+        abstract finished: JS.Promise<Animation>
         /// <summary>
         /// The <b><c>Animation.id</c></b> property of the Web Animations API returns or sets a string used to identify the animation.
         /// <br /><br />
@@ -31039,7 +31029,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Animation/ready">MDN Reference</a>
         /// </summary>
-        abstract ready: Fable.Core.TS.Es.Promise<Animation>
+        abstract ready: JS.Promise<Animation>
         /// <summary>
         /// The read-only <b><c>Animation.replaceState</c></b> property of the Web Animations API indicates whether the animation has been removed by the browser automatically after being replaced by another animation.
         /// <br /><br />
@@ -31539,7 +31529,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioContext/close">MDN Reference</a>
         /// </summary>
-        abstract close: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract close: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>createMediaElementSource()</c></b> method of the AudioContext Interface is used to create a new MediaElementAudioSourceNode object, given an existing HTML &lt;audio&gt; or &lt;video&gt; element, the audio from which can then be played and manipulated.
         /// <br /><br />
@@ -31569,13 +31559,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioContext/resume">MDN Reference</a>
         /// </summary>
-        abstract resume: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract resume: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>suspend()</c></b> method of the AudioContext Interface suspends the progression of time in the audio context, temporarily halting audio hardware access and reducing CPU/battery usage in the process — this is useful if you want an application to power down the audio hardware when it will not be using an audio context for a while.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioContext/suspend">MDN Reference</a>
         /// </summary>
-        abstract suspend: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract suspend: unit -> JS.Promise<unit>
 
     type AudioContextConstructor =
         [<EmitConstructor>]
@@ -31723,7 +31713,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioDecoder/flush">MDN Reference</a>
         /// </summary>
-        abstract flush: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract flush: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>reset()</c></b> method of the AudioDecoder interface resets all states including configuration, control messages in the control message queue, and all pending callbacks.
         /// <br /><br />
@@ -31773,7 +31763,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioDecoder/isConfigSupported_static">MDN Reference</a>
         /// </summary>
-        abstract isConfigSupported: config: AudioDecoderConfig -> Fable.Core.TS.Es.Promise<AudioDecoderSupport>
+        abstract isConfigSupported: config: AudioDecoderConfig -> JS.Promise<AudioDecoderSupport>
 
         [<EmitConstructor>]
         abstract Create: init: AudioDecoderInit -> AudioDecoder
@@ -31850,7 +31840,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioEncoder/flush">MDN Reference</a>
         /// </summary>
-        abstract flush: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract flush: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>reset()</c></b> method of the AudioEncoder interface resets all states including configuration, control messages in the control message queue, and all pending callbacks.
         /// <br /><br />
@@ -31900,7 +31890,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioEncoder/isConfigSupported_static">MDN Reference</a>
         /// </summary>
-        abstract isConfigSupported: config: AudioEncoderConfig -> Fable.Core.TS.Es.Promise<AudioEncoderSupport>
+        abstract isConfigSupported: config: AudioEncoderConfig -> JS.Promise<AudioEncoderSupport>
 
         [<EmitConstructor>]
         abstract Create: init: AudioEncoderInit -> AudioEncoder
@@ -32332,9 +32322,7 @@ module Dom =
         inherit Worklet
 
         [<ParamObject; Emit("$0")>]
-        static member Create
-            (addModule: Func<U2<string, URL>, WorkletOptions option, Fable.Core.TS.Es.Promise<unit>>)
-            : AudioWorklet =
+        static member Create(addModule: Func<U2<string, URL>, WorkletOptions option, JS.Promise<unit>>) : AudioWorklet =
             jsNative
 
     type AudioWorkletConstructor =
@@ -32757,7 +32745,7 @@ module Dom =
             audioData: Fable.Core.TS.Es.ArrayBuffer *
             ?successCallback: DecodeSuccessCallback *
             ?errorCallback: DecodeErrorCallback ->
-                Fable.Core.TS.Es.Promise<AudioBuffer>
+                JS.Promise<AudioBuffer>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -32922,13 +32910,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/arrayBuffer">MDN Reference</a>
         /// </summary>
-        abstract arrayBuffer: unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+        abstract arrayBuffer: unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
         /// <summary>
         /// The <b><c>bytes()</c></b> method of the Blob interface returns a Promise that resolves with a Uint8Array containing the contents of the blob as an array of bytes.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/bytes">MDN Reference</a>
         /// </summary>
-        abstract bytes: unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
+        abstract bytes: unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
         /// <summary>
         /// The <b><c>slice()</c></b> method of the Blob interface creates and returns a new Blob object which contains data from a subset of the blob on which it's called.
         /// <br /><br />
@@ -32946,18 +32934,18 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Blob/text">MDN Reference</a>
         /// </summary>
-        abstract text: unit -> Fable.Core.TS.Es.Promise<string>
+        abstract text: unit -> JS.Promise<string>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 size: float,
                 ``type``: string,
-                arrayBuffer: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>),
-                bytes: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
+                arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+                bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
                 slice: Func<float option, float option, string option, Blob>,
                 stream: (unit -> ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
-                text: (unit -> Fable.Core.TS.Es.Promise<string>)
+                text: (unit -> JS.Promise<string>)
             ) : Blob =
             jsNative
 
@@ -33033,38 +33021,38 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/arrayBuffer">MDN Reference</a>
         /// </summary>
-        abstract arrayBuffer: unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+        abstract arrayBuffer: unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/blob">MDN Reference</a>
         /// </summary>
-        abstract blob: unit -> Fable.Core.TS.Es.Promise<Blob>
+        abstract blob: unit -> JS.Promise<Blob>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bytes">MDN Reference</a>
         /// </summary>
-        abstract bytes: unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
+        abstract bytes: unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/formData">MDN Reference</a>
         /// </summary>
-        abstract formData: unit -> Fable.Core.TS.Es.Promise<FormData>
+        abstract formData: unit -> JS.Promise<FormData>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/json">MDN Reference</a>
         /// </summary>
-        abstract json: unit -> Fable.Core.TS.Es.Promise<obj>
+        abstract json: unit -> JS.Promise<obj>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/text">MDN Reference</a>
         /// </summary>
-        abstract text: unit -> Fable.Core.TS.Es.Promise<string>
+        abstract text: unit -> JS.Promise<string>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 bodyUsed: bool,
-                arrayBuffer: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>),
-                blob: (unit -> Fable.Core.TS.Es.Promise<Blob>),
-                bytes: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
-                formData: (unit -> Fable.Core.TS.Es.Promise<FormData>),
-                json: (unit -> Fable.Core.TS.Es.Promise<obj>),
-                text: (unit -> Fable.Core.TS.Es.Promise<string>),
+                arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+                blob: (unit -> JS.Promise<Blob>),
+                bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
+                formData: (unit -> JS.Promise<FormData>),
+                json: (unit -> JS.Promise<obj>),
+                text: (unit -> JS.Promise<string>),
                 ?body: ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
             ) : Body =
             jsNative
@@ -39001,7 +38989,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSSStyleSheet/replace">MDN Reference</a>
         /// </summary>
-        abstract replace: text: string -> Fable.Core.TS.Es.Promise<CSSStyleSheet>
+        abstract replace: text: string -> JS.Promise<CSSStyleSheet>
         /// <summary>
         /// The <b><c>replaceSync()</c></b> method of the CSSStyleSheet interface synchronously replaces the content of the stylesheet with the content passed into it.
         /// <br /><br />
@@ -39018,7 +39006,7 @@ module Dom =
                 deleteRule: (float -> unit),
                 insertRule: Func<string, float option, float>,
                 removeRule: (float option -> unit),
-                replace: (string -> Fable.Core.TS.Es.Promise<CSSStyleSheet>),
+                replace: (string -> JS.Promise<CSSStyleSheet>),
                 replaceSync: (string -> unit),
                 disabled: bool,
                 media: MediaList,
@@ -39409,35 +39397,31 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Cache/add">MDN Reference</a>
         /// </summary>
-        abstract add: request: U3<string, Request, URL> -> Fable.Core.TS.Es.Promise<unit>
+        abstract add: request: U3<string, Request, URL> -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>addAll()</c></b> method of the Cache interface takes an array of URLs, retrieves them, and adds the resulting response objects to the given cache. The request objects created during retrieval become keys to the stored response operations.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Cache/addAll">MDN Reference</a>
         /// </summary>
-        abstract addAll: requests: RequestInfo[] -> Fable.Core.TS.Es.Promise<unit>
+        abstract addAll: requests: RequestInfo[] -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>addAll()</c></b> method of the Cache interface takes an array of URLs, retrieves them, and adds the resulting response objects to the given cache. The request objects created during retrieval become keys to the stored response operations.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Cache/addAll">MDN Reference</a>
         /// </summary>
-        abstract addAll: requests: Fable.Core.TS.Es.Iterable<RequestInfo, obj, obj> -> Fable.Core.TS.Es.Promise<unit>
-
+        abstract addAll: requests: Fable.Core.TS.Es.Iterable<RequestInfo, obj, obj> -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>delete()</c></b> method of the Cache interface finds the Cache entry whose key is the request, and if found, deletes the Cache entry and returns a Promise that resolves to true. If no Cache entry is found, it resolves to false.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Cache/delete">MDN Reference</a>
         /// </summary>
-        abstract delete:
-            request: U3<string, Request, URL> * ?options: CacheQueryOptions -> Fable.Core.TS.Es.Promise<bool>
-
+        abstract delete: request: U3<string, Request, URL> * ?options: CacheQueryOptions -> JS.Promise<bool>
         /// <summary>
         /// The <b><c>keys()</c></b> method of the Cache interface returns a Promise that resolves to an array of Request objects representing the keys of the Cache.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Cache/keys">MDN Reference</a>
         /// </summary>
-        abstract keys:
-            ?request: U3<string, Request, URL> * ?options: CacheQueryOptions -> Fable.Core.TS.Es.Promise<Request[]>
+        abstract keys: ?request: U3<string, Request, URL> * ?options: CacheQueryOptions -> JS.Promise<Request[]>
 
         /// <summary>
         /// The <b><c>match()</c></b> method of the Cache interface returns a Promise that resolves to the Response associated with the first matching request in the Cache object. If no match is found, the Promise resolves to undefined.
@@ -39445,22 +39429,20 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Cache/match">MDN Reference</a>
         /// </summary>
         abstract ``match``:
-            request: U3<string, Request, URL> * ?options: CacheQueryOptions -> Fable.Core.TS.Es.Promise<Response option>
+            request: U3<string, Request, URL> * ?options: CacheQueryOptions -> JS.Promise<Response option>
 
         /// <summary>
         /// The <b><c>matchAll()</c></b> method of the Cache interface returns a Promise that resolves to an array of all matching responses in the Cache object.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Cache/matchAll">MDN Reference</a>
         /// </summary>
-        abstract matchAll:
-            ?request: U3<string, Request, URL> * ?options: CacheQueryOptions -> Fable.Core.TS.Es.Promise<Response[]>
-
+        abstract matchAll: ?request: U3<string, Request, URL> * ?options: CacheQueryOptions -> JS.Promise<Response[]>
         /// <summary>
         /// The <b><c>put()</c></b> method of the Cache interface allows key/value pairs to be added to the current Cache object.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Cache/put">MDN Reference</a>
         /// </summary>
-        abstract put: request: U3<string, Request, URL> * response: Response -> Fable.Core.TS.Es.Promise<unit>
+        abstract put: request: U3<string, Request, URL> * response: Response -> JS.Promise<unit>
 
     type CacheConstructor =
         [<EmitConstructor>]
@@ -39479,19 +39461,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CacheStorage/delete">MDN Reference</a>
         /// </summary>
-        abstract delete: cacheName: string -> Fable.Core.TS.Es.Promise<bool>
+        abstract delete: cacheName: string -> JS.Promise<bool>
         /// <summary>
         /// The <b><c>has()</c></b> method of the CacheStorage interface returns a Promise that resolves to true if a Cache object matches the cacheName.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CacheStorage/has">MDN Reference</a>
         /// </summary>
-        abstract has: cacheName: string -> Fable.Core.TS.Es.Promise<bool>
+        abstract has: cacheName: string -> JS.Promise<bool>
         /// <summary>
         /// The <b><c>keys()</c></b> method of the CacheStorage interface returns a Promise that will resolve with an array containing strings corresponding to all of the named Cache objects tracked by the CacheStorage object in the order they were created. Use this method to iterate over a list of all Cache objects.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CacheStorage/keys">MDN Reference</a>
         /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.Promise<string[]>
+        abstract keys: unit -> JS.Promise<string[]>
 
         /// <summary>
         /// The <b><c>match()</c></b> method of the CacheStorage interface checks if a given Request or URL string is a key for a stored Response. This method returns a Promise for a Response, or a Promise which resolves to undefined if no match is found.
@@ -39499,29 +39481,23 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CacheStorage/match">MDN Reference</a>
         /// </summary>
         abstract ``match``:
-            request: U3<string, Request, URL> * ?options: MultiCacheQueryOptions ->
-                Fable.Core.TS.Es.Promise<Response option>
+            request: U3<string, Request, URL> * ?options: MultiCacheQueryOptions -> JS.Promise<Response option>
 
         /// <summary>
         /// The <b><c>open()</c></b> method of the CacheStorage interface returns a Promise that resolves to the Cache object matching the cacheName.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CacheStorage/open">MDN Reference</a>
         /// </summary>
-        abstract ``open``: cacheName: string -> Fable.Core.TS.Es.Promise<Cache>
+        abstract ``open``: cacheName: string -> JS.Promise<Cache>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                delete: (string -> Fable.Core.TS.Es.Promise<bool>),
-                has: (string -> Fable.Core.TS.Es.Promise<bool>),
-                keys: (unit -> Fable.Core.TS.Es.Promise<string[]>),
-                ``match``:
-                    Func<
-                        U3<string, Request, URL>,
-                        MultiCacheQueryOptions option,
-                        Fable.Core.TS.Es.Promise<Response option>
-                     >,
-                ``open``: (string -> Fable.Core.TS.Es.Promise<Cache>)
+                delete: (string -> JS.Promise<bool>),
+                has: (string -> JS.Promise<bool>),
+                keys: (unit -> JS.Promise<string[]>),
+                ``match``: Func<U3<string, Request, URL>, MultiCacheQueryOptions option, JS.Promise<Response option>>,
+                ``open``: (string -> JS.Promise<Cache>)
             ) : CacheStorage =
             jsNative
 
@@ -40325,33 +40301,33 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Clipboard/read">MDN Reference</a>
         /// </summary>
-        abstract read: unit -> Fable.Core.TS.Es.Promise<ClipboardItem[]>
+        abstract read: unit -> JS.Promise<ClipboardItem[]>
         /// <summary>
         /// The <b><c>readText()</c></b> method of the Clipboard interface returns a Promise which fulfills with a copy of the textual contents of the system clipboard.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Clipboard/readText">MDN Reference</a>
         /// </summary>
-        abstract readText: unit -> Fable.Core.TS.Es.Promise<string>
+        abstract readText: unit -> JS.Promise<string>
         /// <summary>
         /// The <b><c>write()</c></b> method of the Clipboard interface writes arbitrary ClipboardItem data such as images and text to the clipboard, fulfilling the returned Promise on completion. This can be used to implement cut and copy functionality.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Clipboard/write">MDN Reference</a>
         /// </summary>
-        abstract write: data: ClipboardItem[] -> Fable.Core.TS.Es.Promise<unit>
+        abstract write: data: ClipboardItem[] -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>writeText()</c></b> method of the Clipboard interface writes the specified text to the system clipboard, returning a Promise that is resolved once the system clipboard has been updated.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Clipboard/writeText">MDN Reference</a>
         /// </summary>
-        abstract writeText: data: string -> Fable.Core.TS.Es.Promise<unit>
+        abstract writeText: data: string -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                read: (unit -> Fable.Core.TS.Es.Promise<ClipboardItem[]>),
-                readText: (unit -> Fable.Core.TS.Es.Promise<string>),
-                write: (ClipboardItem[] -> Fable.Core.TS.Es.Promise<unit>),
-                writeText: (string -> Fable.Core.TS.Es.Promise<unit>),
+                read: (unit -> JS.Promise<ClipboardItem[]>),
+                readText: (unit -> JS.Promise<string>),
+                write: (ClipboardItem[] -> JS.Promise<unit>),
+                writeText: (string -> JS.Promise<unit>),
                 addEventListener:
                     Action<string, EventListenerOrEventListenerObject option, U2<bool, AddEventListenerOptions> option>,
                 dispatchEvent: (Event -> bool),
@@ -40437,11 +40413,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ClipboardItem/getType">MDN Reference</a>
         /// </summary>
-        abstract getType: ``type``: string -> Fable.Core.TS.Es.Promise<Blob>
+        abstract getType: ``type``: string -> JS.Promise<Blob>
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (presentationStyle: PresentationStyle, types: string[], getType: (string -> Fable.Core.TS.Es.Promise<Blob>))
+            (presentationStyle: PresentationStyle, types: string[], getType: (string -> JS.Promise<Blob>))
             : ClipboardItem =
             jsNative
 
@@ -40455,8 +40431,7 @@ module Dom =
 
         [<EmitConstructor>]
         abstract Create:
-            items: JS.Record<string, U3<string, Blob, Fable.Core.TS.Es.PromiseLike<U2<string, Blob>>>> *
-            ?options: ClipboardItemOptions ->
+            items: JS.Record<string, U3<string, Blob, JS.Promise<U2<string, Blob>>>> * ?options: ClipboardItemOptions ->
                 ClipboardItem
 
     /// <summary>
@@ -40782,49 +40757,49 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/delete">MDN Reference</a>
         /// </summary>
-        abstract delete: name: string -> Fable.Core.TS.Es.Promise<unit>
+        abstract delete: name: string -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>delete()</c></b> method of the CookieStore interface deletes a cookie that matches the given name or options object. The method expires the cookie by changing its date to one in the past.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/delete">MDN Reference</a>
         /// </summary>
-        abstract delete: options: CookieStoreDeleteOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract delete: options: CookieStoreDeleteOptions -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>get()</c></b> method of the CookieStore interface returns a Promise that resolves to a single cookie matching the given name or options object. The method will return the first cookie that matches.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/get">MDN Reference</a>
         /// </summary>
-        abstract get: name: string -> Fable.Core.TS.Es.Promise<CookieListItem option>
+        abstract get: name: string -> JS.Promise<CookieListItem option>
         /// <summary>
         /// The <b><c>get()</c></b> method of the CookieStore interface returns a Promise that resolves to a single cookie matching the given name or options object. The method will return the first cookie that matches.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/get">MDN Reference</a>
         /// </summary>
-        abstract get: ?options: CookieStoreGetOptions -> Fable.Core.TS.Es.Promise<CookieListItem option>
+        abstract get: ?options: CookieStoreGetOptions -> JS.Promise<CookieListItem option>
         /// <summary>
         /// The <b><c>getAll()</c></b> method of the CookieStore interface returns a Promise that resolves as an array of cookies that match the name or options passed to it. Passing no parameters will return all cookies for the current context.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/getAll">MDN Reference</a>
         /// </summary>
-        abstract getAll: name: string -> Fable.Core.TS.Es.Promise<CookieListItem[]>
+        abstract getAll: name: string -> JS.Promise<CookieListItem[]>
         /// <summary>
         /// The <b><c>getAll()</c></b> method of the CookieStore interface returns a Promise that resolves as an array of cookies that match the name or options passed to it. Passing no parameters will return all cookies for the current context.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/getAll">MDN Reference</a>
         /// </summary>
-        abstract getAll: ?options: CookieStoreGetOptions -> Fable.Core.TS.Es.Promise<CookieListItem[]>
+        abstract getAll: ?options: CookieStoreGetOptions -> JS.Promise<CookieListItem[]>
         /// <summary>
         /// The <b><c>set()</c></b> method of the CookieStore interface sets a cookie with the given name and value or options object.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/set">MDN Reference</a>
         /// </summary>
-        abstract set: name: string * value: string -> Fable.Core.TS.Es.Promise<unit>
+        abstract set: name: string * value: string -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>set()</c></b> method of the CookieStore interface sets a cookie with the given name and value or options object.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/set">MDN Reference</a>
         /// </summary>
-        abstract set: options: CookieInit -> Fable.Core.TS.Es.Promise<unit>
+        abstract set: options: CookieInit -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -40878,13 +40853,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStoreManager/getSubscriptions">MDN Reference</a>
         /// </summary>
-        abstract getSubscriptions: unit -> Fable.Core.TS.Es.Promise<CookieStoreGetOptions[]>
+        abstract getSubscriptions: unit -> JS.Promise<CookieStoreGetOptions[]>
         /// <summary>
         /// The <b><c>subscribe()</c></b> method of the CookieStoreManager interface subscribes a ServiceWorkerRegistration to cookie change events.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStoreManager/subscribe">MDN Reference</a>
         /// </summary>
-        abstract subscribe: subscriptions: CookieStoreGetOptions[] -> Fable.Core.TS.Es.Promise<unit>
+        abstract subscribe: subscriptions: CookieStoreGetOptions[] -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>subscribe()</c></b> method of the CookieStoreManager interface subscribes a ServiceWorkerRegistration to cookie change events.
@@ -40892,14 +40867,14 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStoreManager/subscribe">MDN Reference</a>
         /// </summary>
         abstract subscribe:
-            subscriptions: Fable.Core.TS.Es.Iterable<CookieStoreGetOptions, obj, obj> -> Fable.Core.TS.Es.Promise<unit>
+            subscriptions: Fable.Core.TS.Es.Iterable<CookieStoreGetOptions, obj, obj> -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>unsubscribe()</c></b> method of the CookieStoreManager interface stops the ServiceWorkerRegistration from receiving previously subscribed events.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStoreManager/unsubscribe">MDN Reference</a>
         /// </summary>
-        abstract unsubscribe: subscriptions: CookieStoreGetOptions[] -> Fable.Core.TS.Es.Promise<unit>
+        abstract unsubscribe: subscriptions: CookieStoreGetOptions[] -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>unsubscribe()</c></b> method of the CookieStoreManager interface stops the ServiceWorkerRegistration from receiving previously subscribed events.
@@ -40907,7 +40882,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStoreManager/unsubscribe">MDN Reference</a>
         /// </summary>
         abstract unsubscribe:
-            subscriptions: Fable.Core.TS.Es.Iterable<CookieStoreGetOptions, obj, obj> -> Fable.Core.TS.Es.Promise<unit>
+            subscriptions: Fable.Core.TS.Es.Iterable<CookieStoreGetOptions, obj, obj> -> JS.Promise<unit>
 
     type CookieStoreManagerConstructor =
         [<EmitConstructor>]
@@ -40980,33 +40955,33 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CredentialsContainer/create">MDN Reference</a>
         /// </summary>
-        abstract create: ?options: CredentialCreationOptions -> Fable.Core.TS.Es.Promise<Credential option>
+        abstract create: ?options: CredentialCreationOptions -> JS.Promise<Credential option>
         /// <summary>
         /// The <b><c>get()</c></b> method of the CredentialsContainer interface returns a Promise that fulfills with a single credential, which can then be used to authenticate a user to a website.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CredentialsContainer/get">MDN Reference</a>
         /// </summary>
-        abstract get: ?options: CredentialRequestOptions -> Fable.Core.TS.Es.Promise<Credential option>
+        abstract get: ?options: CredentialRequestOptions -> JS.Promise<Credential option>
         /// <summary>
         /// The <b><c>preventSilentAccess()</c></b> method of the CredentialsContainer interface sets a flag that specifies whether automatic log in is allowed for future visits to the current origin, then returns a Promise that resolves to undefined. For example, you might call this, after a user signs out of a website to ensure that they aren't automatically signed in on the next site visit. Mediation varies by origin, and is an added check point of browser stored credentials, informing a user of an account login status. This method is typically called after a user signs out of a website, ensuring this user's login information is not automatically passed on the next site visit.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CredentialsContainer/preventSilentAccess">MDN Reference</a>
         /// </summary>
-        abstract preventSilentAccess: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract preventSilentAccess: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>store()</c></b> method of the CredentialsContainer stores a set of credentials for the user inside a Credential instance, returning this in a Promise.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CredentialsContainer/store">MDN Reference</a>
         /// </summary>
-        abstract store: credential: Credential -> Fable.Core.TS.Es.Promise<unit>
+        abstract store: credential: Credential -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                create: (CredentialCreationOptions option -> Fable.Core.TS.Es.Promise<Credential option>),
-                get: (CredentialRequestOptions option -> Fable.Core.TS.Es.Promise<Credential option>),
-                preventSilentAccess: (unit -> Fable.Core.TS.Es.Promise<unit>),
-                store: (Credential -> Fable.Core.TS.Es.Promise<unit>)
+                create: (CredentialCreationOptions option -> JS.Promise<Credential option>),
+                get: (CredentialRequestOptions option -> JS.Promise<Credential option>),
+                preventSilentAccess: (unit -> JS.Promise<unit>),
+                store: (Credential -> JS.Promise<unit>)
             ) : CredentialsContainer =
             jsNative
 
@@ -41135,7 +41110,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CustomElementRegistry/whenDefined">MDN Reference</a>
         /// </summary>
-        abstract whenDefined: name: string -> Fable.Core.TS.Es.Promise<CustomElementConstructor>
+        abstract whenDefined: name: string -> JS.Promise<CustomElementConstructor>
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -41145,7 +41120,7 @@ module Dom =
                 getName: (CustomElementConstructor -> string option),
                 initialize: (Node -> unit),
                 upgrade: (Node -> unit),
-                whenDefined: (string -> Fable.Core.TS.Es.Promise<CustomElementConstructor>)
+                whenDefined: (string -> JS.Promise<CustomElementConstructor>)
             ) : CustomElementRegistry =
             jsNative
 
@@ -43692,13 +43667,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/exitFullscreen">MDN Reference</a>
         /// </summary>
-        abstract exitFullscreen: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract exitFullscreen: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>exitPictureInPicture()</c></b> method of the Document interface requests that a video contained in this document, which is currently floating, be taken out of picture-in-picture mode, restoring the previous state of the screen. This usually reverses the effects of a previous call to HTMLVideoElement.requestPictureInPicture().
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/exitPictureInPicture">MDN Reference</a>
         /// </summary>
-        abstract exitPictureInPicture: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract exitPictureInPicture: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>exitPointerLock()</c></b> method of the Document interface asynchronously releases a pointer lock previously requested through Element.requestPointerLock.
         /// <br /><br />
@@ -43783,7 +43758,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/hasStorageAccess">MDN Reference</a>
         /// </summary>
-        abstract hasStorageAccess: unit -> Fable.Core.TS.Es.Promise<bool>
+        abstract hasStorageAccess: unit -> JS.Promise<bool>
         /// <summary>
         /// The <b><c>importNode()</c></b> method of the Document interface creates a copy of a Node or DocumentFragment from another document, to be inserted into the current document later.
         /// <br /><br />
@@ -43828,7 +43803,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/requestStorageAccess">MDN Reference</a>
         /// </summary>
-        abstract requestStorageAccess: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract requestStorageAccess: unit -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>startViewTransition()</c></b> method of the Document interface starts a new same-document (SPA) view transition and returns a ViewTransition object to represent it.
@@ -44767,13 +44742,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/requestFullscreen">MDN Reference</a>
         /// </summary>
-        abstract requestFullscreen: ?options: FullscreenOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract requestFullscreen: ?options: FullscreenOptions -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>requestPointerLock()</c></b> method of the Element interface lets you asynchronously ask for the pointer to be locked on the given element.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/requestPointerLock">MDN Reference</a>
         /// </summary>
-        abstract requestPointerLock: ?options: PointerLockOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract requestPointerLock: ?options: PointerLockOptions -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>scroll()</c></b> method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
         /// <br /><br />
@@ -45588,11 +45563,11 @@ module Dom =
                 webkitRelativePath: string,
                 size: float,
                 ``type``: string,
-                arrayBuffer: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>),
-                bytes: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
+                arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+                bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
                 slice: Func<float option, float option, string option, Blob>,
                 stream: (unit -> ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
-                text: (unit -> Fable.Core.TS.Es.Promise<string>)
+                text: (unit -> JS.Promise<string>)
             ) : File =
             jsNative
 
@@ -45884,29 +45859,26 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemDirectoryHandle/getDirectoryHandle">MDN Reference</a>
         /// </summary>
         abstract getDirectoryHandle:
-            name: string * ?options: FileSystemGetDirectoryOptions ->
-                Fable.Core.TS.Es.Promise<FileSystemDirectoryHandle>
+            name: string * ?options: FileSystemGetDirectoryOptions -> JS.Promise<FileSystemDirectoryHandle>
 
         /// <summary>
         /// The <b><c>getFileHandle()</c></b> method of the FileSystemDirectoryHandle interface returns a FileSystemFileHandle for a file with the specified name, within the directory the method is called.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemDirectoryHandle/getFileHandle">MDN Reference</a>
         /// </summary>
-        abstract getFileHandle:
-            name: string * ?options: FileSystemGetFileOptions -> Fable.Core.TS.Es.Promise<FileSystemFileHandle>
-
+        abstract getFileHandle: name: string * ?options: FileSystemGetFileOptions -> JS.Promise<FileSystemFileHandle>
         /// <summary>
         /// The <b><c>removeEntry()</c></b> method of the FileSystemDirectoryHandle interface attempts to remove an entry if the directory handle contains a file or directory called the name specified.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemDirectoryHandle/removeEntry">MDN Reference</a>
         /// </summary>
-        abstract removeEntry: name: string * ?options: FileSystemRemoveOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract removeEntry: name: string * ?options: FileSystemRemoveOptions -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>resolve()</c></b> method of the FileSystemDirectoryHandle interface returns an Array of directory names from the parent handle to the specified child entry, with the name of the child entry as the last array item.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemDirectoryHandle/resolve">MDN Reference</a>
         /// </summary>
-        abstract resolve: possibleDescendant: FileSystemHandle -> Fable.Core.TS.Es.Promise<string[] option>
+        abstract resolve: possibleDescendant: FileSystemHandle -> JS.Promise<string[] option>
 
         abstract entries:
             unit ->
@@ -46057,31 +46029,27 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemHandle/kind">MDN Reference</a>
         /// </summary>
         abstract kind: string
-
         /// <summary>
         /// The <b><c>createWritable()</c></b> method of the FileSystemFileHandle interface creates a FileSystemWritableFileStream that can be used to write to a file. The method returns a Promise which resolves to this created stream.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemFileHandle/createWritable">MDN Reference</a>
         /// </summary>
-        abstract createWritable:
-            ?options: FileSystemCreateWritableOptions -> Fable.Core.TS.Es.Promise<FileSystemWritableFileStream>
-
+        abstract createWritable: ?options: FileSystemCreateWritableOptions -> JS.Promise<FileSystemWritableFileStream>
         /// <summary>
         /// The <b><c>getFile()</c></b> method of the FileSystemFileHandle interface returns a Promise which resolves to a File object representing the state on disk of the entry represented by the handle.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemFileHandle/getFile">MDN Reference</a>
         /// </summary>
-        abstract getFile: unit -> Fable.Core.TS.Es.Promise<File>
+        abstract getFile: unit -> JS.Promise<File>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 kind: string,
-                createWritable:
-                    (FileSystemCreateWritableOptions option -> Fable.Core.TS.Es.Promise<FileSystemWritableFileStream>),
-                getFile: (unit -> Fable.Core.TS.Es.Promise<File>),
+                createWritable: (FileSystemCreateWritableOptions option -> JS.Promise<FileSystemWritableFileStream>),
+                getFile: (unit -> JS.Promise<File>),
                 name: string,
-                isSameEntry: (FileSystemHandle -> Fable.Core.TS.Es.Promise<bool>)
+                isSameEntry: (FileSystemHandle -> JS.Promise<bool>)
             ) : FileSystemFileHandle =
             jsNative
 
@@ -46114,11 +46082,12 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemHandle/isSameEntry">MDN Reference</a>
         /// </summary>
-        abstract isSameEntry: other: FileSystemHandle -> Fable.Core.TS.Es.Promise<bool>
+        abstract isSameEntry: other: FileSystemHandle -> JS.Promise<bool>
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (kind: FileSystemHandleKind, name: string, isSameEntry: (FileSystemHandle -> Fable.Core.TS.Es.Promise<bool>)) : FileSystemHandle =
+            (kind: FileSystemHandleKind, name: string, isSameEntry: (FileSystemHandle -> JS.Promise<bool>))
+            : FileSystemHandle =
             jsNative
 
     type FileSystemHandleConstructor =
@@ -46139,19 +46108,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemWritableFileStream/seek">MDN Reference</a>
         /// </summary>
-        abstract seek: position: float -> Fable.Core.TS.Es.Promise<unit>
+        abstract seek: position: float -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>truncate()</c></b> method of the FileSystemWritableFileStream interface resizes the file associated with the stream to the specified size in bytes.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemWritableFileStream/truncate">MDN Reference</a>
         /// </summary>
-        abstract truncate: size: float -> Fable.Core.TS.Es.Promise<unit>
+        abstract truncate: size: float -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>write()</c></b> method of the FileSystemWritableFileStream interface writes content into the file the method is called on, at the current file cursor offset.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemWritableFileStream/write">MDN Reference</a>
         /// </summary>
-        abstract write: data: FileSystemWriteChunkType -> Fable.Core.TS.Es.Promise<unit>
+        abstract write: data: FileSystemWriteChunkType -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>getWriter()</c></b> method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
         /// <br /><br />
@@ -46162,12 +46131,12 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                seek: (float -> Fable.Core.TS.Es.Promise<unit>),
-                truncate: (float -> Fable.Core.TS.Es.Promise<unit>),
-                write: (FileSystemWriteChunkType -> Fable.Core.TS.Es.Promise<unit>),
+                seek: (float -> JS.Promise<unit>),
+                truncate: (float -> JS.Promise<unit>),
+                write: (FileSystemWriteChunkType -> JS.Promise<unit>),
                 locked: bool,
-                abort: (obj option -> Fable.Core.TS.Es.Promise<unit>),
-                close: (unit -> Fable.Core.TS.Es.Promise<unit>),
+                abort: (obj option -> JS.Promise<unit>),
+                close: (unit -> JS.Promise<unit>),
                 getWriter: (unit -> WritableStreamDefaultWriter<obj>)
             ) : FileSystemWritableFileStream =
             jsNative
@@ -46242,7 +46211,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FontFace/loaded">MDN Reference</a>
         /// </summary>
-        abstract loaded: Fable.Core.TS.Es.Promise<FontFace>
+        abstract loaded: JS.Promise<FontFace>
         /// <summary>
         /// The <b><c>status</c></b> read-only property of the FontFace interface returns an enumerated value indicating the status of the font, one of "unloaded", "loading", "loaded", or "error".
         /// <br /><br />
@@ -46284,7 +46253,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FontFace/load">MDN Reference</a>
         /// </summary>
-        abstract load: unit -> Fable.Core.TS.Es.Promise<FontFace>
+        abstract load: unit -> JS.Promise<FontFace>
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -46295,14 +46264,14 @@ module Dom =
                 family: string,
                 featureSettings: string,
                 lineGapOverride: string,
-                loaded: Fable.Core.TS.Es.Promise<FontFace>,
+                loaded: JS.Promise<FontFace>,
                 status: FontFaceLoadStatus,
                 stretch: string,
                 style: string,
                 unicodeRange: string,
                 variationSettings: string,
                 weight: string,
-                load: (unit -> Fable.Core.TS.Es.Promise<FontFace>)
+                load: (unit -> JS.Promise<FontFace>)
             ) : FontFace =
             jsNative
 
@@ -46352,7 +46321,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FontFaceSet/ready">MDN Reference</a>
         /// </summary>
-        abstract ready: Fable.Core.TS.Es.Promise<FontFaceSet>
+        abstract ready: JS.Promise<FontFaceSet>
         /// <summary>
         /// The <b><c>status</c></b> read-only property of the FontFaceSet interface returns the loading state of the fonts in the set.
         /// <br /><br />
@@ -46370,7 +46339,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/FontFaceSet/load">MDN Reference</a>
         /// </summary>
-        abstract load: font: string * ?text: string -> Fable.Core.TS.Es.Promise<FontFace[]>
+        abstract load: font: string * ?text: string -> JS.Promise<FontFace[]>
         /// <summary>
         /// Executes a provided function once per each value in the Set object, in insertion order.
         /// </summary>
@@ -46675,14 +46644,14 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPU/requestAdapter">MDN Reference</a>
         /// </summary>
-        abstract requestAdapter: ?options: GPURequestAdapterOptions -> Fable.Core.TS.Es.Promise<GPUAdapter option>
+        abstract requestAdapter: ?options: GPURequestAdapterOptions -> JS.Promise<GPUAdapter option>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 wgslLanguageFeatures: WGSLLanguageFeatures,
                 getPreferredCanvasFormat: (unit -> GPUTextureFormat),
-                requestAdapter: (GPURequestAdapterOptions option -> Fable.Core.TS.Es.Promise<GPUAdapter option>)
+                requestAdapter: (GPURequestAdapterOptions option -> JS.Promise<GPUAdapter option>)
             ) : GPU =
             jsNative
 
@@ -46721,7 +46690,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUAdapter/requestDevice">MDN Reference</a>
         /// </summary>
-        abstract requestDevice: ?descriptor: GPUDeviceDescriptor -> Fable.Core.TS.Es.Promise<GPUDevice>
+        abstract requestDevice: ?descriptor: GPUDeviceDescriptor -> JS.Promise<GPUDevice>
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -46729,7 +46698,7 @@ module Dom =
                 features: GPUSupportedFeatures,
                 info: GPUAdapterInfo,
                 limits: GPUSupportedLimits,
-                requestDevice: (GPUDeviceDescriptor option -> Fable.Core.TS.Es.Promise<GPUDevice>)
+                requestDevice: (GPUDeviceDescriptor option -> JS.Promise<GPUDevice>)
             ) : GPUAdapter =
             jsNative
 
@@ -46907,7 +46876,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUBuffer/mapAsync">MDN Reference</a>
         /// </summary>
-        abstract mapAsync: mode: float * ?offset: float * ?size: float -> Fable.Core.TS.Es.Promise<unit>
+        abstract mapAsync: mode: float * ?offset: float * ?size: float -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>unmap()</c></b> method of the GPUBuffer interface unmaps the mapped range of the GPUBuffer, making its contents available for use by the GPU again after it has previously been mapped with GPUBuffer.mapAsync() (the GPU cannot access a mapped GPUBuffer).
         /// <br /><br />
@@ -46923,7 +46892,7 @@ module Dom =
                 usage: float,
                 destroy: (unit -> unit),
                 getMappedRange: Func<float option, float option, Fable.Core.TS.Es.ArrayBuffer>,
-                mapAsync: Func<float, float option, float option, Fable.Core.TS.Es.Promise<unit>>,
+                mapAsync: Func<float, float option, float option, JS.Promise<unit>>,
                 unmap: (unit -> unit),
                 label: string
             ) : GPUBuffer =
@@ -47329,7 +47298,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice/lost">MDN Reference</a>
         /// </summary>
-        abstract lost: Fable.Core.TS.Es.Promise<GPUDeviceLostInfo>
+        abstract lost: JS.Promise<GPUDeviceLostInfo>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice/uncapturederror_event">MDN Reference</a>
         /// </summary>
@@ -47370,15 +47339,12 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice/createComputePipeline">MDN Reference</a>
         /// </summary>
         abstract createComputePipeline: descriptor: GPUComputePipelineDescriptor -> GPUComputePipeline
-
         /// <summary>
         /// The <b><c>createComputePipelineAsync()</c></b> method of the GPUDevice interface returns a Promise that fulfills with a GPUComputePipeline, which can control the compute shader stage and be used in a GPUComputePassEncoder, once the pipeline can be used without any stalling.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice/createComputePipelineAsync">MDN Reference</a>
         /// </summary>
-        abstract createComputePipelineAsync:
-            descriptor: GPUComputePipelineDescriptor -> Fable.Core.TS.Es.Promise<GPUComputePipeline>
-
+        abstract createComputePipelineAsync: descriptor: GPUComputePipelineDescriptor -> JS.Promise<GPUComputePipeline>
         /// <summary>
         /// The <b><c>createPipelineLayout()</c></b> method of the GPUDevice interface creates a GPUPipelineLayout that defines the GPUBindGroupLayouts used by a pipeline. GPUBindGroups used with the pipeline during command encoding must have compatible GPUBindGroupLayouts.
         /// <br /><br />
@@ -47403,15 +47369,12 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice/createRenderPipeline">MDN Reference</a>
         /// </summary>
         abstract createRenderPipeline: descriptor: GPURenderPipelineDescriptor -> GPURenderPipeline
-
         /// <summary>
         /// The <b><c>createRenderPipelineAsync()</c></b> method of the GPUDevice interface returns a Promise that fulfills with a GPURenderPipeline, which can control the vertex and fragment shader stages and be used in a GPURenderPassEncoder or GPURenderBundleEncoder, once the pipeline can be used without any stalling.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice/createRenderPipelineAsync">MDN Reference</a>
         /// </summary>
-        abstract createRenderPipelineAsync:
-            descriptor: GPURenderPipelineDescriptor -> Fable.Core.TS.Es.Promise<GPURenderPipeline>
-
+        abstract createRenderPipelineAsync: descriptor: GPURenderPipelineDescriptor -> JS.Promise<GPURenderPipeline>
         /// <summary>
         /// The <b><c>createSampler()</c></b> method of the GPUDevice interface creates a GPUSampler, which controls how shaders transform and filter texture resource data.
         /// <br /><br />
@@ -47447,7 +47410,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice/popErrorScope">MDN Reference</a>
         /// </summary>
-        abstract popErrorScope: unit -> Fable.Core.TS.Es.Promise<GPUError option>
+        abstract popErrorScope: unit -> JS.Promise<GPUError option>
         /// <summary>
         /// The <b><c>pushErrorScope()</c></b> method of the GPUDevice interface pushes a new GPU error scope onto the device's error scope stack, allowing you to capture errors of a particular type.
         /// <br /><br />
@@ -47725,7 +47688,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUQueue/onSubmittedWorkDone">MDN Reference</a>
         /// </summary>
-        abstract onSubmittedWorkDone: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract onSubmittedWorkDone: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>submit()</c></b> method of the GPUQueue interface schedules the execution of command buffers represented by one or more GPUCommandBuffer objects by the GPU.
         /// <br /><br />
@@ -47991,11 +47954,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUShaderModule/getCompilationInfo">MDN Reference</a>
         /// </summary>
-        abstract getCompilationInfo: unit -> Fable.Core.TS.Es.Promise<GPUCompilationInfo>
+        abstract getCompilationInfo: unit -> JS.Promise<GPUCompilationInfo>
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (getCompilationInfo: (unit -> Fable.Core.TS.Es.Promise<GPUCompilationInfo>), label: string)
+            (getCompilationInfo: (unit -> JS.Promise<GPUCompilationInfo>), label: string)
             : GPUShaderModule =
             jsNative
 
@@ -48539,26 +48502,21 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/GamepadHapticActuator/playEffect">MDN Reference</a>
         /// </summary>
         abstract playEffect:
-            ``type``: GamepadHapticEffectType * ?``params``: GamepadEffectParameters ->
-                Fable.Core.TS.Es.Promise<GamepadHapticsResult>
+            ``type``: GamepadHapticEffectType * ?``params``: GamepadEffectParameters -> JS.Promise<GamepadHapticsResult>
 
         /// <summary>
         /// The <b><c>reset()</c></b> method of the GamepadHapticActuator interface stops the hardware from playing an active vibration effect.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/GamepadHapticActuator/reset">MDN Reference</a>
         /// </summary>
-        abstract reset: unit -> Fable.Core.TS.Es.Promise<GamepadHapticsResult>
+        abstract reset: unit -> JS.Promise<GamepadHapticsResult>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 playEffect:
-                    Func<
-                        GamepadHapticEffectType,
-                        GamepadEffectParameters option,
-                        Fable.Core.TS.Es.Promise<GamepadHapticsResult>
-                     >,
-                reset: (unit -> Fable.Core.TS.Es.Promise<GamepadHapticsResult>)
+                    Func<GamepadHapticEffectType, GamepadEffectParameters option, JS.Promise<GamepadHapticsResult>>,
+                reset: (unit -> JS.Promise<GamepadHapticsResult>)
             ) : GamepadHapticActuator =
             jsNative
 
@@ -52363,7 +52321,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLImageElement/decode">MDN Reference</a>
         /// </summary>
-        abstract decode: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract decode: unit -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
@@ -53409,21 +53367,21 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play">MDN Reference</a>
         /// </summary>
-        abstract play: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract play: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>setMediaKeys()</c></b> method of the HTMLMediaElement interface sets the MediaKeys that will be used to decrypt media during playback.
         /// Available only in secure contexts.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/setMediaKeys">MDN Reference</a>
         /// </summary>
-        abstract setMediaKeys: ?mediaKeys: MediaKeys -> Fable.Core.TS.Es.Promise<unit>
+        abstract setMediaKeys: ?mediaKeys: MediaKeys -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>setSinkId()</c></b> method of the HTMLMediaElement interface sets the ID of the audio device to use for output and returns a Promise.
         /// Available only in secure contexts.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/setSinkId">MDN Reference</a>
         /// </summary>
-        abstract setSinkId: sinkId: string -> Fable.Core.TS.Es.Promise<unit>
+        abstract setSinkId: sinkId: string -> JS.Promise<unit>
         abstract NETWORK_EMPTY: float
         abstract NETWORK_IDLE: float
         abstract NETWORK_LOADING: float
@@ -56377,7 +56335,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/requestPictureInPicture">MDN Reference</a>
         /// </summary>
-        abstract requestPictureInPicture: unit -> Fable.Core.TS.Es.Promise<PictureInPictureWindow>
+        abstract requestPictureInPicture: unit -> JS.Promise<PictureInPictureWindow>
         /// <summary>
         /// The <b><c>requestVideoFrameCallback()</c></b> method of the HTMLVideoElement interface registers a callback function that runs when a new video frame is sent to the compositor. This enables developers to perform efficient operations on each video frame.
         /// <br /><br />
@@ -57066,7 +57024,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBFactory/databases">MDN Reference</a>
         /// </summary>
-        abstract databases: unit -> Fable.Core.TS.Es.Promise<IDBDatabaseInfo[]>
+        abstract databases: unit -> JS.Promise<IDBDatabaseInfo[]>
         /// <summary>
         /// The <b><c>deleteDatabase()</c></b> method of the IDBFactory interface requests the deletion of a database. The method returns an IDBOpenDBRequest object immediately, and performs the deletion operation asynchronously.
         /// <br /><br />
@@ -57084,7 +57042,7 @@ module Dom =
         static member Create
             (
                 cmp: Func<obj, obj, float>,
-                databases: (unit -> Fable.Core.TS.Es.Promise<IDBDatabaseInfo[]>),
+                databases: (unit -> JS.Promise<IDBDatabaseInfo[]>),
                 deleteDatabase: (string -> IDBOpenDBRequest),
                 ``open``: Func<string, float option, IDBOpenDBRequest>
             ) : IDBFactory =
@@ -58138,34 +58096,34 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ImageCapture/getPhotoCapabilities">MDN Reference</a>
         /// </summary>
-        abstract getPhotoCapabilities: unit -> Fable.Core.TS.Es.Promise<PhotoCapabilities>
+        abstract getPhotoCapabilities: unit -> JS.Promise<PhotoCapabilities>
         /// <summary>
         /// The <b><c>getPhotoSettings()</c></b> method of the ImageCapture interface returns a Promise that resolves with an object containing the current photo configuration settings.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ImageCapture/getPhotoSettings">MDN Reference</a>
         /// </summary>
-        abstract getPhotoSettings: unit -> Fable.Core.TS.Es.Promise<PhotoSettings>
+        abstract getPhotoSettings: unit -> JS.Promise<PhotoSettings>
         /// <summary>
         /// The <b><c>grabFrame()</c></b> method of the ImageCapture interface takes a snapshot of the live video in a MediaStreamTrack and returns a Promise that resolves with an ImageBitmap containing the snapshot.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ImageCapture/grabFrame">MDN Reference</a>
         /// </summary>
-        abstract grabFrame: unit -> Fable.Core.TS.Es.Promise<ImageBitmap>
+        abstract grabFrame: unit -> JS.Promise<ImageBitmap>
         /// <summary>
         /// The <b><c>takePhoto()</c></b> method of the ImageCapture interface takes a single exposure using the video capture device sourcing a MediaStreamTrack and returns a Promise that resolves with a Blob containing the data.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ImageCapture/takePhoto">MDN Reference</a>
         /// </summary>
-        abstract takePhoto: ?photoSettings: PhotoSettings -> Fable.Core.TS.Es.Promise<Blob>
+        abstract takePhoto: ?photoSettings: PhotoSettings -> JS.Promise<Blob>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 track: MediaStreamTrack,
-                getPhotoCapabilities: (unit -> Fable.Core.TS.Es.Promise<PhotoCapabilities>),
-                getPhotoSettings: (unit -> Fable.Core.TS.Es.Promise<PhotoSettings>),
-                grabFrame: (unit -> Fable.Core.TS.Es.Promise<ImageBitmap>),
-                takePhoto: (PhotoSettings option -> Fable.Core.TS.Es.Promise<Blob>)
+                getPhotoCapabilities: (unit -> JS.Promise<PhotoCapabilities>),
+                getPhotoSettings: (unit -> JS.Promise<PhotoSettings>),
+                grabFrame: (unit -> JS.Promise<ImageBitmap>),
+                takePhoto: (PhotoSettings option -> JS.Promise<Blob>)
             ) : ImageCapture =
             jsNative
 
@@ -58237,7 +58195,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ImageDecoder/completed">MDN Reference</a>
         /// </summary>
-        abstract completed: Fable.Core.TS.Es.Promise<unit>
+        abstract completed: JS.Promise<unit>
         /// <summary>
         /// The <b><c>tracks</c></b> read-only property of the ImageDecoder interface returns a list of the tracks in the encoded image data.
         /// <br /><br />
@@ -58261,7 +58219,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ImageDecoder/decode">MDN Reference</a>
         /// </summary>
-        abstract decode: ?options: ImageDecodeOptions -> Fable.Core.TS.Es.Promise<ImageDecodeResult>
+        abstract decode: ?options: ImageDecodeOptions -> JS.Promise<ImageDecodeResult>
         /// <summary>
         /// The <b><c>reset()</c></b> method of the ImageDecoder interface aborts all pending decode() operations; rejecting all pending promises. All other state will be unchanged. Class methods can continue to be invoked after reset(). E.g., calling decode() after reset() is permitted.
         /// <br /><br />
@@ -58273,11 +58231,11 @@ module Dom =
         static member Create
             (
                 complete: bool,
-                completed: Fable.Core.TS.Es.Promise<unit>,
+                completed: JS.Promise<unit>,
                 tracks: ImageTrackList,
                 ``type``: string,
                 close: (unit -> unit),
-                decode: (ImageDecodeOptions option -> Fable.Core.TS.Es.Promise<ImageDecodeResult>),
+                decode: (ImageDecodeOptions option -> JS.Promise<ImageDecodeResult>),
                 reset: (unit -> unit)
             ) : ImageDecoder =
             jsNative
@@ -58288,7 +58246,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ImageDecoder/isTypeSupported_static">MDN Reference</a>
         /// </summary>
-        abstract isTypeSupported: ``type``: string -> Fable.Core.TS.Es.Promise<bool>
+        abstract isTypeSupported: ``type``: string -> JS.Promise<bool>
 
         [<EmitConstructor>]
         abstract Create: init: ImageDecoderInit -> ImageDecoder
@@ -58353,7 +58311,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ImageTrackList/ready">MDN Reference</a>
         /// </summary>
-        abstract ready: Fable.Core.TS.Es.Promise<unit>
+        abstract ready: JS.Promise<unit>
         /// <summary>
         /// The <b><c>selectedIndex</c></b> property of the ImageTrackList interface returns the index of the selected track.
         /// <br /><br />
@@ -59012,13 +58970,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/LockManager/query">MDN Reference</a>
         /// </summary>
-        abstract query: unit -> Fable.Core.TS.Es.Promise<LockManagerSnapshot>
+        abstract query: unit -> JS.Promise<LockManagerSnapshot>
         /// <summary>
         /// The <b><c>request()</c></b> method of the LockManager interface requests a Lock object with parameters specifying its name and characteristics. The requested Lock is passed to a callback, while the function itself returns a Promise that resolves (or rejects) with the result of the callback after the lock is released, or rejects if the request is aborted.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/LockManager/request">MDN Reference</a>
         /// </summary>
-        abstract request<'T> : name: string * callback: LockGrantedCallback<'T> -> Fable.Core.TS.Es.Promise<obj>
+        abstract request<'T> : name: string * callback: LockGrantedCallback<'T> -> JS.Promise<obj>
 
         /// <summary>
         /// The <b><c>request()</c></b> method of the LockManager interface requests a Lock object with parameters specifying its name and characteristics. The requested Lock is passed to a callback, while the function itself returns a Promise that resolves (or rejects) with the result of the callback after the lock is released, or rejects if the request is aborted.
@@ -59026,7 +58984,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/LockManager/request">MDN Reference</a>
         /// </summary>
         abstract request<'T> :
-            name: string * options: LockOptions * callback: LockGrantedCallback<'T> -> Fable.Core.TS.Es.Promise<obj>
+            name: string * options: LockOptions * callback: LockGrantedCallback<'T> -> JS.Promise<obj>
 
     type LockManagerConstructor =
         [<EmitConstructor>]
@@ -59403,13 +59361,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIPort/close">MDN Reference</a>
         /// </summary>
-        abstract close: unit -> Fable.Core.TS.Es.Promise<MIDIPort>
+        abstract close: unit -> JS.Promise<MIDIPort>
         /// <summary>
         /// The <b><c>open()</c></b> method of the MIDIPort interface makes the MIDI device connected to this MIDIPort explicitly available.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIPort/open">MDN Reference</a>
         /// </summary>
-        abstract ``open``: unit -> Fable.Core.TS.Es.Promise<MIDIPort>
+        abstract ``open``: unit -> JS.Promise<MIDIPort>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -59507,22 +59465,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaCapabilities/decodingInfo">MDN Reference</a>
         /// </summary>
-        abstract decodingInfo:
-            configuration: MediaDecodingConfiguration -> Fable.Core.TS.Es.Promise<MediaCapabilitiesDecodingInfo>
-
+        abstract decodingInfo: configuration: MediaDecodingConfiguration -> JS.Promise<MediaCapabilitiesDecodingInfo>
         /// <summary>
         /// The <b><c>encodingInfo()</c></b> method of the MediaCapabilities interface returns a promise that fulfills with the tested media configuration's capabilities for encoding media. This contains the three boolean properties supported, smooth, and powerefficient, which describe how compatible the device is with the type of media.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaCapabilities/encodingInfo">MDN Reference</a>
         /// </summary>
-        abstract encodingInfo:
-            configuration: MediaEncodingConfiguration -> Fable.Core.TS.Es.Promise<MediaCapabilitiesEncodingInfo>
+        abstract encodingInfo: configuration: MediaEncodingConfiguration -> JS.Promise<MediaCapabilitiesEncodingInfo>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                decodingInfo: (MediaDecodingConfiguration -> Fable.Core.TS.Es.Promise<MediaCapabilitiesDecodingInfo>),
-                encodingInfo: (MediaEncodingConfiguration -> Fable.Core.TS.Es.Promise<MediaCapabilitiesEncodingInfo>)
+                decodingInfo: (MediaDecodingConfiguration -> JS.Promise<MediaCapabilitiesDecodingInfo>),
+                encodingInfo: (MediaEncodingConfiguration -> JS.Promise<MediaCapabilitiesEncodingInfo>)
             ) : MediaCapabilities =
             jsNative
 
@@ -59603,13 +59558,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaDevices/enumerateDevices">MDN Reference</a>
         /// </summary>
-        abstract enumerateDevices: unit -> Fable.Core.TS.Es.Promise<MediaDeviceInfo[]>
+        abstract enumerateDevices: unit -> JS.Promise<MediaDeviceInfo[]>
         /// <summary>
         /// The <b><c>getDisplayMedia()</c></b> method of the MediaDevices interface prompts the user to select and grant permission to capture the contents of a display or portion thereof (such as a window) as a MediaStream.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaDevices/getDisplayMedia">MDN Reference</a>
         /// </summary>
-        abstract getDisplayMedia: ?options: DisplayMediaStreamOptions -> Fable.Core.TS.Es.Promise<MediaStream>
+        abstract getDisplayMedia: ?options: DisplayMediaStreamOptions -> JS.Promise<MediaStream>
         /// <summary>
         /// The <b><c>getSupportedConstraints()</c></b> method of the MediaDevices interface returns an object based on the MediaTrackSupportedConstraints dictionary, whose member fields each specify one of the constrainable properties the user agent understands.
         /// <br /><br />
@@ -59621,7 +59576,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaDevices/getUserMedia">MDN Reference</a>
         /// </summary>
-        abstract getUserMedia: ?constraints: MediaStreamConstraints -> Fable.Core.TS.Es.Promise<MediaStream>
+        abstract getUserMedia: ?constraints: MediaStreamConstraints -> JS.Promise<MediaStream>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -59859,7 +59814,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession/closed">MDN Reference</a>
         /// </summary>
-        abstract closed: Fable.Core.TS.Es.Promise<MediaKeySessionClosedReason>
+        abstract closed: JS.Promise<MediaKeySessionClosedReason>
         /// <summary>
         /// The <b><c>expiration</c></b> read-only property of the MediaKeySession interface returns the time after which the keys in the current session can no longer be used to decrypt media data, or NaN if no such time exists.
         /// <br /><br />
@@ -59891,31 +59846,31 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession/close">MDN Reference</a>
         /// </summary>
-        abstract close: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract close: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>generateRequest()</c></b> method of the MediaKeySession interface returns a Promise after generating a license request based on initialization data.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession/generateRequest">MDN Reference</a>
         /// </summary>
-        abstract generateRequest: initDataType: string * initData: BufferSource -> Fable.Core.TS.Es.Promise<unit>
+        abstract generateRequest: initDataType: string * initData: BufferSource -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>load()</c></b> method of the MediaKeySession interface returns a Promise that resolves to a boolean value after loading data for a specified session object.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession/load">MDN Reference</a>
         /// </summary>
-        abstract load: sessionId: string -> Fable.Core.TS.Es.Promise<bool>
+        abstract load: sessionId: string -> JS.Promise<bool>
         /// <summary>
         /// The <b><c>remove()</c></b> method of the MediaKeySession interface returns a Promise after removing any session data associated with the current object.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession/remove">MDN Reference</a>
         /// </summary>
-        abstract remove: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract remove: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>update()</c></b> method of the MediaKeySession interface loads messages and licenses to the CDM, and then returns a Promise.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession/update">MDN Reference</a>
         /// </summary>
-        abstract update: response: BufferSource -> Fable.Core.TS.Es.Promise<unit>
+        abstract update: response: BufferSource -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -60015,7 +59970,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySystemAccess/createMediaKeys">MDN Reference</a>
         /// </summary>
-        abstract createMediaKeys: unit -> Fable.Core.TS.Es.Promise<MediaKeys>
+        abstract createMediaKeys: unit -> JS.Promise<MediaKeys>
         /// <summary>
         /// The <b><c>getConfiguration()</c></b> method of the MediaKeySystemAccess interface returns an object with the supported combination of the following configuration options:
         /// <br /><br />
@@ -60027,7 +59982,7 @@ module Dom =
         static member Create
             (
                 keySystem: string,
-                createMediaKeys: (unit -> Fable.Core.TS.Es.Promise<MediaKeys>),
+                createMediaKeys: (unit -> JS.Promise<MediaKeys>),
                 getConfiguration: (unit -> MediaKeySystemConfiguration)
             ) : MediaKeySystemAccess =
             jsNative
@@ -60055,20 +60010,20 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeys/getStatusForPolicy">MDN Reference</a>
         /// </summary>
-        abstract getStatusForPolicy: ?policy: MediaKeysPolicy -> Fable.Core.TS.Es.Promise<MediaKeyStatus>
+        abstract getStatusForPolicy: ?policy: MediaKeysPolicy -> JS.Promise<MediaKeyStatus>
         /// <summary>
         /// The <b><c>setServerCertificate()</c></b> method of the MediaKeys interface provides a server certificate to be used to encrypt messages to the license server.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeys/setServerCertificate">MDN Reference</a>
         /// </summary>
-        abstract setServerCertificate: serverCertificate: BufferSource -> Fable.Core.TS.Es.Promise<bool>
+        abstract setServerCertificate: serverCertificate: BufferSource -> JS.Promise<bool>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 createSession: (MediaKeySessionType option -> MediaKeySession),
-                getStatusForPolicy: (MediaKeysPolicy option -> Fable.Core.TS.Es.Promise<MediaKeyStatus>),
-                setServerCertificate: (BufferSource -> Fable.Core.TS.Es.Promise<bool>)
+                getStatusForPolicy: (MediaKeysPolicy option -> JS.Promise<MediaKeyStatus>),
+                setServerCertificate: (BufferSource -> JS.Promise<bool>)
             ) : MediaKeys =
             jsNative
 
@@ -60488,13 +60443,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaSession/setCameraActive">MDN Reference</a>
         /// </summary>
-        abstract setCameraActive: active: bool -> Fable.Core.TS.Es.Promise<unit>
+        abstract setCameraActive: active: bool -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>setMicrophoneActive()</c></b> method of the MediaSession interface is used to indicate to the user agent whether the user's microphone is considered to be currently muted.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaSession/setMicrophoneActive">MDN Reference</a>
         /// </summary>
-        abstract setMicrophoneActive: active: bool -> Fable.Core.TS.Es.Promise<unit>
+        abstract setMicrophoneActive: active: bool -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>setPositionState()</c></b> method of the MediaSession interface is used to update the current document's media playback position and speed for presentation by user's device in any kind of interface that provides details about ongoing media. This can be particularly useful if your code implements a player for type of media not directly supported by the browser.
         /// <br /><br />
@@ -60507,8 +60462,8 @@ module Dom =
             (
                 playbackState: MediaSessionPlaybackState,
                 setActionHandler: Action<MediaSessionAction, MediaSessionActionHandler option>,
-                setCameraActive: (bool -> Fable.Core.TS.Es.Promise<unit>),
-                setMicrophoneActive: (bool -> Fable.Core.TS.Es.Promise<unit>),
+                setCameraActive: (bool -> JS.Promise<unit>),
+                setMicrophoneActive: (bool -> JS.Promise<unit>),
                 setPositionState: (MediaPositionState option -> unit),
                 ?metadata: MediaMetadata
             ) : MediaSession =
@@ -60904,7 +60859,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/applyConstraints">MDN Reference</a>
         /// </summary>
-        abstract applyConstraints: ?constraints: MediaTrackConstraints -> Fable.Core.TS.Es.Promise<unit>
+        abstract applyConstraints: ?constraints: MediaTrackConstraints -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>clone()</c></b> method of the MediaStreamTrack interface creates a duplicate of the MediaStreamTrack. This new MediaStreamTrack object is identical except for its unique id.
         /// <br /><br />
@@ -62142,33 +62097,33 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationPreloadManager/disable">MDN Reference</a>
         /// </summary>
-        abstract disable: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract disable: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>enable()</c></b> method of the NavigationPreloadManager interface is used to enable preloading of resources managed by the service worker. It returns a promise that resolves with undefined.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationPreloadManager/enable">MDN Reference</a>
         /// </summary>
-        abstract enable: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract enable: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>getState()</c></b> method of the NavigationPreloadManager interface returns a Promise that resolves to an object with properties that indicate whether preload is enabled and what value will be sent in the Service-Worker-Navigation-Preload HTTP header.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationPreloadManager/getState">MDN Reference</a>
         /// </summary>
-        abstract getState: unit -> Fable.Core.TS.Es.Promise<NavigationPreloadState>
+        abstract getState: unit -> JS.Promise<NavigationPreloadState>
         /// <summary>
         /// The <b><c>setHeaderValue()</c></b> method of the NavigationPreloadManager interface sets the value of the Service-Worker-Navigation-Preload header that will be sent with requests resulting from a fetch() operation made during service worker navigation preloading. It returns an empty Promise that resolves with undefined.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationPreloadManager/setHeaderValue">MDN Reference</a>
         /// </summary>
-        abstract setHeaderValue: value: string -> Fable.Core.TS.Es.Promise<unit>
+        abstract setHeaderValue: value: string -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                disable: (unit -> Fable.Core.TS.Es.Promise<unit>),
-                enable: (unit -> Fable.Core.TS.Es.Promise<unit>),
-                getState: (unit -> Fable.Core.TS.Es.Promise<NavigationPreloadState>),
-                setHeaderValue: (string -> Fable.Core.TS.Es.Promise<unit>)
+                disable: (unit -> JS.Promise<unit>),
+                enable: (unit -> JS.Promise<unit>),
+                getState: (unit -> JS.Promise<NavigationPreloadState>),
+                setHeaderValue: (string -> JS.Promise<unit>)
             ) : NavigationPreloadManager =
             jsNative
 
@@ -62183,13 +62138,13 @@ module Dom =
     /// </summary>
     [<Interface>]
     type NavigationTransition =
-        abstract committed: Fable.Core.TS.Es.Promise<unit>
+        abstract committed: JS.Promise<unit>
         /// <summary>
         /// The <b><c>finished</c></b> read-only property of the NavigationTransition interface returns a Promise that fulfills at the same time the navigatesuccess event fires, or rejects at the same time the navigateerror event fires.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationTransition/finished">MDN Reference</a>
         /// </summary>
-        abstract finished: Fable.Core.TS.Es.Promise<unit>
+        abstract finished: JS.Promise<unit>
         /// <summary>
         /// The <b><c>from</c></b> read-only property of the NavigationTransition interface returns the NavigationHistoryEntry that the transition is coming from.
         /// <br /><br />
@@ -62206,8 +62161,8 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                committed: Fable.Core.TS.Es.Promise<unit>,
-                finished: Fable.Core.TS.Es.Promise<unit>,
+                committed: JS.Promise<unit>,
+                finished: JS.Promise<unit>,
                 from: NavigationHistoryEntry,
                 navigationType: NavigationType
             ) : NavigationTransition =
@@ -62335,7 +62290,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigator/requestMIDIAccess">MDN Reference</a>
         /// </summary>
-        abstract requestMIDIAccess: ?options: MIDIOptions -> Fable.Core.TS.Es.Promise<MIDIAccess>
+        abstract requestMIDIAccess: ?options: MIDIOptions -> JS.Promise<MIDIAccess>
 
         /// <summary>
         /// The <b><c>requestMediaKeySystemAccess()</c></b> method of the Navigator interface returns a Promise which delivers a MediaKeySystemAccess object that can be used to access a particular media key system, which can in turn be used to create keys for decrypting a media stream.
@@ -62345,7 +62300,7 @@ module Dom =
         /// </summary>
         abstract requestMediaKeySystemAccess:
             keySystem: string * supportedConfigurations: MediaKeySystemConfiguration[] ->
-                Fable.Core.TS.Es.Promise<MediaKeySystemAccess>
+                JS.Promise<MediaKeySystemAccess>
 
         /// <summary>
         /// The <b><c>requestMediaKeySystemAccess()</c></b> method of the Navigator interface returns a Promise which delivers a MediaKeySystemAccess object that can be used to access a particular media key system, which can in turn be used to create keys for decrypting a media stream.
@@ -62356,7 +62311,7 @@ module Dom =
         abstract requestMediaKeySystemAccess:
             keySystem: string *
             supportedConfigurations: Fable.Core.TS.Es.Iterable<MediaKeySystemConfiguration, obj, obj> ->
-                Fable.Core.TS.Es.Promise<MediaKeySystemAccess>
+                JS.Promise<MediaKeySystemAccess>
 
         /// <summary>
         /// The <b><c>navigator.sendBeacon()</c></b> method asynchronously sends an HTTP POST request containing a small amount of data to a web server.
@@ -62370,7 +62325,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigator/share">MDN Reference</a>
         /// </summary>
-        abstract share: ?data: ShareData -> Fable.Core.TS.Es.Promise<unit>
+        abstract share: ?data: ShareData -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>vibrate()</c></b> method of the Navigator interface pulses the vibration hardware on the device, if such hardware exists. If the device doesn't support vibration, this method has no effect. If a vibration pattern is already in progress when this method is called, the previous pattern is halted and the new one begins instead.
         /// <br /><br />
@@ -62406,18 +62361,16 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigator/clearAppBadge">MDN Reference</a>
         /// </summary>
-        abstract clearAppBadge: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract clearAppBadge: unit -> JS.Promise<unit>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigator/setAppBadge">MDN Reference</a>
         /// </summary>
-        abstract setAppBadge: ?contents: float -> Fable.Core.TS.Es.Promise<unit>
+        abstract setAppBadge: ?contents: float -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (
-                clearAppBadge: (unit -> Fable.Core.TS.Es.Promise<unit>),
-                setAppBadge: (float option -> Fable.Core.TS.Es.Promise<unit>)
-            ) : NavigatorBadge =
+            (clearAppBadge: (unit -> JS.Promise<unit>), setAppBadge: (float option -> JS.Promise<unit>))
+            : NavigatorBadge =
             jsNative
 
     [<Interface>]
@@ -62559,10 +62512,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/NavigatorLogin/setStatus">MDN Reference</a>
         /// </summary>
-        abstract setStatus: status: LoginStatus -> Fable.Core.TS.Es.Promise<unit>
+        abstract setStatus: status: LoginStatus -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
-        static member Create(setStatus: (LoginStatus -> Fable.Core.TS.Es.Promise<unit>)) : NavigatorLogin = jsNative
+        static member Create(setStatus: (LoginStatus -> JS.Promise<unit>)) : NavigatorLogin = jsNative
 
     type NavigatorLoginConstructor =
         [<EmitConstructor>]
@@ -63231,7 +63184,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Notification/requestPermission_static">MDN Reference</a>
         /// </summary>
         abstract requestPermission:
-            ?deprecatedCallback: NotificationPermissionCallback -> Fable.Core.TS.Es.Promise<NotificationPermission>
+            ?deprecatedCallback: NotificationPermissionCallback -> JS.Promise<NotificationPermission>
 
         [<EmitConstructor>]
         abstract Create: title: string * ?options: NotificationOptions -> Notification
@@ -63522,19 +63475,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/OfflineAudioContext/resume">MDN Reference</a>
         /// </summary>
-        abstract resume: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract resume: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>startRendering()</c></b> method of the OfflineAudioContext Interface starts rendering the audio graph, taking into account the current connections and the current scheduled changes.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/OfflineAudioContext/startRendering">MDN Reference</a>
         /// </summary>
-        abstract startRendering: unit -> Fable.Core.TS.Es.Promise<AudioBuffer>
+        abstract startRendering: unit -> JS.Promise<AudioBuffer>
         /// <summary>
         /// The <b><c>suspend()</c></b> method of the OfflineAudioContext interface schedules a suspension of the time progression in the audio context at the specified time and returns a promise. This is generally useful at the time of manipulating the audio graph synchronously on OfflineAudioContext.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/OfflineAudioContext/suspend">MDN Reference</a>
         /// </summary>
-        abstract suspend: suspendTime: float -> Fable.Core.TS.Es.Promise<unit>
+        abstract suspend: suspendTime: float -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -63605,7 +63558,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/convertToBlob">MDN Reference</a>
         /// </summary>
-        abstract convertToBlob: ?options: ImageEncodeOptions -> Fable.Core.TS.Es.Promise<Blob>
+        abstract convertToBlob: ?options: ImageEncodeOptions -> JS.Promise<Blob>
         /// <summary>
         /// The <b><c>OffscreenCanvas.getContext()</c></b> method returns a drawing context for an offscreen canvas, or null if the context identifier is not supported, or the offscreen canvas has already been set to a different context mode.
         /// <br /><br />
@@ -64379,13 +64332,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequest/abort">MDN Reference</a>
         /// </summary>
-        abstract abort: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract abort: unit -> JS.Promise<unit>
         /// <summary>
         /// The PaymentRequest method <b><c>canMakePayment()</c></b> determines whether or not the request is configured in a way that is compatible with at least one payment method supported by the user agent.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequest/canMakePayment">MDN Reference</a>
         /// </summary>
-        abstract canMakePayment: unit -> Fable.Core.TS.Es.Promise<bool>
+        abstract canMakePayment: unit -> JS.Promise<bool>
 
         /// <summary>
         /// The PaymentRequest interface's <b><c>show()</c></b> method instructs the user agent to begin the process of showing and handling the user interface for the payment request to the user.
@@ -64393,8 +64346,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequest/show">MDN Reference</a>
         /// </summary>
         abstract show:
-            ?detailsPromise: U2<PaymentDetailsUpdate, Fable.Core.TS.Es.PromiseLike<PaymentDetailsUpdate>> ->
-                Fable.Core.TS.Es.Promise<PaymentResponse>
+            ?detailsPromise: U2<PaymentDetailsUpdate, JS.Promise<PaymentDetailsUpdate>> -> JS.Promise<PaymentResponse>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -64452,19 +64404,17 @@ module Dom =
     [<Interface>]
     type PaymentRequestUpdateEvent =
         inherit Event
-
         /// <summary>
         /// The <b><c>updateWith()</c></b> method of the PaymentRequestUpdateEvent interface updates the details of an existing PaymentRequest.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequestUpdateEvent/updateWith">MDN Reference</a>
         /// </summary>
-        abstract updateWith:
-            detailsPromise: U2<PaymentDetailsUpdate, Fable.Core.TS.Es.PromiseLike<PaymentDetailsUpdate>> -> unit
+        abstract updateWith: detailsPromise: U2<PaymentDetailsUpdate, JS.Promise<PaymentDetailsUpdate>> -> unit
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                updateWith: (U2<PaymentDetailsUpdate, Fable.Core.TS.Es.PromiseLike<PaymentDetailsUpdate>> -> unit),
+                updateWith: (U2<PaymentDetailsUpdate, JS.Promise<PaymentDetailsUpdate>> -> unit),
                 bubbles: bool,
                 cancelBubble: bool,
                 cancelable: bool,
@@ -64566,13 +64516,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentResponse/complete">MDN Reference</a>
         /// </summary>
-        abstract complete: ?result: PaymentComplete -> Fable.Core.TS.Es.Promise<unit>
+        abstract complete: ?result: PaymentComplete -> JS.Promise<unit>
         /// <summary>
         /// The PaymentResponse interface's <b><c>retry()</c></b> method makes it possible to ask the user to retry a payment after an error occurs during processing.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentResponse/retry">MDN Reference</a>
         /// </summary>
-        abstract retry: ?errorFields: PaymentValidationErrors -> Fable.Core.TS.Es.Promise<unit>
+        abstract retry: ?errorFields: PaymentValidationErrors -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>toJSON()</c></b> method of the PaymentResponse interface is a serializer; it returns a JSON representation of the PaymentResponse object.
         /// <br /><br />
@@ -65622,13 +65572,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Permissions/query">MDN Reference</a>
         /// </summary>
-        abstract query: permissionDesc: PermissionDescriptor -> Fable.Core.TS.Es.Promise<PermissionStatus>
+        abstract query: permissionDesc: PermissionDescriptor -> JS.Promise<PermissionStatus>
 
         [<ParamObject; Emit("$0")>]
-        static member Create
-            (query: (PermissionDescriptor -> Fable.Core.TS.Es.Promise<PermissionStatus>))
-            : Permissions =
-            jsNative
+        static member Create(query: (PermissionDescriptor -> JS.Promise<PermissionStatus>)) : Permissions = jsNative
 
     type PermissionsConstructor =
         [<EmitConstructor>]
@@ -66059,7 +66006,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent/promise">MDN Reference</a>
         /// </summary>
-        abstract promise: Fable.Core.TS.Es.Promise<obj>
+        abstract promise: JS.Promise<obj>
         /// <summary>
         /// The PromiseRejectionEvent <b><c>reason</c></b> read-only property is any JavaScript value or Object which provides the reason passed into Promise.reject(). This in theory provides information about why the promise was rejected.
         /// <br /><br />
@@ -66070,7 +66017,7 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                promise: Fable.Core.TS.Es.Promise<obj>,
+                promise: JS.Promise<obj>,
                 reason: obj,
                 bubbles: bool,
                 cancelBubble: bool,
@@ -66160,19 +66107,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PublicKeyCredential/getClientCapabilities_static">MDN Reference</a>
         /// </summary>
-        abstract getClientCapabilities: unit -> Fable.Core.TS.Es.Promise<PublicKeyCredentialClientCapabilities>
+        abstract getClientCapabilities: unit -> JS.Promise<PublicKeyCredentialClientCapabilities>
         /// <summary>
         /// The <b><c>isConditionalMediationAvailable()</c></b> static method of the PublicKeyCredential interface returns a Promise which resolves to true if conditional mediation is available.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PublicKeyCredential/isConditionalMediationAvailable_static">MDN Reference</a>
         /// </summary>
-        abstract isConditionalMediationAvailable: unit -> Fable.Core.TS.Es.Promise<bool>
+        abstract isConditionalMediationAvailable: unit -> JS.Promise<bool>
         /// <summary>
         /// The <b><c>isUserVerifyingPlatformAuthenticatorAvailable()</c></b> static method of the PublicKeyCredential interface returns a Promise which resolves to true if a user-verifying platform authenticator is present.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PublicKeyCredential/isUserVerifyingPlatformAuthenticatorAvailable_static">MDN Reference</a>
         /// </summary>
-        abstract isUserVerifyingPlatformAuthenticatorAvailable: unit -> Fable.Core.TS.Es.Promise<bool>
+        abstract isUserVerifyingPlatformAuthenticatorAvailable: unit -> JS.Promise<bool>
 
         /// <summary>
         /// The <b><c>parseCreationOptionsFromJSON()</c></b> static method of the PublicKeyCredential interface creates a PublicKeyCredentialCreationOptions object from a JSON representation of its properties.
@@ -66195,19 +66142,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PublicKeyCredential/signalAllAcceptedCredentials_static">MDN Reference</a>
         /// </summary>
-        abstract signalAllAcceptedCredentials: options: AllAcceptedCredentialsOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract signalAllAcceptedCredentials: options: AllAcceptedCredentialsOptions -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>signalCurrentUserDetails()</c></b> static method of the PublicKeyCredential interface signals to the authenticator that a particular user has updated their user name and/or display name on the relying party (RP) server.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PublicKeyCredential/signalCurrentUserDetails_static">MDN Reference</a>
         /// </summary>
-        abstract signalCurrentUserDetails: options: CurrentUserDetailsOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract signalCurrentUserDetails: options: CurrentUserDetailsOptions -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>signalUnknownCredential()</c></b> static method of the PublicKeyCredential interface signals to the authenticator that a credential ID was not recognized by the relying party (RP) server.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PublicKeyCredential/signalUnknownCredential_static">MDN Reference</a>
         /// </summary>
-        abstract signalUnknownCredential: options: UnknownCredentialOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract signalUnknownCredential: options: UnknownCredentialOptions -> JS.Promise<unit>
 
         [<EmitConstructor>]
         abstract Create: unit -> PublicKeyCredential
@@ -66225,26 +66172,26 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PushManager/getSubscription">MDN Reference</a>
         /// </summary>
-        abstract getSubscription: unit -> Fable.Core.TS.Es.Promise<PushSubscription option>
+        abstract getSubscription: unit -> JS.Promise<PushSubscription option>
         /// <summary>
         /// The <b><c>permissionState()</c></b> method of the PushManager interface returns a Promise that resolves to a string indicating the permission state of the push manager. Possible values are 'prompt', 'denied', or 'granted'.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PushManager/permissionState">MDN Reference</a>
         /// </summary>
-        abstract permissionState: ?options: PushSubscriptionOptionsInit -> Fable.Core.TS.Es.Promise<PermissionState>
+        abstract permissionState: ?options: PushSubscriptionOptionsInit -> JS.Promise<PermissionState>
         /// <summary>
         /// The <b><c>subscribe()</c></b> method of the PushManager interface subscribes to a push service.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PushManager/subscribe">MDN Reference</a>
         /// </summary>
-        abstract subscribe: ?options: PushSubscriptionOptionsInit -> Fable.Core.TS.Es.Promise<PushSubscription>
+        abstract subscribe: ?options: PushSubscriptionOptionsInit -> JS.Promise<PushSubscription>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                getSubscription: (unit -> Fable.Core.TS.Es.Promise<PushSubscription option>),
-                permissionState: (PushSubscriptionOptionsInit option -> Fable.Core.TS.Es.Promise<PermissionState>),
-                subscribe: (PushSubscriptionOptionsInit option -> Fable.Core.TS.Es.Promise<PushSubscription>)
+                getSubscription: (unit -> JS.Promise<PushSubscription option>),
+                permissionState: (PushSubscriptionOptionsInit option -> JS.Promise<PermissionState>),
+                subscribe: (PushSubscriptionOptionsInit option -> JS.Promise<PushSubscription>)
             ) : PushManager =
             jsNative
 
@@ -66315,7 +66262,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PushSubscription/unsubscribe">MDN Reference</a>
         /// </summary>
-        abstract unsubscribe: unit -> Fable.Core.TS.Es.Promise<bool>
+        abstract unsubscribe: unit -> JS.Promise<bool>
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -66324,7 +66271,7 @@ module Dom =
                 options: PushSubscriptionOptions,
                 getKey: (PushEncryptionKeyName -> Fable.Core.TS.Es.ArrayBuffer option),
                 toJSON: (unit -> PushSubscriptionJSON),
-                unsubscribe: (unit -> Fable.Core.TS.Es.Promise<bool>),
+                unsubscribe: (unit -> JS.Promise<bool>),
                 ?expirationTime: float
             ) : PushSubscription =
             jsNative
@@ -67390,7 +67337,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/addIceCandidate">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract addIceCandidate: ?candidate: RTCIceCandidateInit -> Fable.Core.TS.Es.Promise<unit>
+        abstract addIceCandidate: ?candidate: RTCIceCandidateInit -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>addIceCandidate()</c></b> method of the RTCPeerConnection interface adds a new remote candidate to the connection's remote description, which describes the state of the remote end of the connection.
@@ -67402,7 +67349,7 @@ module Dom =
             candidate: RTCIceCandidateInit option *
             successCallback: VoidFunction *
             failureCallback: RTCPeerConnectionErrorCallback ->
-                Fable.Core.TS.Es.Promise<unit>
+                JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>addTrack()</c></b> method of the RTCPeerConnection interface adds a new media track to the set of tracks which will be transmitted to the other peer.
@@ -67431,7 +67378,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/createAnswer">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract createAnswer: ?options: RTCAnswerOptions -> Fable.Core.TS.Es.Promise<RTCSessionDescriptionInit>
+        abstract createAnswer: ?options: RTCAnswerOptions -> JS.Promise<RTCSessionDescriptionInit>
 
         /// <summary>
         /// The <b><c>createAnswer()</c></b> method of the RTCPeerConnection interface creates an SDP answer to an offer received from a remote peer during the offer/answer negotiation of a WebRTC connection.
@@ -67441,7 +67388,7 @@ module Dom =
         /// <remarks>@deprecated</remarks>
         abstract createAnswer:
             successCallback: RTCSessionDescriptionCallback * failureCallback: RTCPeerConnectionErrorCallback ->
-                Fable.Core.TS.Es.Promise<unit>
+                JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>createDataChannel()</c></b> method of the RTCPeerConnection interface creates a new channel linked with the remote peer, over which any kind of data may be transmitted. This can be useful for back-channel content, such as images, file transfer, text chat, game update packets, and so forth.
@@ -67455,7 +67402,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/createOffer">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract createOffer: ?options: RTCOfferOptions -> Fable.Core.TS.Es.Promise<RTCSessionDescriptionInit>
+        abstract createOffer: ?options: RTCOfferOptions -> JS.Promise<RTCSessionDescriptionInit>
 
         /// <summary>
         /// The <b><c>createOffer()</c></b> method of the RTCPeerConnection interface initiates the creation of an SDP offer for the purpose of starting a new WebRTC connection to a remote peer.
@@ -67467,7 +67414,7 @@ module Dom =
             successCallback: RTCSessionDescriptionCallback *
             failureCallback: RTCPeerConnectionErrorCallback *
             ?options: RTCOfferOptions ->
-                Fable.Core.TS.Es.Promise<unit>
+                JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>getConfiguration()</c></b> method of the RTCPeerConnection interface returns an object which indicates the current configuration of the RTCPeerConnection on which the method is called.
@@ -67492,7 +67439,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/getStats">MDN Reference</a>
         /// </summary>
-        abstract getStats: ?selector: MediaStreamTrack -> Fable.Core.TS.Es.Promise<RTCStatsReport>
+        abstract getStats: ?selector: MediaStreamTrack -> JS.Promise<RTCStatsReport>
         /// <summary>
         /// The <b><c>getTransceivers()</c></b> method of the RTCPeerConnection interface returns a list of the RTCRtpTransceiver objects being used to send and receive data on the connection.
         /// <br /><br />
@@ -67523,7 +67470,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/setLocalDescription">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract setLocalDescription: ?description: RTCLocalSessionDescriptionInit -> Fable.Core.TS.Es.Promise<unit>
+        abstract setLocalDescription: ?description: RTCLocalSessionDescriptionInit -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>setLocalDescription()</c></b> method of the RTCPeerConnection interface changes the local description associated with the connection. This description specifies the properties of the local end of the connection, including the media format. The method takes a single parameter—the session description—and it returns a Promise which is fulfilled once the description has been changed, asynchronously.
@@ -67535,7 +67482,7 @@ module Dom =
             description: RTCLocalSessionDescriptionInit *
             successCallback: VoidFunction *
             failureCallback: RTCPeerConnectionErrorCallback ->
-                Fable.Core.TS.Es.Promise<unit>
+                JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>setRemoteDescription()</c></b> method of the RTCPeerConnection interface sets the specified session description as the remote peer's current offer or answer. The description specifies the properties of the remote end of the connection, including the media format. The method takes a single parameter—the session description—and it returns a Promise which is fulfilled once the description has been changed, asynchronously.
@@ -67543,7 +67490,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/setRemoteDescription">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract setRemoteDescription: description: RTCSessionDescriptionInit -> Fable.Core.TS.Es.Promise<unit>
+        abstract setRemoteDescription: description: RTCSessionDescriptionInit -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>setRemoteDescription()</c></b> method of the RTCPeerConnection interface sets the specified session description as the remote peer's current offer or answer. The description specifies the properties of the remote end of the connection, including the media format. The method takes a single parameter—the session description—and it returns a Promise which is fulfilled once the description has been changed, asynchronously.
@@ -67555,7 +67502,7 @@ module Dom =
             description: RTCSessionDescriptionInit *
             successCallback: VoidFunction *
             failureCallback: RTCPeerConnectionErrorCallback ->
-                Fable.Core.TS.Es.Promise<unit>
+                JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -67609,7 +67556,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/generateCertificate_static">MDN Reference</a>
         /// </summary>
-        abstract generateCertificate: keygenAlgorithm: AlgorithmIdentifier -> Fable.Core.TS.Es.Promise<RTCCertificate>
+        abstract generateCertificate: keygenAlgorithm: AlgorithmIdentifier -> JS.Promise<RTCCertificate>
 
         [<EmitConstructor>]
         abstract Create: ?configuration: RTCConfiguration -> RTCPeerConnection
@@ -67733,7 +67680,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCRtpReceiver/getStats">MDN Reference</a>
         /// </summary>
-        abstract getStats: unit -> Fable.Core.TS.Es.Promise<RTCStatsReport>
+        abstract getStats: unit -> JS.Promise<RTCStatsReport>
         /// <summary>
         /// The <b><c>getSynchronizationSources()</c></b> method of the RTCRtpReceiver interface returns an array of objects, each corresponding to one SSRC (synchronization source) identifier received by the current RTCRtpReceiver in the last ten seconds.
         /// <br /><br />
@@ -67747,7 +67694,7 @@ module Dom =
                 track: MediaStreamTrack,
                 getContributingSources: (unit -> RTCRtpContributingSource[]),
                 getParameters: (unit -> RTCRtpReceiveParameters),
-                getStats: (unit -> Fable.Core.TS.Es.Promise<RTCStatsReport>),
+                getStats: (unit -> JS.Promise<RTCStatsReport>),
                 getSynchronizationSources: (unit -> RTCRtpSynchronizationSource[]),
                 ?jitterBufferTarget: float,
                 ?transform: RTCRtpScriptTransform,
@@ -67814,13 +67761,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCRtpSender/getStats">MDN Reference</a>
         /// </summary>
-        abstract getStats: unit -> Fable.Core.TS.Es.Promise<RTCStatsReport>
+        abstract getStats: unit -> JS.Promise<RTCStatsReport>
         /// <summary>
         /// The RTCRtpSender method <b><c>replaceTrack()</c></b> replaces the track currently being used as the sender's source with a new MediaStreamTrack.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCRtpSender/replaceTrack">MDN Reference</a>
         /// </summary>
-        abstract replaceTrack: ?withTrack: MediaStreamTrack -> Fable.Core.TS.Es.Promise<unit>
+        abstract replaceTrack: ?withTrack: MediaStreamTrack -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>setParameters()</c></b> method of the RTCRtpSender interface applies changes the configuration of sender's track, which is the MediaStreamTrack for which the RTCRtpSender is responsible.
@@ -67828,8 +67775,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCRtpSender/setParameters">MDN Reference</a>
         /// </summary>
         abstract setParameters:
-            parameters: RTCRtpSendParameters * ?setParameterOptions: RTCSetParameterOptions ->
-                Fable.Core.TS.Es.Promise<unit>
+            parameters: RTCRtpSendParameters * ?setParameterOptions: RTCSetParameterOptions -> JS.Promise<unit>
 
         /// <summary>
         /// The RTCRtpSender method <b><c>setStreams()</c></b> associates the sender's track with the specified MediaStream objects.
@@ -67842,9 +67788,9 @@ module Dom =
         static member Create
             (
                 getParameters: (unit -> RTCRtpSendParameters),
-                getStats: (unit -> Fable.Core.TS.Es.Promise<RTCStatsReport>),
-                replaceTrack: (MediaStreamTrack option -> Fable.Core.TS.Es.Promise<unit>),
-                setParameters: Func<RTCRtpSendParameters, RTCSetParameterOptions option, Fable.Core.TS.Es.Promise<unit>>,
+                getStats: (unit -> JS.Promise<RTCStatsReport>),
+                replaceTrack: (MediaStreamTrack option -> JS.Promise<unit>),
+                setParameters: Func<RTCRtpSendParameters, RTCSetParameterOptions option, JS.Promise<unit>>,
                 setStreams: (MediaStream[] -> unit),
                 ?dtmf: RTCDTMFSender,
                 ?track: MediaStreamTrack,
@@ -68382,7 +68328,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/cancel">MDN Reference</a>
         /// </summary>
-        abstract cancel: ?reason: obj -> Fable.Core.TS.Es.Promise<unit>
+        abstract cancel: ?reason: obj -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>getReader()</c></b> method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
         /// <br /><br />
@@ -68417,7 +68363,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeTo">MDN Reference</a>
         /// </summary>
-        abstract pipeTo: destination: WritableStream<'R> * ?options: StreamPipeOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract pipeTo: destination: WritableStream<'R> * ?options: StreamPipeOptions -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>tee()</c></b> method of the ReadableStream interface tees the current readable stream, returning a two-element array containing the two resulting branches as new ReadableStream instances.
         /// <br /><br />
@@ -68459,7 +68405,7 @@ module Dom =
         /// </summary>
         abstract read<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>> :
             view: 'T * ?options: ReadableStreamBYOBReaderReadOptions ->
-                Fable.Core.TS.Es.Promise<U2<ReadableStreamReadDoneResult<'T>, ReadableStreamReadValueResult<'T>>>
+                JS.Promise<U2<ReadableStreamReadDoneResult<'T>, ReadableStreamReadValueResult<'T>>>
 
         /// <summary>
         /// The <b><c>releaseLock()</c></b> method of the ReadableStreamBYOBReader interface releases the reader's lock on the stream. After the lock is released, the reader is no longer active.
@@ -68475,11 +68421,11 @@ module Dom =
                     Func<
                         'T,
                         ReadableStreamBYOBReaderReadOptions option,
-                        Fable.Core.TS.Es.Promise<U2<ReadableStreamReadDoneResult<'T>, ReadableStreamReadValueResult<'T>>>
+                        JS.Promise<U2<ReadableStreamReadDoneResult<'T>, ReadableStreamReadValueResult<'T>>>
                      >,
                 releaseLock: (unit -> unit),
-                closed: Fable.Core.TS.Es.Promise<unit>,
-                cancel: (obj option -> Fable.Core.TS.Es.Promise<unit>)
+                closed: JS.Promise<unit>,
+                cancel: (obj option -> JS.Promise<unit>)
             ) : ReadableStreamBYOBReader =
             jsNative
 
@@ -68578,15 +68524,12 @@ module Dom =
     [<Interface>]
     type ReadableStreamDefaultReader<'R> =
         inherit ReadableStreamGenericReader
-
         /// <summary>
         /// The <b><c>read()</c></b> method of the ReadableStreamDefaultReader interface returns a Promise providing access to the next chunk in the stream's internal queue.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader/read">MDN Reference</a>
         /// </summary>
-        abstract read:
-            unit -> Fable.Core.TS.Es.Promise<U2<ReadableStreamReadDoneResult<'R>, ReadableStreamReadValueResult<'R>>>
-
+        abstract read: unit -> JS.Promise<U2<ReadableStreamReadDoneResult<'R>, ReadableStreamReadValueResult<'R>>>
         /// <summary>
         /// The <b><c>releaseLock()</c></b> method of the ReadableStreamDefaultReader interface releases the reader's lock on the stream.
         /// <br /><br />
@@ -68597,14 +68540,10 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                read:
-                    (unit
-                            -> Fable.Core.TS.Es.Promise<
-                                U2<ReadableStreamReadDoneResult<'R>, ReadableStreamReadValueResult<'R>>
-                                >),
+                read: (unit -> JS.Promise<U2<ReadableStreamReadDoneResult<'R>, ReadableStreamReadValueResult<'R>>>),
                 releaseLock: (unit -> unit),
-                closed: Fable.Core.TS.Es.Promise<unit>,
-                cancel: (obj option -> Fable.Core.TS.Es.Promise<unit>)
+                closed: JS.Promise<unit>,
+                cancel: (obj option -> JS.Promise<unit>)
             ) : ReadableStreamDefaultReader<'R> =
             jsNative
 
@@ -68617,15 +68556,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader/closed">MDN Reference</a>
         /// </summary>
-        abstract closed: Fable.Core.TS.Es.Promise<unit>
+        abstract closed: JS.Promise<unit>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader/cancel">MDN Reference</a>
         /// </summary>
-        abstract cancel: ?reason: obj -> Fable.Core.TS.Es.Promise<unit>
+        abstract cancel: ?reason: obj -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (closed: Fable.Core.TS.Es.Promise<unit>, cancel: (obj option -> Fable.Core.TS.Es.Promise<unit>))
+            (closed: JS.Promise<unit>, cancel: (obj option -> JS.Promise<unit>))
             : ReadableStreamGenericReader =
             jsNative
 
@@ -68668,19 +68607,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RemotePlayback/cancelWatchAvailability">MDN Reference</a>
         /// </summary>
-        abstract cancelWatchAvailability: ?id: float -> Fable.Core.TS.Es.Promise<unit>
+        abstract cancelWatchAvailability: ?id: float -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>prompt()</c></b> method of the RemotePlayback interface prompts the user to select an available remote playback device and give permission for the current media to be played using that device.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RemotePlayback/prompt">MDN Reference</a>
         /// </summary>
-        abstract prompt: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract prompt: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>watchAvailability()</c></b> method of the RemotePlayback interface watches the list of available remote playback devices and returns a Promise that resolves with the callbackId of a remote playback device.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RemotePlayback/watchAvailability">MDN Reference</a>
         /// </summary>
-        abstract watchAvailability: callback: RemotePlaybackAvailabilityCallback -> Fable.Core.TS.Es.Promise<float>
+        abstract watchAvailability: callback: RemotePlaybackAvailabilityCallback -> JS.Promise<float>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -68869,12 +68808,12 @@ module Dom =
                 url: string,
                 clone: (unit -> Request),
                 bodyUsed: bool,
-                arrayBuffer: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>),
-                blob: (unit -> Fable.Core.TS.Es.Promise<Blob>),
-                bytes: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
-                formData: (unit -> Fable.Core.TS.Es.Promise<FormData>),
-                json: (unit -> Fable.Core.TS.Es.Promise<obj>),
-                text: (unit -> Fable.Core.TS.Es.Promise<string>),
+                arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+                blob: (unit -> JS.Promise<Blob>),
+                bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
+                formData: (unit -> JS.Promise<FormData>),
+                json: (unit -> JS.Promise<obj>),
+                text: (unit -> JS.Promise<string>),
                 ?body: ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
             ) : Request =
             jsNative
@@ -69071,12 +69010,12 @@ module Dom =
                 url: string,
                 clone: (unit -> Response),
                 bodyUsed: bool,
-                arrayBuffer: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>),
-                blob: (unit -> Fable.Core.TS.Es.Promise<Blob>),
-                bytes: (unit -> Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
-                formData: (unit -> Fable.Core.TS.Es.Promise<FormData>),
-                json: (unit -> Fable.Core.TS.Es.Promise<obj>),
-                text: (unit -> Fable.Core.TS.Es.Promise<string>),
+                arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+                blob: (unit -> JS.Promise<Blob>),
+                bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>),
+                formData: (unit -> JS.Promise<FormData>),
+                json: (unit -> JS.Promise<obj>),
+                text: (unit -> JS.Promise<string>),
                 ?body: ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
             ) : Response =
             jsNative
@@ -74743,22 +74682,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Scheduler/postTask">MDN Reference</a>
         /// </summary>
-        abstract postTask:
-            callback: SchedulerPostTaskCallback * ?options: SchedulerPostTaskOptions -> Fable.Core.TS.Es.Promise<obj>
-
+        abstract postTask: callback: SchedulerPostTaskCallback * ?options: SchedulerPostTaskOptions -> JS.Promise<obj>
         /// <summary>
         /// The <b><c>yield()</c></b> method of the Scheduler interface is used for yielding to the main thread during a task and continuing execution later, with the continuation scheduled as a prioritized task (see the Prioritized Task Scheduling API for more information). This allows long-running work to be broken up so the browser stays responsive.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Scheduler/yield">MDN Reference</a>
         /// </summary>
-        abstract ``yield``: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract ``yield``: unit -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                postTask:
-                    Func<SchedulerPostTaskCallback, SchedulerPostTaskOptions option, Fable.Core.TS.Es.Promise<obj>>,
-                ``yield``: (unit -> Fable.Core.TS.Es.Promise<unit>)
+                postTask: Func<SchedulerPostTaskCallback, SchedulerPostTaskOptions option, JS.Promise<obj>>,
+                ``yield``: (unit -> JS.Promise<unit>)
             ) : Scheduler =
             jsNative
 
@@ -74868,7 +74804,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ScreenOrientation/lock">MDN Reference</a>
         /// </summary>
-        abstract lock: orientation: OrientationLockType -> Fable.Core.TS.Es.Promise<unit>
+        abstract lock: orientation: OrientationLockType -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>unlock()</c></b> method of the ScreenOrientation interface unlocks the orientation of the containing document, effectively locking it to the default screen orientation.
         /// <br /><br />
@@ -75365,22 +75301,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerContainer/ready">MDN Reference</a>
         /// </summary>
-        abstract ready: Fable.Core.TS.Es.Promise<ServiceWorkerRegistration>
-
+        abstract ready: JS.Promise<ServiceWorkerRegistration>
         /// <summary>
         /// The <b><c>getRegistration()</c></b> method of the ServiceWorkerContainer interface gets a ServiceWorkerRegistration object whose scope URL matches the provided client URL. The method returns a Promise that resolves to a ServiceWorkerRegistration or undefined.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerContainer/getRegistration">MDN Reference</a>
         /// </summary>
-        abstract getRegistration:
-            ?clientURL: U2<string, URL> -> Fable.Core.TS.Es.Promise<ServiceWorkerRegistration option>
-
+        abstract getRegistration: ?clientURL: U2<string, URL> -> JS.Promise<ServiceWorkerRegistration option>
         /// <summary>
         /// The <b><c>getRegistrations()</c></b> method of the ServiceWorkerContainer interface gets all ServiceWorkerRegistrations associated with a ServiceWorkerContainer, in an array. The method returns a Promise that resolves to an array of ServiceWorkerRegistration.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerContainer/getRegistrations">MDN Reference</a>
         /// </summary>
-        abstract getRegistrations: unit -> Fable.Core.TS.Es.Promise<ServiceWorkerRegistration[]>
+        abstract getRegistrations: unit -> JS.Promise<ServiceWorkerRegistration[]>
 
         /// <summary>
         /// The <b><c>register()</c></b> method of the ServiceWorkerContainer interface creates or updates a ServiceWorkerRegistration for the given scope.
@@ -75388,8 +75321,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerContainer/register">MDN Reference</a>
         /// </summary>
         abstract register:
-            scriptURL: U2<string, URL> * ?options: RegistrationOptions ->
-                Fable.Core.TS.Es.Promise<ServiceWorkerRegistration>
+            scriptURL: U2<string, URL> * ?options: RegistrationOptions -> JS.Promise<ServiceWorkerRegistration>
 
         /// <summary>
         /// The <b><c>startMessages()</c></b> method of the ServiceWorkerContainer interface explicitly starts the flow of messages being dispatched from a service worker to pages under its control (e.g., sent via Client.postMessage()). This can be used to react to sent messages earlier, even before that page's content has finished loading.
@@ -75507,25 +75439,25 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerRegistration/getNotifications">MDN Reference</a>
         /// </summary>
-        abstract getNotifications: ?filter: GetNotificationOptions -> Fable.Core.TS.Es.Promise<Notification[]>
+        abstract getNotifications: ?filter: GetNotificationOptions -> JS.Promise<Notification[]>
         /// <summary>
         /// The <b><c>showNotification()</c></b> method of the ServiceWorkerRegistration interface creates a notification on an active service worker.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerRegistration/showNotification">MDN Reference</a>
         /// </summary>
-        abstract showNotification: title: string * ?options: NotificationOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract showNotification: title: string * ?options: NotificationOptions -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>unregister()</c></b> method of the ServiceWorkerRegistration interface unregisters the service worker registration and returns a Promise. The promise will resolve to false if no registration was found, otherwise it resolves to true irrespective of whether unregistration happened or not (it may not unregister if someone else just called ServiceWorkerContainer.register() with the same scope.) The service worker will finish any ongoing operations before it is unregistered.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerRegistration/unregister">MDN Reference</a>
         /// </summary>
-        abstract unregister: unit -> Fable.Core.TS.Es.Promise<bool>
+        abstract unregister: unit -> JS.Promise<bool>
         /// <summary>
         /// The <b><c>update()</c></b> method of the ServiceWorkerRegistration interface attempts to update the service worker. It fetches the worker's script URL, and if the new worker is not byte-by-byte identical to the current worker, it installs the new worker. The fetch of the worker bypasses any browser caches if the previous fetch occurred over 24 hours ago.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerRegistration/update">MDN Reference</a>
         /// </summary>
-        abstract update: unit -> Fable.Core.TS.Es.Promise<ServiceWorkerRegistration>
+        abstract update: unit -> JS.Promise<ServiceWorkerRegistration>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -76633,33 +76565,33 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/StorageManager/estimate">MDN Reference</a>
         /// </summary>
-        abstract estimate: unit -> Fable.Core.TS.Es.Promise<StorageEstimate>
+        abstract estimate: unit -> JS.Promise<StorageEstimate>
         /// <summary>
         /// The <b><c>getDirectory()</c></b> method of the StorageManager interface is used to obtain a reference to a FileSystemDirectoryHandle object allowing access to a directory and its contents, stored in the origin private file system (OPFS).
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/StorageManager/getDirectory">MDN Reference</a>
         /// </summary>
-        abstract getDirectory: unit -> Fable.Core.TS.Es.Promise<FileSystemDirectoryHandle>
+        abstract getDirectory: unit -> JS.Promise<FileSystemDirectoryHandle>
         /// <summary>
         /// The <b><c>persist()</c></b> method of the StorageManager interface requests permission to use persistent storage, and returns a Promise that resolves to true if permission is granted and bucket mode is persistent, and false otherwise. The browser may or may not honor the request, depending on browser-specific rules. (For more details, see the guide to Storage quotas and eviction criteria.)
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/StorageManager/persist">MDN Reference</a>
         /// </summary>
-        abstract persist: unit -> Fable.Core.TS.Es.Promise<bool>
+        abstract persist: unit -> JS.Promise<bool>
         /// <summary>
         /// The <b><c>persisted()</c></b> method of the StorageManager interface returns a Promise that resolves to true if your site's storage bucket is persistent.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/StorageManager/persisted">MDN Reference</a>
         /// </summary>
-        abstract persisted: unit -> Fable.Core.TS.Es.Promise<bool>
+        abstract persisted: unit -> JS.Promise<bool>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                estimate: (unit -> Fable.Core.TS.Es.Promise<StorageEstimate>),
-                getDirectory: (unit -> Fable.Core.TS.Es.Promise<FileSystemDirectoryHandle>),
-                persist: (unit -> Fable.Core.TS.Es.Promise<bool>),
-                persisted: (unit -> Fable.Core.TS.Es.Promise<bool>)
+                estimate: (unit -> JS.Promise<StorageEstimate>),
+                getDirectory: (unit -> JS.Promise<FileSystemDirectoryHandle>),
+                persist: (unit -> JS.Promise<bool>),
+                persisted: (unit -> JS.Promise<bool>)
             ) : StorageManager =
             jsNative
 
@@ -76904,7 +76836,7 @@ module Dom =
             algorithm: U6<string, AesCbcParams, AesCtrParams, AesGcmParams, Algorithm, RsaOaepParams> *
             key: CryptoKey *
             data: BufferSource ->
-                Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+                JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
         /// <summary>
         /// The <b><c>deriveBits()</c></b> method of the SubtleCrypto interface can be used to derive an array of bits from a base key.
@@ -76915,7 +76847,7 @@ module Dom =
             algorithm: U5<string, Algorithm, EcdhKeyDeriveParams, HkdfParams, Pbkdf2Params> *
             baseKey: CryptoKey *
             ?length: float ->
-                Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+                JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
         /// <summary>
         /// The <b><c>deriveKey()</c></b> method of the SubtleCrypto interface can be used to derive a secret key from a master key.
@@ -76928,7 +76860,7 @@ module Dom =
             derivedKeyType: U6<string, AesDerivedKeyParams, Algorithm, HkdfParams, HmacImportParams, Pbkdf2Params> *
             extractable: bool *
             keyUsages: KeyUsage[] ->
-                Fable.Core.TS.Es.Promise<CryptoKey>
+                JS.Promise<CryptoKey>
 
         /// <summary>
         /// The <b><c>deriveKey()</c></b> method of the SubtleCrypto interface can be used to derive a secret key from a master key.
@@ -76941,16 +76873,14 @@ module Dom =
             derivedKeyType: U6<string, AesDerivedKeyParams, Algorithm, HkdfParams, HmacImportParams, Pbkdf2Params> *
             extractable: bool *
             keyUsages: Fable.Core.TS.Es.Iterable<KeyUsage, obj, obj> ->
-                Fable.Core.TS.Es.Promise<CryptoKey>
+                JS.Promise<CryptoKey>
 
         /// <summary>
         /// The <b><c>digest()</c></b> method of the SubtleCrypto interface generates a digest of the given data, using the specified hash function. A digest is a short fixed-length value derived from some variable-length input. Cryptographic digests should exhibit collision-resistance, meaning that it's hard to come up with two different inputs that have the same digest value.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/digest">MDN Reference</a>
         /// </summary>
-        abstract digest:
-            algorithm: AlgorithmIdentifier * data: BufferSource ->
-                Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+        abstract digest: algorithm: AlgorithmIdentifier * data: BufferSource -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
         /// <summary>
         /// The <b><c>encrypt()</c></b> method of the SubtleCrypto interface encrypts data.
@@ -76961,23 +76891,14 @@ module Dom =
             algorithm: U6<string, AesCbcParams, AesCtrParams, AesGcmParams, Algorithm, RsaOaepParams> *
             key: CryptoKey *
             data: BufferSource ->
-                Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+                JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
         /// <summary>
         /// The <b><c>exportKey()</c></b> method of the SubtleCrypto interface exports a key: that is, it takes as input a CryptoKey object and gives you the key in an external, portable format.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/exportKey">MDN Reference</a>
         /// </summary>
-        abstract exportKey: format: string * key: CryptoKey -> Fable.Core.TS.Es.Promise<JsonWebKey>
-
-        /// <summary>
-        /// The <b><c>exportKey()</c></b> method of the SubtleCrypto interface exports a key: that is, it takes as input a CryptoKey object and gives you the key in an external, portable format.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/exportKey">MDN Reference</a>
-        /// </summary>
-        abstract exportKey:
-            format: SubtleCrypto.ExportKey.Format * key: CryptoKey ->
-                Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+        abstract exportKey: format: string * key: CryptoKey -> JS.Promise<JsonWebKey>
 
         /// <summary>
         /// The <b><c>exportKey()</c></b> method of the SubtleCrypto interface exports a key: that is, it takes as input a CryptoKey object and gives you the key in an external, portable format.
@@ -76985,7 +76906,15 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/exportKey">MDN Reference</a>
         /// </summary>
         abstract exportKey:
-            format: KeyFormat * key: CryptoKey -> Fable.Core.TS.Es.Promise<U2<Fable.Core.TS.Es.ArrayBuffer, JsonWebKey>>
+            format: SubtleCrypto.ExportKey.Format * key: CryptoKey -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
+
+        /// <summary>
+        /// The <b><c>exportKey()</c></b> method of the SubtleCrypto interface exports a key: that is, it takes as input a CryptoKey object and gives you the key in an external, portable format.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/exportKey">MDN Reference</a>
+        /// </summary>
+        abstract exportKey:
+            format: KeyFormat * key: CryptoKey -> JS.Promise<U2<Fable.Core.TS.Es.ArrayBuffer, JsonWebKey>>
 
         /// <summary>
         /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
@@ -76996,7 +76925,7 @@ module Dom =
             algorithm: U2<string, SubtleCrypto.GenerateKey.Algorithm> *
             extractable: bool *
             keyUsages: SubtleCrypto.GenerateKey.KeyUsages.Item[] ->
-                Fable.Core.TS.Es.Promise<CryptoKeyPair>
+                JS.Promise<CryptoKeyPair>
 
         /// <summary>
         /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
@@ -77007,7 +76936,7 @@ module Dom =
             algorithm: U2<string, SubtleCrypto.GenerateKey.Algorithm2> *
             extractable: bool *
             keyUsages: SubtleCrypto.GenerateKey.KeyUsages.Item2[] ->
-                Fable.Core.TS.Es.Promise<CryptoKeyPair>
+                JS.Promise<CryptoKeyPair>
 
         /// <summary>
         /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
@@ -77016,7 +76945,7 @@ module Dom =
         /// </summary>
         abstract generateKey:
             algorithm: U2<EcKeyGenParams, RsaHashedKeyGenParams> * extractable: bool * keyUsages: KeyUsage[] ->
-                Fable.Core.TS.Es.Promise<CryptoKeyPair>
+                JS.Promise<CryptoKeyPair>
 
         /// <summary>
         /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
@@ -77025,7 +76954,7 @@ module Dom =
         /// </summary>
         abstract generateKey:
             algorithm: U3<AesKeyGenParams, HmacKeyGenParams, Pbkdf2Params> * extractable: bool * keyUsages: KeyUsage[] ->
-                Fable.Core.TS.Es.Promise<CryptoKey>
+                JS.Promise<CryptoKey>
 
         /// <summary>
         /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
@@ -77034,7 +76963,7 @@ module Dom =
         /// </summary>
         abstract generateKey:
             algorithm: AlgorithmIdentifier * extractable: bool * keyUsages: KeyUsage[] ->
-                Fable.Core.TS.Es.Promise<U2<CryptoKey, CryptoKeyPair>>
+                JS.Promise<U2<CryptoKey, CryptoKeyPair>>
 
         /// <summary>
         /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
@@ -77045,7 +76974,7 @@ module Dom =
             algorithm: U2<string, SubtleCrypto.GenerateKey.Algorithm3> *
             extractable: bool *
             keyUsages: SubtleCrypto.GenerateKey.KeyUsages.Item[] ->
-                Fable.Core.TS.Es.Promise<CryptoKeyPair>
+                JS.Promise<CryptoKeyPair>
 
         /// <summary>
         /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
@@ -77056,7 +76985,7 @@ module Dom =
             algorithm: U2<string, SubtleCrypto.GenerateKey.Algorithm4> *
             extractable: bool *
             keyUsages: SubtleCrypto.GenerateKey.KeyUsages.Item2[] ->
-                Fable.Core.TS.Es.Promise<CryptoKeyPair>
+                JS.Promise<CryptoKeyPair>
 
         /// <summary>
         /// The <b><c>generateKey()</c></b> method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
@@ -77067,7 +76996,7 @@ module Dom =
             algorithm: AlgorithmIdentifier *
             extractable: bool *
             keyUsages: Fable.Core.TS.Es.Iterable<KeyUsage, obj, obj> ->
-                Fable.Core.TS.Es.Promise<U2<CryptoKey, CryptoKeyPair>>
+                JS.Promise<U2<CryptoKey, CryptoKeyPair>>
 
         /// <summary>
         /// The <b><c>importKey()</c></b> method of the SubtleCrypto interface imports a key: that is, it takes as input a key in an external, portable format and gives you a CryptoKey object that you can use in the Web Crypto API.
@@ -77081,7 +77010,7 @@ module Dom =
                 U6<string, AesKeyAlgorithm, Algorithm, EcKeyImportParams, HmacImportParams, RsaHashedImportParams> *
             extractable: bool *
             keyUsages: KeyUsage[] ->
-                Fable.Core.TS.Es.Promise<CryptoKey>
+                JS.Promise<CryptoKey>
 
         /// <summary>
         /// The <b><c>importKey()</c></b> method of the SubtleCrypto interface imports a key: that is, it takes as input a key in an external, portable format and gives you a CryptoKey object that you can use in the Web Crypto API.
@@ -77095,7 +77024,7 @@ module Dom =
                 U6<string, AesKeyAlgorithm, Algorithm, EcKeyImportParams, HmacImportParams, RsaHashedImportParams> *
             extractable: bool *
             keyUsages: KeyUsage[] ->
-                Fable.Core.TS.Es.Promise<CryptoKey>
+                JS.Promise<CryptoKey>
 
         /// <summary>
         /// The <b><c>importKey()</c></b> method of the SubtleCrypto interface imports a key: that is, it takes as input a key in an external, portable format and gives you a CryptoKey object that you can use in the Web Crypto API.
@@ -77109,7 +77038,7 @@ module Dom =
                 U6<string, AesKeyAlgorithm, Algorithm, EcKeyImportParams, HmacImportParams, RsaHashedImportParams> *
             extractable: bool *
             keyUsages: Fable.Core.TS.Es.Iterable<KeyUsage, obj, obj> ->
-                Fable.Core.TS.Es.Promise<CryptoKey>
+                JS.Promise<CryptoKey>
 
         /// <summary>
         /// The <b><c>sign()</c></b> method of the SubtleCrypto interface generates a digital signature.
@@ -77118,7 +77047,7 @@ module Dom =
         /// </summary>
         abstract sign:
             algorithm: U4<string, Algorithm, EcdsaParams, RsaPssParams> * key: CryptoKey * data: BufferSource ->
-                Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+                JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
         /// <summary>
         /// The <b><c>unwrapKey()</c></b> method of the SubtleCrypto interface "unwraps" a key. This means that it takes as its input a key that has been exported and then encrypted (also called "wrapped"). It decrypts the key and then imports it, returning a CryptoKey object that can be used in the Web Crypto API.
@@ -77134,7 +77063,7 @@ module Dom =
                 U6<string, AesKeyAlgorithm, Algorithm, EcKeyImportParams, HmacImportParams, RsaHashedImportParams> *
             extractable: bool *
             keyUsages: KeyUsage[] ->
-                Fable.Core.TS.Es.Promise<CryptoKey>
+                JS.Promise<CryptoKey>
 
         /// <summary>
         /// The <b><c>unwrapKey()</c></b> method of the SubtleCrypto interface "unwraps" a key. This means that it takes as its input a key that has been exported and then encrypted (also called "wrapped"). It decrypts the key and then imports it, returning a CryptoKey object that can be used in the Web Crypto API.
@@ -77150,7 +77079,7 @@ module Dom =
                 U6<string, AesKeyAlgorithm, Algorithm, EcKeyImportParams, HmacImportParams, RsaHashedImportParams> *
             extractable: bool *
             keyUsages: Fable.Core.TS.Es.Iterable<KeyUsage, obj, obj> ->
-                Fable.Core.TS.Es.Promise<CryptoKey>
+                JS.Promise<CryptoKey>
 
         /// <summary>
         /// The <b><c>verify()</c></b> method of the SubtleCrypto interface verifies a digital signature.
@@ -77162,7 +77091,7 @@ module Dom =
             key: CryptoKey *
             signature: BufferSource *
             data: BufferSource ->
-                Fable.Core.TS.Es.Promise<bool>
+                JS.Promise<bool>
 
         /// <summary>
         /// The <b><c>wrapKey()</c></b> method of the SubtleCrypto interface "wraps" a key. This means that it exports the key in an external, portable format, then encrypts the exported key. Wrapping a key helps protect it in untrusted environments, such as inside an otherwise unprotected data store or in transmission over an unprotected network.
@@ -77174,7 +77103,7 @@ module Dom =
             key: CryptoKey *
             wrappingKey: CryptoKey *
             wrapAlgorithm: U6<string, AesCbcParams, AesCtrParams, AesGcmParams, Algorithm, RsaOaepParams> ->
-                Fable.Core.TS.Es.Promise<Fable.Core.TS.Es.ArrayBuffer>
+                JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
     type SubtleCryptoConstructor =
         [<EmitConstructor>]
@@ -79137,7 +79066,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/VideoDecoder/flush">MDN Reference</a>
         /// </summary>
-        abstract flush: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract flush: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>reset()</c></b> method of the VideoDecoder interface resets all states including configuration, control messages in the control message queue, and all pending callbacks.
         /// <br /><br />
@@ -79187,7 +79116,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/VideoDecoder/isConfigSupported_static">MDN Reference</a>
         /// </summary>
-        abstract isConfigSupported: config: VideoDecoderConfig -> Fable.Core.TS.Es.Promise<VideoDecoderSupport>
+        abstract isConfigSupported: config: VideoDecoderConfig -> JS.Promise<VideoDecoderSupport>
 
         [<EmitConstructor>]
         abstract Create: init: VideoDecoderInit -> VideoDecoder
@@ -79246,7 +79175,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/VideoEncoder/flush">MDN Reference</a>
         /// </summary>
-        abstract flush: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract flush: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>reset()</c></b> method of the VideoEncoder interface synchronously cancels all pending encodes and callbacks, frees all underlying resources and sets the state to "unconfigured". After calling reset(), configure() must be called before resuming encode() calls.
         /// <br /><br />
@@ -79296,7 +79225,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/VideoEncoder/isConfigSupported_static">MDN Reference</a>
         /// </summary>
-        abstract isConfigSupported: config: VideoEncoderConfig -> Fable.Core.TS.Es.Promise<VideoEncoderSupport>
+        abstract isConfigSupported: config: VideoEncoderConfig -> JS.Promise<VideoEncoderSupport>
 
         [<EmitConstructor>]
         abstract Create: init: VideoEncoderInit -> VideoEncoder
@@ -79393,8 +79322,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/VideoFrame/copyTo">MDN Reference</a>
         /// </summary>
         abstract copyTo:
-            destination: AllowSharedBufferSource * ?options: VideoFrameCopyToOptions ->
-                Fable.Core.TS.Es.Promise<PlaneLayout[]>
+            destination: AllowSharedBufferSource * ?options: VideoFrameCopyToOptions -> JS.Promise<PlaneLayout[]>
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -79408,12 +79336,7 @@ module Dom =
                 allocationSize: (VideoFrameCopyToOptions option -> float),
                 clone: (unit -> VideoFrame),
                 close: (unit -> unit),
-                copyTo:
-                    Func<
-                        AllowSharedBufferSource,
-                        VideoFrameCopyToOptions option,
-                        Fable.Core.TS.Es.Promise<PlaneLayout[]>
-                     >,
+                copyTo: Func<AllowSharedBufferSource, VideoFrameCopyToOptions option, JS.Promise<PlaneLayout[]>>,
                 ?codedRect: DOMRectReadOnly,
                 ?duration: float,
                 ?format: VideoPixelFormat,
@@ -79525,13 +79448,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ViewTransition/finished">MDN Reference</a>
         /// </summary>
-        abstract finished: Fable.Core.TS.Es.Promise<unit>
+        abstract finished: JS.Promise<unit>
         /// <summary>
         /// The <b><c>ready</c></b> read-only property of the ViewTransition interface is a Promise that fulfills once the pseudo-element tree is created and the transition animation is about to start.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ViewTransition/ready">MDN Reference</a>
         /// </summary>
-        abstract ready: Fable.Core.TS.Es.Promise<unit>
+        abstract ready: JS.Promise<unit>
         /// <summary>
         /// The <b><c>types</c></b> read-only property of the ViewTransition interface is a ViewTransitionTypeSet that allows the types set on the view transition to be accessed and modified.
         /// <br /><br />
@@ -79543,7 +79466,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ViewTransition/updateCallbackDone">MDN Reference</a>
         /// </summary>
-        abstract updateCallbackDone: Fable.Core.TS.Es.Promise<unit>
+        abstract updateCallbackDone: JS.Promise<unit>
         /// <summary>
         /// The <b><c>skipTransition()</c></b> method of the ViewTransition interface skips the animation part of the view transition, but doesn't skip running the associated view update.
         /// <br /><br />
@@ -79554,10 +79477,10 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                finished: Fable.Core.TS.Es.Promise<unit>,
-                ready: Fable.Core.TS.Es.Promise<unit>,
+                finished: JS.Promise<unit>,
+                ready: JS.Promise<unit>,
                 types: ViewTransitionTypeSet,
-                updateCallbackDone: Fable.Core.TS.Es.Promise<unit>,
+                updateCallbackDone: JS.Promise<unit>,
                 skipTransition: (unit -> unit)
             ) : ViewTransition =
             jsNative
@@ -80231,11 +80154,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WakeLock/request">MDN Reference</a>
         /// </summary>
-        abstract request: ?``type``: string -> Fable.Core.TS.Es.Promise<WakeLockSentinel>
+        abstract request: ?``type``: string -> JS.Promise<WakeLockSentinel>
 
         [<ParamObject; Emit("$0")>]
-        static member Create(request: (string option -> Fable.Core.TS.Es.Promise<WakeLockSentinel>)) : WakeLock =
-            jsNative
+        static member Create(request: (string option -> JS.Promise<WakeLockSentinel>)) : WakeLock = jsNative
 
     type WakeLockConstructor =
         [<EmitConstructor>]
@@ -80277,7 +80199,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WakeLockSentinel/release">MDN Reference</a>
         /// </summary>
-        abstract release: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract release: unit -> JS.Promise<unit>
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -84807,7 +84729,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/closed">MDN Reference</a>
         /// </summary>
-        abstract closed: Fable.Core.TS.Es.Promise<WebTransportCloseInfo>
+        abstract closed: JS.Promise<WebTransportCloseInfo>
         /// <summary>
         /// The <b><c>datagrams</c></b> read-only property of the WebTransport interface returns a WebTransportDatagramDuplexStream instance that can be used to send and receive datagrams — unreliable data transmission.
         /// <br /><br />
@@ -84831,7 +84753,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/ready">MDN Reference</a>
         /// </summary>
-        abstract ready: Fable.Core.TS.Es.Promise<unit>
+        abstract ready: JS.Promise<unit>
         /// <summary>
         /// The <b><c>close()</c></b> method of the WebTransport interface closes an ongoing WebTransport session.
         /// <br /><br />
@@ -84845,29 +84767,27 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/createBidirectionalStream">MDN Reference</a>
         /// </summary>
         abstract createBidirectionalStream:
-            ?options: WebTransportSendStreamOptions -> Fable.Core.TS.Es.Promise<WebTransportBidirectionalStream>
+            ?options: WebTransportSendStreamOptions -> JS.Promise<WebTransportBidirectionalStream>
 
         /// <summary>
         /// The <b><c>createUnidirectionalStream()</c></b> method of the WebTransport interface asynchronously opens a unidirectional stream.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/createUnidirectionalStream">MDN Reference</a>
         /// </summary>
-        abstract createUnidirectionalStream:
-            ?options: WebTransportSendStreamOptions -> Fable.Core.TS.Es.Promise<WritableStream<obj>>
+        abstract createUnidirectionalStream: ?options: WebTransportSendStreamOptions -> JS.Promise<WritableStream<obj>>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                closed: Fable.Core.TS.Es.Promise<WebTransportCloseInfo>,
+                closed: JS.Promise<WebTransportCloseInfo>,
                 datagrams: WebTransportDatagramDuplexStream,
                 incomingBidirectionalStreams: ReadableStream<obj>,
                 incomingUnidirectionalStreams: ReadableStream<obj>,
-                ready: Fable.Core.TS.Es.Promise<unit>,
+                ready: JS.Promise<unit>,
                 close: (WebTransportCloseInfo option -> unit),
                 createBidirectionalStream:
-                    (WebTransportSendStreamOptions option -> Fable.Core.TS.Es.Promise<WebTransportBidirectionalStream>),
-                createUnidirectionalStream:
-                    (WebTransportSendStreamOptions option -> Fable.Core.TS.Es.Promise<WritableStream<obj>>)
+                    (WebTransportSendStreamOptions option -> JS.Promise<WebTransportBidirectionalStream>),
+                createUnidirectionalStream: (WebTransportSendStreamOptions option -> JS.Promise<WritableStream<obj>>)
             ) : WebTransport =
             jsNative
 
@@ -85852,24 +85772,22 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/clearTimeout">MDN Reference</a>
         /// </summary>
         abstract clearTimeout: ?id: float -> unit
-
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/createImageBitmap">MDN Reference</a>
         /// </summary>
-        abstract createImageBitmap:
-            image: ImageBitmapSource * ?options: ImageBitmapOptions -> Fable.Core.TS.Es.Promise<ImageBitmap>
+        abstract createImageBitmap: image: ImageBitmapSource * ?options: ImageBitmapOptions -> JS.Promise<ImageBitmap>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/createImageBitmap">MDN Reference</a>
         /// </summary>
         abstract createImageBitmap:
             image: ImageBitmapSource * sx: float * sy: float * sw: float * sh: float * ?options: ImageBitmapOptions ->
-                Fable.Core.TS.Es.Promise<ImageBitmap>
+                JS.Promise<ImageBitmap>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/fetch">MDN Reference</a>
         /// </summary>
-        abstract fetch: input: U3<string, Request, URL> * ?init: RequestInit -> Fable.Core.TS.Es.Promise<Response>
+        abstract fetch: input: U3<string, Request, URL> * ?init: RequestInit -> JS.Promise<Response>
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/queueMicrotask">MDN Reference</a>
         /// </summary>
@@ -85979,12 +85897,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Worklet/addModule">MDN Reference</a>
         /// </summary>
-        abstract addModule: moduleURL: U2<string, URL> * ?options: WorkletOptions -> Fable.Core.TS.Es.Promise<unit>
+        abstract addModule: moduleURL: U2<string, URL> * ?options: WorkletOptions -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
-        static member Create
-            (addModule: Func<U2<string, URL>, WorkletOptions option, Fable.Core.TS.Es.Promise<unit>>)
-            : Worklet =
+        static member Create(addModule: Func<U2<string, URL>, WorkletOptions option, JS.Promise<unit>>) : Worklet =
             jsNative
 
     type WorkletConstructor =
@@ -86009,13 +85925,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/abort">MDN Reference</a>
         /// </summary>
-        abstract abort: ?reason: obj -> Fable.Core.TS.Es.Promise<unit>
+        abstract abort: ?reason: obj -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>close()</c></b> method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/close">MDN Reference</a>
         /// </summary>
-        abstract close: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract close: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>getWriter()</c></b> method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
         /// <br /><br />
@@ -86027,8 +85943,8 @@ module Dom =
         static member Create
             (
                 locked: bool,
-                abort: (obj option -> Fable.Core.TS.Es.Promise<unit>),
-                close: (unit -> Fable.Core.TS.Es.Promise<unit>),
+                abort: (obj option -> JS.Promise<unit>),
+                close: (unit -> JS.Promise<unit>),
                 getWriter: (unit -> WritableStreamDefaultWriter<'W>)
             ) : WritableStream<'W> =
             jsNative
@@ -86077,7 +85993,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/closed">MDN Reference</a>
         /// </summary>
-        abstract closed: Fable.Core.TS.Es.Promise<unit>
+        abstract closed: JS.Promise<unit>
         /// <summary>
         /// The <b><c>desiredSize</c></b> read-only property of the WritableStreamDefaultWriter interface returns the desired size required to fill the stream's internal queue.
         /// <br /><br />
@@ -86089,19 +86005,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/ready">MDN Reference</a>
         /// </summary>
-        abstract ready: Fable.Core.TS.Es.Promise<unit>
+        abstract ready: JS.Promise<unit>
         /// <summary>
         /// The <b><c>abort()</c></b> method of the WritableStreamDefaultWriter interface aborts the stream, signaling that the producer can no longer successfully write to the stream and it is to be immediately moved to an error state, with any queued writes discarded.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/abort">MDN Reference</a>
         /// </summary>
-        abstract abort: ?reason: obj -> Fable.Core.TS.Es.Promise<unit>
+        abstract abort: ?reason: obj -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>close()</c></b> method of the WritableStreamDefaultWriter interface closes the associated writable stream.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/close">MDN Reference</a>
         /// </summary>
-        abstract close: unit -> Fable.Core.TS.Es.Promise<unit>
+        abstract close: unit -> JS.Promise<unit>
         /// <summary>
         /// The <b><c>releaseLock()</c></b> method of the WritableStreamDefaultWriter interface releases the writer's lock on the corresponding stream. After the lock is released, the writer is no longer active. If the associated stream is errored when the lock is released, the writer will appear errored in the same way from now on; otherwise, the writer will appear closed.
         /// <br /><br />
@@ -86113,17 +86029,17 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/write">MDN Reference</a>
         /// </summary>
-        abstract write: ?chunk: 'W -> Fable.Core.TS.Es.Promise<unit>
+        abstract write: ?chunk: 'W -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                closed: Fable.Core.TS.Es.Promise<unit>,
-                ready: Fable.Core.TS.Es.Promise<unit>,
-                abort: (obj option -> Fable.Core.TS.Es.Promise<unit>),
-                close: (unit -> Fable.Core.TS.Es.Promise<unit>),
+                closed: JS.Promise<unit>,
+                ready: JS.Promise<unit>,
+                abort: (obj option -> JS.Promise<unit>),
+                close: (unit -> JS.Promise<unit>),
                 releaseLock: (unit -> unit),
-                write: ('W option -> Fable.Core.TS.Es.Promise<unit>),
+                write: ('W option -> JS.Promise<unit>),
                 ?desiredSize: float
             ) : WritableStreamDefaultWriter<'W> =
             jsNative
@@ -87407,9 +87323,9 @@ module Dom =
 
     type MutationCallback = delegate of mutations: MutationRecord[] * observer: MutationObserver -> unit
 
-    type NavigationInterceptHandler = (unit -> Fable.Core.TS.Es.PromiseLike<unit> option)
+    type NavigationInterceptHandler = (unit -> JS.Promise<unit> option)
 
-    type NavigationPrecommitHandler = (NavigationPrecommitController -> Fable.Core.TS.Es.PromiseLike<unit> option)
+    type NavigationPrecommitHandler = (NavigationPrecommitController -> JS.Promise<unit> option)
 
     type NotificationPermissionCallback = (NotificationPermission -> unit)
 
@@ -87445,29 +87361,26 @@ module Dom =
 
     type SchedulerPostTaskCallback = (unit -> obj)
 
-    type TransformerFlushCallback<'O> =
-        (TransformStreamDefaultController<'O> -> Fable.Core.TS.Es.PromiseLike<unit> option)
+    type TransformerFlushCallback<'O> = (TransformStreamDefaultController<'O> -> JS.Promise<unit> option)
 
     type TransformerStartCallback<'O> = (TransformStreamDefaultController<'O> -> obj)
 
     type TransformerTransformCallback<'I, 'O> =
-        delegate of
-            chunk: 'I * controller: TransformStreamDefaultController<'O> -> Fable.Core.TS.Es.PromiseLike<unit> option
+        delegate of chunk: 'I * controller: TransformStreamDefaultController<'O> -> JS.Promise<unit> option
 
-    type UnderlyingSinkAbortCallback = (obj option -> Fable.Core.TS.Es.PromiseLike<unit> option)
+    type UnderlyingSinkAbortCallback = (obj option -> JS.Promise<unit> option)
 
-    type UnderlyingSinkCloseCallback = (unit -> Fable.Core.TS.Es.PromiseLike<unit> option)
+    type UnderlyingSinkCloseCallback = (unit -> JS.Promise<unit> option)
 
     type UnderlyingSinkStartCallback = (WritableStreamDefaultController -> obj)
 
     type UnderlyingSinkWriteCallback<'W> =
-        delegate of chunk: 'W * controller: WritableStreamDefaultController -> Fable.Core.TS.Es.PromiseLike<unit> option
+        delegate of chunk: 'W * controller: WritableStreamDefaultController -> JS.Promise<unit> option
 
-    type UnderlyingSourceCancelCallback = (obj option -> Fable.Core.TS.Es.PromiseLike<unit> option)
+    type UnderlyingSourceCancelCallback = (obj option -> JS.Promise<unit> option)
 
     type UnderlyingSourcePullCallback<'R> =
-        (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>>
-                -> Fable.Core.TS.Es.PromiseLike<unit> option)
+        (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> JS.Promise<unit> option)
 
     type UnderlyingSourceStartCallback<'R> =
         (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> obj)
@@ -87871,7 +87784,7 @@ module Dom =
             VideoFrame
          >
 
-    type ClipboardItemData = Fable.Core.TS.Es.Promise<U2<string, Blob>>
+    type ClipboardItemData = JS.Promise<U2<string, Blob>>
 
     type ClipboardItems = ClipboardItem[]
 
@@ -90480,19 +90393,17 @@ module Dom =
 
         abstract next:
             [<ParamArray>] __0: obj[] ->
-                Fable.Core.TS.Es.Promise<
-                    U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                 >
+                JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
 
         abstract ``return``:
-            (Fable.Core.TS.Es.PromiseLike<unit> option
-                    -> Fable.Core.TS.Es.Promise<
+            (JS.Promise<unit> option
+                    -> JS.Promise<
                         U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
                         >) option with get, set
 
         abstract throw:
             (obj option
-                    -> Fable.Core.TS.Es.Promise<
+                    -> JS.Promise<
                         U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
                         >) option with get, set
 
@@ -90504,19 +90415,17 @@ module Dom =
 
         abstract next:
             [<ParamArray>] __0: obj[] ->
-                Fable.Core.TS.Es.Promise<
-                    U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                 >
+                JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
 
         abstract ``return``:
-            (Fable.Core.TS.Es.PromiseLike<unit> option
-                    -> Fable.Core.TS.Es.Promise<
+            (JS.Promise<unit> option
+                    -> JS.Promise<
                         U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
                         >) option with get, set
 
         abstract throw:
             (obj option
-                    -> Fable.Core.TS.Es.Promise<
+                    -> JS.Promise<
                         U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
                         >) option with get, set
 

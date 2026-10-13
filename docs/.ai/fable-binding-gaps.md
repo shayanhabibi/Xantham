@@ -150,6 +150,10 @@ through Xantham.Fable.Core such that they are reachable through the Fable.Core.J
 
 ## 4. A bound name that carries no arity
 
+**Closed (2026-10-13, W3 #134).** The names this entry counted are written as their
+`Fable.Core.TS.Es` declarations at their real arity, so `TR024` is no longer raised. `LibBindings`
+keeps `Promise`/`PromiseLike` (`JS.Promise`) and `Error` (`exn`), none of which drops an argument.
+
 **Incidence: 132 sites** — `TR024 LibExtraTypeArgumentsDropped` 118 on
 `@cloudflare/workers-types`, 14 corpus-wide as `TR025 LibBindingLoss`.
 

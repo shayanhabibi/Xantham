@@ -209,11 +209,79 @@ let shippedDomTests =
             Expect.isTrue (findings |> List.exists (fun finding -> finding.Message.Contains "Fable.Core.TS.Dom.NodeListOf")) "the repair reports its loss"
     ]
 
+/// A compiler ECMAScript type declared in `file`, under the compiler's lib directory.
+let private esType (id: int) (name: string) (file: string) (arguments: int list) =
+    { libType id name arguments with DeclFile = Some((fun value -> value * uom<declFile>) ("/compiler/" + file)) }
+
+let private compilerLibAs disposition =
+    { Build.context with
+        Config = { GeneratorConfig.Default with Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, disposition ] } }
+
+[<Tests>]
+let shippedEsTests =
+    testList "shipped ES" [
+        testTheory "compiler ES identities keep the shipped name and all arguments" [
+            "ArrayLike", "lib.es5.d.ts", [ 1 ], FsApp("Fable.Core.TS.Es.ArrayLike", [ FsString ])
+            "SharedArrayBuffer", "lib.es2017.sharedmemory.d.ts", [], FsNamed "Fable.Core.TS.Es.SharedArrayBuffer"
+            "RegExp", "lib.es5.d.ts", [], FsNamed "Fable.Core.TS.Es.RegExp"
+            "ArrayIterator", "lib.es2015.iterable.d.ts", [ 1 ], FsApp("Fable.Core.TS.Es.ArrayIterator", [ FsString ])
+            "AsyncGeneratorFunction", "lib.es2018.asyncgenerator.d.ts", [], FsNamed "Fable.Core.TS.Es.AsyncGeneratorFunction"
+            "Map", "lib.es2015.collection.d.ts", [ 1; 1 ], FsApp("Fable.Core.TS.Es.Map", [ FsString; FsString ])
+            "Uint8Array", "lib.es5.d.ts", [ 1 ], FsApp("Fable.Core.TS.Es.Uint8Array", [ FsString ])
+            "Date", "lib.es5.d.ts", [], FsNamed "Fable.Core.TS.Es.Date"
+        ] <| fun (name, file, arguments, expected) ->
+            let model = Build.shapeModel (esType 10 name file arguments :: Build.primitives)
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10<typeId>
+            Expect.equal actual expected "same pinned compiler declaration as Core.TS"
+            Expect.isEmpty findings "no missing declaration"
+
+        testCase "a Fable.Core binding answers before Core.TS" <| fun _ ->
+            let model = Build.shapeModel (esType 10 "Promise" "lib.es2015.promise.d.ts" [ 1 ] :: Build.primitives)
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10<typeId>
+            Expect.equal actual (FsApp("JS.Promise", [ FsString ])) "the ECMAScript table wins"
+            Expect.isEmpty findings "an exact binding"
+
+        testTheory "a pinned name is Core.TS's under every non-ship disposition" [
+            Reference
+            Map(Map.ofList [ "Map", { FSharpName = "System.Collections.Generic.Dictionary"; Arity = 2 } ])
+        ] <| fun disposition ->
+            let model = Build.shapeModel (esType 10 "Map" "lib.es2015.collection.d.ts" [ 1; 1 ] :: Build.primitives)
+            let actual, findings = Spec.typeRef (compilerLibAs disposition) model None "consumer" 10<typeId>
+            Expect.equal actual (FsApp("Fable.Core.TS.Es.Map", [ FsString; FsString ])) "ahead of the template and the group's table"
+            Expect.isEmpty findings "an exact binding"
+
+        testCase "a mapped compiler lib keeps its own table" <| fun _ ->
+            let ctx = compilerLibAs (Map(Map.ofList [ "WeakRef", { FSharpName = "System.WeakReference"; Arity = 1 } ]))
+            let actual, findings = Spec.typeRef ctx (Build.shapeModel [ esType 10 "RegExp" "lib.es5.d.ts" [] ]) None "consumer" 10<typeId>
+            Expect.equal actual FsObj "a name outside the table widens"
+            Expect.equal (findings |> List.map _.Key) [ "TR023" ] "as the rest of the group does"
+
+        testCase "a referenced compiler lib keeps the O7 template" <| fun _ ->
+            let actual = Spec.typeRef (compilerLibAs Reference) (Build.shapeModel [ esType 10 "RegExp" "lib.es5.d.ts" [] ]) None "consumer" 10<typeId>
+            Expect.equal actual (FsNamed "TypeScript.Lib.Es.RegExp", []) "the referenced producer's name"
+
+        testCase "a compiler-lib type outside a lib file still widens" <| fun _ ->
+            let actual, findings = Spec.typeRef Build.context (Build.shapeModel [ esType 10 "RegExp" "other.d.ts" [] ]) None "consumer" 10<typeId>
+            Expect.equal actual FsObj "no Core.TS declaration to name"
+            Expect.equal (findings |> List.map _.Key) [ "TR023" ] "the missing declaration is reported"
+
+        testCase "a checker placeholder name in a lib file is not written as a Core.TS name" <| fun _ ->
+            let actual, _ = Spec.typeRef Build.context (Build.shapeModel [ esType 10 "__type" "lib.es5.d.ts" [] ]) None "consumer" 10<typeId>
+            Expect.equal actual FsObj "an anonymous lib shape has no Core.TS declaration"
+
+        testCase "a package declaration keeps its local identity" <| fun _ ->
+            let local = { esType 10 "ArrayLike" "lib.es5.d.ts" [] with Origin = EntryPackage; DeclFile = Some((fun value -> value * uom<declFile>) "/pkg/index.d.ts") }
+            let model = { Build.shapeModel [ local ] with DeclNames = Map.ofList [ 10<typeId>, "ArrayLike" ] }
+            let actual, findings = Spec.typeRef Build.context model None "consumer" 10<typeId>
+            Expect.equal actual (FsNamed "ArrayLike") "the package owns this declaration"
+            Expect.isEmpty findings "no remapping"
+    ]
+
 [<Tests>]
 let functionConstraintTests =
     testList "function constraints" [
-        testCase "JS.Function bounds are dropped without losing the type parameter" <| fun _ ->
-            let functionType = libType 10 "Function" []
+        testCase "Core.TS Function bounds are dropped without losing the type parameter" <| fun _ ->
+            let functionType = esType 10 "Function" "lib.es5.d.ts" []
             let parameter =
                 { Build.facts (Build.typeResponse 11 TypeFlags.TypeParameter) with
                     SymbolName = Some ((fun value -> value * uom<symbolName>) "T")
@@ -233,7 +301,7 @@ let functionConstraintTests =
                     Constraint = Some 10<typeId> }
             let model = { Build.shapeModel [ bound; parameter ] with DeclNames = Map.ofList [ 10<typeId>, "Function" ] }
             let parameters, _, findings = Spec.typeParamsOf Build.context model "Holder" [ 11<typeId> ]
-            Expect.equal parameters [ { Name = "T"; Constraint = Some(FsNamed "Function") } ] "a package's own Function is not JS.Function"
+            Expect.equal parameters [ { Name = "T"; Constraint = Some(FsNamed "Function") } ] "a package's own Function is not the lib's"
             Expect.isEmpty findings "its nominal constraint is preserved"
     ]
 
@@ -4495,26 +4563,15 @@ let shapePassTests =
             Expect.equal reference (FsApp("JS.Promise", [ FsString ])) "the binding is written"
             Expect.isEmpty findings "and nothing is lost saying it that way"
 
-        testCase "a lib type carrying more arguments than Fable's binding drops the extras, loudly" <| fun _ ->
-            // TypeScript's lib made the typed arrays generic in their backing buffer; Fable's
-            // abbreviation is not. Naming the type is still worth more than `obj`, and the
-            // parameter that goes missing is exactly what a finding is for.
-            let model = Build.shapeModel (libType 10 "Uint8Array" [ 1 ] :: Build.primitives)
+        testCase "a typed array is Core.TS's, generic in its buffer" <| fun _ ->
+            // TypeScript's lib made the typed arrays generic in their backing buffer, and Core.TS
+            // carries the parameter, so no argument is dropped.
+            let model = Build.shapeModel (esType 10 "Uint8Array" "lib.es5.d.ts" [ 1 ] :: Build.primitives)
 
             let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
 
-            Expect.equal reference (FsNamed "JS.Uint8Array") "the name survives the lib's drift"
-            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "and the dropped argument is recorded"
-
-        testCase "a lib type with too few arguments is some other type wearing the name" <| fun _ ->
-            // A `Map` of one argument is not the `Map` this table is about. Guessing here would
-            // emit code that does not compile, so it widens the way it always did.
-            let model = Build.shapeModel (libType 10 "Map" [ 1 ] :: Build.primitives)
-
-            let reference, findings = Spec.typeRef Build.context model None "x" 10<typeId>
-
-            Expect.equal reference FsObj "no binding is claimed"
-            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
+            Expect.equal reference (FsApp("Fable.Core.TS.Es.Uint8Array", [ FsString ])) "the buffer argument is kept"
+            Expect.isEmpty findings "nothing is lost"
 
         testCase "the lib's Error is F#'s exception type, and says what that costs" <| fun _ ->
             // Fable compiles a JavaScript `Error` to `System.Exception`, so `exn` is the name at

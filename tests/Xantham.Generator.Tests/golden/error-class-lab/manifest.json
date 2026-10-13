@@ -22,10 +22,9 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 12,
+      "total": 11,
       "exact": 3,
-      "ergonomic": 8,
-      "widened": 1
+      "ergonomic": 8
     },
     {
       "pass": "SE - shape-exports",

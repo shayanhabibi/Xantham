@@ -4,8 +4,8 @@
   "module": "Animejs",
   "counts": {
     "exact": 129,
-    "ergonomic": 189,
-    "widened": 27,
+    "ergonomic": 190,
+    "widened": 26,
     "escape": 6
   },
   "passes": [
@@ -28,10 +28,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1917,
+      "total": 1918,
       "exact": 27,
-      "ergonomic": 1781,
-      "widened": 100,
+      "ergonomic": 1783,
+      "widened": 99,
       "escape": 9
     },
     {

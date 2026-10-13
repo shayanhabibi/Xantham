@@ -168,7 +168,7 @@ export interface UnionListenerObject {
  */
 export declare function addListener(register: (kind: string, listener: ((x: number) => void) | UnionListenerObject) => void): void;
 
-/** Generic callable identity: F# functions do not inherit JS.Function. */
+/** Generic callable identity: F# functions do not inherit the lib Function. */
 export declare function keepFunction<T extends Function>(callback: T): T;
 
 /** The same bound on a generic interface and one of its methods. */

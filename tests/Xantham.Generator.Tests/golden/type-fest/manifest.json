@@ -3,9 +3,9 @@
   "package": "type-fest",
   "module": "TypeFest",
   "counts": {
-    "exact": 26,
+    "exact": 27,
     "ergonomic": 64,
-    "widened": 205,
+    "widened": 204,
     "escape": 2
   },
   "passes": [
@@ -28,10 +28,10 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 608,
+      "total": 573,
       "exact": 1,
-      "ergonomic": 236,
-      "widened": 371
+      "ergonomic": 211,
+      "widened": 361
     },
     {
       "pass": "SP - synthesize-paramobjects",

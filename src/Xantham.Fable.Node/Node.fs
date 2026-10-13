@@ -24,7 +24,7 @@ type CallSite =
     abstract getEnclosingLineNumber: unit -> float option
     abstract getEvalOrigin: unit -> string option
     abstract getFileName: unit -> string option
-    abstract getFunction: unit -> JS.Function option
+    abstract getFunction: unit -> Fable.Core.TS.Es.Function option
     abstract getFunctionName: unit -> string option
     abstract getLineNumber: unit -> float option
     abstract getMethodName: unit -> string option
@@ -49,7 +49,7 @@ type CallSite =
             getEnclosingLineNumber: (unit -> float option),
             getEvalOrigin: (unit -> string option),
             getFileName: (unit -> string option),
-            getFunction: (unit -> JS.Function option),
+            getFunction: (unit -> Fable.Core.TS.Es.Function option),
             getFunctionName: (unit -> string option),
             getLineNumber: (unit -> float option),
             getMethodName: (unit -> string option),
@@ -112,7 +112,7 @@ type AssertionErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: CallSite[] -> obj
     /// <summary>
@@ -141,7 +141,7 @@ type Strict =
     abstract CallTracker: CallTrackerConstructor with get, set
     abstract deepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
     abstract deepEqual: Action<obj, obj, U2<string, exn> option> with get, set
-    abstract doesNotMatch: Action<string, obj, U2<string, exn> option> with get, set
+    abstract doesNotMatch: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
 
     abstract doesNotReject:
         block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> * ?message: U2<string, exn> -> JS.Promise<unit>
@@ -157,10 +157,15 @@ type Strict =
     abstract fail: ?message: U2<string, exn> -> unit
 
     abstract fail:
-        actual: obj * expected: obj * ?message: U2<string, exn> * ?operator: string * ?stackStartFn: JS.Function -> unit
+        actual: obj *
+        expected: obj *
+        ?message: U2<string, exn> *
+        ?operator: string *
+        ?stackStartFn: Fable.Core.TS.Es.Function ->
+            unit
 
     abstract ifError: (obj -> unit) with get, set
-    abstract ``match``: Action<string, obj, U2<string, exn> option> with get, set
+    abstract ``match``: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
     abstract notDeepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
     abstract notDeepEqual: Action<obj, obj, U2<string, exn> option> with get, set
     abstract notStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
@@ -249,6 +254,7 @@ type AsyncWrapProviders =
 
 type BigInt64Array<'TArrayBuffer> =
     inherit RelativeIndexable<bigint>
+    inherit seq<bigint>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -282,7 +288,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// <summary>
     /// Yields index, value pairs for every entry in the array.
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * bigint)>
     /// <summary>
     /// Determines whether all the members of an array satisfy the specified test.
     /// </summary>
@@ -309,6 +315,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: bigint * ?start: float * ?``end``: float -> BigInt64Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -320,7 +327,9 @@ type BigInt64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: BigInt64Array.Filter.Predicate * ?thisArg: obj -> BigInt64Array<JS.ArrayBuffer>
+    abstract filter:
+        predicate: BigInt64Array.Filter.Predicate * ?thisArg: obj -> BigInt64Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -387,7 +396,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// <summary>
     /// Yields each index in the array.
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -401,6 +410,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -413,7 +423,9 @@ type BigInt64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: BigInt64Array.Map.Callbackfn * ?thisArg: obj -> BigInt64Array<JS.ArrayBuffer>
+    abstract map:
+        callbackfn: BigInt64Array.Map.Callbackfn * ?thisArg: obj -> BigInt64Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -519,13 +531,13 @@ type BigInt64Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<bigint> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array.</param>
-    abstract slice: ?start: float * ?``end``: float -> BigInt64Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> BigInt64Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -554,7 +566,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// <summary>
     /// Converts the array to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: ?locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of the array.
     /// </summary>
@@ -566,14 +578,18 @@ type BigInt64Array<'TArrayBuffer> =
     /// <summary>
     /// Yields each value in the array.
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<bigint>
     abstract at: index: float -> bigint option
+
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
 
     [<EmitIndexer>]
     abstract Item: float -> bigint with get, set
 
 type BigUint64Array<'TArrayBuffer> =
     inherit RelativeIndexable<bigint>
+    inherit seq<bigint>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -607,7 +623,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// <summary>
     /// Yields index, value pairs for every entry in the array.
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * bigint)>
     /// <summary>
     /// Determines whether all the members of an array satisfy the specified test.
     /// </summary>
@@ -634,6 +650,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: bigint * ?start: float * ?``end``: float -> BigUint64Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -645,7 +662,9 @@ type BigUint64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: BigUint64Array.Filter.Predicate * ?thisArg: obj -> BigUint64Array<JS.ArrayBuffer>
+    abstract filter:
+        predicate: BigUint64Array.Filter.Predicate * ?thisArg: obj -> BigUint64Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -712,7 +731,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// <summary>
     /// Yields each index in the array.
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns the index of the last occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -726,6 +745,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -738,7 +758,9 @@ type BigUint64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: BigUint64Array.Map.Callbackfn * ?thisArg: obj -> BigUint64Array<JS.ArrayBuffer>
+    abstract map:
+        callbackfn: BigUint64Array.Map.Callbackfn * ?thisArg: obj -> BigUint64Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -844,13 +866,13 @@ type BigUint64Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<bigint> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array.</param>
-    abstract slice: ?start: float * ?``end``: float -> BigUint64Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> BigUint64Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -879,7 +901,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// <summary>
     /// Converts the array to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: ?locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of the array.
     /// </summary>
@@ -891,8 +913,11 @@ type BigUint64Array<'TArrayBuffer> =
     /// <summary>
     /// Yields each value in the array.
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<bigint>
     abstract at: index: float -> bigint option
+
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
 
     [<EmitIndexer>]
     abstract Item: float -> bigint with get, set
@@ -1016,7 +1041,10 @@ type BufferConstructor =
     /// <remarks>@since v5.10.0</remarks>
     /// <param name="string">A string to encode.</param>
     /// <param name="encoding">The encoding of <c>string</c>. <b>Default:</b> <c>'utf8'</c>.</param>
-    abstract from: array: obj -> Buffer<JS.ArrayBuffer>
+    abstract from:
+        array: U2<Fable.Core.TS.Es.ArrayLike<float>, BufferConstructor.From.Array> ->
+            Buffer<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Allocates a new <c>Buffer</c> using an <c>array</c> of bytes in the range <c>0</c> – <c>255</c>.
     /// Array entries outside that range will be truncated to fit into it.
@@ -1247,13 +1275,137 @@ type BufferConstructor =
     /// <param name="encoding">The encoding of <c>string</c>. <b>Default:</b> <c>'utf8'</c>.</param>
     abstract from:
         string: U3<string, BufferConstructor.From.String, BufferConstructor.From.String2> * ?encoding: BufferEncoding ->
-            Buffer<JS.ArrayBuffer>
+            Buffer<Fable.Core.TS.Es.ArrayBuffer>
+
+    /// <summary>
+    /// Allocates a new <c>Buffer</c> using an <c>array</c> of bytes in the range <c>0</c> – <c>255</c>.
+    /// Array entries outside that range will be truncated to fit into it.
+    /// <code lang="js">
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// // Creates a new Buffer containing the UTF-8 bytes of the string 'buffer'.
+    /// const buf = Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]);
+    /// </code>
+    /// <br /><br />
+    /// If <c>array</c> is an <c>Array</c>-like object (that is, one with a <c>length</c> property of
+    /// type <c>number</c>), it is treated as if it is an array, unless it is a <c>Buffer</c> or
+    /// a <c>Uint8Array</c>. This means all other <c>TypedArray</c> variants get treated as an
+    /// <c>Array</c>. To create a <c>Buffer</c> from the bytes backing a <c>TypedArray</c>, use
+    /// <c>Buffer.copyBytesFrom()</c>.
+    /// <br /><br />
+    /// A <c>TypeError</c> will be thrown if <c>array</c> is not an <c>Array</c> or another type
+    /// appropriate for <c>Buffer.from()</c> variants.
+    /// <br /><br />
+    /// <c>Buffer.from(array)</c> and <c>Buffer.from(string)</c> may also use the internal
+    /// <c>Buffer</c> pool like <c>Buffer.allocUnsafe()</c> does.
+    /// This creates a view of the <c>ArrayBuffer</c> without copying the underlying
+    /// memory. For example, when passed a reference to the <c>.buffer</c> property of a
+    /// <c>TypedArray</c> instance, the newly created <c>Buffer</c> will share the same
+    /// allocated memory as the <c>TypedArray</c>'s underlying <c>ArrayBuffer</c>.
+    /// <code lang="js">
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// const arr = new Uint16Array(2);
+    ///
+    /// arr[0] = 5000;
+    /// arr[1] = 4000;
+    ///
+    /// // Shares memory with `arr`.
+    /// const buf = Buffer.from(arr.buffer);
+    ///
+    /// console.log(buf);
+    /// // Prints: &lt;Buffer 88 13 a0 0f&gt;
+    ///
+    /// // Changing the original Uint16Array changes the Buffer also.
+    /// arr[1] = 6000;
+    ///
+    /// console.log(buf);
+    /// // Prints: &lt;Buffer 88 13 70 17&gt;
+    /// </code>
+    /// <br /><br />
+    /// The optional <c>byteOffset</c> and <c>length</c> arguments specify a memory range within
+    /// the <c>arrayBuffer</c> that will be shared by the <c>Buffer</c>.
+    /// <code lang="js">
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// const ab = new ArrayBuffer(10);
+    /// const buf = Buffer.from(ab, 0, 2);
+    ///
+    /// console.log(buf.length);
+    /// // Prints: 2
+    /// </code>
+    /// <br /><br />
+    /// A <c>TypeError</c> will be thrown if <c>arrayBuffer</c> is not an <c>ArrayBuffer</c> or a
+    /// <c>SharedArrayBuffer</c> or another type appropriate for <c>Buffer.from()</c>
+    /// variants.
+    /// <br /><br />
+    /// It is important to remember that a backing <c>ArrayBuffer</c> can cover a range
+    /// of memory that extends beyond the bounds of a <c>TypedArray</c> view. A new
+    /// <c>Buffer</c> created using the <c>buffer</c> property of a <c>TypedArray</c> may extend
+    /// beyond the range of the <c>TypedArray</c>:
+    /// <code lang="js">
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// const arrA = Uint8Array.from([0x63, 0x64, 0x65, 0x66]); // 4 elements
+    /// const arrB = new Uint8Array(arrA.buffer, 1, 2); // 2 elements
+    /// console.log(arrA.buffer === arrB.buffer); // true
+    ///
+    /// const buf = Buffer.from(arrB.buffer);
+    /// console.log(buf);
+    /// // Prints: &lt;Buffer 63 64 65 66&gt;
+    /// </code>
+    /// Creates a new <c>Buffer</c> containing <c>string</c>. The <c>encoding</c> parameter identifies
+    /// the character encoding to be used when converting <c>string</c> into bytes.
+    /// <code lang="js">
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// const buf1 = Buffer.from('this is a tést');
+    /// const buf2 = Buffer.from('7468697320697320612074c3a97374', 'hex');
+    ///
+    /// console.log(buf1.toString());
+    /// // Prints: this is a tést
+    /// console.log(buf2.toString());
+    /// // Prints: this is a tést
+    /// console.log(buf1.toString('latin1'));
+    /// // Prints: this is a tÃ©st
+    /// </code>
+    /// <br /><br />
+    /// A <c>TypeError</c> will be thrown if <c>string</c> is not a string or another type
+    /// appropriate for <c>Buffer.from()</c> variants.
+    /// <br /><br />
+    /// <c>Buffer.from(string)</c> may also use the internal <c>Buffer</c> pool like
+    /// <c>Buffer.allocUnsafe()</c> does.
+    /// </summary>
+    /// <remarks>@since v5.10.0</remarks>
+    /// <remarks>@since v5.10.0</remarks>
+    /// <param name="arrayBuffer">
+    /// An <c>ArrayBuffer</c>, <c>SharedArrayBuffer</c>, for example the
+    /// <c>.buffer</c> property of a <c>TypedArray</c>.
+    /// </param>
+    /// <param name="byteOffset">Index of first byte to expose. <b>Default:</b> <c>0</c>.</param>
+    /// <param name="length">
+    /// Number of bytes to expose. <b>Default:</b>
+    /// <c>arrayBuffer.byteLength - byteOffset</c>.
+    /// </param>
+    /// <remarks>@since v5.10.0</remarks>
+    /// <param name="string">A string to encode.</param>
+    /// <param name="encoding">The encoding of <c>string</c>. <b>Default:</b> <c>'utf8'</c>.</param>
+    abstract from:
+        arrayOrString:
+            U4<
+                string,
+                Fable.Core.TS.Es.ArrayLike<float>,
+                BufferConstructor.From.ArrayOrString,
+                BufferConstructor.From.String2
+             > ->
+            Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Creates a new Buffer using the passed {data}
     /// </summary>
     /// <param name="values">to create a new Buffer</param>
-    abstract ``of``: [<ParamArray>] items: float[] -> Buffer<JS.ArrayBuffer>
+    abstract ``of``: [<ParamArray>] items: float[] -> Buffer<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns a new <c>Buffer</c> which is the result of concatenating all the <c>Buffer</c> instances in the <c>list</c> together.
     /// <br /><br />
@@ -1292,7 +1444,9 @@ type BufferConstructor =
     /// <remarks>@since v0.7.11</remarks>
     /// <param name="list">List of <c>Buffer</c> or {@link Uint8Array} instances to concatenate.</param>
     /// <param name="totalLength">Total length of the <c>Buffer</c> instances in <c>list</c> when concatenated.</param>
-    abstract concat: list: Uint8Array<obj>[] * ?totalLength: float -> Buffer<JS.ArrayBuffer>
+    abstract concat:
+        list: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>[] * ?totalLength: float ->
+            Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Copies the underlying memory of <c>view</c> into a new <c>Buffer</c>.
@@ -1312,21 +1466,21 @@ type BufferConstructor =
     abstract copyBytesFrom:
         view:
             U11<
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              > *
         ?offset: float *
         ?length: float ->
-            Buffer<JS.ArrayBuffer>
+            Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Allocates a new <c>Buffer</c> of <c>size</c> bytes. If <c>fill</c> is <c>undefined</c>, the<c>Buffer</c> will be zero-filled.
@@ -1373,7 +1527,10 @@ type BufferConstructor =
     /// <param name="fill">A value to pre-fill the new <c>Buffer</c> with.</param>
     /// <param name="encoding">If <c>fill</c> is a string, this is its encoding.</param>
     abstract alloc:
-        size: float * ?fill: U3<string, float, Uint8Array<obj>> * ?encoding: BufferEncoding -> Buffer<JS.ArrayBuffer>
+        size: float *
+        ?fill: U3<string, float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?encoding: BufferEncoding ->
+            Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Allocates a new <c>Buffer</c> of <c>size</c> bytes. If <c>size</c> is larger than constants.MAX_LENGTH or smaller than 0, <c>ERR_OUT_OF_RANGE</c> is thrown.
@@ -1409,7 +1566,7 @@ type BufferConstructor =
     /// </summary>
     /// <remarks>@since v5.10.0</remarks>
     /// <param name="size">The desired length of the new <c>Buffer</c>.</param>
-    abstract allocUnsafe: size: float -> Buffer<JS.ArrayBuffer>
+    abstract allocUnsafe: size: float -> Buffer<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Allocates a new <c>Buffer</c> of <c>size</c> bytes. If <c>size</c> is larger than constants.MAX_LENGTH or smaller than 0, <c>ERR_OUT_OF_RANGE</c> is thrown. A zero-length <c>Buffer</c> is created if
     /// <c>size</c> is 0.
@@ -1453,7 +1610,7 @@ type BufferConstructor =
     /// </summary>
     /// <remarks>@since v5.12.0</remarks>
     /// <param name="size">The desired length of the new <c>Buffer</c>.</param>
-    abstract allocUnsafeSlow: size: float -> Buffer<JS.ArrayBuffer>
+    abstract allocUnsafeSlow: size: float -> Buffer<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Returns <c>true</c> if <c>obj</c> is a <c>Buffer</c>, <c>false</c> otherwise.
     /// <code lang="js">
@@ -1490,6 +1647,7 @@ type BufferConstructor =
     /// <remarks>@since v0.9.1</remarks>
     /// <param name="encoding">A character encoding name to check.</param>
     abstract isEncoding: encoding: string -> bool
+
     /// <summary>
     /// Returns the byte length of a string when encoded using <c>encoding</c>.
     /// This is not the same as <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/length"><c>String.prototype.length</c></a>, which does not account
@@ -1518,7 +1676,28 @@ type BufferConstructor =
     /// <param name="string">A value to calculate the length of.</param>
     /// <param name="encoding">If <c>string</c> is a string, this is its encoding.</param>
     /// <returns>The number of bytes contained within <c>string</c>.</returns>
-    abstract byteLength: string: obj * ?encoding: BufferEncoding -> float
+    abstract byteLength:
+        string:
+            U15<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Fable.Core.TS.Es.SharedArrayBuffer,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > *
+        ?encoding: BufferEncoding ->
+            float
+
     /// <summary>
     /// Compares <c>buf1</c> to <c>buf2</c>, typically for the purpose of sorting arrays of <c>Buffer</c> instances. This is equivalent to calling <c>buf1.compare(buf2)</c>.
     /// <code lang="js">
@@ -1535,7 +1714,11 @@ type BufferConstructor =
     /// </summary>
     /// <remarks>@since v0.11.13</remarks>
     /// <returns>Either <c>-1</c>, <c>0</c>, or <c>1</c>, depending on the result of the comparison. See <c>compare</c> for details.</returns>
-    abstract compare: buf1: Uint8Array<obj> * buf2: Uint8Array<obj> -> Readline.Direction
+    abstract compare:
+        buf1: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> *
+        buf2: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> ->
+            Readline.Direction
+
     /// <summary>
     /// This is the size (in bytes) of pre-allocated internal <c>Buffer</c> instances used
     /// for pooling. This value may be modified.
@@ -1544,19 +1727,20 @@ type BufferConstructor =
     abstract poolSize: float with get, set
 
     [<EmitConstructor>]
-    abstract Create: str: string * ?encoding: BufferEncoding -> Buffer<JS.ArrayBuffer>
+    abstract Create: str: string * ?encoding: BufferEncoding -> Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
     [<EmitConstructor>]
-    abstract Create: size: float -> Buffer<JS.ArrayBuffer>
+    abstract Create: size: float -> Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
     [<EmitConstructor>]
-    abstract Create: array: obj -> Buffer<JS.ArrayBuffer>
+    abstract Create: array: Fable.Core.TS.Es.ArrayLike<float> -> Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
     [<EmitConstructor>]
     abstract Create<'TArrayBuffer> : arrayBuffer: 'TArrayBuffer -> Buffer<'TArrayBuffer>
 
 type Float32Array<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -1613,6 +1797,7 @@ type Float32Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Float32Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -1624,7 +1809,9 @@ type Float32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Float32Array.Filter.Predicate * ?thisArg: obj -> Float32Array<JS.ArrayBuffer>
+    abstract filter:
+        predicate: Float32Array.Filter.Predicate * ?thisArg: obj -> Float32Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -1707,7 +1894,7 @@ type Float32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Float32Array.Map.Callbackfn * ?thisArg: obj -> Float32Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Float32Array.Map.Callbackfn * ?thisArg: obj -> Float32Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -1861,13 +2048,13 @@ type Float32Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Float32Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Float32Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -1907,7 +2094,7 @@ type Float32Array<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -1919,15 +2106,15 @@ type Float32Array<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -1936,11 +2123,15 @@ type Float32Array<'TArrayBuffer> =
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
 
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
+
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
 
 type Float64Array<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -1997,6 +2188,7 @@ type Float64Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Float64Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -2008,7 +2200,9 @@ type Float64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Float64Array.Filter.Predicate * ?thisArg: obj -> Float64Array<JS.ArrayBuffer>
+    abstract filter:
+        predicate: Float64Array.Filter.Predicate * ?thisArg: obj -> Float64Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -2091,7 +2285,7 @@ type Float64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Float64Array.Map.Callbackfn * ?thisArg: obj -> Float64Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Float64Array.Map.Callbackfn * ?thisArg: obj -> Float64Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2245,13 +2439,13 @@ type Float64Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Float64Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Float64Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -2291,7 +2485,7 @@ type Float64Array<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -2303,15 +2497,15 @@ type Float64Array<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -2320,11 +2514,15 @@ type Float64Array<'TArrayBuffer> =
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
 
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
+
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
 
 type Int16Array<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -2392,7 +2590,7 @@ type Int16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Int16Array.Filter.Predicate * ?thisArg: obj -> Int16Array<JS.ArrayBuffer>
+    abstract filter: predicate: Int16Array.Filter.Predicate * ?thisArg: obj -> Int16Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -2475,7 +2673,7 @@ type Int16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Int16Array.Map.Callbackfn * ?thisArg: obj -> Int16Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Int16Array.Map.Callbackfn * ?thisArg: obj -> Int16Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2629,13 +2827,13 @@ type Int16Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Int16Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Int16Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -2675,7 +2873,7 @@ type Int16Array<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -2687,15 +2885,15 @@ type Int16Array<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -2704,11 +2902,15 @@ type Int16Array<'TArrayBuffer> =
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
 
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
+
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
 
 type Int32Array<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -2776,7 +2978,7 @@ type Int32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Int32Array.Filter.Predicate * ?thisArg: obj -> Int32Array<JS.ArrayBuffer>
+    abstract filter: predicate: Int32Array.Filter.Predicate * ?thisArg: obj -> Int32Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -2859,7 +3061,7 @@ type Int32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Int32Array.Map.Callbackfn * ?thisArg: obj -> Int32Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Int32Array.Map.Callbackfn * ?thisArg: obj -> Int32Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3013,13 +3215,13 @@ type Int32Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Int32Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Int32Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -3059,7 +3261,7 @@ type Int32Array<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -3071,15 +3273,15 @@ type Int32Array<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -3088,11 +3290,15 @@ type Int32Array<'TArrayBuffer> =
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
 
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
+
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
 
 type Int8Array<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -3160,7 +3366,7 @@ type Int8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Int8Array.Filter.Predicate * ?thisArg: obj -> Int8Array<JS.ArrayBuffer>
+    abstract filter: predicate: Int8Array.Filter.Predicate * ?thisArg: obj -> Int8Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -3243,7 +3449,7 @@ type Int8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Int8Array.Map.Callbackfn * ?thisArg: obj -> Int8Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Int8Array.Map.Callbackfn * ?thisArg: obj -> Int8Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3397,13 +3603,13 @@ type Int8Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Int8Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Int8Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -3443,7 +3649,7 @@ type Int8Array<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -3455,15 +3661,15 @@ type Int8Array<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -3472,11 +3678,29 @@ type Int8Array<'TArrayBuffer> =
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
 
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
+
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
 
+type IteratorObject<'T, 'TReturn, 'TNext> =
+    inherit seq<'T>
+
+    abstract next:
+        [<ParamArray>] __0: U2<obj[], 'TNext[]> ->
+            U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+
+    abstract ``return``:
+        ('TReturn option
+                -> U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
+
+    abstract throw:
+        (obj option -> U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
+
 type Uint16Array<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -3533,6 +3757,7 @@ type Uint16Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Uint16Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -3544,7 +3769,9 @@ type Uint16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Uint16Array.Filter.Predicate * ?thisArg: obj -> Uint16Array<JS.ArrayBuffer>
+    abstract filter:
+        predicate: Uint16Array.Filter.Predicate * ?thisArg: obj -> Uint16Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -3627,7 +3854,7 @@ type Uint16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Uint16Array.Map.Callbackfn * ?thisArg: obj -> Uint16Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Uint16Array.Map.Callbackfn * ?thisArg: obj -> Uint16Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3781,13 +4008,13 @@ type Uint16Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Uint16Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Uint16Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -3827,7 +4054,7 @@ type Uint16Array<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -3839,15 +4066,15 @@ type Uint16Array<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -3856,11 +4083,15 @@ type Uint16Array<'TArrayBuffer> =
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
 
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
+
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
 
 type Uint32Array<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -3917,6 +4148,7 @@ type Uint32Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Uint32Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -3928,7 +4160,9 @@ type Uint32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Uint32Array.Filter.Predicate * ?thisArg: obj -> Uint32Array<JS.ArrayBuffer>
+    abstract filter:
+        predicate: Uint32Array.Filter.Predicate * ?thisArg: obj -> Uint32Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -4011,7 +4245,7 @@ type Uint32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Uint32Array.Map.Callbackfn * ?thisArg: obj -> Uint32Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Uint32Array.Map.Callbackfn * ?thisArg: obj -> Uint32Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4165,13 +4399,13 @@ type Uint32Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Uint32Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Uint32Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -4211,7 +4445,7 @@ type Uint32Array<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -4223,15 +4457,15 @@ type Uint32Array<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -4240,11 +4474,15 @@ type Uint32Array<'TArrayBuffer> =
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
 
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
+
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
 
 type Uint8Array<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -4312,7 +4550,7 @@ type Uint8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Uint8Array.Filter.Predicate * ?thisArg: obj -> Uint8Array<JS.ArrayBuffer>
+    abstract filter: predicate: Uint8Array.Filter.Predicate * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -4395,7 +4633,7 @@ type Uint8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Uint8Array.Map.Callbackfn * ?thisArg: obj -> Uint8Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Uint8Array.Map.Callbackfn * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4549,13 +4787,13 @@ type Uint8Array<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Uint8Array<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -4595,7 +4833,7 @@ type Uint8Array<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -4607,15 +4845,15 @@ type Uint8Array<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -4624,11 +4862,15 @@ type Uint8Array<'TArrayBuffer> =
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
 
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
+
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
 
 type Uint8ClampedArray<'TArrayBuffer> =
     inherit RelativeIndexable<float>
+    inherit seq<float>
     /// <summary>
     /// The size in bytes of each element in the array.
     /// </summary>
@@ -4685,6 +4927,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Uint8ClampedArray<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -4696,7 +4939,9 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Uint8ClampedArray.Filter.Predicate * ?thisArg: obj -> Uint8ClampedArray<JS.ArrayBuffer>
+    abstract filter:
+        predicate: Uint8ClampedArray.Filter.Predicate * ?thisArg: obj -> Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -4767,6 +5012,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -4779,7 +5025,9 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Uint8ClampedArray.Map.Callbackfn * ?thisArg: obj -> Uint8ClampedArray<JS.ArrayBuffer>
+    abstract map:
+        callbackfn: Uint8ClampedArray.Map.Callbackfn * ?thisArg: obj -> Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4933,13 +5181,13 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// </summary>
     /// <param name="array">A typed or untyped array of values to set.</param>
     /// <param name="offset">The index in the current array at which the values are to be written.</param>
-    abstract set: array: obj * ?offset: float -> unit
+    abstract set: array: Fable.Core.TS.Es.ArrayLike<float> * ?offset: float -> unit
     /// <summary>
     /// Returns a section of an array.
     /// </summary>
     /// <param name="start">The beginning of the specified portion of the array.</param>
     /// <param name="end">The end of the specified portion of the array. This is exclusive of the element at the index 'end'.</param>
-    abstract slice: ?start: float * ?``end``: float -> Uint8ClampedArray<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -4979,7 +5227,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// <summary>
     /// Converts a number to a string by using the current locale.
     /// </summary>
-    abstract toLocaleString: locales: U2<string, string[]> * ?options: obj -> string
+    abstract toLocaleString: locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.NumberFormatOptions -> string
     /// <summary>
     /// Returns a string representation of an array.
     /// </summary>
@@ -4991,15 +5239,15 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// <summary>
     /// Returns an array of key, value pairs for every entry in the array
     /// </summary>
-    abstract entries: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * float)>
     /// <summary>
     /// Returns an list of keys in the array
     /// </summary>
-    abstract keys: unit -> obj
+    abstract keys: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Returns an list of values in the array
     /// </summary>
-    abstract values: unit -> obj
+    abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<float>
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -5007,6 +5255,9 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// <param name="fromIndex">The position in this array at which to begin searching for searchElement.</param>
     abstract includes: searchElement: float * ?fromIndex: float -> bool
     abstract at: index: float -> float option
+
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
 
     [<EmitIndexer>]
     abstract Item: float -> float with get, set
@@ -5045,7 +5296,7 @@ type Buffer<'TArrayBuffer> =
     /// <remarks>@deprecated Use <c>subarray</c> instead.</remarks>
     /// <param name="start">Where the new <c>Buffer</c> will start.</param>
     /// <param name="end">Where the new <c>Buffer</c> will end (not inclusive).</param>
-    abstract slice: ?start: float * ?``end``: float -> Buffer<JS.ArrayBuffer>
+    abstract slice: ?start: float * ?``end``: float -> Buffer<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Returns a new <c>Buffer</c> that references the same memory as the original, but
     /// offset and cropped by the <c>start</c> and <c>end</c> indices.
@@ -5256,6 +5507,7 @@ type Buffer<'TArrayBuffer> =
     /// </summary>
     /// <remarks>@since v0.9.2</remarks>
     abstract toJSON: unit -> Buffer.ToJSON.Result
+
     /// <summary>
     /// Returns <c>true</c> if both <c>buf</c> and <c>otherBuffer</c> have exactly the same bytes,<c>false</c> otherwise. Equivalent to <c>buf.compare(otherBuffer) === 0</c>.
     /// <code lang="js">
@@ -5273,7 +5525,8 @@ type Buffer<'TArrayBuffer> =
     /// </summary>
     /// <remarks>@since v0.11.13</remarks>
     /// <param name="otherBuffer">A <c>Buffer</c> or {@link Uint8Array} with which to compare <c>buf</c>.</param>
-    abstract equals: otherBuffer: Uint8Array<obj> -> bool
+    abstract equals:
+        otherBuffer: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> -> bool
 
     /// <summary>
     /// Compares <c>buf</c> with <c>target</c> and returns a number indicating whether <c>buf</c>comes before, after, or is the same as <c>target</c> in sort order.
@@ -5328,7 +5581,11 @@ type Buffer<'TArrayBuffer> =
     /// <param name="sourceStart">The offset within <c>buf</c> at which to begin comparison.</param>
     /// <param name="sourceEnd">The offset within <c>buf</c> at which to end comparison (not inclusive).</param>
     abstract compare:
-        target: Uint8Array<obj> * ?targetStart: float * ?targetEnd: float * ?sourceStart: float * ?sourceEnd: float ->
+        target: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> *
+        ?targetStart: float *
+        ?targetEnd: float *
+        ?sourceStart: float *
+        ?sourceEnd: float ->
             Readline.Direction
 
     /// <summary>
@@ -5382,7 +5639,13 @@ type Buffer<'TArrayBuffer> =
     /// <param name="sourceStart">The offset within <c>buf</c> from which to begin copying.</param>
     /// <param name="sourceEnd">The offset within <c>buf</c> at which to stop copying (not inclusive).</param>
     /// <returns>The number of bytes copied.</returns>
-    abstract copy: target: Uint8Array<obj> * ?targetStart: float * ?sourceStart: float * ?sourceEnd: float -> float
+    abstract copy:
+        target: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> *
+        ?targetStart: float *
+        ?sourceStart: float *
+        ?sourceEnd: float ->
+            float
+
     /// <summary>
     /// Writes <c>value</c> to <c>buf</c> at the specified <c>offset</c> as big-endian.
     /// <br /><br />
@@ -6402,7 +6665,10 @@ type Buffer<'TArrayBuffer> =
     /// <param name="encoding">The encoding for <c>value</c> if <c>value</c> is a string.</param>
     /// <returns>A reference to <c>buf</c>.</returns>
     abstract fill:
-        value: U3<string, float, Uint8Array<obj>> * ?offset: float * ?``end``: float * ?encoding: BufferEncoding ->
+        value: U3<string, float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?offset: float *
+        ?``end``: float *
+        ?encoding: BufferEncoding ->
             Buffer<'TArrayBuffer>
 
     /// <summary>
@@ -6462,7 +6728,10 @@ type Buffer<'TArrayBuffer> =
     /// <param name="encoding">The encoding for <c>value</c> if <c>value</c> is a string.</param>
     /// <returns>A reference to <c>buf</c>.</returns>
     abstract fill:
-        value: U3<string, float, Uint8Array<obj>> * offset: float * encoding: BufferEncoding -> Buffer<'TArrayBuffer>
+        value: U3<string, float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        offset: float *
+        encoding: BufferEncoding ->
+            Buffer<'TArrayBuffer>
 
     /// <summary>
     /// Fills <c>buf</c> with the specified <c>value</c>. If the <c>offset</c> and <c>end</c> are not given,
@@ -6520,7 +6789,10 @@ type Buffer<'TArrayBuffer> =
     /// <param name="end">Where to stop filling <c>buf</c> (not inclusive).</param>
     /// <param name="encoding">The encoding for <c>value</c> if <c>value</c> is a string.</param>
     /// <returns>A reference to <c>buf</c>.</returns>
-    abstract fill: value: U3<string, float, Uint8Array<obj>> * encoding: BufferEncoding -> Buffer<'TArrayBuffer>
+    abstract fill:
+        value: U3<string, float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        encoding: BufferEncoding ->
+            Buffer<'TArrayBuffer>
 
     /// <summary>
     /// If <c>value</c> is:
@@ -6589,7 +6861,10 @@ type Buffer<'TArrayBuffer> =
     /// <param name="encoding">If <c>value</c> is a string, this is the encoding used to determine the binary representation of the string that will be searched for in <c>buf</c>.</param>
     /// <returns>The index of the first occurrence of <c>value</c> in <c>buf</c>, or <c>-1</c> if <c>buf</c> does not contain <c>value</c>.</returns>
     abstract indexOf:
-        value: U3<string, float, Uint8Array<obj>> * ?byteOffset: float * ?encoding: BufferEncoding -> float
+        value: U3<string, float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?byteOffset: float *
+        ?encoding: BufferEncoding ->
+            float
 
     /// <summary>
     /// If <c>value</c> is:
@@ -6657,7 +6932,10 @@ type Buffer<'TArrayBuffer> =
     /// <param name="byteOffset">Where to begin searching in <c>buf</c>. If negative, then offset is calculated from the end of <c>buf</c>.</param>
     /// <param name="encoding">If <c>value</c> is a string, this is the encoding used to determine the binary representation of the string that will be searched for in <c>buf</c>.</param>
     /// <returns>The index of the first occurrence of <c>value</c> in <c>buf</c>, or <c>-1</c> if <c>buf</c> does not contain <c>value</c>.</returns>
-    abstract indexOf: value: U3<string, float, Uint8Array<obj>> * encoding: BufferEncoding -> float
+    abstract indexOf:
+        value: U3<string, float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        encoding: BufferEncoding ->
+            float
 
     /// <summary>
     /// Identical to <c>buf.indexOf()</c>, except the last occurrence of <c>value</c> is found
@@ -6725,7 +7003,10 @@ type Buffer<'TArrayBuffer> =
     /// <param name="encoding">If <c>value</c> is a string, this is the encoding used to determine the binary representation of the string that will be searched for in <c>buf</c>.</param>
     /// <returns>The index of the last occurrence of <c>value</c> in <c>buf</c>, or <c>-1</c> if <c>buf</c> does not contain <c>value</c>.</returns>
     abstract lastIndexOf:
-        value: U3<string, float, Uint8Array<obj>> * ?byteOffset: float * ?encoding: BufferEncoding -> float
+        value: U3<string, float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?byteOffset: float *
+        ?encoding: BufferEncoding ->
+            float
 
     /// <summary>
     /// Identical to <c>buf.indexOf()</c>, except the last occurrence of <c>value</c> is found
@@ -6792,7 +7073,11 @@ type Buffer<'TArrayBuffer> =
     /// <param name="byteOffset">Where to begin searching in <c>buf</c>. If negative, then offset is calculated from the end of <c>buf</c>.</param>
     /// <param name="encoding">If <c>value</c> is a string, this is the encoding used to determine the binary representation of the string that will be searched for in <c>buf</c>.</param>
     /// <returns>The index of the last occurrence of <c>value</c> in <c>buf</c>, or <c>-1</c> if <c>buf</c> does not contain <c>value</c>.</returns>
-    abstract lastIndexOf: value: U3<string, float, Uint8Array<obj>> * encoding: BufferEncoding -> float
+    abstract lastIndexOf:
+        value: U3<string, float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        encoding: BufferEncoding ->
+            float
+
     /// <summary>
     /// Equivalent to <c>buf.indexOf() !== -1</c>.
     /// <code lang="js">
@@ -6821,7 +7106,12 @@ type Buffer<'TArrayBuffer> =
     /// <param name="byteOffset">Where to begin searching in <c>buf</c>. If negative, then offset is calculated from the end of <c>buf</c>.</param>
     /// <param name="encoding">If <c>value</c> is a string, this is its encoding.</param>
     /// <returns><c>true</c> if <c>value</c> was found in <c>buf</c>, <c>false</c> otherwise.</returns>
-    abstract includes: value: U3<string, float, Buffer<obj>> * ?byteOffset: float * ?encoding: BufferEncoding -> bool
+    abstract includes:
+        value: U3<string, float, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?byteOffset: float *
+        ?encoding: BufferEncoding ->
+            bool
+
     /// <summary>
     /// Equivalent to <c>buf.indexOf() !== -1</c>.
     /// <code lang="js">
@@ -6850,7 +7140,11 @@ type Buffer<'TArrayBuffer> =
     /// <param name="byteOffset">Where to begin searching in <c>buf</c>. If negative, then offset is calculated from the end of <c>buf</c>.</param>
     /// <param name="encoding">If <c>value</c> is a string, this is its encoding.</param>
     /// <returns><c>true</c> if <c>value</c> was found in <c>buf</c>, <c>false</c> otherwise.</returns>
-    abstract includes: value: U3<string, float, Buffer<obj>> * encoding: BufferEncoding -> bool
+    abstract includes:
+        value: U3<string, float, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        encoding: BufferEncoding ->
+            bool
+
     /// <summary>
     /// Returns the this object after copying a section of the array identified by start and end
     /// to the same array starting at position target
@@ -6889,7 +7183,7 @@ type Buffer<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Buffer.Filter.Predicate * ?thisArg: obj -> Uint8Array<JS.ArrayBuffer>
+    abstract filter: predicate: Buffer.Filter.Predicate * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -6942,7 +7236,7 @@ type Buffer<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Buffer.Map.Callbackfn * ?thisArg: obj -> Uint8Array<JS.ArrayBuffer>
+    abstract map: callbackfn: Buffer.Map.Callbackfn * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -7122,18 +7416,18 @@ type Buffer<'TArrayBuffer> =
 /// This is intended for internal use, and will be removed once <c>@types/node</c> no longer supports
 /// TypeScript versions earlier than 5.7.
 /// </remarks>
-type NonSharedBuffer = Buffer<JS.ArrayBuffer>
+type NonSharedBuffer = Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
 /// <remarks>
 /// @deprecated
 /// This is intended for internal use, and will be removed once <c>@types/node</c> no longer supports
 /// TypeScript versions earlier than 5.7.
 /// </remarks>
-type AllowSharedBuffer = Buffer<obj>
+type AllowSharedBuffer = Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
 
 type SlowBufferConstructor =
     [<EmitConstructor>]
-    abstract Create: size: float -> Buffer<JS.ArrayBuffer>
+    abstract Create: size: float -> Buffer<Fable.Core.TS.Es.ArrayBuffer>
 
 [<Interface>]
 type AbortSignal2 =
@@ -7169,33 +7463,31 @@ type AddEventListenerOptions =
     static member Create(?once: bool, ?passive: bool, ?signal: AbortSignal, ?capture: bool) : AddEventListenerOptions =
         jsNative
 
-[<Interface>]
 type AsyncIterator<'T, 'TReturn, 'TNext> =
     inherit AsyncIteratorObject<'T, 'TReturn, 'TNext>
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            next: (U2<obj[], 'TNext[]> -> JS.Promise<obj>),
-            ?``return``: (U2<'TReturn, JS.Promise<'TReturn>> option -> JS.Promise<obj>),
-            ?throw: (obj option -> JS.Promise<obj>)
-        ) : AsyncIterator<'T, 'TReturn, 'TNext> =
-        jsNative
+    [<Emit("$0[Symbol.asyncIterator]()")>]
+    abstract SymbolAsyncIterator: unit -> AsyncIterator<'T, 'TReturn, 'TNext>
 
-[<Interface>]
 type AsyncIteratorObject<'T, 'TReturn, 'TNext> =
-    abstract next: [<ParamArray>] __0: U2<obj[], 'TNext[]> -> JS.Promise<obj>
-    abstract ``return``: (U2<'TReturn, JS.Promise<'TReturn>> option -> JS.Promise<obj>) option with get, set
-    abstract throw: (obj option -> JS.Promise<obj>) option with get, set
+    abstract next:
+        [<ParamArray>] __0: U2<obj[], 'TNext[]> ->
+            JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            next: (U2<obj[], 'TNext[]> -> JS.Promise<obj>),
-            ?``return``: (U2<'TReturn, JS.Promise<'TReturn>> option -> JS.Promise<obj>),
-            ?throw: (obj option -> JS.Promise<obj>)
-        ) : AsyncIteratorObject<'T, 'TReturn, 'TNext> =
-        jsNative
+    abstract ``return``:
+        (U2<'TReturn, JS.Promise<'TReturn>> option
+                -> JS.Promise<
+                    U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+                    >) option with get, set
+
+    abstract throw:
+        (obj option
+                -> JS.Promise<
+                    U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+                    >) option with get, set
+
+    [<Emit("$0[Symbol.asyncIterator]()")>]
+    abstract SymbolAsyncIterator: unit -> AsyncIteratorObject<'T, 'TReturn, 'TNext>
 
 [<Interface>]
 type Event2 =
@@ -7305,7 +7597,7 @@ type _Blob =
     /// the <c>Blob</c> data.
     /// </summary>
     /// <remarks>@since v15.7.0, v14.18.0</remarks>
-    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    abstract arrayBuffer: unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// The <c>blob.bytes()</c> method returns the byte of the <c>Blob</c> object as a <c>Promise&lt;Uint8Array&gt;</c>.
     /// <code lang="js">
@@ -7315,7 +7607,7 @@ type _Blob =
     /// });
     /// </code>
     /// </summary>
-    abstract bytes: unit -> JS.Promise<Uint8Array<obj>>
+    abstract bytes: unit -> JS.Promise<Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     /// <summary>
     /// Creates and returns a new <c>Blob</c> containing a subset of this <c>Blob</c> objects
     /// data. The original <c>Blob</c> is not altered.
@@ -7342,8 +7634,9 @@ type _Blob =
         (
             size: float,
             ``type``: string,
-            arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>),
-            bytes: (unit -> JS.Promise<Uint8Array<obj>>),
+            arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+            bytes:
+                (unit -> JS.Promise<Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>),
             slice: Func<float option, float option, string option, _Blob>,
             text: (unit -> JS.Promise<string>),
             stream: (unit -> Stream.Web.ReadableStream<obj>)
@@ -7375,8 +7668,9 @@ type _File =
             lastModified: float,
             size: float,
             ``type``: string,
-            arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>),
-            bytes: (unit -> JS.Promise<Uint8Array<obj>>),
+            arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+            bytes:
+                (unit -> JS.Promise<Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>),
             slice: Func<float option, float option, string option, _Blob>,
             text: (unit -> JS.Promise<string>),
             stream: (unit -> Stream.Web.ReadableStream<obj>)
@@ -7412,8 +7706,9 @@ type Blob =
         (
             size: float,
             ``type``: string,
-            arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>),
-            bytes: (unit -> JS.Promise<Uint8Array<obj>>),
+            arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+            bytes:
+                (unit -> JS.Promise<Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>),
             slice: Func<float option, float option, string option, _Blob>,
             text: (unit -> JS.Promise<string>),
             stream: (unit -> Stream.Web.ReadableStream<obj>)
@@ -7426,20 +7721,20 @@ type BlobConstructor =
         sources:
             U15<
                 string,
-                JS.ArrayBuffer,
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
+                Fable.Core.TS.Es.ArrayBuffer,
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                 _Blob,
-                JS.DataView,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              >[] *
         ?options: Buffer.BlobOptions ->
             _Blob
@@ -7458,8 +7753,9 @@ type File =
         (
             size: float,
             ``type``: string,
-            arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>),
-            bytes: (unit -> JS.Promise<Uint8Array<obj>>),
+            arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
+            bytes:
+                (unit -> JS.Promise<Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>),
             slice: Func<float option, float option, string option, _Blob>,
             text: (unit -> JS.Promise<string>),
             stream: (unit -> Stream.Web.ReadableStream<obj>),
@@ -7474,19 +7770,19 @@ type FileConstructor =
         sources:
             U14<
                 string,
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                 _Blob,
-                JS.DataView,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              >[] *
         fileName: string *
         ?options: Buffer.FileOptions ->
@@ -7868,7 +8164,12 @@ type ReadWriteStream =
     abstract unpipe: ?destination: WritableStream2 -> ReadWriteStream
     abstract wrap: oldStream: ReadableStream2 -> ReadWriteStream
     abstract ``end``: ?cb: (unit -> unit) -> ReadWriteStream
-    abstract ``end``: data: U2<string, Uint8Array<obj>> * ?cb: (unit -> unit) -> ReadWriteStream
+
+    abstract ``end``:
+        data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?cb: (unit -> unit) ->
+            ReadWriteStream
+
     abstract ``end``: str: string * ?encoding: BufferEncoding * ?cb: (unit -> unit) -> ReadWriteStream
     /// <summary>
     /// Alias for <c>emitter.on(eventName, listener)</c>.
@@ -8075,14 +8376,22 @@ type ReadWriteStream =
 type ReadableStream2 =
     inherit EventEmitter<unit[]>
     abstract readable: bool with get, set
-    abstract read: ?size: float -> U2<string, Buffer<obj>>
+
+    abstract read:
+        ?size: float -> U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
+
     abstract setEncoding: encoding: BufferEncoding -> ReadableStream2
     abstract pause: unit -> ReadableStream2
     abstract resume: unit -> ReadableStream2
     abstract isPaused: unit -> bool
     abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: ReadableStream2.Pipe.Options -> 'T
     abstract unpipe: ?destination: WritableStream2 -> ReadableStream2
-    abstract unshift: chunk: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding -> unit
+
+    abstract unshift:
+        chunk: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?encoding: BufferEncoding ->
+            unit
+
     abstract wrap: oldStream: ReadableStream2 -> ReadableStream2
     /// <summary>
     /// Alias for <c>emitter.on(eventName, listener)</c>.
@@ -8264,7 +8573,7 @@ type ReadableStream2 =
     /// </code>
     /// </summary>
     /// <remarks>@since v0.1.26</remarks>
-    abstract listeners: eventName: obj -> JS.Function[]
+    abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
     /// including any wrappers (such as those created by <c>.once()</c>).
@@ -8294,7 +8603,7 @@ type ReadableStream2 =
     /// </code>
     /// </summary>
     /// <remarks>@since v9.4.0</remarks>
-    abstract rawListeners: eventName: obj -> JS.Function[]
+    abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
     /// <summary>
     /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
     /// to each.
@@ -8343,7 +8652,7 @@ type ReadableStream2 =
     /// <remarks>@since v3.2.0</remarks>
     /// <param name="eventName">The name of the event being listened for</param>
     /// <param name="listener">The event handler function</param>
-    abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+    abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
     /// <summary>
     /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
     /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -8377,13 +8686,32 @@ type ReadableStream2 =
     /// <param name="listener">The callback function</param>
     abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> ReadableStream2
 
+    [<Emit("$0[Symbol.asyncIterator]()")>]
+    abstract SymbolAsyncIterator:
+        unit ->
+            Fable.Core.TS.Es.AsyncIterableIterator<
+                U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
+                obj,
+                obj
+             >
+
 type WritableStream2 =
     inherit EventEmitter<unit[]>
     abstract writable: bool with get, set
-    abstract write: buffer: U2<string, Uint8Array<obj>> * ?cb: (exn option -> unit) -> bool
+
+    abstract write:
+        buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?cb: (exn option -> unit) ->
+            bool
+
     abstract write: str: string * ?encoding: BufferEncoding * ?cb: (exn option -> unit) -> bool
     abstract ``end``: ?cb: (unit -> unit) -> WritableStream2
-    abstract ``end``: data: U2<string, Uint8Array<obj>> * ?cb: (unit -> unit) -> WritableStream2
+
+    abstract ``end``:
+        data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?cb: (unit -> unit) ->
+            WritableStream2
+
     abstract ``end``: str: string * ?encoding: BufferEncoding * ?cb: (unit -> unit) -> WritableStream2
     /// <summary>
     /// Alias for <c>emitter.on(eventName, listener)</c>.
@@ -8565,7 +8893,7 @@ type WritableStream2 =
     /// </code>
     /// </summary>
     /// <remarks>@since v0.1.26</remarks>
-    abstract listeners: eventName: obj -> JS.Function[]
+    abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
     /// including any wrappers (such as those created by <c>.once()</c>).
@@ -8595,7 +8923,7 @@ type WritableStream2 =
     /// </code>
     /// </summary>
     /// <remarks>@since v9.4.0</remarks>
-    abstract rawListeners: eventName: obj -> JS.Function[]
+    abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
     /// <summary>
     /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
     /// to each.
@@ -8644,7 +8972,7 @@ type WritableStream2 =
     /// <remarks>@since v3.2.0</remarks>
     /// <param name="eventName">The name of the event being listened for</param>
     /// <param name="listener">The event handler function</param>
-    abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+    abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
     /// <summary>
     /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
     /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -9058,6 +9386,7 @@ type EventEmitterAsyncResourceConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -9084,7 +9413,9 @@ type EventEmitterAsyncResourceConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -9570,6 +9901,7 @@ type EventEmitterConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -9596,7 +9928,9 @@ type EventEmitterConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -9821,27 +10155,8 @@ type Dict<'T> =
     [<EmitIndexer>]
     abstract Item: string -> 'T option with get, set
 
-[<Interface>]
 type Iterator<'T, 'TReturn, 'TNext> =
     inherit IteratorObject<'T, 'TReturn, 'TNext>
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (next: (U2<obj[], 'TNext[]> -> obj), ?``return``: ('TReturn option -> obj), ?throw: (obj option -> obj))
-        : Iterator<'T, 'TReturn, 'TNext> =
-        jsNative
-
-[<Interface>]
-type IteratorObject<'T, 'TReturn, 'TNext> =
-    abstract next: [<ParamArray>] __0: U2<obj[], 'TNext[]> -> obj
-    abstract ``return``: ('TReturn option -> obj) option with get, set
-    abstract throw: (obj option -> obj) option with get, set
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (next: (U2<obj[], 'TNext[]> -> obj), ?``return``: ('TReturn option -> obj), ?throw: (obj option -> obj))
-        : IteratorObject<'T, 'TReturn, 'TNext> =
-        jsNative
 
 type ProcessEnv =
     [<EmitIndexer>]
@@ -10500,6 +10815,7 @@ type DuplexConstructor =
     /// </summary>
     /// <remarks>@since v0.9.4</remarks>
     abstract Duplex: DuplexConstructor with get, set
+
     /// <summary>
     /// A utility method for creating duplex streams.
     /// <br /><br />
@@ -10520,7 +10836,21 @@ type DuplexConstructor =
     /// - <c>Promise</c> converts into readable <c>Duplex</c>. Value <c>null</c> is ignored.
     /// </summary>
     /// <remarks>@since v16.8.0</remarks>
-    abstract from: src: obj -> Stream.Duplex
+    abstract from:
+        src:
+            U9<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.AsyncGeneratorFunction,
+                Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                _Blob,
+                Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                Fable.Core.TS.Es.Object,
+                JS.Promise<obj>,
+                Stream.Stream
+             > ->
+            Stream.Duplex
+
     /// <summary>
     /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
     /// </summary>
@@ -10874,6 +11204,7 @@ type DuplexConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -10900,7 +11231,9 @@ type DuplexConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -11706,6 +12039,7 @@ type PassThroughConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -11732,7 +12066,9 @@ type PassThroughConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -11930,6 +12266,7 @@ type PassThroughConstructor =
     /// </summary>
     /// <remarks>@since v0.9.4</remarks>
     abstract Duplex: DuplexConstructor with get, set
+
     /// <summary>
     /// A utility method for creating duplex streams.
     /// <br /><br />
@@ -11950,7 +12287,21 @@ type PassThroughConstructor =
     /// - <c>Promise</c> converts into readable <c>Duplex</c>. Value <c>null</c> is ignored.
     /// </summary>
     /// <remarks>@since v16.8.0</remarks>
-    abstract from: src: obj -> Stream.Duplex
+    abstract from:
+        src:
+            U9<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.AsyncGeneratorFunction,
+                Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                _Blob,
+                Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                Fable.Core.TS.Es.Object,
+                JS.Promise<obj>,
+                Stream.Stream
+             > ->
+            Stream.Duplex
+
     /// <summary>
     /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
     /// </summary>
@@ -12222,6 +12573,28 @@ type Pipeline =
     abstract __promisify__<'A, 'T1, 'B> :
         source: 'A * transform1: 'T1 * destination: 'B * ?options: Stream.PipelineOptions -> obj
 
+    abstract __promisify__<'A, 'T1, 'T2, 'B> :
+        source: 'A * transform1: 'T1 * transform2: 'T2 * destination: 'B * ?options: Stream.PipelineOptions -> obj
+
+    abstract __promisify__<'A, 'T1, 'T2, 'T3, 'B> :
+        source: 'A *
+        transform1: 'T1 *
+        transform2: 'T2 *
+        transform3: 'T3 *
+        destination: 'B *
+        ?options: Stream.PipelineOptions ->
+            obj
+
+    abstract __promisify__<'A, 'T1, 'T2, 'T3, 'T4, 'B> :
+        source: 'A *
+        transform1: 'T1 *
+        transform2: 'T2 *
+        transform3: 'T3 *
+        transform4: 'T4 *
+        destination: 'B *
+        ?options: Stream.PipelineOptions ->
+            obj
+
     abstract __promisify__:
         streams: U3<ReadWriteStream, ReadableStream2, WritableStream2>[] * ?options: Stream.PipelineOptions ->
             JS.Promise<unit>
@@ -12237,6 +12610,25 @@ type Pipeline =
 
     [<Emit("$0($1...)")>]
     abstract Invoke<'A, 'T1, 'B> : source: 'A * transform1: 'T1 * destination: 'B * callback: obj -> obj
+
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'A, 'T1, 'T2, 'B> :
+        source: 'A * transform1: 'T1 * transform2: 'T2 * destination: 'B * callback: obj -> obj
+
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'A, 'T1, 'T2, 'T3, 'B> :
+        source: 'A * transform1: 'T1 * transform2: 'T2 * transform3: 'T3 * destination: 'B * callback: obj -> obj
+
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'A, 'T1, 'T2, 'T3, 'T4, 'B> :
+        source: 'A *
+        transform1: 'T1 *
+        transform2: 'T2 *
+        transform3: 'T3 *
+        transform4: 'T4 *
+        destination: 'B *
+        callback: obj ->
+            obj
 
     [<Emit("$0($1...)")>]
     abstract Invoke:
@@ -12589,6 +12981,7 @@ type ReadableConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -12615,7 +13008,9 @@ type ReadableConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -12797,13 +13192,17 @@ type ReadableConstructor =
     abstract EventEmitterAsyncResource: EventEmitterAsyncResourceConstructor with get, set
     /// <remarks>@since v0.9.4</remarks>
     abstract Readable: ReadableConstructor with get, set
+
     /// <summary>
     /// A utility method for creating Readable Streams out of iterators.
     /// </summary>
     /// <remarks>@since v12.3.0, v10.17.0</remarks>
     /// <param name="iterable">Object implementing the <c>Symbol.asyncIterator</c> or <c>Symbol.iterator</c> iterable protocol. Emits an 'error' event if a null value is passed.</param>
     /// <param name="options">Options provided to <c>new stream.Readable([options])</c>. By default, <c>Readable.from()</c> will set <c>options.objectMode</c> to <c>true</c>, unless this is explicitly opted out by setting <c>options.objectMode</c> to <c>false</c>.</param>
-    abstract from: iterable: obj * ?options: Stream.ReadableOptions<Stream.Readable> -> Stream.Readable
+    abstract from:
+        iterable: U2<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, Fable.Core.TS.Es.Iterable<obj, obj, obj>> *
+        ?options: Stream.ReadableOptions<Stream.Readable> ->
+            Stream.Readable
 
     /// <summary>
     /// A utility method for creating a <c>Readable</c> from a web <c>ReadableStream</c>.
@@ -13436,6 +13835,7 @@ type StreamConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -13462,7 +13862,9 @@ type StreamConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -14267,6 +14669,7 @@ type TransformConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -14293,7 +14696,9 @@ type TransformConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -14491,6 +14896,7 @@ type TransformConstructor =
     /// </summary>
     /// <remarks>@since v0.9.4</remarks>
     abstract Duplex: DuplexConstructor with get, set
+
     /// <summary>
     /// A utility method for creating duplex streams.
     /// <br /><br />
@@ -14511,7 +14917,21 @@ type TransformConstructor =
     /// - <c>Promise</c> converts into readable <c>Duplex</c>. Value <c>null</c> is ignored.
     /// </summary>
     /// <remarks>@since v16.8.0</remarks>
-    abstract from: src: obj -> Stream.Duplex
+    abstract from:
+        src:
+            U9<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.AsyncGeneratorFunction,
+                Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                _Blob,
+                Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                Fable.Core.TS.Es.Object,
+                JS.Promise<obj>,
+                Stream.Stream
+             > ->
+            Stream.Duplex
+
     /// <summary>
     /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
     /// </summary>
@@ -15126,6 +15546,7 @@ type WritableConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -15152,7 +15573,9 @@ type WritableConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -15850,19 +16273,52 @@ type GenerateKeyPair =
 [<Interface>]
 type AesCbcParams =
     inherit Algorithm
-    abstract iv: U2<JS.ArrayBuffer, JS.ArrayBufferView> with get, set
+
+    abstract iv:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > with get, set
 
     [<ParamObject; Emit("$0")>]
-    static member Create(iv: U2<JS.ArrayBuffer, JS.ArrayBufferView>, name: string) : AesCbcParams = jsNative
+    static member Create
+        (
+            iv:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >,
+            name: string
+        ) : AesCbcParams =
+        jsNative
 
 [<Interface>]
 type AesCtrParams =
     inherit Algorithm
-    abstract counter: U2<JS.ArrayBuffer, JS.ArrayBufferView> with get, set
+
+    abstract counter:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > with get, set
+
     abstract length: float with get, set
 
     [<ParamObject; Emit("$0")>]
-    static member Create(counter: U2<JS.ArrayBuffer, JS.ArrayBufferView>, length: float, name: string) : AesCtrParams =
+    static member Create
+        (
+            counter:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >,
+            length: float,
+            name: string
+        ) : AesCtrParams =
         jsNative
 
 [<Interface>]
@@ -15876,16 +16332,39 @@ type AesDerivedKeyParams =
 [<Interface>]
 type AesGcmParams =
     inherit Algorithm
-    abstract additionalData: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
-    abstract iv: U2<JS.ArrayBuffer, JS.ArrayBufferView> with get, set
+
+    abstract additionalData:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > option with get, set
+
+    abstract iv:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > with get, set
+
     abstract tagLength: float option with get, set
 
     [<ParamObject; Emit("$0")>]
     static member Create
         (
-            iv: U2<JS.ArrayBuffer, JS.ArrayBufferView>,
+            iv:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >,
             name: string,
-            ?additionalData: U2<JS.ArrayBuffer, JS.ArrayBufferView>,
+            ?additionalData:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >,
             ?tagLength: float
         ) : AesGcmParams =
         jsNative
@@ -15949,24 +16428,62 @@ type EcdsaParams =
 [<Interface>]
 type Ed448Params =
     inherit Algorithm
-    abstract context: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+
+    abstract context:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > option with get, set
 
     [<ParamObject; Emit("$0")>]
-    static member Create(name: string, ?context: U2<JS.ArrayBuffer, JS.ArrayBufferView>) : Ed448Params = jsNative
+    static member Create
+        (
+            name: string,
+            ?context:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >
+        ) : Ed448Params =
+        jsNative
 
 [<Interface>]
 type HkdfParams =
     inherit Algorithm
     abstract hash: U2<string, Algorithm> with get, set
-    abstract info: U2<JS.ArrayBuffer, JS.ArrayBufferView> with get, set
-    abstract salt: U2<JS.ArrayBuffer, JS.ArrayBufferView> with get, set
+
+    abstract info:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > with get, set
+
+    abstract salt:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > with get, set
 
     [<ParamObject; Emit("$0")>]
     static member Create
         (
             hash: U2<string, Algorithm>,
-            info: U2<JS.ArrayBuffer, JS.ArrayBufferView>,
-            salt: U2<JS.ArrayBuffer, JS.ArrayBufferView>,
+            info:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >,
+            salt:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >,
             name: string
         ) : HkdfParams =
         jsNative
@@ -16030,12 +16547,27 @@ type Pbkdf2Params =
     inherit Algorithm
     abstract hash: U2<string, Algorithm> with get, set
     abstract iterations: float with get, set
-    abstract salt: U2<JS.ArrayBuffer, JS.ArrayBufferView> with get, set
+
+    abstract salt:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > with get, set
 
     [<ParamObject; Emit("$0")>]
     static member Create
-        (hash: U2<string, Algorithm>, iterations: float, salt: U2<JS.ArrayBuffer, JS.ArrayBufferView>, name: string)
-        : Pbkdf2Params =
+        (
+            hash: U2<string, Algorithm>,
+            iterations: float,
+            salt:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >,
+            name: string
+        ) : Pbkdf2Params =
         jsNative
 
 [<Interface>]
@@ -16045,27 +16577,52 @@ type RsaHashedKeyGenParams =
 
     [<ParamObject; Emit("$0")>]
     static member Create
-        (hash: U2<string, Algorithm>, name: string, modulusLength: float, publicExponent: Uint8Array<obj>)
-        : RsaHashedKeyGenParams =
+        (
+            hash: U2<string, Algorithm>,
+            name: string,
+            modulusLength: float,
+            publicExponent: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+        ) : RsaHashedKeyGenParams =
         jsNative
 
 [<Interface>]
 type RsaKeyGenParams =
     inherit Algorithm
     abstract modulusLength: float with get, set
-    abstract publicExponent: Uint8Array<obj> with get, set
+    abstract publicExponent: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> with get, set
 
     [<ParamObject; Emit("$0")>]
-    static member Create(modulusLength: float, publicExponent: Uint8Array<obj>, name: string) : RsaKeyGenParams =
+    static member Create
+        (
+            modulusLength: float,
+            publicExponent: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            name: string
+        ) : RsaKeyGenParams =
         jsNative
 
 [<Interface>]
 type RsaOaepParams =
     inherit Algorithm
-    abstract label: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+
+    abstract label:
+        U2<
+            Fable.Core.TS.Es.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         > option with get, set
 
     [<ParamObject; Emit("$0")>]
-    static member Create(name: string, ?label: U2<JS.ArrayBuffer, JS.ArrayBufferView>) : RsaOaepParams = jsNative
+    static member Create
+        (
+            name: string,
+            ?label:
+                U2<
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >
+        ) : RsaOaepParams =
+        jsNative
 
 [<Interface>]
 type RsaOtherPrimesInfo =
@@ -16101,8 +16658,12 @@ type SubtleCrypto =
     abstract decrypt:
         algorithm: U6<string, AesCbcParams, AesCtrParams, AesGcmParams, Algorithm, RsaOaepParams> *
         key: CryptoKey *
-        data: U2<JS.ArrayBuffer, JS.ArrayBufferView> ->
-            JS.Promise<JS.ArrayBuffer>
+        data:
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > ->
+            JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Using the method and parameters specified in <c>algorithm</c> and the keying material provided by <c>baseKey</c>,
@@ -16122,7 +16683,7 @@ type SubtleCrypto =
     /// </summary>
     /// <remarks>@since v15.0.0</remarks>
     abstract deriveBits:
-        algorithm: EcdhKeyDeriveParams * baseKey: CryptoKey * ?length: float -> JS.Promise<JS.ArrayBuffer>
+        algorithm: EcdhKeyDeriveParams * baseKey: CryptoKey * ?length: float -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Using the method and parameters specified in <c>algorithm</c> and the keying material provided by <c>baseKey</c>,
@@ -16143,7 +16704,7 @@ type SubtleCrypto =
     /// <remarks>@since v15.0.0</remarks>
     abstract deriveBits:
         algorithm: U3<EcdhKeyDeriveParams, HkdfParams, Pbkdf2Params> * baseKey: CryptoKey * length: float ->
-            JS.Promise<JS.ArrayBuffer>
+            JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Using the method and parameters specified in <c>algorithm</c>, and the keying material provided by <c>baseKey</c>,
@@ -16185,7 +16746,13 @@ type SubtleCrypto =
     /// </summary>
     /// <remarks>@since v15.0.0</remarks>
     abstract digest:
-        algorithm: U2<string, Algorithm> * data: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
+        algorithm: U2<string, Algorithm> *
+        data:
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > ->
+            JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Using the method and parameters specified by <c>algorithm</c> and the keying material provided by <c>key</c>,
@@ -16203,8 +16770,12 @@ type SubtleCrypto =
     abstract encrypt:
         algorithm: U6<string, AesCbcParams, AesCtrParams, AesGcmParams, Algorithm, RsaOaepParams> *
         key: CryptoKey *
-        data: U2<JS.ArrayBuffer, JS.ArrayBufferView> ->
-            JS.Promise<JS.ArrayBuffer>
+        data:
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > ->
+            JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Exports the given key into the specified format, if supported.
@@ -16221,6 +16792,7 @@ type SubtleCrypto =
     /// <returns><c>&lt;Promise&gt;</c> containing <c>&lt;ArrayBuffer&gt;</c>.</returns>
     /// <remarks>@since v15.0.0</remarks>
     abstract exportKey: format: string * key: CryptoKey -> JS.Promise<JsonWebKey>
+
     /// <summary>
     /// Exports the given key into the specified format, if supported.
     /// <br /><br />
@@ -16235,7 +16807,8 @@ type SubtleCrypto =
     /// <param name="format">Must be one of <c>'raw'</c>, <c>'pkcs8'</c>, <c>'spki'</c>, or <c>'jwk'</c>.</param>
     /// <returns><c>&lt;Promise&gt;</c> containing <c>&lt;ArrayBuffer&gt;</c>.</returns>
     /// <remarks>@since v15.0.0</remarks>
-    abstract exportKey: format: SubtleCrypto.ExportKey.Format * key: CryptoKey -> JS.Promise<JS.ArrayBuffer>
+    abstract exportKey:
+        format: SubtleCrypto.ExportKey.Format * key: CryptoKey -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Using the method and parameters provided in <c>algorithm</c>,
@@ -16361,7 +16934,11 @@ type SubtleCrypto =
     /// <remarks>@since v15.0.0</remarks>
     abstract importKey:
         format: SubtleCrypto.ExportKey.Format *
-        keyData: U2<JS.ArrayBuffer, JS.ArrayBufferView> *
+        keyData:
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > *
         algorithm: U6<string, AesKeyAlgorithm, Algorithm, EcKeyImportParams, HmacImportParams, RsaHashedImportParams> *
         extractable: bool *
         keyUsages: Crypto.KeyObject.ToCryptoKey.KeyUsages.Item[] ->
@@ -16385,8 +16962,12 @@ type SubtleCrypto =
     abstract sign:
         algorithm: U5<string, Algorithm, EcdsaParams, Ed448Params, RsaPssParams> *
         key: CryptoKey *
-        data: U2<JS.ArrayBuffer, JS.ArrayBufferView> ->
-            JS.Promise<JS.ArrayBuffer>
+        data:
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > ->
+            JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// In cryptography, "wrapping a key" refers to exporting and then encrypting the keying material.
@@ -16425,7 +17006,11 @@ type SubtleCrypto =
     /// <remarks>@since v15.0.0</remarks>
     abstract unwrapKey:
         format: SubtleCrypto.UnwrapKey.Format *
-        wrappedKey: U2<JS.ArrayBuffer, JS.ArrayBufferView> *
+        wrappedKey:
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > *
         unwrappingKey: CryptoKey *
         unwrapAlgorithm: U6<string, AesCbcParams, AesCtrParams, AesGcmParams, Algorithm, RsaOaepParams> *
         unwrappedKeyAlgorithm:
@@ -16452,8 +17037,16 @@ type SubtleCrypto =
     abstract verify:
         algorithm: U5<string, Algorithm, EcdsaParams, Ed448Params, RsaPssParams> *
         key: CryptoKey *
-        signature: U2<JS.ArrayBuffer, JS.ArrayBufferView> *
-        data: U2<JS.ArrayBuffer, JS.ArrayBufferView> ->
+        signature:
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > *
+        data:
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > ->
             JS.Promise<bool>
 
     /// <summary>
@@ -16479,7 +17072,7 @@ type SubtleCrypto =
         key: CryptoKey *
         wrappingKey: CryptoKey *
         wrapAlgorithm: U6<string, AesCbcParams, AesCtrParams, AesGcmParams, Algorithm, RsaOaepParams> ->
-            JS.Promise<JS.ArrayBuffer>
+            JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
 
 [<Interface>]
 type Crypto =
@@ -16783,7 +17376,6 @@ type RefCounted =
     [<ParamObject; Emit("$0")>]
     static member Create(ref: (unit -> RefCounted), unref: (unit -> RefCounted)) : RefCounted = jsNative
 
-[<Interface>]
 type Timer =
     inherit RefCounted
     abstract hasRef: unit -> bool
@@ -16791,11 +17383,8 @@ type Timer =
     abstract ref: unit -> Timer
     abstract unref: unit -> Timer
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (hasRef: (unit -> bool), refresh: (unit -> Timer), ref: (unit -> Timer), unref: (unit -> Timer))
-        : Timer =
-        jsNative
+    [<Emit("$0[Symbol.toPrimitive]()")>]
+    abstract SymbolToPrimitive: unit -> float
 
 [<Interface>]
 type Rename =
@@ -17667,6 +18256,15 @@ type Write =
             unit
 
     [<Emit("$0($1...)")>]
+    abstract Invoke<'TBuffer> :
+        fd: float * buffer: 'TBuffer * offset: float option * length: float option * callback: Write.Callback2<'TBuffer> ->
+            unit
+
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'TBuffer> :
+        fd: float * buffer: 'TBuffer * offset: float option * callback: Write.Callback3<'TBuffer> -> unit
+
+    [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> : fd: float * buffer: 'TBuffer * callback: Write.Callback4<'TBuffer> -> unit
 
     [<Emit("$0($1...)")>]
@@ -17681,6 +18279,9 @@ type Write =
         encoding: BufferEncoding option *
         callback: Write.Callback6 ->
             unit
+
+    [<Emit("$0($1...)")>]
+    abstract Invoke: fd: float * string: string * position: float option * callback: Write.Callback7 -> unit
 
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * string: string * callback: Write.Callback8 -> unit
@@ -17905,14 +18506,17 @@ type AppendFile =
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathOrFileDescriptor *
-        data: U2<string, Uint8Array<obj>> *
+        data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
         options: Fs.WriteFileOptions *
         callback: Fs.NoParamCallback ->
             unit
 
     [<Emit("$0($1...)")>]
     abstract Invoke:
-        file: Fs.PathOrFileDescriptor * data: U2<string, Uint8Array<obj>> * callback: Fs.NoParamCallback -> unit
+        file: Fs.PathOrFileDescriptor *
+        data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        callback: Fs.NoParamCallback ->
+            unit
 
     [<ParamObject; Emit("$0")>]
     static member Create(__promisify__: AppendFile.Promisify) : AppendFile = jsNative
@@ -18418,14 +19022,16 @@ type EmitWarningOptions =
     /// When <c>warning</c> is a <c>string</c>, <c>ctor</c> is an optional function used to limit the generated stack trace.
     /// </summary>
     /// <defaultValue>process.emitWarning</defaultValue>
-    abstract ctor: JS.Function option with get, set
+    abstract ctor: Fable.Core.TS.Es.Function option with get, set
     /// <summary>
     /// Additional text to include with the error.
     /// </summary>
     abstract detail: string option with get, set
 
     [<ParamObject; Emit("$0")>]
-    static member Create(?``type``: string, ?code: string, ?ctor: JS.Function, ?detail: string) : EmitWarningOptions =
+    static member Create
+        (?``type``: string, ?code: string, ?ctor: Fable.Core.TS.Es.Function, ?detail: string)
+        : EmitWarningOptions =
         jsNative
 
 type Execve = delegate of file: string * args: string[] option * env: ProcessEnv option -> unit
@@ -18718,7 +19324,7 @@ type Process =
     /// </code>
     /// </summary>
     /// <remarks>@since v9.4.0</remarks>
-    abstract rawListeners: eventName: obj -> JS.Function[]
+    abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
     /// <summary>
     /// Returns the number of listeners listening for the event named <c>eventName</c>.
     /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -18727,7 +19333,7 @@ type Process =
     /// <remarks>@since v3.2.0</remarks>
     /// <param name="eventName">The name of the event being listened for</param>
     /// <param name="listener">The event handler function</param>
-    abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+    abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
     /// <summary>
     /// The <c>process.stdout</c> property returns a stream connected to<c>stdout</c> (fd <c>1</c>). It is a <c>net.Socket</c> (which is a <c>Duplex</c> stream) unless fd <c>1</c> refers to a file, in which case it is
     /// a <c>Writable</c> stream.
@@ -18982,7 +19588,7 @@ type Process =
     /// </summary>
     /// <remarks>@since v8.0.0</remarks>
     /// <param name="warning">The warning to emit.</param>
-    abstract emitWarning: warning: U2<string, exn> * ?ctor: JS.Function -> unit
+    abstract emitWarning: warning: U2<string, exn> * ?ctor: Fable.Core.TS.Es.Function -> unit
     /// <summary>
     /// The <c>process.emitWarning()</c> method can be used to emit custom or application
     /// specific process warnings. These can be listened for by adding a handler to the <c>'warning'</c> event.
@@ -19047,7 +19653,8 @@ type Process =
     /// </summary>
     /// <remarks>@since v8.0.0</remarks>
     /// <param name="warning">The warning to emit.</param>
-    abstract emitWarning: warning: U2<string, exn> * ?``type``: string * ?ctor: JS.Function -> unit
+    abstract emitWarning: warning: U2<string, exn> * ?``type``: string * ?ctor: Fable.Core.TS.Es.Function -> unit
+
     /// <summary>
     /// The <c>process.emitWarning()</c> method can be used to emit custom or application
     /// specific process warnings. These can be listened for by adding a handler to the <c>'warning'</c> event.
@@ -19112,7 +19719,9 @@ type Process =
     /// </summary>
     /// <remarks>@since v8.0.0</remarks>
     /// <param name="warning">The warning to emit.</param>
-    abstract emitWarning: warning: U2<string, exn> * ?``type``: string * ?code: string * ?ctor: JS.Function -> unit
+    abstract emitWarning:
+        warning: U2<string, exn> * ?``type``: string * ?code: string * ?ctor: Fable.Core.TS.Es.Function -> unit
+
     /// <summary>
     /// The <c>process.emitWarning()</c> method can be used to emit custom or application
     /// specific process warnings. These can be listened for by adding a handler to the <c>'warning'</c> event.
@@ -19975,7 +20584,7 @@ type Process =
     /// </summary>
     /// <remarks>@since v0.1.26</remarks>
     /// <param name="args">Additional arguments to pass when invoking the <c>callback</c></param>
-    abstract nextTick: callback: JS.Function * [<ParamArray>] args: obj[] -> unit
+    abstract nextTick: callback: Fable.Core.TS.Es.Function * [<ParamArray>] args: obj[] -> unit
     /// <summary>
     /// The process.noDeprecation property indicates whether the --no-deprecation flag is set on the current Node.js process.
     /// See the documentation for the <a href="https://nodejs.org/docs/latest/api/process.html#event-warning">'warning' event</a> and the <a href="https://nodejs.org/docs/latest/api/process.html#processemitwarningwarning-type-code-ctor">emitWarning()</a> method for more information about this flag's behavior.
@@ -20123,7 +20732,7 @@ type Process =
     /// contain what _would have_ been allowable.
     /// </summary>
     /// <remarks>@since v10.10.0</remarks>
-    abstract allowedNodeEnvironmentFlags: JS.Set<string> with get, set
+    abstract allowedNodeEnvironmentFlags: Fable.Core.TS.Es.ReadonlySet<string> with get, set
     /// <summary>
     /// <c>process.report</c> is an object whose methods are used to generate diagnostic reports for the current process.
     /// Additional documentation is available in the <a href="https://nodejs.org/docs/latest-v22.x/api/report.html">report documentation</a>.
@@ -22885,6 +23494,7 @@ type Http2ServerRequestConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -22911,7 +23521,9 @@ type Http2ServerRequestConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -23096,13 +23708,17 @@ type Http2ServerRequestConstructor =
     abstract promises: Crypto.Hash.Stream.Readable.Promises with get, set
     /// <remarks>@since v0.9.4</remarks>
     abstract Readable: ReadableConstructor with get, set
+
     /// <summary>
     /// A utility method for creating Readable Streams out of iterators.
     /// </summary>
     /// <remarks>@since v12.3.0, v10.17.0</remarks>
     /// <param name="iterable">Object implementing the <c>Symbol.asyncIterator</c> or <c>Symbol.iterator</c> iterable protocol. Emits an 'error' event if a null value is passed.</param>
     /// <param name="options">Options provided to <c>new stream.Readable([options])</c>. By default, <c>Readable.from()</c> will set <c>options.objectMode</c> to <c>true</c>, unless this is explicitly opted out by setting <c>options.objectMode</c> to <c>false</c>.</param>
-    abstract from: iterable: obj * ?options: Stream.ReadableOptions<Stream.Readable> -> Stream.Readable
+    abstract from:
+        iterable: U2<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, Fable.Core.TS.Es.Iterable<obj, obj, obj>> *
+        ?options: Stream.ReadableOptions<Stream.Readable> ->
+            Stream.Readable
 
     /// <summary>
     /// A utility method for creating a <c>Readable</c> from a web <c>ReadableStream</c>.
@@ -23725,6 +24341,7 @@ type Http2ServerResponseConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -23751,7 +24368,9 @@ type Http2ServerResponseConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -24558,6 +25177,7 @@ type IncomingMessageConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -24584,7 +25204,9 @@ type IncomingMessageConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -24769,13 +25391,17 @@ type IncomingMessageConstructor =
     abstract promises: Crypto.Hash.Stream.Readable.Promises with get, set
     /// <remarks>@since v0.9.4</remarks>
     abstract Readable: ReadableConstructor with get, set
+
     /// <summary>
     /// A utility method for creating Readable Streams out of iterators.
     /// </summary>
     /// <remarks>@since v12.3.0, v10.17.0</remarks>
     /// <param name="iterable">Object implementing the <c>Symbol.asyncIterator</c> or <c>Symbol.iterator</c> iterable protocol. Emits an 'error' event if a null value is passed.</param>
     /// <param name="options">Options provided to <c>new stream.Readable([options])</c>. By default, <c>Readable.from()</c> will set <c>options.objectMode</c> to <c>true</c>, unless this is explicitly opted out by setting <c>options.objectMode</c> to <c>false</c>.</param>
-    abstract from: iterable: obj * ?options: Stream.ReadableOptions<Stream.Readable> -> Stream.Readable
+    abstract from:
+        iterable: U2<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, Fable.Core.TS.Es.Iterable<obj, obj, obj>> *
+        ?options: Stream.ReadableOptions<Stream.Readable> ->
+            Stream.Readable
 
     /// <summary>
     /// A utility method for creating a <c>Readable</c> from a web <c>ReadableStream</c>.
@@ -25419,6 +26045,7 @@ type ServerResponseConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -25445,7 +26072,9 @@ type ServerResponseConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -29717,6 +30346,7 @@ type InterfaceConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -29743,7 +30373,9 @@ type InterfaceConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -29998,14 +30630,28 @@ type Constants7 =
 /// </summary>
 [<Interface>]
 type _ByteLengthQueuingStrategy =
-    inherit Stream.Web.QueuingStrategy<JS.ArrayBufferView>
+    inherit Stream.Web.QueuingStrategy<
+        Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             >
+
     abstract highWaterMark: float
-    abstract size: Stream.Web.QueuingStrategySize<JS.ArrayBufferView>
+
+    abstract size:
+        Stream.Web.QueuingStrategySize<
+            Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         >
 
     [<ParamObject; Emit("$0")>]
     static member Create
-        (highWaterMark: float, size: Stream.Web.QueuingStrategySize<JS.ArrayBufferView>)
-        : _ByteLengthQueuingStrategy =
+        (
+            highWaterMark: float,
+            size:
+                Stream.Web.QueuingStrategySize<
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >
+        ) : _ByteLengthQueuingStrategy =
         jsNative
 
 /// <summary>
@@ -30028,14 +30674,20 @@ type _ReadableByteStreamController =
     abstract byobRequest: _ReadableStreamBYOBRequest option
     abstract desiredSize: float option
     abstract close: unit -> unit
-    abstract enqueue: chunk: JS.ArrayBufferView -> unit
+
+    abstract enqueue:
+        chunk: Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> ->
+            unit
+
     abstract error: ?error: obj -> unit
 
     [<ParamObject; Emit("$0")>]
     static member Create
         (
             close: (unit -> unit),
-            enqueue: (JS.ArrayBufferView -> unit),
+            enqueue:
+                (Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                        -> unit),
             error: (obj option -> unit),
             ?byobRequest: _ReadableStreamBYOBRequest,
             ?desiredSize: float
@@ -30054,7 +30706,8 @@ type _ReadableStreamBYOBReader =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader/read">MDN Reference</a>
     /// </summary>
-    abstract read<'T when 'T :> JS.ArrayBufferView> :
+    abstract read<'T
+        when 'T :> Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> :
         view: 'T * ?options: _ReadableStreamBYOBReader.Read.Options ->
             JS.Promise<U2<Stream.Web.ReadableStreamReadDoneResult<'T>, Stream.Web.ReadableStreamReadValueResult<'T>>>
 
@@ -30088,20 +30741,31 @@ type _ReadableStreamBYOBRequest =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/view">MDN Reference</a>
     /// </summary>
-    abstract view: JS.ArrayBufferView option
+    abstract view:
+        Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option
+
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/respond">MDN Reference</a>
     /// </summary>
     abstract respond: bytesWritten: float -> unit
+
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/respondWithNewView">MDN Reference</a>
     /// </summary>
-    abstract respondWithNewView: view: JS.ArrayBufferView -> unit
+    abstract respondWithNewView:
+        view: Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> ->
+            unit
 
     [<ParamObject; Emit("$0")>]
     static member Create
-        (respond: (float -> unit), respondWithNewView: (JS.ArrayBufferView -> unit), ?view: JS.ArrayBufferView)
-        : _ReadableStreamBYOBRequest =
+        (
+            respond: (float -> unit),
+            respondWithNewView:
+                (Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                        -> unit),
+            ?view:
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+        ) : _ReadableStreamBYOBRequest =
         jsNative
 
 type _ReadableStreamDefaultController<'R> = Stream.Web.ReadableStreamDefaultController<'R>
@@ -30110,7 +30774,6 @@ type _ReadableStreamDefaultReader<'R> = Stream.Web.ReadableStreamDefaultReader<'
 
 type _ReadableWritablePair<'R, 'W> = Stream.Web.ReadableWritablePair<'R, 'W>
 
-[<Interface>]
 type _TextDecoderStream =
     /// <summary>
     /// Returns encoding's name, lower cased.
@@ -30127,34 +30790,22 @@ type _TextDecoderStream =
     abstract readable: Stream.Web.ReadableStream<string>
     abstract writable: Stream.Web.WritableStream<Stream.Web.BufferSource>
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            encoding: string,
-            fatal: bool,
-            ignoreBOM: bool,
-            readable: Stream.Web.ReadableStream<string>,
-            writable: Stream.Web.WritableStream<Stream.Web.BufferSource>
-        ) : _TextDecoderStream =
-        jsNative
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
 
-[<Interface>]
 type _TextEncoderStream =
     /// <summary>
     /// Returns "utf-8".
     /// </summary>
     abstract encoding: string
-    abstract readable: Stream.Web.ReadableStream<Uint8Array<obj>>
+
+    abstract readable:
+        Stream.Web.ReadableStream<Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
+
     abstract writable: Stream.Web.WritableStream<string>
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            encoding: string,
-            readable: Stream.Web.ReadableStream<Uint8Array<obj>>,
-            writable: Stream.Web.WritableStream<string>
-        ) : _TextEncoderStream =
-        jsNative
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
 
 type _TransformStream<'O, 'I> = Stream.Web.TransformStream<'I, 'O>
 
@@ -30178,12 +30829,16 @@ type _WritableStreamDefaultController =
 type _WritableStreamDefaultWriter<'W> = Stream.Web.WritableStreamDefaultWriter<'W>
 
 type ReadableStreamConstructor =
-    abstract from<'T> : iterable: obj -> Stream.Web.ReadableStream<'T>
+    abstract from<'T> :
+        iterable: U2<Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, Fable.Core.TS.Es.Iterable<'T, obj, obj>> ->
+            Stream.Web.ReadableStream<'T>
 
     [<EmitConstructor>]
     abstract Create:
-        underlyingSource: Stream.Web.UnderlyingByteSource * ?strategy: Stream.Web.QueuingStrategy<Uint8Array<obj>> ->
-            Stream.Web.ReadableStream<Uint8Array<obj>>
+        underlyingSource: Stream.Web.UnderlyingByteSource *
+        ?strategy:
+            Stream.Web.QueuingStrategy<Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> ->
+            Stream.Web.ReadableStream<Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
     [<EmitConstructor>]
     abstract Create<'R> :
@@ -30263,8 +30918,15 @@ type ByteLengthQueuingStrategy =
 
     [<ParamObject; Emit("$0")>]
     static member Create
-        (highWaterMark: float, size: Stream.Web.QueuingStrategySize<JS.ArrayBufferView>)
-        : ByteLengthQueuingStrategy =
+        (
+            highWaterMark: float,
+            size:
+                Stream.Web.QueuingStrategySize<
+                    Fable.Core.TS.Es.ArrayBufferView<
+                        U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                     >
+                 >
+        ) : ByteLengthQueuingStrategy =
         jsNative
 
 /// <summary>
@@ -30299,7 +30961,9 @@ type ReadableByteStreamController =
     static member Create
         (
             close: (unit -> unit),
-            enqueue: (JS.ArrayBufferView -> unit),
+            enqueue:
+                (Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                        -> unit),
             error: (obj option -> unit),
             ?byobRequest: _ReadableStreamBYOBRequest,
             ?desiredSize: float
@@ -30353,8 +31017,14 @@ type ReadableStreamBYOBRequest =
 
     [<ParamObject; Emit("$0")>]
     static member Create
-        (respond: (float -> unit), respondWithNewView: (JS.ArrayBufferView -> unit), ?view: JS.ArrayBufferView)
-        : ReadableStreamBYOBRequest =
+        (
+            respond: (float -> unit),
+            respondWithNewView:
+                (Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                        -> unit),
+            ?view:
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+        ) : ReadableStreamBYOBRequest =
         jsNative
 
 /// <summary>
@@ -30410,38 +31080,16 @@ type ReadableWritablePair<'R, 'W> =
 /// https://nodejs.org/api/globals.html#class-textdecoderstream
 /// </summary>
 /// <remarks>@since v18.0.0</remarks>
-[<Interface>]
 type TextDecoderStream =
     inherit _TextDecoderStream
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            encoding: string,
-            fatal: bool,
-            ignoreBOM: bool,
-            readable: Stream.Web.ReadableStream<string>,
-            writable: Stream.Web.WritableStream<Stream.Web.BufferSource>
-        ) : TextDecoderStream =
-        jsNative
 
 /// <summary>
 /// <c>TextEncoderStream</c> class is a global reference for <c>import { TextEncoderStream } from 'node:stream/web'</c>.
 /// https://nodejs.org/api/globals.html#class-textencoderstream
 /// </summary>
 /// <remarks>@since v18.0.0</remarks>
-[<Interface>]
 type TextEncoderStream =
     inherit _TextEncoderStream
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            encoding: string,
-            readable: Stream.Web.ReadableStream<Uint8Array<obj>>,
-            writable: Stream.Web.WritableStream<string>
-        ) : TextEncoderStream =
-        jsNative
 
 /// <summary>
 /// <c>TransformStream</c> class is a global reference for <c>import { TransformStream } from 'node:stream/web'</c>.
@@ -31206,7 +31854,13 @@ type SpecReporter =
     /// <remarks>@since v0.3.5</remarks>
     abstract setMaxListeners: n: float -> SpecReporter
     abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: SpecReporter.Pipe.Options -> 'T
-    abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: SpecReporter.Compose.Options -> 'T
+
+    abstract compose<'T when 'T :> ReadableStream2> :
+        stream:
+            U4<'T, Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, (obj -> unit), Fable.Core.TS.Es.Iterable<'T, obj, obj>> *
+        ?options: SpecReporter.Compose.Options ->
+            'T
+
     /// <summary>
     /// The <c>readable.setEncoding()</c> method sets the character encoding for
     /// data read from the <c>Readable</c> stream.
@@ -33000,6 +33654,7 @@ type SpecReporterConstructor =
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
     abstract listenerCount: emitter: EventEmitter<unit[]> * eventName: obj -> float
+
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
     /// <br /><br />
@@ -33026,7 +33681,9 @@ type SpecReporterConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
-    abstract getEventListeners: emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> JS.Function[]
+    abstract getEventListeners:
+        emitter: U2<EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+
     /// <summary>
     /// Returns the currently set max amount of listeners.
     /// <br /><br />
@@ -33224,6 +33881,7 @@ type SpecReporterConstructor =
     /// </summary>
     /// <remarks>@since v0.9.4</remarks>
     abstract Duplex: DuplexConstructor with get, set
+
     /// <summary>
     /// A utility method for creating duplex streams.
     /// <br /><br />
@@ -33244,7 +33902,21 @@ type SpecReporterConstructor =
     /// - <c>Promise</c> converts into readable <c>Duplex</c>. Value <c>null</c> is ignored.
     /// </summary>
     /// <remarks>@since v16.8.0</remarks>
-    abstract from: src: obj -> Stream.Duplex
+    abstract from:
+        src:
+            U9<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.AsyncGeneratorFunction,
+                Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                _Blob,
+                Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                Fable.Core.TS.Es.Object,
+                JS.Promise<obj>,
+                Stream.Stream
+             > ->
+            Stream.Duplex
+
     /// <summary>
     /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
     /// </summary>
@@ -33544,7 +34216,13 @@ type LcovReporter =
     /// <remarks>@since v0.3.5</remarks>
     abstract setMaxListeners: n: float -> LcovReporter
     abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: LcovReporter.Pipe.Options -> 'T
-    abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: LcovReporter.Compose.Options -> 'T
+
+    abstract compose<'T when 'T :> ReadableStream2> :
+        stream:
+            U4<'T, Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, (obj -> unit), Fable.Core.TS.Es.Iterable<'T, obj, obj>> *
+        ?options: LcovReporter.Compose.Options ->
+            'T
+
     /// <summary>
     /// The <c>readable.setEncoding()</c> method sets the character encoding for
     /// data read from the <c>Readable</c> stream.
@@ -35050,7 +35728,6 @@ type SetImmediate =
     static member Create(__promisify__: Func<obj option, Timers.TimerOptions option, JS.Promise<obj>>) : SetImmediate =
         jsNative
 
-[<Interface>]
 type Timeout =
     inherit RefCounted
     inherit Disposable
@@ -35095,18 +35772,6 @@ type Timeout =
     abstract unref: unit -> Timeout
     abstract _onTimeout: [<ParamArray>] args: obj[] -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            close: (unit -> Timeout),
-            hasRef: (unit -> bool),
-            ref: (unit -> Timeout),
-            refresh: (unit -> Timeout),
-            unref: (unit -> Timeout),
-            _onTimeout: (obj[] -> unit)
-        ) : Timeout =
-        jsNative
-
 [<Interface>]
 type SetTimeout =
     abstract __promisify__: Func<float option, obj option, Timers.TimerOptions option, JS.Promise<obj>> with get, set
@@ -35128,7 +35793,6 @@ type SetTimeout =
 /// https://nodejs.org/api/url.html#class-urlsearchparams
 /// </summary>
 /// <remarks>@since v10.0.0</remarks>
-[<Interface>]
 type URLSearchParams =
     inherit Url.URLSearchParams
     /// <summary>
@@ -35147,28 +35811,18 @@ type URLSearchParams =
     /// <param name="thisArg">To be used as <c>this</c> value for when <c>fn</c> is called</param>
     abstract forEach<'TThis> : fn: URLSearchParams.ForEach.Fn * ?thisArg: 'TThis -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            append: Action<string, string>,
-            delete: Action<string, string option>,
-            entries: (unit -> Url.URLSearchParamsIterator<(string * string)>),
-            forEach: Action<URLSearchParams.ForEach.Fn, 'TThis option>,
-            get: (string -> string option),
-            getAll: (string -> string[]),
-            has: Func<string, string option, bool>,
-            keys: (unit -> Url.URLSearchParamsIterator<string>),
-            set: Action<string, string>,
-            size: float,
-            sort: (unit -> unit),
-            toString: (unit -> string),
-            values: (unit -> Url.URLSearchParamsIterator<string>)
-        ) : URLSearchParams =
-        jsNative
-
 type URLSearchParamsConstructor =
     [<EmitConstructor>]
-    abstract Create: ?init: obj -> Url.URLSearchParams
+    abstract Create:
+        ?init:
+            U5<
+                string,
+                Fable.Core.TS.Es.Iterable<(string * string), obj, obj>,
+                (string * string)[],
+                JS.Record<string, U2<string, string[]>>,
+                Url.URLSearchParams
+             > ->
+            Url.URLSearchParams
 
 /// <summary>
 /// <c>URL</c> class is a global reference for <c>import { URL } from 'url'</c>
@@ -35377,7 +36031,7 @@ type Promisify =
         fn: Promisify.Fn10<'T1, 'T2, 'T3, 'T4, 'T5> -> Promisify.Result8<'T1, 'T2, 'T3, 'T4, 'T5>
 
     [<Emit("$0($1...)")>]
-    abstract Invoke: fn: JS.Function -> JS.Function
+    abstract Invoke: fn: Fable.Core.TS.Es.Function -> Fable.Core.TS.Es.Function
 
     [<ParamObject; Emit("$0")>]
     static member Create(custom: obj) : Promisify = jsNative
@@ -35840,8 +36494,8 @@ type EventSourceInit =
     [<ParamObject; Emit("$0")>]
     static member Create(?withCredentials: bool, ?dispatcher: obj) : EventSourceInit = jsNative
 
-[<Interface>]
 type FormData =
+    inherit seq<(string * obj)>
     /// <summary>
     /// Appends a new value onto an existing key inside a FormData object,
     /// or adds the key if it does not already exist.
@@ -35910,24 +36564,11 @@ type FormData =
     /// </summary>
     abstract entries: (unit -> obj) with get, set
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            append: Action<string, obj, string option>,
-            set: Action<string, obj, string option>,
-            get: (string -> obj option),
-            getAll: (string -> obj[]),
-            has: (string -> bool),
-            delete: (string -> unit),
-            forEach: FormData.ForEach,
-            keys: (unit -> obj),
-            values: (unit -> obj),
-            entries: (unit -> obj)
-        ) : FormData =
-        jsNative
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
 
-[<Interface>]
 type Headers =
+    inherit seq<(string * string)>
     abstract append: Headers.Append
     abstract delete: (string -> unit)
     abstract get: (string -> string option)
@@ -35938,22 +36579,6 @@ type Headers =
     abstract keys: (unit -> obj)
     abstract values: (unit -> obj)
     abstract entries: (unit -> obj)
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            append: Headers.Append,
-            delete: (string -> unit),
-            get: (string -> string option),
-            has: (string -> bool),
-            set: Headers.Set,
-            getSetCookie: (unit -> string[]),
-            forEach: Headers.ForEach,
-            keys: (unit -> obj),
-            values: (unit -> obj),
-            entries: (unit -> obj)
-        ) : Headers =
-        jsNative
 
 [<Interface>]
 type MessageEvent =
@@ -36061,7 +36686,7 @@ type MessageEventInit =
 type Request =
     abstract body: Stream.Web.ReadableStream<obj> option
     abstract bodyUsed: bool
-    abstract arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>)
+    abstract arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>)
     abstract blob: (unit -> JS.Promise<_Blob>)
     /// <remarks>
     /// @deprecated
@@ -36107,7 +36732,7 @@ type Request =
     static member Create
         (
             bodyUsed: bool,
-            arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>),
+            arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
             blob: (unit -> JS.Promise<_Blob>),
             formData: (unit -> JS.Promise<obj>),
             json: (unit -> JS.Promise<obj>),
@@ -36172,7 +36797,7 @@ type RequestInit =
 type Response =
     abstract body: Stream.Web.ReadableStream<obj> option
     abstract bodyUsed: bool
-    abstract arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>)
+    abstract arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>)
     abstract blob: (unit -> JS.Promise<_Blob>)
     /// <remarks>
     /// @deprecated
@@ -36211,7 +36836,7 @@ type Response =
     static member Create
         (
             bodyUsed: bool,
-            arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>),
+            arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>),
             blob: (unit -> JS.Promise<_Blob>),
             formData: (unit -> JS.Promise<obj>),
             json: (unit -> JS.Promise<obj>),
@@ -36250,7 +36875,18 @@ type WebSocket =
     abstract readyState: float
     abstract url: string
     abstract close: ?code: float * ?reason: string -> unit
-    abstract send: data: obj -> unit
+
+    abstract send:
+        data:
+            U5<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                _Blob,
+                Fable.Core.TS.Es.SharedArrayBuffer
+             > ->
+            unit
+
     abstract CLOSED: float
     abstract CLOSING: float
     abstract CONNECTING: float
@@ -37406,7 +38042,7 @@ module AppendFile =
     type Promisify =
         delegate of
             file: Fs.PathOrFileDescriptor *
-            data: U2<string, Uint8Array<obj>> *
+            data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
             options: U2<string, Fs.WriteFileOptions2> option ->
                 JS.Promise<unit>
 
@@ -37481,7 +38117,7 @@ module Assert =
         /// <summary>
         /// If provided, the generated stack trace omits frames before this function.
         /// </summary>
-        abstract stackStartFn: JS.Function option with get, set
+        abstract stackStartFn: Fable.Core.TS.Es.Function option with get, set
         /// <summary>
         /// If set to <c>'full'</c>, shows the full diff in assertion errors.
         /// </summary>
@@ -37495,7 +38131,7 @@ module Assert =
                 ?actual: obj,
                 ?expected: obj,
                 ?operator: string,
-                ?stackStartFn: JS.Function,
+                ?stackStartFn: Fable.Core.TS.Es.Function,
                 ?diff: Assert.AssertOptions.Diff
             ) : AssertionErrorOptions =
             jsNative
@@ -37598,7 +38234,7 @@ module Assert =
         /// </code>
         /// </summary>
         [<Import("AssertionError.captureStackTrace", "node:assert/strict")>]
-        static member captureStackTrace(targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace(targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
 
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("AssertionError.prepareStackTrace", "node:assert/strict")>]
@@ -37683,7 +38319,7 @@ module Assert =
         /// </summary>
         /// <remarks>@since v18.8.0, v16.18.0</remarks>
         /// <returns>An array with all the calls to a tracked function.</returns>
-        abstract getCalls: fn: JS.Function -> CallTrackerCall[]
+        abstract getCalls: fn: Fable.Core.TS.Es.Function -> CallTrackerCall[]
         /// <summary>
         /// The arrays contains information about the expected and actual number of calls of
         /// the functions that have not been called the expected number of times.
@@ -37737,7 +38373,7 @@ module Assert =
         /// </summary>
         /// <remarks>@since v18.8.0, v16.18.0</remarks>
         /// <param name="fn">a tracked function to reset.</param>
-        abstract reset: ?fn: JS.Function -> unit
+        abstract reset: ?fn: Fable.Core.TS.Es.Function -> unit
         /// <summary>
         /// Iterates through the list of functions passed to tracker.calls () and will throw an error for functions that
         /// have not been called the expected number of times.
@@ -37876,8 +38512,13 @@ module Assert =
         /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
         [<Import("fail", "node:assert")>]
         static member fail
-            (actual: obj, expected: obj, ?message: U2<string, exn>, ?operator: string, ?stackStartFn: JS.Function)
-            : unit =
+            (
+                actual: obj,
+                expected: obj,
+                ?message: U2<string, exn>,
+                ?operator: string,
+                ?stackStartFn: Fable.Core.TS.Es.Function
+            ) : unit =
             jsNative
 
         /// <summary>
@@ -38938,7 +39579,8 @@ module Assert =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.16.0</remarks>
         [<Import("match", "node:assert")>]
-        static member ``match``(value: string, regExp: obj, ?message: U2<string, exn>) : unit = jsNative
+        static member ``match``(value: string, regExp: Fable.Core.TS.Es.RegExp, ?message: U2<string, exn>) : unit =
+            jsNative
 
         /// <summary>
         /// Expects the <c>string</c> input not to match the regular expression.
@@ -38962,7 +39604,8 @@ module Assert =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.16.0</remarks>
         [<Import("doesNotMatch", "node:assert")>]
-        static member doesNotMatch(value: string, regExp: obj, ?message: U2<string, exn>) : unit = jsNative
+        static member doesNotMatch(value: string, regExp: Fable.Core.TS.Es.RegExp, ?message: U2<string, exn>) : unit =
+            jsNative
 
         /// <summary>
         /// Tests for partial deep equality between the <c>actual</c> and <c>expected</c> parameters.
@@ -39030,7 +39673,11 @@ module Assert =
             /// <remarks>@since v0.1.21</remarks>
             /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
             abstract fail:
-                actual: obj * expected: obj * ?message: U2<string, exn> * ?operator: string * ?stackStartFn: JS.Function ->
+                actual: obj *
+                expected: obj *
+                ?message: U2<string, exn> *
+                ?operator: string *
+                ?stackStartFn: Fable.Core.TS.Es.Function ->
                     unit
 
             /// <summary>
@@ -40059,7 +40706,7 @@ module Assert =
             /// instance of an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error">Error</a> then it will be thrown instead of the <c>{@link AssertionError}</c>.
             /// </summary>
             /// <remarks>@since v13.6.0, v12.16.0</remarks>
-            abstract ``match``: Action<string, obj, U2<string, exn> option> with get, set
+            abstract ``match``: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
             /// <summary>
             /// Expects the <c>string</c> input not to match the regular expression.
             /// <code lang="js">
@@ -40081,7 +40728,7 @@ module Assert =
             /// instance of an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error">Error</a> then it will be thrown instead of the <c>{@link AssertionError}</c>.
             /// </summary>
             /// <remarks>@since v13.6.0, v12.16.0</remarks>
-            abstract doesNotMatch: Action<string, obj, U2<string, exn> option> with get, set
+            abstract doesNotMatch: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
             /// <summary>
             /// Tests for partial deep equality between the <c>actual</c> and <c>expected</c> parameters.
             /// "Deep" equality means that the enumerable "own" properties of child objects
@@ -40112,7 +40759,7 @@ module Assert =
         type Base =
             abstract deepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
             abstract deepEqual: Action<obj, obj, U2<string, exn> option> with get, set
-            abstract doesNotMatch: Action<string, obj, U2<string, exn> option> with get, set
+            abstract doesNotMatch: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
 
             abstract doesNotReject:
                 block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> * ?message: U2<string, exn> -> JS.Promise<unit>
@@ -40131,11 +40778,15 @@ module Assert =
             abstract fail: ?message: U2<string, exn> -> unit
 
             abstract fail:
-                actual: obj * expected: obj * ?message: U2<string, exn> * ?operator: string * ?stackStartFn: JS.Function ->
+                actual: obj *
+                expected: obj *
+                ?message: U2<string, exn> *
+                ?operator: string *
+                ?stackStartFn: Fable.Core.TS.Es.Function ->
                     unit
 
             abstract ifError: (obj -> unit) with get, set
-            abstract ``match``: Action<string, obj, U2<string, exn> option> with get, set
+            abstract ``match``: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
             abstract notDeepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
             abstract notDeepEqual: Action<obj, obj, U2<string, exn> option> with get, set
             abstract notStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
@@ -40233,8 +40884,13 @@ module Assert =
             /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
             [<Import("fail", "node:assert/strict")>]
             static member fail
-                (actual: obj, expected: obj, ?message: U2<string, exn>, ?operator: string, ?stackStartFn: JS.Function)
-                : unit =
+                (
+                    actual: obj,
+                    expected: obj,
+                    ?message: U2<string, exn>,
+                    ?operator: string,
+                    ?stackStartFn: Fable.Core.TS.Es.Function
+                ) : unit =
                 jsNative
 
             /// <summary>
@@ -41262,7 +41918,8 @@ module Assert =
             /// </summary>
             /// <remarks>@since v13.6.0, v12.16.0</remarks>
             [<Import("match", "node:assert/strict")>]
-            static member ``match``(value: string, regExp: obj, ?message: U2<string, exn>) : unit = jsNative
+            static member ``match``(value: string, regExp: Fable.Core.TS.Es.RegExp, ?message: U2<string, exn>) : unit =
+                jsNative
 
             /// <summary>
             /// Expects the <c>string</c> input not to match the regular expression.
@@ -41286,7 +41943,10 @@ module Assert =
             /// </summary>
             /// <remarks>@since v13.6.0, v12.16.0</remarks>
             [<Import("doesNotMatch", "node:assert/strict")>]
-            static member doesNotMatch(value: string, regExp: obj, ?message: U2<string, exn>) : unit = jsNative
+            static member doesNotMatch
+                (value: string, regExp: Fable.Core.TS.Es.RegExp, ?message: U2<string, exn>)
+                : unit =
+                jsNative
 
             /// <summary>
             /// Tests for partial deep equality between the <c>actual</c> and <c>expected</c> parameters.
@@ -42166,18 +42826,18 @@ module Buffer =
         static member isUtf8
             (input:
                 U12<
-                    JS.ArrayBuffer,
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  >)
             : bool =
             jsNative
@@ -42194,18 +42854,18 @@ module Buffer =
         static member isAscii
             (input:
                 U12<
-                    JS.ArrayBuffer,
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  >)
             : bool =
             jsNative
@@ -42250,8 +42910,11 @@ module Buffer =
         /// <param name="toEnc">To target encoding.</param>
         [<Import("transcode", "node:buffer")>]
         static member transcode
-            (source: Uint8Array<obj>, fromEnc: TranscodeEncoding, toEnc: TranscodeEncoding)
-            : NonSharedBuffer =
+            (
+                source: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                fromEnc: TranscodeEncoding,
+                toEnc: TranscodeEncoding
+            ) : NonSharedBuffer =
             jsNative
 
         /// <summary>
@@ -42274,20 +42937,20 @@ module Buffer =
                 sources:
                     U15<
                         string,
-                        JS.ArrayBuffer,
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
+                        Fable.Core.TS.Es.ArrayBuffer,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                         _Blob,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >[],
                 ?options: BlobOptions
             ) : _Blob =
@@ -42303,19 +42966,19 @@ module Buffer =
                 sources:
                     U14<
                         string,
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                         _Blob,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >[],
                 fileName: string,
                 ?options: FileOptions
@@ -42421,17 +43084,18 @@ module BufferConstructor =
     module From =
         [<Interface>]
         type Array =
-            abstract valueOf: unit -> obj
+            abstract valueOf: unit -> Fable.Core.TS.Es.ArrayLike<float>
 
             [<ParamObject; Emit("$0")>]
-            static member Create(valueOf: (unit -> obj)) : Array = jsNative
+            static member Create(valueOf: (unit -> Fable.Core.TS.Es.ArrayLike<float>)) : Array = jsNative
 
         [<Interface>]
         type ArrayOrString =
-            abstract valueOf: unit -> obj
+            abstract valueOf: unit -> U2<string, Fable.Core.TS.Es.ArrayLike<float>>
 
             [<ParamObject; Emit("$0")>]
-            static member Create(valueOf: (unit -> obj)) : ArrayOrString = jsNative
+            static member Create(valueOf: (unit -> U2<string, Fable.Core.TS.Es.ArrayLike<float>>)) : ArrayOrString =
+                jsNative
 
         [<Interface>]
         type String =
@@ -42440,7 +43104,9 @@ module BufferConstructor =
             [<ParamObject; Emit("$0")>]
             static member Create(valueOf: (unit -> string)) : String = jsNative
 
-        type String2 = interface end
+        type String2 =
+            [<Emit("$0[Symbol.toPrimitive]($1...)")>]
+            abstract SymbolToPrimitive: hint: string -> string
 
 /// <summary>node:child_process</summary>
 module ChildProcess =
@@ -44123,7 +44789,7 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -44153,7 +44819,7 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -44162,7 +44828,7 @@ module ChildProcess =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -44542,7 +45208,9 @@ module ChildProcess =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ChildProcess.getEventListeners", "node:child_process")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -46658,7 +47326,7 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -46688,7 +47356,7 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -46737,7 +47405,7 @@ module ChildProcess =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -46784,10 +47452,10 @@ module ChildProcess =
                 removeAllListeners: (obj option -> Control),
                 setMaxListeners: (float -> Control),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> JS.Function[]),
-                rawListeners: (obj -> JS.Function[]),
+                listeners: (obj -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
                 emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, JS.Function option, float>,
+                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
                 prependListener: Func<obj, (obj[] -> unit), Control>,
                 prependOnceListener: Func<obj, (obj[] -> unit), Control>,
                 eventNames: (unit -> obj[])
@@ -47100,7 +47768,6 @@ module ChildProcess =
             ) : ExecException =
             jsNative
 
-    [<Interface>]
     type PromiseWithChild<'T> =
         abstract child: ChildProcess with get, set
 
@@ -47131,20 +47798,8 @@ module ChildProcess =
         /// <returns>A Promise for the completion of the callback.</returns>
         abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<'T>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                child: ChildProcess,
-                ``then``:
-                    Func<
-                        ('T -> U2<'TResult1, JS.Promise<'TResult1>>) option,
-                        (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option,
-                        JS.Promise<U2<'TResult1, 'TResult2>>
-                     >,
-                catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<'T, 'TResult>>),
-                ``finally``: ((unit -> unit) option -> JS.Promise<'T>)
-            ) : PromiseWithChild<'T> =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     [<Interface>]
     type ExecFileOptions =
@@ -51081,7 +51736,7 @@ module ChildProcess =
         /// <param name="command">The command to run.</param>
         /// <param name="args">List of string arguments.</param>
         [<Import("spawnSync", "node:child_process")>]
-        static member spawnSync_Overload2
+        static member spawnSync
             (command: string, ?options: SpawnSyncOptions)
             : SpawnSyncReturns<U2<string, NonSharedBuffer>> =
             jsNative
@@ -51162,7 +51817,7 @@ module ChildProcess =
         /// <param name="command">The command to run.</param>
         /// <param name="args">List of string arguments.</param>
         [<Import("spawnSync", "node:child_process")>]
-        static member spawnSync_Overload3
+        static member spawnSync
             (command: string, ?args: string[], ?options: SpawnSyncOptions)
             : SpawnSyncReturns<U2<string, NonSharedBuffer>> =
             jsNative
@@ -51241,8 +51896,7 @@ module ChildProcess =
         /// <param name="command">The command to run.</param>
         /// <returns>The stdout from the command.</returns>
         [<Import("execSync", "node:child_process")>]
-        static member execSync_Overload2(command: string, ?options: ExecSyncOptions) : U2<string, NonSharedBuffer> =
-            jsNative
+        static member execSync(command: string, ?options: ExecSyncOptions) : U2<string, NonSharedBuffer> = jsNative
 
         /// <summary>
         /// The <c>child_process.execFileSync()</c> method is generally identical to execFile with the exception that the method will not
@@ -51335,10 +51989,7 @@ module ChildProcess =
         /// <param name="args">List of string arguments.</param>
         /// <returns>The stdout from the command.</returns>
         [<Import("execFileSync", "node:child_process")>]
-        static member execFileSync_Overload2
-            (file: string, ?options: ExecFileSyncOptions)
-            : U2<string, NonSharedBuffer> =
-            jsNative
+        static member execFileSync(file: string, ?options: ExecFileSyncOptions) : U2<string, NonSharedBuffer> = jsNative
 
         /// <summary>
         /// The <c>child_process.execFileSync()</c> method is generally identical to execFile with the exception that the method will not
@@ -51436,7 +52087,7 @@ module ChildProcess =
         /// <param name="args">List of string arguments.</param>
         /// <returns>The stdout from the command.</returns>
         [<Import("execFileSync", "node:child_process")>]
-        static member execFileSync_Overload3
+        static member execFileSync
             (file: string, ?args: string[], ?options: ExecFileSyncOptions)
             : U2<string, NonSharedBuffer> =
             jsNative
@@ -52836,7 +53487,7 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -52866,7 +53517,7 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -52875,7 +53526,7 @@ module Cluster =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
         /// <summary>
         /// <code lang="js">
@@ -53091,7 +53742,9 @@ module Cluster =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Worker.getEventListeners", "node:cluster")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -53568,7 +54221,7 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.7.0</remarks>
-        abstract workers: Record<string, Worker option> option
+        abstract workers: JS.Record<string, Worker option> option
         abstract SCHED_NONE: float
         abstract SCHED_RR: float
         /// <summary>
@@ -54541,7 +55194,7 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -54571,7 +55224,7 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -54580,7 +55233,7 @@ module Cluster =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -54785,18 +55438,18 @@ module Crypto =
         abstract verifySpkac:
             spkac:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 bool
 
@@ -54807,18 +55460,20 @@ module Crypto =
                 exportPublicKey: Func<BinaryLike, string option, NonSharedBuffer>,
                 verifySpkac:
                     (U12<
-                            BigInt64Array<obj>,
-                            BigUint64Array<obj>,
-                            JS.DataView,
-                            Float32Array<obj>,
-                            Float64Array<obj>,
-                            Int16Array<obj>,
-                            Int32Array<obj>,
-                            Int8Array<obj>,
-                            Uint16Array<obj>,
-                            Uint32Array<obj>,
-                            Uint8Array<obj>,
-                            Uint8ClampedArray<obj>
+                            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.DataView<
+                                U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                             >,
+                            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                         >
                             -> bool)
             ) : Certificate =
@@ -54871,18 +55526,18 @@ module Crypto =
         static member verifySpkac
             (spkac:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  >)
             : bool =
             jsNative
@@ -55185,7 +55840,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Hash
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.Hash.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.Hash.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.Hash.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -57060,7 +57726,9 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Hash.getEventListeners", "node:crypto")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -57232,7 +57900,21 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Hash.from", "node:crypto")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -57679,7 +58361,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Hmac
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.Hmac.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.Hmac.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.Hmac.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -59512,7 +60205,9 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Hmac.getEventListeners", "node:crypto")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -59770,7 +60465,21 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Hmac.from", "node:crypto")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -60089,12 +60798,18 @@ module Crypto =
         abstract ``type``: Crypto.KeyExportOptions.Type with get, set
         abstract format: 'T with get, set
         abstract cipher: string option with get, set
-        abstract passphrase: U2<string, Buffer<obj>> option with get, set
+
+        abstract passphrase:
+            U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (``type``: Crypto.KeyExportOptions.Type, format: 'T, ?cipher: string, ?passphrase: U2<string, Buffer<obj>>)
-            : KeyExportOptions<'T> =
+            (
+                ``type``: Crypto.KeyExportOptions.Type,
+                format: 'T,
+                ?cipher: string,
+                ?passphrase: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
+            ) : KeyExportOptions<'T> =
             jsNative
 
     [<Interface>]
@@ -60361,36 +61076,36 @@ module Crypto =
     type BinaryLike =
         U13<
             string,
-            BigInt64Array<obj>,
-            BigUint64Array<obj>,
-            JS.DataView,
-            Float32Array<obj>,
-            Float64Array<obj>,
-            Int16Array<obj>,
-            Int32Array<obj>,
-            Int8Array<obj>,
-            Uint16Array<obj>,
-            Uint32Array<obj>,
-            Uint8Array<obj>,
-            Uint8ClampedArray<obj>
+            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
          >
 
     type CipherKey =
         U14<
             string,
-            BigInt64Array<obj>,
-            BigUint64Array<obj>,
-            JS.DataView,
-            Float32Array<obj>,
-            Float64Array<obj>,
-            Int16Array<obj>,
-            Int32Array<obj>,
-            Int8Array<obj>,
+            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
             KeyObject,
-            Uint16Array<obj>,
-            Uint32Array<obj>,
-            Uint8Array<obj>,
-            Uint8ClampedArray<obj>
+            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
          >
 
     [<Interface>]
@@ -60714,18 +61429,18 @@ module Crypto =
         abstract update:
             data:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             inputEncoding: unit *
             outputEncoding: Encoding ->
@@ -60806,7 +61521,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Cipher
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.Cipher.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.Cipher.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.Cipher.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -62639,7 +63365,9 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Cipher.getEventListeners", "node:crypto")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -62897,7 +63625,21 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Cipher.from", "node:crypto")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -63211,18 +63953,18 @@ module Crypto =
         abstract setAAD:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             options: Crypto.CipherCCM.SetAAD.Options ->
                 CipherCCM
@@ -63270,7 +64012,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> CipherCCM
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.CipherCCM.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.CipherCCM.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.CipherCCM.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -64731,18 +65484,18 @@ module Crypto =
         abstract setAAD:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?options: Crypto.CipherGCM.SetAAD.Options ->
                 CipherGCM
@@ -64790,7 +65543,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> CipherGCM
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.CipherGCM.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.CipherGCM.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.CipherGCM.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -66251,18 +67015,18 @@ module Crypto =
         abstract setAAD:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?options: Crypto.CipherOCB.SetAAD.Options ->
                 CipherOCB
@@ -66310,7 +67074,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> CipherOCB
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.CipherOCB.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.CipherOCB.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.CipherOCB.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -67771,18 +68546,18 @@ module Crypto =
         abstract setAAD:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             options: Crypto.CipherChaCha20Poly1305.SetAAD.Options ->
                 CipherChaCha20Poly1305
@@ -67834,7 +68609,15 @@ module Crypto =
             destination: 'T * ?options: Crypto.CipherChaCha20Poly1305.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Crypto.CipherChaCha20Poly1305.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.CipherChaCha20Poly1305.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -69417,18 +70200,18 @@ module Crypto =
         abstract update:
             data:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 NonSharedBuffer
 
@@ -69465,18 +70248,18 @@ module Crypto =
         abstract update:
             data:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             inputEncoding: unit *
             outputEncoding: Encoding ->
@@ -69665,7 +70448,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Decipher
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.Decipher.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.Decipher.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.Decipher.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -71387,7 +72181,9 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Decipher.getEventListeners", "node:crypto")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -71645,7 +72441,21 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Decipher.from", "node:crypto")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -71959,36 +72769,36 @@ module Crypto =
         abstract setAuthTag:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 DecipherCCM
 
         abstract setAAD:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             options: Crypto.DecipherCCM.SetAAD.Options ->
                 DecipherCCM
@@ -72034,7 +72844,15 @@ module Crypto =
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.DecipherCCM.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Crypto.DecipherCCM.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.DecipherCCM.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -73496,36 +74314,36 @@ module Crypto =
         abstract setAuthTag:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 DecipherGCM
 
         abstract setAAD:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?options: Crypto.DecipherGCM.SetAAD.Options ->
                 DecipherGCM
@@ -73571,7 +74389,15 @@ module Crypto =
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.DecipherGCM.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Crypto.DecipherGCM.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.DecipherGCM.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -75033,36 +75859,36 @@ module Crypto =
         abstract setAuthTag:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 DecipherOCB
 
         abstract setAAD:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?options: Crypto.DecipherOCB.SetAAD.Options ->
                 DecipherOCB
@@ -75108,7 +75934,15 @@ module Crypto =
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.DecipherOCB.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Crypto.DecipherOCB.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.DecipherOCB.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -76570,36 +77404,36 @@ module Crypto =
         abstract setAuthTag:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 DecipherChaCha20Poly1305
 
         abstract setAAD:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             options: Crypto.DecipherChaCha20Poly1305.SetAAD.Options ->
                 DecipherChaCha20Poly1305
@@ -76647,7 +77481,15 @@ module Crypto =
             destination: 'T * ?options: Crypto.DecipherChaCha20Poly1305.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Crypto.DecipherChaCha20Poly1305.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.DecipherChaCha20Poly1305.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -78108,34 +78950,41 @@ module Crypto =
 
     [<Interface>]
     type PrivateKeyInput =
-        abstract key: U2<string, Buffer<obj>> with get, set
+        abstract key: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
         abstract format: KeyFormat option with get, set
         abstract ``type``: Crypto.PrivateKeyInput.Type option with get, set
-        abstract passphrase: U2<string, Buffer<obj>> option with get, set
+
+        abstract passphrase:
+            U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> option with get, set
+
         abstract encoding: string option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                key: U2<string, Buffer<obj>>,
+                key: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
                 ?format: KeyFormat,
                 ?``type``: Crypto.PrivateKeyInput.Type,
-                ?passphrase: U2<string, Buffer<obj>>,
+                ?passphrase: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
                 ?encoding: string
             ) : PrivateKeyInput =
             jsNative
 
     [<Interface>]
     type PublicKeyInput =
-        abstract key: U2<string, Buffer<obj>> with get, set
+        abstract key: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
         abstract format: KeyFormat option with get, set
         abstract ``type``: Crypto.PublicKeyInput.Type option with get, set
         abstract encoding: string option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (key: U2<string, Buffer<obj>>, ?format: KeyFormat, ?``type``: Crypto.PublicKeyInput.Type, ?encoding: string)
-            : PublicKeyInput =
+            (
+                key: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
+                ?format: KeyFormat,
+                ?``type``: Crypto.PublicKeyInput.Type,
+                ?encoding: string
+            ) : PublicKeyInput =
             jsNative
 
     [<Interface>]
@@ -78169,10 +79018,10 @@ module Crypto =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                key: U2<string, Buffer<obj>>,
+                key: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
                 ?format: KeyFormat,
                 ?``type``: Crypto.PrivateKeyInput.Type,
-                ?passphrase: U2<string, Buffer<obj>>,
+                ?passphrase: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
                 ?encoding: string,
                 ?padding: float,
                 ?saltLength: float,
@@ -78210,7 +79059,7 @@ module Crypto =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                key: U2<string, Buffer<obj>>,
+                key: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
                 ?format: KeyFormat,
                 ?``type``: Crypto.PublicKeyInput.Type,
                 ?encoding: string,
@@ -78242,7 +79091,7 @@ module Crypto =
             : VerifyJsonWebKeyInput =
             jsNative
 
-    type KeyLike = U3<string, Buffer<obj>, KeyObject>
+    type KeyLike = U3<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, KeyObject>
 
     /// <summary>
     /// The <c>Sign</c> class is a utility for generating signatures. It can be used in one
@@ -78345,7 +79194,15 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.1.92</remarks>
         abstract sign:
-            privateKey: U6<string, Buffer<obj>, KeyObject, SignJsonWebKeyInput, SignKeyObjectInput, SignPrivateKeyInput> ->
+            privateKey:
+                U6<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    KeyObject,
+                    SignJsonWebKeyInput,
+                    SignKeyObjectInput,
+                    SignPrivateKeyInput
+                 > ->
                 NonSharedBuffer
 
         /// <summary>
@@ -78361,7 +79218,15 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.1.92</remarks>
         abstract sign:
-            privateKey: U6<string, Buffer<obj>, KeyObject, SignJsonWebKeyInput, SignKeyObjectInput, SignPrivateKeyInput> *
+            privateKey:
+                U6<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    KeyObject,
+                    SignJsonWebKeyInput,
+                    SignKeyObjectInput,
+                    SignPrivateKeyInput
+                 > *
             outputFormat: BinaryToTextEncoding ->
                 string
 
@@ -78392,7 +79257,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Sign
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.Sign.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.Sign.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.Sign.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>writable.setDefaultEncoding()</c> method sets the default <c>encoding</c> for a <c>Writable</c> stream.
         /// </summary>
@@ -79767,7 +80643,9 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Sign.getEventListeners", "node:crypto")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -80371,21 +81249,28 @@ module Crypto =
         /// <remarks>@since v0.1.92</remarks>
         abstract verify:
             ``object``:
-                U6<string, Buffer<obj>, KeyObject, VerifyJsonWebKeyInput, VerifyKeyObjectInput, VerifyPublicKeyInput> *
+                U6<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    KeyObject,
+                    VerifyJsonWebKeyInput,
+                    VerifyKeyObjectInput,
+                    VerifyPublicKeyInput
+                 > *
             signature:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 bool
 
@@ -80410,7 +81295,14 @@ module Crypto =
         /// <remarks>@since v0.1.92</remarks>
         abstract verify:
             ``object``:
-                U6<string, Buffer<obj>, KeyObject, VerifyJsonWebKeyInput, VerifyKeyObjectInput, VerifyPublicKeyInput> *
+                U6<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    KeyObject,
+                    VerifyJsonWebKeyInput,
+                    VerifyKeyObjectInput,
+                    VerifyPublicKeyInput
+                 > *
             signature: string *
             ?signature_format: BinaryToTextEncoding ->
                 bool
@@ -80442,7 +81334,18 @@ module Crypto =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Verify
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Crypto.Verify.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Crypto.Verify.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Crypto.Verify.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>writable.setDefaultEncoding()</c> method sets the default <c>encoding</c> for a <c>Writable</c> stream.
         /// </summary>
@@ -81817,7 +82720,9 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Verify.getEventListeners", "node:crypto")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -82434,18 +83339,18 @@ module Crypto =
         abstract computeSecret:
             otherPublicKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?inputEncoding: unit *
             ?outputEncoding: unit ->
@@ -82483,18 +83388,18 @@ module Crypto =
         abstract computeSecret:
             otherPublicKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             inputEncoding: obj *
             outputEncoding: BinaryToTextEncoding ->
@@ -82592,18 +83497,18 @@ module Crypto =
         abstract setPublicKey:
             publicKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 unit
 
@@ -82629,18 +83534,18 @@ module Crypto =
         abstract setPrivateKey:
             privateKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 unit
 
@@ -82737,18 +83642,18 @@ module Crypto =
         abstract computeSecret:
             otherPublicKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?inputEncoding: unit *
             ?outputEncoding: unit ->
@@ -82786,18 +83691,18 @@ module Crypto =
         abstract computeSecret:
             otherPublicKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             inputEncoding: obj *
             outputEncoding: BinaryToTextEncoding ->
@@ -82938,17 +83843,17 @@ module Crypto =
 
         abstract oaepLabel:
             U11<
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              > option with get, set
 
         abstract padding: float option with get, set
@@ -82961,17 +83866,17 @@ module Crypto =
                 ?oaepHash: string,
                 ?oaepLabel:
                     U11<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?padding: float
             ) : RsaPrivateKey =
@@ -83053,18 +83958,18 @@ module Crypto =
         abstract computeSecret:
             otherPublicKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 NonSharedBuffer
 
@@ -83107,18 +84012,18 @@ module Crypto =
         abstract computeSecret:
             otherPublicKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             outputEncoding: BinaryToTextEncoding ->
                 string
@@ -83195,18 +84100,18 @@ module Crypto =
         abstract setPrivateKey:
             privateKey:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 unit
 
@@ -83813,7 +84718,7 @@ module Crypto =
         /// The date/time from which this certificate is valid, encapsulated in a <c>Date</c> object.
         /// </summary>
         /// <remarks>@since v22.10.0</remarks>
-        abstract validFromDate: JS.Date
+        abstract validFromDate: Fable.Core.TS.Es.Date
         /// <summary>
         /// The date/time until which this certificate is considered valid.
         /// </summary>
@@ -83823,7 +84728,7 @@ module Crypto =
         /// The date/time until which this certificate is valid, encapsulated in a <c>Date</c> object.
         /// </summary>
         /// <remarks>@since v22.10.0</remarks>
-        abstract validToDate: JS.Date
+        abstract validToDate: Fable.Core.TS.Es.Date
         /// <summary>
         /// Checks whether the certificate matches the given email address.
         /// <br /><br />
@@ -83925,7 +84830,24 @@ module Crypto =
         /// <param name="publicKey">A public key.</param>
         abstract verify: publicKey: KeyObject -> bool
 
-    type LargeNumberLike = obj
+    type LargeNumberLike =
+        U15<
+            bigint,
+            Fable.Core.TS.Es.ArrayBuffer,
+            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Fable.Core.TS.Es.SharedArrayBuffer,
+            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+         >
 
     [<Interface>]
     type GeneratePrimeOptions =
@@ -84880,7 +85802,15 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v11.6.0</remarks>
         [<Import("createPrivateKey", "node:crypto")>]
-        static member createPrivateKey(key: U4<string, Buffer<obj>, JsonWebKeyInput, PrivateKeyInput>) : KeyObject =
+        static member createPrivateKey
+            (key:
+                U4<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    JsonWebKeyInput,
+                    PrivateKeyInput
+                 >)
+            : KeyObject =
             jsNative
 
         /// <summary>
@@ -84899,7 +85829,14 @@ module Crypto =
         /// <remarks>@since v11.6.0</remarks>
         [<Import("createPublicKey", "node:crypto")>]
         static member createPublicKey
-            (key: U5<string, Buffer<obj>, JsonWebKeyInput, KeyObject, PublicKeyInput>)
+            (key:
+                U5<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    JsonWebKeyInput,
+                    KeyObject,
+                    PublicKeyInput
+                 >)
             : KeyObject =
             jsNative
 
@@ -84913,18 +85850,18 @@ module Crypto =
         static member createSecretKey
             (key:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  >)
             : KeyObject =
             jsNative
@@ -85089,36 +86026,36 @@ module Crypto =
             (
                 prime:
                     U13<
-                        JS.ArrayBuffer,
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        Fable.Core.TS.Es.ArrayBuffer,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?generator:
                     U14<
                         float,
-                        JS.ArrayBuffer,
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        Fable.Core.TS.Es.ArrayBuffer,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >
             ) : DiffieHellman =
             jsNative
@@ -85143,19 +86080,19 @@ module Crypto =
             (
                 prime:
                     U13<
-                        JS.ArrayBuffer,
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        Fable.Core.TS.Es.ArrayBuffer,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 generator: string,
                 generatorEncoding: BinaryToTextEncoding
@@ -85185,19 +86122,19 @@ module Crypto =
                 ?generator:
                     U14<
                         float,
-                        JS.ArrayBuffer,
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        Fable.Core.TS.Es.ArrayBuffer,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >
             ) : DiffieHellman =
             jsNative
@@ -86096,8 +87033,17 @@ module Crypto =
         /// <remarks>@since v0.11.14</remarks>
         [<Import("publicEncrypt", "node:crypto")>]
         static member publicEncrypt
-            (key: U5<string, Buffer<obj>, KeyObject, RsaPrivateKey, RsaPublicKey>, buffer: BinaryLike)
-            : NonSharedBuffer =
+            (
+                key:
+                    U5<
+                        string,
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        KeyObject,
+                        RsaPrivateKey,
+                        RsaPublicKey
+                     >,
+                buffer: BinaryLike
+            ) : NonSharedBuffer =
             jsNative
 
         /// <summary>
@@ -86113,8 +87059,17 @@ module Crypto =
         /// <remarks>@since v1.1.0</remarks>
         [<Import("publicDecrypt", "node:crypto")>]
         static member publicDecrypt
-            (key: U5<string, Buffer<obj>, KeyObject, RsaPrivateKey, RsaPublicKey>, buffer: BinaryLike)
-            : NonSharedBuffer =
+            (
+                key:
+                    U5<
+                        string,
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        KeyObject,
+                        RsaPrivateKey,
+                        RsaPublicKey
+                     >,
+                buffer: BinaryLike
+            ) : NonSharedBuffer =
             jsNative
 
         /// <summary>
@@ -86127,8 +87082,16 @@ module Crypto =
         /// <remarks>@since v0.11.14</remarks>
         [<Import("privateDecrypt", "node:crypto")>]
         static member privateDecrypt
-            (privateKey: U4<string, Buffer<obj>, KeyObject, RsaPrivateKey>, buffer: BinaryLike)
-            : NonSharedBuffer =
+            (
+                privateKey:
+                    U4<
+                        string,
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        KeyObject,
+                        RsaPrivateKey
+                     >,
+                buffer: BinaryLike
+            ) : NonSharedBuffer =
             jsNative
 
         /// <summary>
@@ -86141,8 +87104,16 @@ module Crypto =
         /// <remarks>@since v1.1.0</remarks>
         [<Import("privateEncrypt", "node:crypto")>]
         static member privateEncrypt
-            (privateKey: U4<string, Buffer<obj>, KeyObject, RsaPrivateKey>, buffer: BinaryLike)
-            : NonSharedBuffer =
+            (
+                privateKey:
+                    U4<
+                        string,
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        KeyObject,
+                        RsaPrivateKey
+                     >,
+                buffer: BinaryLike
+            ) : NonSharedBuffer =
             jsNative
 
         /// <summary>
@@ -86273,33 +87244,33 @@ module Crypto =
             (
                 a:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 b:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >
             ) : bool =
             jsNative
@@ -88728,20 +89699,28 @@ module Crypto =
                 algorithm: string option,
                 data:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
-                key: U6<string, Buffer<obj>, KeyObject, SignJsonWebKeyInput, SignKeyObjectInput, SignPrivateKeyInput>
+                key:
+                    U6<
+                        string,
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        KeyObject,
+                        SignJsonWebKeyInput,
+                        SignKeyObjectInput,
+                        SignPrivateKeyInput
+                     >
             ) : NonSharedBuffer =
             jsNative
 
@@ -88763,20 +89742,28 @@ module Crypto =
                 algorithm: string option,
                 data:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
-                key: U6<string, Buffer<obj>, KeyObject, SignJsonWebKeyInput, SignKeyObjectInput, SignPrivateKeyInput>,
+                key:
+                    U6<
+                        string,
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        KeyObject,
+                        SignJsonWebKeyInput,
+                        SignKeyObjectInput,
+                        SignPrivateKeyInput
+                     >,
                 callback: Crypto.Sign.Callback
             ) : unit =
             jsNative
@@ -88803,35 +89790,42 @@ module Crypto =
                 algorithm: string option,
                 data:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 key:
-                    U6<string, Buffer<obj>, KeyObject, VerifyJsonWebKeyInput, VerifyKeyObjectInput, VerifyPublicKeyInput>,
+                    U6<
+                        string,
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        KeyObject,
+                        VerifyJsonWebKeyInput,
+                        VerifyKeyObjectInput,
+                        VerifyPublicKeyInput
+                     >,
                 signature:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >
             ) : bool =
             jsNative
@@ -88858,35 +89852,42 @@ module Crypto =
                 algorithm: string option,
                 data:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 key:
-                    U6<string, Buffer<obj>, KeyObject, VerifyJsonWebKeyInput, VerifyKeyObjectInput, VerifyPublicKeyInput>,
+                    U6<
+                        string,
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        KeyObject,
+                        VerifyJsonWebKeyInput,
+                        VerifyKeyObjectInput,
+                        VerifyPublicKeyInput
+                     >,
                 signature:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 callback: Crypto.Verify.Callback
             ) : unit =
@@ -89084,7 +90085,7 @@ module Crypto =
         [<Import("hkdfSync", "node:crypto")>]
         static member hkdfSync
             (digest: string, ikm: CipherKey, salt: BinaryLike, info: BinaryLike, keylen: float)
-            : JS.ArrayBuffer =
+            : Fable.Core.TS.Es.ArrayBuffer =
             jsNative
 
         /// <remarks>@since v15.6.0</remarks>
@@ -89271,7 +90272,7 @@ module Crypto =
         /// <remarks>@since v15.8.0</remarks>
         /// <param name="size">The size (in bits) of the prime to generate.</param>
         [<Import("generatePrimeSync", "node:crypto")>]
-        static member generatePrimeSync(size: float) : JS.ArrayBuffer = jsNative
+        static member generatePrimeSync(size: float) : Fable.Core.TS.Es.ArrayBuffer = jsNative
 
         /// <summary>
         /// Generates a pseudorandom prime of <c>size</c> bits.
@@ -89331,7 +90332,9 @@ module Crypto =
         /// <remarks>@since v15.8.0</remarks>
         /// <param name="size">The size (in bits) of the prime to generate.</param>
         [<Import("generatePrimeSync", "node:crypto")>]
-        static member generatePrimeSync(size: float, options: GeneratePrimeOptionsArrayBuffer) : JS.ArrayBuffer =
+        static member generatePrimeSync
+            (size: float, options: GeneratePrimeOptionsArrayBuffer)
+            : Fable.Core.TS.Es.ArrayBuffer =
             jsNative
 
         /// <summary>
@@ -89362,7 +90365,9 @@ module Crypto =
         /// <remarks>@since v15.8.0</remarks>
         /// <param name="size">The size (in bits) of the prime to generate.</param>
         [<Import("generatePrimeSync", "node:crypto")>]
-        static member generatePrimeSync(size: float, options: GeneratePrimeOptions) : U2<bigint, JS.ArrayBuffer> =
+        static member generatePrimeSync
+            (size: float, options: GeneratePrimeOptions)
+            : U2<bigint, Fable.Core.TS.Es.ArrayBuffer> =
             jsNative
 
         /// <summary>
@@ -90094,13 +91099,13 @@ module Crypto =
             static member Create(length: float) : Options = jsNative
 
     module GeneratePrime =
-        type Callback = delegate of err: exn option * prime: JS.ArrayBuffer -> unit
+        type Callback = delegate of err: exn option * prime: Fable.Core.TS.Es.ArrayBuffer -> unit
 
         type Callback2 = delegate of err: exn option * prime: bigint -> unit
 
-        type Callback3 = delegate of err: exn option * prime: JS.ArrayBuffer -> unit
+        type Callback3 = delegate of err: exn option * prime: Fable.Core.TS.Es.ArrayBuffer -> unit
 
-        type Callback4 = delegate of err: exn option * prime: U2<bigint, JS.ArrayBuffer> -> unit
+        type Callback4 = delegate of err: exn option * prime: U2<bigint, Fable.Core.TS.Es.ArrayBuffer> -> unit
 
     module Hash =
         [<StringEnum(CaseRules.None)>]
@@ -90168,6 +91173,33 @@ module Crypto =
 
                     abstract pipeline<'A, 'T1, 'B> :
                         source: 'A * transform1: 'T1 * destination: 'B * ?options: Stream.PipelineOptions -> obj
+
+                    abstract pipeline<'A, 'T1, 'T2, 'B> :
+                        source: 'A *
+                        transform1: 'T1 *
+                        transform2: 'T2 *
+                        destination: 'B *
+                        ?options: Stream.PipelineOptions ->
+                            obj
+
+                    abstract pipeline<'A, 'T1, 'T2, 'T3, 'B> :
+                        source: 'A *
+                        transform1: 'T1 *
+                        transform2: 'T2 *
+                        transform3: 'T3 *
+                        destination: 'B *
+                        ?options: Stream.PipelineOptions ->
+                            obj
+
+                    abstract pipeline<'A, 'T1, 'T2, 'T3, 'T4, 'B> :
+                        source: 'A *
+                        transform1: 'T1 *
+                        transform2: 'T2 *
+                        transform3: 'T3 *
+                        transform4: 'T4 *
+                        destination: 'B *
+                        ?options: Stream.PipelineOptions ->
+                            obj
 
                     abstract pipeline:
                         streams: U3<ReadWriteStream, ReadableStream2, WritableStream2>[] *
@@ -90283,7 +91315,7 @@ module Crypto =
             delegate of chunks: Stream.DuplexOptions.Writev.Chunks.Item[] * callback: (exn option -> unit) -> unit
 
     module Hkdf =
-        type Callback = delegate of err: exn option * derivedKey: JS.ArrayBuffer -> unit
+        type Callback = delegate of err: exn option * derivedKey: Fable.Core.TS.Es.ArrayBuffer -> unit
 
     module Hmac =
         [<StringEnum(CaseRules.None)>]
@@ -91053,19 +92085,19 @@ module Dgram =
             msg:
                 U14<
                     string,
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     obj[],
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?port: float *
             ?address: string *
@@ -91166,19 +92198,19 @@ module Dgram =
             msg:
                 U14<
                     string,
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     obj[],
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?port: float *
             ?callback: Dgram.Socket.Send.Callback2 ->
@@ -91278,19 +92310,19 @@ module Dgram =
             msg:
                 U14<
                     string,
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     obj[],
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?callback: Dgram.Socket.Send.Callback3 ->
                 unit
@@ -91393,6 +92425,197 @@ module Dgram =
             ?address: string *
             ?callback: Dgram.Socket.Send.Callback4 ->
                 unit
+
+        /// <summary>
+        /// Broadcasts a datagram on the socket.
+        /// For connectionless sockets, the destination <c>port</c> and <c>address</c> must be
+        /// specified. Connected sockets, on the other hand, will use their associated
+        /// remote endpoint, so the <c>port</c> and <c>address</c> arguments must not be set.
+        /// <br /><br />
+        /// The <c>msg</c> argument contains the message to be sent.
+        /// Depending on its type, different behavior can apply. If <c>msg</c> is a <c>Buffer</c>,
+        /// any <c>TypedArray</c> or a <c>DataView</c>,
+        /// the <c>offset</c> and <c>length</c> specify the offset within the <c>Buffer</c> where the
+        /// message begins and the number of bytes in the message, respectively.
+        /// If <c>msg</c> is a <c>String</c>, then it is automatically converted to a <c>Buffer</c> with <c>'utf8'</c> encoding. With messages that
+        /// contain multi-byte characters, <c>offset</c> and <c>length</c> will be calculated with
+        /// respect to <c>byte length</c> and not the character position.
+        /// If <c>msg</c> is an array, <c>offset</c> and <c>length</c> must not be specified.
+        /// <br /><br />
+        /// The <c>address</c> argument is a string. If the value of <c>address</c> is a host name,
+        /// DNS will be used to resolve the address of the host. If <c>address</c> is not
+        /// provided or otherwise nullish, <c>'127.0.0.1'</c> (for <c>udp4</c> sockets) or <c>'::1'</c> (for <c>udp6</c> sockets) will be used by default.
+        /// <br /><br />
+        /// If the socket has not been previously bound with a call to <c>bind</c>, the socket
+        /// is assigned a random port number and is bound to the "all interfaces" address
+        /// (<c>'0.0.0.0'</c> for <c>udp4</c> sockets, <c>'::0'</c> for <c>udp6</c> sockets.)
+        /// <br /><br />
+        /// An optional <c>callback</c> function may be specified to as a way of reporting
+        /// DNS errors or for determining when it is safe to reuse the <c>buf</c> object.
+        /// DNS lookups delay the time to send for at least one tick of the
+        /// Node.js event loop.
+        /// <br /><br />
+        /// The only way to know for sure that the datagram has been sent is by using a <c>callback</c>. If an error occurs and a <c>callback</c> is given, the error will be
+        /// passed as the first argument to the <c>callback</c>. If a <c>callback</c> is not given,
+        /// the error is emitted as an <c>'error'</c> event on the <c>socket</c> object.
+        /// <br /><br />
+        /// Offset and length are optional but both _must_ be set if either are used.
+        /// They are supported only when the first argument is a <c>Buffer</c>, a <c>TypedArray</c>,
+        /// or a <c>DataView</c>.
+        /// <br /><br />
+        /// This method throws <c>ERR_SOCKET_BAD_PORT</c> if called on an unbound socket.
+        /// <br /><br />
+        /// Example of sending a UDP packet to a port on <c>localhost</c>;
+        /// <code lang="js">
+        /// import dgram from 'node:dgram';
+        /// import { Buffer } from 'node:buffer';
+        ///
+        /// const message = Buffer.from('Some bytes');
+        /// const client = dgram.createSocket('udp4');
+        /// client.send(message, 41234, 'localhost', (err) =&gt; {
+        ///   client.close();
+        /// });
+        /// </code>
+        /// <br /><br />
+        /// Example of sending a UDP packet composed of multiple buffers to a port on<c>127.0.0.1</c>;
+        /// <code lang="js">
+        /// import dgram from 'node:dgram';
+        /// import { Buffer } from 'node:buffer';
+        ///
+        /// const buf1 = Buffer.from('Some ');
+        /// const buf2 = Buffer.from('bytes');
+        /// const client = dgram.createSocket('udp4');
+        /// client.send([buf1, buf2], 41234, (err) =&gt; {
+        ///   client.close();
+        /// });
+        /// </code>
+        /// <br /><br />
+        /// Sending multiple buffers might be faster or slower depending on the
+        /// application and operating system. Run benchmarks to
+        /// determine the optimal strategy on a case-by-case basis. Generally speaking,
+        /// however, sending multiple buffers is faster.
+        /// <br /><br />
+        /// Example of sending a UDP packet using a socket connected to a port on <c>localhost</c>:
+        /// <code lang="js">
+        /// import dgram from 'node:dgram';
+        /// import { Buffer } from 'node:buffer';
+        ///
+        /// const message = Buffer.from('Some bytes');
+        /// const client = dgram.createSocket('udp4');
+        /// client.connect(41234, 'localhost', (err) =&gt; {
+        ///   client.send(message, (err) =&gt; {
+        ///     client.close();
+        ///   });
+        /// });
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v0.1.99</remarks>
+        /// <param name="msg">Message to be sent.</param>
+        /// <param name="offset">Offset in the buffer where the message starts.</param>
+        /// <param name="length">Number of bytes in the message.</param>
+        /// <param name="port">Destination port.</param>
+        /// <param name="address">Destination host name or IP address.</param>
+        /// <param name="callback">Called when the message has been sent.</param>
+        abstract send:
+            msg: Crypto.BinaryLike *
+            offset: float *
+            length: float *
+            ?port: float *
+            ?callback: Dgram.Socket.Send.Callback5 ->
+                unit
+
+        /// <summary>
+        /// Broadcasts a datagram on the socket.
+        /// For connectionless sockets, the destination <c>port</c> and <c>address</c> must be
+        /// specified. Connected sockets, on the other hand, will use their associated
+        /// remote endpoint, so the <c>port</c> and <c>address</c> arguments must not be set.
+        /// <br /><br />
+        /// The <c>msg</c> argument contains the message to be sent.
+        /// Depending on its type, different behavior can apply. If <c>msg</c> is a <c>Buffer</c>,
+        /// any <c>TypedArray</c> or a <c>DataView</c>,
+        /// the <c>offset</c> and <c>length</c> specify the offset within the <c>Buffer</c> where the
+        /// message begins and the number of bytes in the message, respectively.
+        /// If <c>msg</c> is a <c>String</c>, then it is automatically converted to a <c>Buffer</c> with <c>'utf8'</c> encoding. With messages that
+        /// contain multi-byte characters, <c>offset</c> and <c>length</c> will be calculated with
+        /// respect to <c>byte length</c> and not the character position.
+        /// If <c>msg</c> is an array, <c>offset</c> and <c>length</c> must not be specified.
+        /// <br /><br />
+        /// The <c>address</c> argument is a string. If the value of <c>address</c> is a host name,
+        /// DNS will be used to resolve the address of the host. If <c>address</c> is not
+        /// provided or otherwise nullish, <c>'127.0.0.1'</c> (for <c>udp4</c> sockets) or <c>'::1'</c> (for <c>udp6</c> sockets) will be used by default.
+        /// <br /><br />
+        /// If the socket has not been previously bound with a call to <c>bind</c>, the socket
+        /// is assigned a random port number and is bound to the "all interfaces" address
+        /// (<c>'0.0.0.0'</c> for <c>udp4</c> sockets, <c>'::0'</c> for <c>udp6</c> sockets.)
+        /// <br /><br />
+        /// An optional <c>callback</c> function may be specified to as a way of reporting
+        /// DNS errors or for determining when it is safe to reuse the <c>buf</c> object.
+        /// DNS lookups delay the time to send for at least one tick of the
+        /// Node.js event loop.
+        /// <br /><br />
+        /// The only way to know for sure that the datagram has been sent is by using a <c>callback</c>. If an error occurs and a <c>callback</c> is given, the error will be
+        /// passed as the first argument to the <c>callback</c>. If a <c>callback</c> is not given,
+        /// the error is emitted as an <c>'error'</c> event on the <c>socket</c> object.
+        /// <br /><br />
+        /// Offset and length are optional but both _must_ be set if either are used.
+        /// They are supported only when the first argument is a <c>Buffer</c>, a <c>TypedArray</c>,
+        /// or a <c>DataView</c>.
+        /// <br /><br />
+        /// This method throws <c>ERR_SOCKET_BAD_PORT</c> if called on an unbound socket.
+        /// <br /><br />
+        /// Example of sending a UDP packet to a port on <c>localhost</c>;
+        /// <code lang="js">
+        /// import dgram from 'node:dgram';
+        /// import { Buffer } from 'node:buffer';
+        ///
+        /// const message = Buffer.from('Some bytes');
+        /// const client = dgram.createSocket('udp4');
+        /// client.send(message, 41234, 'localhost', (err) =&gt; {
+        ///   client.close();
+        /// });
+        /// </code>
+        /// <br /><br />
+        /// Example of sending a UDP packet composed of multiple buffers to a port on<c>127.0.0.1</c>;
+        /// <code lang="js">
+        /// import dgram from 'node:dgram';
+        /// import { Buffer } from 'node:buffer';
+        ///
+        /// const buf1 = Buffer.from('Some ');
+        /// const buf2 = Buffer.from('bytes');
+        /// const client = dgram.createSocket('udp4');
+        /// client.send([buf1, buf2], 41234, (err) =&gt; {
+        ///   client.close();
+        /// });
+        /// </code>
+        /// <br /><br />
+        /// Sending multiple buffers might be faster or slower depending on the
+        /// application and operating system. Run benchmarks to
+        /// determine the optimal strategy on a case-by-case basis. Generally speaking,
+        /// however, sending multiple buffers is faster.
+        /// <br /><br />
+        /// Example of sending a UDP packet using a socket connected to a port on <c>localhost</c>:
+        /// <code lang="js">
+        /// import dgram from 'node:dgram';
+        /// import { Buffer } from 'node:buffer';
+        ///
+        /// const message = Buffer.from('Some bytes');
+        /// const client = dgram.createSocket('udp4');
+        /// client.connect(41234, 'localhost', (err) =&gt; {
+        ///   client.send(message, (err) =&gt; {
+        ///     client.close();
+        ///   });
+        /// });
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v0.1.99</remarks>
+        /// <param name="msg">Message to be sent.</param>
+        /// <param name="offset">Offset in the buffer where the message starts.</param>
+        /// <param name="length">Number of bytes in the message.</param>
+        /// <param name="port">Destination port.</param>
+        /// <param name="address">Destination host name or IP address.</param>
+        /// <param name="callback">Called when the message has been sent.</param>
+        abstract send:
+            msg: Crypto.BinaryLike * offset: float * length: float * ?callback: Dgram.Socket.Send.Callback6 -> unit
 
         /// <summary>
         /// Sets or clears the <c>SO_BROADCAST</c> socket option. When set to <c>true</c>, UDP
@@ -92248,7 +93471,7 @@ module Dgram =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -92278,7 +93501,7 @@ module Dgram =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -92287,7 +93510,7 @@ module Dgram =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -92667,7 +93890,9 @@ module Dgram =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Socket.getEventListeners", "node:dgram")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -92979,6 +94204,10 @@ module Dgram =
             type Callback3 = delegate of error: exn option * bytes: float -> unit
 
             type Callback4 = delegate of error: exn option * bytes: float -> unit
+
+            type Callback5 = delegate of error: exn option * bytes: float -> unit
+
+            type Callback6 = delegate of error: exn option * bytes: float -> unit
 
     module SocketOptions =
         type Lookup =
@@ -93882,10 +95111,12 @@ module Dns =
         abstract certUsage: float with get, set
         abstract selector: float with get, set
         abstract ``match``: float with get, set
-        abstract data: JS.ArrayBuffer with get, set
+        abstract data: Fable.Core.TS.Es.ArrayBuffer with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(certUsage: float, selector: float, ``match``: float, data: JS.ArrayBuffer) : TlsaRecord =
+        static member Create
+            (certUsage: float, selector: float, ``match``: float, data: Fable.Core.TS.Es.ArrayBuffer)
+            : TlsaRecord =
             jsNative
 
     [<Interface>]
@@ -93895,7 +95126,7 @@ module Dns =
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (``type``: string, certUsage: float, selector: float, ``match``: float, data: JS.ArrayBuffer)
+            (``type``: string, certUsage: float, selector: float, ``match``: float, data: Fable.Core.TS.Es.ArrayBuffer)
             : AnyTlsaRecord =
             jsNative
 
@@ -93962,7 +95193,7 @@ module Dns =
             expire: float *
             minttl: float
         | SRV of priority: float * weight: float * port: float * name: string
-        | TLSA of certUsage: float * selector: float * ``match``: float * data: JS.ArrayBuffer
+        | TLSA of certUsage: float * selector: float * ``match``: float * data: Fable.Core.TS.Es.ArrayBuffer
         | TXT of entries: string[]
 
     [<Interface>]
@@ -97202,7 +98433,7 @@ module Domain =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -97232,7 +98463,7 @@ module Domain =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -97281,7 +98512,7 @@ module Domain =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -97334,10 +98565,10 @@ module Domain =
                 removeAllListeners: (obj option -> Domain),
                 setMaxListeners: (float -> Domain),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> JS.Function[]),
-                rawListeners: (obj -> JS.Function[]),
+                listeners: (obj -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
                 emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, JS.Function option, float>,
+                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
                 prependListener: Func<obj, (obj[] -> unit), Domain>,
                 prependOnceListener: Func<obj, (obj[] -> unit), Domain>,
                 eventNames: (unit -> obj[])
@@ -97722,7 +98953,9 @@ module Domain =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Domain.getEventListeners", "node:domain")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -98574,7 +99807,7 @@ module Events =
         [<Import("EventEmitter.getEventListeners", "node:events")>]
         static member getEventListeners
             (emitter: U2<Node.EventEmitter<unit[]>, EventTarget>, name: obj)
-            : JS.Function[] =
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -99072,7 +100305,7 @@ module Events =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -99102,7 +100335,7 @@ module Events =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -99151,7 +100384,7 @@ module Events =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -99200,10 +100433,10 @@ module Events =
                 removeAllListeners: (obj option -> EventEmitterAsyncResource),
                 setMaxListeners: (float -> EventEmitterAsyncResource),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> JS.Function[]),
-                rawListeners: (obj -> JS.Function[]),
+                listeners: (obj -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
                 emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, JS.Function option, float>,
+                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
                 prependListener: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
                 prependOnceListener: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
                 eventNames: (unit -> obj[])
@@ -99631,7 +100864,7 @@ module Events =
         [<Import("EventEmitterAsyncResource.getEventListeners", "node:events")>]
         static member getEventListeners
             (emitter: U2<Node.EventEmitter<unit[]>, EventTarget>, name: obj)
-            : JS.Function[] =
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -100300,7 +101533,7 @@ module Events =
         [<Import("getEventListeners", "node:events")>]
         static member getEventListeners
             (emitter: U2<Node.EventEmitter<unit[]>, EventTarget>, name: obj)
-            : JS.Function[] =
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -100774,11 +102007,12 @@ module Fs =
     /// <summary>
     /// Valid types for path values in "fs".
     /// </summary>
-    type PathLike = U3<string, Buffer<obj>, Url.URL>
+    type PathLike = U3<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Url.URL>
 
-    type PathOrFileDescriptor = U4<string, float, Buffer<obj>, Url.URL>
+    type PathOrFileDescriptor =
+        U4<string, float, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Url.URL>
 
-    type TimeLike = U3<string, float, JS.Date>
+    type TimeLike = U3<string, float, Fable.Core.TS.Es.Date>
 
     type NoParamCallback = (ErrnoException option -> unit)
 
@@ -100826,10 +102060,10 @@ module Fs =
         abstract mtimeMs: 'T with get, set
         abstract ctimeMs: 'T with get, set
         abstract birthtimeMs: 'T with get, set
-        abstract atime: JS.Date with get, set
-        abstract mtime: JS.Date with get, set
-        abstract ctime: JS.Date with get, set
-        abstract birthtime: JS.Date with get, set
+        abstract atime: Fable.Core.TS.Es.Date with get, set
+        abstract mtime: Fable.Core.TS.Es.Date with get, set
+        abstract ctime: Fable.Core.TS.Es.Date with get, set
+        abstract birthtime: Fable.Core.TS.Es.Date with get, set
 
     /// <summary>
     /// A <c>fs.Stats</c> object provides information about a file.
@@ -101237,6 +102471,12 @@ module Fs =
         /// <remarks>@since v12.12.0</remarks>
         abstract readSync: unit -> Dirent<string> option
 
+        /// <summary>
+        /// Asynchronously iterates over the directory via <c>readdir(3)</c> until all entries have been read.
+        /// </summary>
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIterator<Dirent<string>, obj, obj>
+
     /// <summary>
     /// Class: fs.StatWatcher
     /// </summary>
@@ -101448,7 +102688,7 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -101478,7 +102718,7 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -101527,7 +102767,7 @@ module Fs =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -101574,10 +102814,10 @@ module Fs =
                 removeAllListeners: (obj option -> StatWatcher),
                 setMaxListeners: (float -> StatWatcher),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> JS.Function[]),
-                rawListeners: (obj -> JS.Function[]),
+                listeners: (obj -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
                 emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, JS.Function option, float>,
+                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
                 prependListener: Func<obj, (obj[] -> unit), StatWatcher>,
                 prependOnceListener: Func<obj, (obj[] -> unit), StatWatcher>,
                 eventNames: (unit -> obj[])
@@ -102070,7 +103310,7 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -102100,7 +103340,7 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -102149,7 +103389,7 @@ module Fs =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
     /// <summary>
     /// Instances of <c>fs.ReadStream</c> are created and returned using the createReadStream function.
@@ -102171,7 +103411,7 @@ module Fs =
         /// <c>Buffer</c>. If <c>fd</c> is specified, then<c>readStream.path</c> will be <c>undefined</c>.
         /// </summary>
         /// <remarks>@since v0.1.93</remarks>
-        abstract path: U2<string, Buffer<obj>> with get, set
+        abstract path: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
         /// <summary>
         /// This property is <c>true</c> if the underlying file has not been opened yet,
         /// i.e. before the <c>'ready'</c> event is emitted.
@@ -102290,7 +103530,18 @@ module Fs =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> ReadStream
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Fs.ReadStream.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Fs.ReadStream.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Fs.ReadStream.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -103336,7 +104587,9 @@ module Fs =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ReadStream.getEventListeners", "node:fs")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -103532,7 +104785,11 @@ module Fs =
         /// <param name="iterable">Object implementing the <c>Symbol.asyncIterator</c> or <c>Symbol.iterator</c> iterable protocol. Emits an 'error' event if a null value is passed.</param>
         /// <param name="options">Options provided to <c>new stream.Readable([options])</c>. By default, <c>Readable.from()</c> will set <c>options.objectMode</c> to <c>true</c>, unless this is explicitly opted out by setting <c>options.objectMode</c> to <c>false</c>.</param>
         [<Import("ReadStream.from", "node:fs")>]
-        static member from(iterable: obj, ?options: Stream.ReadableOptions<Stream.Readable>) : Stream.Readable =
+        static member from
+            (
+                iterable: U2<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, Fable.Core.TS.Es.Iterable<obj, obj, obj>>,
+                ?options: Stream.ReadableOptions<Stream.Readable>
+            ) : Stream.Readable =
             jsNative
 
         /// <summary>
@@ -103895,7 +105152,7 @@ module Fs =
         /// <c>Buffer</c>.
         /// </summary>
         /// <remarks>@since v0.1.93</remarks>
-        abstract path: U2<string, Buffer<obj>> with get, set
+        abstract path: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
         /// <summary>
         /// This property is <c>true</c> if the underlying file has not been opened yet,
         /// i.e. before the <c>'ready'</c> event is emitted.
@@ -104014,7 +105271,18 @@ module Fs =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> WriteStream
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Fs.WriteStream.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Fs.WriteStream.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Fs.WriteStream.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>writable.setDefaultEncoding()</c> method sets the default <c>encoding</c> for a <c>Writable</c> stream.
         /// </summary>
@@ -105033,7 +106301,9 @@ module Fs =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("WriteStream.getEventListeners", "node:fs")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -105575,7 +106845,6 @@ module Fs =
             with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
             and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
 
-    [<Interface>]
     type StatSyncFn =
         /// <summary>
         /// Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
@@ -105603,11 +106872,21 @@ module Fs =
         abstract prototype: obj with get, set
         abstract length: float
         abstract arguments: obj with get, set
-        abstract caller: JS.Function with get, set
+        abstract caller: Fable.Core.TS.Es.Function with get, set
         /// <summary>
         /// Returns the name of the function. Function names are read-only and can not be changed.
         /// </summary>
         abstract name: string
+
+        /// <summary>
+        /// Determines whether the given value inherits from this function if this function was used
+        /// as a constructor function.
+        /// <br /><br />
+        /// A constructor function can control which objects are recognized as its instances by
+        /// 'instanceof' by overriding this method.
+        /// </summary>
+        [<Emit("$0[Symbol.hasInstance]($1...)")>]
+        abstract SymbolHasInstance: value: obj -> bool
 
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * ?options: unit -> Stats
@@ -105629,21 +106908,6 @@ module Fs =
 
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * ?options: StatSyncOptions -> U2<BigIntStats, Stats> option
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                apply: Func<obj, obj option, obj>,
-                call: Func<obj, obj[], obj>,
-                bind: Func<obj, obj[], obj>,
-                toString: (unit -> string),
-                prototype: obj,
-                length: float,
-                arguments: obj,
-                caller: JS.Function,
-                name: string
-            ) : StatSyncFn =
-            jsNative
 
     [<Interface>]
     type RmDirOptions =
@@ -106744,8 +108008,29 @@ module Fs =
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
         abstract writeFile:
             Func<
-                U4<string, Buffer<obj>, Fs.Promises.FileHandle, Url.URL>,
-                obj,
+                U4<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fs.Promises.FileHandle,
+                    Url.URL
+                 >,
+                U15<
+                    string,
+                    Fable.Core.TS.Es.AsyncIterable<Crypto.BinaryLike, obj, obj>,
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.Iterable<Crypto.BinaryLike, obj, obj>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                 >,
                 U2<string, Fs.Promises.WriteFile.Options> option,
                 JS.Promise<unit>
              > with get, set
@@ -106766,8 +108051,29 @@ module Fs =
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
         abstract appendFile:
             Func<
-                U4<string, Buffer<obj>, Fs.Promises.FileHandle, Url.URL>,
-                obj,
+                U4<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fs.Promises.FileHandle,
+                    Url.URL
+                 >,
+                U15<
+                    string,
+                    Fable.Core.TS.Es.AsyncIterable<Crypto.BinaryLike, obj, obj>,
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.Iterable<Crypto.BinaryLike, obj, obj>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                 >,
                 U2<string, Fs.Promises.AppendFile.Options> option,
                 JS.Promise<unit>
              > with get, set
@@ -106844,7 +108150,14 @@ module Fs =
         /// If a flag is not provided, it defaults to <c>'r'</c>.
         /// </param>
         abstract readFile:
-            path: U4<string, Buffer<obj>, Fs.Promises.FileHandle, Url.URL> * ?options: Fs.Promises.ReadFile.Options ->
+            path:
+                U4<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fs.Promises.FileHandle,
+                    Url.URL
+                 > *
+            ?options: Fs.Promises.ReadFile.Options ->
                 JS.Promise<NonSharedBuffer>
 
         /// <summary>
@@ -106919,7 +108232,13 @@ module Fs =
         /// If a flag is not provided, it defaults to <c>'r'</c>.
         /// </param>
         abstract readFile:
-            path: U4<string, Buffer<obj>, Fs.Promises.FileHandle, Url.URL> *
+            path:
+                U4<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fs.Promises.FileHandle,
+                    Url.URL
+                 > *
             options: U2<string, Fs.Promises.ReadFile.Options2> ->
                 JS.Promise<string>
 
@@ -106995,7 +108314,13 @@ module Fs =
         /// If a flag is not provided, it defaults to <c>'r'</c>.
         /// </param>
         abstract readFile:
-            path: U4<string, Buffer<obj>, Fs.Promises.FileHandle, Url.URL> *
+            path:
+                U4<
+                    string,
+                    Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fs.Promises.FileHandle,
+                    Url.URL
+                 > *
             ?options: U2<string, Fs.Promises.ReadFile.Options3> ->
                 JS.Promise<U2<string, NonSharedBuffer>>
 
@@ -110283,18 +111608,18 @@ module Fs =
                 fd: float,
                 buffer:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?offset: float,
                 ?length: float,
@@ -110492,18 +111817,18 @@ module Fs =
                 fd: float,
                 buffer:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 offset: float,
                 length: float,
@@ -110526,18 +111851,18 @@ module Fs =
                 fd: float,
                 buffer:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?opts: ReadOptions
             ) : float =
@@ -111244,7 +112569,7 @@ module Fs =
         static member appendFile
             (
                 path: PathOrFileDescriptor,
-                data: U2<string, Uint8Array<obj>>,
+                data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
                 options: WriteFileOptions,
                 callback: NoParamCallback
             ) : unit =
@@ -111308,8 +112633,11 @@ module Fs =
         /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
         [<Import("appendFile", "node:fs")>]
         static member appendFile
-            (file: PathOrFileDescriptor, data: U2<string, Uint8Array<obj>>, callback: NoParamCallback)
-            : unit =
+            (
+                file: PathOrFileDescriptor,
+                data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
+                callback: NoParamCallback
+            ) : unit =
             jsNative
 
         /// <summary>
@@ -111358,8 +112686,11 @@ module Fs =
         /// <param name="path">filename or file descriptor</param>
         [<Import("appendFileSync", "node:fs")>]
         static member appendFileSync
-            (path: PathOrFileDescriptor, data: U2<string, Uint8Array<obj>>, ?options: U2<string, WriteFileOptions2>)
-            : unit =
+            (
+                path: PathOrFileDescriptor,
+                data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
+                ?options: U2<string, WriteFileOptions2>
+            ) : unit =
             jsNative
 
         /// <summary>
@@ -112425,18 +113756,18 @@ module Fs =
                 fd: float,
                 buffers:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >[],
                 ?position: float
             ) : float =
@@ -112491,18 +113822,18 @@ module Fs =
                 fd: float,
                 buffers:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >[],
                 ?position: float
             ) : float =
@@ -112926,7 +114257,26 @@ module Fs =
             /// <remarks>@since v10.0.0</remarks>
             /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
             abstract appendFile:
-                data: obj * ?options: U2<string, Fs.Promises.FileHandle.AppendFile.Options> -> JS.Promise<unit>
+                data:
+                    U15<
+                        string,
+                        Fable.Core.TS.Es.AsyncIterable<Crypto.BinaryLike, obj, obj>,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.Iterable<Crypto.BinaryLike, obj, obj>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                     > *
+                ?options: U2<string, Fs.Promises.FileHandle.AppendFile.Options> ->
+                    JS.Promise<unit>
 
             /// <summary>
             /// Changes the ownership of the file. A wrapper for <a href="http://man7.org/linux/man-pages/man2/chown.2.html"><c>chown(2)</c></a>.
@@ -113242,7 +114592,26 @@ module Fs =
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
             abstract writeFile:
-                data: obj * ?options: U2<string, Fs.Promises.FileHandle.AppendFile.Options> -> JS.Promise<unit>
+                data:
+                    U15<
+                        string,
+                        Fable.Core.TS.Es.AsyncIterable<Crypto.BinaryLike, obj, obj>,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.Iterable<Crypto.BinaryLike, obj, obj>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                     > *
+                ?options: U2<string, Fs.Promises.FileHandle.AppendFile.Options> ->
+                    JS.Promise<unit>
 
             /// <summary>
             /// Write <c>buffer</c> to the file.
@@ -113288,7 +114657,8 @@ module Fs =
             /// The offset from the beginning of the file where the data from <c>buffer</c> should be written. If <c>position</c> is not a <c>number</c>, the data will be written at the current
             /// position. See the POSIX pwrite(2) documentation for more detail.
             /// </param>
-            abstract write<'TBuffer when 'TBuffer :> Uint8Array<obj>> :
+            abstract write<'TBuffer
+                when 'TBuffer :> Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> :
                 buffer: 'TBuffer * ?options: Fs.Promises.FileHandle.Write.Options ->
                     JS.Promise<Fs.Promises.FileHandle.Write.Result.Item2<'TBuffer>>
 
@@ -114229,8 +115599,33 @@ module Fs =
             [<Import("writeFile", "node:fs/promises")>]
             static member writeFile
                 (
-                    file: U4<string, Buffer<obj>, FileHandle, Url.URL>,
-                    data: obj,
+                    file:
+                        U4<
+                            string,
+                            Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            FileHandle,
+                            Url.URL
+                         >,
+                    data:
+                        U15<
+                            string,
+                            Fable.Core.TS.Es.AsyncIterable<Crypto.BinaryLike, obj, obj>,
+                            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.DataView<
+                                U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                             >,
+                            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.Iterable<Crypto.BinaryLike, obj, obj>,
+                            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                         >,
                     ?options: U2<string, Fs.Promises.WriteFile.Options>
                 ) : JS.Promise<unit> =
                 jsNative
@@ -114252,8 +115647,33 @@ module Fs =
             [<Import("appendFile", "node:fs/promises")>]
             static member appendFile
                 (
-                    path: U4<string, Buffer<obj>, FileHandle, Url.URL>,
-                    data: obj,
+                    path:
+                        U4<
+                            string,
+                            Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            FileHandle,
+                            Url.URL
+                         >,
+                    data:
+                        U15<
+                            string,
+                            Fable.Core.TS.Es.AsyncIterable<Crypto.BinaryLike, obj, obj>,
+                            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.DataView<
+                                U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                             >,
+                            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.Iterable<Crypto.BinaryLike, obj, obj>,
+                            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                         >,
                     ?options: U2<string, Fs.Promises.AppendFile.Options>
                 ) : JS.Promise<unit> =
                 jsNative
@@ -114331,8 +115751,16 @@ module Fs =
             /// </param>
             [<Import("readFile", "node:fs/promises")>]
             static member readFile
-                (path: U4<string, Buffer<obj>, FileHandle, Url.URL>, ?options: Fs.Promises.ReadFile.Options)
-                : JS.Promise<NonSharedBuffer> =
+                (
+                    path:
+                        U4<
+                            string,
+                            Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            FileHandle,
+                            Url.URL
+                         >,
+                    ?options: Fs.Promises.ReadFile.Options
+                ) : JS.Promise<NonSharedBuffer> =
                 jsNative
 
             /// <summary>
@@ -114408,8 +115836,16 @@ module Fs =
             /// </param>
             [<Import("readFile", "node:fs/promises")>]
             static member readFile
-                (path: U4<string, Buffer<obj>, FileHandle, Url.URL>, options: U2<string, Fs.Promises.ReadFile.Options2>)
-                : JS.Promise<string> =
+                (
+                    path:
+                        U4<
+                            string,
+                            Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            FileHandle,
+                            Url.URL
+                         >,
+                    options: U2<string, Fs.Promises.ReadFile.Options2>
+                ) : JS.Promise<string> =
                 jsNative
 
             /// <summary>
@@ -114485,13 +115921,16 @@ module Fs =
             /// </param>
             [<Import("readFile", "node:fs/promises")>]
             static member readFile
-                (path: U4<string, Buffer<obj>, FileHandle, Url.URL>, ?options: U2<string, Fs.Promises.ReadFile.Options3>) : JS.Promise<
-                                                                                                                                U2<
-                                                                                                                                    string,
-                                                                                                                                    NonSharedBuffer
-                                                                                                                                 >
-                                                                                                                             >
-                =
+                (
+                    path:
+                        U4<
+                            string,
+                            Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            FileHandle,
+                            Url.URL
+                         >,
+                    ?options: U2<string, Fs.Promises.ReadFile.Options3>
+                ) : JS.Promise<U2<string, NonSharedBuffer>> =
                 jsNative
 
             /// <summary>
@@ -114796,7 +116235,9 @@ module Fs =
                         static member Create(bytesWritten: float, buffer: 'TBuffer) : Item<'TBuffer> = jsNative
 
                     [<Interface>]
-                    type Item2<'TBuffer when 'TBuffer :> Uint8Array<obj>> =
+                    type Item2<'TBuffer
+                        when 'TBuffer :> Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
+                        =
                         abstract bytesWritten: float with get, set
                         abstract buffer: 'TBuffer with get, set
 
@@ -118429,7 +119870,9 @@ module Http =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Server.getEventListeners", "node:http")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -118632,7 +120075,7 @@ module Http =
         /// <param name="name">Header name</param>
         /// <param name="value">Header value</param>
         abstract setHeaders:
-            headers: U2<Headers, JS.Map<string, U3<string, float, string[]>>> -> OutgoingMessage<'Request>
+            headers: U2<Headers, Fable.Core.TS.Es.Map<string, U3<string, float, string[]>>> -> OutgoingMessage<'Request>
 
         /// <summary>
         /// Append a single header value to the header object.
@@ -118741,7 +120184,15 @@ module Http =
             destination: 'T * ?options: Http.OutgoingMessage.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http.OutgoingMessage.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http.OutgoingMessage.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>writable.setDefaultEncoding()</c> method sets the default <c>encoding</c> for a <c>Writable</c> stream.
@@ -120120,7 +121571,9 @@ module Http =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("OutgoingMessage.getEventListeners", "node:http")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -120698,7 +122151,7 @@ module Http =
         /// <remarks>@since v18.11.0</remarks>
         /// <param name="hints">An object containing the values of headers</param>
         /// <param name="callback">Will be called when the response message has been written</param>
-        abstract writeEarlyHints: hints: Record<string, U2<string, string[]>> * ?callback: (unit -> unit) -> unit
+        abstract writeEarlyHints: hints: JS.Record<string, U2<string, string[]>> * ?callback: (unit -> unit) -> unit
 
         /// <summary>
         /// Sends a response header to the request. The status code is a 3-digit HTTP
@@ -120897,7 +122350,7 @@ module Http =
         /// <param name="name">Header name</param>
         /// <param name="value">Header value</param>
         abstract setHeaders:
-            headers: U2<Headers, JS.Map<string, U3<string, float, string[]>>> -> ServerResponse<'Request>
+            headers: U2<Headers, Fable.Core.TS.Es.Map<string, U3<string, float, string[]>>> -> ServerResponse<'Request>
 
         /// <summary>
         /// Append a single header value to the header object.
@@ -120920,7 +122373,15 @@ module Http =
             destination: 'T * ?options: Http.ServerResponse.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http.ServerResponse.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http.ServerResponse.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>writable.setDefaultEncoding()</c> method sets the default <c>encoding</c> for a <c>Writable</c> stream.
@@ -122318,7 +123779,9 @@ module Http =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ServerResponse.getEventListeners", "node:http")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -123747,6 +125210,7 @@ module Http =
         /// <param name="name">Header name</param>
         /// <param name="value">Header value</param>
         abstract setHeader: name: string * value: U3<string, float, string[]> -> ClientRequest
+
         /// <summary>
         /// Sets multiple header values for implicit headers. headers must be an instance of
         /// <c>Headers</c> or <c>Map</c>, if a header already exists in the to-be-sent headers, its
@@ -123778,7 +125242,9 @@ module Http =
         /// <remarks>@since v19.6.0, v18.15.0</remarks>
         /// <param name="name">Header name</param>
         /// <param name="value">Header value</param>
-        abstract setHeaders: headers: U2<Headers, JS.Map<string, U3<string, float, string[]>>> -> ClientRequest
+        abstract setHeaders:
+            headers: U2<Headers, Fable.Core.TS.Es.Map<string, U3<string, float, string[]>>> -> ClientRequest
+
         /// <summary>
         /// Append a single header value to the header object.
         /// <br /><br />
@@ -123798,7 +125264,15 @@ module Http =
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Http.ClientRequest.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http.ClientRequest.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http.ClientRequest.Compose.Options ->
+                'T
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -124178,7 +125652,9 @@ module Http =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ClientRequest.getEventListeners", "node:http")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -124786,7 +126262,7 @@ module Http =
         /// </code>
         /// </summary>
         /// <remarks>@since v18.3.0, v16.17.0</remarks>
-        abstract headersDistinct: Record<string, string[] option> with get, set
+        abstract headersDistinct: JS.Record<string, string[] option> with get, set
         /// <summary>
         /// The raw request/response headers list exactly as they were received.
         /// <br /><br />
@@ -124815,14 +126291,14 @@ module Http =
         /// The request/response trailers object. Only populated at the <c>'end'</c> event.
         /// </summary>
         /// <remarks>@since v0.3.0</remarks>
-        abstract trailers: Record<string, string option> with get, set
+        abstract trailers: JS.Record<string, string option> with get, set
         /// <summary>
         /// Similar to <c>message.trailers</c>, but there is no join logic and the values are
         /// always arrays of strings, even for headers received just once.
         /// Only populated at the <c>'end'</c> event.
         /// </summary>
         /// <remarks>@since v18.3.0, v16.17.0</remarks>
-        abstract trailersDistinct: Record<string, string[] option> with get, set
+        abstract trailersDistinct: JS.Record<string, string[] option> with get, set
         /// <summary>
         /// The raw request/response trailer keys and values exactly as they were
         /// received. Only populated at the <c>'end'</c> event.
@@ -124932,7 +126408,15 @@ module Http =
             destination: 'T * ?options: Http.IncomingMessage.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http.IncomingMessage.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http.IncomingMessage.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -126298,7 +127782,9 @@ module Http =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("IncomingMessage.getEventListeners", "node:http")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -126523,7 +128009,11 @@ module Http =
         /// <param name="iterable">Object implementing the <c>Symbol.asyncIterator</c> or <c>Symbol.iterator</c> iterable protocol. Emits an 'error' event if a null value is passed.</param>
         /// <param name="options">Options provided to <c>new stream.Readable([options])</c>. By default, <c>Readable.from()</c> will set <c>options.objectMode</c> to <c>true</c>, unless this is explicitly opted out by setting <c>options.objectMode</c> to <c>false</c>.</param>
         [<Import("IncomingMessage.from", "node:http")>]
-        static member from(iterable: obj, ?options: Stream.ReadableOptions<Stream.Readable>) : Stream.Readable =
+        static member from
+            (
+                iterable: U2<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, Fable.Core.TS.Es.Iterable<obj, obj, obj>>,
+                ?options: Stream.ReadableOptions<Stream.Readable>
+            ) : Stream.Readable =
             jsNative
 
         /// <summary>
@@ -127280,7 +128770,7 @@ module Http =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -127310,7 +128800,7 @@ module Http =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -127359,7 +128849,7 @@ module Http =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -127771,7 +129261,9 @@ module Http =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Agent.getEventListeners", "node:http")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -130743,7 +132235,15 @@ module Http2 =
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Http2.Http2Stream.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http2.Http2Stream.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http2.Http2Stream.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.unpipe()</c> method detaches a <c>Writable</c> stream previously attached
@@ -132035,7 +133535,15 @@ module Http2 =
             destination: 'T * ?options: Http2.ClientHttp2Stream.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http2.ClientHttp2Stream.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http2.ClientHttp2Stream.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -134110,7 +135618,15 @@ module Http2 =
             destination: 'T * ?options: Http2.ServerHttp2Stream.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http2.ServerHttp2Stream.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http2.ServerHttp2Stream.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -134729,7 +136245,7 @@ module Http2 =
         abstract maxConcurrentStreams: float option with get, set
         abstract maxHeaderListSize: float option with get, set
         abstract enableConnectProtocol: bool option with get, set
-        abstract customSettings: Record<float, float> option with get, set
+        abstract customSettings: JS.Record<float, float> option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -134741,7 +136257,7 @@ module Http2 =
                 ?maxConcurrentStreams: float,
                 ?maxHeaderListSize: float,
                 ?enableConnectProtocol: bool,
-                ?customSettings: Record<float, float>
+                ?customSettings: JS.Record<float, float>
             ) : Settings =
             jsNative
 
@@ -134832,7 +136348,7 @@ module Http2 =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -134862,7 +136378,7 @@ module Http2 =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -134871,7 +136387,7 @@ module Http2 =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Value will be <c>undefined</c> if the <c>Http2Session</c> is not yet connected to a
         /// socket, <c>h2c</c> if the <c>Http2Session</c> is not connected to a <c>TLSSocket</c>, or
@@ -134993,18 +136509,18 @@ module Http2 =
             ?lastStreamID: float *
             ?opaqueData:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 unit
 
@@ -135067,18 +136583,18 @@ module Http2 =
         abstract ping:
             payload:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             callback: Http2.Http2Session.Ping.Callback2 ->
                 bool
@@ -135272,6 +136788,45 @@ module Http2 =
         /// </code>
         /// </summary>
         abstract emit: ``event``: string * frameType: float * errorCode: float * id: float -> bool
+        /// <summary>
+        /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
+        /// to each.
+        /// <br /><br />
+        /// Returns <c>true</c> if the event had listeners, <c>false</c> otherwise.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        /// const myEmitter = new EventEmitter();
+        ///
+        /// // First listener
+        /// myEmitter.on('event', function firstListener() {
+        ///   console.log('Helloooo! first listener');
+        /// });
+        /// // Second listener
+        /// myEmitter.on('event', function secondListener(arg1, arg2) {
+        ///   console.log(`event with parameters ${arg1}, ${arg2} in second listener`);
+        /// });
+        /// // Third listener
+        /// myEmitter.on('event', function thirdListener(...args) {
+        ///   const parameters = args.join(', ');
+        ///   console.log(`event with parameters ${parameters} in third listener`);
+        /// });
+        ///
+        /// console.log(myEmitter.listeners('event'));
+        ///
+        /// myEmitter.emit('event', 1, 2, 3, 4, 5);
+        ///
+        /// // Prints:
+        /// // [
+        /// //   [Function: firstListener],
+        /// //   [Function: secondListener],
+        /// //   [Function: thirdListener]
+        /// // ]
+        /// // Helloooo! first listener
+        /// // event with parameters 1, 2 in second listener
+        /// // event with parameters 1, 2, 3, 4, 5 in third listener
+        /// </code>
+        /// </summary>
+        abstract emit: ``event``: string * errorCode: float * lastStreamID: float * ?opaqueData: NonSharedBuffer -> bool
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -141804,7 +143359,15 @@ module Http2 =
             destination: 'T * ?options: Http2.Http2ServerRequest.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http2.Http2ServerRequest.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http2.Http2ServerRequest.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -142645,7 +144208,9 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Http2ServerRequest.getEventListeners", "node:http2")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -142870,7 +144435,11 @@ module Http2 =
         /// <param name="iterable">Object implementing the <c>Symbol.asyncIterator</c> or <c>Symbol.iterator</c> iterable protocol. Emits an 'error' event if a null value is passed.</param>
         /// <param name="options">Options provided to <c>new stream.Readable([options])</c>. By default, <c>Readable.from()</c> will set <c>options.objectMode</c> to <c>true</c>, unless this is explicitly opted out by setting <c>options.objectMode</c> to <c>false</c>.</param>
         [<Import("Http2ServerRequest.from", "node:http2")>]
-        static member from(iterable: obj, ?options: Stream.ReadableOptions<Stream.Readable>) : Stream.Readable =
+        static member from
+            (
+                iterable: U2<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, Fable.Core.TS.Es.Iterable<obj, obj, obj>>,
+                ?options: Stream.ReadableOptions<Stream.Readable>
+            ) : Stream.Readable =
             jsNative
 
         /// <summary>
@@ -143320,18 +144889,6 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v8.4.0</remarks>
         abstract ``end``: ?callback: (unit -> unit) -> Http2ServerResponse<'Request>
-        /// <summary>
-        /// This method signals to the server that all of the response headers and body
-        /// have been sent; that server should consider this message complete.
-        /// The method, <c>response.end()</c>, MUST be called on each response.
-        /// <br /><br />
-        /// If <c>data</c> is specified, it is equivalent to calling <c>response.write(data, encoding)</c> followed by <c>response.end(callback)</c>.
-        /// <br /><br />
-        /// If <c>callback</c> is specified, it will be called when the response stream
-        /// is finished.
-        /// </summary>
-        /// <remarks>@since v8.4.0</remarks>
-        abstract ``end``: data: U2<string, Uint8Array<obj>> * ?callback: (unit -> unit) -> Http2ServerResponse<'Request>
 
         /// <summary>
         /// This method signals to the server that all of the response headers and body
@@ -143345,7 +144902,25 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v8.4.0</remarks>
         abstract ``end``:
-            data: U2<string, Uint8Array<obj>> * encoding: BufferEncoding * ?callback: (unit -> unit) ->
+            data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (unit -> unit) ->
+                Http2ServerResponse<'Request>
+
+        /// <summary>
+        /// This method signals to the server that all of the response headers and body
+        /// have been sent; that server should consider this message complete.
+        /// The method, <c>response.end()</c>, MUST be called on each response.
+        /// <br /><br />
+        /// If <c>data</c> is specified, it is equivalent to calling <c>response.write(data, encoding)</c> followed by <c>response.end(callback)</c>.
+        /// <br /><br />
+        /// If <c>callback</c> is specified, it will be called when the response stream
+        /// is finished.
+        /// </summary>
+        /// <remarks>@since v8.4.0</remarks>
+        abstract ``end``:
+            data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            encoding: BufferEncoding *
+            ?callback: (unit -> unit) ->
                 Http2ServerResponse<'Request>
 
         /// <summary>
@@ -143449,6 +145024,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v8.4.0</remarks>
         abstract setTimeout: msecs: float * ?callback: (unit -> unit) -> unit
+
         /// <summary>
         /// If this method is called and <c>response.writeHead()</c> has not been called,
         /// it will switch to implicit header mode and flush the implicit headers.
@@ -143477,7 +145053,11 @@ module Http2 =
         /// buffer. Returns <c>false</c> if all or part of the data was queued in user memory.<c>'drain'</c> will be emitted when the buffer is free again.
         /// </summary>
         /// <remarks>@since v8.4.0</remarks>
-        abstract write: chunk: U2<string, Uint8Array<obj>> * ?callback: (exn -> unit) -> bool
+        abstract write:
+            chunk: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (exn -> unit) ->
+                bool
+
         /// <summary>
         /// If this method is called and <c>response.writeHead()</c> has not been called,
         /// it will switch to implicit header mode and flush the implicit headers.
@@ -143506,7 +145086,12 @@ module Http2 =
         /// buffer. Returns <c>false</c> if all or part of the data was queued in user memory.<c>'drain'</c> will be emitted when the buffer is free again.
         /// </summary>
         /// <remarks>@since v8.4.0</remarks>
-        abstract write: chunk: U2<string, Uint8Array<obj>> * encoding: BufferEncoding * ?callback: (exn -> unit) -> bool
+        abstract write:
+            chunk: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            encoding: BufferEncoding *
+            ?callback: (exn -> unit) ->
+                bool
+
         /// <summary>
         /// Sends a status <c>100 Continue</c> to the client, indicating that the request body
         /// should be sent. See the <c>'checkContinue'</c> event on <c>Http2Server</c> and <c>Http2SecureServer</c>.
@@ -143536,7 +145121,7 @@ module Http2 =
         /// </code>
         /// </summary>
         /// <remarks>@since v18.11.0</remarks>
-        abstract writeEarlyHints: hints: Record<string, U2<string, string[]>> -> unit
+        abstract writeEarlyHints: hints: JS.Record<string, U2<string, string[]>> -> unit
 
         /// <summary>
         /// Sends a response header to the request. The status code is a 3-digit HTTP
@@ -144277,7 +145862,15 @@ module Http2 =
             destination: 'T * ?options: Http2.Http2ServerResponse.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Http2.Http2ServerResponse.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Http2.Http2ServerResponse.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>writable.setDefaultEncoding()</c> method sets the default <c>encoding</c> for a <c>Writable</c> stream.
@@ -145000,7 +146593,9 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Http2ServerResponse.getEventListeners", "node:http2")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -145567,7 +147162,10 @@ module Http2 =
         /// <remarks>@since v8.4.0</remarks>
         /// <param name="buf">The packed settings.</param>
         [<Import("getUnpackedSettings", "node:http2")>]
-        static member getUnpackedSettings(buf: Uint8Array<obj>) : Settings = jsNative
+        static member getUnpackedSettings
+            (buf: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>)
+            : Settings =
+            jsNative
 
         /// <summary>
         /// Returns a <c>net.Server</c> instance that creates and manages <c>Http2Session</c> instances.
@@ -147145,7 +148743,9 @@ module Https =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Agent.getEventListeners", "node:https")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -150191,7 +151791,9 @@ module Https =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Server.getEventListeners", "node:https")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -150987,15 +152589,31 @@ module Https =
                 delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
         module Emit =
-            type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+            type Callback =
+                delegate of
+                    err: exn option *
+                    resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                        unit
 
-            type Callback2 = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+            type Callback2 =
+                delegate of
+                    err: exn option *
+                    sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                        unit
 
         module On =
             type Listener = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
@@ -151024,10 +152642,18 @@ module Https =
                 delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
         module Once =
             type Listener = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
@@ -151056,10 +152682,18 @@ module Https =
                 delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
         module PrependListener =
             type Listener = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
@@ -151089,10 +152723,18 @@ module Https =
                 delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
         module PrependOnceListener =
             type Listener = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
@@ -151122,10 +152764,18 @@ module Https =
                 delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
 module Inflate =
     type Promisify =
@@ -165968,7 +167618,7 @@ module Inspector =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -165998,7 +167648,7 @@ module Inspector =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -166007,7 +167657,7 @@ module Inspector =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -166387,7 +168037,9 @@ module Inspector =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Session.getEventListeners", "node:inspector")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -182079,7 +183731,7 @@ module Inspector =
             /// </code>
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract listeners: eventName: obj -> JS.Function[]
+            abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
             /// <summary>
             /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
             /// including any wrappers (such as those created by <c>.once()</c>).
@@ -182109,7 +183761,7 @@ module Inspector =
             /// </code>
             /// </summary>
             /// <remarks>@since v9.4.0</remarks>
-            abstract rawListeners: eventName: obj -> JS.Function[]
+            abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
             /// <summary>
             /// Returns the number of listeners listening for the event named <c>eventName</c>.
             /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -182118,7 +183770,7 @@ module Inspector =
             /// <remarks>@since v3.2.0</remarks>
             /// <param name="eventName">The name of the event being listened for</param>
             /// <param name="listener">The event handler function</param>
-            abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+            abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
             /// <summary>
             /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -182498,7 +184150,9 @@ module Inspector =
             /// </summary>
             /// <remarks>@since v15.2.0, v14.17.0</remarks>
             [<Import("Session.getEventListeners", "node:inspector/promises")>]
-            static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+            static member getEventListeners
+                (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+                : Fable.Core.TS.Es.Function[] =
                 jsNative
 
             /// <summary>
@@ -183846,18 +185500,18 @@ module Module =
     type ModuleSource =
         U13<
             string,
-            JS.ArrayBuffer,
-            BigInt64Array<obj>,
-            BigUint64Array<obj>,
-            Float32Array<obj>,
-            Float64Array<obj>,
-            Int16Array<obj>,
-            Int32Array<obj>,
-            Int8Array<obj>,
-            Uint16Array<obj>,
-            Uint32Array<obj>,
-            Uint8Array<obj>,
-            Uint8ClampedArray<obj>
+            Fable.Core.TS.Es.ArrayBuffer,
+            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
          >
 
     type InitializeHook<'Data> = ('Data -> JS.Promise<unit> option)
@@ -184559,18 +186213,33 @@ module Net =
 
     [<Interface>]
     type OnReadOpts =
-        abstract buffer: U2<Uint8Array<obj>, (unit -> Uint8Array<obj>)> with get, set
+        abstract buffer:
+            U2<
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                (unit -> Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>)
+             > with get, set
+
         /// <summary>
         /// This function is called for every chunk of incoming data.
         /// Two arguments are passed to it: the number of bytes written to <c>buffer</c> and a reference to <c>buffer</c>.
         /// Return <c>false</c> from this function to implicitly <c>pause()</c> the socket.
         /// </summary>
-        abstract callback: bytesWritten: float * buffer: Uint8Array<obj> -> bool
+        abstract callback:
+            bytesWritten: float *
+            buffer: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> ->
+                bool
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (buffer: U2<Uint8Array<obj>, (unit -> Uint8Array<obj>)>, callback: Func<float, Uint8Array<obj>, bool>)
-            : OnReadOpts =
+            (
+                buffer:
+                    U2<
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        (unit -> Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>)
+                     >,
+                callback:
+                    Func<float, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, bool>
+            ) : OnReadOpts =
             jsNative
 
     /// <remarks>@deprecated</remarks>
@@ -184654,6 +186323,7 @@ module Net =
         /// </summary>
         /// <remarks>@since v0.3.4</remarks>
         abstract destroySoon: unit -> unit
+
         /// <summary>
         /// Sends data on the socket. The second parameter specifies the encoding in the
         /// case of a string. It defaults to UTF8 encoding.
@@ -184672,7 +186342,11 @@ module Net =
         /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        abstract write: buffer: U2<string, Uint8Array<obj>> * ?cb: (exn option -> unit) -> bool
+        abstract write:
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?cb: (exn option -> unit) ->
+                bool
+
         /// <summary>
         /// Sends data on the socket. The second parameter specifies the encoding in the
         /// case of a string. It defaults to UTF8 encoding.
@@ -184691,7 +186365,12 @@ module Net =
         /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        abstract write: str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?cb: (exn option -> unit) -> bool
+        abstract write:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?cb: (exn option -> unit) ->
+                bool
+
         /// <summary>
         /// Initiate a connection on a given socket.
         /// <br /><br />
@@ -184997,26 +186676,6 @@ module Net =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``: ?callback: (unit -> unit) -> Socket
-        /// <summary>
-        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
-        /// server will still send some data.
-        /// <br /><br />
-        /// See <c>writable.end()</c> for further details.
-        /// Half-closes the socket, with one final chunk of data.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        abstract ``end``: buffer: U2<string, Uint8Array<obj>> * ?callback: (unit -> unit) -> Socket
 
         /// <summary>
         /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
@@ -185038,7 +186697,34 @@ module Net =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``:
-            str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?callback: (unit -> unit) -> Socket
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (unit -> unit) ->
+                Socket
+
+        /// <summary>
+        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
+        /// server will still send some data.
+        /// <br /><br />
+        /// See <c>writable.end()</c> for further details.
+        /// Half-closes the socket, with one final chunk of data.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="encoding">Only used when data is <c>string</c>.</param>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        abstract ``end``:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?callback: (unit -> unit) ->
+                Socket
 
         /// <summary>
         /// events.EventEmitter
@@ -186393,7 +188079,18 @@ module Net =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Socket
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Net.Socket.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Net.Socket.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Net.Socket.Compose.Options ->
+                'T
+
         /// <summary>
         /// Destroy the stream. Optionally emit an <c>'error'</c> event, and emit a <c>'close'</c> event (unless <c>emitClose</c> is set to <c>false</c>). After this call, the readable
         /// stream will release any internal resources and subsequent calls to <c>push()</c> will be ignored.
@@ -187186,7 +188883,9 @@ module Net =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Socket.getEventListeners", "node:net")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -187444,7 +189143,21 @@ module Net =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Socket.from", "node:net")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -189101,7 +190814,7 @@ module Net =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -189131,7 +190844,7 @@ module Net =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -189140,7 +190853,7 @@ module Net =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -189520,7 +191233,9 @@ module Net =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Server.getEventListeners", "node:net")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -190859,7 +192574,10 @@ module Os =
         /// </summary>
         /// <remarks>@since v6.0.0</remarks>
         [<Import("userInfo", "node:os")>]
-        static member userInfo(options: UserInfoOptions) : UserInfo<U2<string, Buffer<obj>>> = jsNative
+        static member userInfo
+            (options: UserInfoOptions)
+            : UserInfo<U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>> =
+            jsNative
 
         [<Import("constants", "node:os")>]
         static member constants: Constants5 = jsNative
@@ -192129,12 +193847,12 @@ module PerfHooks =
         /// Returns a <c>Map</c> object detailing the accumulated percentile distribution.
         /// </summary>
         /// <remarks>@since v11.10.0</remarks>
-        abstract percentiles: JS.Map<float, float>
+        abstract percentiles: Fable.Core.TS.Es.Map<float, float>
         /// <summary>
         /// Returns a <c>Map</c> object detailing the accumulated percentile distribution.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
-        abstract percentilesBigInt: JS.Map<bigint, bigint>
+        abstract percentilesBigInt: Fable.Core.TS.Es.Map<bigint, bigint>
         /// <summary>
         /// Resets the collected histogram data.
         /// </summary>
@@ -192160,8 +193878,8 @@ module PerfHooks =
                 minBigInt: bigint,
                 percentile: (float -> float),
                 percentileBigInt: (float -> bigint),
-                percentiles: JS.Map<float, float>,
-                percentilesBigInt: JS.Map<bigint, bigint>,
+                percentiles: Fable.Core.TS.Es.Map<float, float>,
+                percentilesBigInt: Fable.Core.TS.Es.Map<bigint, bigint>,
                 reset: (unit -> unit),
                 stddev: float
             ) : Histogram =
@@ -192199,8 +193917,8 @@ module PerfHooks =
                 minBigInt: bigint,
                 percentile: (float -> float),
                 percentileBigInt: (float -> bigint),
-                percentiles: JS.Map<float, float>,
-                percentilesBigInt: JS.Map<bigint, bigint>,
+                percentiles: Fable.Core.TS.Es.Map<float, float>,
+                percentilesBigInt: Fable.Core.TS.Es.Map<bigint, bigint>,
                 reset: (unit -> unit),
                 stddev: float
             ) : IntervalHistogram =
@@ -192241,8 +193959,8 @@ module PerfHooks =
                 minBigInt: bigint,
                 percentile: (float -> float),
                 percentileBigInt: (float -> bigint),
-                percentiles: JS.Map<float, float>,
-                percentilesBigInt: JS.Map<bigint, bigint>,
+                percentiles: Fable.Core.TS.Es.Map<float, float>,
+                percentilesBigInt: Fable.Core.TS.Es.Map<bigint, bigint>,
                 reset: (unit -> unit),
                 stddev: float
             ) : RecordableHistogram =
@@ -192531,7 +194249,7 @@ module Process =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -192561,7 +194279,7 @@ module Process =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -192570,7 +194288,7 @@ module Process =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Returns an array listing the events for which the emitter has registered
         /// listeners. The values in the array are strings or <c>Symbol</c>s.
@@ -192596,6 +194314,7 @@ module Process =
         /// </summary>
         /// <remarks>@since v0.3.4</remarks>
         abstract destroySoon: unit -> unit
+
         /// <summary>
         /// Sends data on the socket. The second parameter specifies the encoding in the
         /// case of a string. It defaults to UTF8 encoding.
@@ -192614,7 +194333,11 @@ module Process =
         /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        abstract write: buffer: U2<string, Uint8Array<obj>> * ?cb: (exn option -> unit) -> bool
+        abstract write:
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?cb: (exn option -> unit) ->
+                bool
+
         /// <summary>
         /// Sends data on the socket. The second parameter specifies the encoding in the
         /// case of a string. It defaults to UTF8 encoding.
@@ -192633,7 +194356,12 @@ module Process =
         /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        abstract write: str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?cb: (exn option -> unit) -> bool
+        abstract write:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?cb: (exn option -> unit) ->
+                bool
+
         /// <summary>
         /// Initiate a connection on a given socket.
         /// <br /><br />
@@ -192939,26 +194667,6 @@ module Process =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``: ?callback: (unit -> unit) -> Stderr
-        /// <summary>
-        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
-        /// server will still send some data.
-        /// <br /><br />
-        /// See <c>writable.end()</c> for further details.
-        /// Half-closes the socket, with one final chunk of data.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        abstract ``end``: buffer: U2<string, Uint8Array<obj>> * ?callback: (unit -> unit) -> Stderr
 
         /// <summary>
         /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
@@ -192980,10 +194688,48 @@ module Process =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``:
-            str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?callback: (unit -> unit) -> Stderr
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (unit -> unit) ->
+                Stderr
+
+        /// <summary>
+        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
+        /// server will still send some data.
+        /// <br /><br />
+        /// See <c>writable.end()</c> for further details.
+        /// Half-closes the socket, with one final chunk of data.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="encoding">Only used when data is <c>string</c>.</param>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        abstract ``end``:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?callback: (unit -> unit) ->
+                Stderr
 
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Process.Stderr.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Process.Stderr.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Process.Stderr.Compose.Options ->
+                'T
+
         /// <summary>
         /// Returns whether the stream was destroyed or errored before emitting <c>'end'</c>.
         /// </summary>
@@ -194366,6 +196112,9 @@ module Process =
         abstract isTTY: bool with get, set
         abstract fd: float with get, set
 
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIterator<obj, obj, obj>
+
     type Stdin =
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
@@ -194410,7 +196159,7 @@ module Process =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -194440,7 +196189,7 @@ module Process =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -194449,7 +196198,7 @@ module Process =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Returns an array listing the events for which the emitter has registered
         /// listeners. The values in the array are strings or <c>Symbol</c>s.
@@ -194475,6 +196224,7 @@ module Process =
         /// </summary>
         /// <remarks>@since v0.3.4</remarks>
         abstract destroySoon: unit -> unit
+
         /// <summary>
         /// Sends data on the socket. The second parameter specifies the encoding in the
         /// case of a string. It defaults to UTF8 encoding.
@@ -194493,7 +196243,11 @@ module Process =
         /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        abstract write: buffer: U2<string, Uint8Array<obj>> * ?cb: (exn option -> unit) -> bool
+        abstract write:
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?cb: (exn option -> unit) ->
+                bool
+
         /// <summary>
         /// Sends data on the socket. The second parameter specifies the encoding in the
         /// case of a string. It defaults to UTF8 encoding.
@@ -194512,7 +196266,12 @@ module Process =
         /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        abstract write: str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?cb: (exn option -> unit) -> bool
+        abstract write:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?cb: (exn option -> unit) ->
+                bool
+
         /// <summary>
         /// Initiate a connection on a given socket.
         /// <br /><br />
@@ -194818,26 +196577,6 @@ module Process =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``: ?callback: (unit -> unit) -> Stdin
-        /// <summary>
-        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
-        /// server will still send some data.
-        /// <br /><br />
-        /// See <c>writable.end()</c> for further details.
-        /// Half-closes the socket, with one final chunk of data.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        abstract ``end``: buffer: U2<string, Uint8Array<obj>> * ?callback: (unit -> unit) -> Stdin
 
         /// <summary>
         /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
@@ -194859,7 +196598,34 @@ module Process =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``:
-            str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?callback: (unit -> unit) -> Stdin
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (unit -> unit) ->
+                Stdin
+
+        /// <summary>
+        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
+        /// server will still send some data.
+        /// <br /><br />
+        /// See <c>writable.end()</c> for further details.
+        /// Half-closes the socket, with one final chunk of data.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="encoding">Only used when data is <c>string</c>.</param>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        abstract ``end``:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?callback: (unit -> unit) ->
+                Stdin
 
         /// <summary>
         /// events.EventEmitter
@@ -196218,7 +197984,18 @@ module Process =
         /// </summary>
         abstract prependOnceListener: ``event``: string * listener: Net.Socket.PrependOnceListener.Listener4 -> Stdin
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Process.Stdin.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Process.Stdin.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Process.Stdin.Compose.Options ->
+                'T
+
         /// <summary>
         /// Returns whether the stream was destroyed or errored before emitting <c>'end'</c>.
         /// </summary>
@@ -197214,6 +198991,9 @@ module Process =
         abstract isTTY: bool with get, set
         abstract fd: float with get, set
 
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIterator<obj, obj, obj>
+
     type Stdout =
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
@@ -197258,7 +199038,7 @@ module Process =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -197288,7 +199068,7 @@ module Process =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -197297,7 +199077,7 @@ module Process =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Returns an array listing the events for which the emitter has registered
         /// listeners. The values in the array are strings or <c>Symbol</c>s.
@@ -197323,6 +199103,7 @@ module Process =
         /// </summary>
         /// <remarks>@since v0.3.4</remarks>
         abstract destroySoon: unit -> unit
+
         /// <summary>
         /// Sends data on the socket. The second parameter specifies the encoding in the
         /// case of a string. It defaults to UTF8 encoding.
@@ -197341,7 +199122,11 @@ module Process =
         /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        abstract write: buffer: U2<string, Uint8Array<obj>> * ?cb: (exn option -> unit) -> bool
+        abstract write:
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?cb: (exn option -> unit) ->
+                bool
+
         /// <summary>
         /// Sends data on the socket. The second parameter specifies the encoding in the
         /// case of a string. It defaults to UTF8 encoding.
@@ -197360,7 +199145,12 @@ module Process =
         /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        abstract write: str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?cb: (exn option -> unit) -> bool
+        abstract write:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?cb: (exn option -> unit) ->
+                bool
+
         /// <summary>
         /// Initiate a connection on a given socket.
         /// <br /><br />
@@ -197666,26 +199456,6 @@ module Process =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``: ?callback: (unit -> unit) -> Stdout
-        /// <summary>
-        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
-        /// server will still send some data.
-        /// <br /><br />
-        /// See <c>writable.end()</c> for further details.
-        /// Half-closes the socket, with one final chunk of data.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        abstract ``end``: buffer: U2<string, Uint8Array<obj>> * ?callback: (unit -> unit) -> Stdout
 
         /// <summary>
         /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
@@ -197707,10 +199477,48 @@ module Process =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``:
-            str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?callback: (unit -> unit) -> Stdout
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (unit -> unit) ->
+                Stdout
+
+        /// <summary>
+        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
+        /// server will still send some data.
+        /// <br /><br />
+        /// See <c>writable.end()</c> for further details.
+        /// Half-closes the socket, with one final chunk of data.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="encoding">Only used when data is <c>string</c>.</param>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        abstract ``end``:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?callback: (unit -> unit) ->
+                Stdout
 
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Process.Stdout.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Process.Stdout.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Process.Stdout.Compose.Options ->
+                'T
+
         /// <summary>
         /// Returns whether the stream was destroyed or errored before emitting <c>'end'</c>.
         /// </summary>
@@ -199093,6 +200901,9 @@ module Process =
         abstract isTTY: bool with get, set
         abstract fd: float with get, set
 
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIterator<obj, obj, obj>
+
     [<StringEnum(CaseRules.None)>]
     type UncaughtException = | [<CompiledName("uncaughtException")>] UncaughtException
 
@@ -200053,6 +201864,7 @@ module Readline =
         /// </summary>
         /// <remarks>@since v0.1.98</remarks>
         abstract close: unit -> unit
+
         /// <summary>
         /// The <c>rl.write()</c> method will write either <c>data</c> or a key sequence identified
         /// by <c>key</c> to the <c>output</c>. The <c>key</c> argument is supported only if <c>output</c> is
@@ -200074,7 +201886,10 @@ module Readline =
         /// The <c>rl.write()</c> method will write the data to the <c>readline</c> <c>Interface</c>'s <c>input</c> _as if it were provided by the user_.
         /// </summary>
         /// <remarks>@since v0.1.98</remarks>
-        abstract write: data: U2<string, Buffer<obj>> * ?key: Key -> unit
+        abstract write:
+            data: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?key: Key ->
+                unit
+
         /// <summary>
         /// The <c>rl.write()</c> method will write either <c>data</c> or a key sequence identified
         /// by <c>key</c> to the <c>output</c>. The <c>key</c> argument is supported only if <c>output</c> is
@@ -200096,7 +201911,11 @@ module Readline =
         /// The <c>rl.write()</c> method will write the data to the <c>readline</c> <c>Interface</c>'s <c>input</c> _as if it were provided by the user_.
         /// </summary>
         /// <remarks>@since v0.1.98</remarks>
-        abstract write: data: U2<string, Buffer<obj>> option * key: Key -> unit
+        abstract write:
+            data: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> option *
+            key: Key ->
+                unit
+
         /// <summary>
         /// Returns the real position of the cursor in relation to the input
         /// prompt + string. Long input (wrapping) strings, as well as multiple
@@ -200932,7 +202751,7 @@ module Readline =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -200962,7 +202781,7 @@ module Readline =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -200971,7 +202790,10 @@ module Readline =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIterator<string, obj, obj>
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -201351,7 +203173,9 @@ module Readline =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Interface.getEventListeners", "node:readline")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -203192,7 +205016,9 @@ module Readline =
             /// </summary>
             /// <remarks>@since v15.2.0, v14.17.0</remarks>
             [<Import("Interface.getEventListeners", "node:readline/promises")>]
-            static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+            static member getEventListeners
+                (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+                : Fable.Core.TS.Es.Function[] =
                 jsNative
 
             /// <summary>
@@ -205045,7 +206871,9 @@ module Repl =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("REPLServer.getEventListeners", "node:repl")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -205480,7 +207308,7 @@ module Repl =
         /// </code>
         /// </summary>
         [<Import("Recoverable.captureStackTrace", "node:repl")>]
-        static member captureStackTrace(targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace(targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
 
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("Recoverable.prepareStackTrace", "node:repl")>]
@@ -205814,7 +207642,7 @@ module Sea =
         /// </summary>
         /// <remarks>@since v20.12.0</remarks>
         [<Import("getAsset", "node:sea")>]
-        static member getAsset(key: string) : JS.ArrayBuffer = jsNative
+        static member getAsset(key: string) : Fable.Core.TS.Es.ArrayBuffer = jsNative
 
         /// <summary>
         /// This method can be used to retrieve the assets configured to be bundled into the
@@ -205847,7 +207675,7 @@ module Sea =
         /// </summary>
         /// <remarks>@since v20.12.0</remarks>
         [<Import("getRawAsset", "node:sea")>]
-        static member getRawAsset(key: string) : JS.ArrayBuffer = jsNative
+        static member getRawAsset(key: string) : Fable.Core.TS.Es.ArrayBuffer = jsNative
 
         /// <summary>
         /// This method can be used to retrieve an array of all the keys of assets
@@ -205921,21 +207749,21 @@ module Sqlite =
             string,
             float,
             bigint,
-            BigInt64Array<obj>,
-            BigUint64Array<obj>,
-            JS.DataView,
-            Float32Array<obj>,
-            Float64Array<obj>,
-            Int16Array<obj>,
-            Int32Array<obj>,
-            Int8Array<obj>,
-            Uint16Array<obj>,
-            Uint32Array<obj>,
-            Uint8Array<obj>,
-            Uint8ClampedArray<obj>
+            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
          > option
 
-    type SQLOutputValue = U4<string, float, bigint, Uint8Array<JS.ArrayBuffer>> option
+    type SQLOutputValue = U4<string, float, bigint, Uint8Array<Fable.Core.TS.Es.ArrayBuffer>> option
 
     [<Interface>]
     type DatabaseSyncOptions =
@@ -206342,6 +208170,7 @@ module Sqlite =
         /// <returns>A session handle.</returns>
         /// <remarks>@since v22.12.0</remarks>
         abstract createSession: ?options: CreateSessionOptions -> Session
+
         /// <summary>
         /// An exception is thrown if the database is not
         /// open. This method is a wrapper around
@@ -206368,7 +208197,10 @@ module Sqlite =
         /// <param name="options">The configuration options for how the changes will be applied.</param>
         /// <returns>Whether the changeset was applied successfully without being aborted.</returns>
         /// <remarks>@since v22.12.0</remarks>
-        abstract applyChangeset: changeset: Uint8Array<obj> * ?options: ApplyChangesetOptions -> bool
+        abstract applyChangeset:
+            changeset: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> *
+            ?options: ApplyChangesetOptions ->
+                bool
 
     /// <remarks>@since v22.12.0</remarks>
     [<Interface>]
@@ -206380,7 +208212,7 @@ module Sqlite =
         /// </summary>
         /// <returns>Binary changeset that can be applied to other databases.</returns>
         /// <remarks>@since v22.12.0</remarks>
-        abstract changeset: unit -> Uint8Array<JS.ArrayBuffer>
+        abstract changeset: unit -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
         /// <summary>
         /// Similar to the method above, but generates a more compact patchset. See
         /// <a href="https://www.sqlite.org/sessionintro.html#changesets_and_patchsets">Changesets and Patchsets</a>
@@ -206390,7 +208222,7 @@ module Sqlite =
         /// </summary>
         /// <returns>Binary patchset that can be applied to other databases.</returns>
         /// <remarks>@since v22.12.0</remarks>
-        abstract patchset: unit -> Uint8Array<JS.ArrayBuffer>
+        abstract patchset: unit -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
         /// <summary>
         /// Closes the session. An exception is thrown if the database or the session is not open. This method is a
         /// wrapper around
@@ -206401,8 +208233,8 @@ module Sqlite =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                changeset: (unit -> Uint8Array<JS.ArrayBuffer>),
-                patchset: (unit -> Uint8Array<JS.ArrayBuffer>),
+                changeset: (unit -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>),
+                patchset: (unit -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>),
                 close: (unit -> unit)
             ) : Session =
             jsNative
@@ -206491,7 +208323,7 @@ module Sqlite =
         /// An array of objects. Each object corresponds to a row returned by executing the prepared statement. The keys and values of each object correspond to the column names and values of
         /// the row.
         /// </returns>
-        abstract all: [<ParamArray>] anonymousParameters: SQLInputValue[] -> Record<string, SQLOutputValue>[]
+        abstract all: [<ParamArray>] anonymousParameters: SQLInputValue[] -> JS.Record<string, SQLOutputValue>[]
 
         /// <summary>
         /// This method executes a prepared statement and returns all results as an array of
@@ -206507,8 +208339,8 @@ module Sqlite =
         /// the row.
         /// </returns>
         abstract all:
-            namedParameters: Record<string, SQLInputValue> * [<ParamArray>] anonymousParameters: SQLInputValue[] ->
-                Record<string, SQLOutputValue>[]
+            namedParameters: JS.Record<string, SQLInputValue> * [<ParamArray>] anonymousParameters: SQLInputValue[] ->
+                JS.Record<string, SQLOutputValue>[]
 
         /// <summary>
         /// This method is used to retrieve information about the columns returned by the
@@ -206541,7 +208373,7 @@ module Sqlite =
         /// An object corresponding to the first row returned by executing the prepared statement. The keys and values of the object correspond to the column names and values of the row. If no
         /// rows were returned from the database then this method returns <c>undefined</c>.
         /// </returns>
-        abstract get: [<ParamArray>] anonymousParameters: SQLInputValue[] -> Record<string, SQLOutputValue> option
+        abstract get: [<ParamArray>] anonymousParameters: SQLInputValue[] -> JS.Record<string, SQLOutputValue> option
 
         /// <summary>
         /// This method executes a prepared statement and returns the first result as an
@@ -206557,8 +208389,8 @@ module Sqlite =
         /// rows were returned from the database then this method returns <c>undefined</c>.
         /// </returns>
         abstract get:
-            namedParameters: Record<string, SQLInputValue> * [<ParamArray>] anonymousParameters: SQLInputValue[] ->
-                Record<string, SQLOutputValue> option
+            namedParameters: JS.Record<string, SQLInputValue> * [<ParamArray>] anonymousParameters: SQLInputValue[] ->
+                JS.Record<string, SQLOutputValue> option
 
         /// <summary>
         /// This method executes a prepared statement and returns an iterator of
@@ -206578,7 +208410,7 @@ module Sqlite =
         /// object correspond to the column names and values of the row.
         /// </returns>
         abstract iterate:
-            [<ParamArray>] anonymousParameters: SQLInputValue[] -> Iterator<Record<string, SQLOutputValue>, obj, obj>
+            [<ParamArray>] anonymousParameters: SQLInputValue[] -> Iterator<JS.Record<string, SQLOutputValue>, obj, obj>
 
         /// <summary>
         /// This method executes a prepared statement and returns an iterator of
@@ -206598,8 +208430,8 @@ module Sqlite =
         /// object correspond to the column names and values of the row.
         /// </returns>
         abstract iterate:
-            namedParameters: Record<string, SQLInputValue> * [<ParamArray>] anonymousParameters: SQLInputValue[] ->
-                Iterator<Record<string, SQLOutputValue>, obj, obj>
+            namedParameters: JS.Record<string, SQLInputValue> * [<ParamArray>] anonymousParameters: SQLInputValue[] ->
+                Iterator<JS.Record<string, SQLOutputValue>, obj, obj>
 
         /// <summary>
         /// This method executes a prepared statement and returns an object summarizing the
@@ -206620,7 +208452,7 @@ module Sqlite =
         /// <param name="namedParameters">An optional object used to bind named parameters. The keys of this object are used to configure the mapping.</param>
         /// <param name="anonymousParameters">Zero or more values to bind to anonymous parameters.</param>
         abstract run:
-            namedParameters: Record<string, SQLInputValue> * [<ParamArray>] anonymousParameters: SQLInputValue[] ->
+            namedParameters: JS.Record<string, SQLInputValue> * [<ParamArray>] anonymousParameters: SQLInputValue[] ->
                 StatementResultingChanges
 
         /// <summary>
@@ -207053,7 +208885,7 @@ module Stream =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -207083,7 +208915,7 @@ module Stream =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -207132,7 +208964,7 @@ module Stream =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -207166,7 +208998,17 @@ module Stream =
         /// <param name="listener">The callback function</param>
         abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> Stream
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Stream.Stream.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Stream.Stream.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Stream.Stream.Compose.Options ->
+                'T
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -207179,15 +209021,25 @@ module Stream =
                 removeAllListeners: (obj option -> Stream),
                 setMaxListeners: (float -> Stream),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> JS.Function[]),
-                rawListeners: (obj -> JS.Function[]),
+                listeners: (obj -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
                 emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, JS.Function option, float>,
+                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
                 prependListener: Func<obj, (obj[] -> unit), Stream>,
                 prependOnceListener: Func<obj, (obj[] -> unit), Stream>,
                 eventNames: (unit -> obj[]),
                 pipe: Func<'T, Stream.Stream.Pipe.Options option, 'T>,
-                compose: Func<obj, Stream.Stream.Compose.Options option, 'T>
+                compose:
+                    Func<
+                        U4<
+                            'T,
+                            Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                            (obj -> unit),
+                            Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                         >,
+                        Stream.Stream.Compose.Options option,
+                        'T
+                     >
             ) : Stream =
             jsNative
 
@@ -207569,7 +209421,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Stream.getEventListeners", "node:stream")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -209690,7 +211544,20 @@ module Stream =
         /// </summary>
         abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Readable
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Stream.Readable.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Stream.Readable.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Stream.Readable.Compose.Options ->
+                'T
+
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIterator<obj, obj, obj>
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -210070,7 +211937,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Readable.getEventListeners", "node:stream")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -210283,7 +212152,12 @@ module Stream =
         /// <param name="iterable">Object implementing the <c>Symbol.asyncIterator</c> or <c>Symbol.iterator</c> iterable protocol. Emits an 'error' event if a null value is passed.</param>
         /// <param name="options">Options provided to <c>new stream.Readable([options])</c>. By default, <c>Readable.from()</c> will set <c>options.objectMode</c> to <c>true</c>, unless this is explicitly opted out by setting <c>options.objectMode</c> to <c>false</c>.</param>
         [<Import("Readable.from", "node:stream")>]
-        static member from(iterable: obj, ?options: ReadableOptions<Readable>) : Readable = jsNative
+        static member from
+            (
+                iterable: U2<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, Fable.Core.TS.Es.Iterable<obj, obj, obj>>,
+                ?options: ReadableOptions<Readable>
+            ) : Readable =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a <c>Readable</c> from a web <c>ReadableStream</c>.
@@ -212011,7 +213885,17 @@ module Stream =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Writable
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Stream.Writable.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Stream.Writable.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Stream.Writable.Compose.Options ->
+                'T
 
         /// <remarks>@since v0.9.4</remarks>
         static member Writable
@@ -212415,7 +214299,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Writable.getEventListeners", "node:stream")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -214240,7 +216126,18 @@ module Stream =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Duplex
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Stream.Duplex.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Stream.Duplex.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Stream.Duplex.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -214514,7 +216411,21 @@ module Stream =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Duplex.from", "node:stream")>]
-        static member from(src: obj) : Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream
+                 >)
+            : Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -214913,7 +216824,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Duplex.getEventListeners", "node:stream")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -215503,7 +217416,18 @@ module Stream =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Transform
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Stream.Transform.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Stream.Transform.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Stream.Transform.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -217351,7 +219275,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Transform.getEventListeners", "node:stream")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -217609,7 +219535,21 @@ module Stream =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Transform.from", "node:stream")>]
-        static member from(src: obj) : Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream
+                 >)
+            : Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -217936,7 +219876,15 @@ module Stream =
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Stream.PassThrough.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Stream.PassThrough.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Stream.PassThrough.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -219778,7 +221726,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("PassThrough.getEventListeners", "node:stream")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -220036,7 +221986,21 @@ module Stream =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("PassThrough.from", "node:stream")>]
-        static member from(src: obj) : Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream
+                 >)
+            : Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -220344,28 +222308,42 @@ module Stream =
         static member Create(?error: bool, ?readable: bool, ?writable: bool, ?signal: AbortSignal) : FinishedOptions =
             jsNative
 
-    [<Erase>]
-    type PipelineSourceFunction<'T> = private PipelineSourceFunction__ of (unit -> obj)
+    type PipelineSourceFunction<'T> =
+        (unit -> U2<Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, Fable.Core.TS.Es.Iterable<'T, obj, obj>>)
+
+    type PipelineSource<'T> =
+        U4<
+            Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+            Fable.Core.TS.Es.Iterable<'T, obj, obj>,
+            (unit -> U2<Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, Fable.Core.TS.Es.Iterable<'T, obj, obj>>),
+            ReadableStream2
+         >
 
     [<Erase>]
-    type PipelineSource<'T> = private PipelineSource__ of obj
+    type PipelineTransform<'S, 'U> =
+        private | PipelineTransform__ of U2<ReadWriteStream, (obj -> Fable.Core.TS.Es.AsyncIterable<'U, obj, obj>)>
 
-    [<Erase>]
-    type PipelineTransform<'S, 'U> = private PipelineTransform__ of U2<ReadWriteStream, (obj -> JS.AsyncIterable<'U>)>
+    type PipelineTransformSource<'T> =
+        U6<
+            Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+            Fable.Core.TS.Es.Iterable<'T, obj, obj>,
+            (unit -> U2<Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, Fable.Core.TS.Es.Iterable<'T, obj, obj>>),
+            ReadWriteStream,
+            ReadableStream2,
+            (obj -> Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>)
+         >
 
-    [<Erase>]
-    type PipelineTransformSource<'T> = private PipelineTransformSource__ of obj
+    type PipelineDestinationIterableFunction<'T> =
+        (Fable.Core.TS.Es.AsyncIterable<'T, obj, obj> -> Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>)
 
-    type PipelineDestinationIterableFunction<'T> = (JS.AsyncIterable<'T> -> JS.AsyncIterable<obj>)
-
-    type PipelineDestinationPromiseFunction<'T, 'P> = (JS.AsyncIterable<'T> -> JS.Promise<'P>)
+    type PipelineDestinationPromiseFunction<'T, 'P> = (Fable.Core.TS.Es.AsyncIterable<'T, obj, obj> -> JS.Promise<'P>)
 
     [<Erase>]
     type PipelineDestination<'S, 'P> =
         private | PipelineDestination__ of
             U3<
-                (JS.AsyncIterable<obj> -> JS.AsyncIterable<obj>),
-                (JS.AsyncIterable<obj> -> JS.Promise<'P>),
+                (Fable.Core.TS.Es.AsyncIterable<obj, obj, obj> -> Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>),
+                (Fable.Core.TS.Es.AsyncIterable<obj, obj, obj> -> JS.Promise<'P>),
                 WritableStream2
              >
 
@@ -221187,15 +223165,17 @@ module Stream =
             /// <returns>Fulfills with an <c>ArrayBuffer</c> containing the full contents of the stream.</returns>
             [<Import("arrayBuffer", "node:stream/consumers")>]
             static member arrayBuffer
-                (stream: U3<JS.AsyncIterable<obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
-                : JS.Promise<JS.ArrayBuffer> =
+                (stream:
+                    U3<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
+                : JS.Promise<Fable.Core.TS.Es.ArrayBuffer> =
                 jsNative
 
             /// <remarks>@since v16.7.0</remarks>
             /// <returns>Fulfills with a <c>Blob</c> containing the full contents of the stream.</returns>
             [<Import("blob", "node:stream/consumers")>]
             static member blob
-                (stream: U3<JS.AsyncIterable<obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
+                (stream:
+                    U3<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
                 : JS.Promise<_Blob> =
                 jsNative
 
@@ -221203,7 +223183,8 @@ module Stream =
             /// <returns>Fulfills with a <c>Buffer</c> containing the full contents of the stream.</returns>
             [<Import("buffer", "node:stream/consumers")>]
             static member buffer
-                (stream: U3<JS.AsyncIterable<obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
+                (stream:
+                    U3<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
                 : JS.Promise<NonSharedBuffer> =
                 jsNative
 
@@ -221214,7 +223195,8 @@ module Stream =
             /// </returns>
             [<Import("json", "node:stream/consumers")>]
             static member json
-                (stream: U3<JS.AsyncIterable<obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
+                (stream:
+                    U3<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
                 : JS.Promise<obj> =
                 jsNative
 
@@ -221222,7 +223204,8 @@ module Stream =
             /// <returns>Fulfills with the contents of the stream parsed as a UTF-8 encoded string.</returns>
             [<Import("text", "node:stream/consumers")>]
             static member text
-                (stream: U3<JS.AsyncIterable<obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
+                (stream:
+                    U3<Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, ReadableStream2, Stream.Web.ReadableStream<obj>>)
                 : JS.Promise<string> =
                 jsNative
 
@@ -221738,20 +223721,27 @@ module Stream =
 
         type ReadableStreamErrorCallback = (obj -> JS.Promise<unit> option)
 
-        [<Interface>]
         type ReadableStreamAsyncIterator<'T> =
             inherit AsyncIterator<'T, unit, obj>
-            abstract next: [<ParamArray>] __0: obj[] -> JS.Promise<obj>
-            abstract ``return``: (JS.Promise<unit> option -> JS.Promise<obj>) option with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (
-                    next: (obj[] -> JS.Promise<obj>),
-                    ?``return``: (JS.Promise<unit> option -> JS.Promise<obj>),
-                    ?throw: (obj option -> JS.Promise<obj>)
-                ) : ReadableStreamAsyncIterator<'T> =
-                jsNative
+            abstract next:
+                [<ParamArray>] __0: obj[] ->
+                    JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
+
+            abstract ``return``:
+                (JS.Promise<unit> option
+                        -> JS.Promise<
+                            U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+                            >) option with get, set
+
+            abstract throw:
+                (obj option
+                        -> JS.Promise<
+                            U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+                            >) option with get, set
+
+            [<Emit("$0[Symbol.asyncIterator]()")>]
+            abstract SymbolAsyncIterator: unit -> ReadableStreamAsyncIterator<'T>
 
         /// <summary>
         /// This Streams API interface represents a readable stream of byte data.
@@ -221772,6 +223762,9 @@ module Stream =
             abstract pipeTo: destination: WritableStream<'R> * ?options: StreamPipeOptions -> JS.Promise<unit>
             abstract tee: unit -> ReadableStream<'R> * ReadableStream<'R>
             abstract values: ?options: Stream.Web.ReadableStream.Values.Options -> ReadableStreamAsyncIterator<'R>
+
+            [<Emit("$0[Symbol.asyncIterator]()")>]
+            abstract SymbolAsyncIterator: unit -> ReadableStreamAsyncIterator<'R>
 
         type ReadableStreamReaderMode = string
 
@@ -221946,7 +223939,11 @@ module Stream =
             [<ParamObject; Emit("$0")>]
             static member Create(?fatal: bool, ?ignoreBOM: bool) : TextDecoderOptions = jsNative
 
-        type BufferSource = U2<JS.ArrayBuffer, JS.ArrayBufferView>
+        type BufferSource =
+            U2<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             >
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type CompressionFormat =
@@ -222287,7 +224284,7 @@ module Test =
         /// Strings are interpreted as JavaScript regular expressions.
         /// </summary>
         /// <defaultValue>undefined</defaultValue>
-        abstract testNamePatterns: obj option with get, set
+        abstract testNamePatterns: U3<string, U2<string, Fable.Core.TS.Es.RegExp>[], Fable.Core.TS.Es.RegExp> option with get, set
         /// <summary>
         /// A String, RegExp or a RegExp Array, that can be used to exclude running tests whose
         /// name matches the provided pattern. Test name patterns are interpreted as JavaScript
@@ -222296,7 +224293,7 @@ module Test =
         /// </summary>
         /// <defaultValue>undefined</defaultValue>
         /// <remarks>@since v22.1.0</remarks>
-        abstract testSkipPatterns: obj option with get, set
+        abstract testSkipPatterns: U3<string, U2<string, Fable.Core.TS.Es.RegExp>[], Fable.Core.TS.Es.RegExp> option with get, set
         /// <summary>
         /// The number of milliseconds after which the test execution will fail.
         /// If unspecified, subtests inherit this value from their parent.
@@ -222375,8 +224372,8 @@ module Test =
                 ?execArgv: string[],
                 ?argv: string[],
                 ?signal: AbortSignal,
-                ?testNamePatterns: obj,
-                ?testSkipPatterns: obj,
+                ?testNamePatterns: U3<string, U2<string, Fable.Core.TS.Es.RegExp>[], Fable.Core.TS.Es.RegExp>,
+                ?testSkipPatterns: U3<string, U2<string, Fable.Core.TS.Es.RegExp>[], Fable.Core.TS.Es.RegExp>,
                 ?timeout: float,
                 ?watch: bool,
                 ?shard: TestShard,
@@ -224216,7 +226213,18 @@ module Test =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> TestsStream
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Test.TestsStream.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Test.TestsStream.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Test.TestsStream.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -225448,7 +227456,7 @@ module Test =
         abstract ``method``<'MockedObject> :
             ``object``: 'MockedObject *
             methodName: keyof<'MockedObject> *
-            implementation: JS.Function *
+            implementation: Fable.Core.TS.Es.Function *
             options: MockMethodOptions ->
                 Test.MockTracker.Method.Result
 
@@ -225795,10 +227803,12 @@ module Test =
     [<Interface>]
     type MockTimersOptions =
         abstract apis: Test.MockTimersOptions.Apis.Item[] with get, set
-        abstract now: U2<float, JS.Date> option with get, set
+        abstract now: U2<float, Fable.Core.TS.Es.Date> option with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(apis: Test.MockTimersOptions.Apis.Item[], ?now: U2<float, JS.Date>) : MockTimersOptions =
+        static member Create
+            (apis: Test.MockTimersOptions.Apis.Item[], ?now: U2<float, Fable.Core.TS.Es.Date>)
+            : MockTimersOptions =
             jsNative
 
     /// <summary>
@@ -226745,7 +228755,6 @@ module Test =
                     jsNative
 
         module Method =
-            [<Interface>]
             type Result =
                 /// <summary>
                 /// Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
@@ -226773,28 +228782,22 @@ module Test =
                 abstract prototype: obj with get, set
                 abstract length: float
                 abstract arguments: obj with get, set
-                abstract caller: JS.Function with get, set
+                abstract caller: Fable.Core.TS.Es.Function with get, set
                 /// <summary>
                 /// Returns the name of the function. Function names are read-only and can not be changed.
                 /// </summary>
                 abstract name: string
-                abstract mock: Test.MockFunctionContext<JS.Function> with get, set
+                abstract mock: Test.MockFunctionContext<Fable.Core.TS.Es.Function> with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        apply: Func<obj, obj option, obj>,
-                        call: Func<obj, obj[], obj>,
-                        bind: Func<obj, obj[], obj>,
-                        toString: (unit -> string),
-                        prototype: obj,
-                        length: float,
-                        arguments: obj,
-                        caller: JS.Function,
-                        name: string,
-                        mock: Test.MockFunctionContext<JS.Function>
-                    ) : Result =
-                    jsNative
+                /// <summary>
+                /// Determines whether the given value inherits from this function if this function was used
+                /// as a constructor function.
+                /// <br /><br />
+                /// A constructor function can control which objects are recognized as its instances by
+                /// 'instanceof' by overriding this method.
+                /// </summary>
+                [<Emit("$0[Symbol.hasInstance]($1...)")>]
+                abstract SymbolHasInstance: value: obj -> bool
 
         module Setter =
             [<Interface>]
@@ -226953,8 +228956,8 @@ module Test =
             /// <remarks>@since v20.0.0</remarks>
             [<Import("dot", "node:test/reporters")>]
             static member dot
-                (source: JS.AsyncGenerator<TestEvent>)
-                : JS.AsyncGenerator<Test.Reporters.Dot.Result.Item> =
+                (source: Fable.Core.TS.Es.AsyncGenerator<TestEvent, unit, obj>)
+                : Fable.Core.TS.Es.AsyncGenerator<Test.Reporters.Dot.Result.Item, unit, obj> =
                 jsNative
 
             /// <summary>
@@ -226962,7 +228965,10 @@ module Test =
             /// </summary>
             /// <remarks>@since v20.0.0</remarks>
             [<Import("tap", "node:test/reporters")>]
-            static member tap(source: JS.AsyncGenerator<TestEvent>) : JS.AsyncGenerator<string> = jsNative
+            static member tap
+                (source: Fable.Core.TS.Es.AsyncGenerator<TestEvent, unit, obj>)
+                : Fable.Core.TS.Es.AsyncGenerator<string, unit, obj> =
+                jsNative
 
             /// <summary>
             /// The <c>spec</c> reporter outputs the test results in a human-readable format.
@@ -226976,7 +228982,10 @@ module Test =
             /// </summary>
             /// <remarks>@since v21.0.0</remarks>
             [<Import("junit", "node:test/reporters")>]
-            static member junit(source: JS.AsyncGenerator<TestEvent>) : JS.AsyncGenerator<string> = jsNative
+            static member junit
+                (source: Fable.Core.TS.Es.AsyncGenerator<TestEvent, unit, obj>)
+                : Fable.Core.TS.Es.AsyncGenerator<string, unit, obj> =
+                jsNative
 
             /// <summary>
             /// The <c>lcov</c> reporter outputs test coverage when used with the
@@ -227853,7 +229862,7 @@ module Tls =
         /// <summary>
         /// An array describing the AuthorityInfoAccess, used with OCSP.
         /// </summary>
-        abstract infoAccess: Record<string, string[] option> option with get, set
+        abstract infoAccess: JS.Record<string, string[] option> option with get, set
         /// <summary>
         /// For RSA keys: The RSA bit size.
         /// <br /><br />
@@ -227901,7 +229910,7 @@ module Tls =
                 fingerprint512: string,
                 ?ext_key_usage: string[],
                 ?subjectaltname: string,
-                ?infoAccess: Record<string, string[] option>,
+                ?infoAccess: JS.Record<string, string[] option>,
                 ?bits: float,
                 ?exponent: string,
                 ?modulus: string,
@@ -227936,7 +229945,7 @@ module Tls =
                 fingerprint512: string,
                 ?ext_key_usage: string[],
                 ?subjectaltname: string,
-                ?infoAccess: Record<string, string[] option>,
+                ?infoAccess: JS.Record<string, string[] option>,
                 ?bits: float,
                 ?exponent: string,
                 ?modulus: string,
@@ -227987,28 +229996,38 @@ module Tls =
         /// <summary>
         /// Private keys in PEM format.
         /// </summary>
-        abstract pem: U2<string, Buffer<obj>> with get, set
+        abstract pem: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
         /// <summary>
         /// Optional passphrase.
         /// </summary>
         abstract passphrase: string option with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(pem: U2<string, Buffer<obj>>, ?passphrase: string) : KeyObject = jsNative
+        static member Create
+            (
+                pem: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
+                ?passphrase: string
+            ) : KeyObject =
+            jsNative
 
     [<Interface>]
     type PxfObject =
         /// <summary>
         /// PFX or PKCS12 encoded private key and certificate chain.
         /// </summary>
-        abstract buf: U2<string, Buffer<obj>> with get, set
+        abstract buf: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
         /// <summary>
         /// Optional passphrase.
         /// </summary>
         abstract passphrase: string option with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(buf: U2<string, Buffer<obj>>, ?passphrase: string) : PxfObject = jsNative
+        static member Create
+            (
+                buf: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
+                ?passphrase: string
+            ) : PxfObject =
+            jsNative
 
     type TLSSocketOptions =
         inherit SecureContextOptions
@@ -228025,7 +230044,7 @@ module Tls =
         /// <summary>
         /// An optional Buffer instance containing a TLS session.
         /// </summary>
-        abstract session: Buffer<obj> option with get, set
+        abstract session: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option with get, set
         /// <summary>
         /// If true, specifies that the OCSP status request extension will be
         /// added to the client hello and an 'OCSPResponse' event will be
@@ -228160,26 +230179,6 @@ module Tls =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``: ?callback: (unit -> unit) -> TLSSocket
-        /// <summary>
-        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
-        /// server will still send some data.
-        /// <br /><br />
-        /// See <c>writable.end()</c> for further details.
-        /// Half-closes the socket, with one final chunk of data.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        abstract ``end``: buffer: U2<string, Uint8Array<obj>> * ?callback: (unit -> unit) -> TLSSocket
 
         /// <summary>
         /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
@@ -228201,7 +230200,34 @@ module Tls =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``:
-            str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?callback: (unit -> unit) -> TLSSocket
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (unit -> unit) ->
+                TLSSocket
+
+        /// <summary>
+        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
+        /// server will still send some data.
+        /// <br /><br />
+        /// See <c>writable.end()</c> for further details.
+        /// Half-closes the socket, with one final chunk of data.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="encoding">Only used when data is <c>string</c>.</param>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        abstract ``end``:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?callback: (unit -> unit) ->
+                TLSSocket
 
         /// <summary>
         /// The <c>readable.unpipe()</c> method detaches a <c>Writable</c> stream previously attached
@@ -228496,6 +230522,7 @@ module Tls =
         /// </summary>
         /// <remarks>@since v15.9.0</remarks>
         abstract getX509Certificate: unit -> Crypto.X509Certificate option
+
         /// <summary>
         /// Keying material is used for validations to prevent different kind of attacks in
         /// network protocols, for example in the specifications of IEEE 802.1X.
@@ -228525,7 +230552,12 @@ module Tls =
         /// </param>
         /// <param name="context">Optionally provide a context.</param>
         /// <returns>requested bytes of the keying material</returns>
-        abstract exportKeyingMaterial: length: float * label: string * context: Buffer<obj> -> NonSharedBuffer
+        abstract exportKeyingMaterial:
+            length: float *
+            label: string *
+            context: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> ->
+                NonSharedBuffer
+
         /// <summary>
         /// events.EventEmitter
         ///   1. close
@@ -229071,7 +231103,18 @@ module Tls =
         /// </summary>
         abstract connect: path: string * ?connectionListener: (unit -> unit) -> TLSSocket
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Tls.TLSSocket.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Tls.TLSSocket.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Tls.TLSSocket.Compose.Options ->
+                'T
+
         /// <summary>
         /// Destroy the stream. Optionally emit an <c>'error'</c> event, and emit a <c>'close'</c> event (unless <c>emitClose</c> is set to <c>false</c>). After this call, the readable
         /// stream will release any internal resources and subsequent calls to <c>push()</c> will be ignored.
@@ -229700,7 +231743,9 @@ module Tls =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("TLSSocket.getEventListeners", "node:tls")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -230122,7 +232167,21 @@ module Tls =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("TLSSocket.from", "node:tls")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -230455,19 +232514,19 @@ module Tls =
         /// </summary>
         abstract ALPNProtocols:
             U13<
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
-                JS.DataView,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                 string[],
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              > option with get, set
 
         /// <summary>
@@ -230496,19 +232555,19 @@ module Tls =
                 ?requestCert: bool,
                 ?ALPNProtocols:
                     U13<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                         string[],
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?SNICallback: Tls.TLSSocketOptions.SNICallback,
                 ?rejectUnauthorized: bool
@@ -230556,18 +232615,18 @@ module Tls =
     type PSKCallbackNegotation =
         abstract psk:
             U12<
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
-                JS.DataView,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              > with get, set
 
         abstract identity: string with get, set
@@ -230577,18 +232636,18 @@ module Tls =
             (
                 psk:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 identity: string
             ) : PSKCallbackNegotation =
@@ -230603,7 +232662,7 @@ module Tls =
         abstract socket: Stream.Duplex option with get, set
         abstract checkServerIdentity: Func<string, PeerCertificate, exn option> option with get, set
         abstract servername: string option with get, set
-        abstract session: Buffer<obj> option with get, set
+        abstract session: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option with get, set
         abstract minDHSize: float option with get, set
         abstract lookup: Net.LookupFunction option with get, set
         abstract timeout: float option with get, set
@@ -230803,6 +232862,7 @@ module Tls =
         /// <remarks>@since v11.0.0</remarks>
         /// <param name="options">An object containing any of the possible properties from the {@link createSecureContext} <c>options</c> arguments (e.g. <c>key</c>, <c>cert</c>, <c>ca</c>, etc).</param>
         abstract setSecureContext: options: SecureContextOptions -> unit
+
         /// <summary>
         /// Sets the session ticket keys.
         /// <br /><br />
@@ -230813,7 +232873,9 @@ module Tls =
         /// </summary>
         /// <remarks>@since v3.0.0</remarks>
         /// <param name="keys">A 48-byte buffer containing the session ticket keys.</param>
-        abstract setTicketKeys: keys: Buffer<obj> -> unit
+        abstract setTicketKeys:
+            keys: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> -> unit
+
         /// <summary>
         /// events.EventEmitter
         /// 1. tlsClientError
@@ -230964,6 +233026,51 @@ module Tls =
         /// </summary>
         abstract emit:
             ``event``: string * sessionId: NonSharedBuffer * sessionData: NonSharedBuffer * callback: (unit -> unit) ->
+                bool
+
+        /// <summary>
+        /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
+        /// to each.
+        /// <br /><br />
+        /// Returns <c>true</c> if the event had listeners, <c>false</c> otherwise.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        /// const myEmitter = new EventEmitter();
+        ///
+        /// // First listener
+        /// myEmitter.on('event', function firstListener() {
+        ///   console.log('Helloooo! first listener');
+        /// });
+        /// // Second listener
+        /// myEmitter.on('event', function secondListener(arg1, arg2) {
+        ///   console.log(`event with parameters ${arg1}, ${arg2} in second listener`);
+        /// });
+        /// // Third listener
+        /// myEmitter.on('event', function thirdListener(...args) {
+        ///   const parameters = args.join(', ');
+        ///   console.log(`event with parameters ${parameters} in third listener`);
+        /// });
+        ///
+        /// console.log(myEmitter.listeners('event'));
+        ///
+        /// myEmitter.emit('event', 1, 2, 3, 4, 5);
+        ///
+        /// // Prints:
+        /// // [
+        /// //   [Function: firstListener],
+        /// //   [Function: secondListener],
+        /// //   [Function: thirdListener]
+        /// // ]
+        /// // Helloooo! first listener
+        /// // event with parameters 1, 2 in second listener
+        /// // event with parameters 1, 2, 3, 4, 5 in third listener
+        /// </code>
+        /// </summary>
+        abstract emit:
+            ``event``: string *
+            certificate: NonSharedBuffer *
+            issuer: NonSharedBuffer *
+            callback: Tls.Server.Emit.Callback ->
                 bool
 
         /// <summary>
@@ -232380,7 +234487,9 @@ module Tls =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Server.getEventListeners", "node:tls")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -232620,12 +234729,19 @@ module Tls =
         /// </summary>
         /// <remarks>@since v22.9.0, v20.18.0</remarks>
         abstract allowPartialTrustChain: bool option with get, set
+
         /// <summary>
         /// Optionally override the trusted CA certificates. Default is to trust
         /// the well-known CAs curated by Mozilla. Mozilla's CAs are completely
         /// replaced when CAs are explicitly specified using this option.
         /// </summary>
-        abstract ca: U3<string, U2<string, Buffer<obj>>[], Buffer<obj>> option with get, set
+        abstract ca:
+            U3<
+                string,
+                U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>[],
+                Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > option with get, set
+
         /// <summary>
         /// Cert chains in PEM format. One cert chain should be provided per
         /// private key. Each cert chain should consist of the PEM formatted
@@ -232637,7 +234753,13 @@ module Tls =
         /// intermediate certificates are not provided, the peer will not be
         /// able to validate the certificate, and the handshake will fail.
         /// </summary>
-        abstract cert: U3<string, U2<string, Buffer<obj>>[], Buffer<obj>> option with get, set
+        abstract cert:
+            U3<
+                string,
+                U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>[],
+                Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > option with get, set
+
         /// <summary>
         /// Colon-separated list of supported signature algorithms. The list
         /// can contain digest algorithms (SHA256, MD5 etc.), public key
@@ -232657,16 +234779,25 @@ module Tls =
         /// </summary>
         /// <remarks>@deprecated</remarks>
         abstract clientCertEngine: string option with get, set
+
         /// <summary>
         /// PEM formatted CRLs (Certificate Revocation Lists).
         /// </summary>
-        abstract crl: U3<string, U2<string, Buffer<obj>>[], Buffer<obj>> option with get, set
+        abstract crl:
+            U3<
+                string,
+                U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>[],
+                Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > option with get, set
+
         /// <summary>
         /// <c>'auto'</c> or custom Diffie-Hellman parameters, required for non-ECDHE perfect forward secrecy.
         /// If omitted or invalid, the parameters are silently discarded and DHE ciphers will not be available.
         /// ECDHE-based perfect forward secrecy will still be available.
         /// </summary>
-        abstract dhparam: U2<string, Buffer<obj>> option with get, set
+        abstract dhparam:
+            U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> option with get, set
+
         /// <summary>
         /// A string describing a named curve or a colon separated list of curve
         /// NIDs or names, for example P-521:P-384:P-256, to use for ECDH key
@@ -232683,6 +234814,7 @@ module Tls =
         /// set in secureOptions
         /// </summary>
         abstract honorCipherOrder: bool option with get, set
+
         /// <summary>
         /// Private keys in PEM format. PEM allows the option of private keys
         /// being encrypted. Encrypted keys will be decrypted with
@@ -232693,7 +234825,13 @@ module Tls =
         /// object.passphrase is optional. Encrypted keys will be decrypted with
         /// object.passphrase if provided, or options.passphrase if it is not.
         /// </summary>
-        abstract key: U3<string, U3<string, Buffer<obj>, KeyObject>[], Buffer<obj>> option with get, set
+        abstract key:
+            U3<
+                string,
+                U3<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, KeyObject>[],
+                Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > option with get, set
+
         /// <summary>
         /// Name of an OpenSSL engine to get private key from. Should be used
         /// together with privateKeyIdentifier.
@@ -232731,6 +234869,7 @@ module Tls =
         /// Shared passphrase used for a single private key and/or a PFX.
         /// </summary>
         abstract passphrase: string option with get, set
+
         /// <summary>
         /// PFX or PKCS12 encoded private key and certificate chain. pfx is an
         /// alternative to providing key and cert individually. PFX is usually
@@ -232741,7 +234880,13 @@ module Tls =
         /// object.passphrase is optional. Encrypted PFX will be decrypted with
         /// object.passphrase if provided, or options.passphrase if it is not.
         /// </summary>
-        abstract pfx: U3<string, U3<string, Buffer<obj>, PxfObject>[], Buffer<obj>> option with get, set
+        abstract pfx:
+            U3<
+                string,
+                U3<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, PxfObject>[],
+                Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+             > option with get, set
+
         /// <summary>
         /// Optionally affect the OpenSSL protocol behavior, which is not
         /// usually necessary. This should be used carefully if at all! Value is
@@ -232769,7 +234914,7 @@ module Tls =
         /// 48-bytes of cryptographically strong pseudo-random data.
         /// See Session Resumption for more information.
         /// </summary>
-        abstract ticketKeys: Buffer<obj> option with get, set
+        abstract ticketKeys: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option with get, set
         /// <summary>
         /// The number of seconds after which a TLS session created by the
         /// server will no longer be resumable. See Session Resumption for more
@@ -232782,26 +234927,59 @@ module Tls =
             (
                 ?ALPNCallback: (Tls.SecureContextOptions.ALPNCallback.Arg -> string option),
                 ?allowPartialTrustChain: bool,
-                ?ca: U3<string, U2<string, Buffer<obj>>[], Buffer<obj>>,
-                ?cert: U3<string, U2<string, Buffer<obj>>[], Buffer<obj>>,
+                ?ca:
+                    U3<
+                        string,
+                        U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>[],
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                     >,
+                ?cert:
+                    U3<
+                        string,
+                        U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>[],
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                     >,
                 ?sigalgs: string,
                 ?ciphers: string,
                 ?clientCertEngine: string,
-                ?crl: U3<string, U2<string, Buffer<obj>>[], Buffer<obj>>,
-                ?dhparam: U2<string, Buffer<obj>>,
+                ?crl:
+                    U3<
+                        string,
+                        U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>[],
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                     >,
+                ?dhparam: U2<string, Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
                 ?ecdhCurve: string,
                 ?honorCipherOrder: bool,
-                ?key: U3<string, U3<string, Buffer<obj>, KeyObject>[], Buffer<obj>>,
+                ?key:
+                    U3<
+                        string,
+                        U3<
+                            string,
+                            Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            KeyObject
+                         >[],
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                     >,
                 ?privateKeyEngine: string,
                 ?privateKeyIdentifier: string,
                 ?maxVersion: SecureVersion,
                 ?minVersion: SecureVersion,
                 ?passphrase: string,
-                ?pfx: U3<string, U3<string, Buffer<obj>, PxfObject>[], Buffer<obj>>,
+                ?pfx:
+                    U3<
+                        string,
+                        U3<
+                            string,
+                            Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            PxfObject
+                         >[],
+                        Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
+                     >,
                 ?secureOptions: float,
                 ?secureProtocol: string,
                 ?sessionIdContext: string,
-                ?ticketKeys: Buffer<obj>,
+                ?ticketKeys: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                 ?sessionTimeout: float
             ) : SecureContextOptions =
             jsNative
@@ -233347,13 +235525,31 @@ module Tls =
             type Listener5 = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
         module Emit =
-            type Callback2 = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+            type Callback =
+                delegate of
+                    err: exn option *
+                    resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                        unit
+
+            type Callback2 =
+                delegate of
+                    err: exn option *
+                    sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                        unit
 
         module On =
             type Listener = delegate of err: exn * tlsSocket: Tls.TLSSocket -> unit
@@ -233371,10 +235567,18 @@ module Tls =
             type Listener5 = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
         module Once =
             type Listener = delegate of err: exn * tlsSocket: Tls.TLSSocket -> unit
@@ -233395,10 +235599,18 @@ module Tls =
             type Listener5 = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
         module PrependListener =
             type Listener = delegate of err: exn * tlsSocket: Tls.TLSSocket -> unit
@@ -233419,10 +235631,18 @@ module Tls =
             type Listener5 = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
         module PrependOnceListener =
             type Listener = delegate of err: exn * tlsSocket: Tls.TLSSocket -> unit
@@ -233444,10 +235664,18 @@ module Tls =
             type Listener5 = delegate of line: NonSharedBuffer * tlsSocket: Tls.TLSSocket -> unit
 
             module Listener3 =
-                type Callback = delegate of err: exn option * resp: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        resp: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
             module Listener4 =
-                type Callback = delegate of err: exn option * sessionData: Buffer<obj> option -> unit
+                type Callback =
+                    delegate of
+                        err: exn option *
+                        sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
+                            unit
 
     module TLSSocket =
         [<StringEnum(CaseRules.None)>]
@@ -233495,18 +235723,18 @@ module Tls =
             delegate of
                 socket: Tls.TLSSocket * identity: string ->
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      > option
 
 /// <summary>node:trace_events</summary>
@@ -233638,7 +235866,18 @@ module Tty =
     [<Import("ReadStream", "node:tty")>]
     type ReadStream =
         inherit Net.Socket
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Tty.ReadStream.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Tty.ReadStream.Compose.Options ->
+                'T
+
         /// <summary>
         /// A <c>boolean</c> that is <c>true</c> if the TTY is currently configured to operate as a
         /// raw device.
@@ -233888,26 +236127,6 @@ module Tty =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``: ?callback: (unit -> unit) -> ReadStream
-        /// <summary>
-        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
-        /// server will still send some data.
-        /// <br /><br />
-        /// See <c>writable.end()</c> for further details.
-        /// Half-closes the socket, with one final chunk of data.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        abstract ``end``: buffer: U2<string, Uint8Array<obj>> * ?callback: (unit -> unit) -> ReadStream
 
         /// <summary>
         /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
@@ -233929,7 +236148,34 @@ module Tty =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``:
-            str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?callback: (unit -> unit) -> ReadStream
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (unit -> unit) ->
+                ReadStream
+
+        /// <summary>
+        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
+        /// server will still send some data.
+        /// <br /><br />
+        /// See <c>writable.end()</c> for further details.
+        /// Half-closes the socket, with one final chunk of data.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="encoding">Only used when data is <c>string</c>.</param>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        abstract ``end``:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?callback: (unit -> unit) ->
+                ReadStream
 
         /// <summary>
         /// events.EventEmitter
@@ -235907,7 +238153,9 @@ module Tty =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ReadStream.getEventListeners", "node:tty")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -236165,7 +238413,21 @@ module Tty =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("ReadStream.from", "node:tty")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -237084,26 +239346,6 @@ module Tty =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``: ?callback: (unit -> unit) -> WriteStream
-        /// <summary>
-        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
-        /// server will still send some data.
-        /// <br /><br />
-        /// See <c>writable.end()</c> for further details.
-        /// Half-closes the socket, with one final chunk of data.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
-        /// <param name="callback">Optional callback for when the socket is finished.</param>
-        /// <returns>The socket itself.</returns>
-        abstract ``end``: buffer: U2<string, Uint8Array<obj>> * ?callback: (unit -> unit) -> WriteStream
 
         /// <summary>
         /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
@@ -237125,10 +239367,48 @@ module Tty =
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
         abstract ``end``:
-            str: U2<string, Uint8Array<obj>> * ?encoding: BufferEncoding * ?callback: (unit -> unit) -> WriteStream
+            buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?callback: (unit -> unit) ->
+                WriteStream
+
+        /// <summary>
+        /// Half-closes the socket. i.e., it sends a FIN packet. It is possible the
+        /// server will still send some data.
+        /// <br /><br />
+        /// See <c>writable.end()</c> for further details.
+        /// Half-closes the socket, with one final chunk of data.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        /// <remarks>@see {@link Socket.end} for full details.</remarks>
+        /// <remarks>@since v0.1.90</remarks>
+        /// <param name="encoding">Only used when data is <c>string</c>.</param>
+        /// <param name="callback">Optional callback for when the socket is finished.</param>
+        /// <returns>The socket itself.</returns>
+        abstract ``end``:
+            str: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+            ?encoding: BufferEncoding *
+            ?callback: (unit -> unit) ->
+                WriteStream
 
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Tty.WriteStream.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Tty.WriteStream.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Tty.WriteStream.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.unpipe()</c> method detaches a <c>Writable</c> stream previously attached
         /// using the pipe method.
@@ -237972,7 +240252,9 @@ module Tty =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("WriteStream.getEventListeners", "node:tty")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -238230,7 +240512,21 @@ module Tty =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("WriteStream.from", "node:tty")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -239387,17 +241683,18 @@ module Url =
         [<Import("URL.parse", "node:url")>]
         static member parse(input: string, ?``base``: string) : URL option = jsNative
 
-    [<Interface>]
     type URLSearchParamsIterator<'T> =
         inherit Iterator<'T, unit, obj>
-        abstract next: [<ParamArray>] __0: obj[] -> obj
-        abstract ``return``: (unit option -> obj) option with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (next: (obj[] -> obj), ?``return``: (unit option -> obj), ?throw: (obj option -> obj))
-            : URLSearchParamsIterator<'T> =
-            jsNative
+        abstract next:
+            [<ParamArray>] __0: obj[] ->
+                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+
+        abstract ``return``:
+            (unit option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
+
+        abstract throw:
+            (obj option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
 
     /// <summary>
     /// The <c>URLSearchParams</c> API provides read and write access to the query of a <c>URL</c>. The <c>URLSearchParams</c> class can also be used standalone with one of the
@@ -239442,8 +241739,8 @@ module Url =
     /// </code>
     /// </summary>
     /// <remarks>@since v7.5.0, v6.13.0</remarks>
-    [<Interface>]
     type URLSearchParams =
+        inherit seq<(string * string)>
         /// <summary>
         /// Append a new name-value pair to the query string.
         /// </summary>
@@ -239560,25 +241857,6 @@ module Url =
         /// </summary>
         abstract values: unit -> URLSearchParamsIterator<string>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                append: Action<string, string>,
-                delete: Action<string, string option>,
-                entries: (unit -> URLSearchParamsIterator<(string * string)>),
-                forEach: Action<Url.URLSearchParams.ForEach.Fn, 'TThis option>,
-                get: (string -> string option),
-                getAll: (string -> string[]),
-                has: Func<string, string option, bool>,
-                keys: (unit -> URLSearchParamsIterator<string>),
-                set: Action<string, string>,
-                size: float,
-                sort: (unit -> unit),
-                toString: (unit -> string),
-                values: (unit -> URLSearchParamsIterator<string>)
-            ) : URLSearchParams =
-            jsNative
-
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
@@ -239632,9 +241910,7 @@ module Url =
         /// result would be <c>{host: 'foo', pathname: '/bar'}</c> rather than <c>{pathname: '//foo/bar'}</c>.
         /// </param>
         [<Import("parse", "node:url")>]
-        static member parse_Overload2
-            (urlString: string, ?parseQueryString: bool, ?slashesDenoteHost: bool)
-            : UrlWithStringQuery =
+        static member parse(urlString: string, ?parseQueryString: bool, ?slashesDenoteHost: bool) : UrlWithStringQuery =
             jsNative
 
         /// <summary>
@@ -239661,7 +241937,7 @@ module Url =
         /// result would be <c>{host: 'foo', pathname: '/bar'}</c> rather than <c>{pathname: '//foo/bar'}</c>.
         /// </param>
         [<Import("parse", "node:url")>]
-        static member parse
+        static member parse_Overload2
             (urlString: string, parseQueryString: bool, ?slashesDenoteHost: bool)
             : U2<UrlWithParsedQuery, Url> =
             jsNative
@@ -240025,7 +242301,17 @@ module Url =
         /// </summary>
         /// <remarks>@since v7.5.0, v6.13.0</remarks>
         [<Import("URLSearchParams", "node:url"); EmitConstructor>]
-        static member URLSearchParams(?init: obj) : URLSearchParams = jsNative
+        static member URLSearchParams
+            (?init:
+                U5<
+                    string,
+                    Fable.Core.TS.Es.Iterable<(string * string), obj, obj>,
+                    (string * string)[],
+                    JS.Record<string, U2<string, string[]>>,
+                    URLSearchParams
+                 >)
+            : URLSearchParams =
+            jsNative
 
     module URL =
         [<Interface>]
@@ -240248,7 +242534,6 @@ module Util =
         [<ParamObject; Emit("$0")>]
         static member Create(enabled: bool) : DebugLogger = jsNative
 
-    [<Interface>]
     type CustomPromisifyLegacy<'TCustom> =
         abstract __promisify__: 'TCustom with get, set
         /// <summary>
@@ -240277,29 +242562,22 @@ module Util =
         abstract prototype: obj with get, set
         abstract length: float
         abstract arguments: obj with get, set
-        abstract caller: JS.Function with get, set
+        abstract caller: Fable.Core.TS.Es.Function with get, set
         /// <summary>
         /// Returns the name of the function. Function names are read-only and can not be changed.
         /// </summary>
         abstract name: string
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                __promisify__: 'TCustom,
-                apply: Func<obj, obj option, obj>,
-                call: Func<obj, obj[], obj>,
-                bind: Func<obj, obj[], obj>,
-                toString: (unit -> string),
-                prototype: obj,
-                length: float,
-                arguments: obj,
-                caller: JS.Function,
-                name: string
-            ) : CustomPromisifyLegacy<'TCustom> =
-            jsNative
+        /// <summary>
+        /// Determines whether the given value inherits from this function if this function was used
+        /// as a constructor function.
+        /// <br /><br />
+        /// A constructor function can control which objects are recognized as its instances by
+        /// 'instanceof' by overriding this method.
+        /// </summary>
+        [<Emit("$0[Symbol.hasInstance]($1...)")>]
+        abstract SymbolHasInstance: value: obj -> bool
 
-    [<Interface>]
     type CustomPromisifySymbol<'TCustom> =
         /// <summary>
         /// Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
@@ -240327,26 +242605,21 @@ module Util =
         abstract prototype: obj with get, set
         abstract length: float
         abstract arguments: obj with get, set
-        abstract caller: JS.Function with get, set
+        abstract caller: Fable.Core.TS.Es.Function with get, set
         /// <summary>
         /// Returns the name of the function. Function names are read-only and can not be changed.
         /// </summary>
         abstract name: string
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                apply: Func<obj, obj option, obj>,
-                call: Func<obj, obj[], obj>,
-                bind: Func<obj, obj[], obj>,
-                toString: (unit -> string),
-                prototype: obj,
-                length: float,
-                arguments: obj,
-                caller: JS.Function,
-                name: string
-            ) : CustomPromisifySymbol<'TCustom> =
-            jsNative
+        /// <summary>
+        /// Determines whether the given value inherits from this function if this function was used
+        /// as a constructor function.
+        /// <br /><br />
+        /// A constructor function can control which objects are recognized as its instances by
+        /// 'instanceof' by overriding this method.
+        /// </summary>
+        [<Emit("$0[Symbol.hasInstance]($1...)")>]
+        abstract SymbolHasInstance: value: obj -> bool
 
     type CustomPromisify<'TCustom> = U2<CustomPromisifyLegacy<'TCustom>, CustomPromisifySymbol<'TCustom>>
 
@@ -240403,19 +242676,19 @@ module Util =
         abstract decode:
             ?input:
                 U13<
-                    JS.ArrayBuffer,
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > *
             ?options: Util.TextDecoder.Decode.Options ->
                 string
@@ -240429,19 +242702,21 @@ module Util =
                 decode:
                     Func<
                         U13<
-                            JS.ArrayBuffer,
-                            BigInt64Array<obj>,
-                            BigUint64Array<obj>,
-                            JS.DataView,
-                            Float32Array<obj>,
-                            Float64Array<obj>,
-                            Int16Array<obj>,
-                            Int32Array<obj>,
-                            Int8Array<obj>,
-                            Uint16Array<obj>,
-                            Uint32Array<obj>,
-                            Uint8Array<obj>,
-                            Uint8ClampedArray<obj>
+                            Fable.Core.TS.Es.ArrayBuffer,
+                            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.DataView<
+                                U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                             >,
+                            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                          > option,
                         Util.TextDecoder.Decode.Options option,
                         string
@@ -240485,7 +242760,8 @@ module Util =
         /// encoded bytes.
         /// </summary>
         /// <param name="input">The text to encode.</param>
-        abstract encode: ?input: string -> Uint8Array<JS.ArrayBuffer>
+        abstract encode: ?input: string -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+
         /// <summary>
         /// UTF-8 encodes the <c>src</c> string to the <c>dest</c> Uint8Array and returns an object
         /// containing the read Unicode code units and written UTF-8 bytes.
@@ -240498,14 +242774,21 @@ module Util =
         /// </summary>
         /// <param name="src">The text to encode.</param>
         /// <param name="dest">The array to hold the encode result.</param>
-        abstract encodeInto: src: string * dest: Uint8Array<obj> -> EncodeIntoResult
+        abstract encodeInto:
+            src: string * dest: Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> ->
+                EncodeIntoResult
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 encoding: string,
-                encode: (string option -> Uint8Array<JS.ArrayBuffer>),
-                encodeInto: Func<string, Uint8Array<obj>, EncodeIntoResult>
+                encode: (string option -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>),
+                encodeInto:
+                    Func<
+                        string,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        EncodeIntoResult
+                     >
             ) : TextEncoder =
             jsNative
 
@@ -240687,8 +242970,8 @@ module Util =
     /// The <c>MIMEParams</c> API provides read and write access to the parameters of a <c>MIMEType</c>.
     /// </summary>
     /// <remarks>@since v19.1.0, v18.13.0</remarks>
-    [<Interface>]
     type MIMEParams =
+        inherit seq<(string * string)>
         /// <summary>
         /// Remove all name-value pairs whose name is <c>name</c>.
         /// </summary>
@@ -240742,19 +243025,6 @@ module Util =
         /// Returns an iterator over the values of each name-value pair.
         /// </summary>
         abstract values: unit -> Iterator<string, obj, obj>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                delete: (string -> unit),
-                entries: (unit -> Iterator<(string * string), obj, obj>),
-                get: (string -> string option),
-                has: (string -> bool),
-                keys: (unit -> Iterator<string, obj, obj>),
-                set: Action<string, string>,
-                values: (unit -> Iterator<string, obj, obj>)
-            ) : MIMEParams =
-            jsNative
 
     type Types =
         /// <summary>
@@ -241562,7 +243832,7 @@ module Util =
         /// </summary>
         /// <remarks>@since v16.0.0, v14.17.0</remarks>
         [<Import("getSystemErrorMap", "node:util")>]
-        static member getSystemErrorMap() : JS.Map<float, (string * string)> = jsNative
+        static member getSystemErrorMap() : Fable.Core.TS.Es.Map<float, (string * string)> = jsNative
 
         /// <summary>
         /// Returns the string message for a numeric error code that comes from a Node.js
@@ -244352,7 +246622,7 @@ module Util =
         /// </summary>
         /// <remarks>@since v8.0.0</remarks>
         [<Import("promisify", "node:util")>]
-        static member promisify(fn: JS.Function) : JS.Function = jsNative
+        static member promisify(fn: Fable.Core.TS.Es.Function) : Fable.Core.TS.Es.Function = jsNative
 
         /// <summary>
         /// Stability: 1.1 - Active development
@@ -244367,7 +246637,7 @@ module Util =
         /// <param name="content">The raw contents of a <c>.env</c> file.</param>
         /// <remarks>@since v20.12.0</remarks>
         [<Import("parseEnv", "node:util")>]
-        static member parseEnv(content: string) : Record<string, string option> = jsNative
+        static member parseEnv(content: string) : JS.Record<string, string option> = jsNative
 
         /// <summary>
         /// This function returns a formatted text considering the <c>format</c> passed
@@ -245408,7 +247678,7 @@ module V8 =
         /// </summary>
         /// <param name="id">A 32-bit unsigned integer.</param>
         /// <param name="arrayBuffer">An <c>ArrayBuffer</c> instance.</param>
-        abstract transferArrayBuffer: id: float * arrayBuffer: JS.ArrayBuffer -> unit
+        abstract transferArrayBuffer: id: float * arrayBuffer: Fable.Core.TS.Es.ArrayBuffer -> unit
         /// <summary>
         /// Write a raw 32-bit unsigned integer.
         /// For use inside of a custom <c>serializer._writeHostObject()</c>.
@@ -245433,18 +247703,18 @@ module V8 =
         abstract writeRawBytes:
             buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > ->
                 unit
 
@@ -245454,24 +247724,26 @@ module V8 =
                 writeHeader: (unit -> unit),
                 writeValue: (obj -> bool),
                 releaseBuffer: (unit -> NonSharedBuffer),
-                transferArrayBuffer: Action<float, JS.ArrayBuffer>,
+                transferArrayBuffer: Action<float, Fable.Core.TS.Es.ArrayBuffer>,
                 writeUint32: (float -> unit),
                 writeUint64: Action<float, float>,
                 writeDouble: (float -> unit),
                 writeRawBytes:
                     (U12<
-                            BigInt64Array<obj>,
-                            BigUint64Array<obj>,
-                            JS.DataView,
-                            Float32Array<obj>,
-                            Float64Array<obj>,
-                            Int16Array<obj>,
-                            Int32Array<obj>,
-                            Int8Array<obj>,
-                            Uint16Array<obj>,
-                            Uint32Array<obj>,
-                            Uint8Array<obj>,
-                            Uint8ClampedArray<obj>
+                            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.DataView<
+                                U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                             >,
+                            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                         >
                             -> unit)
             ) : Serializer =
@@ -245492,24 +247764,26 @@ module V8 =
                 writeHeader: (unit -> unit),
                 writeValue: (obj -> bool),
                 releaseBuffer: (unit -> NonSharedBuffer),
-                transferArrayBuffer: Action<float, JS.ArrayBuffer>,
+                transferArrayBuffer: Action<float, Fable.Core.TS.Es.ArrayBuffer>,
                 writeUint32: (float -> unit),
                 writeUint64: Action<float, float>,
                 writeDouble: (float -> unit),
                 writeRawBytes:
                     (U12<
-                            BigInt64Array<obj>,
-                            BigUint64Array<obj>,
-                            JS.DataView,
-                            Float32Array<obj>,
-                            Float64Array<obj>,
-                            Int16Array<obj>,
-                            Int32Array<obj>,
-                            Int8Array<obj>,
-                            Uint16Array<obj>,
-                            Uint32Array<obj>,
-                            Uint8Array<obj>,
-                            Uint8ClampedArray<obj>
+                            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.DataView<
+                                U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                             >,
+                            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                         >
                             -> unit)
             ) : DefaultSerializer =
@@ -245535,7 +247809,7 @@ module V8 =
         /// </summary>
         /// <param name="id">A 32-bit unsigned integer.</param>
         /// <param name="arrayBuffer">An <c>ArrayBuffer</c> instance.</param>
-        abstract transferArrayBuffer: id: float * arrayBuffer: JS.ArrayBuffer -> unit
+        abstract transferArrayBuffer: id: float * arrayBuffer: Fable.Core.TS.Es.ArrayBuffer -> unit
         /// <summary>
         /// Reads the underlying wire format version. Likely mostly to be useful to
         /// legacy code reading old wire format versions. May not be called before <c>.readHeader()</c>.
@@ -245556,24 +247830,26 @@ module V8 =
         /// For use inside of a custom <c>deserializer._readHostObject()</c>.
         /// </summary>
         abstract readDouble: unit -> float
+
         /// <summary>
         /// Read raw bytes from the deserializer's internal buffer. The <c>length</c> parameter
         /// must correspond to the length of the buffer that was passed to <c>serializer.writeRawBytes()</c>.
         /// For use inside of a custom <c>deserializer._readHostObject()</c>.
         /// </summary>
-        abstract readRawBytes: length: float -> Buffer<obj>
+        abstract readRawBytes:
+            length: float -> Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 readHeader: (unit -> bool),
                 readValue: (unit -> obj),
-                transferArrayBuffer: Action<float, JS.ArrayBuffer>,
+                transferArrayBuffer: Action<float, Fable.Core.TS.Es.ArrayBuffer>,
                 getWireFormatVersion: (unit -> float),
                 readUint32: (unit -> float),
                 readUint64: (unit -> (float * float)),
                 readDouble: (unit -> float),
-                readRawBytes: (float -> Buffer<obj>)
+                readRawBytes: (float -> Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>)
             ) : Deserializer =
             jsNative
 
@@ -245590,12 +247866,12 @@ module V8 =
             (
                 readHeader: (unit -> bool),
                 readValue: (unit -> obj),
-                transferArrayBuffer: Action<float, JS.ArrayBuffer>,
+                transferArrayBuffer: Action<float, Fable.Core.TS.Es.ArrayBuffer>,
                 getWireFormatVersion: (unit -> float),
                 readUint32: (unit -> float),
                 readUint64: (unit -> (float * float)),
                 readDouble: (unit -> float),
-                readRawBytes: (float -> Buffer<obj>)
+                readRawBytes: (float -> Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>)
             ) : DefaultDeserializer =
             jsNative
 
@@ -245788,28 +248064,28 @@ module V8 =
         /// <remarks>@since v17.1.0, v16.14.0</remarks>
         /// <param name="init">The {@link Init | <c>init</c> callback} to call when a promise is created.</param>
         /// <returns>Call to stop the hook.</returns>
-        abstract onInit: (Init -> JS.Function) with get, set
+        abstract onInit: (Init -> Fable.Core.TS.Es.Function) with get, set
         /// <summary>
         /// The <c>settled</c> hook must be a plain function. Providing an async function will throw as it would produce an infinite microtask loop.
         /// </summary>
         /// <remarks>@since v17.1.0, v16.14.0</remarks>
         /// <param name="settled">The {@link Settled | <c>settled</c> callback} to call when a promise is created.</param>
         /// <returns>Call to stop the hook.</returns>
-        abstract onSettled: (Settled -> JS.Function) with get, set
+        abstract onSettled: (Settled -> Fable.Core.TS.Es.Function) with get, set
         /// <summary>
         /// The <c>before</c> hook must be a plain function. Providing an async function will throw as it would produce an infinite microtask loop.
         /// </summary>
         /// <remarks>@since v17.1.0, v16.14.0</remarks>
         /// <param name="before">The {@link Before | <c>before</c> callback} to call before a promise continuation executes.</param>
         /// <returns>Call to stop the hook.</returns>
-        abstract onBefore: (Before -> JS.Function) with get, set
+        abstract onBefore: (Before -> Fable.Core.TS.Es.Function) with get, set
         /// <summary>
         /// The <c>after</c> hook must be a plain function. Providing an async function will throw as it would produce an infinite microtask loop.
         /// </summary>
         /// <remarks>@since v17.1.0, v16.14.0</remarks>
         /// <param name="after">The {@link After | <c>after</c> callback} to call after a promise continuation executes.</param>
         /// <returns>Call to stop the hook.</returns>
-        abstract onAfter: (After -> JS.Function) with get, set
+        abstract onAfter: (After -> Fable.Core.TS.Es.Function) with get, set
         /// <summary>
         /// Registers functions to be called for different lifetime events of each promise.
         /// The callbacks <c>init()</c>/<c>before()</c>/<c>after()</c>/<c>settled()</c> are called for the respective events during a promise's lifetime.
@@ -245819,16 +248095,16 @@ module V8 =
         /// <remarks>@since v17.1.0, v16.14.0</remarks>
         /// <param name="callbacks">The {@link HookCallbacks | Hook Callbacks} to register</param>
         /// <returns>Used for disabling hooks</returns>
-        abstract createHook: (HookCallbacks -> JS.Function) with get, set
+        abstract createHook: (HookCallbacks -> Fable.Core.TS.Es.Function) with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                onInit: (Init -> JS.Function),
-                onSettled: (Settled -> JS.Function),
-                onBefore: (Before -> JS.Function),
-                onAfter: (After -> JS.Function),
-                createHook: (HookCallbacks -> JS.Function)
+                onInit: (Init -> Fable.Core.TS.Es.Function),
+                onSettled: (Settled -> Fable.Core.TS.Es.Function),
+                onBefore: (Before -> Fable.Core.TS.Es.Function),
+                onAfter: (After -> Fable.Core.TS.Es.Function),
+                createHook: (HookCallbacks -> Fable.Core.TS.Es.Function)
             ) : PromiseHooks =
             jsNative
 
@@ -246098,7 +248374,7 @@ module V8 =
         /// <remarks>@since v20.13.0</remarks>
         /// <remarks>@experimental</remarks>
         [<Import("queryObjects", "node:v8")>]
-        static member queryObjects(ctor: JS.Function) : U2<float, string[]> = jsNative
+        static member queryObjects(ctor: Fable.Core.TS.Es.Function) : U2<float, string[]> = jsNative
 
         /// <summary>
         /// This is similar to the <a href="https://developer.chrome.com/docs/devtools/console/utilities#queryObjects-function"><c>queryObjects()</c> console API</a>
@@ -246141,7 +248417,7 @@ module V8 =
         /// <remarks>@since v20.13.0</remarks>
         /// <remarks>@experimental</remarks>
         [<Import("queryObjects", "node:v8")>]
-        static member queryObjects(ctor: JS.Function, options: V8.QueryObjects.Options) : float = jsNative
+        static member queryObjects(ctor: Fable.Core.TS.Es.Function, options: V8.QueryObjects.Options) : float = jsNative
 
         /// <summary>
         /// This is similar to the <a href="https://developer.chrome.com/docs/devtools/console/utilities#queryObjects-function"><c>queryObjects()</c> console API</a>
@@ -246184,7 +248460,8 @@ module V8 =
         /// <remarks>@since v20.13.0</remarks>
         /// <remarks>@experimental</remarks>
         [<Import("queryObjects", "node:v8")>]
-        static member queryObjects(ctor: JS.Function, options: V8.QueryObjects.Options2) : string[] = jsNative
+        static member queryObjects(ctor: Fable.Core.TS.Es.Function, options: V8.QueryObjects.Options2) : string[] =
+            jsNative
 
         /// <summary>
         /// Generates a snapshot of the current V8 heap and returns a Readable
@@ -246334,17 +248611,17 @@ module V8 =
         static member Deserializer
             (data:
                 U11<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  >)
             : Deserializer =
             jsNative
@@ -246357,17 +248634,17 @@ module V8 =
         static member DefaultDeserializer
             (data:
                 U11<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  >)
             : DefaultDeserializer =
             jsNative
@@ -246393,18 +248670,18 @@ module V8 =
         static member deserialize
             (buffer:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  >)
             : obj =
             jsNative
@@ -246638,18 +248915,18 @@ module Vm =
         /// </summary>
         abstract cachedData:
             U12<
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
-                JS.DataView,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              > option with get, set
 
         /// <remarks>@deprecated in favor of <c>script.createCachedData()</c></remarks>
@@ -246666,18 +248943,18 @@ module Vm =
             (
                 ?cachedData:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?produceCachedData: bool,
                 ?importModuleDynamically: U2<float, Vm.ScriptOptions.ImportModuleDynamically>,
@@ -246772,18 +249049,18 @@ module Vm =
                 ?columnOffset: float,
                 ?cachedData:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?displayErrors: bool,
                 ?timeout: float,
@@ -246811,18 +249088,18 @@ module Vm =
                 ?columnOffset: float,
                 ?cachedData:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?displayErrors: bool,
                 ?timeout: float,
@@ -246845,7 +249122,7 @@ module Vm =
         /// <summary>
         /// An array containing a collection of context extensions (objects wrapping the current scope) to be applied while compiling
         /// </summary>
-        abstract contextExtensions: JS.Object[] option with get, set
+        abstract contextExtensions: Fable.Core.TS.Es.Object[] option with get, set
         /// <summary>
         /// Used to specify how the modules should be loaded during the evaluation of this script when <c>import()</c> is called. This option is
         /// part of the experimental modules API. We do not recommend using it in a production environment. For detailed information, see
@@ -246857,25 +249134,25 @@ module Vm =
         static member Create
             (
                 ?parsingContext: Context,
-                ?contextExtensions: JS.Object[],
+                ?contextExtensions: Fable.Core.TS.Es.Object[],
                 ?importModuleDynamically: U2<float, Vm.CompileFunctionOptions.ImportModuleDynamically>,
                 ?filename: string,
                 ?lineOffset: float,
                 ?columnOffset: float,
                 ?cachedData:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?produceCachedData: bool
             ) : CompileFunctionOptions =
@@ -247269,7 +249546,7 @@ module Vm =
         /// Corresponds to the <a href="https://tc39.es/ecma262/#sec-getmodulenamespace">GetModuleNamespace</a> abstract operation in the ECMAScript
         /// specification.
         /// </summary>
-        abstract ``namespace``: JS.Object with get, set
+        abstract ``namespace``: Fable.Core.TS.Es.Object with get, set
         /// <summary>
         /// The current status of the module. Will be one of:
         /// <br /><br />
@@ -247345,7 +249622,7 @@ module Vm =
                 error: obj,
                 identifier: string,
                 context: Context,
-                ``namespace``: JS.Object,
+                ``namespace``: Fable.Core.TS.Es.Object,
                 status: ModuleStatus,
                 evaluate: (ModuleEvaluateOptions option -> JS.Promise<unit>),
                 link: (ModuleLinker -> JS.Promise<unit>)
@@ -247402,18 +249679,18 @@ module Vm =
                 ?columnOffset: float,
                 ?cachedData:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >
             ) : SourceTextModuleOptions =
             jsNative
@@ -247483,7 +249760,7 @@ module Vm =
                 error: obj,
                 identifier: string,
                 context: Context,
-                ``namespace``: JS.Object,
+                ``namespace``: Fable.Core.TS.Es.Object,
                 status: ModuleStatus,
                 evaluate: (ModuleEvaluateOptions option -> JS.Promise<unit>),
                 link: (ModuleLinker -> JS.Promise<unit>)
@@ -247559,7 +249836,7 @@ module Vm =
                 error: obj,
                 identifier: string,
                 context: Context,
-                ``namespace``: JS.Object,
+                ``namespace``: Fable.Core.TS.Es.Object,
                 status: ModuleStatus,
                 evaluate: (ModuleEvaluateOptions option -> JS.Promise<unit>),
                 link: (ModuleLinker -> JS.Promise<unit>)
@@ -248005,18 +250282,18 @@ module Vm =
             /// </summary>
             abstract cachedData:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > option with get, set
 
             /// <remarks>@deprecated in favor of <c>script.createCachedData()</c></remarks>
@@ -248027,18 +250304,20 @@ module Vm =
                 (
                     ?cachedData:
                         U12<
-                            BigInt64Array<obj>,
-                            BigUint64Array<obj>,
-                            JS.DataView,
-                            Float32Array<obj>,
-                            Float64Array<obj>,
-                            Int16Array<obj>,
-                            Int32Array<obj>,
-                            Int8Array<obj>,
-                            Uint16Array<obj>,
-                            Uint32Array<obj>,
-                            Uint8Array<obj>,
-                            Uint8ClampedArray<obj>
+                            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.DataView<
+                                U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                             >,
+                            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                          >,
                     ?produceCachedData: bool
                 ) : Base =
@@ -248052,7 +250331,6 @@ module Vm =
                     U2<Vm.Module, JS.Promise<Vm.Module>>
 
         module ImportModuleDynamically =
-            [<Interface>]
             type Referrer =
                 /// <summary>
                 /// Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
@@ -248080,7 +250358,7 @@ module Vm =
                 abstract prototype: obj with get, set
                 abstract length: float
                 abstract arguments: obj with get, set
-                abstract caller: JS.Function with get, set
+                abstract caller: Fable.Core.TS.Es.Function with get, set
                 /// <summary>
                 /// Returns the name of the function. Function names are read-only and can not be changed.
                 /// </summary>
@@ -248096,23 +250374,15 @@ module Vm =
                 abstract cachedDataRejected: bool option with get, set
                 abstract cachedData: NonSharedBuffer option with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        apply: Func<obj, obj option, obj>,
-                        call: Func<obj, obj[], obj>,
-                        bind: Func<obj, obj[], obj>,
-                        toString: (unit -> string),
-                        prototype: obj,
-                        length: float,
-                        arguments: obj,
-                        caller: JS.Function,
-                        name: string,
-                        ?cachedDataProduced: bool,
-                        ?cachedDataRejected: bool,
-                        ?cachedData: NonSharedBuffer
-                    ) : Referrer =
-                    jsNative
+                /// <summary>
+                /// Determines whether the given value inherits from this function if this function was used
+                /// as a constructor function.
+                /// <br /><br />
+                /// A constructor function can control which objects are recognized as its instances by
+                /// 'instanceof' by overriding this method.
+                /// </summary>
+                [<Emit("$0[Symbol.hasInstance]($1...)")>]
+                abstract SymbolHasInstance: value: obj -> bool
 
     module CreateContextOptions =
         type ImportModuleDynamically =
@@ -248170,36 +250440,36 @@ module Vm =
             /// </summary>
             abstract cachedData:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > option with get, set
 
             [<ParamObject; Emit("$0")>]
             static member Create
                 (?cachedData:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >)
                 : Base =
                 jsNative
@@ -248257,18 +250527,18 @@ module Vm =
             /// </summary>
             abstract cachedData:
                 U12<
-                    BigInt64Array<obj>,
-                    BigUint64Array<obj>,
-                    JS.DataView,
-                    Float32Array<obj>,
-                    Float64Array<obj>,
-                    Int16Array<obj>,
-                    Int32Array<obj>,
-                    Int8Array<obj>,
-                    Uint16Array<obj>,
-                    Uint32Array<obj>,
-                    Uint8Array<obj>,
-                    Uint8ClampedArray<obj>
+                    BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                    Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                  > option with get, set
 
             [<ParamObject; Emit("$0")>]
@@ -248278,18 +250548,20 @@ module Vm =
                     ?columnOffset: float,
                     ?cachedData:
                         U12<
-                            BigInt64Array<obj>,
-                            BigUint64Array<obj>,
-                            JS.DataView,
-                            Float32Array<obj>,
-                            Float64Array<obj>,
-                            Int16Array<obj>,
-                            Int32Array<obj>,
-                            Int8Array<obj>,
-                            Uint16Array<obj>,
-                            Uint32Array<obj>,
-                            Uint8Array<obj>,
-                            Uint8ClampedArray<obj>
+                            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Fable.Core.TS.Es.DataView<
+                                U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+                             >,
+                            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                          >
                 ) : Base =
                 jsNative
@@ -248324,7 +250596,7 @@ module Wasi =
         /// directories within the sandbox. The corresponding values in <c>preopens</c> are
         /// the real paths to those directories on the host machine.
         /// </summary>
-        abstract preopens: Record<string, string option> option with get, set
+        abstract preopens: JS.Record<string, string option> option with get, set
         /// <summary>
         /// By default, when WASI applications call <c>__wasi_proc_exit()</c>
         /// <c>wasi.start()</c> will return with the exit code specified rather than terminatng the process.
@@ -248361,7 +250633,7 @@ module Wasi =
                 version: Wasi.WASIOptions.Version,
                 ?args: string[],
                 ?env: obj,
-                ?preopens: Record<string, string option>,
+                ?preopens: JS.Record<string, string option>,
                 ?returnOnExit: bool,
                 ?stdin: float,
                 ?stdout: float,
@@ -248486,7 +250758,7 @@ module WorkerThreads =
     type Transferable =
         U7<
             AbortSignal,
-            JS.ArrayBuffer,
+            Fable.Core.TS.Es.ArrayBuffer,
             Fs.Promises.FileHandle,
             MessagePort,
             Stream.Web.ReadableStream<obj>,
@@ -250093,7 +252365,7 @@ module WorkerThreads =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> JS.Function[]
+        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -250123,7 +252395,7 @@ module WorkerThreads =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> JS.Function[]
+        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -250132,7 +252404,7 @@ module WorkerThreads =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: JS.Function -> float
+        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
         /// <summary>
         /// Listens once to the <c>abort</c> event on the provided <c>signal</c>.
@@ -250658,7 +252930,9 @@ module WorkerThreads =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Worker.getEventListeners", "node:worker_threads")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -251246,19 +253520,19 @@ module Zlib =
         /// </summary>
         abstract dictionary:
             U13<
-                JS.ArrayBuffer,
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
-                JS.DataView,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                Fable.Core.TS.Es.ArrayBuffer,
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              > option with get, set
 
         /// <summary>
@@ -251283,19 +253557,19 @@ module Zlib =
                 ?strategy: float,
                 ?dictionary:
                     U13<
-                        JS.ArrayBuffer,
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        Fable.Core.TS.Es.ArrayBuffer,
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >,
                 ?info: bool,
                 ?maxOutputLength: float
@@ -251310,7 +253584,7 @@ module Zlib =
         abstract finishFlush: float option with get, set
         /// <defaultValue>16*1024</defaultValue>
         abstract chunkSize: float option with get, set
-        abstract ``params``: Record<float, U2<float, bool>> option with get, set
+        abstract ``params``: JS.Record<float, U2<float, bool>> option with get, set
         /// <summary>
         /// Limits output size when using <a href="https://nodejs.org/docs/latest-v22.x/api/zlib.html#convenience-methods">convenience methods</a>.
         /// </summary>
@@ -251327,7 +253601,7 @@ module Zlib =
                 ?flush: float,
                 ?finishFlush: float,
                 ?chunkSize: float,
-                ?``params``: Record<float, U2<float, bool>>,
+                ?``params``: JS.Record<float, U2<float, bool>>,
                 ?maxOutputLength: float,
                 ?info: bool
             ) : BrotliOptions =
@@ -251345,7 +253619,7 @@ module Zlib =
         /// Key-value object containing indexed
         /// <a href="https://nodejs.org/docs/latest-v22.x/api/zlib.html#zstd-constants">Zstd parameters</a>.
         /// </summary>
-        abstract ``params``: Record<float, U2<float, bool>> option with get, set
+        abstract ``params``: JS.Record<float, U2<float, bool>> option with get, set
         /// <summary>
         /// Limits output size when using
         /// <a href="https://nodejs.org/docs/latest-v22.x/api/zlib.html#convenience-methods">convenience methods</a>.
@@ -251364,18 +253638,18 @@ module Zlib =
         /// <remarks>@since v22.19.0</remarks>
         abstract dictionary:
             U12<
-                BigInt64Array<obj>,
-                BigUint64Array<obj>,
-                JS.DataView,
-                Float32Array<obj>,
-                Float64Array<obj>,
-                Int16Array<obj>,
-                Int32Array<obj>,
-                Int8Array<obj>,
-                Uint16Array<obj>,
-                Uint32Array<obj>,
-                Uint8Array<obj>,
-                Uint8ClampedArray<obj>
+                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
              > option with get, set
 
         [<ParamObject; Emit("$0")>]
@@ -251384,23 +253658,23 @@ module Zlib =
                 ?flush: float,
                 ?finishFlush: float,
                 ?chunkSize: float,
-                ?``params``: Record<float, U2<float, bool>>,
+                ?``params``: JS.Record<float, U2<float, bool>>,
                 ?maxOutputLength: float,
                 ?info: bool,
                 ?dictionary:
                     U12<
-                        BigInt64Array<obj>,
-                        BigUint64Array<obj>,
-                        JS.DataView,
-                        Float32Array<obj>,
-                        Float64Array<obj>,
-                        Int16Array<obj>,
-                        Int32Array<obj>,
-                        Int8Array<obj>,
-                        Uint16Array<obj>,
-                        Uint32Array<obj>,
-                        Uint8Array<obj>,
-                        Uint8ClampedArray<obj>
+                        BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+                        Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
                      >
             ) : ZstdOptions =
             jsNative
@@ -251465,7 +253739,15 @@ module Zlib =
             destination: 'T * ?options: Zlib.BrotliCompress.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Zlib.BrotliCompress.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.BrotliCompress.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -253299,7 +255581,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("BrotliCompress.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -253557,7 +255841,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("BrotliCompress.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -253902,7 +256200,15 @@ module Zlib =
             destination: 'T * ?options: Zlib.BrotliDecompress.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Zlib.BrotliDecompress.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.BrotliDecompress.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -255736,7 +258042,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("BrotliDecompress.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -255994,7 +258302,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("BrotliDecompress.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -256335,7 +258657,18 @@ module Zlib =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Gzip
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Zlib.Gzip.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Zlib.Gzip.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.Gzip.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -258168,7 +260501,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Gzip.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -258426,7 +260761,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Gzip.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -258767,7 +261116,18 @@ module Zlib =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Gunzip
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Zlib.Gunzip.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Zlib.Gunzip.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.Gunzip.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -260600,7 +262960,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Gunzip.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -260858,7 +263220,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Gunzip.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -261201,7 +263577,18 @@ module Zlib =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Deflate
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Zlib.Deflate.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Zlib.Deflate.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.Deflate.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -263034,7 +265421,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Deflate.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -263292,7 +265681,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Deflate.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -263634,7 +266037,18 @@ module Zlib =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Inflate
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Zlib.Inflate.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Zlib.Inflate.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.Inflate.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -265467,7 +267881,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Inflate.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -265725,7 +268141,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Inflate.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -266068,7 +268498,18 @@ module Zlib =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> DeflateRaw
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Zlib.DeflateRaw.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Zlib.DeflateRaw.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.DeflateRaw.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -267901,7 +270342,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("DeflateRaw.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -268159,7 +270602,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("DeflateRaw.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -268501,7 +270958,18 @@ module Zlib =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> InflateRaw
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Zlib.InflateRaw.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Zlib.InflateRaw.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.InflateRaw.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -270334,7 +272802,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("InflateRaw.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -270592,7 +273062,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("InflateRaw.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -270933,7 +273417,18 @@ module Zlib =
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> Unzip
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Zlib.Unzip.Pipe.Options -> 'T
-        abstract compose<'T when 'T :> ReadableStream2> : stream: obj * ?options: Zlib.Unzip.Compose.Options -> 'T
+
+        abstract compose<'T when 'T :> ReadableStream2> :
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.Unzip.Compose.Options ->
+                'T
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -272766,7 +275261,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Unzip.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -273024,7 +275521,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("Unzip.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -273368,7 +275879,15 @@ module Zlib =
         abstract pipe<'T when 'T :> WritableStream2> : destination: 'T * ?options: Zlib.ZstdCompress.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Zlib.ZstdCompress.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.ZstdCompress.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -275202,7 +277721,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ZstdCompress.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -275460,7 +277981,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("ZstdCompress.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -275806,7 +278341,15 @@ module Zlib =
             destination: 'T * ?options: Zlib.ZstdDecompress.Pipe.Options -> 'T
 
         abstract compose<'T when 'T :> ReadableStream2> :
-            stream: obj * ?options: Zlib.ZstdDecompress.Compose.Options -> 'T
+            stream:
+                U4<
+                    'T,
+                    Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
+                    (obj -> unit),
+                    Fable.Core.TS.Es.Iterable<'T, obj, obj>
+                 > *
+            ?options: Zlib.ZstdDecompress.Compose.Options ->
+                'T
 
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
@@ -277640,7 +280183,9 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ZstdDecompress.getEventListeners", "node:zlib")>]
-        static member getEventListeners(emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj) : JS.Function[] =
+        static member getEventListeners
+            (emitter: U2<EventEmitter<unit[]>, EventTarget>, name: obj)
+            : Fable.Core.TS.Es.Function[] =
             jsNative
 
         /// <summary>
@@ -277898,7 +280443,21 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v16.8.0</remarks>
         [<Import("ZstdDecompress.from", "node:zlib")>]
-        static member from(src: obj) : Stream.Duplex = jsNative
+        static member from
+            (src:
+                U9<
+                    string,
+                    Fable.Core.TS.Es.ArrayBuffer,
+                    Fable.Core.TS.Es.AsyncGeneratorFunction,
+                    Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>,
+                    _Blob,
+                    Fable.Core.TS.Es.Iterable<obj, obj, obj>,
+                    Fable.Core.TS.Es.Object,
+                    JS.Promise<obj>,
+                    Stream.Stream
+                 >)
+            : Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// A utility method for creating a web <c>ReadableStream</c> and <c>WritableStream</c> from a <c>Duplex</c>.
@@ -278209,19 +280768,19 @@ module Zlib =
     type InputType =
         U14<
             string,
-            JS.ArrayBuffer,
-            BigInt64Array<obj>,
-            BigUint64Array<obj>,
-            JS.DataView,
-            Float32Array<obj>,
-            Float64Array<obj>,
-            Int16Array<obj>,
-            Int32Array<obj>,
-            Int8Array<obj>,
-            Uint16Array<obj>,
-            Uint32Array<obj>,
-            Uint8Array<obj>,
-            Uint8ClampedArray<obj>
+            Fable.Core.TS.Es.ArrayBuffer,
+            BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
+            Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
          >
 
     type CompressCallback = delegate of error: exn option * result: NonSharedBuffer -> unit

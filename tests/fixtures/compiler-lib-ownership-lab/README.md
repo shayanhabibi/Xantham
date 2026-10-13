@@ -4,6 +4,9 @@ The default fixture adds application declarations to ES5. Its aliases and `Windo
 intersection belong to the entry module; the compiler's `Date` and other shared declarations
 remain in the core group. The golden compile gate checks their references together.
 
+Under `ship`, the compiler's `Promise` and `PromiseLike` are written as Fable.Core's `JS.Promise`
+in the core group and the entry alike, so promises unify with Fable.Promise and consumers.
+
 The live tests also select `clean.d.ts`, whose empty export contributes no declarations, and
 `referenced-augmentation.d.ts`, whose otherwise empty root loads a `DateConstructor` augmentation.
 Only the clean program earns compiler-core ownership of its synthetic `GlobalThis`.

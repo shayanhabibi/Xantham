@@ -476,9 +476,9 @@ always was.
   interface receiver); emit doc note when the declared `this` differs from the receiver.
 - Type predicates (`x is Foo`) → return `bool`, Widened, doc-noted. (An erased
   `TypeGuard<'T>` that unlocks a typed read is possible future work.)
-- Generators/iterables → `JS.Iterable` / `seq<'T>` (Fable understands both); async
-  iterables → `JS.AsyncIterable`. Promises → `JS.Promise<'T>` (leave `Async` adaptation to
-  the consumer or an opt-in wrapper layer; don't bake it into bindings).
+- Generators/iterables → Core.TS's `Fable.Core.TS.Es.Iterable` / `AsyncIterable` (not
+  `seq<'T>`). Promises → `JS.Promise<'T>` (leave `Async` adaptation to the consumer or an
+  opt-in wrapper layer; don't bake it into bindings).
 
 *Landed (2026-09-02, phase D) - the compiler-lib group's disposition.* O7 widened everything
 the compiler's own `lib.d.ts` declares to `obj`, "until the shipped compiler-lib package
@@ -495,8 +495,25 @@ Ergonomic finding; one carrying fewer is some other type wearing a familiar name
 as before. `PromiseLike`, `ReadonlyMap` and `ReadonlySet` map with a finding for the
 restriction F# has no binding for.
 
-One absence is deliberate: the *synchronous* iteration protocol (`Iterable`, `Iterator`) has
-no Fable.Core binding, and `seq<'T>` is not one however alike the two look.
+The *synchronous* iteration protocol (`Iterable`, `Iterator`) has no Fable.Core binding, and
+`seq<'T>` is not one however alike the two look. Under the default `widen` disposition it is
+written as Core.TS's own JS-iterable interface, `Fable.Core.TS.Es.Iterable<'T, 'TReturn,
+'TNext>`, as is every other ECMAScript declaration the table does not bind (2026-10-13, W3
+#134; `generator-architecture.md`, "ECMAScript consumer bindings"). `seq<'T>` is still not
+used; W4 owns `[Symbol.iterator]` → `inherit seq<'T>`.
+
+*Superseded (2026-10-13, W3 #134).* Generated bindings are free of Fable.Core's `JS.*`
+bindings except where the Fable compiler or the ecosystem's support pins one. `LibBindings`
+keeps three entries: `Promise` and `PromiseLike` → `JS.Promise<'T>` (Fable.Promise's
+`promise { }` and `Async.AwaitPromise`/`StartAsPromise` are written against it; `PromiseLike`
+keeps its loss finding) and `Error` → `exn` (Fable compiles `System.Exception` to a JavaScript
+`Error`). Every other former entry (`Map`, `Set`, `Date`, `Function`, `ArrayBuffer`, the typed
+arrays, the async-iteration names, ...) is written as its `Fable.Core.TS.Es` declaration at
+its real arity, under every non-ship disposition. Their arity truncations (TR024) and readonly
+or shape losses (TR025) are gone because Core.TS carries the real declarations, and a
+consumer's `U2<Es.ArrayBuffer, Es.SharedArrayBuffer>` is now Core.TS's `ArrayBufferLike`.
+The promise rows bind under `ship` too, so Core.TS returns `JS.Promise` as well.
+`generator-architecture.md`, "ECMAScript consumer bindings", has the measurements.
 
 What it was worth on the workers-types rung: widened findings 528 -> 451, and 39 "type
 parameter is erased: every use of it widened away" findings gone, because a generic whose only

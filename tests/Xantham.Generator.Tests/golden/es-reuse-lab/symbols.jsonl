@@ -1,0 +1,14 @@
+{"name":"Exports.fill","tier":"exact","findings":[]}
+{"name":"Exports.wrap","tier":"exact","findings":[]}
+{"name":"Exports.share","tier":"exact","findings":[]}
+{"name":"Exports.words","tier":"ergonomic","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.words(values)","message":"any maps to obj"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.words(values)","message":"any maps to obj"}]}
+{"name":"Exports.entries","tier":"exact","findings":[]}
+{"name":"Exports.test","tier":"exact","findings":[]}
+{"name":"Exports.generatorFunction","tier":"exact","findings":[]}
+{"name":"Exports.format","tier":"exact","findings":[]}
+{"name":"Exports.later","tier":"exact","findings":[]}
+{"name":"Exports.settle","tier":"ergonomic","findings":[{"name":"TR.LibBindingLoss","key":"TR025","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.settle(value)","fields":{"note":"PromiseLike reads as JS.Promise; a bare thenable is not one"},"message":"PromiseLike reads as JS.Promise; a bare thenable is not one"}]}
+{"name":"Exports.index","tier":"exact","findings":[]}
+{"name":"Exports.unique","tier":"exact","findings":[]}
+{"name":"Exports.bytes","tier":"exact","findings":[]}
+{"name":"Exports.fail","tier":"ergonomic","findings":[{"name":"TR.LibBindingLoss","key":"TR025","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.fail()","fields":{"note":"Error reads as exn; the JavaScript name, stack and cause properties are not on it"},"message":"Error reads as exn; the JavaScript name, stack and cause properties are not on it"}]}

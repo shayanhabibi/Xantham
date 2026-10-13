@@ -670,13 +670,13 @@ type AutoLayout =
     /// <remarks>@type {LayoutStateParams}</remarks>
     abstract leaveToParams: LayoutStateParams with get, set
     /// <remarks>@type {Set&lt;String&gt;}</remarks>
-    abstract properties: JS.Set<string> with get, set
+    abstract properties: Fable.Core.TS.Es.Set<string> with get, set
     /// <remarks>@type {Set&lt;String&gt;}</remarks>
-    abstract recordedProperties: JS.Set<string> with get, set
+    abstract recordedProperties: Fable.Core.TS.Es.Set<string> with get, set
     /// <remarks>@type {WeakSet&lt;DOMTarget&gt;}</remarks>
-    abstract pendingRemoval: JS.WeakSet<DOMTarget> with get, set
+    abstract pendingRemoval: Fable.Core.TS.Es.WeakSet<DOMTarget> with get, set
     /// <remarks>@type {Map&lt;DOMTarget, String|null&gt;}</remarks>
-    abstract transitionMuteStore: JS.Map<DOMTarget, string option> with get, set
+    abstract transitionMuteStore: Fable.Core.TS.Es.Map<DOMTarget, string option> with get, set
     /// <remarks>@type {LayoutSnapshot}</remarks>
     abstract oldState: LayoutSnapshot with get, set
     /// <remarks>@type {LayoutSnapshot}</remarks>
@@ -698,7 +698,7 @@ type AutoLayout =
     abstract animate: ?``params``: LayoutAnimationParams -> Timeline
     abstract update: callback: (AutoLayout -> unit) * ?``params``: LayoutAnimationParams -> Timeline
     [<ParamObject; Emit("$0")>]
-    static member Create (``params``: AutoLayoutParams, root: DOMTarget, id: TimelinePosition, children: LayoutChildrenParam, absoluteCoords: bool, swapAtParams: LayoutStateParams, enterFromParams: LayoutStateParams, leaveToParams: LayoutStateParams, properties: JS.Set<string>, recordedProperties: JS.Set<string>, pendingRemoval: JS.WeakSet<DOMTarget>, transitionMuteStore: JS.Map<DOMTarget, string option>, oldState: LayoutSnapshot, newState: LayoutSnapshot, timeline: Timeline, transformAnimation: WAAPIAnimation, animating: DOMTarget[], swapping: DOMTarget[], leaving: DOMTarget[], entering: DOMTarget[], revert: (unit -> AutoLayout), record: (unit -> AutoLayout), animate: (LayoutAnimationParams option -> Timeline), update: Func<(AutoLayout -> unit), LayoutAnimationParams option, Timeline>) : AutoLayout = jsNative
+    static member Create (``params``: AutoLayoutParams, root: DOMTarget, id: TimelinePosition, children: LayoutChildrenParam, absoluteCoords: bool, swapAtParams: LayoutStateParams, enterFromParams: LayoutStateParams, leaveToParams: LayoutStateParams, properties: Fable.Core.TS.Es.Set<string>, recordedProperties: Fable.Core.TS.Es.Set<string>, pendingRemoval: Fable.Core.TS.Es.WeakSet<DOMTarget>, transitionMuteStore: Fable.Core.TS.Es.Map<DOMTarget, string option>, oldState: LayoutSnapshot, newState: LayoutSnapshot, timeline: Timeline, transformAnimation: WAAPIAnimation, animating: DOMTarget[], swapping: DOMTarget[], leaving: DOMTarget[], entering: DOMTarget[], revert: (unit -> AutoLayout), record: (unit -> AutoLayout), animate: (LayoutAnimationParams option -> Timeline), update: Func<(AutoLayout -> unit), LayoutAnimationParams option, Timeline>) : AutoLayout = jsNative
 
 [<Interface>]
 type LayoutSnapshot =
@@ -707,9 +707,9 @@ type LayoutSnapshot =
     /// <remarks>@type {LayoutNode|null}</remarks>
     abstract rootNode: LayoutNode option with get, set
     /// <remarks>@type {Set&lt;LayoutNode&gt;}</remarks>
-    abstract rootNodes: JS.Set<LayoutNode> with get, set
+    abstract rootNodes: Fable.Core.TS.Es.Set<LayoutNode> with get, set
     /// <remarks>@type {Map&lt;String, LayoutNode&gt;}</remarks>
-    abstract nodes: JS.Map<string, LayoutNode> with get, set
+    abstract nodes: Fable.Core.TS.Es.Map<string, LayoutNode> with get, set
     /// <remarks>@type {Number}</remarks>
     abstract scrollX: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -721,10 +721,10 @@ type LayoutSnapshot =
     abstract forEachRootNode: cb: LayoutNodeIterator -> unit
     abstract forEachNode: cb: LayoutNodeIterator -> unit
     abstract registerElement: ``$el``: DOMTarget * ?parentNode: LayoutNode -> LayoutNode option
-    abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: JS.Set<DOMTarget> -> LayoutNode option
+    abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: Fable.Core.TS.Es.Set<DOMTarget> -> LayoutNode option
     abstract record: unit -> LayoutSnapshot
     [<ParamObject; Emit("$0")>]
-    static member Create (layout: AutoLayout, rootNodes: JS.Set<LayoutNode>, nodes: JS.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: (unit -> LayoutSnapshot), getNode: (DOMTarget -> LayoutNode), getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: (LayoutNodeIterator -> unit), forEachNode: (LayoutNodeIterator -> unit), registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, JS.Set<DOMTarget>, LayoutNode option>, record: (unit -> LayoutSnapshot), ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
+    static member Create (layout: AutoLayout, rootNodes: Fable.Core.TS.Es.Set<LayoutNode>, nodes: Fable.Core.TS.Es.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: (unit -> LayoutSnapshot), getNode: (DOMTarget -> LayoutNode), getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: (LayoutNodeIterator -> unit), forEachNode: (LayoutNodeIterator -> unit), registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, Fable.Core.TS.Es.Set<DOMTarget>, LayoutNode option>, record: (unit -> LayoutSnapshot), ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
 
 type LayoutChildrenParam = U5<string, DOMTargetSelector[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>
 
@@ -985,9 +985,9 @@ type Segment =
 
 [<Interface>]
 type Segmenter =
-    abstract segment: (string -> obj) with get, set
+    abstract segment: (string -> Fable.Core.TS.Es.Iterable<Segment, obj, obj>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (segment: (string -> obj)) : Segmenter = jsNative
+    static member Create (segment: (string -> Fable.Core.TS.Es.Iterable<Segment, obj, obj>)) : Segmenter = jsNative
 
 type Timeline =
     inherit Timer
@@ -1124,7 +1124,7 @@ type Timer =
     /// <remarks>@type {Number}</remarks>
     abstract _currentIteration: float with get, set
     /// <remarks>@type {Function}</remarks>
-    abstract _resolve: JS.Function with get, set
+    abstract _resolve: Fable.Core.TS.Es.Function with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract _running: bool with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1528,8 +1528,8 @@ type Tween =
     abstract property: string with get, set
     abstract target: Target with get, set
     abstract _value: obj with get, set
-    abstract _toFunc: JS.Function option with get, set
-    abstract _fromFunc: JS.Function option with get, set
+    abstract _toFunc: Fable.Core.TS.Es.Function option with get, set
+    abstract _fromFunc: Fable.Core.TS.Es.Function option with get, set
     abstract _ease: EasingFunction with get, set
     abstract _fromNumbers: float[] with get, set
     abstract _toNumbers: float[] with get, set
@@ -1602,9 +1602,9 @@ type TweenPropertySiblings =
 
 type TweenLookups = JS.Record<string, TweenPropertySiblings>
 
-type TweenReplaceLookups = JS.WeakMap<Target, TweenLookups>
+type TweenReplaceLookups = Fable.Core.TS.Es.WeakMap<Target, TweenLookups>
 
-type TweenAdditiveLookups = JS.Map<Target, TweenLookups>
+type TweenAdditiveLookups = Fable.Core.TS.Es.Map<Target, TweenLookups>
 
 type TweenParamValue = U6<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>
 
@@ -3762,8 +3762,8 @@ type Utils =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     abstract stagger: ``val``: string * string * ?``params``: StaggerParams -> Utils.Stagger.Result2
-    abstract forEachChildren: Action<obj, JS.Function, bool option, string option, string option> with get, set
-    abstract addChild: Action<obj, obj, JS.Function option, string option, string option> with get, set
+    abstract forEachChildren: Action<obj, Fable.Core.TS.Es.Function, bool option, string option, string option> with get, set
+    abstract addChild: Action<obj, obj, Fable.Core.TS.Es.Function option, string option, string option> with get, set
     abstract removeChild: Action<obj, obj, string option, string option> with get, set
 
 type RandomNumberGenerator = delegate of min: float option * max: float option * decimalLength: float option -> float
@@ -3794,7 +3794,7 @@ type WAAPIAnimation =
     /// <remarks>@type {Number}</remarks>
     abstract _speed: float with get, set
     /// <remarks>@type {Function}</remarks>
-    abstract _resolve: JS.Function with get, set
+    abstract _resolve: Fable.Core.TS.Es.Function with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _completed: float with get, set
     /// <remarks>@type {Array.&lt;Object&gt;}</remarks>
@@ -3843,11 +3843,11 @@ type Exports =
     [<Import("globals", "animejs")>]
     static member globals: Globals = jsNative
     [<Import("forEachChildren", "animejs")>]
-    static member forEachChildren (parent: obj, callback: JS.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
+    static member forEachChildren (parent: obj, callback: Fable.Core.TS.Es.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("removeChild", "animejs")>]
     static member removeChild (parent: obj, child: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("addChild", "animejs")>]
-    static member addChild (parent: obj, child: obj, ?sortMethod: JS.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
+    static member addChild (parent: obj, child: obj, ?sortMethod: Fable.Core.TS.Es.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("cleanInlineStyles", "animejs")>]
     static member cleanInlineStyles<'T> (renderable: 'T) : 'T = jsNative
     /// <remarks>@overload</remarks>
@@ -3908,7 +3908,7 @@ type Exports =
     [<Import("engine", "animejs")>]
     static member engine: Engine = jsNative
     [<Import("scrollContainers", "animejs")>]
-    static member scrollContainers: JS.Map<obj, obj> = jsNative
+    static member scrollContainers: Fable.Core.TS.Es.Map<obj, obj> = jsNative
     [<Import("ScrollObserver", "animejs"); EmitConstructor>]
     static member ScrollObserver (?parameters: ScrollObserverParams) : ScrollObserver = jsNative
     [<Import("onScroll", "animejs")>]
@@ -4689,7 +4689,7 @@ module Events =
     [<Erase>]
     type Exports =
         [<Import("scrollContainers", "animejs/events")>]
-        static member scrollContainers: JS.Map<obj, obj> = jsNative
+        static member scrollContainers: Fable.Core.TS.Es.Map<obj, obj> = jsNative
         [<Import("ScrollObserver", "animejs/events"); EmitConstructor>]
         static member ScrollObserver (?parameters: ScrollObserverParams) : ScrollObserver = jsNative
         [<Import("onScroll", "animejs/events")>]
@@ -4699,18 +4699,18 @@ module Globals =
     [<Interface>]
     type Editor =
         abstract showPanel: bool with get, set
-        abstract addAnimation: JS.Function with get, set
-        abstract addSet: JS.Function with get, set
-        abstract addTimeline: JS.Function with get, set
-        abstract addTimelineChild: JS.Function with get, set
-        abstract addTimelineLabel: JS.Function with get, set
-        abstract addTimelineCall: JS.Function with get, set
-        abstract addTimelineSync: JS.Function with get, set
-        abstract resolveStagger: JS.Function with get, set
+        abstract addAnimation: Fable.Core.TS.Es.Function with get, set
+        abstract addSet: Fable.Core.TS.Es.Function with get, set
+        abstract addTimeline: Fable.Core.TS.Es.Function with get, set
+        abstract addTimelineChild: Fable.Core.TS.Es.Function with get, set
+        abstract addTimelineLabel: Fable.Core.TS.Es.Function with get, set
+        abstract addTimelineCall: Fable.Core.TS.Es.Function with get, set
+        abstract addTimelineSync: Fable.Core.TS.Es.Function with get, set
+        abstract resolveStagger: Fable.Core.TS.Es.Function with get, set
         abstract _head: obj with get, set
         abstract _tail: obj with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (showPanel: bool, addAnimation: JS.Function, addSet: JS.Function, addTimeline: JS.Function, addTimelineChild: JS.Function, addTimelineLabel: JS.Function, addTimelineCall: JS.Function, addTimelineSync: JS.Function, resolveStagger: JS.Function, _head: obj, _tail: obj) : Editor = jsNative
+        static member Create (showPanel: bool, addAnimation: Fable.Core.TS.Es.Function, addSet: Fable.Core.TS.Es.Function, addTimeline: Fable.Core.TS.Es.Function, addTimelineChild: Fable.Core.TS.Es.Function, addTimelineLabel: Fable.Core.TS.Es.Function, addTimelineCall: Fable.Core.TS.Es.Function, addTimelineSync: Fable.Core.TS.Es.Function, resolveStagger: Fable.Core.TS.Es.Function, _head: obj, _tail: obj) : Editor = jsNative
 
 /// <summary>animejs/layout</summary>
 module Layout =
@@ -4883,11 +4883,11 @@ module Utils =
     [<Erase>]
     type Exports =
         [<Import("forEachChildren", "animejs/utils")>]
-        static member forEachChildren (parent: obj, callback: JS.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
+        static member forEachChildren (parent: obj, callback: Fable.Core.TS.Es.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
         [<Import("removeChild", "animejs/utils")>]
         static member removeChild (parent: obj, child: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
         [<Import("addChild", "animejs/utils")>]
-        static member addChild (parent: obj, child: obj, ?sortMethod: JS.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
+        static member addChild (parent: obj, child: obj, ?sortMethod: Fable.Core.TS.Es.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
         [<Import("cleanInlineStyles", "animejs/utils")>]
         static member cleanInlineStyles<'T> (renderable: 'T) : 'T = jsNative
         /// <remarks>@overload</remarks>

@@ -844,11 +844,11 @@ let private authenticationTests compression =
 open Fable.Core
 let accept (reader: Identity.Root.Reader) : Identity.Root.Reader = Identity.Adapter.Exports.accept reader
 let unconstrained (value: Identity.Root.ReadResult2<string>) : string = value.value
-let read<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+let read<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>> (reader: Identity.Root.Reader) (view: 'T)
     : JS.Promise<U2<Identity.Root.ReadResult2<'T>, Identity.Root.ReadResult3>> = reader.read view
-let readAtLeast<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+let readAtLeast<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>> (reader: Identity.Root.Reader) (view: 'T)
     : JS.Promise<U2<Identity.Root.ReadResult2<'T>, Identity.Root.ReadResult3>> = reader.readAtLeast(1.0, view)
-let bound<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+let bound<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>> (reader: Identity.Root.Reader) (view: 'T)
     : JS.Promise<U2<Identity.Root.BoundResult2<'T>, Identity.Root.BoundResult3>> = reader.readBound view
 """
                     let code, output = compileConsumer directory sources consumer

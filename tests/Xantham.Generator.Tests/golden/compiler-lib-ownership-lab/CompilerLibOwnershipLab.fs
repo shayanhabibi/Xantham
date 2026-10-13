@@ -192,6 +192,7 @@ type GlobalThis =
     abstract Intl: TypeScript.Lib.Es.Intl with get, set
     abstract currentItem: Item with get, set
     abstract inspect: (Item[] -> Brief) with get, set
+    abstract settle: (JS.Promise<float> -> JS.Promise<string>) with get, set
     abstract windowLike: WindowLike with get, set
     abstract globalThis: GlobalThis
     abstract undefined: unit
@@ -211,6 +212,8 @@ type Exports =
         and set (_: Item): unit = jsNative
     [<Global("inspect")>]
     static member inspect (items: Item[]) : Brief = jsNative
+    [<Global("settle")>]
+    static member settle (value: JS.Promise<float>) : JS.Promise<string> = jsNative
     static member windowLike
         with get (): WindowLike = jsNative
         and set (_: WindowLike): unit = jsNative

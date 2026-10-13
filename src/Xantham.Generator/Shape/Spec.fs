@@ -1679,7 +1679,16 @@ and internal typeRefOnPath
                             [ Finding.make owner (TypeReference.TypeParameterOutOfScopeToConstraint name) ]
                         | None -> FsObj, [ Finding.make owner TypeReference.TypeParameterOutOfScope ]
         elif has TypeFlags.Object then
-            objectRef ctx model self owner facts
+            // A shipped compiler lib declares `Promise` and still writes references to it as
+            // `JS.Promise`, ahead of its own declaration.
+            match
+                (if GeneratorConfig.disposition ctx.Config CompilerLib = Ship then
+                     libBinding ctx model self owner facts
+                 else
+                     None)
+            with
+            | Some result -> result
+            | None -> objectRef ctx model self owner facts
         elif has TypeFlags.Index then
             keyOfRef model owner facts
         elif has TypeFlags.IndexedAccess then
@@ -1969,12 +1978,17 @@ and internal objectRef
 
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
-/// A compiler-lib type a shipped Fable package already binds - `Promise` -> `JS.Promise<'T>`,
-/// DOM declarations use the same names and arguments as the shipped Core.TS producer.
-/// The ECMAScript table retains its explicit arity and loss rules.
+/// A compiler-lib type a shipped package binds: `Error` -> `exn` and `Promise` -> `JS.Promise<'T>`
+/// through `Naming.LibBindings`, with their explicit arity and loss rules; any DOM declaration, a
+/// pinned ECMAScript declaration (`Map`, `Uint8Array`), and under `widen` any other ECMAScript
+/// declaration, under the name and arguments of the shipped Core.TS producer
+/// (`Fable.Core.TS.Dom`, `Fable.Core.TS.Es`). Under `ship`, only the promise names bind.
 and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
     match facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
-    | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
+    | CompilerLib, Some name when
+        GeneratorConfig.disposition ctx.Config CompilerLib <> Ship
+        || Naming.LibBindings.bindsWhenShipped name
+        ->
         let arguments = facts.TypeArguments
 
         // (F# name, arity it takes, the loss the mapping itself costs). A DOM binding costs
@@ -1986,18 +2000,25 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
                     None
                 else
                     Some(fsharpName, arity, Option.toList loss)
-            | None when
-                (facts.DeclFile |> Option.map (fun value -> value / uom<declFile>))
-                |> Option.exists (fun file -> Grouping.libFamily file = "Dom")
-                ->
-                Some($"Fable.Core.TS.Dom.{name}", arguments.Length, [])
-            | None -> None
+            | None ->
+                match facts.DeclFile |> Option.map (fun value -> value / uom<declFile>) with
+                | Some file when Grouping.libFamily file = "Dom" ->
+                    Some($"Fable.Core.TS.Dom.{name}", arguments.Length, [])
+                | Some file when
+                    Grouping.isLibFile file
+                    && name <> "globalThis"
+                    && not (isSyntheticName (name * uom<symbolName>))
+                    && (GeneratorConfig.disposition ctx.Config CompilerLib = Widen
+                        || Naming.LibBindings.isPinnedToCoreTs name)
+                    ->
+                    Some($"Fable.Core.TS.Es.{name}", arguments.Length, [])
+                | _ -> None
 
         match bound with
         | None -> None
         | Some(fsharpName, arity, loss) ->
             let parameters =
-                if fsharpName.StartsWith "Fable.Core.TS.Dom." then
+                if fsharpName.StartsWith "Fable.Core.TS." then
                     facts.Response.TargetTypeId
                     |> ValueOption.toOption
                     |> Option.bind (fun target -> Map.tryFind target model.Types)
@@ -2136,7 +2157,7 @@ and internal appliedRefTo
                 |> Option.orElseWith (fun () ->
                     match typeRef ctx model self owner boundId with
                     | FsApp _ as reference, _ -> Some reference
-                    | FsNamed name, [] when name <> "JS.Function" -> Some(FsNamed name)
+                    | FsNamed name, [] when name <> Naming.LibBindings.FunctionBinding -> Some(FsNamed name)
                     | _ -> None)
                 |> Option.map (fun reference -> boundId, reference)
             | _ -> None)
@@ -2634,7 +2655,7 @@ let typeParamsOf
                 |> Option.defaultValue true
 
             match bound with
-            | Some(FsNamed "JS.Function", _) ->
+            | Some(FsNamed Naming.LibBindings.FunctionBinding, _) ->
                 findings <-
                     findings
                     @ [ Finding.make owner (TypeParameters.FunctionConstraintDropped name) ]

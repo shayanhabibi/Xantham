@@ -72,9 +72,9 @@ type Recorder =
 /// </summary>
 [<Interface>]
 type Stamped =
-    abstract at: JS.Date
+    abstract at: Fable.Core.TS.Es.Date
     [<ParamObject; Emit("$0")>]
-    static member Create (at: JS.Date) : Stamped = jsNative
+    static member Create (at: Fable.Core.TS.Es.Date) : Stamped = jsNative
 
 /// <summary>
 /// A lib declaration at a reference position outside every shipped package: it widens under its

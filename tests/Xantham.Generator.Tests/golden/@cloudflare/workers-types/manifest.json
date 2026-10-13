@@ -3,9 +3,9 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 412,
-    "ergonomic": 1147,
-    "widened": 404,
+    "exact": 419,
+    "ergonomic": 1154,
+    "widened": 390,
     "escape": 1
   },
   "passes": [
@@ -27,9 +27,9 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 63,
+      "total": 61,
       "exact": 17,
-      "ergonomic": 43,
+      "ergonomic": 41,
       "widened": 3
     },
     {
@@ -40,23 +40,23 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8121,
+      "total": 8046,
       "exact": 98,
-      "ergonomic": 7516,
-      "widened": 507
+      "ergonomic": 7468,
+      "widened": 480
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 74,
-      "ergonomic": 39,
-      "widened": 35
+      "total": 51,
+      "ergonomic": 22,
+      "widened": 29
     },
     {
       "pass": "SC - shape-classes",
-      "total": 116,
+      "total": 113,
       "exact": 7,
-      "ergonomic": 101,
-      "widened": 8
+      "ergonomic": 100,
+      "widened": 6
     },
     {
       "pass": "SE - shape-exports",
@@ -66,9 +66,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2029,
+      "total": 2030,
       "ergonomic": 1996,
-      "widened": 33
+      "widened": 34
     },
     {
       "pass": "settle-symbol-members",

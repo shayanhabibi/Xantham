@@ -38,7 +38,7 @@ type Exports =
     /// interface form and the flattened members of its base.
     /// </summary>
     [<Global("Mishap"); EmitConstructor>]
-    static member Mishap_Overload2 (?message: string, ?options: obj) : Mishap = jsNative
+    static member Mishap_Overload2 (?message: string, ?options: Fable.Core.TS.Es.ErrorOptions) : Mishap = jsNative
 
 module ErrorLab =
     /// <summary>error-lab:faults</summary>

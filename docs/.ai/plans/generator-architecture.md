@@ -1340,6 +1340,112 @@ nominal `JS.Function` constraints: generic interfaces and abstract methods fail 
 an annotated inline function specializes to an F# function. The generator retains its existing
 function constraints. Reproduction details are in `../probes/constrain-function/README.md`.
 
+## ECMAScript consumer bindings (2026-10-13, W3 #134)
+
+Under the default `widen` disposition of `typescript/lib`, a compiler-lib ECMAScript declaration
+that `Naming.LibBindings` does not bind is written as `Fable.Core.TS.Es.{name}` with all of its
+checker type arguments, as the DOM half above already is. The table still answers first
+for its three remaining rows (below). Checker placeholders (`__type`) and `globalThis` keep the
+existing widening. Namespace members take their bare name, which is the name Core.TS flattens
+them to (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`).
+
+- **`widen` only.** A `map` disposition keeps its own table (group-map-lab maps `RegExp` to
+  `System.Text.RegularExpressions.Regex`), and `reference` keeps the O7 template
+  (`TypeScript.Lib.Es.RegExp`).
+- **Nominal metadata.** Resolve reads the target parameters and base types of these declarations
+  (not their members), as it does for DOM, so the constrained-argument repair applies to
+  `Fable.Core.TS.Es` references. Names the table binds are excluded from that read.
+- **No catalog contract bump.** Ship producers (Core.TS and every catalog lab) emit an unchanged
+  ABI, and a consumer under `widen` loads no catalogue. Bumping `CatalogCompatibility.current`
+  would reject Core.TS's committed catalogue for no change in its content.
+- **Why not catalog reuse.** Node lists no `declarationReferences`, and a catalogue is accepted
+  only under an equal inference profile. Making Node a catalogue consumer means switching it to
+  `lib: [esnext, dom]` with `typescript/lib: ship`, which changes its compiler program and is a
+  product decision (`docs/.ai/footguns.md`, "Declaration catalogs").
+- **lib-lab.** `each(values: Iterable<string>)` was pinned as `obj`. It is now
+  `Fable.Core.TS.Es.Iterable<string, obj, obj>`, Core.TS's JS-iterable interface and not
+  `seq<'T>`, so the reason for that pin still holds.
+- **Known gaps.** The `any` defaults of `Iterable`/`IterableIterator` (`TReturn`, `TNext`) render
+  as `obj` and raise TR008, graded escape until W1. A name Core.TS renamed on collision
+  (`Iterator2`) is reachable only under the name it kept; the compile gate cannot detect a
+  same-arity wrong target.
+
+Measured on 2026-10-13:
+
+| Run | TR023 | TR035 | TR008 | Tiers (exact / ergonomic / widened / escape) |
+| --- | --- | --- | --- | --- |
+| es-reuse-lab (new) | 0 | 0 | 2 | 8 / 0 / 0 / 1 |
+| lib-lab | 1 → 0 | 0 | 0 → 2 | widened 2 → 1, escape 0 → 1 |
+| `@cloudflare/workers-types` | 37 → 9 | 11 → 6 | 168 → 218 | 412 / 1067 → 1068 / 374 → 361 / 111 → 123 |
+| `solid-js` | 6 → 0 | 35 → 35 | 78 → 78 | 69 / 146 → 147 / 85 → 84 / 42 |
+| `Xantham.Fable.Node` | 737 → 148 | 1725 → 1270 | 2668 → 2735 | 1247 → 1263 / 1772 → 1858 / 768 → 656 / 345 → 353 |
+
+In workers-types, TP006 5 → 3 and SP004 37 → 39: `SqlStorageCursor.raw<U>` and
+`SyncKvStorage.list<T>` now return `IterableIterator<'U>`, so the type parameter is used rather
+than dropped. Its remaining TR023 are `Module` (8) and `Env` (1), outside the compiler lib. Node's
+remaining TR023 come from undici and web-global names (`Headers`, `FormData`, `MessageEvent`,
+`SpecIterableIterator`) and module specifiers.
+
+Node was regenerated under the T4 override: the selected goldens hold 43 of W3's ~780 TR023 hits
+and none of `SharedArrayBuffer`, `ArrayLike`, `ArrayIterator`, `AsyncGeneratorFunction` or
+`RegExp`; Node holds the rest. Node's "before" figures come from a regeneration at the parent
+commit, not the committed 2026-10-06 output, which differs by 60 `symbols.jsonl` lines of
+earlier generator drift.
+
+### Fable.Core `JS.*` bindings retired (2026-10-13, W3 #134)
+
+Generated bindings no longer depend on Fable.Core's `JS.*` bindings for standard-library types.
+`Naming.LibBindings` keeps three rows: `Error` → `exn` (Fable compiles `System.Exception` to a
+JavaScript `Error`), and `Promise`/`PromiseLike` → `JS.Promise<'T>` (lead decision: Fable.Promise's
+`promise { }` and `Async.AwaitPromise`/`StartAsPromise` are written against `JS.Promise`;
+`PromiseLike` keeps its TR025 loss so a `JS.Promise` passes where one is expected). Every other
+former row (`Map`, `ReadonlyMap`, `WeakMap`, `Set`, `ReadonlySet`, `WeakSet`, `Date`, `Function`,
+`Object`, `Math`, `JSON`, `Console`, `PropertyDescriptor`, `ArrayBuffer`, `ArrayBufferView`,
+`DataView`, the typed arrays, `AsyncIterable`, `AsyncIterator`, `AsyncGenerator`,
+`IteratorResult`, `AsyncIterableIterator`) is written as its `Fable.Core.TS.Es` declaration with
+all of its checker arguments (`Uint8Array<'TArrayBuffer>`), so `U2<Es.ArrayBuffer,
+Es.SharedArrayBuffer>` is Core.TS's `ArrayBufferLike`.
+
+- **Premise.** Fable 5.17.2 special-cases the `Fable.Core.JS.` namespace as a whole (global
+  resolution, no replacement, unmangled members) and `JS.Map`/`JS.Set` only for TypeScript-output
+  annotations; no `JS.*` type gets an F#-visible conversion (`docs/.ai/footguns.md`, "Fable
+  consumption of bindings").
+- **Every non-ship disposition.** The former rows were consulted under `reference`, `map` and
+  `widen` alike, so `LibBindings.isPinnedToCoreTs` keeps them bound under all three, now to
+  Core.TS, ahead of the O7 template and a `map` table, as DOM names already are. Every generated
+  consumer file opens `Fable.Core.TS.Dom`, so no non-ship disposition runs without Core.TS.
+  Other ECMAScript names still follow their disposition (`widen` → Core.TS, `reference` →
+  `TypeScript.Lib.Es.*`, `map` → table or widen).
+- **TP010.** The dropped `Function` bound is matched as `Fable.Core.TS.Es.Function`
+  (`LibBindings.FunctionBinding`); the message no longer names `JS.Function`.
+- **Ship mode.** A `ship` run binds `Promise` and `PromiseLike` too (`LibBindings.bindsWhenShipped`,
+  checked in `Spec.typeRefOnPath` ahead of the run's own declaration), so Core.TS's members return
+  `JS.Promise` and unify with consumers and Fable.Promise; `PromiseLike` records TR025 there as
+  well. Core.TS still declares `Es.Promise`, `Es.PromiseLike` and `PromiseConstructor`: the
+  declarations keep their catalogue entries (the `core-ts package` test asserts `Es.Promise` at
+  arity 1), and the `Promise` global's `resolve`/`all`/`race`/`reject` now return `JS.Promise`.
+  Only a declaration's own `Create` still returns it. The emitted ABI of a shipped compiler lib
+  changed, so `CatalogCompatibility.current` ApiVersion is 6 → 7 and Core.TS's catalogue is
+  regenerated. compiler-lib-ownership-lab (ES5, `ship`) is the lab.
+
+Measured on 2026-10-13 (es-reuse-lab is the lab, extended with `Promise`, `PromiseLike`, `Map`,
+`Set`, `Date`, `ArrayBuffer`, `Uint8Array<ArrayBuffer>` and `Error`):
+
+| Run | TR024 | TR025 | TR008 | Tiers (exact / ergonomic / widened / escape) |
+| --- | --- | --- | --- | --- |
+| es-reuse-lab | 0 | 0 → 2 (new `PromiseLike`, `Error` sites) | 2 | 8 / 1 / 0 / 0 → 11 / 3 / 0 / 0 |
+| lib-lab | 7 → 0 | 3 → 1 | 2 → 6 | 12 / 8 / 1 / 0 → 15 / 5 / 1 / 0 |
+| `@cloudflare/workers-types` | 120 → 0 | 10 → 8 | 218 → 222 | 412 / 1161 / 390 / 1 → 419 / 1154 / 390 / 1 |
+| `solid-js` | 0 | 2 | 78 | unchanged (69 / 180 / 92 / 1); 26 lines respelled |
+| `Xantham.Fable.Node` | 255 → 0 | 1434 → 1431 | 2877 → 2895 | 1263 / 2032 / 830 / 5 → 1270 / 2025 / 830 / 5 |
+| `Xantham.Fable.Core.TS` (ship) | 0 | 0 → 51 | 1681 | unchanged (2073 / 2203 / 785 / 5); 483 `JS.Promise` references |
+
+TR023 and TR035 are unchanged in every row. The TR008 rise is the `any` defaults of the
+async-iteration and `IteratorResult` declarations, now applied at their real arity rather than
+truncated away. Node's residual `JS.*` spellings are `JS.Promise` (1006) and the support package's
+`JS.Record` (30); it held 1469 `JS.ArrayBuffer`, 195 `JS.Function` and 112 `JS.AsyncIterable`
+before.
+
 ## Generator identity measures (2026-09-11)
 
 The generator keeps distinct measures for compiler symbol, type and node IDs, and for
