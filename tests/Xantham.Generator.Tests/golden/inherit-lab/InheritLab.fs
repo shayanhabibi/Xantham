@@ -129,7 +129,6 @@ type Failure =
 /// it - under a name this run did not declare, so the members flatten into this type, each
 /// keeping its call signature.
 /// </summary>
-[<Interface>]
 type Deferred =
     abstract tag: string with get, set
     /// <summary>
@@ -152,8 +151,8 @@ type Deferred =
     /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
     /// <returns>A Promise for the completion of the callback.</returns>
     abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<string>
-    [<ParamObject; Emit("$0")>]
-    static member Create (tag: string, ``then``: Func<(string -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<string, 'TResult>>), ``finally``: ((unit -> unit) option -> JS.Promise<string>)) : Deferred = jsNative
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
 
 /// <summary>
 /// A utility-type base: TypeScript's surgery over <c>Base</c> rather than a name it can inherit.
