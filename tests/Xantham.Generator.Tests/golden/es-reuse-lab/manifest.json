@@ -3,16 +3,16 @@
   "package": "es-reuse-lab",
   "module": "EsReuseLab",
   "counts": {
-    "exact": 8,
-    "ergonomic": 1,
+    "exact": 11,
+    "ergonomic": 3,
     "widened": 0,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SE - shape-exports",
-      "total": 2,
-      "ergonomic": 2
+      "total": 4,
+      "ergonomic": 4
     }
   ]
 }

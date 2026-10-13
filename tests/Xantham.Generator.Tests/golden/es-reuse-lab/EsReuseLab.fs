@@ -22,7 +22,7 @@ type Exports =
     /// An indexed-access alias over ArrayBuffer and SharedArrayBuffer.
     /// </summary>
     [<Import("wrap", "es-reuse-lab")>]
-    static member wrap (buffer: U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>) : unit = jsNative
+    static member wrap (buffer: U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>) : unit = jsNative
     /// <summary>
     /// Declared in lib.es2017.sharedmemory.d.ts; Core.TS adds the es2024 members.
     /// </summary>
@@ -45,7 +45,26 @@ type Exports =
     [<Import("format", "es-reuse-lab")>]
     static member format (options: Fable.Core.TS.Es.NumberFormatOptions) : string = jsNative
     /// <summary>
-    /// A name Fable.Core binds keeps its Fable.Core.JS spelling.
+    /// The ecosystem's promise support is written against Fable.Core's JS.Promise.
     /// </summary>
     [<Import("later", "es-reuse-lab")>]
     static member later () : JS.Promise<string> = jsNative
+    /// <summary>
+    /// A thenable reads as JS.Promise, with a recorded loss.
+    /// </summary>
+    [<Import("settle", "es-reuse-lab")>]
+    static member settle (value: JS.Promise<float>) : unit = jsNative
+    [<Import("index", "es-reuse-lab")>]
+    static member index () : Fable.Core.TS.Es.Map<string, Fable.Core.TS.Es.Date> = jsNative
+    [<Import("unique", "es-reuse-lab")>]
+    static member unique (values: Fable.Core.TS.Es.Set<string>) : unit = jsNative
+    /// <summary>
+    /// Generic in its buffer since TypeScript 5.7; Core.TS carries the parameter.
+    /// </summary>
+    [<Import("bytes", "es-reuse-lab")>]
+    static member bytes (buffer: Fable.Core.TS.Es.ArrayBuffer) : Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer> = jsNative
+    /// <summary>
+    /// F# raises and catches a JavaScript Error as exn.
+    /// </summary>
+    [<Import("fail", "es-reuse-lab")>]
+    static member fail () : exn = jsNative

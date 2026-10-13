@@ -3,8 +3,8 @@
   "package": "type-fest",
   "module": "TypeFest",
   "counts": {
-    "exact": 26,
-    "ergonomic": 65,
+    "exact": 27,
+    "ergonomic": 64,
     "widened": 204,
     "escape": 2
   },
@@ -28,9 +28,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 598,
+      "total": 573,
       "exact": 1,
-      "ergonomic": 236,
+      "ergonomic": 211,
       "widened": 361
     },
     {

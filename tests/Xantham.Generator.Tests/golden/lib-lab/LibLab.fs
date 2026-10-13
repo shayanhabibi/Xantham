@@ -18,7 +18,7 @@ type Store =
     /// <summary>
     /// A promise-returning member, which is what the group's widening used to cost most.
     /// </summary>
-    abstract load: key: string -> JS.Promise<JS.Uint8Array>
+    abstract load: key: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     /// <summary>
     /// Under an array.
     /// </summary>
@@ -30,13 +30,13 @@ type Store =
     /// <summary>
     /// A lib type as the argument of a generic this package declares.
     /// </summary>
-    abstract boxed: Box<JS.Date> with get, set
+    abstract boxed: Box<Fable.Core.TS.Es.Date> with get, set
     /// <summary>
     /// A property whose type is a lib collection.
     /// </summary>
-    abstract index: JS.Map<string, JS.ArrayBuffer> with get, set
+    abstract index: Fable.Core.TS.Es.Map<string, Fable.Core.TS.Es.ArrayBuffer> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (load: (string -> JS.Promise<JS.Uint8Array>), all: (unit -> JS.Promise<string>[]), boxed: Box<JS.Date>, index: JS.Map<string, JS.ArrayBuffer>, ?pending: JS.Promise<unit>) : Store = jsNative
+    static member Create (load: (string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), all: (unit -> JS.Promise<string>[]), boxed: Box<Fable.Core.TS.Es.Date>, index: Fable.Core.TS.Es.Map<string, Fable.Core.TS.Es.ArrayBuffer>, ?pending: JS.Promise<unit>) : Store = jsNative
 
 /// <summary>
 /// A generic of our own, so a lib type can be seen passing through one.
@@ -64,52 +64,52 @@ type Exports =
     /// Both parameters carried.
     /// </summary>
     [<Import("index", "lib-lab")>]
-    static member index (entries: JS.Map<string, float>) : JS.Map<string, string[]> = jsNative
+    static member index (entries: Fable.Core.TS.Es.Map<string, float>) : Fable.Core.TS.Es.Map<string, string[]> = jsNative
     /// <summary>
     /// And the one-parameter collections.
     /// </summary>
     [<Import("unique", "lib-lab")>]
-    static member unique (values: JS.Set<string>) : JS.Set<float> = jsNative
+    static member unique (values: Fable.Core.TS.Es.Set<string>) : Fable.Core.TS.Es.Set<float> = jsNative
     /// <summary>
-    /// The weak collections, which Fable binds under the same names.
+    /// The weak collections.
     /// </summary>
     [<Import("cache", "lib-lab")>]
-    static member cache (store: JS.WeakMap<obj, string>, seen: JS.WeakSet<obj>) : unit = jsNative
+    static member cache (store: Fable.Core.TS.Es.WeakMap<obj, string>, seen: Fable.Core.TS.Es.WeakSet<obj>) : unit = jsNative
     /// <summary>
     /// Non-generic lib types: no arguments to shape, just a name to write.
     /// </summary>
     [<Import("stamp", "lib-lab")>]
-    static member stamp (at: JS.Date) : JS.Date = jsNative
+    static member stamp (at: Fable.Core.TS.Es.Date) : Fable.Core.TS.Es.Date = jsNative
     /// <summary>
     /// Binary data - the buffer types a worker or a stream API traffics in.
     /// </summary>
     [<Import("view", "lib-lab")>]
-    static member view (buffer: JS.ArrayBuffer, over: JS.DataView) : JS.ArrayBufferView = jsNative
+    static member view (buffer: Fable.Core.TS.Es.ArrayBuffer, over: Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>) : Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> = jsNative
     /// <summary>
-    /// An async iterable, which Fable.Core binds (the <i>synchronous</i> one it does not - see below).
+    /// An async iterable.
     /// </summary>
     [<Import("stream", "lib-lab")>]
-    static member stream (source: JS.AsyncIterable<string>) : JS.AsyncIterator<float> = jsNative
+    static member stream (source: Fable.Core.TS.Es.AsyncIterable<string, obj, obj>) : Fable.Core.TS.Es.AsyncIterator<float, obj, obj> = jsNative
     /// <summary>
-    /// A bare <c>Function</c> in a <c>.d.ts</c> is untyped by construction; <c>JS.Function</c> says the same.
+    /// A bare <c>Function</c> in a <c>.d.ts</c> is untyped by construction; Core.TS's <c>Function</c> says the same.
     /// </summary>
     [<Import("invoke", "lib-lab")>]
-    static member invoke (fn: JS.Function) : JS.Object = jsNative
+    static member invoke (fn: Fable.Core.TS.Es.Function) : Fable.Core.TS.Es.Object = jsNative
     /// <summary>
     /// A typed array. Under a modern lib this is <c>Uint8Array&lt;ArrayBufferLike&gt;</c>.
     /// </summary>
     [<Import("bytes", "lib-lab")>]
-    static member bytes (input: JS.Uint8Array) : JS.Float64Array = jsNative
+    static member bytes (input: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>) : Fable.Core.TS.Es.Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> = jsNative
     /// <summary>
     /// A thenable is the structural supertype of a promise, not a promise.
     /// </summary>
     [<Import("thenable", "lib-lab")>]
     static member thenable () : JS.Promise<string> = jsNative
     /// <summary>
-    /// Readonly views over the collections. F# has the mutable binding and only that.
+    /// Readonly views over the collections.
     /// </summary>
     [<Import("frozen", "lib-lab")>]
-    static member frozen (entries: JS.Map<string, float>, values: JS.Set<string>) : unit = jsNative
+    static member frozen (entries: Fable.Core.TS.Es.ReadonlyMap<string, float>, values: Fable.Core.TS.Es.ReadonlySet<string>) : unit = jsNative
     /// <summary>
     /// The one the group's widening used to cost most: a DOM name in an ordinary position.
     /// </summary>

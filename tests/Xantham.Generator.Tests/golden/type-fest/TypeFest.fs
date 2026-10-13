@@ -9218,7 +9218,7 @@ type Stringified<'ObjectType> = private Stringified__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Structured clone</remarks>
-type StructuredCloneable = U50<string, float, bigint, bool, JS.ArrayBuffer, Fable.Core.TS.Dom.AudioData, JS.BigInt64Array, Fable.Core.TS.Es.BigUint64Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Es.Boolean, Fable.Core.TS.Dom.CryptoKey, Fable.Core.TS.Dom.DOMException, Fable.Core.TS.Dom.DOMMatrix, Fable.Core.TS.Dom.DOMMatrixReadOnly, Fable.Core.TS.Dom.DOMPoint, Fable.Core.TS.Dom.DOMPointReadOnly, Fable.Core.TS.Dom.DOMQuad, Fable.Core.TS.Dom.DOMRect, Fable.Core.TS.Dom.DOMRectReadOnly, JS.DataView, JS.Date, exn, Fable.Core.TS.Dom.File, Fable.Core.TS.Dom.FileList, Fable.Core.TS.Dom.FileSystemDirectoryHandle, Fable.Core.TS.Dom.FileSystemFileHandle, Fable.Core.TS.Dom.FileSystemHandle, Fable.Core.TS.Es.Float16Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, JS.Float32Array, JS.Float64Array, Fable.Core.TS.Dom.GPUCompilationInfo, Fable.Core.TS.Dom.GPUCompilationMessage, Fable.Core.TS.Dom.ImageBitmap, Fable.Core.TS.Dom.ImageData, JS.Int16Array, JS.Int32Array, JS.Int8Array, Fable.Core.TS.Es.Number, Fable.Core.TS.Dom.RTCCertificate, obj[], JS.Map<obj, obj>, JS.Set<obj>, Fable.Core.TS.Es.RegExp, Fable.Core.TS.Es.String, JS.Uint16Array, JS.Uint32Array, JS.Uint8Array, JS.Uint8ClampedArray, Fable.Core.TS.Dom.VideoFrame, StructuredCloneable2> option
+type StructuredCloneable = U50<string, float, bigint, bool, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Dom.AudioData, Fable.Core.TS.Es.BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Es.Boolean, Fable.Core.TS.Dom.CryptoKey, Fable.Core.TS.Dom.DOMException, Fable.Core.TS.Dom.DOMMatrix, Fable.Core.TS.Dom.DOMMatrixReadOnly, Fable.Core.TS.Dom.DOMPoint, Fable.Core.TS.Dom.DOMPointReadOnly, Fable.Core.TS.Dom.DOMQuad, Fable.Core.TS.Dom.DOMRect, Fable.Core.TS.Dom.DOMRectReadOnly, Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Date, exn, Fable.Core.TS.Dom.File, Fable.Core.TS.Dom.FileList, Fable.Core.TS.Dom.FileSystemDirectoryHandle, Fable.Core.TS.Dom.FileSystemFileHandle, Fable.Core.TS.Dom.FileSystemHandle, Fable.Core.TS.Es.Float16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Dom.GPUCompilationInfo, Fable.Core.TS.Dom.GPUCompilationMessage, Fable.Core.TS.Dom.ImageBitmap, Fable.Core.TS.Dom.ImageData, Fable.Core.TS.Es.Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Number, Fable.Core.TS.Dom.RTCCertificate, obj[], Fable.Core.TS.Es.ReadonlyMap<obj, obj>, Fable.Core.TS.Es.ReadonlySet<obj>, Fable.Core.TS.Es.RegExp, Fable.Core.TS.Es.String, Fable.Core.TS.Es.Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Dom.VideoFrame, StructuredCloneable2> option
 
 type StructuredCloneable2 =
     [<EmitIndexer>]
@@ -9842,7 +9842,7 @@ type TupleToUnion<'ArrayType> = private TupleToUnion__ of obj
 /// Matches any <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">typed array</a>, like <c>Uint8Array</c> or <c>Float64Array</c>.
 /// </summary>
 /// <remarks>@category Array</remarks>
-type TypedArray = U12<JS.BigInt64Array, Fable.Core.TS.Es.BigUint64Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float16Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, JS.Float32Array, JS.Float64Array, JS.Int16Array, JS.Int32Array, JS.Int8Array, JS.Uint16Array, JS.Uint32Array, JS.Uint8Array, JS.Uint8ClampedArray>
+type TypedArray = U12<Fable.Core.TS.Es.BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
 /// <summary>
 /// Create a deep version of another type where all optional keys are set to also accept <c>undefined</c>.
@@ -10090,7 +10090,7 @@ type UnknownArray = obj[]
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-type UnknownMap = JS.Map<obj, obj>
+type UnknownMap = Fable.Core.TS.Es.ReadonlyMap<obj, obj>
 
 /// <summary>
 /// Represents an object with <c>unknown</c> value. You probably want this instead of <c>{}</c>.
@@ -10155,7 +10155,7 @@ type UnknownRecord =
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-type UnknownSet = JS.Set<obj>
+type UnknownSet = Fable.Core.TS.Es.ReadonlySet<obj>
 
 /// <summary>
 /// Revert the <c>Partial</c> modifier on an object type.

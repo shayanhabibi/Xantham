@@ -122,17 +122,17 @@ type Transition = (unit -> bool) * ((unit -> unit) -> JS.Promise<unit>)
 
 [<Interface>]
 type TransitionState =
-    abstract sources: JS.Set<SignalState<obj>> with get, set
+    abstract sources: Fable.Core.TS.Es.Set<SignalState<obj>> with get, set
     abstract effects: Computation<obj, obj>[] with get, set
-    abstract promises: JS.Set<JS.Promise<obj>> with get, set
-    abstract disposed: JS.Set<Computation<obj, obj>> with get, set
-    abstract queue: JS.Set<Computation<obj, obj>> with get, set
+    abstract promises: Fable.Core.TS.Es.Set<JS.Promise<obj>> with get, set
+    abstract disposed: Fable.Core.TS.Es.Set<Computation<obj, obj>> with get, set
+    abstract queue: Fable.Core.TS.Es.Set<Computation<obj, obj>> with get, set
     abstract scheduler: ((unit -> unit) -> obj) option with get, set
     abstract running: bool with get, set
     abstract ``done``: JS.Promise<unit> option with get, set
     abstract resolve: (unit -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (sources: JS.Set<SignalState<obj>>, effects: Computation<obj, obj>[], promises: JS.Set<JS.Promise<obj>>, disposed: JS.Set<Computation<obj, obj>>, queue: JS.Set<Computation<obj, obj>>, running: bool, ?scheduler: ((unit -> unit) -> obj), ?``done``: JS.Promise<unit>, ?resolve: (unit -> unit)) : TransitionState = jsNative
+    static member Create (sources: Fable.Core.TS.Es.Set<SignalState<obj>>, effects: Computation<obj, obj>[], promises: Fable.Core.TS.Es.Set<JS.Promise<obj>>, disposed: Fable.Core.TS.Es.Set<Computation<obj, obj>>, queue: Fable.Core.TS.Es.Set<Computation<obj, obj>>, running: bool, ?scheduler: ((unit -> unit) -> obj), ?``done``: JS.Promise<unit>, ?resolve: (unit -> unit)) : TransitionState = jsNative
 
 type Accessor<'T> = (unit -> 'T)
 
@@ -404,14 +404,14 @@ type SharedConfig =
     abstract load: (string -> obj) option with get, set
     abstract has: (string -> bool) option with get, set
     abstract gather: (string -> unit) option with get, set
-    abstract registry: JS.Map<string, JsxDevRuntime.DOMElement> option with get, set
+    abstract registry: Fable.Core.TS.Es.Map<string, JsxDevRuntime.DOMElement> option with get, set
     abstract ``done``: bool option with get, set
     abstract count: float option with get, set
     abstract effects: Computation<obj, obj>[] option with get, set
     abstract getContextId: unit -> string
     abstract getNextContextId: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: JS.Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: JS.Map<string, JsxDevRuntime.DOMElement>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
+    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: JS.Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: Fable.Core.TS.Es.Map<string, JsxDevRuntime.DOMElement>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -2563,7 +2563,7 @@ module Store =
         /// </code>
         /// </example>
         [<Import("unwrap", "solid-js/store")>]
-        static member unwrap<'T> (item: 'T, ?set: JS.Set<obj>) : 'T = jsNative
+        static member unwrap<'T> (item: 'T, ?set: Fable.Core.TS.Es.Set<obj>) : 'T = jsNative
         /// <summary>
         /// Creates a reactive store that can be read through a proxy object and written with a setter function
         /// </summary>
@@ -2812,15 +2812,15 @@ module Web =
         [<Import("Aliases", "solid-js/web")>]
         static member Aliases: JS.Record<string, string> = jsNative
         [<Import("Properties", "solid-js/web")>]
-        static member Properties: JS.Set<string> = jsNative
+        static member Properties: Fable.Core.TS.Es.Set<string> = jsNative
         [<Import("ChildProperties", "solid-js/web")>]
-        static member ChildProperties: JS.Set<string> = jsNative
+        static member ChildProperties: Fable.Core.TS.Es.Set<string> = jsNative
         [<Import("DelegatedEvents", "solid-js/web")>]
-        static member DelegatedEvents: JS.Set<string> = jsNative
+        static member DelegatedEvents: Fable.Core.TS.Es.Set<string> = jsNative
         [<Import("DOMElements", "solid-js/web")>]
-        static member DOMElements: JS.Set<string> = jsNative
+        static member DOMElements: Fable.Core.TS.Es.Set<string> = jsNative
         [<Import("SVGElements", "solid-js/web")>]
-        static member SVGElements: JS.Set<string> = jsNative
+        static member SVGElements: Fable.Core.TS.Es.Set<string> = jsNative
         [<Import("SVGNamespace", "solid-js/web")>]
         static member SVGNamespace: JS.Record<string, string> = jsNative
         [<Import("getPropAlias", "solid-js/web")>]

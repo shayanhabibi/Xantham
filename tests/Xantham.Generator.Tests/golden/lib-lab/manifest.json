@@ -3,21 +3,21 @@
   "package": "lib-lab",
   "module": "LibLab",
   "counts": {
-    "exact": 12,
-    "ergonomic": 8,
+    "exact": 15,
+    "ergonomic": 5,
     "widened": 1,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 3,
-      "ergonomic": 3
+      "total": 2,
+      "ergonomic": 2
     },
     {
       "pass": "SE - shape-exports",
-      "total": 13,
-      "ergonomic": 11,
+      "total": 9,
+      "ergonomic": 7,
       "widened": 2
     },
     {

@@ -100,7 +100,7 @@ type Request<'T> =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/body">MDN Reference</a>
     /// </summary>
-    abstract body: Fable.Core.TS.Dom.ReadableStream<JS.Uint8Array> option
+    abstract body: Fable.Core.TS.Dom.ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>> option
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bodyUsed">MDN Reference</a>
     /// </summary>
@@ -108,7 +108,7 @@ type Request<'T> =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/arrayBuffer">MDN Reference</a>
     /// </summary>
-    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    abstract arrayBuffer: unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/blob">MDN Reference</a>
     /// </summary>
@@ -116,7 +116,7 @@ type Request<'T> =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bytes">MDN Reference</a>
     /// </summary>
-    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
+    abstract bytes: unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/formData">MDN Reference</a>
     /// </summary>
@@ -130,14 +130,14 @@ type Request<'T> =
     /// </summary>
     abstract text: unit -> JS.Promise<string>
     [<ParamObject; Emit("$0")>]
-    static member Create (cache: Request.Cache, credentials: Request.Credentials, destination: Request.Destination, headers: Fable.Core.TS.Dom.Headers, integrity: string, keepalive: bool, ``method``: string, mode: Request.Mode, redirect: Request.Redirect, referrer: string, referrerPolicy: Request.ReferrerPolicy, signal: Fable.Core.TS.Dom.AbortSignal, url: string, clone: (unit -> Request<obj>), bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>), blob: (unit -> JS.Promise<Fable.Core.TS.Dom.Blob>), bytes: (unit -> JS.Promise<JS.Uint8Array>), formData: (unit -> JS.Promise<Fable.Core.TS.Dom.FormData>), json: (unit -> JS.Promise<obj>), text: (unit -> JS.Promise<string>), ?cf: 'T, ?body: Fable.Core.TS.Dom.ReadableStream<JS.Uint8Array>) : Request<'T> = jsNative
+    static member Create (cache: Request.Cache, credentials: Request.Credentials, destination: Request.Destination, headers: Fable.Core.TS.Dom.Headers, integrity: string, keepalive: bool, ``method``: string, mode: Request.Mode, redirect: Request.Redirect, referrer: string, referrerPolicy: Request.ReferrerPolicy, signal: Fable.Core.TS.Dom.AbortSignal, url: string, clone: (unit -> Request<obj>), bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>), blob: (unit -> JS.Promise<Fable.Core.TS.Dom.Blob>), bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>), formData: (unit -> JS.Promise<Fable.Core.TS.Dom.FormData>), json: (unit -> JS.Promise<obj>), text: (unit -> JS.Promise<string>), ?cf: 'T, ?body: Fable.Core.TS.Dom.ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>) : Request<'T> = jsNative
 
 [<Interface>]
 type RequestInit<'T> =
     /// <summary>
     /// A BodyInit object or null to set request's body.
     /// </summary>
-    abstract body: U7<string, JS.ArrayBuffer, JS.ArrayBufferView, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Dom.FormData, Fable.Core.TS.Dom.ReadableStream<obj>, Fable.Core.TS.Dom.URLSearchParams> option with get, set
+    abstract body: U7<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Dom.FormData, Fable.Core.TS.Dom.ReadableStream<obj>, Fable.Core.TS.Dom.URLSearchParams> option with get, set
     /// <summary>
     /// A string indicating how the request will interact with the browser's cache to set request's cache.
     /// </summary>
@@ -189,7 +189,7 @@ type RequestInit<'T> =
     abstract window: unit option with get, set
     abstract cf: 'T option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?body: U7<string, JS.ArrayBuffer, JS.ArrayBufferView, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Dom.FormData, Fable.Core.TS.Dom.ReadableStream<obj>, Fable.Core.TS.Dom.URLSearchParams>, ?cache: Request.Cache, ?credentials: Request.Credentials, ?headers: U3<(string * string)[], Fable.Core.TS.Dom.Headers, JS.Record<string, string>>, ?integrity: string, ?keepalive: bool, ?``method``: string, ?mode: Request.Mode, ?priority: RequestInit.Priority, ?redirect: Request.Redirect, ?referrer: string, ?referrerPolicy: Request.ReferrerPolicy, ?signal: Fable.Core.TS.Dom.AbortSignal, ?window: unit, ?cf: 'T) : RequestInit<'T> = jsNative
+    static member Create (?body: U7<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Dom.FormData, Fable.Core.TS.Dom.ReadableStream<obj>, Fable.Core.TS.Dom.URLSearchParams>, ?cache: Request.Cache, ?credentials: Request.Credentials, ?headers: U3<(string * string)[], Fable.Core.TS.Dom.Headers, JS.Record<string, string>>, ?integrity: string, ?keepalive: bool, ?``method``: string, ?mode: Request.Mode, ?priority: RequestInit.Priority, ?redirect: Request.Redirect, ?referrer: string, ?referrerPolicy: Request.ReferrerPolicy, ?signal: Fable.Core.TS.Dom.AbortSignal, ?window: unit, ?cf: 'T) : RequestInit<'T> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
