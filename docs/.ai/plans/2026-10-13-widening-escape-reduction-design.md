@@ -68,6 +68,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W1.2** Escape is reserved for stated-type losses, such as TR063 (an unresolved reference) and TR064 (an `intrinsic` alias body).
 - **W1.3** W1.1 applies to rest-argument listeners: `(...args: any[]) => void` → `obj[] -> unit`.
 - **Acceptance:** the lab asserts TR008 at ergonomic, a rest-argument listener, a TR063 that stays escape, and a row that stays escape when TR008 sits beside a TR063. In `animejs` and `workers-types`, no TR008 finding grades escape.
+- **Status:** merged to `develop` in #141 (2026-10-13). Escape counts fell from 79 to 6 in `animejs`, from 111 to 1 in `workers-types`, and from 42 to 1 in `solid-js`.
 
 ### W2. Author-selected => any returns as unit
 
