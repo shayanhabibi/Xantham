@@ -469,6 +469,10 @@ module Stages =
             and! sync = Options.syncUpstream
             and! noFormat = Options.noFormat
 
+            // A worktree reads the main checkout's `@types/node`, as it borrows the compiler.
+            let nodeTypes =
+                System.IO.Path.Combine(Workspace.nodeModulesRoot __SOURCE_DIRECTORY__, "node_modules", "@types", "node")
+
             return
                 stage "generate" {
                     workingDir Repo.FileSystem.``.``
@@ -525,7 +529,6 @@ module Stages =
                             )
 
                             System.IO.File.Delete(System.IO.Path.Combine(output, "FableCoreTsInput.fs"))
-                            System.IO.File.Delete(System.IO.Path.Combine(output, "symbols.jsonl"))
 
                             // Before the stamp, which hashes the binding's text.
                             if not noFormat then
@@ -538,8 +541,10 @@ module Stages =
                     stage "generate node-lib" {
                         when' (only |> Option.contains Options.NodeLib)
 
-                        run
-                            "dotnet run --project src/Xantham.Cli -- generate node_modules/@types/node -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
+                        run (
+                            cmd
+                                $"dotnet run --project src/Xantham.Cli -- generate \"{nodeTypes}\" -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
+                        )
 
                         run (fun _ ->
                             if not noFormat then
