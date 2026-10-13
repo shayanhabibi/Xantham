@@ -108,6 +108,12 @@ let private configKeys =
             ("unionArmOverloads",
              "Synthesized overloads beside a member whose parameter is an erased union, one per arm. \
           Disabled by default: enabling it makes existing `!^` casts at those call sites ambiguous.")
+
+            "AnyReturnAsUnit",
+            ("anyReturnAsUnit",
+             "A .NET regular expression over property and value names. A callback typed directly at a matching \
+          name returns unit where its source return is any, reported as TR065. Omitted, every such return \
+          stays obj. The compiler-library binding selects ^on for event-handler properties.")
         ]
 
 /// The JSON key and description of one `UnionArmOverloadsConfig` field. `policy` is spelled as

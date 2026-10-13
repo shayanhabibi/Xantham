@@ -172,6 +172,14 @@ earlier and mapping over `model.Decls` looking for `FsExports` matches nothing, 
 no output, and has no container name to key its findings on. `expand-union-arms` cost an
 afternoon to this.
 
+**`anyReturnAsUnit` reaches only sites that scope with `selectAnyReturn`.** `delegateRef` writes
+`unit` for a callback's `any` return when its owner equals `ShapeModel.AnyReturnOwner`, which only
+`Spec.selectAnyReturn` sets. A new property or value site that calls `typeRef` without it keeps
+`obj` for a selected name. A stale owner affects only a callback whose owner string is identical.
+The pattern is part of `DeclarationCatalog.profile` when set, so a catalog consumer whose pattern
+differs from its producer's fails the inference-profile check. Every Core.TS catalog consumer sets
+`^on`.
+
 **A finding needs a row in `FindingCodes.table`, not just a registered union.** Registering the
 kind in `FindingCatalogue` is enough to compile and enough for the pass to run; the missing code
 only throws at manifest render, from `Finding.get_Key`, which reads as a render bug rather than a

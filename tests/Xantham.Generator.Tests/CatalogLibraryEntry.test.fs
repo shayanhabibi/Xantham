@@ -87,6 +87,27 @@ let augmentationTests = testSequenced <| testList "catalog library ambient authe
             (fun () -> Pipeline.run config package output |> Async.RunSynchronously |> ignore)
             (fun error -> Expect.stringContains error.Message "F# API mismatch for GlobalThis" "augmented globalThis cannot authenticate the producer's unchanged API")
         Expect.isFalse (Directory.Exists output) "authentication happens before writing output")
+
+    testCase "a consumer whose anyReturnAsUnit differs from the producer's fails the inference profile" <| fun () ->
+      CatalogLibraryLab.withProducer (fun reference _ ->
+        use scratch = Scratch.directory "catalog-library-any-return-lab"
+        let package = Path.Combine(scratch.Path, "package")
+        Directory.CreateDirectory package |> ignore
+        File.WriteAllText(Path.Combine(package, "package.json"),
+            """{"name":"catalog-library-any-return-lab","version":"1.0.0","types":"index.d.ts"}""")
+        File.WriteAllText(Path.Combine(package, "index.d.ts"),
+            "export declare function accept(value: TextStreamReader): void;")
+        let config =
+            { CatalogLibraryLab.config with
+                CompilerLib = CompilerLibConfig.Default
+                DeclarationCatalog = true
+                AnyReturnAsUnit = Some "^on"
+                DeclarationReferences = [reference] }
+        let output = Path.Combine(scratch.Path, "rejected")
+        Expect.throwsC
+            (fun () -> Pipeline.run config package output |> Async.RunSynchronously |> ignore)
+            (fun error -> Expect.stringContains error.Message "inference profile" "the pattern is part of the inference profile")
+        Expect.isFalse (Directory.Exists output) "authentication happens before writing output")
 ]
 
 [<Tests>]

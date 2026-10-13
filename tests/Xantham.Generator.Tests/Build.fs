@@ -110,6 +110,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         ExportMembers = []
         TypeVars = Map.empty
         KeyVars = Map.empty
+        AnyReturnOwner = None
         Decls = []
         RuntimePackage = "lab" * Measure.uom<Measure.importSpecifier>
     }

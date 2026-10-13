@@ -198,6 +198,10 @@ let internal isPureCallback (facts: TypeFacts) =
     && facts.ConstructSignatures.IsEmpty
     && facts.Members.IsEmpty
 
+/// Whether a type is the checker's `any` intrinsic, the type `typeRef` reports as `TR008`.
+let internal isSourceAny (facts: TypeFacts) =
+    flag TypeFlags.Any facts && facts.Response.IntrinsicName = ValueSome "any"
+
 /// The identity of a hoisted type parameter: its symbol name paired with its constraint, or the
 /// id itself for an anonymous parameter. Two ids share an identity when they resolve to the same
 /// symbol under the same constraint.
@@ -1037,6 +1041,21 @@ let internal callbackRetainedAsDelegate
     (facts: TypeFacts)
     =
     isPureCallback facts && not (functionShapedCallback model names Set.empty facts)
+
+/// The model for shaping the property or value `name` at `owner`. Where `anyReturnAsUnit`
+/// matches `name`, a callback typed directly at `owner` returns `unit` for a source `any`;
+/// otherwise every callback keeps its `any` return.
+let internal selectAnyReturn (ctx: Context) (model: ShapeModel) (name: string) (owner: string) =
+    let selected =
+        if GeneratorConfig.selectsAnyReturn ctx.Config name then
+            Some owner
+        else
+            None
+
+    if model.AnyReturnOwner = selected then
+        model
+    else
+        { model with AnyReturnOwner = selected }
 
 /// A call signature's parameter types, in order, ahead of any type resolution: the identity an
 /// overload set separates on everywhere but its return type.
@@ -2254,8 +2273,13 @@ and internal delegateRef
                 findings <- findings @ refFindings
                 optionalRef (isOptionalParam p reference) reference)
 
+        let returnOwner = $"{owner}()"
+
         let returns, returnFindings =
-            typeRef ctx model self $"{owner}()" signature.ReturnTypeId
+            match Map.tryFind signature.ReturnTypeId model.Types with
+            | Some returnFacts when model.AnyReturnOwner = Some owner && isSourceAny returnFacts ->
+                FsUnit, [ Finding.make returnOwner TypeReference.AnyReturnAsUnit ]
+            | _ -> typeRef ctx model self returnOwner signature.ReturnTypeId
 
         let reference, callbackFindings = callbackRef owner parameters returns
         reference, findings @ returnFindings @ callbackFindings
@@ -3242,7 +3266,8 @@ let internal shapeMembers
                             Return = returns
                         })
             | None, None ->
-                let reference, refFindings = typeRef ctx model (Some self) owner effectiveTypeId
+                let reference, refFindings =
+                    typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) (Some self) owner effectiveTypeId
 
                 findings <- findings @ refFindings
 

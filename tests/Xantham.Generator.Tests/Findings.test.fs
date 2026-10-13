@@ -109,6 +109,7 @@ let findingsTests =
                     "TR.CallbackOverloadsNotSeparable TR062 widened"
                     "TR.ErrorTypeToObj TR063 escape"
                     "TR.IntrinsicMarkerToObj TR064 escape"
+                    "TR.AnyReturnAsUnit TR065 ergonomic"
                     "TP.UnnamedTypeParameter TP001 widened"
                     "TP.ConstraintDropped TP002 ergonomic"
                     "TP.GenericFunctionHoisted TP003 ergonomic"

@@ -177,7 +177,14 @@ let shapeClasses: Pass<ShapeModel> =
                                         Settable = false
                                     })
                             | None ->
-                                let reference, refFindings = typeRef ctx model (Some name) owner m.TypeId
+                                let reference, refFindings =
+                                    typeRef
+                                        ctx
+                                        (selectAnyReturn ctx model m.Symbol.Name owner)
+                                        (Some name)
+                                        owner
+                                        m.TypeId
+
                                 findings <- findings @ refFindings
 
                                 if m.Optional then

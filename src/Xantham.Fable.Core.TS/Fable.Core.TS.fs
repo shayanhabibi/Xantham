@@ -5733,21 +5733,21 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/devicemotion_event">MDN Reference</a>
         /// </summary>
-        abstract ondevicemotion: (Fable.Core.TS.Dom.DeviceMotionEvent -> obj) option with get, set
+        abstract ondevicemotion: (Fable.Core.TS.Dom.DeviceMotionEvent -> unit) option with get, set
         /// <summary>
         /// Available only in secure contexts.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/deviceorientation_event">MDN Reference</a>
         /// </summary>
-        abstract ondeviceorientation: (Fable.Core.TS.Dom.DeviceOrientationEvent -> obj) option with get, set
+        abstract ondeviceorientation: (Fable.Core.TS.Dom.DeviceOrientationEvent -> unit) option with get, set
         /// <summary>
         /// Available only in secure contexts.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/deviceorientationabsolute_event">MDN Reference</a>
         /// </summary>
-        abstract ondeviceorientationabsolute: (Fable.Core.TS.Dom.DeviceOrientationEvent -> obj) option with get, set
+        abstract ondeviceorientationabsolute: (Fable.Core.TS.Dom.DeviceOrientationEvent -> unit) option with get, set
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Window/orientationchange_event">MDN Reference</a></remarks>
-        abstract onorientationchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onorientationchange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// The Window interface's <b><c>opener</c></b> property returns a reference to the window that opened the window, either with open(), or by navigating a link with a target attribute.
         /// <br /><br />
@@ -6081,139 +6081,139 @@ module Es =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event">MDN Reference</a>
         /// </summary>
-        abstract onabort: (Fable.Core.TS.Dom.UIEvent -> obj) option with get, set
+        abstract onabort: (Fable.Core.TS.Dom.UIEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationcancel_event">MDN Reference</a>
         /// </summary>
-        abstract onanimationcancel: (Fable.Core.TS.Dom.AnimationEvent -> obj) option with get, set
+        abstract onanimationcancel: (Fable.Core.TS.Dom.AnimationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationend_event">MDN Reference</a>
         /// </summary>
-        abstract onanimationend: (Fable.Core.TS.Dom.AnimationEvent -> obj) option with get, set
+        abstract onanimationend: (Fable.Core.TS.Dom.AnimationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event">MDN Reference</a>
         /// </summary>
-        abstract onanimationiteration: (Fable.Core.TS.Dom.AnimationEvent -> obj) option with get, set
+        abstract onanimationiteration: (Fable.Core.TS.Dom.AnimationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationstart_event">MDN Reference</a>
         /// </summary>
-        abstract onanimationstart: (Fable.Core.TS.Dom.AnimationEvent -> obj) option with get, set
+        abstract onanimationstart: (Fable.Core.TS.Dom.AnimationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/auxclick_event">MDN Reference</a>
         /// </summary>
-        abstract onauxclick: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onauxclick: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/beforeinput_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforeinput: (Fable.Core.TS.Dom.InputEvent -> obj) option with get, set
+        abstract onbeforeinput: (Fable.Core.TS.Dom.InputEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/beforematch_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforematch: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onbeforematch: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/beforetoggle_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforetoggle: (Fable.Core.TS.Dom.ToggleEvent -> obj) option with get, set
+        abstract onbeforetoggle: (Fable.Core.TS.Dom.ToggleEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/blur_event">MDN Reference</a>
         /// </summary>
-        abstract onblur: (Fable.Core.TS.Dom.FocusEvent -> obj) option with get, set
+        abstract onblur: (Fable.Core.TS.Dom.FocusEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/cancel_event">MDN Reference</a>
         /// </summary>
-        abstract oncancel: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract oncancel: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplay_event">MDN Reference</a>
         /// </summary>
-        abstract oncanplay: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract oncanplay: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event">MDN Reference</a>
         /// </summary>
-        abstract oncanplaythrough: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract oncanplaythrough: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event">MDN Reference</a>
         /// </summary>
-        abstract onchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onchange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/click_event">MDN Reference</a>
         /// </summary>
-        abstract onclick: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onclick: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/close_event">MDN Reference</a>
         /// </summary>
-        abstract onclose: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onclose: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/command_event">MDN Reference</a>
         /// </summary>
-        abstract oncommand: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract oncommand: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextlost_event">MDN Reference</a>
         /// </summary>
-        abstract oncontextlost: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract oncontextlost: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/contextmenu_event">MDN Reference</a>
         /// </summary>
-        abstract oncontextmenu: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract oncontextmenu: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextrestored_event">MDN Reference</a>
         /// </summary>
-        abstract oncontextrestored: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract oncontextrestored: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/copy_event">MDN Reference</a>
         /// </summary>
-        abstract oncopy: (Fable.Core.TS.Dom.ClipboardEvent -> obj) option with get, set
+        abstract oncopy: (Fable.Core.TS.Dom.ClipboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/cuechange_event">MDN Reference</a>
         /// </summary>
-        abstract oncuechange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract oncuechange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/cut_event">MDN Reference</a>
         /// </summary>
-        abstract oncut: (Fable.Core.TS.Dom.ClipboardEvent -> obj) option with get, set
+        abstract oncut: (Fable.Core.TS.Dom.ClipboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/dblclick_event">MDN Reference</a>
         /// </summary>
-        abstract ondblclick: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
+        abstract ondblclick: (Fable.Core.TS.Dom.MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event">MDN Reference</a>
         /// </summary>
-        abstract ondrag: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
+        abstract ondrag: (Fable.Core.TS.Dom.DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event">MDN Reference</a>
         /// </summary>
-        abstract ondragend: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
+        abstract ondragend: (Fable.Core.TS.Dom.DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event">MDN Reference</a>
         /// </summary>
-        abstract ondragenter: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
+        abstract ondragenter: (Fable.Core.TS.Dom.DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event">MDN Reference</a>
         /// </summary>
-        abstract ondragleave: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
+        abstract ondragleave: (Fable.Core.TS.Dom.DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event">MDN Reference</a>
         /// </summary>
-        abstract ondragover: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
+        abstract ondragover: (Fable.Core.TS.Dom.DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event">MDN Reference</a>
         /// </summary>
-        abstract ondragstart: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
+        abstract ondragstart: (Fable.Core.TS.Dom.DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/drop_event">MDN Reference</a>
         /// </summary>
-        abstract ondrop: (Fable.Core.TS.Dom.DragEvent -> obj) option with get, set
+        abstract ondrop: (Fable.Core.TS.Dom.DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/durationchange_event">MDN Reference</a>
         /// </summary>
-        abstract ondurationchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract ondurationchange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/emptied_event">MDN Reference</a>
         /// </summary>
-        abstract onemptied: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onemptied: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ended_event">MDN Reference</a>
         /// </summary>
-        abstract onended: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onended: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/error_event">MDN Reference</a>
         /// </summary>
@@ -6221,362 +6221,362 @@ module Es =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/focus_event">MDN Reference</a>
         /// </summary>
-        abstract onfocus: (Fable.Core.TS.Dom.FocusEvent -> obj) option with get, set
+        abstract onfocus: (Fable.Core.TS.Dom.FocusEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/formdata_event">MDN Reference</a>
         /// </summary>
-        abstract onformdata: (Fable.Core.TS.Dom.FormDataEvent -> obj) option with get, set
+        abstract onformdata: (Fable.Core.TS.Dom.FormDataEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event">MDN Reference</a>
         /// </summary>
-        abstract ongotpointercapture: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract ongotpointercapture: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/input_event">MDN Reference</a>
         /// </summary>
-        abstract oninput: (Fable.Core.TS.Dom.InputEvent -> obj) option with get, set
+        abstract oninput: (Fable.Core.TS.Dom.InputEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/invalid_event">MDN Reference</a>
         /// </summary>
-        abstract oninvalid: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract oninvalid: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/keydown_event">MDN Reference</a>
         /// </summary>
-        abstract onkeydown: (Fable.Core.TS.Dom.KeyboardEvent -> obj) option with get, set
+        abstract onkeydown: (Fable.Core.TS.Dom.KeyboardEvent -> unit) option with get, set
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Element/keypress_event">MDN Reference</a></remarks>
-        abstract onkeypress: (Fable.Core.TS.Dom.KeyboardEvent -> obj) option with get, set
+        abstract onkeypress: (Fable.Core.TS.Dom.KeyboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/keyup_event">MDN Reference</a>
         /// </summary>
-        abstract onkeyup: (Fable.Core.TS.Dom.KeyboardEvent -> obj) option with get, set
+        abstract onkeyup: (Fable.Core.TS.Dom.KeyboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/load_event">MDN Reference</a>
         /// </summary>
-        abstract onload: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onload: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadeddata_event">MDN Reference</a>
         /// </summary>
-        abstract onloadeddata: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onloadeddata: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadedmetadata_event">MDN Reference</a>
         /// </summary>
-        abstract onloadedmetadata: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onloadedmetadata: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadstart_event">MDN Reference</a>
         /// </summary>
-        abstract onloadstart: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onloadstart: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/lostpointercapture_event">MDN Reference</a>
         /// </summary>
-        abstract onlostpointercapture: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onlostpointercapture: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mousedown_event">MDN Reference</a>
         /// </summary>
-        abstract onmousedown: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
+        abstract onmousedown: (Fable.Core.TS.Dom.MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseenter_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseenter: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
+        abstract onmouseenter: (Fable.Core.TS.Dom.MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseleave_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseleave: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
+        abstract onmouseleave: (Fable.Core.TS.Dom.MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mousemove_event">MDN Reference</a>
         /// </summary>
-        abstract onmousemove: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
+        abstract onmousemove: (Fable.Core.TS.Dom.MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseout_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseout: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
+        abstract onmouseout: (Fable.Core.TS.Dom.MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseover_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseover: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
+        abstract onmouseover: (Fable.Core.TS.Dom.MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseup_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseup: (Fable.Core.TS.Dom.MouseEvent -> obj) option with get, set
+        abstract onmouseup: (Fable.Core.TS.Dom.MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/paste_event">MDN Reference</a>
         /// </summary>
-        abstract onpaste: (Fable.Core.TS.Dom.ClipboardEvent -> obj) option with get, set
+        abstract onpaste: (Fable.Core.TS.Dom.ClipboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/pause_event">MDN Reference</a>
         /// </summary>
-        abstract onpause: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onpause: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play_event">MDN Reference</a>
         /// </summary>
-        abstract onplay: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onplay: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/playing_event">MDN Reference</a>
         /// </summary>
-        abstract onplaying: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onplaying: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointercancel_event">MDN Reference</a>
         /// </summary>
-        abstract onpointercancel: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onpointercancel: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerdown_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerdown: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onpointerdown: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerenter_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerenter: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onpointerenter: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerleave_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerleave: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onpointerleave: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointermove_event">MDN Reference</a>
         /// </summary>
-        abstract onpointermove: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onpointermove: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerout_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerout: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onpointerout: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerover_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerover: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onpointerover: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// Available only in secure contexts.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerrawupdate_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerrawupdate: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onpointerrawupdate: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerup_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerup: (Fable.Core.TS.Dom.PointerEvent -> obj) option with get, set
+        abstract onpointerup: (Fable.Core.TS.Dom.PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/progress_event">MDN Reference</a>
         /// </summary>
-        abstract onprogress: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj) option with get, set
+        abstract onprogress: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ratechange_event">MDN Reference</a>
         /// </summary>
-        abstract onratechange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onratechange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/reset_event">MDN Reference</a>
         /// </summary>
-        abstract onreset: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onreset: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/resize_event">MDN Reference</a>
         /// </summary>
-        abstract onresize: (Fable.Core.TS.Dom.UIEvent -> obj) option with get, set
+        abstract onresize: (Fable.Core.TS.Dom.UIEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/scroll_event">MDN Reference</a>
         /// </summary>
-        abstract onscroll: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onscroll: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/scrollend_event">MDN Reference</a>
         /// </summary>
-        abstract onscrollend: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onscrollend: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/securitypolicyviolation_event">MDN Reference</a>
         /// </summary>
-        abstract onsecuritypolicyviolation: (Fable.Core.TS.Dom.SecurityPolicyViolationEvent -> obj) option with get, set
+        abstract onsecuritypolicyviolation: (Fable.Core.TS.Dom.SecurityPolicyViolationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeked_event">MDN Reference</a>
         /// </summary>
-        abstract onseeked: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onseeked: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeking_event">MDN Reference</a>
         /// </summary>
-        abstract onseeking: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onseeking: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/select_event">MDN Reference</a>
         /// </summary>
-        abstract onselect: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onselect: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/selectionchange_event">MDN Reference</a>
         /// </summary>
-        abstract onselectionchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onselectionchange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Node/selectstart_event">MDN Reference</a>
         /// </summary>
-        abstract onselectstart: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onselectstart: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSlotElement/slotchange_event">MDN Reference</a>
         /// </summary>
-        abstract onslotchange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onslotchange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/stalled_event">MDN Reference</a>
         /// </summary>
-        abstract onstalled: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onstalled: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/submit_event">MDN Reference</a>
         /// </summary>
-        abstract onsubmit: (Fable.Core.TS.Dom.SubmitEvent -> obj) option with get, set
+        abstract onsubmit: (Fable.Core.TS.Dom.SubmitEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/suspend_event">MDN Reference</a>
         /// </summary>
-        abstract onsuspend: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onsuspend: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/timeupdate_event">MDN Reference</a>
         /// </summary>
-        abstract ontimeupdate: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract ontimeupdate: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/toggle_event">MDN Reference</a>
         /// </summary>
-        abstract ontoggle: (Fable.Core.TS.Dom.ToggleEvent -> obj) option with get, set
+        abstract ontoggle: (Fable.Core.TS.Dom.ToggleEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchcancel_event">MDN Reference</a>
         /// </summary>
-        abstract ontouchcancel: (Fable.Core.TS.Dom.TouchEvent -> obj) option with get, set
+        abstract ontouchcancel: (Fable.Core.TS.Dom.TouchEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchend_event">MDN Reference</a>
         /// </summary>
-        abstract ontouchend: (Fable.Core.TS.Dom.TouchEvent -> obj) option with get, set
+        abstract ontouchend: (Fable.Core.TS.Dom.TouchEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchmove_event">MDN Reference</a>
         /// </summary>
-        abstract ontouchmove: (Fable.Core.TS.Dom.TouchEvent -> obj) option with get, set
+        abstract ontouchmove: (Fable.Core.TS.Dom.TouchEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchstart_event">MDN Reference</a>
         /// </summary>
-        abstract ontouchstart: (Fable.Core.TS.Dom.TouchEvent -> obj) option with get, set
+        abstract ontouchstart: (Fable.Core.TS.Dom.TouchEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitioncancel_event">MDN Reference</a>
         /// </summary>
-        abstract ontransitioncancel: (Fable.Core.TS.Dom.TransitionEvent -> obj) option with get, set
+        abstract ontransitioncancel: (Fable.Core.TS.Dom.TransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionend_event">MDN Reference</a>
         /// </summary>
-        abstract ontransitionend: (Fable.Core.TS.Dom.TransitionEvent -> obj) option with get, set
+        abstract ontransitionend: (Fable.Core.TS.Dom.TransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionrun_event">MDN Reference</a>
         /// </summary>
-        abstract ontransitionrun: (Fable.Core.TS.Dom.TransitionEvent -> obj) option with get, set
+        abstract ontransitionrun: (Fable.Core.TS.Dom.TransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionstart_event">MDN Reference</a>
         /// </summary>
-        abstract ontransitionstart: (Fable.Core.TS.Dom.TransitionEvent -> obj) option with get, set
+        abstract ontransitionstart: (Fable.Core.TS.Dom.TransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/volumechange_event">MDN Reference</a>
         /// </summary>
-        abstract onvolumechange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onvolumechange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waiting_event">MDN Reference</a>
         /// </summary>
-        abstract onwaiting: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onwaiting: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// This is a legacy alias of <c>onanimationend</c>.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationend_event">MDN Reference</a>
         /// </remarks>
-        abstract onwebkitanimationend: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onwebkitanimationend: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// This is a legacy alias of <c>onanimationiteration</c>.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event">MDN Reference</a>
         /// </remarks>
-        abstract onwebkitanimationiteration: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onwebkitanimationiteration: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// This is a legacy alias of <c>onanimationstart</c>.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationstart_event">MDN Reference</a>
         /// </remarks>
-        abstract onwebkitanimationstart: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onwebkitanimationstart: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// This is a legacy alias of <c>ontransitionend</c>.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionend_event">MDN Reference</a>
         /// </remarks>
-        abstract onwebkittransitionend: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onwebkittransitionend: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/wheel_event">MDN Reference</a>
         /// </summary>
-        abstract onwheel: (Fable.Core.TS.Dom.WheelEvent -> obj) option with get, set
+        abstract onwheel: (Fable.Core.TS.Dom.WheelEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/afterprint_event">MDN Reference</a>
         /// </summary>
-        abstract onafterprint: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onafterprint: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/beforeprint_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforeprint: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onbeforeprint: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/beforeunload_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforeunload: (Fable.Core.TS.Dom.BeforeUnloadEvent -> obj) option with get, set
+        abstract onbeforeunload: (Fable.Core.TS.Dom.BeforeUnloadEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/gamepadconnected_event">MDN Reference</a>
         /// </summary>
-        abstract ongamepadconnected: (Fable.Core.TS.Dom.GamepadEvent -> obj) option with get, set
+        abstract ongamepadconnected: (Fable.Core.TS.Dom.GamepadEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/gamepaddisconnected_event">MDN Reference</a>
         /// </summary>
-        abstract ongamepaddisconnected: (Fable.Core.TS.Dom.GamepadEvent -> obj) option with get, set
+        abstract ongamepaddisconnected: (Fable.Core.TS.Dom.GamepadEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/hashchange_event">MDN Reference</a>
         /// </summary>
-        abstract onhashchange: (Fable.Core.TS.Dom.HashChangeEvent -> obj) option with get, set
+        abstract onhashchange: (Fable.Core.TS.Dom.HashChangeEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/languagechange_event">MDN Reference</a>
         /// </summary>
-        abstract onlanguagechange: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onlanguagechange: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (Fable.Core.TS.Dom.MessageEvent<obj> -> obj) option with get, set
+        abstract onmessage: (Fable.Core.TS.Dom.MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/messageerror_event">MDN Reference</a>
         /// </summary>
-        abstract onmessageerror: (Fable.Core.TS.Dom.MessageEvent<obj> -> obj) option with get, set
+        abstract onmessageerror: (Fable.Core.TS.Dom.MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/offline_event">MDN Reference</a>
         /// </summary>
-        abstract onoffline: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onoffline: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/online_event">MDN Reference</a>
         /// </summary>
-        abstract ononline: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract ononline: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/pagehide_event">MDN Reference</a>
         /// </summary>
-        abstract onpagehide: (Fable.Core.TS.Dom.PageTransitionEvent -> obj) option with get, set
+        abstract onpagehide: (Fable.Core.TS.Dom.PageTransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/pagereveal_event">MDN Reference</a>
         /// </summary>
-        abstract onpagereveal: (Fable.Core.TS.Dom.PageRevealEvent -> obj) option with get, set
+        abstract onpagereveal: (Fable.Core.TS.Dom.PageRevealEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/pageshow_event">MDN Reference</a>
         /// </summary>
-        abstract onpageshow: (Fable.Core.TS.Dom.PageTransitionEvent -> obj) option with get, set
+        abstract onpageshow: (Fable.Core.TS.Dom.PageTransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/pageswap_event">MDN Reference</a>
         /// </summary>
-        abstract onpageswap: (Fable.Core.TS.Dom.PageSwapEvent -> obj) option with get, set
+        abstract onpageswap: (Fable.Core.TS.Dom.PageSwapEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/popstate_event">MDN Reference</a>
         /// </summary>
-        abstract onpopstate: (Fable.Core.TS.Dom.PopStateEvent -> obj) option with get, set
+        abstract onpopstate: (Fable.Core.TS.Dom.PopStateEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/rejectionhandled_event">MDN Reference</a>
         /// </summary>
-        abstract onrejectionhandled: (Fable.Core.TS.Dom.PromiseRejectionEvent -> obj) option with get, set
+        abstract onrejectionhandled: (Fable.Core.TS.Dom.PromiseRejectionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/storage_event">MDN Reference</a>
         /// </summary>
-        abstract onstorage: (Fable.Core.TS.Dom.StorageEvent -> obj) option with get, set
+        abstract onstorage: (Fable.Core.TS.Dom.StorageEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/unhandledrejection_event">MDN Reference</a>
         /// </summary>
-        abstract onunhandledrejection: (Fable.Core.TS.Dom.PromiseRejectionEvent -> obj) option with get, set
+        abstract onunhandledrejection: (Fable.Core.TS.Dom.PromiseRejectionEvent -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// The unload event is not reliable, consider visibilitychange or pagehide events.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/unload_event">MDN Reference</a>
         /// </remarks>
-        abstract onunload: (Fable.Core.TS.Dom.Event -> obj) option with get, set
+        abstract onunload: (Fable.Core.TS.Dom.Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/localStorage">MDN Reference</a>
         /// </summary>
@@ -30622,7 +30622,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal/abort_event">MDN Reference</a>
         /// </summary>
-        abstract onabort: (Event -> obj) option with get, set
+        abstract onabort: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>reason</c></b> read-only property returns a JavaScript value that indicates the abort reason.
         /// <br /><br />
@@ -30754,7 +30754,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorker/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (ErrorEvent -> obj) option with get, set
+        abstract onerror: (ErrorEvent -> unit) option with get, set
 
         abstract addEventListener<'K> :
             ``type``: 'K * listener: (ErrorEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
@@ -30911,15 +30911,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Animation/cancel_event">MDN Reference</a>
         /// </summary>
-        abstract oncancel: (AnimationPlaybackEvent -> obj) option with get, set
+        abstract oncancel: (AnimationPlaybackEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Animation/finish_event">MDN Reference</a>
         /// </summary>
-        abstract onfinish: (AnimationPlaybackEvent -> obj) option with get, set
+        abstract onfinish: (AnimationPlaybackEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Animation/remove_event">MDN Reference</a>
         /// </summary>
-        abstract onremove: (AnimationPlaybackEvent -> obj) option with get, set
+        abstract onremove: (AnimationPlaybackEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>overallProgress</c></b> read-only property of the Animation interface returns a number between 0 and 1 indicating the animation's overall progress towards its finished state. This is the overall progress across all of the animation's iterations, not each individual iteration.
         /// <br /><br />
@@ -31603,7 +31603,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioDecoder/dequeue_event">MDN Reference</a>
         /// </summary>
-        abstract ondequeue: (Event -> obj) option with get, set
+        abstract ondequeue: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the AudioDecoder interface returns the current state of the underlying codec.
         /// <br /><br />
@@ -31730,7 +31730,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioEncoder/dequeue_event">MDN Reference</a>
         /// </summary>
-        abstract ondequeue: (Event -> obj) option with get, set
+        abstract ondequeue: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the AudioEncoder interface returns the current state of the underlying codec.
         /// <br /><br />
@@ -32191,7 +32191,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioScheduledSourceNode/ended_event">MDN Reference</a>
         /// </summary>
-        abstract onended: (Event -> obj) option with get, set
+        abstract onended: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>start()</c></b> method on AudioScheduledSourceNode schedules a sound to begin playback at the specified time. If no time is specified, then the sound begins playing immediately.
         /// <br /><br />
@@ -32283,7 +32283,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/AudioWorkletNode/processorerror_event">MDN Reference</a>
         /// </summary>
-        abstract onprocessorerror: (ErrorEvent -> obj) option with get, set
+        abstract onprocessorerror: (ErrorEvent -> unit) option with get, set
         /// <summary>
         /// The read-only <b><c>parameters</c></b> property of the AudioWorkletNode interface returns the associated AudioParamMap — that is, a Map-like collection of AudioParam objects. They are instantiated during creation of the underlying AudioWorkletProcessor according to its parameterDescriptors static getter.
         /// <br /><br />
@@ -32521,7 +32521,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/BaseAudioContext/statechange_event">MDN Reference</a>
         /// </summary>
-        abstract onstatechange: (Event -> obj) option with get, set
+        abstract onstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>sampleRate</c></b> property of the BaseAudioContext interface returns a floating point number representing the sample rate, in samples per second, used by all nodes in this audio context. This limitation means that sample-rate converters are not supported.
         /// <br /><br />
@@ -33018,11 +33018,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/BroadcastChannel/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessage: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/BroadcastChannel/messageerror_event">MDN Reference</a>
         /// </summary>
-        abstract onmessageerror: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessageerror: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// The <b><c>close()</c></b> method of the BroadcastChannel interface terminates the connection to the underlying channel, allowing the object to be garbage collected. This is a necessary step to perform as there is no other way for a browser to know that this channel is not needed anymore.
         /// <br /><br />
@@ -40694,7 +40694,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore/change_event">MDN Reference</a>
         /// </summary>
-        abstract onchange: (CookieChangeEvent -> obj) option with get, set
+        abstract onchange: (CookieChangeEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>delete()</c></b> method of the CookieStore interface deletes a cookie that matches the given name or options object. The method expires the cookie by changing its date to one in the past.
         /// <br /><br />
@@ -42862,27 +42862,27 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/fullscreenchange_event">MDN Reference</a>
         /// </summary>
-        abstract onfullscreenchange: (Event -> obj) option with get, set
+        abstract onfullscreenchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/fullscreenerror_event">MDN Reference</a>
         /// </summary>
-        abstract onfullscreenerror: (Event -> obj) option with get, set
+        abstract onfullscreenerror: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/pointerlockchange_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerlockchange: (Event -> obj) option with get, set
+        abstract onpointerlockchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/pointerlockerror_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerlockerror: (Event -> obj) option with get, set
+        abstract onpointerlockerror: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/readystatechange_event">MDN Reference</a>
         /// </summary>
-        abstract onreadystatechange: (Event -> obj) option with get, set
+        abstract onreadystatechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/visibilitychange_event">MDN Reference</a>
         /// </summary>
-        abstract onvisibilitychange: (Event -> obj) option with get, set
+        abstract onvisibilitychange: (Event -> unit) option with get, set
         /// <summary>
         /// The read-only <b><c>ownerDocument</c></b> property of the Node interface returns the top-level document object of the node.
         /// <br /><br />
@@ -44353,11 +44353,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/fullscreenchange_event">MDN Reference</a>
         /// </summary>
-        abstract onfullscreenchange: (Event -> obj) option with get, set
+        abstract onfullscreenchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/fullscreenerror_event">MDN Reference</a>
         /// </summary>
-        abstract onfullscreenerror: (Event -> obj) option with get, set
+        abstract onfullscreenerror: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>outerHTML</c></b> attribute of the Element interface gets or sets the HTML or XML markup of the element and its descendants, omitting any shadow roots in both cases.
         /// <br /><br />
@@ -45338,15 +45338,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (Event -> obj) option with get, set
+        abstract onerror: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessage: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource/open_event">MDN Reference</a>
         /// </summary>
-        abstract onopen: (Event -> obj) option with get, set
+        abstract onopen: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>readyState</c></b> read-only property of the EventSource interface returns a number representing the state of the connection.
         /// <br /><br />
@@ -45614,27 +45614,27 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileReader/abort_event">MDN Reference</a>
         /// </summary>
-        abstract onabort: (ProgressEvent<FileReader> -> obj) option with get, set
+        abstract onabort: (ProgressEvent<FileReader> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileReader/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (ProgressEvent<FileReader> -> obj) option with get, set
+        abstract onerror: (ProgressEvent<FileReader> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileReader/load_event">MDN Reference</a>
         /// </summary>
-        abstract onload: (ProgressEvent<FileReader> -> obj) option with get, set
+        abstract onload: (ProgressEvent<FileReader> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileReader/loadend_event">MDN Reference</a>
         /// </summary>
-        abstract onloadend: (ProgressEvent<FileReader> -> obj) option with get, set
+        abstract onloadend: (ProgressEvent<FileReader> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileReader/loadstart_event">MDN Reference</a>
         /// </summary>
-        abstract onloadstart: (ProgressEvent<FileReader> -> obj) option with get, set
+        abstract onloadstart: (ProgressEvent<FileReader> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileReader/progress_event">MDN Reference</a>
         /// </summary>
-        abstract onprogress: (ProgressEvent<FileReader> -> obj) option with get, set
+        abstract onprogress: (ProgressEvent<FileReader> -> unit) option with get, set
         /// <summary>
         /// The <b><c>readyState</c></b> read-only property of the FileReader interface provides the current state of the reading operation. This will be one of the states: EMPTY, LOADING, or DONE.
         /// <br /><br />
@@ -46311,15 +46311,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FontFaceSet/loading_event">MDN Reference</a>
         /// </summary>
-        abstract onloading: (FontFaceSetLoadEvent -> obj) option with get, set
+        abstract onloading: (FontFaceSetLoadEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FontFaceSet/loadingdone_event">MDN Reference</a>
         /// </summary>
-        abstract onloadingdone: (FontFaceSetLoadEvent -> obj) option with get, set
+        abstract onloadingdone: (FontFaceSetLoadEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/FontFaceSet/loadingerror_event">MDN Reference</a>
         /// </summary>
-        abstract onloadingerror: (FontFaceSetLoadEvent -> obj) option with get, set
+        abstract onloadingerror: (FontFaceSetLoadEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>ready</c></b> read-only property of the FontFaceSet interface returns a Promise that resolves to the given FontFaceSet.
         /// <br /><br />
@@ -47305,7 +47305,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice/uncapturederror_event">MDN Reference</a>
         /// </summary>
-        abstract onuncapturederror: (GPUUncapturedErrorEvent -> obj) option with get, set
+        abstract onuncapturederror: (GPUUncapturedErrorEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>queue</c></b> read-only property of the GPUDevice interface returns the primary GPUQueue for the device.
         /// <br /><br />
@@ -48879,139 +48879,139 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event">MDN Reference</a>
         /// </summary>
-        abstract onabort: (UIEvent -> obj) option with get, set
+        abstract onabort: (UIEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationcancel_event">MDN Reference</a>
         /// </summary>
-        abstract onanimationcancel: (AnimationEvent -> obj) option with get, set
+        abstract onanimationcancel: (AnimationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationend_event">MDN Reference</a>
         /// </summary>
-        abstract onanimationend: (AnimationEvent -> obj) option with get, set
+        abstract onanimationend: (AnimationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event">MDN Reference</a>
         /// </summary>
-        abstract onanimationiteration: (AnimationEvent -> obj) option with get, set
+        abstract onanimationiteration: (AnimationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationstart_event">MDN Reference</a>
         /// </summary>
-        abstract onanimationstart: (AnimationEvent -> obj) option with get, set
+        abstract onanimationstart: (AnimationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/auxclick_event">MDN Reference</a>
         /// </summary>
-        abstract onauxclick: (PointerEvent -> obj) option with get, set
+        abstract onauxclick: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/beforeinput_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforeinput: (InputEvent -> obj) option with get, set
+        abstract onbeforeinput: (InputEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/beforematch_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforematch: (Event -> obj) option with get, set
+        abstract onbeforematch: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/beforetoggle_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforetoggle: (ToggleEvent -> obj) option with get, set
+        abstract onbeforetoggle: (ToggleEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/blur_event">MDN Reference</a>
         /// </summary>
-        abstract onblur: (FocusEvent -> obj) option with get, set
+        abstract onblur: (FocusEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/cancel_event">MDN Reference</a>
         /// </summary>
-        abstract oncancel: (Event -> obj) option with get, set
+        abstract oncancel: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplay_event">MDN Reference</a>
         /// </summary>
-        abstract oncanplay: (Event -> obj) option with get, set
+        abstract oncanplay: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event">MDN Reference</a>
         /// </summary>
-        abstract oncanplaythrough: (Event -> obj) option with get, set
+        abstract oncanplaythrough: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event">MDN Reference</a>
         /// </summary>
-        abstract onchange: (Event -> obj) option with get, set
+        abstract onchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/click_event">MDN Reference</a>
         /// </summary>
-        abstract onclick: (PointerEvent -> obj) option with get, set
+        abstract onclick: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/close_event">MDN Reference</a>
         /// </summary>
-        abstract onclose: (Event -> obj) option with get, set
+        abstract onclose: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/command_event">MDN Reference</a>
         /// </summary>
-        abstract oncommand: (Event -> obj) option with get, set
+        abstract oncommand: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextlost_event">MDN Reference</a>
         /// </summary>
-        abstract oncontextlost: (Event -> obj) option with get, set
+        abstract oncontextlost: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/contextmenu_event">MDN Reference</a>
         /// </summary>
-        abstract oncontextmenu: (PointerEvent -> obj) option with get, set
+        abstract oncontextmenu: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextrestored_event">MDN Reference</a>
         /// </summary>
-        abstract oncontextrestored: (Event -> obj) option with get, set
+        abstract oncontextrestored: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/copy_event">MDN Reference</a>
         /// </summary>
-        abstract oncopy: (ClipboardEvent -> obj) option with get, set
+        abstract oncopy: (ClipboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/cuechange_event">MDN Reference</a>
         /// </summary>
-        abstract oncuechange: (Event -> obj) option with get, set
+        abstract oncuechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/cut_event">MDN Reference</a>
         /// </summary>
-        abstract oncut: (ClipboardEvent -> obj) option with get, set
+        abstract oncut: (ClipboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/dblclick_event">MDN Reference</a>
         /// </summary>
-        abstract ondblclick: (MouseEvent -> obj) option with get, set
+        abstract ondblclick: (MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event">MDN Reference</a>
         /// </summary>
-        abstract ondrag: (DragEvent -> obj) option with get, set
+        abstract ondrag: (DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event">MDN Reference</a>
         /// </summary>
-        abstract ondragend: (DragEvent -> obj) option with get, set
+        abstract ondragend: (DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event">MDN Reference</a>
         /// </summary>
-        abstract ondragenter: (DragEvent -> obj) option with get, set
+        abstract ondragenter: (DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event">MDN Reference</a>
         /// </summary>
-        abstract ondragleave: (DragEvent -> obj) option with get, set
+        abstract ondragleave: (DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event">MDN Reference</a>
         /// </summary>
-        abstract ondragover: (DragEvent -> obj) option with get, set
+        abstract ondragover: (DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event">MDN Reference</a>
         /// </summary>
-        abstract ondragstart: (DragEvent -> obj) option with get, set
+        abstract ondragstart: (DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/drop_event">MDN Reference</a>
         /// </summary>
-        abstract ondrop: (DragEvent -> obj) option with get, set
+        abstract ondrop: (DragEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/durationchange_event">MDN Reference</a>
         /// </summary>
-        abstract ondurationchange: (Event -> obj) option with get, set
+        abstract ondurationchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/emptied_event">MDN Reference</a>
         /// </summary>
-        abstract onemptied: (Event -> obj) option with get, set
+        abstract onemptied: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ended_event">MDN Reference</a>
         /// </summary>
-        abstract onended: (Event -> obj) option with get, set
+        abstract onended: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/error_event">MDN Reference</a>
         /// </summary>
@@ -49019,279 +49019,279 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/focus_event">MDN Reference</a>
         /// </summary>
-        abstract onfocus: (FocusEvent -> obj) option with get, set
+        abstract onfocus: (FocusEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/formdata_event">MDN Reference</a>
         /// </summary>
-        abstract onformdata: (FormDataEvent -> obj) option with get, set
+        abstract onformdata: (FormDataEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event">MDN Reference</a>
         /// </summary>
-        abstract ongotpointercapture: (PointerEvent -> obj) option with get, set
+        abstract ongotpointercapture: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/input_event">MDN Reference</a>
         /// </summary>
-        abstract oninput: (InputEvent -> obj) option with get, set
+        abstract oninput: (InputEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/invalid_event">MDN Reference</a>
         /// </summary>
-        abstract oninvalid: (Event -> obj) option with get, set
+        abstract oninvalid: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/keydown_event">MDN Reference</a>
         /// </summary>
-        abstract onkeydown: (KeyboardEvent -> obj) option with get, set
+        abstract onkeydown: (KeyboardEvent -> unit) option with get, set
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Element/keypress_event">MDN Reference</a></remarks>
-        abstract onkeypress: (KeyboardEvent -> obj) option with get, set
+        abstract onkeypress: (KeyboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/keyup_event">MDN Reference</a>
         /// </summary>
-        abstract onkeyup: (KeyboardEvent -> obj) option with get, set
+        abstract onkeyup: (KeyboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/load_event">MDN Reference</a>
         /// </summary>
-        abstract onload: (Event -> obj) option with get, set
+        abstract onload: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadeddata_event">MDN Reference</a>
         /// </summary>
-        abstract onloadeddata: (Event -> obj) option with get, set
+        abstract onloadeddata: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadedmetadata_event">MDN Reference</a>
         /// </summary>
-        abstract onloadedmetadata: (Event -> obj) option with get, set
+        abstract onloadedmetadata: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadstart_event">MDN Reference</a>
         /// </summary>
-        abstract onloadstart: (Event -> obj) option with get, set
+        abstract onloadstart: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/lostpointercapture_event">MDN Reference</a>
         /// </summary>
-        abstract onlostpointercapture: (PointerEvent -> obj) option with get, set
+        abstract onlostpointercapture: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mousedown_event">MDN Reference</a>
         /// </summary>
-        abstract onmousedown: (MouseEvent -> obj) option with get, set
+        abstract onmousedown: (MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseenter_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseenter: (MouseEvent -> obj) option with get, set
+        abstract onmouseenter: (MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseleave_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseleave: (MouseEvent -> obj) option with get, set
+        abstract onmouseleave: (MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mousemove_event">MDN Reference</a>
         /// </summary>
-        abstract onmousemove: (MouseEvent -> obj) option with get, set
+        abstract onmousemove: (MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseout_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseout: (MouseEvent -> obj) option with get, set
+        abstract onmouseout: (MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseover_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseover: (MouseEvent -> obj) option with get, set
+        abstract onmouseover: (MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/mouseup_event">MDN Reference</a>
         /// </summary>
-        abstract onmouseup: (MouseEvent -> obj) option with get, set
+        abstract onmouseup: (MouseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/paste_event">MDN Reference</a>
         /// </summary>
-        abstract onpaste: (ClipboardEvent -> obj) option with get, set
+        abstract onpaste: (ClipboardEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/pause_event">MDN Reference</a>
         /// </summary>
-        abstract onpause: (Event -> obj) option with get, set
+        abstract onpause: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play_event">MDN Reference</a>
         /// </summary>
-        abstract onplay: (Event -> obj) option with get, set
+        abstract onplay: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/playing_event">MDN Reference</a>
         /// </summary>
-        abstract onplaying: (Event -> obj) option with get, set
+        abstract onplaying: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointercancel_event">MDN Reference</a>
         /// </summary>
-        abstract onpointercancel: (PointerEvent -> obj) option with get, set
+        abstract onpointercancel: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerdown_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerdown: (PointerEvent -> obj) option with get, set
+        abstract onpointerdown: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerenter_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerenter: (PointerEvent -> obj) option with get, set
+        abstract onpointerenter: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerleave_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerleave: (PointerEvent -> obj) option with get, set
+        abstract onpointerleave: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointermove_event">MDN Reference</a>
         /// </summary>
-        abstract onpointermove: (PointerEvent -> obj) option with get, set
+        abstract onpointermove: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerout_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerout: (PointerEvent -> obj) option with get, set
+        abstract onpointerout: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerover_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerover: (PointerEvent -> obj) option with get, set
+        abstract onpointerover: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// Available only in secure contexts.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerrawupdate_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerrawupdate: (Event -> obj) option with get, set
+        abstract onpointerrawupdate: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/pointerup_event">MDN Reference</a>
         /// </summary>
-        abstract onpointerup: (PointerEvent -> obj) option with get, set
+        abstract onpointerup: (PointerEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/progress_event">MDN Reference</a>
         /// </summary>
-        abstract onprogress: (ProgressEvent<EventTarget> -> obj) option with get, set
+        abstract onprogress: (ProgressEvent<EventTarget> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ratechange_event">MDN Reference</a>
         /// </summary>
-        abstract onratechange: (Event -> obj) option with get, set
+        abstract onratechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/reset_event">MDN Reference</a>
         /// </summary>
-        abstract onreset: (Event -> obj) option with get, set
+        abstract onreset: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/resize_event">MDN Reference</a>
         /// </summary>
-        abstract onresize: (UIEvent -> obj) option with get, set
+        abstract onresize: (UIEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/scroll_event">MDN Reference</a>
         /// </summary>
-        abstract onscroll: (Event -> obj) option with get, set
+        abstract onscroll: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/scrollend_event">MDN Reference</a>
         /// </summary>
-        abstract onscrollend: (Event -> obj) option with get, set
+        abstract onscrollend: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/securitypolicyviolation_event">MDN Reference</a>
         /// </summary>
-        abstract onsecuritypolicyviolation: (SecurityPolicyViolationEvent -> obj) option with get, set
+        abstract onsecuritypolicyviolation: (SecurityPolicyViolationEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeked_event">MDN Reference</a>
         /// </summary>
-        abstract onseeked: (Event -> obj) option with get, set
+        abstract onseeked: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeking_event">MDN Reference</a>
         /// </summary>
-        abstract onseeking: (Event -> obj) option with get, set
+        abstract onseeking: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/select_event">MDN Reference</a>
         /// </summary>
-        abstract onselect: (Event -> obj) option with get, set
+        abstract onselect: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/selectionchange_event">MDN Reference</a>
         /// </summary>
-        abstract onselectionchange: (Event -> obj) option with get, set
+        abstract onselectionchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Node/selectstart_event">MDN Reference</a>
         /// </summary>
-        abstract onselectstart: (Event -> obj) option with get, set
+        abstract onselectstart: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSlotElement/slotchange_event">MDN Reference</a>
         /// </summary>
-        abstract onslotchange: (Event -> obj) option with get, set
+        abstract onslotchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/stalled_event">MDN Reference</a>
         /// </summary>
-        abstract onstalled: (Event -> obj) option with get, set
+        abstract onstalled: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement/submit_event">MDN Reference</a>
         /// </summary>
-        abstract onsubmit: (SubmitEvent -> obj) option with get, set
+        abstract onsubmit: (SubmitEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/suspend_event">MDN Reference</a>
         /// </summary>
-        abstract onsuspend: (Event -> obj) option with get, set
+        abstract onsuspend: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/timeupdate_event">MDN Reference</a>
         /// </summary>
-        abstract ontimeupdate: (Event -> obj) option with get, set
+        abstract ontimeupdate: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/toggle_event">MDN Reference</a>
         /// </summary>
-        abstract ontoggle: (ToggleEvent -> obj) option with get, set
+        abstract ontoggle: (ToggleEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchcancel_event">MDN Reference</a>
         /// </summary>
-        abstract ontouchcancel: (TouchEvent -> obj) option with get, set
+        abstract ontouchcancel: (TouchEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchend_event">MDN Reference</a>
         /// </summary>
-        abstract ontouchend: (TouchEvent -> obj) option with get, set
+        abstract ontouchend: (TouchEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchmove_event">MDN Reference</a>
         /// </summary>
-        abstract ontouchmove: (TouchEvent -> obj) option with get, set
+        abstract ontouchmove: (TouchEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/touchstart_event">MDN Reference</a>
         /// </summary>
-        abstract ontouchstart: (TouchEvent -> obj) option with get, set
+        abstract ontouchstart: (TouchEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitioncancel_event">MDN Reference</a>
         /// </summary>
-        abstract ontransitioncancel: (TransitionEvent -> obj) option with get, set
+        abstract ontransitioncancel: (TransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionend_event">MDN Reference</a>
         /// </summary>
-        abstract ontransitionend: (TransitionEvent -> obj) option with get, set
+        abstract ontransitionend: (TransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionrun_event">MDN Reference</a>
         /// </summary>
-        abstract ontransitionrun: (TransitionEvent -> obj) option with get, set
+        abstract ontransitionrun: (TransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionstart_event">MDN Reference</a>
         /// </summary>
-        abstract ontransitionstart: (TransitionEvent -> obj) option with get, set
+        abstract ontransitionstart: (TransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/volumechange_event">MDN Reference</a>
         /// </summary>
-        abstract onvolumechange: (Event -> obj) option with get, set
+        abstract onvolumechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waiting_event">MDN Reference</a>
         /// </summary>
-        abstract onwaiting: (Event -> obj) option with get, set
+        abstract onwaiting: (Event -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// This is a legacy alias of <c>onanimationend</c>.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationend_event">MDN Reference</a>
         /// </remarks>
-        abstract onwebkitanimationend: (Event -> obj) option with get, set
+        abstract onwebkitanimationend: (Event -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// This is a legacy alias of <c>onanimationiteration</c>.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event">MDN Reference</a>
         /// </remarks>
-        abstract onwebkitanimationiteration: (Event -> obj) option with get, set
+        abstract onwebkitanimationiteration: (Event -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// This is a legacy alias of <c>onanimationstart</c>.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/animationstart_event">MDN Reference</a>
         /// </remarks>
-        abstract onwebkitanimationstart: (Event -> obj) option with get, set
+        abstract onwebkitanimationstart: (Event -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// This is a legacy alias of <c>ontransitionend</c>.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/transitionend_event">MDN Reference</a>
         /// </remarks>
-        abstract onwebkittransitionend: (Event -> obj) option with get, set
+        abstract onwebkittransitionend: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/wheel_event">MDN Reference</a>
         /// </summary>
-        abstract onwheel: (WheelEvent -> obj) option with get, set
+        abstract onwheel: (WheelEvent -> unit) option with get, set
 
         abstract addEventListener<'K> :
             ``type``: 'K *
@@ -53270,11 +53270,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/encrypted_event">MDN Reference</a>
         /// </summary>
-        abstract onencrypted: (MediaEncryptedEvent -> obj) option with get, set
+        abstract onencrypted: (MediaEncryptedEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waitingforkey_event">MDN Reference</a>
         /// </summary>
-        abstract onwaitingforkey: (Event -> obj) option with get, set
+        abstract onwaitingforkey: (Event -> unit) option with get, set
         /// <summary>
         /// The read-only <b><c>HTMLMediaElement.paused</c></b> property tells whether the media element is paused.
         /// <br /><br />
@@ -56312,11 +56312,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/enterpictureinpicture_event">MDN Reference</a>
         /// </summary>
-        abstract onenterpictureinpicture: (PictureInPictureEvent -> obj) option with get, set
+        abstract onenterpictureinpicture: (PictureInPictureEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/leavepictureinpicture_event">MDN Reference</a>
         /// </summary>
-        abstract onleavepictureinpicture: (PictureInPictureEvent -> obj) option with get, set
+        abstract onleavepictureinpicture: (PictureInPictureEvent -> unit) option with get, set
         abstract playsInline: bool with get, set
         /// <summary>
         /// The <b><c>poster</c></b> property of the HTMLVideoElement interface is a string that reflects the URL for an image to be shown while no video data is available. If the property does not represent a valid URL, no poster frame will be shown.
@@ -56990,16 +56990,16 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBTransaction/abort_event">MDN Reference</a>
         /// </summary>
-        abstract onabort: (Event -> obj) option with get, set
+        abstract onabort: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBDatabase/close_event">MDN Reference</a>
         /// </summary>
-        abstract onclose: (Event -> obj) option with get, set
-        abstract onerror: (Event -> obj) option with get, set
+        abstract onclose: (Event -> unit) option with get, set
+        abstract onerror: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBDatabase/versionchange_event">MDN Reference</a>
         /// </summary>
-        abstract onversionchange: (IDBVersionChangeEvent -> obj) option with get, set
+        abstract onversionchange: (IDBVersionChangeEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>version</c></b> property of the IDBDatabase interface is a 64-bit integer that contains the version of the connected database. When a database is first created, this attribute is an empty string.
         /// <br /><br />
@@ -57744,11 +57744,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest/blocked_event">MDN Reference</a>
         /// </summary>
-        abstract onblocked: (IDBVersionChangeEvent -> obj) option with get, set
+        abstract onblocked: (IDBVersionChangeEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest/upgradeneeded_event">MDN Reference</a>
         /// </summary>
-        abstract onupgradeneeded: (IDBVersionChangeEvent -> obj) option with get, set
+        abstract onupgradeneeded: (IDBVersionChangeEvent -> unit) option with get, set
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -57807,11 +57807,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBRequest/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (Event -> obj) option with get, set
+        abstract onerror: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBRequest/success_event">MDN Reference</a>
         /// </summary>
-        abstract onsuccess: (Event -> obj) option with get, set
+        abstract onsuccess: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>readyState</c></b> read-only property of the IDBRequest interface returns the state of the request.
         /// <br /><br />
@@ -57926,15 +57926,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBTransaction/abort_event">MDN Reference</a>
         /// </summary>
-        abstract onabort: (Event -> obj) option with get, set
+        abstract onabort: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBTransaction/complete_event">MDN Reference</a>
         /// </summary>
-        abstract oncomplete: (Event -> obj) option with get, set
+        abstract oncomplete: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/IDBTransaction/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (Event -> obj) option with get, set
+        abstract onerror: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>abort()</c></b> method of the IDBTransaction interface rolls back all the changes to objects in the database associated with this transaction.
         /// <br /><br />
@@ -59098,7 +59098,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIAccess/statechange_event">MDN Reference</a>
         /// </summary>
-        abstract onstatechange: (MIDIConnectionEvent -> obj) option with get, set
+        abstract onstatechange: (MIDIConnectionEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>outputs</c></b> read-only property of the MIDIAccess interface provides access to any available MIDI output ports.
         /// <br /><br />
@@ -59221,7 +59221,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIInput/midimessage_event">MDN Reference</a>
         /// </summary>
-        abstract onmidimessage: (MIDIMessageEvent -> obj) option with get, set
+        abstract onmidimessage: (MIDIMessageEvent -> unit) option with get, set
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -59449,7 +59449,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIPort/statechange_event">MDN Reference</a>
         /// </summary>
-        abstract onstatechange: (MIDIConnectionEvent -> obj) option with get, set
+        abstract onstatechange: (MIDIConnectionEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the MIDIPort interface returns the state of the port.
         /// <br /><br />
@@ -59667,7 +59667,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaDevices/devicechange_event">MDN Reference</a>
         /// </summary>
-        abstract ondevicechange: (Event -> obj) option with get, set
+        abstract ondevicechange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>enumerateDevices()</c></b> method of the MediaDevices interface requests a list of the currently available media input and output devices, such as microphones, cameras, headsets, and so forth. The returned Promise is resolved with an array of MediaDeviceInfo objects describing the devices.
         /// <br /><br />
@@ -59945,11 +59945,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession/keystatuseschange_event">MDN Reference</a>
         /// </summary>
-        abstract onkeystatuseschange: (Event -> obj) option with get, set
+        abstract onkeystatuseschange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (MediaKeyMessageEvent -> obj) option with get, set
+        abstract onmessage: (MediaKeyMessageEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>sessionId</c></b> read-only property of the MediaKeySession interface contains a unique string generated by the content decryption module (CDM) for the current media object and its associated keys or licenses.
         /// <br /><br />
@@ -60273,7 +60273,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaQueryList/change_event">MDN Reference</a>
         /// </summary>
-        abstract onchange: (MediaQueryListEvent -> obj) option with get, set
+        abstract onchange: (MediaQueryListEvent -> unit) option with get, set
         /// <summary>
         /// The deprecated <b><c>addListener()</c></b> method of the MediaQueryList interface adds a listener to the MediaQueryListener that will run a custom callback function in response to the media query status changing.
         /// </summary>
@@ -60417,27 +60417,27 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaRecorder/dataavailable_event">MDN Reference</a>
         /// </summary>
-        abstract ondataavailable: (BlobEvent -> obj) option with get, set
+        abstract ondataavailable: (BlobEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaRecorder/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (ErrorEvent -> obj) option with get, set
+        abstract onerror: (ErrorEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaRecorder/pause_event">MDN Reference</a>
         /// </summary>
-        abstract onpause: (Event -> obj) option with get, set
+        abstract onpause: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaRecorder/resume_event">MDN Reference</a>
         /// </summary>
-        abstract onresume: (Event -> obj) option with get, set
+        abstract onresume: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaRecorder/start_event">MDN Reference</a>
         /// </summary>
-        abstract onstart: (Event -> obj) option with get, set
+        abstract onstart: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaRecorder/stop_event">MDN Reference</a>
         /// </summary>
-        abstract onstop: (Event -> obj) option with get, set
+        abstract onstop: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the MediaRecorder interface returns the current state of the current MediaRecorder object.
         /// <br /><br />
@@ -60631,15 +60631,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaSource/sourceclose_event">MDN Reference</a>
         /// </summary>
-        abstract onsourceclose: (Event -> obj) option with get, set
+        abstract onsourceclose: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaSource/sourceended_event">MDN Reference</a>
         /// </summary>
-        abstract onsourceended: (Event -> obj) option with get, set
+        abstract onsourceended: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaSource/sourceopen_event">MDN Reference</a>
         /// </summary>
-        abstract onsourceopen: (Event -> obj) option with get, set
+        abstract onsourceopen: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>readyState</c></b> read-only property of the MediaSource interface returns an enum representing the state of the current MediaSource. The three possible values are:
         /// <br /><br />
@@ -60780,11 +60780,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStream/addtrack_event">MDN Reference</a>
         /// </summary>
-        abstract onaddtrack: (MediaStreamTrackEvent -> obj) option with get, set
+        abstract onaddtrack: (MediaStreamTrackEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStream/removetrack_event">MDN Reference</a>
         /// </summary>
-        abstract onremovetrack: (MediaStreamTrackEvent -> obj) option with get, set
+        abstract onremovetrack: (MediaStreamTrackEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>addTrack()</c></b> method of the MediaStream interface adds a new track to the stream. The track is specified as a parameter of type MediaStreamTrack.
         /// <br /><br />
@@ -60966,15 +60966,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/ended_event">MDN Reference</a>
         /// </summary>
-        abstract onended: (Event -> obj) option with get, set
+        abstract onended: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/mute_event">MDN Reference</a>
         /// </summary>
-        abstract onmute: (Event -> obj) option with get, set
+        abstract onmute: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/unmute_event">MDN Reference</a>
         /// </summary>
-        abstract onunmute: (Event -> obj) option with get, set
+        abstract onunmute: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>readyState</c></b> read-only property of the MediaStreamTrack interface returns an enumerated value giving the status of the track.
         /// <br /><br />
@@ -61214,11 +61214,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/DedicatedWorkerGlobalScope/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessage: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/DedicatedWorkerGlobalScope/messageerror_event">MDN Reference</a>
         /// </summary>
-        abstract onmessageerror: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessageerror: (MessageEvent<obj> -> unit) option with get, set
 
         abstract addEventListener<'K> :
             ``type``: 'K * listener: (MessageEvent<obj> -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
@@ -61828,19 +61828,19 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigation/currententrychange_event">MDN Reference</a>
         /// </summary>
-        abstract oncurrententrychange: (NavigationCurrentEntryChangeEvent -> obj) option with get, set
+        abstract oncurrententrychange: (NavigationCurrentEntryChangeEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigation/navigate_event">MDN Reference</a>
         /// </summary>
-        abstract onnavigate: (NavigateEvent -> obj) option with get, set
+        abstract onnavigate: (NavigateEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigation/navigateerror_event">MDN Reference</a>
         /// </summary>
-        abstract onnavigateerror: (ErrorEvent -> obj) option with get, set
+        abstract onnavigateerror: (ErrorEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigation/navigatesuccess_event">MDN Reference</a>
         /// </summary>
-        abstract onnavigatesuccess: (Event -> obj) option with get, set
+        abstract onnavigatesuccess: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>transition</c></b> read-only property of the Navigation interface returns a NavigationTransition object representing the status of an in-progress navigation, which can be used to track it.
         /// <br /><br />
@@ -62117,7 +62117,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationHistoryEntry/dispose_event">MDN Reference</a>
         /// </summary>
-        abstract ondispose: (Event -> obj) option with get, set
+        abstract ondispose: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>sameDocument</c></b> read-only property of the NavigationHistoryEntry interface returns true if this history entry is for the same document as the current Document value and current document is fully active, or false otherwise.
         /// <br /><br />
@@ -63213,19 +63213,19 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Notification/click_event">MDN Reference</a>
         /// </summary>
-        abstract onclick: (Event -> obj) option with get, set
+        abstract onclick: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Notification/close_event">MDN Reference</a>
         /// </summary>
-        abstract onclose: (Event -> obj) option with get, set
+        abstract onclose: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Notification/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (Event -> obj) option with get, set
+        abstract onerror: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Notification/show_event">MDN Reference</a>
         /// </summary>
-        abstract onshow: (Event -> obj) option with get, set
+        abstract onshow: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>requireInteraction</c></b> read-only property of the Notification interface returns a boolean value indicating that a notification should remain active until the user clicks or dismisses it, rather than closing automatically.
         /// <br /><br />
@@ -63592,7 +63592,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/OfflineAudioContext/complete_event">MDN Reference</a>
         /// </summary>
-        abstract oncomplete: (OfflineAudioCompletionEvent -> obj) option with get, set
+        abstract oncomplete: (OfflineAudioCompletionEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>resume()</c></b> method of the OfflineAudioContext interface resumes the progression of time in an audio context that has been suspended. The promise resolves immediately because the OfflineAudioContext does not require the audio hardware.
         /// <br /><br />
@@ -63665,11 +63665,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/contextlost_event">MDN Reference</a>
         /// </summary>
-        abstract oncontextlost: (Event -> obj) option with get, set
+        abstract oncontextlost: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/contextrestored_event">MDN Reference</a>
         /// </summary>
-        abstract oncontextrestored: (Event -> obj) option with get, set
+        abstract oncontextrestored: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>width</c></b> property returns and sets the width of an OffscreenCanvas object.
         /// <br /><br />
@@ -64430,11 +64430,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequest/paymentmethodchange_event">MDN Reference</a>
         /// </summary>
-        abstract onpaymentmethodchange: (PaymentMethodChangeEvent -> obj) option with get, set
+        abstract onpaymentmethodchange: (PaymentMethodChangeEvent -> unit) option with get, set
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequest/shippingaddresschange_event">MDN Reference</a></remarks>
-        abstract onshippingaddresschange: (PaymentRequestUpdateEvent -> obj) option with get, set
+        abstract onshippingaddresschange: (PaymentRequestUpdateEvent -> unit) option with get, set
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequest/shippingoptionchange_event">MDN Reference</a></remarks>
-        abstract onshippingoptionchange: (PaymentRequestUpdateEvent -> obj) option with get, set
+        abstract onshippingoptionchange: (PaymentRequestUpdateEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>shippingAddress</c></b> read-only property of the PaymentRequest interface returns the shipping address provided by the user. It is null by default.
         /// </summary>
@@ -64600,7 +64600,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentResponse/payerdetailchange_event">MDN Reference</a>
         /// </summary>
-        abstract onpayerdetailchange: (PaymentRequestUpdateEvent -> obj) option with get, set
+        abstract onpayerdetailchange: (PaymentRequestUpdateEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>payerEmail</c></b> read-only property of the PaymentResponse interface returns the email address supplied by the user. This option is only present when the requestPayerEmail option is set to true in the options object passed to the PaymentRequest constructor.
         /// <br /><br />
@@ -64732,7 +64732,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Performance/resourcetimingbufferfull_event">MDN Reference</a>
         /// </summary>
-        abstract onresourcetimingbufferfull: (Event -> obj) option with get, set
+        abstract onresourcetimingbufferfull: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>timeOrigin</c></b> read-only property of the Performance interface returns the high resolution timestamp that is used as the baseline for performance-related timestamps.
         /// <br /><br />
@@ -65638,7 +65638,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/PermissionStatus/change_event">MDN Reference</a>
         /// </summary>
-        abstract onchange: (Event -> obj) option with get, set
+        abstract onchange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the PermissionStatus interface returns the state of a requested permission. This property returns one of 'granted', 'denied', or 'prompt'.
         /// <br /><br />
@@ -65781,7 +65781,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/PictureInPictureWindow/resize_event">MDN Reference</a>
         /// </summary>
-        abstract onresize: (Event -> obj) option with get, set
+        abstract onresize: (Event -> unit) option with get, set
         /// <summary>
         /// The read-only <b><c>width</c></b> property of the PictureInPictureWindow interface returns the width of the floating video window in pixels.
         /// <br /><br />
@@ -66489,7 +66489,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDTMFSender/tonechange_event">MDN Reference</a>
         /// </summary>
-        abstract ontonechange: (RTCDTMFToneChangeEvent -> obj) option with get, set
+        abstract ontonechange: (RTCDTMFToneChangeEvent -> unit) option with get, set
         /// <summary>
         /// The RTCDTMFSender interface's <b><c>toneBuffer</c></b> property returns a string containing a list of the DTMF tones currently queued for sending to the remote peer over the RTCPeerConnection. To place tones into the buffer, call insertDTMF().
         /// <br /><br />
@@ -66671,27 +66671,27 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDataChannel/bufferedamountlow_event">MDN Reference</a>
         /// </summary>
-        abstract onbufferedamountlow: (Event -> obj) option with get, set
+        abstract onbufferedamountlow: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDataChannel/close_event">MDN Reference</a>
         /// </summary>
-        abstract onclose: (Event -> obj) option with get, set
+        abstract onclose: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDataChannel/closing_event">MDN Reference</a>
         /// </summary>
-        abstract onclosing: (Event -> obj) option with get, set
+        abstract onclosing: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDataChannel/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (RTCErrorEvent -> obj) option with get, set
+        abstract onerror: (RTCErrorEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDataChannel/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessage: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDataChannel/open_event">MDN Reference</a>
         /// </summary>
-        abstract onopen: (Event -> obj) option with get, set
+        abstract onopen: (Event -> unit) option with get, set
         /// <summary>
         /// The read-only RTCDataChannel property <b><c>ordered</c></b> indicates whether or not the data channel guarantees in-order delivery of messages; the default is true, which indicates that the data channel is indeed ordered. This is set when the RTCDataChannel is created, by setting the ordered property on the object passed as RTCPeerConnection.createDataChannel()'s options parameter.
         /// <br /><br />
@@ -66859,11 +66859,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDtlsTransport/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (RTCErrorEvent -> obj) option with get, set
+        abstract onerror: (RTCErrorEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDtlsTransport/statechange_event">MDN Reference</a>
         /// </summary>
-        abstract onstatechange: (Event -> obj) option with get, set
+        abstract onstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the RTCDtlsTransport interface provides information which describes a Datagram Transport Layer Security (DTLS) transport state.
         /// <br /><br />
@@ -67254,15 +67254,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCIceTransport/gatheringstatechange_event">MDN Reference</a>
         /// </summary>
-        abstract ongatheringstatechange: (Event -> obj) option with get, set
+        abstract ongatheringstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCIceTransport/selectedcandidatepairchange_event">MDN Reference</a>
         /// </summary>
-        abstract onselectedcandidatepairchange: (Event -> obj) option with get, set
+        abstract onselectedcandidatepairchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCIceTransport/statechange_event">MDN Reference</a>
         /// </summary>
-        abstract onstatechange: (Event -> obj) option with get, set
+        abstract onstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the RTCIceTransport interface returns the current state of the ICE transport, so you can determine the state of ICE gathering in which the ICE agent currently is operating.
         /// <br /><br />
@@ -67395,39 +67395,39 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/connectionstatechange_event">MDN Reference</a>
         /// </summary>
-        abstract onconnectionstatechange: (Event -> obj) option with get, set
+        abstract onconnectionstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/datachannel_event">MDN Reference</a>
         /// </summary>
-        abstract ondatachannel: (RTCDataChannelEvent -> obj) option with get, set
+        abstract ondatachannel: (RTCDataChannelEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/icecandidate_event">MDN Reference</a>
         /// </summary>
-        abstract onicecandidate: (RTCPeerConnectionIceEvent -> obj) option with get, set
+        abstract onicecandidate: (RTCPeerConnectionIceEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/icecandidateerror_event">MDN Reference</a>
         /// </summary>
-        abstract onicecandidateerror: (RTCPeerConnectionIceErrorEvent -> obj) option with get, set
+        abstract onicecandidateerror: (RTCPeerConnectionIceErrorEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/iceconnectionstatechange_event">MDN Reference</a>
         /// </summary>
-        abstract oniceconnectionstatechange: (Event -> obj) option with get, set
+        abstract oniceconnectionstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/icegatheringstatechange_event">MDN Reference</a>
         /// </summary>
-        abstract onicegatheringstatechange: (Event -> obj) option with get, set
+        abstract onicegatheringstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/negotiationneeded_event">MDN Reference</a>
         /// </summary>
-        abstract onnegotiationneeded: (Event -> obj) option with get, set
+        abstract onnegotiationneeded: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/signalingstatechange_event">MDN Reference</a>
         /// </summary>
-        abstract onsignalingstatechange: (Event -> obj) option with get, set
+        abstract onsignalingstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/track_event">MDN Reference</a>
         /// </summary>
-        abstract ontrack: (RTCTrackEvent -> obj) option with get, set
+        abstract ontrack: (RTCTrackEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>pendingLocalDescription</c></b> read-only property of the RTCPeerConnection interface returns an RTCSessionDescription object describing a pending configuration change for the local end of the connection.
         /// <br /><br />
@@ -68026,7 +68026,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCSctpTransport/statechange_event">MDN Reference</a>
         /// </summary>
-        abstract onstatechange: (Event -> obj) option with get, set
+        abstract onstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the RTCSctpTransport interface provides information which describes a Stream Control Transmission Protocol (SCTP) transport state.
         /// <br /><br />
@@ -68730,15 +68730,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RemotePlayback/connect_event">MDN Reference</a>
         /// </summary>
-        abstract onconnect: (Event -> obj) option with get, set
+        abstract onconnect: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RemotePlayback/connecting_event">MDN Reference</a>
         /// </summary>
-        abstract onconnecting: (Event -> obj) option with get, set
+        abstract onconnecting: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/RemotePlayback/disconnect_event">MDN Reference</a>
         /// </summary>
-        abstract ondisconnect: (Event -> obj) option with get, set
+        abstract ondisconnect: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the RemotePlayback interface returns the current state of the RemotePlayback connection.
         /// <br /><br />
@@ -74933,7 +74933,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ScreenOrientation/change_event">MDN Reference</a>
         /// </summary>
-        abstract onchange: (Event -> obj) option with get, set
+        abstract onchange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>type</c></b> read-only property of the ScreenOrientation interface returns the document's current orientation type, one of portrait-primary, portrait-secondary, landscape-primary, or landscape-secondary.
         /// <br /><br />
@@ -75018,7 +75018,7 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/ScriptProcessorNode/bufferSize">MDN Reference</a></remarks>
         abstract bufferSize: float
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/ScriptProcessorNode/audioprocess_event">MDN Reference</a></remarks>
-        abstract onaudioprocess: (AudioProcessingEvent -> obj) option with get, set
+        abstract onaudioprocess: (AudioProcessingEvent -> unit) option with get, set
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -75352,7 +75352,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorker/statechange_event">MDN Reference</a>
         /// </summary>
-        abstract onstatechange: (Event -> obj) option with get, set
+        abstract onstatechange: (Event -> unit) option with get, set
         /// <summary>
         /// Returns the ServiceWorker serialized script URL defined as part of ServiceWorkerRegistration. Must be on the same origin as the document that registers the ServiceWorker.
         /// <br /><br />
@@ -75428,15 +75428,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerContainer/controllerchange_event">MDN Reference</a>
         /// </summary>
-        abstract oncontrollerchange: (Event -> obj) option with get, set
+        abstract oncontrollerchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerContainer/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessage: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerContainer/messageerror_event">MDN Reference</a>
         /// </summary>
-        abstract onmessageerror: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessageerror: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// The <b><c>ready</c></b> read-only property of the ServiceWorkerContainer interface provides a way of delaying code execution until a service worker is active.
         /// <br /><br />
@@ -75560,7 +75560,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerRegistration/updatefound_event">MDN Reference</a>
         /// </summary>
-        abstract onupdatefound: (Event -> obj) option with get, set
+        abstract onupdatefound: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>scope</c></b> read-only property of the ServiceWorkerRegistration interface returns a string representing a URL that defines a service worker's registration scope; that is, the range of URLs a service worker can control. This is set using the scope parameter specified in the call to ServiceWorkerContainer.register() which registered the service worker.
         /// <br /><br />
@@ -75689,7 +75689,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/ShadowRoot/mode">MDN Reference</a>
         /// </summary>
         abstract mode: ShadowRootMode
-        abstract onslotchange: (Event -> obj) option with get, set
+        abstract onslotchange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>serializable</c></b> read-only property of the ShadowRoot interface returns true if the shadow root is serializable.
         /// <br /><br />
@@ -75832,23 +75832,23 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SourceBuffer/abort_event">MDN Reference</a>
         /// </summary>
-        abstract onabort: (Event -> obj) option with get, set
+        abstract onabort: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SourceBuffer/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (Event -> obj) option with get, set
+        abstract onerror: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SourceBuffer/update_event">MDN Reference</a>
         /// </summary>
-        abstract onupdate: (Event -> obj) option with get, set
+        abstract onupdate: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SourceBuffer/updateend_event">MDN Reference</a>
         /// </summary>
-        abstract onupdateend: (Event -> obj) option with get, set
+        abstract onupdateend: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SourceBuffer/updatestart_event">MDN Reference</a>
         /// </summary>
-        abstract onupdatestart: (Event -> obj) option with get, set
+        abstract onupdatestart: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>timestampOffset</c></b> property of the SourceBuffer interface controls the offset applied to timestamps inside media segments that are appended to the SourceBuffer.
         /// <br /><br />
@@ -75947,8 +75947,8 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SourceBufferList/length">MDN Reference</a>
         /// </summary>
         abstract length: float
-        abstract onaddsourcebuffer: (Event -> obj) option with get, set
-        abstract onremovesourcebuffer: (Event -> obj) option with get, set
+        abstract onaddsourcebuffer: (Event -> unit) option with get, set
+        abstract onremovesourcebuffer: (Event -> unit) option with get, set
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -76211,7 +76211,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesis/voiceschanged_event">MDN Reference</a>
         /// </summary>
-        abstract onvoiceschanged: (Event -> obj) option with get, set
+        abstract onvoiceschanged: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>paused</c></b> read-only property of the SpeechSynthesis interface is a boolean value that returns true if the SpeechSynthesis object is in a paused state, or false if not.
         /// <br /><br />
@@ -76400,31 +76400,31 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisUtterance/boundary_event">MDN Reference</a>
         /// </summary>
-        abstract onboundary: (SpeechSynthesisEvent -> obj) option with get, set
+        abstract onboundary: (SpeechSynthesisEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisUtterance/end_event">MDN Reference</a>
         /// </summary>
-        abstract onend: (SpeechSynthesisEvent -> obj) option with get, set
+        abstract onend: (SpeechSynthesisEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisUtterance/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (SpeechSynthesisErrorEvent -> obj) option with get, set
+        abstract onerror: (SpeechSynthesisErrorEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisUtterance/mark_event">MDN Reference</a>
         /// </summary>
-        abstract onmark: (SpeechSynthesisEvent -> obj) option with get, set
+        abstract onmark: (SpeechSynthesisEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisUtterance/pause_event">MDN Reference</a>
         /// </summary>
-        abstract onpause: (SpeechSynthesisEvent -> obj) option with get, set
+        abstract onpause: (SpeechSynthesisEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisUtterance/resume_event">MDN Reference</a>
         /// </summary>
-        abstract onresume: (SpeechSynthesisEvent -> obj) option with get, set
+        abstract onresume: (SpeechSynthesisEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisUtterance/start_event">MDN Reference</a>
         /// </summary>
-        abstract onstart: (SpeechSynthesisEvent -> obj) option with get, set
+        abstract onstart: (SpeechSynthesisEvent -> unit) option with get, set
         /// <summary>
         /// The <b><c>pitch</c></b> property of the SpeechSynthesisUtterance interface gets and sets the pitch at which the utterance will be spoken at.
         /// <br /><br />
@@ -77386,7 +77386,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/TaskSignal/prioritychange_event">MDN Reference</a>
         /// </summary>
-        abstract onprioritychange: (TaskPriorityChangeEvent -> obj) option with get, set
+        abstract onprioritychange: (TaskPriorityChangeEvent -> unit) option with get, set
         /// <summary>
         /// The read-only <b><c>priority</c></b> property of the TaskSignal interface indicates the signal priority.
         /// <br /><br />
@@ -77814,7 +77814,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrack/cuechange_event">MDN Reference</a>
         /// </summary>
-        abstract oncuechange: (Event -> obj) option with get, set
+        abstract oncuechange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>addCue()</c></b> method of the TextTrack interface adds a new cue to the list of cues.
         /// <br /><br />
@@ -77898,11 +77898,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackCue/enter_event">MDN Reference</a>
         /// </summary>
-        abstract onenter: (Event -> obj) option with get, set
+        abstract onenter: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackCue/exit_event">MDN Reference</a>
         /// </summary>
-        abstract onexit: (Event -> obj) option with get, set
+        abstract onexit: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>pauseOnExit</c></b> property of the TextTrackCue interface returns or sets the flag indicating whether playback of the media should pause when the end of the range to which this cue applies is reached.
         /// <br /><br />
@@ -78014,15 +78014,15 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackList/addtrack_event">MDN Reference</a>
         /// </summary>
-        abstract onaddtrack: (TrackEvent -> obj) option with get, set
+        abstract onaddtrack: (TrackEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackList/change_event">MDN Reference</a>
         /// </summary>
-        abstract onchange: (Event -> obj) option with get, set
+        abstract onchange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackList/removetrack_event">MDN Reference</a>
         /// </summary>
-        abstract onremovetrack: (TrackEvent -> obj) option with get, set
+        abstract onremovetrack: (TrackEvent -> unit) option with get, set
         /// <summary>
         /// The TextTrackList method <b><c>getTrackById()</c></b> returns the first TextTrack object from the track list whose id matches the specified string. This lets you find a specified track if you know its ID string.
         /// <br /><br />
@@ -79237,7 +79237,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/VideoDecoder/dequeue_event">MDN Reference</a>
         /// </summary>
-        abstract ondequeue: (Event -> obj) option with get, set
+        abstract ondequeue: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> property of the VideoDecoder interface returns the current state of the underlying codec.
         /// <br /><br />
@@ -79346,7 +79346,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/VideoEncoder/dequeue_event">MDN Reference</a>
         /// </summary>
-        abstract ondequeue: (Event -> obj) option with get, set
+        abstract ondequeue: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the VideoEncoder interface returns the current state of the underlying codec.
         /// <br /><br />
@@ -79802,11 +79802,11 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/VisualViewport/resize_event">MDN Reference</a>
         /// </summary>
-        abstract onresize: (Event -> obj) option with get, set
+        abstract onresize: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/VisualViewport/scroll_event">MDN Reference</a>
         /// </summary>
-        abstract onscroll: (Event -> obj) option with get, set
+        abstract onscroll: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>pageLeft</c></b> read-only property of the VisualViewport interface returns the x coordinate of the left edge of the visual viewport relative to the initial containing block origin, in CSS pixels, or 0 if current document is not fully active.
         /// <br /><br />
@@ -80432,7 +80432,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/WakeLockSentinel/release_event">MDN Reference</a>
         /// </summary>
-        abstract onrelease: (Event -> obj) option with get, set
+        abstract onrelease: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>released</c></b> read-only property of the WakeLockSentinel interface returns a boolean that indicates whether a WakeLockSentinel has been released.
         /// <br /><br />
@@ -84868,19 +84868,19 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/close_event">MDN Reference</a>
         /// </summary>
-        abstract onclose: (CloseEvent -> obj) option with get, set
+        abstract onclose: (CloseEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/error_event">MDN Reference</a>
         /// </summary>
-        abstract onerror: (Event -> obj) option with get, set
+        abstract onerror: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessage: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/open_event">MDN Reference</a>
         /// </summary>
-        abstract onopen: (Event -> obj) option with get, set
+        abstract onopen: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>WebSocket.protocol</c></b> read-only property returns the name of the sub-protocol the server selected; this will be one of the strings specified in the protocols parameter when creating the WebSocket object, or the empty string if no connection is established.
         /// <br /><br />
@@ -85356,21 +85356,21 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/devicemotion_event">MDN Reference</a>
         /// </summary>
-        abstract ondevicemotion: (DeviceMotionEvent -> obj) option with get, set
+        abstract ondevicemotion: (DeviceMotionEvent -> unit) option with get, set
         /// <summary>
         /// Available only in secure contexts.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/deviceorientation_event">MDN Reference</a>
         /// </summary>
-        abstract ondeviceorientation: (DeviceOrientationEvent -> obj) option with get, set
+        abstract ondeviceorientation: (DeviceOrientationEvent -> unit) option with get, set
         /// <summary>
         /// Available only in secure contexts.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/deviceorientationabsolute_event">MDN Reference</a>
         /// </summary>
-        abstract ondeviceorientationabsolute: (DeviceOrientationEvent -> obj) option with get, set
+        abstract ondeviceorientationabsolute: (DeviceOrientationEvent -> unit) option with get, set
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Window/orientationchange_event">MDN Reference</a></remarks>
-        abstract onorientationchange: (Event -> obj) option with get, set
+        abstract onorientationchange: (Event -> unit) option with get, set
         /// <summary>
         /// The Window interface's <b><c>opener</c></b> property returns a reference to the window that opened the window, either with open(), or by navigating a link with a target attribute.
         /// <br /><br />
@@ -85833,86 +85833,86 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/afterprint_event">MDN Reference</a>
         /// </summary>
-        abstract onafterprint: (Event -> obj) option with get, set
+        abstract onafterprint: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/beforeprint_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforeprint: (Event -> obj) option with get, set
+        abstract onbeforeprint: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/beforeunload_event">MDN Reference</a>
         /// </summary>
-        abstract onbeforeunload: (BeforeUnloadEvent -> obj) option with get, set
+        abstract onbeforeunload: (BeforeUnloadEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/gamepadconnected_event">MDN Reference</a>
         /// </summary>
-        abstract ongamepadconnected: (GamepadEvent -> obj) option with get, set
+        abstract ongamepadconnected: (GamepadEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/gamepaddisconnected_event">MDN Reference</a>
         /// </summary>
-        abstract ongamepaddisconnected: (GamepadEvent -> obj) option with get, set
+        abstract ongamepaddisconnected: (GamepadEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/hashchange_event">MDN Reference</a>
         /// </summary>
-        abstract onhashchange: (HashChangeEvent -> obj) option with get, set
+        abstract onhashchange: (HashChangeEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/languagechange_event">MDN Reference</a>
         /// </summary>
-        abstract onlanguagechange: (Event -> obj) option with get, set
+        abstract onlanguagechange: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/message_event">MDN Reference</a>
         /// </summary>
-        abstract onmessage: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessage: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/messageerror_event">MDN Reference</a>
         /// </summary>
-        abstract onmessageerror: (MessageEvent<obj> -> obj) option with get, set
+        abstract onmessageerror: (MessageEvent<obj> -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/offline_event">MDN Reference</a>
         /// </summary>
-        abstract onoffline: (Event -> obj) option with get, set
+        abstract onoffline: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/online_event">MDN Reference</a>
         /// </summary>
-        abstract ononline: (Event -> obj) option with get, set
+        abstract ononline: (Event -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/pagehide_event">MDN Reference</a>
         /// </summary>
-        abstract onpagehide: (PageTransitionEvent -> obj) option with get, set
+        abstract onpagehide: (PageTransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/pagereveal_event">MDN Reference</a>
         /// </summary>
-        abstract onpagereveal: (PageRevealEvent -> obj) option with get, set
+        abstract onpagereveal: (PageRevealEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/pageshow_event">MDN Reference</a>
         /// </summary>
-        abstract onpageshow: (PageTransitionEvent -> obj) option with get, set
+        abstract onpageshow: (PageTransitionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/pageswap_event">MDN Reference</a>
         /// </summary>
-        abstract onpageswap: (PageSwapEvent -> obj) option with get, set
+        abstract onpageswap: (PageSwapEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/popstate_event">MDN Reference</a>
         /// </summary>
-        abstract onpopstate: (PopStateEvent -> obj) option with get, set
+        abstract onpopstate: (PopStateEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/rejectionhandled_event">MDN Reference</a>
         /// </summary>
-        abstract onrejectionhandled: (PromiseRejectionEvent -> obj) option with get, set
+        abstract onrejectionhandled: (PromiseRejectionEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/storage_event">MDN Reference</a>
         /// </summary>
-        abstract onstorage: (StorageEvent -> obj) option with get, set
+        abstract onstorage: (StorageEvent -> unit) option with get, set
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/unhandledrejection_event">MDN Reference</a>
         /// </summary>
-        abstract onunhandledrejection: (PromiseRejectionEvent -> obj) option with get, set
+        abstract onunhandledrejection: (PromiseRejectionEvent -> unit) option with get, set
         /// <remarks>
         /// @deprecated
         /// The unload event is not reliable, consider visibilitychange or pagehide events.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/unload_event">MDN Reference</a>
         /// </remarks>
-        abstract onunload: (Event -> obj) option with get, set
+        abstract onunload: (Event -> unit) option with get, set
 
         abstract addEventListener<'K> :
             ``type``: 'K *
@@ -86842,7 +86842,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/XMLHttpRequest/readystatechange_event">MDN Reference</a>
         /// </summary>
-        abstract onreadystatechange: (Event -> obj) option with get, set
+        abstract onreadystatechange: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>XMLHttpRequest.readyState</c></b> property returns the state an XMLHttpRequest client is in. An XHR client exists in one of the following states:
         /// <br /><br />
@@ -87041,13 +87041,13 @@ module Dom =
     /// </summary>
     type XMLHttpRequestEventTarget =
         inherit EventTarget
-        abstract onabort: (ProgressEvent<EventTarget> -> obj) option with get, set
-        abstract onerror: (ProgressEvent<EventTarget> -> obj) option with get, set
-        abstract onload: (ProgressEvent<EventTarget> -> obj) option with get, set
-        abstract onloadend: (ProgressEvent<EventTarget> -> obj) option with get, set
-        abstract onloadstart: (ProgressEvent<EventTarget> -> obj) option with get, set
-        abstract onprogress: (ProgressEvent<EventTarget> -> obj) option with get, set
-        abstract ontimeout: (ProgressEvent<EventTarget> -> obj) option with get, set
+        abstract onabort: (ProgressEvent<EventTarget> -> unit) option with get, set
+        abstract onerror: (ProgressEvent<EventTarget> -> unit) option with get, set
+        abstract onload: (ProgressEvent<EventTarget> -> unit) option with get, set
+        abstract onloadend: (ProgressEvent<EventTarget> -> unit) option with get, set
+        abstract onloadstart: (ProgressEvent<EventTarget> -> unit) option with get, set
+        abstract onprogress: (ProgressEvent<EventTarget> -> unit) option with get, set
+        abstract ontimeout: (ProgressEvent<EventTarget> -> unit) option with get, set
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.

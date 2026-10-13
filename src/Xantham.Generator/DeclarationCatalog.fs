@@ -92,8 +92,10 @@ let private reusableDeclarations declarations =
 let private sourceKey (source: Source) =
     $"{source.Package}@{source.Version}/{source.File}"
 
+/// The settings a catalog consumer shares with its producer. `anyReturnAsUnit` is present only
+/// when set, so a profile without it hashes as it did before the key existed.
 let private profile (config: GeneratorConfig) =
-    json
+    let settings =
         {|
             inferenceVersion = 1
             lib = config.Lib |> Option.map List.sort
@@ -104,6 +106,14 @@ let private profile (config: GeneratorConfig) =
                 |> Array.map (fun (key, disposition) -> key, sprintf "%A" disposition)
             resolveNoInfer = config.ResolveNoInfer
         |}
+
+    match config.AnyReturnAsUnit with
+    | None -> json settings
+    | Some pattern ->
+        json
+            {| settings with
+                anyReturnAsUnit = pattern
+            |}
     |> hashText
 
 let private compiler (ctx: Context) =

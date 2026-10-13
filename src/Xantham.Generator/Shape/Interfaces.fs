@@ -338,7 +338,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // shared ones - never a `never`-typed placeholder for the other arm's
                     // exclusive member - so a folded pair's overloads carry no `unit` parameter.
                     let buildParam (owner: string) (m: ResolvedMember) =
-                        let reference, refFindings = typeRef ctx model None owner m.TypeId
+                        let reference, refFindings =
+                            typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
 
                         {
                             Name = Naming.memberName m.Symbol.Name
@@ -349,7 +350,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                         refFindings
 
                     let buildMember (owner: string) (optional: bool) (m: ResolvedMember) =
-                        let reference, refFindings = typeRef ctx model None owner m.TypeId
+                        let reference, refFindings =
+                            typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
 
                         FsProperty
                             {

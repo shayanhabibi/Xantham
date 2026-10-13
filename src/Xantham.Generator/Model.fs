@@ -291,6 +291,10 @@ type GeneratorConfig =
         PublicInputs: Map<string, string> option
         /// Arm overloads beside an erased-union parameter (D4 §4.5's deferred half).
         UnionArmOverloads: UnionArmOverloadsConfig
+        /// A .NET regular expression over property and value names. A callback typed directly at
+        /// a matching name returns `unit` where its source return is `any` (`TR065`).
+        [<Description("A .NET regular expression over property and value names. A callback typed directly at a matching name returns unit where its source return is any, reported as TR065. Omitted, every such return stays obj.")>]
+        AnyReturnAsUnit: string option
     }
 
     static member Default =
@@ -312,6 +316,7 @@ type GeneratorConfig =
             Subpaths = None
             PublicInputs = None
             UnionArmOverloads = UnionArmOverloadsConfig.Default
+            AnyReturnAsUnit = None
         }
 
 module GeneratorConfig =
@@ -606,6 +611,24 @@ module GeneratorConfig =
                         config
                 | true, _ -> failwith "xantham.json: compilerLib must be an object"
 
+            let anyReturnAsUnit =
+                match doc.RootElement.TryGetProperty "anyReturnAsUnit" with
+                | false, _ -> None
+                | true, value when
+                    value.ValueKind = JsonValueKind.String
+                    && not (String.IsNullOrEmpty(value.GetString()))
+                    ->
+                    let pattern = value.GetString()
+
+                    try
+                        Text.RegularExpressions.Regex(pattern, Text.RegularExpressions.RegexOptions.CultureInvariant)
+                        |> ignore
+                    with :? ArgumentException ->
+                        failwith $"xantham.json: anyReturnAsUnit is not a valid regular expression: {pattern}"
+
+                    Some pattern
+                | true, _ -> failwith "xantham.json: anyReturnAsUnit must be a nonempty regular expression string"
+
             {
                 ModuleName = field "module"
                 Namespace = field "namespace"
@@ -624,11 +647,18 @@ module GeneratorConfig =
                 Subpaths = subpaths
                 PublicInputs = publicInputs
                 UnionArmOverloads = unionArmOverloads
+                AnyReturnAsUnit = anyReturnAsUnit
             }
 
     /// Loads `<packageDir>/xantham.json`.
     let load (packageDir: string) : GeneratorConfig =
         loadFile (Path.Combine(packageDir, "xantham.json"))
+
+    /// Whether `anyReturnAsUnit` matches a property or value name.
+    let selectsAnyReturn (config: GeneratorConfig) (name: string) =
+        config.AnyReturnAsUnit
+        |> Option.exists (fun pattern ->
+            Text.RegularExpressions.Regex.IsMatch(name, pattern, Text.RegularExpressions.RegexOptions.CultureInvariant))
 
     /// The npm package a binding's imports name at runtime, derived from the package the
     /// declarations were generated from.
@@ -1724,6 +1754,9 @@ type ShapeModel =
         /// signature currently being shaped (§4.10). Scoped like `TypeVars`, and for the same
         /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
         KeyVars: Map<int<typeId>, KeyBinding>
+        /// The owner whose directly typed callback returns `unit` for a source `any`, for the
+        /// property or value currently being shaped (`anyReturnAsUnit`). Scoped like `TypeVars`.
+        AnyReturnOwner: string option
         Decls: FsDecl list
         /// The specifier value exports import from; ambient modules under it are entry owners.
         RuntimePackage: string<importSpecifier>

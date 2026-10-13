@@ -440,6 +440,7 @@ let configTests =
             Expect.equal layout.DomModule "Dom" "the artifact keeps DOM in its own child"
             Expect.isTrue layout.AutoOpenEs "the artifact opens only its ECMAScript child"
             Expect.isFalse layout.AutoOpenDom "the artifact leaves its DOM child opt-in"
+            Expect.equal config.AnyReturnAsUnit (Some "^on") "the artifact writes on* handler returns as unit"
 
         testCase "compilerLib refuses malformed layouts with a configuration error" <| fun _ ->
             let refused json =
@@ -459,6 +460,24 @@ let configTests =
             refused """{ "compilerLib": { "esModule": "not-valid" } }"""
             refused """{ "compilerLib": { "domModule": "" } }"""
             refused """{ "compilerLib": { "esModule": "Same", "domModule": "Same" } }"""
+
+        testCase "anyReturnAsUnit is one regular expression, omitted by default (W2)" <| fun _ ->
+            withConfig """{ "anyReturnAsUnit": "^on" }""" <| fun config ->
+                Expect.equal config.AnyReturnAsUnit (Some "^on") "the pattern is carried through"
+
+            withConfig """{ }""" <| fun config ->
+                Expect.equal config.AnyReturnAsUnit None "omitted, nothing is selected"
+
+            let refused json =
+                try
+                    withConfig json ignore
+                    failtest "the invalid anyReturnAsUnit was accepted"
+                with error ->
+                    Expect.stringContains error.Message "xantham.json: anyReturnAsUnit" "the error names its key"
+
+            refused """{ "anyReturnAsUnit": "" }"""
+            refused """{ "anyReturnAsUnit": 42 }"""
+            refused """{ "anyReturnAsUnit": "([" }"""
 
         testCase "lib is the compiler's lib option, as tsconfig spells it" <| fun _ ->
             // A global type library that replaces the DOM (`@cloudflare/workers-types`) has to
@@ -558,6 +577,9 @@ let private groupMapLab = handFixture "group-map-lab"
 /// Wave fifteen item 4: `NoInfer<T>` under the lab's own `xantham.json`, which sets
 /// `resolveNoInfer` to exercise the toggled side; `solid-js` exercises the default.
 let private noInferLab = handFixture "noinfer-lab"
+
+/// W2: `anyReturnAsUnit` set to `^on` under the lab's own `xantham.json`.
+let private handlerReturnLab = handFixture "handler-return-lab"
 
 [<Tests>]
 let pipelineTests =
@@ -4439,6 +4461,74 @@ let pipelineTests =
                       Expect.contains tiers ("Exports.listen", Ergonomic) "a row whose only loss is a faithful any grades ergonomic"
                       Expect.contains tiers ("Faithful", Ergonomic) "an interface of faithful any members grades ergonomic"
                       Expect.contains tiers ("Probe", Escape) "a faithful any beside a stated-type loss stays escape" ])
+
+        // W2: a callback typed directly at a property or value `anyReturnAsUnit` selects returns
+        // unit for a source `any`, under `TR065`, including a callback arm of an erased union. An
+        // unselected name, a non-callback `any`, a nested callback, a method, a named callback alias
+        // and a hoisted two-argument delegate keep `obj` under `TR008`.
+        yield!
+            fixtureTests "handler-return-lab" handlerReturnLab (handConfig handlerReturnLab) (fun package ->
+                [ testCase "handler-return-lab: a selected callback's any return reads unit and the rest keep obj" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig handlerReturnLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let sites key =
+                          rendered.Findings
+                          |> List.filter (fun finding -> finding.Key = key)
+                          |> List.map (fun finding -> finding.Symbol, finding.Tier)
+                          |> List.sort
+
+                      Expect.equal
+                          (sites "TR065")
+                          [ "Exports.onload()", Ergonomic
+                            "Upload.onmixed()", Ergonomic
+                            "Upload.onprogress()", Ergonomic
+                            "Upload.onready()", Ergonomic ]
+                          "the selected callbacks"
+
+                      Expect.equal
+                          (sites "TR008" |> List.map fst)
+                          [ "Handler()"
+                            "Upload.Onpair()"
+                            "Upload.onclose()"
+                            "Upload.onregister(resolve)()"
+                            "Upload.onstate"
+                            "Upload.transform()" ]
+                          "every unselected any stays obj"
+
+                      Expect.stringContains
+                          source
+                          "type Onpair = delegate of a: Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> * b: string -> obj"
+                          "a two-argument callback at a selected name hoists to a delegate and stays obj"
+
+                      Expect.stringContains
+                          source
+                          "abstract onmixed: U2<string, (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit)> with get, set"
+                          "a callback arm of an erased union at a selected name"
+
+                      Expect.stringContains
+                          source
+                          "abstract onprogress: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit) option with get, set"
+                          "a selected on* handler"
+
+                      Expect.stringContains source "abstract onready: (unit -> unit) option with get, set" "a no-argument handler"
+
+                      Expect.stringContains
+                          source
+                          "?onprogress: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit)"
+                          "Create takes the handler as its property reads"
+
+                      Expect.stringContains
+                          source
+                          "static member onload: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit) option = jsNative"
+                          "a selected value export"
+
+                      Expect.stringContains source "type Handler = (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj)" "a named callback alias stays obj"
+
+                      Expect.stringContains
+                          source
+                          "abstract transform: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj) with get, set"
+                          "an unselected member stays obj" ])
 
         // Tagged unions over type parameters: the union binds the alias's own parameters, or the
         // ones it reads from the signature it is written in, and every reference applies them.
