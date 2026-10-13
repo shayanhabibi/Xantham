@@ -61,6 +61,13 @@ Every one of those flags removes something that is real safety on the way out an
 the way in. **Drop them all and run `dotnet fsi build.fsx -- test` before you commit.** A branch
 handed over having only ever run the fast loop has not been gated.
 
+**Exception — widening and escape work items (W1–W9, issues #131–#140).** These never run the
+full corpus. Each proves its change on a lab fixture, then regenerates only its two selected
+goldens, and regenerates Core.TS or Node only under a recorded override. The rules (T1–T6) and the
+golden selection table are in §5 of
+`docs/.ai/plans/2026-10-13-widening-escape-reduction-design.md`; they replace this section and
+"Large fixtures" below for those items.
+
 ## Large fixtures: regenerate, gate, measure - do not load
 
 The npm rungs (`@cloudflare/workers-types`, `animejs`, `type-fest`, `solid-js`, and any rung added
