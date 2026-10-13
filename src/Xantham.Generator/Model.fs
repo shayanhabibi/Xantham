@@ -297,6 +297,10 @@ type GeneratorConfig =
         /// a matching name returns `unit` where its source return is `any` (`TR065`).
         [<Description("A .NET regular expression over property and value names. A callback typed directly at a matching name returns unit where its source return is any, reported as TR065. Omitted, every such return stays obj.")>]
         AnyReturnAsUnit: string option
+        /// Writes a conditional deferred over a bounded type parameter as the conditional
+        /// instantiated at that bound (`TR068`). Experimental (W9).
+        [<Description("Experimental. Writes a conditional type deferred over a bounded type parameter, such as InstanceType<Request> where Request extends typeof IncomingMessage, as its value at that bound (IncomingMessage), reported as TR068. Defaults to false, which keeps such a reference obj under TR045.")>]
+        ResolveConditionalConstraints: bool
     }
 
     static member Default =
@@ -319,6 +323,7 @@ type GeneratorConfig =
             PublicInputs = None
             UnionArmOverloads = UnionArmOverloadsConfig.Default
             AnyReturnAsUnit = None
+            ResolveConditionalConstraints = false
         }
 
 module GeneratorConfig =
@@ -650,6 +655,8 @@ module GeneratorConfig =
                 PublicInputs = publicInputs
                 UnionArmOverloads = unionArmOverloads
                 AnyReturnAsUnit = anyReturnAsUnit
+                ResolveConditionalConstraints =
+                    boolField "resolveConditionalConstraints" GeneratorConfig.Default.ResolveConditionalConstraints
             }
 
     /// Loads `<packageDir>/xantham.json`.
@@ -1238,6 +1245,10 @@ type ConditionalFacts =
         /// The branch the mapping takes, named for the manifest and carried by id. Absent where
         /// both branches are reachable and inhabited.
         Branch: (string * int<typeId>) option
+        /// The conditional instantiated at its check type's bound, carried by id. Present only
+        /// under `resolveConditionalConstraints`, for a conditional that is not its alias's own
+        /// declaration and whose branch is absent or an `infer` variable.
+        Constraint: int<typeId> option
     }
 
 /// A `TypeResponse` plus the derived facts of the kinds the skeleton resolves: object members,

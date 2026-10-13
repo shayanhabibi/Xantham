@@ -1811,7 +1811,9 @@ and internal typeRefOnPath
 /// `T extends U ? X : Y` at a reference position (§4.11). F# defers no type, so the mapping is
 /// a branch wherever the run can name one: the condition holds for every argument the head
 /// admits, or one branch is `never` and no application lands in it. A branch that maps to `obj`
-/// itself carries what the undifferentiated widening already did, so it reads as deferred.
+/// itself carries what the undifferentiated widening already did, so it reads as deferred. Where
+/// no branch maps, a conditional over a bounded type parameter reads its value at that bound
+/// under `resolveConditionalConstraints` (W9).
 and internal conditionalRef
     (ctx: Context)
     (model: ShapeModel)
@@ -1827,11 +1829,22 @@ and internal conditionalRef
     let deferred =
         FsObj, [ Finding.make owner (TypeReference.ConditionalTypeDeferred name) ]
 
+    let constrained () =
+        match facts.Conditional |> Option.bind _.Constraint with
+        | Some bound ->
+            match typeRef ctx model self owner bound with
+            | FsObj, _ -> deferred
+            | reference, findings ->
+                reference,
+                findings
+                @ [ Finding.make owner (TypeReference.ConditionalResolvedToConstraint name) ]
+        | None -> deferred
+
     match facts.Conditional |> Option.bind _.Branch with
-    | None -> deferred
+    | None -> constrained ()
     | Some(side, branch) ->
         match typeRef ctx model self owner branch with
-        | FsObj, _ -> deferred
+        | FsObj, _ -> constrained ()
         | reference, findings ->
             reference,
             findings

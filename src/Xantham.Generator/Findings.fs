@@ -148,6 +148,7 @@ module FindingCodes =
             "TR.AnyReturnAsUnit", "TR065"
             "TR.ValueOfAsPropTypeLock", "TR066"
             "TR.MappedAsPropertyRecord", "TR067"
+            "TR.ConditionalResolvedToConstraint", "TR068"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -534,6 +535,10 @@ type TypeReference =
     /// W8 (#139). `{ [P in keyof T]: V }`, with `T` in scope and `V` independent of `P`, written
     /// as the support package's `PropertyRecord<'T, V>`: an indexer keyed by `keyof<'T>`.
     | [<Ergonomic>] MappedAsPropertyRecord of operand: string
+    /// A conditional deferred over a bounded type parameter, written as the conditional
+    /// instantiated at that bound (`InstanceType<Request>` as `IncomingMessage`).
+    /// `resolveConditionalConstraints` selects it.
+    | [<Widened>] ConditionalResolvedToConstraint of conditional: string
 
     interface IFindingKind with
         member this.Message =
@@ -659,6 +664,8 @@ type TypeReference =
             | ValueOfAsPropTypeLock operand -> $"T[keyof T] reads as proptypelock<'{operand}> (§4.10)"
             | MappedAsPropertyRecord operand ->
                 $"{{ [P in keyof T]: V }} reads as PropertyRecord<'{operand}, V> (§4.10)"
+            | ConditionalResolvedToConstraint conditional ->
+                $"{conditional} written as its value at the check type's bound; the parameter it is applied to is not carried (§4.11)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]

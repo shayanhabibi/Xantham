@@ -685,6 +685,43 @@ let typeRefTests =
             Expect.equal reference FsObj "no arity to write Box at"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
+        testCase "a conditional with a bound constraint reads the bound (W9)" <| fun _ ->
+            // `InstanceType<Request>` with `Request extends typeof IncomingMessage`: Resolve
+            // carries the conditional's value at the bound as `Constraint`.
+            let conditional branch bound =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Conditional) with
+                    Conditional = Some { Name = Some "InstanceType"; Branch = branch; Constraint = bound } }
+
+            let read facts =
+                let model =
+                    { Build.shapeModel
+                          (facts
+                           :: Build.facts (Build.typeResponse 40 TypeFlags.Object)
+                           :: Build.facts (Build.typeResponse 41 TypeFlags.Any)
+                           :: typeParam 20 "R"
+                           :: Build.primitives) with
+                        DeclNames = Map.ofList [ 40<typeId>, "IncomingMessage" ] }
+
+                let reference, findings = Spec.typeRef Build.context model None "Holder.req" 10<typeId>
+                reference, findings |> List.map (fun finding -> finding.Symbol, finding.Key, finding.Tier)
+
+            Expect.equal
+                (read (conditional None (Some 40<typeId>)))
+                (FsNamed "IncomingMessage", [ "Holder.req", "TR068", Widened ])
+                "the bound's instance type"
+
+            Expect.equal
+                (read (conditional None (Some 41<typeId>)))
+                (FsObj, [ "Holder.req", "TR045", Widened ])
+                "a bound that maps to obj reads as deferred"
+
+            Expect.equal (read (conditional None None)) (FsObj, [ "Holder.req", "TR045", Widened ]) "no bound"
+
+            Expect.equal
+                (read (conditional (Some("sole inhabited", 20<typeId>)) (Some 40<typeId>)))
+                (FsNamed "IncomingMessage", [ "Holder.req", "TR068", Widened ])
+                "an infer variable out of scope falls back to the bound"
+
         testCase "keyof over an operand not in scope widens to obj" <| fun _ ->
             // The idiom needs a `'T` to be taken over; without one there is nothing to phantom
             // the key with, and an unphantomed key is just a string.

@@ -1973,13 +1973,85 @@ let private deriveFacts
                                 }
                             | None -> async.Return None
 
+                        // The conditional instantiated at its check type's bound (W9): read where no
+                        // branch is taken, or where the taken branch is an `infer` variable, over a
+                        // check type that is a bounded type parameter. An alias's own declaration
+                        // keeps its deferred body.
+                        let! constrained =
+                            let wanted =
+                                ctx.Config.ResolveConditionalConstraints
+                                && (match taken with
+                                    | None -> true
+                                    | Some(_, bare) -> bare.Flags.HasFlag TypeFlags.TypeParameter)
+
+                            if not wanted then
+                                async.Return None
+                            else
+                                async {
+                                    let! checkBare = peeled check
+
+                                    let! bound =
+                                        if checkBare.Flags.HasFlag TypeFlags.TypeParameter then
+                                            ctx.Session.getConstraintOfTypeParameter checkBare.Id
+                                        else
+                                            async.Return ValueNone
+
+                                    let! ownBody =
+                                        match bound, alias with
+                                        | ValueSome _, ValueSome alias ->
+                                            async {
+                                                let! declared = ctx.Session.getDeclaredTypeOfSymbol alias.Id
+                                                return declared.Id = ty.Id
+                                            }
+                                        | ValueSome _, ValueNone -> async.Return false
+                                        | ValueNone, _ -> async.Return true
+
+                                    if ownBody || bound.IsNone then
+                                        return None
+                                    else
+                                        //FOR-REVIEW `Session.getConstraintOfType` reads a substitution type's preloaded constraint, not the checker's; `getBaseConstraintOfType` is the checker's distributive constraint, and falls back to the union of both branches, which the guards below refuse.
+                                        let! resolved = ctx.Session.getBaseConstraintOfType ty.Id
+
+                                        match resolved with
+                                        | ValueSome c when
+                                            c.Id <> ty.Id
+                                            && c.Id <> whenTrue.Id
+                                            && c.Id <> whenFalse.Id
+                                            && not (
+                                                c.Flags.HasFlag TypeFlags.Any
+                                                || c.Flags.HasFlag TypeFlags.Unknown
+                                                || c.Flags.HasFlag TypeFlags.Never
+                                                || c.Flags.HasFlag TypeFlags.Conditional
+                                            )
+                                            ->
+                                            if c.Flags.HasFlag TypeFlags.Union then
+                                                let! members = ctx.Session.getTypesOfType c.Id
+
+                                                let ids =
+                                                    members
+                                                    |> ValueOption.defaultValue [||]
+                                                    |> Array.map _.Id
+                                                    |> Set.ofArray
+
+                                                return
+                                                    if ids.Contains whenTrue.Id && ids.Contains whenFalse.Id then
+                                                        None
+                                                    else
+                                                        Some c
+                                            else
+                                                return Some c
+                                        | _ -> return None
+                                }
+
                         return
                             Some
                                 {
                                     Name = alias |> ValueOption.map _.Name |> ValueOption.toOption
                                     Branch = taken |> Option.map (fun (side, bare) -> side, bare.TypeId)
+                                    Constraint = constrained |> Option.map _.TypeId
                                 },
                             channel trace "conditional-branch" (taken |> Option.map snd |> Option.toList)
+                            @ channel trace "conditional-constraint" (Option.toList constrained)
                     }
                 else
                     async.Return(None, [])

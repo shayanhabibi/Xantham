@@ -112,6 +112,7 @@ let findingsTests =
                     "TR.AnyReturnAsUnit TR065 ergonomic"
                     "TR.ValueOfAsPropTypeLock TR066 ergonomic"
                     "TR.MappedAsPropertyRecord TR067 ergonomic"
+                    "TR.ConditionalResolvedToConstraint TR068 widened"
                     "TP.UnnamedTypeParameter TP001 widened"
                     "TP.ConstraintDropped TP002 ergonomic"
                     "TP.GenericFunctionHoisted TP003 ergonomic"

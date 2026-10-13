@@ -1,0 +1,4 @@
+{
+    // W9: a conditional deferred over a bounded type parameter is written at its bound.
+    "resolveConditionalConstraints": true
+}
