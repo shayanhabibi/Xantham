@@ -32,5 +32,10 @@ export type Divergent<T> = T extends string ? number : boolean;
 export declare function divergent<T>(value: Divergent<T>): void;
 // 5. Bounded, but the bound instantiates to any.
 export declare function returns<F extends (...args: any) => any>(value: ReturnType<F>): void;
-// 6. The alias's own body stays deferred.
+// 6. A union bound: the value at the bound is the union of each member's branch.
+export declare class Outgoing {
+    readonly sent: boolean;
+}
+export declare function either<C extends typeof IncomingMessage | typeof Outgoing>(value: InstanceType<C>): void;
+// 7. The alias's own body stays deferred.
 export type Instance<C extends typeof IncomingMessage> = C extends abstract new (...args: any) => infer R ? R : never;

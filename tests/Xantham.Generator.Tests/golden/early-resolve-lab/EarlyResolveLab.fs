@@ -40,6 +40,12 @@ type ConcreteListener = (IncomingMessage -> unit)
 [<Erase>]
 type Divergent<'T> = private Divergent__ of obj
 
+[<Interface>]
+type Outgoing =
+    abstract sent: bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (sent: bool) : Outgoing = jsNative
+
 [<Erase>]
 type Instance<'C> = private Instance__ of obj
 
@@ -58,6 +64,10 @@ type Exports =
     static member divergent (value: obj) : unit = jsNative
     [<Import("returns", "early-resolve-lab")>]
     static member returns (value: obj) : unit = jsNative
+    [<Import("Outgoing", "early-resolve-lab"); EmitConstructor>]
+    static member Outgoing () : Outgoing = jsNative
+    [<Import("either", "early-resolve-lab")>]
+    static member either (value: obj) : unit = jsNative
 
 module CreateServer =
     module Listener =

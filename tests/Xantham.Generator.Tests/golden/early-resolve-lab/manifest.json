@@ -3,9 +3,9 @@
   "package": "early-resolve-lab",
   "module": "EarlyResolveLab",
   "counts": {
-    "exact": 4,
-    "ergonomic": 3,
-    "widened": 8,
+    "exact": 5,
+    "ergonomic": 4,
+    "widened": 9,
     "escape": 0
   },
   "passes": [
@@ -40,14 +40,14 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 10,
-      "ergonomic": 5,
-      "widened": 5
+      "total": 13,
+      "ergonomic": 6,
+      "widened": 7
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 8,
-      "ergonomic": 8
+      "total": 9,
+      "ergonomic": 9
     }
   ]
 }

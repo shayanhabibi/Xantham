@@ -1996,22 +1996,25 @@ let private deriveFacts
                                         else
                                             async.Return ValueNone
 
-                                    let! ownBody =
+                                    // Unbounded, or the alias's own declaration.
+                                    let! refused =
                                         match bound, alias with
+                                        | ValueNone, _ -> async.Return true
+                                        | ValueSome _, ValueNone -> async.Return false
                                         | ValueSome _, ValueSome alias ->
                                             async {
                                                 let! declared = ctx.Session.getDeclaredTypeOfSymbol alias.Id
                                                 return declared.Id = ty.Id
                                             }
-                                        | ValueSome _, ValueNone -> async.Return false
-                                        | ValueNone, _ -> async.Return true
 
-                                    if ownBody || bound.IsNone then
+                                    if refused then
                                         return None
                                     else
-                                        //FOR-REVIEW `Session.getConstraintOfType` reads a substitution type's preloaded constraint, not the checker's; `getBaseConstraintOfType` is the checker's distributive constraint, and falls back to the union of both branches, which the guards below refuse.
                                         let! resolved = ctx.Session.getBaseConstraintOfType ty.Id
 
+                                        // The checker's distributive constraint (footguns: not
+                                        // `getConstraintOfType`). A union constraint is the
+                                        // branch union §4.11 rejects, and is refused whole.
                                         match resolved with
                                         | ValueSome c when
                                             c.Id <> ty.Id
@@ -2022,24 +2025,11 @@ let private deriveFacts
                                                 || c.Flags.HasFlag TypeFlags.Unknown
                                                 || c.Flags.HasFlag TypeFlags.Never
                                                 || c.Flags.HasFlag TypeFlags.Conditional
+                                                || (c.Flags.HasFlag TypeFlags.Union
+                                                    && not (c.Flags.HasFlag TypeFlags.Boolean))
                                             )
                                             ->
-                                            if c.Flags.HasFlag TypeFlags.Union then
-                                                let! members = ctx.Session.getTypesOfType c.Id
-
-                                                let ids =
-                                                    members
-                                                    |> ValueOption.defaultValue [||]
-                                                    |> Array.map _.Id
-                                                    |> Set.ofArray
-
-                                                return
-                                                    if ids.Contains whenTrue.Id && ids.Contains whenFalse.Id then
-                                                        None
-                                                    else
-                                                        Some c
-                                            else
-                                                return Some c
+                                            return Some c
                                         | _ -> return None
                                 }
 

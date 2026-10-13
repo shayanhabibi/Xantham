@@ -4669,8 +4669,9 @@ let pipelineTests =
 
         // W9: a conditional deferred over a bounded type parameter (`InstanceType<Request>`, as
         // @types/node's `http.RequestListener` writes it) reads its value at the bound under
-        // `TR068`. A concrete argument resolves before Resolve; an unbounded parameter, a bound
-        // that instantiates to `any` and an alias's own body stay `obj` under `TR045`.
+        // `TR066`. A concrete argument resolves before Resolve; an unbounded parameter, a bound
+        // that instantiates to `any`, a union bound and an alias's own body stay `obj` under
+        // `TR045`.
         yield!
             fixtureTests "early-resolve-lab" earlyResolveLab (handConfig earlyResolveLab) (fun package ->
                 let sites (rendered: RenderModel) key =
@@ -4689,7 +4690,10 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate (handConfig earlyResolveLab) package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.isEmpty (instanceTypeDeferred rendered) "no InstanceType over a bounded parameter stays obj"
+                      Expect.equal
+                          (instanceTypeDeferred rendered)
+                          [ "Exports.either(value)" ]
+                          "only the InstanceType over a union bound stays obj"
 
                       Expect.equal
                           (sites rendered "TR068")
@@ -4722,7 +4726,12 @@ let pipelineTests =
 
                       let deferred = sites rendered "TR045" |> List.map fst
 
-                      for symbol in [ "Divergent"; "Exports.divergent(value)"; "Exports.returns(value)"; "Instance" ] do
+                      for symbol in
+                          [ "Divergent"
+                            "Exports.divergent(value)"
+                            "Exports.either(value)"
+                            "Exports.returns(value)"
+                            "Instance" ] do
                           Expect.contains deferred symbol $"{symbol} stays deferred"
 
                       Expect.isEmpty
@@ -4736,6 +4745,7 @@ let pipelineTests =
                       Expect.equal
                           (instanceTypeDeferred rendered)
                           [ "Exports.createServer(listener)(req)"
+                            "Exports.either(value)"
                             "RequestListener(req)"
                             "Server(requestListener)(req)"
                             "Server.on(listener)(req)" ]
