@@ -2990,7 +2990,10 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.stringContains source "abstract catch" "the member survives"
-                      Expect.stringContains source "Func<" "carrying its call signature"
+                      Expect.stringContains
+                          source
+                          "abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>)"
+                          "carrying its call signature"
 
                       Expect.isEmpty
                           (rendered.Findings
