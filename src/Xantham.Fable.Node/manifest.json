@@ -3,8 +3,8 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 1263,
-    "ergonomic": 2032,
+    "exact": 1270,
+    "ergonomic": 2025,
     "widened": 830,
     "escape": 5
   },
@@ -33,35 +33,35 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 2572,
-      "ergonomic": 2211,
+      "total": 2573,
+      "ergonomic": 2212,
       "widened": 361
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 27061,
+      "total": 26888,
       "exact": 915,
-      "ergonomic": 17743,
+      "ergonomic": 17570,
       "widened": 8403
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 66,
-      "ergonomic": 33,
+      "total": 55,
+      "ergonomic": 22,
       "widened": 33
     },
     {
       "pass": "SC - shape-classes",
-      "total": 3295,
+      "total": 3266,
       "exact": 795,
-      "ergonomic": 1490,
+      "ergonomic": 1461,
       "widened": 1010
     },
     {
       "pass": "SE - shape-exports",
-      "total": 1781,
+      "total": 1753,
       "exact": 8,
-      "ergonomic": 1246,
+      "ergonomic": 1218,
       "widened": 527
     },
     {
