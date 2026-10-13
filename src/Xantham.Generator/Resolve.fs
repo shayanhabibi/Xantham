@@ -348,6 +348,124 @@ let private sourceFile (ctx: Context) (path: string) : Async<Ast.SourceFile vopt
         .Value
     |> Async.AwaitTask
 
+/// The description of a `/** */` block, up to its first tag line, with the comment markers and
+/// each line's leading `*` removed.
+let private jsDocDescription (block: string) =
+    block.Substring(3, max 0 (block.Length - 5)).Replace("\r\n", "\n").Split '\n'
+    |> Array.map (fun line ->
+        let line = line.Trim()
+
+        if line.StartsWith "*" then
+            line.Substring(1).Trim()
+        else
+            line)
+    |> Array.takeWhile (fun line -> not (line.StartsWith "@"))
+    |> String.concat "\n"
+    |> _.Trim()
+
+/// A signature declaration's text as the description of the JSDoc written above it and the
+/// declaration on one line, comments outside string literals removed:
+/// `/** Closed. */ on(\n  event: "close",\n): this;` reads `"Closed."` and
+/// `on(event: "close"): this`.
+let internal signatureText (text: string) : string * string =
+    let at (index: int) (token: string) =
+        System.String.CompareOrdinal(text, index, token, 0, token.Length) = 0
+
+    let skipComment (index: int) =
+        if at index "//" then
+            match text.IndexOf('\n', index) with
+            | -1 -> text.Length
+            | newline -> newline + 1
+        else
+            match text.IndexOf("*/", index + 2, System.StringComparison.Ordinal) with
+            | -1 -> text.Length
+            | close -> close + 2
+
+    let mutable index = 0
+    let mutable comment = ""
+    let mutable leading = true
+
+    while leading && index < text.Length do
+        if System.Char.IsWhiteSpace text[index] then
+            index <- index + 1
+        elif at index "//" || at index "/*" then
+            let next = skipComment index
+
+            if at index "/**" && next - index >= 5 then
+                comment <- jsDocDescription (text.Substring(index, next - index))
+
+            index <- next
+        else
+            leading <- false
+
+    let body = System.Text.StringBuilder()
+
+    let space () =
+        if body.Length > 0 && body[body.Length - 1] <> ' ' then
+            body.Append ' ' |> ignore
+
+    let mutable quote = None
+
+    while index < text.Length do
+        let c = text[index]
+
+        match quote with
+        | Some q ->
+            body.Append c |> ignore
+
+            if c = '\\' && index + 1 < text.Length then
+                body.Append text[index + 1] |> ignore
+                index <- index + 2
+            else
+                if c = q then
+                    quote <- None
+
+                index <- index + 1
+        | None when c = '"' || c = '\'' || c = '`' ->
+            quote <- Some c
+            body.Append c |> ignore
+            index <- index + 1
+        | None when at index "//" || at index "/*" ->
+            space ()
+            index <- skipComment index
+        | None when System.Char.IsWhiteSpace c ->
+            space ()
+            index <- index + 1
+        | None ->
+            body.Append c |> ignore
+            index <- index + 1
+
+    let spelling =
+        body.ToString().Trim().Replace("( ", "(").Replace(" )", ")").Replace(",)", ")").TrimEnd(';').Trim()
+
+    comment, spelling
+
+/// The source of a signature declaration, where its node handle resolves to source text.
+let private signatureSource (ctx: Context) (declaration: string voption) : Async<SignatureSource option> =
+    async {
+        match declaration |> ValueOption.bind NodeHandle.parse with
+        | ValueNone -> return None
+        | ValueSome handle ->
+            match! attempt (sourceFile ctx handle.Path) with
+            | Ok(ValueSome source) ->
+                let node = Node.ofIndex<AnyNode> source handle.Index
+                let text = Ast.sourceText source
+
+                if node.Pos < 0 || node.End > text.Length || node.End <= node.Pos then
+                    return None
+                else
+                    let comment, spelling =
+                        signatureText (text.Substring(node.Pos, node.End - node.Pos))
+
+                    return
+                        Some
+                            {
+                                Spelling = spelling
+                                Comment = comment
+                            }
+            | _ -> return None
+    }
+
 /// A type alias can bind unused parameters that disappear from its resolved type. Read the
 /// declaring alias rather than attaching that fact to a type shared with nongeneric aliases.
 let internal declarationHasTypeParameters (ctx: Context) (symbol: SymbolResponse) =
@@ -770,6 +888,13 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                     for parameter in typeParameters do
                         registers.SignatureParameters.TryAdd(parameter.TypeId, true) |> ignore
 
+                    // The spelling documents a literal overload's method of its own (W5).
+                    let! source =
+                        if signatures.Length >= 2 then
+                            signatureSource ctx signature.Declaration
+                        else
+                            async.Return None
+
                     return
                         {
                             Parameters = parameterFacts |> Array.map fst |> Array.toList
@@ -777,6 +902,7 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                             TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
                             IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
                             ReturnTypeId = returnType.TypeId
+                            Source = source
                         },
                         [
                             yield! channel trace $"{label}-parameter" (parameterFacts |> Array.map snd |> Array.toList)

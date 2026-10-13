@@ -1503,6 +1503,16 @@ let internal applyWithProducer
                 let rec member_ =
                     function
                     | FsSymbolKeyed(symbol, inner) -> Canonical.node "symbol" [ Canonical.text symbol; member_ inner ]
+                    | FsLiteralKeyed(target, literals, inner) ->
+                        Canonical.node
+                            "literal"
+                            [
+                                Canonical.text target
+                                literals
+                                |> Canonical.list (fun (index, text) ->
+                                    Canonical.node "argument" [ string index; Canonical.text text ])
+                                member_ inner
+                            ]
                     | FsProperty property ->
                         Canonical.node
                             "property"

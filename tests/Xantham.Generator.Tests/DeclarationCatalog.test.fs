@@ -277,17 +277,18 @@ let shippedOverloadTests =
             let reference = Path.Combine(producer, "declarations.json")
             Pipeline.run (configure "Adapter" [| reference |]) package (Path.Combine(directory, "adapter"))
             |> Async.RunSynchronously |> ignore
+            // W5 (#136): each literal overload is a method of its own, reached through Emit.
             let consumer = """module Identity.Consumer
-let read (store: Identity.Root.Store) (text: Identity.Root.Store.Text) (bytes: Identity.Root.Store.Bytes) : string * float =
+let read (store: Identity.Root.Store) : string * float =
     let shared = Identity.Adapter.Exports.``use`` store
-    shared.get text, shared.get bytes
+    shared.getText (), shared.getBytes ()
 """
             let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
             Expect.equal code 0 output
             let invalid = consumer + "\nlet invalid (store: Identity.Root.Store) = store.get \"anything\"\n"
             let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] invalid
             Expect.notEqual code 0 "arbitrary strings must not enter a literal-discriminated overload"
-            Expect.stringContains output "FS0041" "overload resolution rejects the wrong discriminator"
+            Expect.stringContains output "FS0039" "no member takes the discriminator as a string"
         finally
             if Directory.Exists directory then Directory.Delete(directory, true)
 

@@ -300,10 +300,12 @@ let shapeInterfaces: Pass<ShapeModel> =
                                     |> List.exists (function
                                         | FsProperty p -> p.Name = "Invoke"
                                         | FsMethod m -> m.Name = "Invoke"
+                                        | FsLiteralKeyed(_, _, FsMethod m) -> m.Name = "Invoke"
                                         | FsIndexer _
                                         | FsConstructor _
                                         | FsInvoke _
-                                        | FsSymbolKeyed _ -> false)
+                                        | FsSymbolKeyed _
+                                        | FsLiteralKeyed _ -> false)
 
                                 let invokes =
                                     if invokeCollides then

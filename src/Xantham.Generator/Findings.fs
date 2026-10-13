@@ -165,6 +165,7 @@ module FindingCodes =
             "MB.UnspellableMemberDropped", "MB007"
             "MB.SymbolIteratorAsSeq", "MB008"
             "MB.SymbolKeyedMemberAsEmit", "MB009"
+            "MB.LiteralOverloadAsMethod", "MB010"
             "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
@@ -705,6 +706,8 @@ type Members =
     | [<Ergonomic>] SymbolIteratorAsSeq of element: string
     /// W4. The member reads as `$0[Symbol.<symbol>]` through `[<Emit>]`.
     | [<Ergonomic>] SymbolKeyedMemberAsEmit of symbol: string * name: string
+    /// W5. An overload keyed by a string literal reads as a method of its own through `[<Emit>]`.
+    | [<Ergonomic>] LiteralOverloadAsMethod of literal: string * name: string
 
     interface IFindingKind with
         member this.Message =
@@ -720,6 +723,8 @@ type Members =
             | SymbolIteratorAsSeq element ->
                 $"[Symbol.iterator] reads as inherit seq<{element}>; the iterator object is not exposed"
             | SymbolKeyedMemberAsEmit(symbol, name) -> $"[Symbol.{symbol}] reads as {name} through [<Emit>]"
+            | LiteralOverloadAsMethod(literal, name) ->
+                $"overload on literal \"{literal}\" reads as {name} through [<Emit>]"
 
 // -------------------------------------------------------------------------------------------------
 // Per-pass unions, in pipeline order. Append-only.

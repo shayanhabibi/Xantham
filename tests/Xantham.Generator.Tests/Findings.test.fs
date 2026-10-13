@@ -129,6 +129,7 @@ let findingsTests =
                     "MB.UnspellableMemberDropped MB007 widened"
                     "MB.SymbolIteratorAsSeq MB008 ergonomic"
                     "MB.SymbolKeyedMemberAsEmit MB009 ergonomic"
+                    "MB.LiteralOverloadAsMethod MB010 ergonomic"
                     "NE.TypeNameSuffixed NE001 exact"
                     "HG.AmbientModuleDropped HG001 escape"
                     "HG.UnwritableGlobalDropped HG002 escape"

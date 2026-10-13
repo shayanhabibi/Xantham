@@ -125,6 +125,7 @@ let signature (parameters: ResolvedMember list) (returnTypeId: int) : ResolvedSi
         TypeParameters = []
         IsAbstract = false
         ReturnTypeId = returnTypeId * Measure.uom<Measure.typeId>
+        Source = None
     }
 
 /// Runs one pass to completion under the wire-less context and splits the outcome.

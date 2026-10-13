@@ -16,6 +16,7 @@ let rec private signature (m: FsMember) : FsMember =
     | FsConstructor c -> FsConstructor { c with Docs = ""; Tags = [] }
     | FsInvoke c -> FsInvoke { c with Docs = ""; Tags = [] }
     | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, signature inner)
+    | FsLiteralKeyed(target, literals, inner) -> FsLiteralKeyed(target, literals, signature inner)
 
 /// The declared name a base reference resolves to, where the base is one this run declares.
 let private baseName (reference: FsTypeRef) =

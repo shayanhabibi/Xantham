@@ -208,6 +208,13 @@ earlier and mapping over `model.Decls` looking for `FsExports` matches nothing, 
 no output, and has no container name to key its findings on. `expand-union-arms` cost an
 afternoon to this.
 
+**`literalOverloadSets` and `shapeMembers` must read the same literal keys.** Both decide
+through `Spec.isLiteralKeyed` and `Spec.literalKeys` whether a literal is a method name (W5) or
+a retained single-case StringEnum. If they diverge, a StringEnum is declared that nothing reads,
+or a literal parameter is both written into an Emit and kept. A callback-valued property is
+tested on its declared type in `literalOverloadSets` and on the type its intersection operands
+agree on in `shapeMembers`; where those differ, the literal widens rather than retains.
+
 **`anyReturnAsUnit` reaches only sites that scope with `selectAnyReturn`.** `delegateRef` writes
 `unit` for a callback's `any` return when its owner equals `ShapeModel.AnyReturnOwner`, which only
 `Spec.selectAnyReturn` sets. A new property or value site that calls `typeRef` without it keeps

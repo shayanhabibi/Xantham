@@ -3412,19 +3412,20 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
+                          // W5 (#136): a literal parameter of a method is a method of its own.
                           Expect.stringContains
                               source
-                              "abstract read: key: string * kind: Store.Text -> JS.Promise<string option>"
-                              "the literal parameter reads the type the literal is written as"
+                              "[<Emit(\"$0.read($1, 'text')\")>]\n    abstract readText: key: string -> JS.Promise<string option>"
+                              "the literal parameter is written into the call"
 
                           Expect.stringContains
                               source
-                              "abstract read: key: string * kind: Store.Json -> JS.Promise<obj>"
-                              "one overload per literal, each keeping its own return type"
+                              "[<Emit(\"$0.read($1, 'json')\")>]\n    abstract readJson: key: string -> JS.Promise<obj>"
+                              "one method per literal, each keeping its own return type"
 
                           Expect.stringContains
                               source
-                              "abstract read: key: string * kind: Store.Bytes -> JS.Promise<Chunk option>"
+                              "[<Emit(\"$0.read($1, 'bytes')\")>]\n    abstract readBytes: key: string -> JS.Promise<Chunk option>"
                               "including the one no consumer could reach before"
 
                           Expect.stringContains
@@ -3471,8 +3472,8 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "abstract send: body: string * mode: string -> unit"
-                              "overloads that differ before the literal is read keep widening it"
+                              "[<Emit(\"$0.send($1, 'now')\")>]\n    abstract sendNow: body: string -> unit"
+                              "a method's literal is a method of its own where nothing collides too"
 
                           Expect.stringContains
                               source
@@ -3537,7 +3538,7 @@ let pipelineTests =
 
                           Expect.equal
                               (symbolsOf "TR056")
-                              [ "Exports.emit(kind)"; "Store.read(kind)"; "Store.read(options)" ]
+                              [ "Exports.emit(kind)"; "Store.read(options)" ]
                               "and one per position the literal is kept at"
 
                           Expect.equal
@@ -3546,6 +3547,11 @@ let pipelineTests =
                               "the two collisions no retained literal separates are the overloads still dropped"
 
                           Expect.equal (symbolsOf "DO003") [] "no overload set is separated by a union of literals"
+
+                          Expect.equal
+                              (symbolsOf "MB010")
+                              [ "Mixed.send"; "Store.read" ]
+                              "a method's top-level literals are methods of their own (W5)"
 
                           Expect.contains
                               (symbolsOf "TR006")
@@ -5274,6 +5280,140 @@ let pipelineTests =
                            |> List.filter (fun f -> f.Key = "MB008" || f.Key = "MB009")
                            |> List.forall (fun f -> f.Tier = Ergonomic))
                           "both mappings are ergonomic" ])
+
+        // W5 (#136): an overload keyed by a string literal reads as a method of its own under
+        // `[<Emit>]`, and the generic overload stays.
+        let literalMethodLab = handFixture "literal-method-lab"
+        let literalMethodConfig = handConfig literalMethodLab
+
+        yield!
+            fixtureTests "literal-method-lab" literalMethodLab literalMethodConfig (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate literalMethodConfig package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                /// The Emit line and the member line beneath it, as one string.
+                let pairs (source: string) =
+                    let lines = source.Replace("\r\n", "\n").Split '\n' |> Array.map _.Trim()
+                    lines |> Array.pairwise |> Array.map (fun (a, b) -> a + "\n" + b)
+
+                let expectPair (source: string) (emit: string) (head: string) =
+                    Expect.isTrue
+                        (pairs source |> Array.exists (fun pair -> pair.StartsWith(emit + "\n" + head)))
+                        $"{emit} above {head}"
+
+                [ testCase "literal-method-lab: each literal overload is a method under Emit" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      expectPair source "[<Emit(\"$0.on('close', $1)\")>]" "abstract onClose: listener: (bool -> unit) -> Socket"
+                      expectPair source "[<Emit(\"$0.on('connect', $1)\")>]" "abstract onConnect: listener: (unit -> unit) -> Socket"
+                      expectPair source "[<Emit(\"$0.on('ready', $1)\")>]" "abstract onReady: listener: (unit -> unit) -> Socket"
+                      expectPair source "[<Emit(\"$0.once('close', $1)\")>]" "abstract onceClose: listener: (bool -> unit) -> Socket"
+                      expectPair source "[<Emit(\"$0.emit('close', $1)\")>]" "abstract emitClose: hadError: bool -> bool"
+                      expectPair source "[<Emit(\"$0.emit('connect')\")>]" "abstract emitConnect: unit -> bool"
+
+                  testCase "literal-method-lab: the generic overload stays" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "abstract on: ``event``: string * listener: (obj[] -> unit) -> Socket"
+                          "the string-keyed overload is kept under the TypeScript name"
+
+                  testCase "literal-method-lab: a collision with a member separates the parts with an underscore" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      expectPair source "[<Emit(\"$0.on('close', $1)\")>]" "abstract on_Close: listener: (unit -> unit) -> Dialog"
+                      expectPair source "[<Emit(\"$0.on('key-down', $1)\")>]" "abstract onKeyDown: listener: (string -> unit) -> Dialog"
+
+                  testCase "literal-method-lab: a literal mid-list and optional and rest tails" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      expectPair source "[<Emit(\"$0.read($1, 'text')\")>]" "abstract readText: key: string -> string"
+                      expectPair source "[<Emit(\"$0.read($1, 'bytes')\")>]" "abstract readBytes: key: string -> float[]"
+                      Expect.stringContains source "abstract read: key: string -> string" "the generic overload"
+                      expectPair source "[<Emit(\"$0.log('warn', $1...)\")>]" "abstract logWarn: ?message: string -> unit"
+                      expectPair source "[<Emit(\"$0.log('info', $1...)\")>]" "abstract logInfo: [<ParamArray>] parts: string[] -> unit"
+
+                  testCase "literal-method-lab: an intersection operand's literal overload is a method of its own" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      expectPair source "[<Emit(\"$0.setAttribute('draw', $1)\")>]" "abstract setAttributeDraw: value: string -> unit"
+
+                  testCase "literal-method-lab: the doc carries the TypeScript signature" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "/// <code lang=\"ts\">" "a TypeScript code block"
+                      Expect.stringContains source "/// on(event: \"close\", listener: (hadError: boolean) =&gt; void): this" "the signature on one line"
+                      Expect.stringContains source "/// on(event: \"connectionAttempt\", listener: (ip: string, port: number, family: number) =&gt; void): this" "a multi-line signature collapsed"
+
+                      let lines = source.Replace("\r\n", "\n").Split '\n' |> Array.map _.Trim()
+
+                      let described =
+                          lines
+                          |> Array.findIndex ((=) "/// Fires once the socket is fully closed.")
+
+                      Expect.equal lines[described + 1] "/// <code lang=\"ts\">" "the JSDoc of its own declaration precedes the signature"
+
+                      Expect.stringContains
+                          source
+                          "/// <summary>\n    /// <code lang=\"ts\">\n    /// emit(event: \"connect\"): boolean"
+                          "an undocumented member's method carries the signature alone"
+
+                  testCase "literal-method-lab: a single signature and a union of literals keep their mapping" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "abstract tag: name: string -> unit" "one signature widens"
+                      Expect.stringContains source "abstract pick: kind: " "a union stays one method"
+
+                  testCase "literal-method-lab: findings" <| fun _ ->
+                      let rendered = generate ()
+
+                      let symbolsOf key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      let keyed =
+                          [ "Emitter."; "Socket."; "Dialog."; "Store."; "Logger."; "Drawable." ]
+
+                      for key in [ "TR006"; "DO001" ] do
+                          Expect.isEmpty
+                              (symbolsOf key |> List.filter (fun s -> keyed |> List.exists s.StartsWith))
+                              $"no {key} on a literal-keyed method"
+
+                      Expect.contains (symbolsOf "TR006") "Solo.tag(name)" "a single signature widens"
+
+                      Expect.equal
+                          (symbolsOf "MB010")
+                          [ "Dialog.on"
+                            "Drawable.setAttribute"
+                            "Emitter.on"
+                            "Logger.log"
+                            "Socket.emit"
+                            "Socket.on"
+                            "Socket.once"
+                            "Store.read" ]
+                          "one finding per literal-keyed member"
+
+                      let mb010 = rendered.Findings |> List.filter (fun f -> f.Key = "MB010")
+                      Expect.isTrue (mb010 |> List.forall (fun f -> f.Tier = Ergonomic)) "every MB010 is ergonomic"
+
+                      Expect.isTrue
+                          (mb010 |> List.exists (fun f -> f.Symbol = "Dialog.on" && f.Kind.Message.Contains "on_Close"))
+                          "the collision is named in the message"
+
+                      let refused =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SP003" && f.Kind.Message.Contains "overloaded method")
+                          |> List.map _.Symbol
+                          |> List.sort
+
+                      Expect.equal
+                          refused
+                          [ "Choice"; "Dialog"; "Drawable"; "Emitter"; "Logger"; "Socket"; "Store" ]
+                          "a literal-keyed member refuses Create as an overload does" ])
     ]
 
 [<Tests>]

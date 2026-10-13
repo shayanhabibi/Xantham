@@ -142,7 +142,7 @@ order — each row cites its mapping-doc section:
 | `flatten-intersections` | apparent-members flattening + interface inheritance where nominal | §4.6 |
 | `resolve-enums` | `getConstantValue`, const-enum inlining | §4.7 |
 | `shape-callbacks` | delegates by default | §4.8, D5 |
-| `expand-literal-overloads` | `on("click", …)` ⇒ `onClick` companions (config-gated) | §4.8 |
+| `expand-literal-overloads` | `on("click", …)` ⇒ `onClick` under `[<Emit>]`; landed inside `shape-interfaces`, unconditional (W5) | §4.8 |
 | `shape-tuples` | fixed/option-tail/rest-carrier | §4.12, D7 |
 | `split-keyof-regimes` | closed ⇒ literal union; open ⇒ support-package idioms | §4.10 |
 | `name-expanded-aliases` | `Partial<Options>` ⇒ `OptionsPartial` | §4.10, D6 |
@@ -2469,3 +2469,91 @@ refusal: 31 Core.TS interfaces (`Promise`, `Map`, `Set`, `Headers` and others) c
 regenerated: it compiles against the regenerated Core.TS. Core.TS's three new escape symbols
 (`SegmentIterator` and two `[Symbol.replace]` replacer delegates) are newly reached
 declarations whose escape is `TR008`.
+
+## Literal overloads as methods (2026-10-13, W5 #136)
+
+An overload keyed by a string literal is a method of its own. The draft pass
+`expand-literal-overloads` (§3) landed inside `shape-interfaces`, in `Spec.shapeMembers`,
+rather than as a pass of its own: `typeRef` raises `TR006` while the signature is shaped, and a
+finding cannot be withdrawn (`docs/.ai/footguns.md`). It is unconditional.
+
+- **Which members.** `Spec.isLiteralKeyed`: two or more call signatures, at least one carrying a
+  literal key, on a method or on a required property holding a pure callback whose signatures
+  `callSignaturesSeparable` tells apart. An intersection's member is such a property
+  (`Element & { setAttribute(name: "draw", ...): void }`), unless `shapeMembers` reads it at a
+  type its operands agree on, where it stays unkeyed. A symbol-keyed or backtick name is
+  excluded. A literal key (`Spec.literalKeys`) is a required, non-rest parameter typed by one
+  string literal that is not an enum member and holds no `$`, `{` or `}` (Emit macro syntax).
+  Exported functions, class statics, optional callbacks, single signatures, unions of literals
+  and literals nested in a parameter type (`Options<"text">`) keep their mapping.
+- **Names.** The keyed overload is `FsLiteralKeyed(target, literals, FsMethod inner)`: the
+  literal parameters are removed and the inner name is the JavaScript key plus each literal's
+  `Naming.literalSuffix` (`onClose`, `getElementsByTagNameNSHttpWwwW3Org1999Xhtml`). A name the
+  declaration's members already hold (inherited ones included) takes `on_Close`, then
+  `on_Close2`. Overloads sharing a key and literals share a method (`onData` twice). The
+  overloads without a literal stay under the TypeScript name, so `on(event: string, ...)` is
+  kept.
+- **Emit.** `Render.literalCallTemplate` writes each literal, single-quoted, before the F#
+  argument at its index; from the first optional or rest parameter at or after the last literal
+  the arguments spread as `$k...`: `$0.on('close', $1)`, `$0.read($1, 'text')`,
+  `$0.log('warn', $1...)`. A key that is no JavaScript identifier is indexed
+  (`$0['my-on'](...)`). On an `[<AbstractClass>]` entrypoint the method is a concrete
+  `[<Emit>] member _.onClose(...) = jsNative`, so a derived class has no slot to fill.
+- **Docs.** Resolve reads each signature declaration of a set of two or more into
+  `ResolvedSignature.Source`: the declaration on one line (comments outside string literals
+  removed) and the description of the JSDoc above it. The method's doc is that description, or
+  the member's where the overload has none, then a ```` ```ts ```` block of the signature
+  (`<code lang="ts">`). The overloads that stay keep the member's doc.
+- **Findings.** `MB.LiteralOverloadAsMethod` (`MB010`, Ergonomic) once per method, at
+  `{owner}.{key}`, with the literal and the name; the inner signature's findings are owned by
+  `{owner}.{name}`. A literal-keyed member refuses `Create` with the overloaded-method reason
+  (`SP003`), and `dedupe-overloads` drops a repeated `FsLiteralKeyed` signature as `DO001`.
+- **Retention.** `literalOverloadSets` reads the same `isLiteralKeyed`/`literalKeys` and offers
+  only a keyed member's unkeyed signatures, so retention (`TR056`/`DO002`) serves nested
+  literals, optional callbacks and exported functions. `KVNamespace.get(key, "text")` is
+  `getText(key)` where it read `get(key, KVNamespace.Text)`.
+- `CatalogCompatibility.ApiVersion` is 7 → 8: the canonical API text gains a `literal` node, and
+  lib declarations' emitted ABI changes.
+
+Lab `literal-method-lab`: `Socket` (an `Emitter` with `on("end")`) carries `onClose`, the
+three `() => void` listeners that collided before (`onConnect`, `onReady`, `onEnd`),
+`onConnectionAttempt` through its delegate, `onceClose`, `emitClose` and `emitConnect`, and keeps
+the generic `on`, `once` and `emit`. `Dialog` has an `onClose` property, so its literal method is
+`on_Close`; `onKeyDown` reads `"key-down"`. `Store.readText(key)` writes the literal after the
+argument, `Logger.logWarn(?message)` and `logInfo(...parts)` spread their tails, and `Drawable`
+(`Element & {...}`) reads `setAttributeDraw`. `Solo.tag` keeps `TR006` and `Choice.pick` its
+literal unions. No `TR006` or `DO001` names a keyed member. The RunGate calls `onClose`,
+`emitClose`, `onConnect`/`emitConnect`, `onConnectionAttempt` with the generic `emit`, the generic
+`on`, `onEnd` (declared by `Socket` and `Emitter` both), `on_Close`, `readText`, the generic
+`read`, `logWarn` with and without its argument, and `logInfo("a", "b")`, which arrives spread.
+
+`literal-overload-lab` moves with it: `Store.read`'s `kind` overloads read `readText`,
+`readJson` and `readBytes`, `Mixed.send` reads `sendNow`/`sendLater`, and `TR056` keeps
+`Exports.emit(kind)` and `Store.read(options)`.
+
+Measured on the two selected goldens:
+
+| Golden | TR006 | DO001 | TR056 | DO002 | MB010 | exact symbols | lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `@cloudflare/workers-types` | 228 → 221 | 2 → 2 | 26 → 12 | 3 → 2 | 0 → 17 | 412 → 410 | 26,006 → 25,952 |
+| `animejs` | 21 → 20 | 1 → 0 | 3 → 0 | 1 → 0 | 0 → 4 | 129 → 126 | 5,167 → 5,177 |
+
+The other tiers are unchanged; the exact symbols that go are the retained single-case
+StringEnums. In `workers-types`, `BrowserRun.quickAction` and `KVNamespace.get`/`getWithMetadata`
+read as methods, and `DO001` stays at `Ai.run` (a `keyof` bound) and `AutoRAG.aiSearch`
+(object-typed parameters), which no literal keys. In `animejs`,
+`DrawableSVGGeometry.setAttribute(name: "draw", ...)` reads `setAttributeDraw` and the three
+namespace literals of `getElementsByTagNameNS` read as methods.
+
+Core.TS and Node were generated into scratch, not committed (T4), and both compile there:
+
+| Binding | TR006 | DO001 | TR056 | DO002 | MB010 | exact symbols |
+| --- | --- | --- | --- | --- | --- | --- |
+| Core.TS | 94 → 89 | 10 → 10 | 786 → 0 | 161 → 1 | 0 → 784 | 2,073 → 1,302 |
+| Node | 5,063 → 673 | 1,904 → 27 | 546 → 8 | 87 → 1 | 0 → 4,843 | 1,263 → 768 |
+
+Node also loses its one `LU002` (`WorkerThreads.Worker.Error`, a retained literal now
+`onError`). Both need regeneration at integration: Core.TS's member surfaces and API hashes
+change (`createEvent("AnimationEvent")` is `createEventAnimationEvent()`) and ApiVersion 8
+rejects the committed catalogue, so `catalog library identity` and `core-ts package` fail until
+it is regenerated; Node carries the `TR006`/`DO001` reduction.

@@ -1,0 +1,8 @@
+{
+    "name": "literal-method-lab",
+    "version": "1.0.0",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for literal overloads as Emit-backed methods (W5, #136). Each overload keyed by a string literal reads as a method of its own; the generic overload stays. Tracked in git, no npm install."
+}

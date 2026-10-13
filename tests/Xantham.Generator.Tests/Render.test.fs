@@ -973,3 +973,90 @@ let symbolKeyedRenderTests =
             Expect.stringContains source "    [<Emit(\"$0[Symbol.species]\")>]\n    abstract SymbolSpecies: string with get\n" "the getter reads"
             Expect.stringContains source "    [<Emit(\"$0[Symbol.species] = $1\")>]\n    abstract SymbolSpecies: string with set\n" "the setter assigns"
     ]
+
+/// W5 (#136): a literal-keyed overload renders as a method of its own, reached through
+/// `[<Emit>]` as a call to its JavaScript key with the literal written in.
+[<Tests>]
+let literalKeyedRenderTests =
+    let param name =
+        { Name = name; Optional = false; Rest = false; Type = FsString }
+
+    let keyed target literals name docs parameters returns =
+        FsLiteralKeyed(
+            target,
+            literals,
+            FsMethod
+                { Name = name
+                  Docs = docs
+                  Tags = []
+                  TypeParameters = []
+                  Parameters = parameters
+                  Return = returns }
+        )
+
+    let decl entrypoint members =
+        FsInterface
+            { Name = "Socket"
+              Docs = ""
+              Tags = []
+              Order = None
+              TypeParameters = []
+              Inherits = []
+              Members = members
+              Entrypoint = entrypoint
+              CreateOverloads = []
+              Statics = [] }
+
+    let render decl =
+        renderAll { baseModel with Decls = [ decl ] } |> Map.find "TestPkg.fs"
+
+    testList "render literal-keyed methods" [
+        testCase "the literal is written before the argument at its index" <| fun _ ->
+            Expect.equal (Render.literalCallTemplate "on" [ 0, "close" ] [ param "listener" ]) "$0.on('close', $1)" "a leading literal"
+            Expect.equal (Render.literalCallTemplate "emit" [ 0, "connect" ] []) "$0.emit('connect')" "no arguments"
+            Expect.equal (Render.literalCallTemplate "read" [ 1, "text" ] [ param "key" ]) "$0.read($1, 'text')" "a trailing literal"
+
+            Expect.equal
+                (Render.literalCallTemplate "pick" [ 0, "a"; 1, "b" ] [ param "x" ])
+                "$0.pick('a', $1, 'b')"
+                "two literals around an argument"
+
+        testCase "an optional or rest tail after the literal spreads" <| fun _ ->
+            let optional = { param "message" with Optional = true; Type = FsOption FsString }
+            let rest = { param "parts" with Rest = true; Type = FsArray FsString }
+            Expect.equal (Render.literalCallTemplate "log" [ 0, "warn" ] [ optional ]) "$0.log('warn', $1...)" "an optional tail"
+            Expect.equal (Render.literalCallTemplate "log" [ 0, "info" ] [ param "a"; rest ]) "$0.log('info', $1, $2...)" "a rest tail"
+
+        testCase "the literal and the key are quoted for JavaScript" <| fun _ ->
+            Expect.equal (Render.literalCallTemplate "on" [ 0, "it's" ] [ param "l" ]) "$0.on('it\\'s', $1)" "a quote is escaped"
+            Expect.equal (Render.literalCallTemplate "my-on" [ 0, "x" ] [ param "l" ]) "$0['my-on']('x', $1)" "a key that is no identifier is indexed"
+
+        testCase "the Emit line sits above the abstract member" <| fun _ ->
+            let source = render (decl None [ keyed "on" [ 0, "close" ] "onClose" "" [ param "listener" ] FsUnit ])
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"$0.on('close', $1)\")>]\n    abstract onClose: listener: string -> unit\n"
+                "the method is reached through its key"
+
+            let quoted = render (decl None [ keyed "on" [ 0, "it's" ] "onIts" "" [ param "listener" ] FsUnit ])
+            Expect.stringContains quoted "[<Emit(\"$0.on('it\\\\'s', $1)\")>]" "the F# string escapes the JavaScript escape"
+
+        testCase "the TypeScript signature renders as a code block" <| fun _ ->
+            let docs = "```ts\non(event: \"close\"): this\n```"
+            let source = render (decl None [ keyed "on" [ 0, "close" ] "onClose" docs [] FsUnit ])
+            Expect.stringContains source "    /// <code lang=\"ts\">\n    /// on(event: \"close\"): this\n    /// </code>" "a ts code block"
+
+        testCase "an entrypoint class carries the method as a concrete Emit member" <| fun _ ->
+            let entrypoint =
+                { Binding = ImportNamed "Socket"
+                  Parameters = []
+                  Inherits = None }
+
+            let source = render (decl (Some entrypoint) [ keyed "on" [ 0, "close" ] "onClose" "" [ param "listener" ] FsUnit ])
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"$0.on('close', $1)\")>]\n    member _.onClose(listener: string) : unit = jsNative"
+                "no abstract slot for a derived class to fill"
+    ]

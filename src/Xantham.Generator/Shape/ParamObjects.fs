@@ -52,6 +52,11 @@ let private isSymbolKeyed' =
     | FsSymbolKeyed _ -> true
     | _ -> false
 
+let private isLiteralKeyed' =
+    function
+    | FsLiteralKeyed _ -> true
+    | _ -> false
+
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
 /// and carries no `Create` parameter of its own.
@@ -73,7 +78,11 @@ let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
         Some Reason.NoMembers
     elif members |> List.exists isIndexer then
         Some Reason.IndexSignature
-    elif (List.distinct methodNames).Length <> methodNames.Length then
+    // A literal-keyed overload is one more overload of its JavaScript key.
+    elif
+        (List.distinct methodNames).Length <> methodNames.Length
+        || members |> List.exists isLiteralKeyed'
+    then
         Some Reason.OverloadedMethod
     elif members.Length > CreateParameterBudget then
         Some Reason.OverBudget
@@ -109,7 +118,8 @@ let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list 
     | FsIndexer _
     | FsConstructor _
     | FsInvoke _
-    | FsSymbolKeyed _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
+    | FsSymbolKeyed _
+    | FsLiteralKeyed _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
 
 /// Construction ergonomics (D3, §4.4): an interface gains a `[<ParamObject; Emit("$0")>]`
 /// Create overload mirroring its members, required members first, so consumers never hand-build

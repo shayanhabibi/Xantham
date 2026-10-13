@@ -33,9 +33,27 @@ type Chunk =
 /// </summary>
 type Store =
     abstract read: key: string * ?options: ReadOptions<unit> -> JS.Promise<string option>
-    abstract read: key: string * kind: Store.Text -> JS.Promise<string option>
-    abstract read: key: string * kind: Store.Json -> JS.Promise<obj>
-    abstract read: key: string * kind: Store.Bytes -> JS.Promise<Chunk option>
+    /// <summary>
+    /// <code lang="ts">
+    /// read(key: string, kind: "text"): Promise&lt;string | null&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.read($1, 'text')")>]
+    abstract readText: key: string -> JS.Promise<string option>
+    /// <summary>
+    /// <code lang="ts">
+    /// read(key: string, kind: "json"): Promise&lt;unknown&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.read($1, 'json')")>]
+    abstract readJson: key: string -> JS.Promise<obj>
+    /// <summary>
+    /// <code lang="ts">
+    /// read(key: string, kind: "bytes"): Promise&lt;Chunk | null&gt;
+    /// </code>
+    /// </summary>
+    [<Emit("$0.read($1, 'bytes')")>]
+    abstract readBytes: key: string -> JS.Promise<Chunk option>
     abstract read: key: string * ?options: ReadOptions<Store.Text> -> JS.Promise<string option>
     abstract read: key: string * ?options: ReadOptions<Store.Bytes> -> JS.Promise<Chunk option>
 
@@ -63,8 +81,20 @@ type Label =
 /// Negative: the parameter lists differ before the literal is read, so nothing collides.
 /// </summary>
 type Mixed =
-    abstract send: body: string * mode: string -> unit
-    abstract send: body: float * mode: string -> unit
+    /// <summary>
+    /// <code lang="ts">
+    /// send(body: string, mode: "now"): void
+    /// </code>
+    /// </summary>
+    [<Emit("$0.send($1, 'now')")>]
+    abstract sendNow: body: string -> unit
+    /// <summary>
+    /// <code lang="ts">
+    /// send(body: number, mode: "later"): void
+    /// </code>
+    /// </summary>
+    [<Emit("$0.send($1, 'later')")>]
+    abstract sendLater: body: float -> unit
 
 /// <summary>
 /// Negative: a union of literals per position, which one literal type cannot stand for.
@@ -128,10 +158,6 @@ module Store =
     [<StringEnum(CaseRules.None)>]
     type Bytes =
         | [<CompiledName("bytes")>] Bytes
-
-    [<StringEnum(CaseRules.None)>]
-    type Json =
-        | [<CompiledName("json")>] Json
 
     [<StringEnum(CaseRules.None)>]
     type Text =

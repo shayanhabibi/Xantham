@@ -149,7 +149,8 @@ let dedupeOverloads: Pass<ShapeModel> =
                                 else
                                     seen <- Set.add key seen
                                     true
-                            | FsSymbolKeyed(_, FsMethod m) ->
+                            | FsSymbolKeyed(_, FsMethod m)
+                            | FsLiteralKeyed(_, _, FsMethod m) ->
                                 let key = m.Name, signatureKey m.TypeParameters m.Parameters
 
                                 if Set.contains key seen then
@@ -160,7 +161,8 @@ let dedupeOverloads: Pass<ShapeModel> =
                                 else
                                     seen <- Set.add key seen
                                     true
-                            | FsSymbolKeyed _ -> true)
+                            | FsSymbolKeyed _
+                            | FsLiteralKeyed _ -> true)
 
                     let decls =
                         model.Decls
