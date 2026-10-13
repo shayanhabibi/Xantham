@@ -3,7 +3,7 @@
   "package": "fable-core-ts-input",
   "module": "FableCoreTsInput",
   "counts": {
-    "exact": 2073,
+    "exact": 1302,
     "ergonomic": 2203,
     "widened": 785,
     "escape": 5
@@ -33,10 +33,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 83658,
-      "exact": 1665,
-      "ergonomic": 73429,
-      "widened": 8564
+      "total": 83651,
+      "exact": 879,
+      "ergonomic": 74213,
+      "widened": 8559
     },
     {
       "pass": "SA - shape-aliases",
@@ -64,8 +64,8 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 188,
-      "exact": 161,
+      "total": 28,
+      "exact": 1,
       "widened": 27
     },
     {
