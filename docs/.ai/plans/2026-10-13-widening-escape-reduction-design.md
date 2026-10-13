@@ -118,6 +118,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
   - The lab asserts an `Event`-shaped type with methods and numeric constants, a subtype that inherits them, a string discriminant, and a value that needs escaping.
   - The RunGate checks that `match e.eventPhase with | Event.AT_TARGET` compiles to `e.eventPhase === 2`, and that a subtype's `Create` takes no constant parameters.
   - In `solid-js` and `animejs`, TR007 falls.
+- **Status:** integrated on `integ/w6` (2026-10-14), stacked on W5. A literal member reports `MB011` and a `Create` that writes literals `SP005`. Lead amendment: a required single-literal member is a literal member whether readonly or writable; optional ones stay `Create` parameters. A subtype's module holds its own literal members only; inherited constants are read through the base's module. TR007 falls from 54 to 0 in `solid-js` and from 18 to 0 in `animejs`; TR006 falls from 221 to 77 in `workers-types`. Core.TS and Node are regenerated under the T4 override: TR007 falls from 6,494 to 0 in Core.TS and from 86 to 0 in Node.
 
 ### W7. Type parameters in scope
 

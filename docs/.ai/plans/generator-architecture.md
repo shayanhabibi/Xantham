@@ -2622,38 +2622,37 @@ statement-position `Create`, reads the inherited constants off `PointerPhaseEven
 discriminants of `MethodSignal`, `WritableSignal` and `Tagged<string>`, the JSON of `Phases.Create()`, and the
 escaped marker through a module abbreviation.
 
-Measured on the selected goldens:
+Measured at integration on `integ/w6` (2026-10-14), over W5, with the lead amendment:
 
-| Golden | `TR007` | `MB011` | exact / ergonomic / widened / escape |
-| --- | --- | --- | --- |
-| `solid-js` | 54 → 0 | 0 → 54 | 69/180/92/1 → 69/183/89/1 |
-| `animejs` | 18 → 0 | 0 → 18 | 129/190/26/6 → 129/190/26/6 |
+| Golden | `TR007` | `TR006` | `MB011` | `SP005` | exact / ergonomic / widened / escape |
+| --- | --- | --- | --- | --- | --- |
+| `solid-js` | 54 → 0 | 6 → 1 | 0 → 59 | 0 → 5 | 69/180/92/1 → 69/188/84/1 |
+| `animejs` | 18 → 0 | 20 → 20 | 0 → 18 | 0 → 0 | 126/190/26/6 → 126/190/26/6 |
+| `@cloudflare/workers-types` | 0 → 0 | 221 → 77 | 0 → 144 | 0 → 121 | 417/1154/390/1 → 417/1259/285/1 |
 
-Every `solid-js` hit is a DOM `Node` constant flattened into `H.JsxDevRuntime.Jsx.Result` and
-`Result.Item`, which gain `module Result =` and a merged `module Item =`; every `animejs` hit is
-on `DrawableSVGGeometry`, whose existing module now opens at its constants, so its nested string
-enums move up beside them. Neither golden gains `SP005`: both declarations carry an index
-signature and so no `Create`.
+The readonly-only branch measured 54 `MB011` on `solid-js`, every one a DOM `Node` constant
+flattened into `H.JsxDevRuntime.Jsx.Result` and `Result.Item`, which gain `module Result =` and a
+merged `module Item =`; the other five are writable discriminants. Every `animejs` hit is on
+`DrawableSVGGeometry`, whose existing module now opens at its constants, so its nested string
+enums move up beside them; it carries an index signature and so no `Create`.
 
-The pull-request regeneration (`test --goldens`) moves readonly string discriminants to
-`MB011`, with each `Create` dropping the `kind` parameter and writing it in the Emit:
-`@cloudflare/workers-types` `TR006` 228 → 196, `MB011` +32, `SP005` +28 (tiers
-412/1161/390/1 → 412/1186/365/1); `generic-tag-lab` `TR006` 23 → 0; `shared-tag-lab` 31 → 2;
-`compiler-lib-ownership-lab` 6 → 0 (the `ClassDecoratorContext` family); `nominal-lab` 2 → 0;
-`subpath-lab` 1 → 0. `Owned3`, `Marker2`, `Marker3`, `Attr`, `GLAttr` and `RootSession` now
-have a parameterless `Create`.
+Required string discriminants, readonly or writable, move to `MB011`, with each `Create`
+dropping the `kind` parameter and writing it in the Emit. The readonly-only branch moved
+`workers-types` `TR006` 228 → 196; the writable discriminants take it to 77. In the labs,
+`TR006` falls in `generic-tag-lab` 23 → 0, `shared-tag-lab` 31 → 2,
+`compiler-lib-ownership-lab` 6 → 0 (the `ClassDecoratorContext` family),
+`catalog-alias-api-lab` 4 → 0, `projection-lab` 4 → 2, `literal-overload-lab` 4 → 3, and 2 or
+1 → 0 in `nominal-lab`, `instantiation-operand-lab`, `catalog-recursive-json-lab`, `lab`,
+`customization-lab`, `flags-lab`, `inherit-lab` and `subpath-lab`.
 
-Core.TS and Node were not regenerated (T4). Generated into scratch with the pinned compiler
-(T5), and both compiled against each other:
+Core.TS and Node are regenerated under the T4 override and compile against each other:
 
 | Binding | `TR007` | `MB011` | `TR006` | `SP005` | `SP001` / `SP003` | tiers |
 | --- | --- | --- | --- | --- | --- | --- |
-| Core.TS | 6,494 → 0 | 0 → 6,503 | 94 → 85 | 0 → 126 | 1,098/519 → 1,124/493 | 2073/2203/785/5 → 2073/2385/603/5 |
-| Node | 86 → 3 | 0 → 115 | 5,063 → 5,031 | 0 → 8 | 1,120/215 → 1,122/213 | 1263/2032/830/5 → 1263/2039/823/5 |
+| Core.TS | 6,494 → 0 | 0 → 6,515 | 89 → 68 | 0 → 138 | 1,098/519 → 1,124/493 | 1302/2203/785/5 → 1302/2397/591/5 |
+| Node | 86 → 0 | 0 → 182 | 673 → 577 | 0 → 70 | 1,120/215 → 1,122/213 | 775/2025/829/5 → 775/2094/760/5 |
 
 In Core.TS, `Event.Create` writes `NONE`, `CAPTURING_PHASE`, `AT_TARGET` and `BUBBLING_PHASE`
 rather than taking them, and 26 interfaces refused for the parameter budget (`UIEvent`,
 `ProgressEvent` and `DOMException` among them) now carry a `Create`, raising `SP002` 884 → 988
-and `TR055` 678 → 704 with their method parameters. Both
-need regeneration at integration: the shipped bindings carry neither the modules nor the
-`Create` Emits.
+and `TR055` 678 → 704 with their method parameters. The catalogue's API hashes are unchanged.
