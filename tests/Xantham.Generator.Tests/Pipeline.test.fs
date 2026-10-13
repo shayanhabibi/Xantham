@@ -2062,6 +2062,38 @@ let pipelineTests =
                           entry.Contains "inherit GlobalThis"
                           |> Flip.Expect.equal "WindowLike.self retains its program-global intersection operand" true
 
+                      // Fable.Promise and Async.AwaitPromise are written against JS.Promise, so a
+                      // shipped compiler lib writes its promises the way consumers do.
+                      testCase "compiler-lib ownership writes Promise and PromiseLike as JS.Promise" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "compiler-lib-ownership-lab")) package)
+
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          Expect.stringContains
+                              entry
+                              "static member settle (value: JS.Promise<float>) : JS.Promise<string>"
+                              "the entry's references"
+
+                          Expect.stringContains core "-> JS.Promise<U2<'TResult1, 'TResult2>>" "Promise.then"
+                          Expect.stringContains core "type Promise<'T> =" "the declaration stays"
+
+                          // A declaration's own `Create` still returns the declaration.
+                          let references =
+                              core.Split '\n' |> Array.filter (fun line -> not (line.Contains "static member Create"))
+
+                          for spelling in [ ": Promise<"; "-> Promise<"; "<Promise<"; ", Promise<"; ": PromiseLike<"; "-> PromiseLike<"; "<PromiseLike<"; ", PromiseLike<" ] do
+                              Expect.isFalse
+                                  (references |> Array.exists (fun line -> line.Contains spelling))
+                                  $"no reference reads {spelling}"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map _.Message |> List.distinct)
+                              "PromiseLike reads as JS.Promise; a bare thenable is not one"
+                              "the thenable's loss is recorded"
+
                       testCase "compiler-lib ownership certifies the global scope of a clean producer" <| fun _ ->
                           let config =
                               { handConfig (handFixture "compiler-lib-ownership-lab") with Entry = Some "clean.d.ts" }

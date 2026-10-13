@@ -158,8 +158,9 @@ the corresponding lab under `tests/fixtures/` is the reducer.
   on collision (`Iterator2`) is reachable only under the name it kept, and the compile gate will
   not catch a same-arity wrong target. A `LibBindings` row splits a type across two families: a
   consumer's `U2<JS.ArrayBuffer, Es.SharedArrayBuffer>` was a different F# type from Core.TS's
-  `ArrayBufferLike` until the row went. `Promise` keeps that split: Core.TS's own members
-  returning `Promise` use `Es.Promise`, which will not unify with a consumer's `JS.Promise`.
+  `ArrayBufferLike` until the row went. `Promise` and `PromiseLike` are bound under `ship` as
+  well (`LibBindings.bindsWhenShipped`), so Core.TS's own members return `JS.Promise` and unify
+  with a consumer's; Core.TS still declares `Es.Promise`, which nothing it emits references.
 
 ## Generator passes
 
@@ -284,7 +285,8 @@ the Core.TS declaration does not, and costs unification with every Core.TS API. 
 keeps `Error` → `exn` (Fable compiles `System.Exception` to a JavaScript `Error`) and `Promise`
 /`PromiseLike` → `JS.Promise`, because Fable.Promise's `promise { }` and
 `Async.AwaitPromise`/`StartAsPromise` are written against `JS.Promise` (lead decision, W3 #134).
-A future row needs a reason of one of those two kinds.
+A future row needs a reason of one of those two kinds. The promise rows also bind under `ship`;
+a row that binds only for consumers splits a type between Core.TS and its consumers.
 
 ## Build and test environment
 

@@ -1418,8 +1418,15 @@ Es.SharedArrayBuffer>` is Core.TS's `ArrayBufferLike`.
   `TypeScript.Lib.Es.*`, `map` → table or widen).
 - **TP010.** The dropped `Function` bound is matched as `Fable.Core.TS.Es.Function`
   (`LibBindings.FunctionBinding`); the message no longer names `JS.Function`.
-- **Known gap.** Core.TS (ship mode) still declares and references its own `Es.Promise`, so a
-  Core.TS member returning `Promise` will not unify with a consumer's `JS.Promise`.
+- **Ship mode.** A `ship` run binds `Promise` and `PromiseLike` too (`LibBindings.bindsWhenShipped`,
+  checked in `Spec.typeRefOnPath` ahead of the run's own declaration), so Core.TS's members return
+  `JS.Promise` and unify with consumers and Fable.Promise; `PromiseLike` records TR025 there as
+  well. Core.TS still declares `Es.Promise`, `Es.PromiseLike` and `PromiseConstructor`: the
+  declarations keep their catalogue entries (the `core-ts package` test asserts `Es.Promise` at
+  arity 1), and the `Promise` global's `resolve`/`all`/`race`/`reject` now return `JS.Promise`.
+  Only a declaration's own `Create` still returns it. The emitted ABI of a shipped compiler lib
+  changed, so `CatalogCompatibility.current` ApiVersion is 6 → 7 and Core.TS's catalogue is
+  regenerated. compiler-lib-ownership-lab (ES5, `ship`) is the lab.
 
 Measured on 2026-10-13 (es-reuse-lab is the lab, extended with `Promise`, `PromiseLike`, `Map`,
 `Set`, `Date`, `ArrayBuffer`, `Uint8Array<ArrayBuffer>` and `Error`):
@@ -1431,6 +1438,7 @@ Measured on 2026-10-13 (es-reuse-lab is the lab, extended with `Promise`, `Promi
 | `@cloudflare/workers-types` | 120 → 0 | 10 → 8 | 218 → 222 | 412 / 1161 / 390 / 1 → 419 / 1154 / 390 / 1 |
 | `solid-js` | 0 | 2 | 78 | unchanged (69 / 180 / 92 / 1); 26 lines respelled |
 | `Xantham.Fable.Node` | 255 → 0 | 1434 → 1431 | 2877 → 2895 | 1263 / 2032 / 830 / 5 → 1270 / 2025 / 830 / 5 |
+| `Xantham.Fable.Core.TS` (ship) | 0 | 0 → 51 | 1681 | unchanged (2073 / 2203 / 785 / 5); 483 `JS.Promise` references |
 
 TR023 and TR035 are unchanged in every row. The TR008 rise is the `any` defaults of the
 async-iteration and `IteratorResult` declarations, now applied at their real arity rather than

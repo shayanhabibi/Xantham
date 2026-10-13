@@ -1706,7 +1706,7 @@ module Es =
 
     type PromiseConstructorLike =
         [<EmitConstructor>]
-        abstract Create<'T>: executor: PromiseConstructorLike.Executor<'T> -> PromiseLike<'T>
+        abstract Create<'T>: executor: PromiseConstructorLike.Executor<'T> -> JS.Promise<'T>
 
     [<Interface>]
     type PromiseLike<'T> =
@@ -1716,9 +1716,9 @@ module Es =
         /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, PromiseLike<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, PromiseLike<'TResult2>>) -> PromiseLike<U2<'TResult1, 'TResult2>>
+        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
         [<ParamObject; Emit("$0")>]
-        static member Create (``then``: Func<('T -> U2<'TResult1, PromiseLike<'TResult1>>) option, (obj -> U2<'TResult2, PromiseLike<'TResult2>>) option, PromiseLike<U2<'TResult1, 'TResult2>>>) : PromiseLike<'T> = jsNative
+        static member Create (``then``: Func<('T -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>) : PromiseLike<'T> = jsNative
 
     /// <summary>
     /// Represents the completion of an asynchronous operation
@@ -1731,15 +1731,15 @@ module Es =
         /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, PromiseLike<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, PromiseLike<'TResult2>>) -> Promise<U2<'TResult1, 'TResult2>>
+        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
         /// <summary>
         /// Attaches a callback for only the rejection of the Promise.
         /// </summary>
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of the callback.</returns>
-        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, PromiseLike<'TResult>>) -> Promise<U2<'T, 'TResult>>
+        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'T, 'TResult>>
         [<ParamObject; Emit("$0")>]
-        static member Create (``then``: Func<('T -> U2<'TResult1, PromiseLike<'TResult1>>) option, (obj -> U2<'TResult2, PromiseLike<'TResult2>>) option, Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, PromiseLike<'TResult>>) option -> Promise<U2<'T, 'TResult>>)) : Promise<'T> = jsNative
+        static member Create (``then``: Func<('T -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<'T, 'TResult>>)) : Promise<'T> = jsNative
 
     /// <summary>
     /// Recursively unwraps the "awaited type" of a type. Non-promise "thenables" should resolve to <c>never</c>. This emulates the behavior of <c>await</c>.
@@ -6064,7 +6064,7 @@ module Es =
                 abstract Item: string -> obj
 
     module PromiseConstructorLike =
-        type Executor<'T> = delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
+        type Executor<'T> = delegate of resolve: (U2<'T, JS.Promise<'T>> -> unit) * reject: (obj option -> unit) -> unit
 
     module String =
         module Replace =

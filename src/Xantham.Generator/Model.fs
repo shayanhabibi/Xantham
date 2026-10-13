@@ -908,6 +908,12 @@ module Naming =
         /// name, its arity, and the loss to record.
         let tryFind (name: string) = Map.tryFind name table
 
+        /// Whether a `ship` run also writes the name as its binding, so the promises of a shipped
+        /// compiler lib, its consumers and Fable.Promise are one F# type. The declaration itself
+        /// is still emitted.
+        let bindsWhenShipped (name: string) =
+            name = "Promise" || name = "PromiseLike"
+
         let private pinned =
             set
                 [

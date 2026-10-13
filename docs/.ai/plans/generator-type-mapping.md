@@ -512,6 +512,7 @@ arrays, the async-iteration names, ...) is written as its `Fable.Core.TS.Es` dec
 its real arity, under every non-ship disposition. Their arity truncations (TR024) and readonly
 or shape losses (TR025) are gone because Core.TS carries the real declarations, and a
 consumer's `U2<Es.ArrayBuffer, Es.SharedArrayBuffer>` is now Core.TS's `ArrayBufferLike`.
+The promise rows bind under `ship` too, so Core.TS returns `JS.Promise` as well.
 `generator-architecture.md`, "ECMAScript consumer bindings", has the measurements.
 
 What it was worth on the workers-types rung: widened findings 528 -> 451, and 39 "type

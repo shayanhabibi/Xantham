@@ -1679,7 +1679,16 @@ and internal typeRefOnPath
                             [ Finding.make owner (TypeReference.TypeParameterOutOfScopeToConstraint name) ]
                         | None -> FsObj, [ Finding.make owner TypeReference.TypeParameterOutOfScope ]
         elif has TypeFlags.Object then
-            objectRef ctx model self owner facts
+            // A shipped compiler lib declares `Promise` and still writes references to it as
+            // `JS.Promise`, ahead of its own declaration.
+            match
+                (if GeneratorConfig.disposition ctx.Config CompilerLib = Ship then
+                     libBinding ctx model self owner facts
+                 else
+                     None)
+            with
+            | Some result -> result
+            | None -> objectRef ctx model self owner facts
         elif has TypeFlags.Index then
             keyOfRef model owner facts
         elif has TypeFlags.IndexedAccess then
@@ -1971,11 +1980,15 @@ and internal objectRef
 
 /// A compiler-lib type a shipped package binds: `Error` -> `exn` and `Promise` -> `JS.Promise<'T>`
 /// through `Naming.LibBindings`, with their explicit arity and loss rules; any DOM declaration, a
-/// pinned ECMAScript declaration (`Map`, `Uint8Array`), and under `widen` any other ECMAScript declaration, under the name
-/// and arguments of the shipped Core.TS producer (`Fable.Core.TS.Dom`, `Fable.Core.TS.Es`).
+/// pinned ECMAScript declaration (`Map`, `Uint8Array`), and under `widen` any other ECMAScript
+/// declaration, under the name and arguments of the shipped Core.TS producer
+/// (`Fable.Core.TS.Dom`, `Fable.Core.TS.Es`). Under `ship`, only the promise names bind.
 and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
     match facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
-    | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
+    | CompilerLib, Some name when
+        GeneratorConfig.disposition ctx.Config CompilerLib <> Ship
+        || Naming.LibBindings.bindsWhenShipped name
+        ->
         let arguments = facts.TypeArguments
 
         // (F# name, arity it takes, the loss the mapping itself costs). A DOM binding costs

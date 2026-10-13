@@ -27,15 +27,15 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 918,
-      "ergonomic": 586,
+      "total": 931,
+      "ergonomic": 599,
       "widened": 332
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 83620,
+      "total": 83658,
       "exact": 1665,
-      "ergonomic": 73391,
+      "ergonomic": 73429,
       "widened": 8564
     },
     {
