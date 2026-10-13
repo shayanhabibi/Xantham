@@ -5354,6 +5354,16 @@ let pipelineTests =
 
                       Expect.equal lines[described + 1] "/// <code lang=\"ts\">" "the JSDoc of its own declaration precedes the signature"
 
+                      for keyed in [ "connect"; "ready"; "connectionAttempt" ] do
+                          let signature =
+                              lines
+                              |> Array.findIndex (fun line -> line.StartsWith $"/// on(event: \"{keyed}\"")
+
+                          Expect.equal
+                              lines[signature - 2]
+                              "/// <summary>"
+                              $"the on(\"{keyed}\") method carries no sibling overload's JSDoc"
+
                       Expect.stringContains
                           source
                           "/// <summary>\n    /// <code lang=\"ts\">\n    /// emit(event: \"connect\"): boolean"

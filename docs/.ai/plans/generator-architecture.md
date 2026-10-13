@@ -2501,9 +2501,15 @@ finding cannot be withdrawn (`docs/.ai/footguns.md`). It is unconditional.
   `[<Emit>] member _.onClose(...) = jsNative`, so a derived class has no slot to fill.
 - **Docs.** Resolve reads each signature declaration of a set of two or more into
   `ResolvedSignature.Source`: the declaration on one line (comments outside string literals
-  removed) and the description of the JSDoc above it. The method's doc is that description, or
-  the member's where the overload has none, then a ```` ```ts ```` block of the signature
-  (`<code lang="ts">`). The overloads that stay keep the member's doc.
+  removed) and the description of the JSDoc above it. The method's doc is that description,
+  then a ```` ```ts ```` block of the signature (`<code lang="ts">`); an overload without JSDoc
+  carries the signature block alone, because the member's doc merges every overload's JSDoc. The
+  overloads that stay keep the member's doc.
+- **Listeners.** A listener of two or more parameters keeps its D5a delegate
+  (`onConnectionAttempt: listener: Socket.On.Listener`), departing from W5.3's curried form
+  (probe 6). The keyed method's parameters are shaped by the same `shapeSignature` as every other
+  signature, and D5a measured a curried callback of arity 2 or more failing in return and
+  read-back positions (`generator-type-mapping.md`, D5).
 - **Findings.** `MB.LiteralOverloadAsMethod` (`MB010`, Ergonomic) once per method, at
   `{owner}.{key}`, with the literal and the name; the inner signature's findings are owned by
   `{owner}.{name}`. A literal-keyed member refuses `Create` with the overloaded-method reason

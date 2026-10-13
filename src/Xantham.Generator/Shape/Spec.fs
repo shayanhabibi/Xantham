@@ -1184,7 +1184,7 @@ let internal literalKeys (model: ShapeModel) (signature: ResolvedSignature) : (i
 /// call signatures, at least one keyed by a literal, on a method or on a required property
 /// holding a pure callback whose signatures F# tells apart. An intersection's member is such a
 /// property: `Element & { setAttribute(name: "draw", ...): void }`. `literalOverloadSets` and
-/// `shapeMembers` both read this, so a literal is either a method name or a retained type.
+/// `shapeMembers` share this test.
 let internal isLiteralKeyed (model: ShapeModel) (m: ResolvedMember) (memberFacts: TypeFacts) =
     let signatures = memberFacts.CallSignatures
 
@@ -3355,23 +3355,16 @@ let internal shapeMembers
             |> List.map (fun (index, _) -> signature.Parameters[index].Symbol.Name)
             |> Set.ofList
 
-        // The overload's own JSDoc where it has one, else the member's, then its TypeScript
-        // signature.
+        // The overload's own JSDoc, then its TypeScript signature.
         let docs =
             match signature.Source with
             | Some source ->
-                let description =
-                    if source.Comment = "" then
-                        m.Docs.Trim()
-                    else
-                        source.Comment
-
                 let fence = "```ts\n" + source.Spelling + "\n```"
 
-                if description = "" then
+                if source.Comment = "" then
                     fence
                 else
-                    description + "\n\n" + fence
+                    source.Comment + "\n\n" + fence
             | None -> m.Docs
 
         FsLiteralKeyed(
@@ -3450,9 +3443,8 @@ let internal shapeMembers
                         Some memberFacts
                     | _ -> None
 
-            // Each call signature an overload of one method, or a method of its own where a
-            // literal keys it (W5). `literalOverloadSets` tests the member's declared type, so a
-            // callback read at the type its intersection operands agree on stays unkeyed.
+            // Writes each call signature as an overload of one method, or as a method of its own
+            // where a literal keys it (W5). Only the member's declared type is keyed.
             let overloads (declared: bool) (memberFacts: TypeFacts) =
                 let keyed = declared && isLiteralKeyed model m memberFacts
 

@@ -612,8 +612,8 @@ let private jsIdentifier =
 
 /// The Emit template of a literal-keyed method (W5): a call to `target` on the receiver with
 /// each literal written before the F# argument at its index. From the first optional or rest
-/// parameter at or after the last literal, the remaining arguments spread as `$k...`, so an
-/// omitted optional argument is absent rather than `undefined`: `$0.log('warn', $1...)`.
+/// parameter at or after the last literal, the remaining arguments spread as `$k...` and an
+/// omitted optional argument is absent: `$0.log('warn', $1...)`.
 let internal literalCallTemplate (target: string) (literals: (int * string) list) (parameters: FsParam list) =
     let receiver =
         if jsIdentifier.IsMatch target then

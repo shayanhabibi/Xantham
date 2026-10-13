@@ -38,7 +38,6 @@ type Socket =
     [<Emit("$0.on('close', $1)")>]
     abstract onClose: listener: (bool -> unit) -> Socket
     /// <summary>
-    /// Fires once the socket is fully closed.
     /// <code lang="ts">
     /// on(event: "connect", listener: () =&gt; void): this
     /// </code>
@@ -46,7 +45,6 @@ type Socket =
     [<Emit("$0.on('connect', $1)")>]
     abstract onConnect: listener: (unit -> unit) -> Socket
     /// <summary>
-    /// Fires once the socket is fully closed.
     /// <code lang="ts">
     /// on(event: "ready", listener: () =&gt; void): this
     /// </code>
@@ -54,7 +52,6 @@ type Socket =
     [<Emit("$0.on('ready', $1)")>]
     abstract onReady: listener: (unit -> unit) -> Socket
     /// <summary>
-    /// Fires once the socket is fully closed.
     /// <code lang="ts">
     /// on(event: "end", listener: () =&gt; void): this
     /// </code>
@@ -62,7 +59,6 @@ type Socket =
     [<Emit("$0.on('end', $1)")>]
     abstract onEnd: listener: (unit -> unit) -> Socket
     /// <summary>
-    /// Fires once the socket is fully closed.
     /// <code lang="ts">
     /// on(event: "connectionAttempt", listener: (ip: string, port: number, family: number) =&gt; void): this
     /// </code>
