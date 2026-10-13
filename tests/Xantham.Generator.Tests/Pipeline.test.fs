@@ -3590,12 +3590,12 @@ let pipelineTests =
                           // two overloads take different F# parameter types and both survive.
                           Expect.stringContains
                               source
-                              "abstract find<'R>: selector: typekeyof<HtmlTags, 'R> -> 'R"
+                              "abstract find<'E>: selector: typekeyof<HtmlTags, 'E> -> 'E"
                               "the first map"
 
                           Expect.stringContains
                               source
-                              "abstract find<'R>: selector: typekeyof<SvgTags, 'R> -> 'R"
+                              "abstract find<'E>: selector: typekeyof<SvgTags, 'E> -> 'E"
                               "and the second"
 
                           Expect.stringContains
@@ -4735,7 +4735,7 @@ let pipelineTests =
         // the index reaches past those keys stay widened. Wave fifteen item 3 lifted the
         // erased-union cap, so a value union past `Fable.Core`'s shipped arity renders against
         // a `U<n>` this file's own footer declares, rather than widening to `obj`. W8 (#139)
-        // writes a key over a declared map as `typekeyof<Map,'R>`, so `Map[K]` is `'R`.
+        // writes a key over a declared map as `typekeyof<Map,'E>`, so `Map[K]` is `'E`.
         yield!
             fixtureTests "indexed-access-lab" (handFixture "indexed-access-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "an access confined to the operand's own keys resolves to the value union" <| fun _ ->
@@ -4748,17 +4748,17 @@ let pipelineTests =
                       // access is the value the key selects.
                       Expect.stringContains
                           source
-                          "static member addEventListener<'R> (``type``: typekeyof<WorkerEventMap, 'R>, handler: ('R -> unit)) : unit"
+                          "static member addEventListener<'E> (``type``: typekeyof<WorkerEventMap, 'E>, handler: ('E -> unit)) : unit"
                           "the value the key selects"
 
                       Expect.stringContains
                           source
-                          "static member lastEvent<'R> (``type``: typekeyof<WorkerEventMap, 'R>) : 'R"
+                          "static member lastEvent<'E> (``type``: typekeyof<WorkerEventMap, 'E>) : 'E"
                           "and the same value returned"
 
                       Expect.stringContains
                           source
-                          "abstract on<'R>: ``type``: typekeyof<WorkerEventMap, 'R> * handler: ('R -> unit) -> unit"
+                          "abstract on<'E>: ``type``: typekeyof<WorkerEventMap, 'E> * handler: ('E -> unit) -> unit"
                           "and on a member"
 
                       Expect.stringContains
@@ -5710,7 +5710,7 @@ let pipelineTests =
                       Expect.equal (sitesOf rendered "TR027") [ "Container.queryLike()" ] "the structural bound"
                       Expect.equal (sitesOf rendered "TP006") [ "Container.queryLike" ] "the structural bound" ])
 
-        // W8 (#139): a key over a declared map reads as `typekeyof<Map,'R>` with `'R` at the
+        // W8 (#139): a key over a declared map reads as `typekeyof<Map,'E>` with `'E` at the
         // access, so tag-map overloads stay distinct; `T[keyof T]` reads as `proptypelock<'T>`.
         yield!
             fixtureTests "tag-map-lab" (handFixture "tag-map-lab") GeneratorConfig.Default (fun package ->
@@ -5729,12 +5729,12 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "abstract createElement<'R>: tagName: typekeyof<TagMap, 'R> * ?options: CreateOptions -> 'R"
+                          "abstract createElement<'E>: tagName: typekeyof<TagMap, 'E> * ?options: CreateOptions -> 'E"
                           "W8.1: the primary map"
 
                       Expect.stringContains
                           source
-                          "abstract createElement<'R>: tagName: typekeyof<DeprecatedTagMap, 'R> * ?options: CreateOptions -> 'R"
+                          "abstract createElement<'E>: tagName: typekeyof<DeprecatedTagMap, 'E> * ?options: CreateOptions -> 'E"
                           "W8.2: the deprecated map is a second overload"
 
                       Expect.stringContains
@@ -5744,7 +5744,7 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "abstract createSvg<'R>: tagName: typekeyof<SvgTagMap, 'R> -> 'R"
+                          "abstract createSvg<'E>: tagName: typekeyof<SvgTagMap, 'E> -> 'E"
                           "a single key overload"
 
                   testCase "tag-map-lab: a constrained result carries the constraint on its own parameter" <| fun _ ->
@@ -5752,22 +5752,22 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "abstract getElementsByTagName<'R when 'R :> Elem>: qualifiedName: typekeyof<TagMap, 'R> -> ElemList<'R>"
+                          "abstract getElementsByTagName<'E when 'E :> Elem>: qualifiedName: typekeyof<TagMap, 'E> -> ElemList<'E>"
                           "W8.4: every TagMap value inherits Elem"
 
                       Expect.stringContains
                           source
-                          "abstract getElementsByTagName<'R when 'R :> Elem>: qualifiedName: typekeyof<SvgTagMap, 'R> -> ElemList<'R>"
+                          "abstract getElementsByTagName<'E when 'E :> Elem>: qualifiedName: typekeyof<SvgTagMap, 'E> -> ElemList<'E>"
                           "and every SvgTagMap value"
 
                       Expect.stringContains
                           source
-                          "abstract findLoose<'R>: tag: typekeyof<LooseTagMap, 'R> -> ElemList<Elem>"
-                          "a map whose values do not inherit the bound keeps 'R unconstrained, and the argument widens"
+                          "abstract findLoose<'E>: tag: typekeyof<LooseTagMap, 'E> -> ElemList<Elem>"
+                          "a map whose values do not inherit the bound keeps 'E unconstrained, and the argument widens"
 
                       Expect.stringContains
                           source
-                          "abstract libElements<'R when 'R :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'R> -> Fable.Core.TS.Dom.HTMLCollectionOf<'R>"
+                          "abstract libElements<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>"
                           "a catalogued map's values carry the bound too"
 
                   testCase "tag-map-lab: a key used only as a key reads as keyof" <| fun _ ->
@@ -5814,11 +5814,11 @@ let pipelineTests =
                           lines[index - 1].Trim() = "/// <remarks>@deprecated</remarks>"
 
                       Expect.isFalse
-                          (deprecatedBefore "abstract createElement<'R>: tagName: typekeyof<TagMap, 'R>")
+                          (deprecatedBefore "abstract createElement<'E>: tagName: typekeyof<TagMap, 'E>")
                           "the primary overload is not deprecated"
 
                       Expect.isTrue
-                          (deprecatedBefore "abstract createElement<'R>: tagName: typekeyof<DeprecatedTagMap, 'R>")
+                          (deprecatedBefore "abstract createElement<'E>: tagName: typekeyof<DeprecatedTagMap, 'E>")
                           "the deprecated overload keeps its tag"
 
                       Expect.isFalse

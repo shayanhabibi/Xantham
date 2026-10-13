@@ -2748,13 +2748,14 @@ types (§4.10 of `generator-type-mapping.md`).
   matches the access to its binding by operand id.
 - `shapeSignature` partitions keys whose operand is out of scope: an operand that is not a type
   parameter and whose reference is an `FsNamed` or `FsApp` with no Widened or Escape finding is a
-  map. The key reads `typekeyof<M,'R>` with `'R` at `M[K]` when a parameter or return reaches the
+  map. The key reads `typekeyof<M,'E>` with `'E` at `M[K]` when a parameter or return reaches the
   access, `keyof<M>` otherwise (`TP.KeyOverDeclaredMap`, `TP011`, Ergonomic). Any other operand
-  keeps the ordinary type parameter and its `TP002`.
-- `accessBound` gives `'R` the constraint of the generic parameter the access is applied at
+  keeps the ordinary type parameter and its `TP002`. The result variable is `'E` (`E1`, `E2`, ... where
+  taken), the spec's W8.1 spelling; a key over an in-scope operand keeps `'R` (`Spec.resultName`).
+- `accessBound` gives `'E` the constraint of the generic parameter the access is applied at
   (`statedConstraintOf`, lifted out of `appliedRefTo`), where every member value of `M` satisfies
   it nominally. `appliedRefTo` passes a result variable bound with that constraint without
-  `TR027`. Otherwise `'R` stays unconstrained and the argument widens to the constraint (`TR027`).
+  `TR027`. Otherwise `'E` stays unconstrained and the argument widens to the constraint (`TR027`).
 - `valueOfOperand` recognises `T[keyof T]`, and `T[K]` where `K`'s constraint and default are both
   `keyof T`. Over an in-scope `T`, after `indexedAccessValues` declines, the access reads
   `proptypelock<'T>` (`TR.ValueOfAsPropTypeLock`, `TR066`, Ergonomic). A key with no default
@@ -2767,11 +2768,11 @@ types (§4.10 of `generator-type-mapping.md`).
   rather than dropping under `DO005`. A call naming one of several key overloads states the map:
   `typekeyof<HTMLElementTagNameMap, _> _.canvas`.
 
-Lab `tag-map-lab`: `Doc.createElement` reads `typekeyof<TagMap, 'R>` and
-`typekeyof<DeprecatedTagMap, 'R>` beside the `string` overload; `getElementsByTagName<'R when 'R
-:> Elem>` returns `ElemList<'R>` over `TagMap` and `SvgTagMap`; `createSvg` has the single key
+Lab `tag-map-lab`: `Doc.createElement` reads `typekeyof<TagMap, 'E>` and
+`typekeyof<DeprecatedTagMap, 'E>` beside the `string` overload; `getElementsByTagName<'E when 'E
+:> Elem>` returns `ElemList<'E>` over `TagMap` and `SvgTagMap`; `createSvg` has the single key
 overload; `hasTag` reads `keyof<TagMap>`; `findLoose`, over a map whose value does not inherit
-`Elem`, keeps `'R` unconstrained and writes `ElemList<Elem>` under `TR027`. `ValueOf`,
+`Elem`, keeps `'E` unconstrained and writes `ElemList<Elem>` under `TR027`. `ValueOf`,
 `ValuesOf` and `valuesOf` read `proptypelock`; `Picked<T, K extends keyof T>` stays `obj`
 (`TR020`). No `DO005`, `DO001` or `TR044`; `TP011` on the five `Doc` methods. The RunGate calls
 each method and reads the key back: `createElement("canvas")`, `createElement("marquee")`,
@@ -2780,7 +2781,7 @@ each method and reads the key back: `createElement("canvas")`, `createElement("m
 
 `keyof-overload-lab` keeps both `find` overloads (`DO005` 1 → 0; `DO001` stays on `pick`).
 `keyof-lab` `values` reads `proptypelock<'T>[]`. `indexed-access-lab` `addEventListener`,
-`lastEvent` and `Registrar.on` read `typekeyof<WorkerEventMap, 'R>`, and `runModel`, whose access
+`lastEvent` and `Registrar.on` read `typekeyof<WorkerEventMap, 'E>`, and `runModel`, whose access
 is nested, reads `keyof<ModelMap>`; the fixture gains `anyWide(WideEventMap[keyof
 WideEventMap])` to keep the footer-declared `U12` coverage `onWide` carried.
 
@@ -2797,15 +2798,15 @@ Measured goldens (finding counts):
 `solid-js` is byte-identical: its `Store` accesses are bounded by its own conditional `KeyOf`
 alias and `T[number]`, neither a `keyof` over a declared type. type-fest's 170 `SA002` are
 type-level computations with no Core counterpart. `workers-types`' `addEventListener` reads
-`<'R when 'R :> Event>` over `WorkerGlobalScopeEventMap`. `animejs` flattens DOM element members
+`<'E when 'E :> Event>` over `WorkerGlobalScopeEventMap`. `animejs` flattens DOM element members
 in: its `getElementsByTagName` and `querySelectorAll` overloads cannot prove the lib map's values
-inherit `Element`/`Node`, so `'R` stays unconstrained and the collection argument widens
+inherit `Element`/`Node`, so `'E` stays unconstrained and the collection argument widens
 (`TR027` +8). Symbol tiers: `type-fest` 26/65/204/2 → 26/66/203/2, `workers-types` ergonomic
 1,161 → 1,163 and widened 390 → 388.
 
 Core.TS was generated into scratch only (T4) and compiled there: 193 `typekeyof` members, among
 them two `createElement` key overloads and four each on `querySelector` and `getElementsByTagName`, and 83
-`addEventListener<'R>`. It needs regenerating at integration: the committed catalogue's API hashes
+`addEventListener<'E>`. It needs regenerating at integration: the committed catalogue's API hashes
 predate the new members, so `catalog library identity` reports 86 changed entries and `core-ts
 package` an API mismatch for `GlobalThis` until it is. `CatalogCompatibility.ApiVersion` is
 unchanged; whether W8's emitted-ABI change bumps it is left to integration. Node generated into
@@ -2829,8 +2830,8 @@ scratch is unchanged by finding count, and its five key-type lines predate W8.
   symbol-keyed methods, class statics and exported functions.
 
 `tag-map-lab` gains `Stringified` (`PropertyRecord<'T, string>`), its negative `Mirrored`
-(phantom), and `Doc.libElements` over `HTMLElementTagNameMap` (`<'R when 'R :>
-Fable.Core.TS.Dom.Element>`, returning `HTMLCollectionOf<'R>`); only the `DeprecatedTagMap`
+(phantom), and `Doc.libElements` over `HTMLElementTagNameMap` (`<'E when 'E :>
+Fable.Core.TS.Dom.Element>`, returning `HTMLCollectionOf<'E>`); only the `DeprecatedTagMap`
 overload of `createElement` carries `@deprecated`.
 
 | Golden | SA002 | TR067 | TR027 | `@deprecated` lines |

@@ -100,17 +100,17 @@ type CreateOptions =
     static member Create (?is: string) : CreateOptions = jsNative
 
 type Doc =
-    abstract createElement<'R>: tagName: typekeyof<TagMap, 'R> * ?options: CreateOptions -> 'R
+    abstract createElement<'E>: tagName: typekeyof<TagMap, 'E> * ?options: CreateOptions -> 'E
     /// <remarks>@deprecated</remarks>
-    abstract createElement<'R>: tagName: typekeyof<DeprecatedTagMap, 'R> * ?options: CreateOptions -> 'R
+    abstract createElement<'E>: tagName: typekeyof<DeprecatedTagMap, 'E> * ?options: CreateOptions -> 'E
     abstract createElement: tagName: string * ?options: CreateOptions -> Elem
-    abstract getElementsByTagName<'R when 'R :> Elem>: qualifiedName: typekeyof<TagMap, 'R> -> ElemList<'R>
-    abstract getElementsByTagName<'R when 'R :> Elem>: qualifiedName: typekeyof<SvgTagMap, 'R> -> ElemList<'R>
+    abstract getElementsByTagName<'E when 'E :> Elem>: qualifiedName: typekeyof<TagMap, 'E> -> ElemList<'E>
+    abstract getElementsByTagName<'E when 'E :> Elem>: qualifiedName: typekeyof<SvgTagMap, 'E> -> ElemList<'E>
     abstract getElementsByTagName: qualifiedName: string -> ElemList<Elem>
     /// <summary>
     /// One key overload: the map is inferred at the call.
     /// </summary>
-    abstract createSvg<'R>: tagName: typekeyof<SvgTagMap, 'R> -> 'R
+    abstract createSvg<'E>: tagName: typekeyof<SvgTagMap, 'E> -> 'E
     /// <summary>
     /// A key used only as a key.
     /// </summary>
@@ -118,11 +118,11 @@ type Doc =
     /// <summary>
     /// A map whose values do not inherit the bound: the result stays unconstrained and widens.
     /// </summary>
-    abstract findLoose<'R>: tag: typekeyof<LooseTagMap, 'R> -> ElemList<Elem>
+    abstract findLoose<'E>: tag: typekeyof<LooseTagMap, 'E> -> ElemList<Elem>
     /// <summary>
     /// A map the compiler lib declares: its values are catalogued rather than derived.
     /// </summary>
-    abstract libElements<'R when 'R :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'R> -> Fable.Core.TS.Dom.HTMLCollectionOf<'R>
+    abstract libElements<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
 
 type ValueOf<'ObjectType> = proptypelock<'ObjectType>
 

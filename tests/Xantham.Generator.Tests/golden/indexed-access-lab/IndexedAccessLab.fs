@@ -53,9 +53,9 @@ type WorkerEventMap =
 /// </summary>
 [<Interface>]
 type Registrar =
-    abstract on<'R>: ``type``: typekeyof<WorkerEventMap, 'R> * handler: ('R -> unit) -> unit
+    abstract on<'E>: ``type``: typekeyof<WorkerEventMap, 'E> * handler: ('E -> unit) -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (on: Action<typekeyof<WorkerEventMap, 'R>, ('R -> unit)>) : Registrar = jsNative
+    static member Create (on: Action<typekeyof<WorkerEventMap, 'E>, ('E -> unit)>) : Registrar = jsNative
 
 /// <summary>
 /// What every value of a dispatch target's map is at least.
@@ -198,12 +198,12 @@ type Exports =
     /// inside the callback. Both read as the value the key selects.
     /// </summary>
     [<Import("addEventListener", "indexed-access-lab")>]
-    static member addEventListener<'R> (``type``: typekeyof<WorkerEventMap, 'R>, handler: ('R -> unit)) : unit = jsNative
+    static member addEventListener<'E> (``type``: typekeyof<WorkerEventMap, 'E>, handler: ('E -> unit)) : unit = jsNative
     /// <summary>
     /// The same access returned rather than taken.
     /// </summary>
     [<Import("lastEvent", "indexed-access-lab")>]
-    static member lastEvent<'R> (``type``: typekeyof<WorkerEventMap, 'R>) : 'R = jsNative
+    static member lastEvent<'E> (``type``: typekeyof<WorkerEventMap, 'E>) : 'E = jsNative
     /// <summary>
     /// <c>EventMap[keyof EventMap]</c> over a parameter bounded by an index signature: the bound's
     /// value type is what the access selects, whichever key it lands on.
@@ -214,7 +214,7 @@ type Exports =
     /// A key over a map whose value union is wider than the cap.
     /// </summary>
     [<Import("onWide", "indexed-access-lab")>]
-    static member onWide<'R> (``type``: typekeyof<WideEventMap, 'R>, handler: ('R -> unit)) : unit = jsNative
+    static member onWide<'E> (``type``: typekeyof<WideEventMap, 'E>, handler: ('E -> unit)) : unit = jsNative
     /// <summary>
     /// Every value of the map at once: the access is the twelve-arm union.
     /// </summary>

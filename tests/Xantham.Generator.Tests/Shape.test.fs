@@ -765,13 +765,13 @@ let typeRefTests =
                       :: Build.facts (Build.typeResponse 30 TypeFlags.Object)
                       :: Build.primitives
                   ) with
-                    KeyVars = Map.ofList [ 50<typeId>, TypedKeyOf(FsNamed "TagMap", 30<typeId>, "R", None) ] }
+                    KeyVars = Map.ofList [ 50<typeId>, TypedKeyOf(FsNamed "TagMap", 30<typeId>, "E", None) ] }
 
             let key, keyFindings = Spec.typeRef Build.context model None "x" 50<typeId>
             let access, accessFindings = Spec.typeRef Build.context model None "x" 51<typeId>
 
-            Expect.equal key (FsApp("typekeyof", [ FsNamed "TagMap"; FsTypeVar "R" ])) "typekeyof<TagMap,'R>"
-            Expect.equal access (FsTypeVar "R") "the access is the result variable"
+            Expect.equal key (FsApp("typekeyof", [ FsNamed "TagMap"; FsTypeVar "E" ])) "typekeyof<TagMap,'E>"
+            Expect.equal access (FsTypeVar "E") "the access is the result variable"
             Expect.isEmpty (keyFindings @ accessFindings) "the binding reported its finding where it was made"
 
         testCase "an instantiation of a declared generic is written as an application" <| fun _ ->
@@ -5459,30 +5459,30 @@ let private shapeFind model returns =
 [<Tests>]
 let mapKeyBindingTests =
     testList "map key binding" [
-        testCase "a key over a declared map and its access read as typekeyof and 'R" <| fun _ ->
+        testCase "a key over a declared map and its access read as typekeyof and 'E" <| fun _ ->
             let typeParameters, parameters, returns, findings = shapeFind (mapKeyModel [] []) 51
 
-            Expect.equal typeParameters [ { Name = "R"; Constraint = None } ] "the result variable replaces 'K"
+            Expect.equal typeParameters [ { Name = "E"; Constraint = None } ] "the result variable replaces 'K"
 
             Expect.equal
                 (parameters |> List.map _.Type)
-                [ FsApp("typekeyof", [ FsNamed "TagMap"; FsTypeVar "R" ]) ]
+                [ FsApp("typekeyof", [ FsNamed "TagMap"; FsTypeVar "E" ]) ]
                 "the key"
 
-            Expect.equal returns (FsTypeVar "R") "the access"
+            Expect.equal returns (FsTypeVar "E") "the access"
             Expect.equal (findings |> List.map _.Key) [ "TP011" ] "one ergonomic finding"
 
         testCase "a result applied at a constrained parameter carries the constraint" <| fun _ ->
             let typeParameters, _, returns, findings = shapeFind (mapKeyModel [ 70 ] [ 70 ]) 61
 
-            Expect.equal typeParameters [ { Name = "R"; Constraint = Some(FsNamed "Elem") } ] "every value inherits Elem"
-            Expect.equal returns (FsApp("ElemList", [ FsTypeVar "R" ])) "the access passes through the application"
+            Expect.equal typeParameters [ { Name = "E"; Constraint = Some(FsNamed "Elem") } ] "every value inherits Elem"
+            Expect.equal returns (FsApp("ElemList", [ FsTypeVar "E" ])) "the access passes through the application"
             Expect.equal (findings |> List.map _.Key) [ "TP011" ] "and nothing widens"
 
         testCase "a value that does not inherit the bound leaves the result unconstrained" <| fun _ ->
             let typeParameters, _, returns, findings = shapeFind (mapKeyModel [ 70 ] []) 61
 
-            Expect.equal typeParameters [ { Name = "R"; Constraint = None } ] "SpanElem is not an Elem"
+            Expect.equal typeParameters [ { Name = "E"; Constraint = None } ] "SpanElem is not an Elem"
             Expect.equal returns (FsApp("ElemList", [ FsNamed "Elem" ])) "the argument is written as its constraint"
             Expect.equal (findings |> List.map _.Key) [ "TP011"; "TR027" ] "and widens"
 

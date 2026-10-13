@@ -682,7 +682,7 @@ type TypeParameters =
     | [<Ergonomic>] DuplicateTypeParameterCollapsed of name: string * declared: int
     | [<Widened>] FunctionConstraintDropped of name: string
     /// W8 (#139). A key over a declared map (`K extends keyof HTMLElementTagNameMap`) written as
-    /// `keyof<Map>`, or as `typekeyof<Map,'R>` with `'R` at `Map[K]` when the signature reads
+    /// `keyof<Map>`, or as `typekeyof<Map,'E>` with `'E` at `Map[K]` when the signature reads
     /// the value the key selects.
     | [<Ergonomic>] KeyOverDeclaredMap of map: string * result: string option
 

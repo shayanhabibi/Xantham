@@ -641,7 +641,7 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   | `T[keyof T]`, `T` in scope | `proptypelock<'T>`, Ergonomic (`TR066`) |
   | `T[K]`, `K extends keyof T = keyof T` (type-fest `ValueOf`) | `proptypelock<'T>`, Ergonomic (`TR066`) |
   | `K extends keyof M`, `M` a declared type, used only as a key | `keyof<M>`, `K` unbound (`TP011`) |
-  | `K extends keyof M` plus `M[K]` | `typekeyof<M,'R>` at the key, `'R` at the access (`TP011`) |
+  | `K extends keyof M` plus `M[K]` | `typekeyof<M,'E>` at the key, `'E` at the access (`TP011`) |
   | `{ [P in keyof T]: V }`, `T` in scope, `V` independent of `P` | `PropertyRecord<'T, V>`, Ergonomic (`TR067`) |
 
   So `get<T, K extends keyof T>(source: T, key: K): T[K]` emits
@@ -658,10 +658,10 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   `K extends keyof T`) selects a narrower set than `proptypelock` states, and stays `obj`
   (`TR020`). A key over a declared map (`HTMLElementTagNameMap`) is written over the map's own
   name, so `createElement<K extends keyof HTMLElementTagNameMap>(tagName: K):
-  HTMLElementTagNameMap[K]` reads `createElement<'R>: tagName: typekeyof<HTMLElementTagNameMap,
-  'R> -> 'R`. The checker resolves `keyof M` to `M`'s key literals, so Resolve reads `M` off the
-  constraint node (`TypeFacts.KeyOfOperand`). `'R` carries the constraint of the generic
-  parameter the access is applied at (`getElementsByTagName<'R when 'R :> Element>`) where every
+  HTMLElementTagNameMap[K]` reads `createElement<'E>: tagName: typekeyof<HTMLElementTagNameMap,
+  'E> -> 'E`. The checker resolves `keyof M` to `M`'s key literals, so Resolve reads `M` off the
+  constraint node (`TypeFacts.KeyOfOperand`). `'E` carries the constraint of the generic
+  parameter the access is applied at (`getElementsByTagName<'E when 'E :> Element>`) where every
   value `M` declares inherits it nominally; otherwise the argument widens to the constraint
   (`TR027`). Each map is a distinct F# parameter type, so key-set overloads survive `DO005`.
   A catalogued map (`HTMLElementTagNameMap` reached from a package) derives no members, so

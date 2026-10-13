@@ -3045,12 +3045,12 @@ let internal accessBound
         Some reference
     | _ -> None
 
-/// The name to write the value a key selects under: `R`, unless something in scope already
-/// answers to it - a generated variable that shadows one the signature also mentions would
-/// silently retype it.
-let internal resultName (taken: Set<string>) =
+/// The name to write the value a key selects under: `stem`, then `stem1`, `stem2`, ... while the
+/// name is taken in scope. `R` for a key over an in-scope operand, `E` for a key over a declared
+/// map (`typekeyof<HTMLElementTagNameMap, 'E>`).
+let internal resultName (stem: string) (taken: Set<string>) =
     let rec pick n =
-        let candidate = if n = 0 then "R" else $"R{n}"
+        let candidate = if n = 0 then stem else $"{stem}{n}"
 
         if Set.contains candidate taken then
             pick (n + 1)
@@ -3138,7 +3138,7 @@ let internal shapeSignature
         let operandName = Map.find operand scope
 
         if mentionsAccess model operand key roots then
-            let result = resultName taken
+            let result = resultName "R" taken
             taken <- Set.add result taken
             resultParameters <- resultParameters @ [ { Name = result; Constraint = None } ]
             keyVars <- Map.add key (TypedKeyOf(FsTypeVar operandName, operand, result, None)) keyVars
@@ -3158,7 +3158,7 @@ let internal shapeSignature
         let spelling = typeSpelling map
 
         if mentionsAccess model operand key roots then
-            let result = resultName taken
+            let result = resultName "E" taken
             taken <- Set.add result taken
 
             let bound =
