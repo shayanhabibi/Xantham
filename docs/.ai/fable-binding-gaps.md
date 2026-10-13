@@ -117,6 +117,10 @@ The two halves are different problems and only the first is a binding gap. A `Sy
 let `unique symbol` and `symbol` bind; the *keyed member* still needs `EmitIndexer` or a similar
 route, which wave three verified exists but did not take.
 
+*2026-10-13 (W4).* Members keyed by well-known symbols are now emitted: `[Symbol.iterator]` as
+`inherit seq<'T>`, every other key as a `Symbol<Name>` member under `[<Emit>]`. A key naming a
+package's own `unique symbol` remains `MB002`.
+
 [//]: # (ANSWER)
 Same as before; we'll generate or hand roll our own bindings for this.
 [//]: # (ANSWER END)

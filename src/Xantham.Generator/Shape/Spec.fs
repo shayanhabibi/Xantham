@@ -385,6 +385,25 @@ let internal isAnonymousIndexSignature (model: ShapeModel) (facts: TypeFacts) =
 /// the embedded checker id is session-specific - keeping one would also break determinism.
 let internal isSymbolKeyed (name: string) = name.StartsWith "__@"
 
+/// The F# name a well-known symbol member is declared under: `SymbolDispose` for
+/// `[Symbol.dispose]`.
+let internal symbolMemberName (symbol: string) = "Symbol" + Naming.pascalSegment symbol
+
+/// The well-known symbol a member is emitted under: the member is required, and its F# name is
+/// free on the declaration.
+let internal emittedSymbol (facts: TypeFacts) (m: ResolvedMember) =
+    m.WellKnownSymbol
+    |> Option.filter (fun symbol ->
+        not m.Optional
+        && facts.Members
+           |> List.forall (fun other -> Naming.memberName other.Symbol.Name <> symbolMemberName symbol))
+
+/// The element of an inherited `seq`.
+let internal sequenceElement (reference: FsTypeRef) =
+    match reference with
+    | FsApp("seq", [ element ]) -> Some element
+    | _ -> None
+
 /// How many members an array-shaped intersection's other operands contribute (§4.6). An F# array
 /// carries the element alone, so `readonly T[] & { tag: "t" }` loses `tag`. Every other spelling
 /// of an array contributes zero.
@@ -3078,6 +3097,39 @@ let internal callSignaturesOf (model: ShapeModel) (typeId: int<Measure.typeId>) 
         |> List.collect _.CallSignatures
     | Some _ -> []
 
+/// The element type an iterator method yields: the `value` of the first `next` result arm whose
+/// `done` is absent or admits `false`; otherwise the returned iterator's first type argument.
+let internal iteratedElement (model: ShapeModel) (iteratorTypeId: int<Measure.typeId>) : int<Measure.typeId> option =
+    callSignaturesOf model iteratorTypeId
+    |> List.tryHead
+    |> Option.bind (fun signature -> Map.tryFind signature.ReturnTypeId model.Types)
+    |> Option.bind (fun iterator ->
+        let memberOf (name: string) (facts: TypeFacts) =
+            facts.Members |> List.tryFind (fun m -> m.Symbol.Name = name)
+
+        let finished (arm: TypeFacts) =
+            memberOf "done" arm
+            |> Option.bind (fun m -> Map.tryFind m.TypeId model.Types)
+            |> Option.bind literalOf
+            |> (=) (Some(LitBool true))
+
+        let yielded =
+            memberOf "next" iterator
+            |> Option.bind (fun next -> callSignaturesOf model next.TypeId |> List.tryHead)
+            |> Option.bind (fun signature -> Map.tryFind signature.ReturnTypeId model.Types)
+            |> Option.bind (fun result ->
+                (if flag TypeFlags.Union result then
+                     result.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+                 else
+                     [ result ])
+                |> List.tryFind (fun arm -> not (finished arm) && (memberOf "value" arm).IsSome)
+                |> Option.bind (memberOf "value")
+                |> Option.map _.TypeId)
+
+        match yielded with
+        | Some element -> Some element
+        | None -> List.tryHead iterator.TypeArguments)
+
 /// A *lifecycle hook*: a method a declaration marks `?`, which the platform calls on an object
 /// that provides it. The name is identifier-shaped, because the emission names an interface
 /// after it.
@@ -3178,6 +3230,9 @@ let internal shapeMembers
         |> List.filter (fun m ->
             if m.Symbol.Name.Contains '`' then
                 emit (Finding.make $"{self}.{m.Symbol.Name}" Members.UnspellableMemberDropped)
+                false
+            elif (emittedSymbol facts m).IsSome then
+                // Shaped below, under the symbol's own F# name.
                 false
             elif isSymbolKeyed m.Symbol.Name then
                 // The name is cut at the checker id (`__@iterator@1469` -> `__@iterator`):
@@ -3288,6 +3343,63 @@ let internal shapeMembers
                         }
                 ])
 
+    // A well-known symbol's member is spelled from the symbol: `m.Symbol.Name` carries the
+    // session-specific checker id. `settle-symbol-members` raises its findings.
+    let symbolMembers =
+        facts.Members
+        |> List.collect (fun m ->
+            match emittedSymbol facts m with
+            | None -> []
+            | Some symbol ->
+                let name = symbolMemberName symbol
+                let owner = $"{self}.[Symbol.{symbol}]"
+
+                let signatures =
+                    if hasAny SymbolFlags.Method m.Symbol.Flags then
+                        match Map.tryFind m.TypeId model.Types with
+                        | Some memberFacts -> memberFacts.CallSignatures
+                        | None -> []
+                    else
+                        []
+
+                if signatures.IsEmpty then
+                    let reference, refFindings = typeRef ctx model (Some self) owner m.TypeId
+                    findings <- findings @ refFindings
+
+                    [
+                        FsSymbolKeyed(
+                            symbol,
+                            FsProperty
+                                {
+                                    Name = name
+                                    Docs = m.Docs
+                                    Tags = m.Tags
+                                    ReadOnly = m.ReadOnly
+                                    Type = reference
+                                }
+                        )
+                    ]
+                else
+                    signatures
+                    |> List.map (fun signature ->
+                        let typeParameters, parameters, returns, signatureFindings =
+                            shapeSignature ctx model (Some self) owner signature
+
+                        findings <- findings @ signatureFindings
+
+                        FsSymbolKeyed(
+                            symbol,
+                            FsMethod
+                                {
+                                    Name = name
+                                    Docs = m.Docs
+                                    Tags = m.Tags
+                                    TypeParameters = typeParameters
+                                    Parameters = parameters
+                                    Return = returns
+                                }
+                        )))
+
     // Index signatures come after the named members, because that is where an `Item` member
     // reads most naturally and because the order has to be stable for the goldens. A type may
     // declare both a string and a number signature; each becomes its own `Item` overload.
@@ -3330,7 +3442,7 @@ let internal shapeMembers
                     Return = returns
                 })
 
-    members @ indexers @ constructors, findings
+    members @ symbolMembers @ indexers @ constructors, findings
 
 /// Case names must be unique within one DU; a later duplicate takes a numeric suffix in member
 /// order, deterministically.

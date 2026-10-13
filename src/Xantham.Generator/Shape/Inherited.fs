@@ -8,13 +8,14 @@ open Xantham.Generator
 // ---------------------------------------------------------------------------------------------
 
 /// A member with its documentation cleared, so two declarations compare on signature alone.
-let private signature (m: FsMember) : FsMember =
+let rec private signature (m: FsMember) : FsMember =
     match m with
     | FsProperty p -> FsProperty { p with Docs = ""; Tags = [] }
     | FsMethod m -> FsMethod { m with Docs = ""; Tags = [] }
     | FsIndexer _ -> m
     | FsConstructor c -> FsConstructor { c with Docs = ""; Tags = [] }
     | FsInvoke c -> FsInvoke { c with Docs = ""; Tags = [] }
+    | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, signature inner)
 
 /// The declared name a base reference resolves to, where the base is one this run declares.
 let private baseName (reference: FsTypeRef) =

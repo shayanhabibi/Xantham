@@ -1500,8 +1500,9 @@ let internal applyWithProducer
                             typeText vars returns
                         ]
 
-                let member_ =
+                let rec member_ =
                     function
+                    | FsSymbolKeyed(symbol, inner) -> Canonical.node "symbol" [ Canonical.text symbol; member_ inner ]
                     | FsProperty property ->
                         Canonical.node
                             "property"

@@ -37,13 +37,14 @@ let private typeParamNames (parameters: FsTypeParam list) =
     parameters
     |> List.collect (_.Constraint >> Option.map namesOf >> Option.defaultValue [])
 
-let private memberNames (m: FsMember) =
+let rec private memberNames (m: FsMember) =
     match m with
     | FsProperty p -> namesOf p.Type
     | FsMethod m -> typeParamNames m.TypeParameters @ paramNames m.Parameters @ namesOf m.Return
     | FsIndexer i -> namesOf i.Key @ namesOf i.Value
     | FsConstructor c
     | FsInvoke c -> typeParamNames c.TypeParameters @ paramNames c.Parameters @ namesOf c.Return
+    | FsSymbolKeyed(_, inner) -> memberNames inner
 
 let private exportMemberNames (m: FsExportMember) =
     typeParamNames m.TypeParameters

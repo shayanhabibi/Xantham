@@ -54,6 +54,7 @@ let shapeInterfaces: Pass<ShapeModel> =
             fun ctx model ->
                 async {
                     let mutable findings = []
+                    let mutable iteratorFindings = model.IteratorFindings
 
                     let fallbackDocs =
                         model.Harvest.Exports
@@ -190,6 +191,12 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 let members, memberFindings =
                                     shapeMembers ctx { model with TypeVars = scope } hooks name facts
 
+                                // `settle-symbol-members` reports the iterator member's findings
+                                // where it keeps the member.
+                                let iteratorMemberFindings, memberFindings =
+                                    memberFindings
+                                    |> List.partition (fun f -> f.Symbol.StartsWith $"{name}.[Symbol.iterator]")
+
                                 findings <- findings @ memberFindings
 
                                 let hookDecls =
@@ -244,6 +251,35 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                 inheritGraph <- Map.add name (inherits |> List.map fst) inheritGraph
 
+                                // `[Symbol.iterator]` reads as `inherit seq<element>` (W4); whether
+                                // the declaration keeps it, and so its findings, is settled once
+                                // every base is shaped.
+                                let sequence, elementFindings =
+                                    facts.Members
+                                    |> List.tryFind (fun m -> emittedSymbol facts m = Some "iterator")
+                                    |> Option.bind (fun m -> iteratedElement model m.TypeId)
+                                    |> Option.map (fun elementId ->
+                                        let element, elementFindings =
+                                            typeRef
+                                                ctx
+                                                { model with TypeVars = scope }
+                                                (Some name)
+                                                $"{name}.[Symbol.iterator]"
+                                                elementId
+
+                                        Some(FsApp("seq", [ element ])), elementFindings)
+                                    |> Option.defaultValue (None, [])
+
+                                if not (elementFindings.IsEmpty && iteratorMemberFindings.IsEmpty) then
+                                    let elements, members =
+                                        Map.tryFind name iteratorFindings |> Option.defaultValue ([], [])
+
+                                    iteratorFindings <-
+                                        Map.add
+                                            name
+                                            (elements @ elementFindings, members @ iteratorMemberFindings)
+                                            iteratorFindings
+
                                 if isConstructorObject facts then
                                     findings <-
                                         findings
@@ -266,7 +302,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         | FsMethod m -> m.Name = "Invoke"
                                         | FsIndexer _
                                         | FsConstructor _
-                                        | FsInvoke _ -> false)
+                                        | FsInvoke _
+                                        | FsSymbolKeyed _ -> false)
 
                                 let invokes =
                                     if invokeCollides then
@@ -325,7 +362,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         Tags = tags
                                         Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
                                         TypeParameters = typeParameters
-                                        Inherits = inherits |> List.map snd
+                                        Inherits = (inherits |> List.map snd) @ Option.toList sequence
                                         Members = members @ invokes
                                         Entrypoint = None
                                         CreateOverloads = []
@@ -426,6 +463,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                         { model with
                             Decls = model.Decls @ decls @ foldedDecls
                             DeclNames = declNames
+                            IteratorFindings = iteratorFindings
                         }
 
                     return

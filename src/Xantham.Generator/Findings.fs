@@ -163,6 +163,8 @@ module FindingCodes =
             "MB.OptionalHookAsInterface", "MB005"
             "MB.OptionalParameterFromUnion", "MB006"
             "MB.UnspellableMemberDropped", "MB007"
+            "MB.SymbolIteratorAsSeq", "MB008"
+            "MB.SymbolKeyedMemberAsEmit", "MB009"
             "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
@@ -699,6 +701,10 @@ type Members =
     /// Wave sixteen. The member's key holds a backtick, which no F# identifier can carry even
     /// backticked: `RegExpConstructor`'s legacy `` $` ``.
     | [<Widened>] UnspellableMemberDropped
+    /// W4. The iterator object returned by `[Symbol.iterator]` is hidden behind `seq`.
+    | [<Ergonomic>] SymbolIteratorAsSeq of element: string
+    /// W4. The member reads as `$0[Symbol.<symbol>]` through `[<Emit>]`.
+    | [<Ergonomic>] SymbolKeyedMemberAsEmit of symbol: string * name: string
 
     interface IFindingKind with
         member this.Message =
@@ -711,6 +717,9 @@ type Members =
             | OptionalHookAsInterface asInterface ->
                 $"optional method emitted as the opt-in interface {asInterface} a subclass implements"
             | OptionalParameterFromUnion -> "parameter admits undefined through its type; reads as option"
+            | SymbolIteratorAsSeq element ->
+                $"[Symbol.iterator] reads as inherit seq<{element}>; the iterator object is not exposed"
+            | SymbolKeyedMemberAsEmit(symbol, name) -> $"[Symbol.{symbol}] reads as {name} through [<Emit>]"
 
 // -------------------------------------------------------------------------------------------------
 // Per-pass unions, in pipeline order. Append-only.

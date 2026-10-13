@@ -600,8 +600,25 @@ let private declRef (name: string) (typeParameters: FsTypeParam list) =
 
         $"{ident name}<{parameters}>"
 
-let private renderMemberWith (attributes: Map<string, (string * string) list>) (m: FsMember) =
+let rec private renderMemberWith (attributes: Map<string, (string * string) list>) (m: FsMember) =
     match m with
+    | FsSymbolKeyed(symbol, inner) ->
+        // `$0[Symbol.<symbol>]` reaches the symbol key: a read-only property at the member site,
+        // a writable one per accessor, and a method as a call.
+        let key = $"$0[Symbol.{symbol}]"
+        let emit (text: string) = $"Emit({stringLit text})"
+
+        let name, sites =
+            match inner with
+            | FsProperty p when p.ReadOnly -> p.Name, [ "member", emit key ]
+            | FsProperty p -> p.Name, [ "get", emit key; "set", emit (key + " = $1") ]
+            | FsMethod m ->
+                let arguments = if m.Parameters.IsEmpty then "()" else "($1...)"
+                m.Name, [ "member", emit (key + arguments) ]
+            | _ -> "", []
+
+        let existing = Map.tryFind name attributes |> Option.defaultValue []
+        renderMemberWith (Map.add name (existing @ sites) attributes) inner
     | FsProperty p ->
         [
             yield! docLines "    " p.Docs p.Tags
@@ -1147,7 +1164,7 @@ let private qualifyTypeParams foreign (parameters: FsTypeParam list) =
             Constraint = parameter.Constraint |> Option.map (qualifyRef foreign)
         })
 
-let private qualifyMember foreign =
+let rec private qualifyMember foreign =
     function
     | FsProperty m ->
         FsProperty
@@ -1181,6 +1198,7 @@ let private qualifyMember foreign =
                 Parameters = m.Parameters |> List.map (qualifyParam foreign)
                 Return = qualifyRef foreign m.Return
             }
+    | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, qualifyMember foreign inner)
 
 let private qualifyBound foreign (m: FsExportMember) =
     { m with
@@ -1302,8 +1320,9 @@ let private declErasedArities (decl: FsDecl) : int list =
     let ofTypeParam (p: FsTypeParam) =
         p.Constraint |> Option.map erasedArities |> Option.defaultValue []
 
-    let ofMember =
+    let rec ofMember =
         function
+        | FsSymbolKeyed(_, inner) -> ofMember inner
         | FsProperty p -> erasedArities p.Type
         | FsIndexer i -> erasedArities i.Key @ erasedArities i.Value
         | FsMethod m ->

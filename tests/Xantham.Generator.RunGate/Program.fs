@@ -2120,6 +2120,37 @@ let private bindingExtensions () =
 
     check "toJSFunc yields the callable JavaScript function" (emitJsExpr increment "$0(1) === 2")
 
+/// W4 (#135): well-known symbol members reach JavaScript under their `Symbol.<name>` key.
+let private symbolMembers () =
+    let resource = SymbolMemberLab.Exports.resource
+    resource.SymbolDispose()
+    check "an Emit-backed symbol method calls the [Symbol.dispose] key" (emitJsExpr resource "$0.disposed === true")
+
+    equal
+        "an Emit-backed getter reads the [Symbol.toStringTag] key"
+        "Lab"
+        SymbolMemberLab.Exports.tagged.SymbolToStringTag
+
+    equal "an iterable iterates as seq without a cast" [ "a"; "b" ] (SymbolMemberLab.Exports.bag |> Seq.toList)
+
+    let convertible = SymbolMemberLab.Exports.convertible
+    equal "a writable symbol property reads the [Symbol.toStringTag] key" "Lab" convertible.SymbolToStringTag
+    convertible.SymbolToStringTag <- "Changed"
+
+    check
+        "an Emit-backed setter writes the [Symbol.toStringTag] key"
+        (emitJsExpr convertible "$0[Symbol.toStringTag] === 'Changed'")
+
+    equal
+        "an optional symbol argument passed as None reaches the call as absent"
+        "none"
+        (convertible.SymbolToPrimitive())
+
+    equal
+        "an optional symbol argument passed as Some reaches the call"
+        "number"
+        (convertible.SymbolToPrimitive "number")
+
 [<EntryPoint>]
 let main _ =
     dependencyEntrypoint ()
@@ -2157,6 +2188,7 @@ let main _ =
     recordIndex ()
     callableHybrids ()
     callableOverloads ()
+    symbolMembers ()
     patternParameters ()
     exportLayout ()
     subpathLab ()

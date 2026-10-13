@@ -2454,6 +2454,7 @@ type PromiseRejectionEvent =
 /// <a href="https://developer.mozilla.org/docs/Web/API/FormData">MDN Reference</a>
 /// </summary>
 type FormData =
+    inherit seq<(string * U2<string, File>)>
     /// <summary>
     /// The <b><c>append()</c></b> method of the FormData interface appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.
     /// <br /><br />
@@ -2657,8 +2658,8 @@ type HeadersInit = obj
 /// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/Headers">MDN Reference</a>
 /// </summary>
-[<Interface>]
 type Headers =
+    inherit seq<(string * string)>
     /// <summary>
     /// The <b><c>get()</c></b> method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
     /// <br /><br />
@@ -2700,8 +2701,6 @@ type Headers =
     abstract entries: unit -> obj
     abstract keys: unit -> obj
     abstract values: unit -> obj
-    [<ParamObject; Emit("$0")>]
-    static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj)) : Headers = jsNative
 
 type BodyInit = obj
 
@@ -3458,6 +3457,8 @@ type ReadableStream<'R> =
     /// </summary>
     abstract tee: unit -> ReadableStream<'R> * ReadableStream<'R>
     abstract values: ?options: ReadableStreamValuesOptions -> JS.AsyncIterable<'R>
+    [<Emit("$0[Symbol.asyncIterator]($1...)")>]
+    abstract SymbolAsyncIterator: ?options: ReadableStreamValuesOptions -> JS.AsyncIterable<'R>
 
 type ReadableStreamConstructor =
     [<EmitConstructor>]
@@ -4319,8 +4320,8 @@ type URL =
 /// <br /><br />
 /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams">MDN Reference</a>
 /// </summary>
-[<Interface>]
 type URLSearchParams =
+    inherit seq<(string * string)>
     /// <summary>
     /// The <b><c>size</c></b> read-only property of the URLSearchParams interface indicates the total number of search parameter entries.
     /// <br /><br />
@@ -4374,8 +4375,6 @@ type URLSearchParams =
     abstract values: unit -> obj
     abstract forEach<'This>: callback: URLSearchParams.ForEach.Callback * ?thisArg: 'This -> unit
     abstract toString: unit -> string
-    [<ParamObject; Emit("$0")>]
-    static member Create (size: float, append: Action<string, string>, delete: Action<string, string option>, get: (string -> string option), getAll: (string -> string[]), has: Func<string, string option, bool>, set: Action<string, string>, sort: (unit -> unit), entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), forEach: Action<URLSearchParams.ForEach.Callback, 'This option>, toString: (unit -> string)) : URLSearchParams = jsNative
 
 /// <summary>
 /// The <b><c>URLPattern</c></b> interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
@@ -4675,8 +4674,8 @@ type SqlStorageStatement = obj
 
 type SqlStorageValue = U3<string, float, JS.ArrayBuffer> option
 
-[<Interface>]
 type SqlStorageCursor<'T> =
+    inherit seq<'T>
     abstract next: unit -> U2<SqlStorageCursor.Next.Result<'T>, SqlStorageCursor.Next.Result2>
     abstract toArray: unit -> 'T[]
     abstract one: unit -> 'T
@@ -4684,8 +4683,6 @@ type SqlStorageCursor<'T> =
     abstract columnNames: string[] with get, set
     abstract rowsRead: float
     abstract rowsWritten: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (next: (unit -> U2<SqlStorageCursor.Next.Result<'T>, SqlStorageCursor.Next.Result2>), toArray: (unit -> 'T[]), one: (unit -> 'T), raw: (unit -> obj), columnNames: string[], rowsRead: float, rowsWritten: float) : SqlStorageCursor<'T> = jsNative
 
 [<Interface>]
 type Socket =
@@ -5479,8 +5476,8 @@ type PerformanceObserverObserveOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?buffered: bool, ?durationThreshold: float, ?entryTypes: string[], ?``type``: string) : PerformanceObserverObserveOptions = jsNative
 
-[<Interface>]
 type EventCounts =
+    inherit seq<string[]>
     abstract size: float
     abstract get: eventType: string -> float option
     abstract has: eventType: string -> bool
@@ -5488,8 +5485,6 @@ type EventCounts =
     abstract keys: unit -> obj
     abstract values: unit -> obj
     abstract forEach: param1: EventCounts.ForEach.Param1 * ?param2: obj -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (size: float, get: (string -> float option), has: (string -> bool), entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), forEach: Action<EventCounts.ForEach.Param1, obj option>) : EventCounts = jsNative
 
 type SpanConstructor =
     [<EmitConstructor>]
@@ -16070,13 +16065,13 @@ type Hyperdrive =
     static member Create (connect: (unit -> Socket), connectionString: string, host: string, ip: string, port: float, user: string, password: string, database: string) : Hyperdrive = jsNative
 
 type Disposable =
-    interface end
+    [<Emit("$0[Symbol.dispose]()")>]
+    abstract SymbolDispose: unit -> unit
 
 /// <summary>
 /// A handle to a dynamically-provisioned Hyperdrive connection, returned by
 /// <c>HyperdriveApi.get()</c>.
 /// </summary>
-[<Interface>]
 type HyperdriveDynamic =
     inherit Disposable
     /// <summary>
@@ -16089,8 +16084,6 @@ type HyperdriveDynamic =
     /// Open a TCP socket to the target database through this Hyperdrive.
     /// </summary>
     abstract connect: unit -> JS.Promise<Socket>
-    [<ParamObject; Emit("$0")>]
-    static member Create (database: JS.Promise<string>, user: JS.Promise<string>, password: JS.Promise<string>, connect: (unit -> JS.Promise<Socket>)) : HyperdriveDynamic = jsNative
 
 /// <summary>
 /// Binding that provisions Hyperdrive connections at request time, rather than
@@ -25456,19 +25449,13 @@ module R2Bucket =
             static member Create (onlyIf: U2<Headers, R2Conditional>, ?range: U4<Headers, R2Object.Range, R2Object.Range2, R2Object.Range3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : Options = jsNative
 
         module Options =
-            [<Interface>]
             type OnlyIf =
                 inherit Headers
                 inherit R2Conditional
-                [<ParamObject; Emit("$0")>]
-                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf = jsNative
 
-            [<Interface>]
             type OnlyIf2 =
                 inherit R2Conditional
                 inherit Headers
-                [<ParamObject; Emit("$0")>]
-                static member Create (get: (string -> string option), getAll: (string -> string[]), getSetCookie: (unit -> string[]), has: (string -> bool), set: Action<string, string>, append: Action<string, string>, delete: (string -> unit), forEach: Action<Headers.ForEach.Callback, 'This option>, entries: (unit -> obj), keys: (unit -> obj), values: (unit -> obj), ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : OnlyIf2 = jsNative
 
     module Put =
         [<Interface>]

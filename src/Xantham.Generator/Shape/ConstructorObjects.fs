@@ -92,8 +92,10 @@ let nameConstructorObjects: Pass<ShapeModel> =
         let positions (facts: TypeFacts) =
             [
                 for m in facts.Members do
-                    if not (isSymbolKeyed m.Symbol.Name) then
-                        Naming.pascalSegment m.Symbol.Name, m.TypeId
+                    match emittedSymbol facts m with
+                    | Some symbol -> symbolMemberName symbol, m.TypeId
+                    | None when not (isSymbolKeyed m.Symbol.Name) -> Naming.pascalSegment m.Symbol.Name, m.TypeId
+                    | None -> ()
                 for info in facts.IndexInfos do
                     "Item", info.KeyTypeId
                     "Item", info.ValueTypeId

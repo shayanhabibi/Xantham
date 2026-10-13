@@ -28,6 +28,10 @@ module private Reason =
     let EntrypointClass =
         "the declaration is a class a consumer inherits, where `new` is the construction"
 
+    [<Literal>]
+    let SymbolKeyed =
+        "a required well-known symbol member has no key a ParamObject literal can write"
+
 let private isConstructor =
     function
     | FsConstructor _ -> true
@@ -43,6 +47,11 @@ let private isInvoke =
     | FsInvoke _ -> true
     | _ -> false
 
+let private isSymbolKeyed' =
+    function
+    | FsSymbolKeyed _ -> true
+    | _ -> false
+
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
 /// and carries no `Create` parameter of its own.
@@ -55,6 +64,11 @@ let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
 
     if decl.Entrypoint.IsSome then
         Some Reason.EntrypointClass
+    elif
+        decl.Members |> List.exists isSymbolKeyed'
+        || decl.Inherits |> List.exists (sequenceElement >> Option.isSome)
+    then
+        Some Reason.SymbolKeyed
     elif List.isEmpty members then
         Some Reason.NoMembers
     elif members |> List.exists isIndexer then
@@ -94,7 +108,8 @@ let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list 
         findings
     | FsIndexer _
     | FsConstructor _
-    | FsInvoke _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
+    | FsInvoke _
+    | FsSymbolKeyed _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
 
 /// Construction ergonomics (D3, §4.4): an interface gains a `[<ParamObject; Emit("$0")>]`
 /// Create overload mirroring its members, required members first, so consumers never hand-build

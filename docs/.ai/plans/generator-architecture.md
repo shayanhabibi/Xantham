@@ -320,7 +320,8 @@ Phases — each ends with the compile gate green on its fixtures:
     flattens into an interface carrying the whole `Array.prototype`.
   - *Symbol-keyed members* (`__@iterator@1469`) are dropped with a finding: they are
     unrepresentable, and the checker id embedded in the name breaks run-to-run
-    determinism (the first determinism failure the e2e property caught).
+    determinism (the first determinism failure the e2e property caught). *Superseded for
+    well-known symbols by "Well-known symbol members (2026-10-13, W4 #135)".*
   - *`true | false` inside bigger unions* reads back as `bool` - the checker re-expands
     `boolean` in unions, so `boolean | undefined` is a two-literal union at the wire.
   - *Member-position unions resolve to declared aliases by member set*: literal types
@@ -2273,3 +2274,92 @@ Targeted Fantomas checks passed. Committed golden bindings and findings are unch
 Core.TS regeneration in catalogue mode preserves all 4,062 declaration identities, APIs,
 constraints and source sets, and the binding is byte-identical; only compatibility metadata
 and producer provenance change in its committed catalogue.
+
+## Well-known symbol members (2026-10-13, W4 #135)
+
+A member keyed by a well-known symbol is emitted. Resolve records the symbol on
+`ResolvedMember.WellKnownSymbol` from the declaration's computed name `[Symbol.<name>]`, and
+only where the checker resolves `Symbol.<name>` to a `SymbolConstructor` property declared by a
+`lib.*.d.ts` file. The escaped name `__@iterator@<id>` also spells a package's own `declare
+const iterator: unique symbol`, so the name alone does not identify one; and a package's
+`declare global` augmentation (`Symbol.observable` in `solid-js` and `type-fest`) names a key
+that is `undefined` at runtime without a polyfill.
+
+- `shape-interfaces` writes `[Symbol.iterator]` as an `inherit seq<element>` beside an
+  `FsSymbolKeyed` member. The element is the `value` of the first `next` result arm whose `done`
+  is absent or admits `false`, or else the iterator's first type argument: a lib iterator reaches
+  Shape without members under O7, and every lib iterator takes its element first.
+- Every other well-known key is an `FsSymbolKeyed` member named `Symbol<Name>` and rendered
+  under `[<Emit("$0[Symbol.<name>]")>]`: a call appends `()` or `($1...)`, and a writable property
+  carries per-accessor get and set Emits.
+- `settle-symbol-members` runs after `drop-inherited`, bases first. A declaration keeps its own
+  `seq` only where no base iterates; at the base's element it inherits the base's alone. F#
+  admits one `seq` instantiation per interface (FS3360, `NodeListOf<'TNode>` over
+  `NodeList`), so a narrowed element drops its own `seq` and keeps the iterator as an Emit
+  member. `MB008` reports a kept `seq`, `MB009` each Emit member.
+- The findings raised while shaping a `[Symbol.iterator]` wait on `ShapeModel.IteratorFindings`:
+  `settle-symbol-members` reports the element's with a kept `seq` and the member's with a kept
+  member, stamped with its own pass name. A removed member leaves no finding behind.
+- Bases the settle pass reads are the run's own declarations. A lib base is never inherited,
+  catalogue run or not: its members are flattened in (`SI002`), so the declaration's own `seq`
+  is the only one. A catalogue run re-shapes every reused declaration, so a reused base is among
+  the run's declarations.
+- `MB002` remains for a key naming the package's own `unique symbol`, a key declared solely
+  by a package's augmentation, an optional member, a member whose `Symbol<Name>` is already declared
+  by another member, a class static, a member of an `[<AbstractClass>]` entrypoint (a new
+  abstract slot obliges every consumer subclass to implement it), and a narrowed iterator whose
+  member `drop-inherited` removed. Its message text is unchanged.
+- A declaration carrying a required symbol member or a `seq` inherit, its own or a base's,
+  carries no `Create` (`SP003`, "a required well-known symbol member has no key a ParamObject
+  literal can write"): the object `Create` builds would lack the key the type promises.
+  `synthesize-paramobjects` runs before the settle pass, so inherited members are still present.
+- `CatalogCompatibility.ApiVersion` is 6: the canonical API text gains a `symbol` node and lib
+  declarations' emitted ABI changes. A consumer rejects an earlier Core.TS catalogue.
+- No page under `site/content` documents member-key mapping, so the consumer docs are
+  unchanged.
+
+Lab `symbol-member-lab`: `Disposable` reads `SymbolDispose`, `Tagged` reads
+`SymbolToStringTag`, `Bag`/`Box<T>`/`Values` inherit `seq<string>`/`seq<'T>`/`seq<U2<string,
+float>>`, `LabelledBag` inherits `Bag` alone, and `Strings` (narrowed through a package
+iterator) inherits `Values` and keeps `SymbolIterator` under Emit. `Convertible` carries a
+writable `SymbolToStringTag` (get and set Emits) and `SymbolToPrimitive: ?hint: string ->
+string`; `Narrowed` extends lib `Iterable<string | number>` and inherits `seq<string>` alone.
+`MB002` remains on `Keyed.__@key`, on `Impostor.__@iterator` (a unique symbol spelled
+`iterator`) and on `Observed.__@observable` (an augmented `SymbolConstructor`). Every
+declaration with a symbol member or `seq` reports `SP003` and carries no `Create`, and no
+`[Symbol.iterator](...)` finding survives a removed member. The RunGate calls `SymbolDispose`,
+reads `SymbolToStringTag`, iterates `bag` with `Seq.toList`, writes `convertible`'s
+`SymbolToStringTag`, and calls `SymbolToPrimitive` with and without its argument.
+
+Measured on W2 (`anyReturnAsUnit`, with W1 merged):
+
+| Golden | MB002 | MB008 | MB009 | exact / ergonomic / widened / escape |
+| --- | --- | --- | --- | --- |
+| `@cloudflare/workers-types` | 10 → 0 | 0 → 5 | 0 → 2 | 412/1144/407/1 → 412/1147/404/1 |
+| `type-fest` | 2 → 2 | 0 | 0 | 26/64/205/2 → 26/64/205/2 |
+| Core.TS (T4) | 202 → 0 | 0 → 61 | 0 → 76 | 2073/2125/860/5 → 2073/2203/785/5 |
+
+In `workers-types`, `TR023` is unchanged (37): the iterator member of the five iterables that
+inherit `seq` (`EventCounts`, `FormData`, `Headers`, `SqlStorageCursor`, `URLSearchParams`) and
+of `R2Bucket.Get.Options.OnlyIf`/`OnlyIf2`, which read through `Headers`, is removed with its
+findings. `HyperdriveDynamic` reads `SymbolDispose` through `Disposable`. Those eight lose their
+`Create` (`SP001` 1305 → 1298 against the first W4 commit, `SP003` +7, with `SP002`/`SP004`/`TR055`
+falling with the dropped parameters). `ReadableStream.[Symbol.asyncIterator]` keeps its Emit
+member, so its `TR024`/`TR025`/`TR032`/`MB001` stand. `type-fest`'s
+`EmptyObject.__@emptyObjectSymbol` is a unique symbol and `ObservableLike.__@observable` an
+augmented key; both stay `MB002`.
+
+The pull-request regeneration (`test --goldens`) moves `inherit-lab` and `member-shape-lab`
+`Deferred`, which gain `SymbolToStringTag` from `Promise` (`MB002` 1 → 0 each) and so carry
+no `Create`. `solid-js` `Observable.__@observable` stays `MB002`, and `Observable` keeps its
+`Create`.
+
+Core.TS was regenerated under override T4: a consumer re-shapes every reused Core.TS
+declaration and authenticates it against the committed `declarations.json` API hash
+(`catalog library identity` failed with 117 changed entries before the regeneration), and
+W4 with the ApiVersion bump changes that hash. It was regenerated again for the `Create`
+refusal: 31 Core.TS interfaces (`Promise`, `Map`, `Set`, `Headers` and others) carried a
+`Create` building an object without the symbol key the type promises. Node was not
+regenerated: it compiles against the regenerated Core.TS. Core.TS's three new escape symbols
+(`SegmentIterator` and two `[Symbol.replace]` replacer delegates) are newly reached
+declarations whose escape is `TR008`.

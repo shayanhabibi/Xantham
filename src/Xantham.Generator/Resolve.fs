@@ -604,6 +604,99 @@ let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : A
                        |> ValueOption.isSome
     }
 
+/// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
+/// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
+/// `lib.*.d.ts` file. A key referencing a package's own `unique symbol` reads `None`, including
+/// one escaped as `__@iterator@<id>`, as does a `SymbolConstructor` property declared solely by a
+/// package's augmentation (`Symbol.observable`).
+let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<string option> =
+    async {
+        match
+            property.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | _ when not (property.Name.StartsWith "__@") -> return None
+        | None -> return None
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            let candidate =
+                match file with
+                | ValueNone -> None
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    let name =
+                        match node.Kind with
+                        | SyntaxKind.PropertySignature ->
+                            Node.retag<AnyNode, PropertySignatureDeclaration> node
+                            |> PropertySignatureDeclaration.name
+                        | SyntaxKind.PropertyDeclaration ->
+                            Node.retag<AnyNode, PropertyDeclaration> node |> PropertyDeclaration.name
+                        | SyntaxKind.MethodSignature ->
+                            Node.retag<AnyNode, MethodSignatureDeclaration> node
+                            |> MethodSignatureDeclaration.name
+                        | SyntaxKind.MethodDeclaration ->
+                            Node.retag<AnyNode, MethodDeclaration> node |> MethodDeclaration.name
+                        | SyntaxKind.GetAccessor ->
+                            Node.retag<AnyNode, GetAccessorDeclaration> node |> GetAccessorDeclaration.name
+                        | SyntaxKind.SetAccessor ->
+                            Node.retag<AnyNode, SetAccessorDeclaration> node |> SetAccessorDeclaration.name
+                        | _ -> ValueNone
+
+                    match name with
+                    | ValueSome name when name.Kind = SyntaxKind.ComputedPropertyName ->
+                        match
+                            Node.retag<PropertyName, ComputedPropertyName> name
+                            |> ComputedPropertyName.expression
+                        with
+                        | ValueSome access when access.Kind = SyntaxKind.PropertyAccessExpression ->
+                            let access = Node.retag<Expression, PropertyAccessExpression> access
+
+                            match PropertyAccessExpression.expression access, PropertyAccessExpression.name access with
+                            | ValueSome receiver, ValueSome key when
+                                receiver.Kind = SyntaxKind.Identifier
+                                && receiver.Text = ValueSome "Symbol"
+                                && key.Kind = SyntaxKind.Identifier
+                                ->
+                                key.Text
+                                |> ValueOption.toOption
+                                |> Option.map (fun text -> text, Node.index key, key.Kind)
+                            | _ -> None
+                        | _ -> None
+                    | _ -> None
+
+            match candidate with
+            | None -> return None
+            | Some(text, index, kind) ->
+                let! symbol =
+                    ctx.Session.getSymbolAtLocation (
+                        NodeHandle.format
+                            {
+                                Index = index
+                                Kind = kind
+                                Path = handle.Path
+                            }
+                    )
+
+                let declaredByLib =
+                    symbol
+                    |> ValueOption.bind _.Declarations
+                    |> ValueOption.defaultValue [||]
+                    |> Array.exists (fun declaration ->
+                        match NodeHandle.parse declaration with
+                        | ValueSome declaration ->
+                            let file = System.IO.Path.GetFileName declaration.Path
+
+                            file.StartsWith("lib.", System.StringComparison.Ordinal)
+                            && file.EndsWith(".d.ts", System.StringComparison.Ordinal)
+                        | ValueNone -> false)
+
+                return if declaredByLib then Some text else None
+    }
+
 let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
     async {
         let! propertyType = ctx.Session.getTypeOfSymbol property.Id
@@ -624,6 +717,12 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
             else
                 declaresQuestionToken ctx property
 
+        let! symbol =
+            if isProperty then
+                wellKnownSymbol ctx property
+            else
+                async.Return None
+
         return
             {
                 Symbol = property
@@ -635,6 +734,7 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
                     || questionToken
                 ReadOnly = readOnly
                 TypeId = propertyType.TypeId
+                WellKnownSymbol = symbol
             },
             propertyType
     }

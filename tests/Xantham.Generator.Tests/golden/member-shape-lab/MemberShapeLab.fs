@@ -14,7 +14,6 @@ open Fable.Core.TS.Dom
 /// An intersection over a compiler-lib type: <c>then</c> / <c>catch</c> / <c>finally</c> arrive as method
 /// symbols, and each is a callback rather than a declaration.
 /// </summary>
-[<Interface>]
 type Deferred =
     /// <summary>
     /// Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -37,8 +36,8 @@ type Deferred =
     /// <returns>A Promise for the completion of the callback.</returns>
     abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<string>
     abstract tag: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (``then``: Func<(string -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<string, 'TResult>>), ``finally``: ((unit -> unit) option -> JS.Promise<string>), tag: string) : Deferred = jsNative
+    [<Emit("$0[Symbol.toStringTag]")>]
+    abstract SymbolToStringTag: string
 
 /// <summary>
 /// The same reach by heritage rather than intersection.

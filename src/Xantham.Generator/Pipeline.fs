@@ -99,6 +99,7 @@ let toShape (runtimePackage: string<importSpecifier>) (resolve: ResolveModel) : 
         KeyVars = Map.empty
         AnyReturnOwner = None
         Decls = []
+        IteratorFindings = Map.empty
         RuntimePackage = runtimePackage
     }
 

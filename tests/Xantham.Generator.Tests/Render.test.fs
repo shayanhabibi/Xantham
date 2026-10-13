@@ -915,3 +915,61 @@ let renderTests =
             let source = renderAll model |> Map.find "TestPkg.fs"
             Expect.stringContains source "type U10<" "nested members participate in footer analysis"
     ]
+
+/// W4 (#135): a well-known symbol member renders under its F# name, reached through `[<Emit>]`.
+[<Tests>]
+let symbolKeyedRenderTests =
+    let interface' inherits members =
+        FsInterface
+            { Name = "Holder"
+              Docs = ""
+              Tags = []
+              Order = None
+              TypeParameters = []
+              Inherits = inherits
+              Members = members
+              Entrypoint = None
+              CreateOverloads = []
+              Statics = [] }
+
+    let render decl =
+        renderAll { baseModel with Decls = [ decl ] } |> Map.find "TestPkg.fs"
+
+    let method' symbol name parameters returns =
+        FsSymbolKeyed(
+            symbol,
+            FsMethod
+                { Name = name
+                  Docs = ""
+                  Tags = []
+                  TypeParameters = []
+                  Parameters = parameters
+                  Return = returns }
+        )
+
+    let property symbol name readOnly reference =
+        FsSymbolKeyed(symbol, FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = readOnly; Type = reference })
+
+    testList "render symbol-keyed members" [
+        testCase "an inherited seq renders as an inherit line" <| fun _ ->
+            let source = render (interface' [ FsApp("seq", [ FsString ]) ] [])
+            Expect.stringContains source "    inherit seq<string>\n" "seq is spelled as F# names it"
+
+        testCase "a method calls the symbol key" <| fun _ ->
+            let source = render (interface' [] [ method' "dispose" "SymbolDispose" [] FsUnit ])
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.dispose]()\")>]\n    abstract SymbolDispose: unit -> unit" "a nullary call"
+
+        testCase "a method with parameters spreads them into the call" <| fun _ ->
+            let hint = { Name = "hint"; Optional = false; Rest = false; Type = FsString }
+            let source = render (interface' [] [ method' "toPrimitive" "SymbolToPrimitive" [ hint ] FsObj ])
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.toPrimitive]($1...)\")>]\n    abstract SymbolToPrimitive: hint: string -> obj" "the arguments follow the key"
+
+        testCase "a read-only property reads the symbol key" <| fun _ ->
+            let source = render (interface' [] [ property "toStringTag" "SymbolToStringTag" true FsString ])
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.toStringTag]\")>]\n    abstract SymbolToStringTag: string\n" "one member-site attribute"
+
+        testCase "a writable property emits per accessor" <| fun _ ->
+            let source = render (interface' [] [ property "species" "SymbolSpecies" false FsString ])
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.species]\")>]\n    abstract SymbolSpecies: string with get\n" "the getter reads"
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.species] = $1\")>]\n    abstract SymbolSpecies: string with set\n" "the setter assigns"
+    ]

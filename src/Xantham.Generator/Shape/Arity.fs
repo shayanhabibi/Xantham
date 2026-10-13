@@ -35,7 +35,7 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
             Constraint = p.Constraint |> Option.map reference
         }
 
-    let declMember =
+    let rec declMember =
         function
         | FsProperty p -> FsProperty { p with Type = reference p.Type }
         | FsIndexer i ->
@@ -62,6 +62,7 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
                     Parameters = c.Parameters |> List.map parameter
                     Return = reference c.Return
                 }
+        | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, declMember inner)
 
     match decl with
     | FsInterface d ->
