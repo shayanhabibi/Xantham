@@ -1404,8 +1404,8 @@ type FsTypeRef =
     | FsBranded of primitive: FsTypeRef * measure: string
     | FsNamed of string
 
-/// A literal payload carried by a StringEnum case (D12: mixed literal unions keep their
-/// non-string members as `[<CompiledValue>]` cases).
+/// A literal value: the payload of a StringEnum case (D12: mixed literal unions keep their
+/// non-string members as `[<CompiledValue>]` cases), or the value of a literal member.
 type FsLiteral =
     | LitString of string
     | LitNumber of float
@@ -1418,6 +1418,9 @@ type FsPropertyMember =
         Tags: JSDocTagInfo list
         ReadOnly: bool
         Type: FsTypeRef
+        /// The value of a literal member: a required readonly property typed by one string or
+        /// numeric literal. `Type` is the literal's primitive.
+        Literal: FsLiteral option
     }
 
 /// A type parameter (§4.9), bound by a declaration or by a generic signature of its own. The
@@ -1581,6 +1584,15 @@ type FsEntrypoint =
         Inherits: FsTypeRef option
     }
 
+/// One `Create` overload of a plain-data interface (D3).
+type FsCreateOverload =
+    {
+        Parameters: FsParam list
+        /// Literal members the Emit writes into the object, as JavaScript key and value, in
+        /// member order, inherited ones included.
+        Literals: (string * FsLiteral) list
+    }
+
 type FsInterfaceDecl =
     {
         Name: string
@@ -1595,8 +1607,9 @@ type FsInterfaceDecl =
         /// `None` where it renders as an `[<Interface>]`.
         Entrypoint: FsEntrypoint option
         /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
-        /// parameter lists mirroring the members, so consumers never hand-build objects.
-        CreateOverloads: FsParam list list
+        /// parameter lists mirroring the members, so consumers never hand-build objects. Literal
+        /// members are written by the Emit rather than taken as parameters.
+        CreateOverloads: FsCreateOverload list
         /// A class's static members (§4.4): the properties of the constructor object. A get-only
         /// static is bound through a dotted selector of its own (`[<Import("Counter.MAX",
         /// "pkg")>]`); a settable one is bound through the type-level attribute this list puts on

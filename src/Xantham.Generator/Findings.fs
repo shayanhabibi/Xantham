@@ -166,6 +166,7 @@ module FindingCodes =
             "MB.SymbolIteratorAsSeq", "MB008"
             "MB.SymbolKeyedMemberAsEmit", "MB009"
             "MB.LiteralOverloadAsMethod", "MB010"
+            "MB.LiteralMemberAsConstant", "MB011"
             "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
@@ -221,6 +222,7 @@ module FindingCodes =
             "SP.MethodMemberAsCreateParameter", "SP002"
             "SP.CreateNotSynthesized", "SP003"
             "SP.MethodTypeParametersBoundAtCreate", "SP004"
+            "SP.LiteralMembersWrittenByCreate", "SP005"
             "DO.OverloadDropped", "DO001"
             "DO.OverloadsDistinguishedByLiteral", "DO002"
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
@@ -708,6 +710,10 @@ type Members =
     | [<Ergonomic>] SymbolKeyedMemberAsEmit of symbol: string * name: string
     /// W5. An overload keyed by a string literal reads as a method of its own through `[<Emit>]`.
     | [<Ergonomic>] LiteralOverloadAsMethod of literal: string * name: string
+    /// W6. A readonly member typed by one string or numeric literal: the instance reads its
+    /// primitive, the literal is a `[<Literal>]` in the declaration's same-named module, and
+    /// `Create` writes it.
+    | [<Ergonomic>] LiteralMemberAsConstant of literal: string
 
     interface IFindingKind with
         member this.Message =
@@ -725,6 +731,8 @@ type Members =
             | SymbolKeyedMemberAsEmit(symbol, name) -> $"[Symbol.{symbol}] reads as {name} through [<Emit>]"
             | LiteralOverloadAsMethod(literal, name) ->
                 $"overload on literal \"{literal}\" reads as {name} through [<Emit>]"
+            | LiteralMemberAsConstant literal ->
+                $"literal member {literal}: read as its primitive, declared as a [<Literal>], written by Create"
 
 // -------------------------------------------------------------------------------------------------
 // Per-pass unions, in pipeline order. Append-only.
@@ -1051,6 +1059,8 @@ type SynthesizeParamObjects =
     /// A generic method carried into `Create`: its type parameters are bound once per `Create`
     /// call, so the object holds one instantiation of a method its interface declares generic.
     | [<Widened>] MethodTypeParametersBoundAtCreate of parameters: string
+    /// W6. Literal members the `Create` Emit writes into the object in place of parameters.
+    | [<Exact>] LiteralMembersWrittenByCreate of members: string
 
     interface IFindingKind with
         member this.Message =
@@ -1061,6 +1071,8 @@ type SynthesizeParamObjects =
             | CreateNotSynthesized reason -> $"no ParamObject Create synthesized: {reason}"
             | MethodTypeParametersBoundAtCreate parameters ->
                 $"generic method's {parameters} bound once per Create call; the object holds one instantiation"
+            | LiteralMembersWrittenByCreate members ->
+                $"Create writes the literal members {members} in its Emit; they are not parameters"
 
 /// `dedupe-overloads`.
 [<Prefix("DO", "dedupe-overloads")>]

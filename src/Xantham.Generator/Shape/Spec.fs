@@ -82,6 +82,37 @@ let literalOf (facts: TypeFacts) : FsLiteral option =
     else
         None
 
+/// The TypeScript spelling of a literal: `2`, `0.5`, `"method"`.
+let typeScriptLiteral (literal: FsLiteral) =
+    match literal with
+    | LitString text ->
+        let escaped =
+            text
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\n", "\\n")
+                .Replace("\r", "\\r")
+                .Replace("\t", "\\t")
+
+        "\"" + escaped + "\""
+    | LitNumber value when System.Double.IsInteger value && abs value < 2147483648.0 -> string (int value)
+    | LitNumber value -> value.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
+    | LitBool value -> if value then "true" else "false"
+
+/// The value of a literal member: a required readonly property typed by one string or numeric
+/// literal that is not an enum member.
+let internal literalMemberValue (model: ShapeModel) (m: ResolvedMember) (typeId: int<Measure.typeId>) =
+    if m.ReadOnly && not m.Optional then
+        match Map.tryFind typeId model.Types with
+        | Some facts when
+            (flag TypeFlags.StringLiteral facts || flag TypeFlags.NumberLiteral facts)
+            && not (flag TypeFlags.EnumLiteral facts || flag TypeFlags.Union facts)
+            ->
+            literalOf facts
+        | _ -> None
+    else
+        None
+
 /// The spellings of absence a type is written with. TypeScript keeps `null`, `undefined` and
 /// `void` apart and F# offers one `option` for all three, so the spelling survives here rather
 /// than in the rendered binding: a KV miss reads `null`, a Durable Object storage miss reads
@@ -3479,7 +3510,22 @@ let internal shapeMembers
                 let reference, refFindings =
                     typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) (Some self) owner effectiveTypeId
 
-                findings <- findings @ refFindings
+                let literal =
+                    literalMemberValue model m effectiveTypeId
+                    |> Option.filter (fun _ -> reference = FsFloat || reference = FsString)
+
+                match literal with
+                | Some value ->
+                    let widening (finding: Finding) =
+                        match finding.Kind with
+                        | :? TypeReference as kind ->
+                            kind = TypeReference.NumericLiteralToFloat
+                            || kind = TypeReference.StringLiteralToString
+                        | _ -> false
+
+                    findings <- findings @ List.filter (widening >> not) refFindings
+                    emit (Finding.make owner (Members.LiteralMemberAsConstant(typeScriptLiteral value)))
+                | None -> findings <- findings @ refFindings
 
                 if agreed.IsSome then
                     emit (Finding.make owner TypeReference.IntersectionOperandsIdentical)
@@ -3495,6 +3541,7 @@ let internal shapeMembers
                             Tags = m.Tags
                             ReadOnly = m.ReadOnly
                             Type = optionalRef m.Optional reference
+                            Literal = literal
                         }
                 ])
 
@@ -3531,6 +3578,7 @@ let internal shapeMembers
                                     Tags = m.Tags
                                     ReadOnly = m.ReadOnly
                                     Type = reference
+                                    Literal = None
                                 }
                         )
                     ]

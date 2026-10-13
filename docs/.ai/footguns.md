@@ -223,6 +223,12 @@ The pattern is part of `DeclarationCatalog.profile` when set, so a catalog consu
 differs from its producer's fails the inference-profile check. Every Core.TS catalog consumer sets
 `^on`.
 
+**A `[<ParamObject>]` Emit that spreads `$0` is parenthesised.** In statement position `{`
+opens a block, so `{ kind: 'method', ...$0 }` fails with `SyntaxError: Unexpected token '...'`;
+`({ kind: 'method', ...$0 })` works in every position (spec probe 10). A literal value written
+into an Emit template escapes `$`, `{` and `}` as `\x24`, `\x7B` and `\x7D`, because Fable's Emit
+macro reads them as argument holes; `Render.jsString` does both.
+
 **A finding needs a row in `FindingCodes.table`, not just a registered union.** Registering the
 kind in `FindingCatalogue` is enough to compile and enough for the pass to run; the missing code
 only throws at manifest render, from `Finding.get_Key`, which reads as a render bug rather than a
@@ -294,6 +300,14 @@ keeps `Error` → `exn` (Fable compiles `System.Exception` to a JavaScript `Erro
 `Async.AwaitPromise`/`StartAsPromise` are written against `JS.Promise` (lead decision, W3 #134).
 A future row needs a reason of one of those two kinds. The promise rows also bind under `ship`;
 a row that binds only for consumers splits a type between Core.TS and its consumers.
+
+**A same-named module loses expression lookup to an interface member.** `module Event` of
+`[<Literal>]` values beside `[<Interface>] type Event` resolves `Event.AT_TARGET` in a pattern
+to the literal, but in an expression to the interface's instance property (FS0806, "Property
+'AT_TARGET' is not static"), in `module rec` or not and in either declaration order. A module
+abbreviation (`module EventConstants = Event`) names the module alone. `Event.Create` resolves
+to the type's static, since the module declares no `Create`; W6 keeps a literal named `Create`
+out of the module.
 
 ## Build and test environment
 

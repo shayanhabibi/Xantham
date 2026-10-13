@@ -56,6 +56,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\subpath-classes-lab\SubpathClassesLab.fs" Link="subpath-classes-lab\SubpathClassesLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\symbol-member-lab\SymbolMemberLab.fs" Link="symbol-member-lab\SymbolMemberLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\literal-method-lab\LiteralMethodLab.fs" Link="literal-method-lab\LiteralMethodLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\literal-member-lab\LiteralMemberLab.fs" Link="literal-member-lab\LiteralMemberLab.fs" />
         <Compile Include="Probes.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\pattern-parameter-lab\PatternParameterLab.fs" Link="pattern-parameter-lab\PatternParameterLab.fs" />
         <Compile Include="SupportHelpers.fs" />

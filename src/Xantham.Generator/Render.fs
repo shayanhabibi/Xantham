@@ -214,6 +214,58 @@ let private xmlEscape (text: string) =
 let private xmlAttributeEscape (text: string) =
     (xmlEscape text).Replace("\"", "&quot;").Replace("'", "&apos;")
 
+/// A single-quoted JavaScript string literal. `$`, `{` and `}` are hex escapes, so an Emit
+/// template reads them as text rather than as argument holes.
+let internal jsString (text: string) =
+    let escaped =
+        text
+        |> Seq.map (fun c ->
+            match c with
+            | '\\' -> "\\\\"
+            | '\'' -> "\\'"
+            | '\n' -> "\\n"
+            | '\r' -> "\\r"
+            | '\t' -> "\\t"
+            | ' ' -> "\\u2028"
+            | ' ' -> "\\u2029"
+            | '$' -> "\\x24"
+            | '{' -> "\\x7B"
+            | '}' -> "\\x7D"
+            | c when c < ' ' -> $"\\x%02X{int c}"
+            | c -> string c)
+        |> String.concat ""
+
+    $"'{escaped}'"
+
+/// An object-literal key: bare where it is an identifier, a string literal otherwise.
+let internal jsKey (name: string) =
+    if System.Text.RegularExpressions.Regex.IsMatch(name, "^[A-Za-z_][A-Za-z0-9_]*$") then
+        name
+    else
+        jsString name
+
+/// A literal as JavaScript source text.
+let internal jsLiteral =
+    function
+    | LitString text -> jsString text
+    | other -> printLiteral other
+
+/// A literal as the right-hand side of an F# `[<Literal>]` binding: numbers are `float`.
+let internal fsLiteralValue =
+    function
+    | LitNumber _ as literal ->
+        let text = printLiteral literal
+
+        if text.IndexOfAny [| '.'; 'E'; 'e' |] >= 0 then
+            text
+        else
+            text + ".0"
+    | other -> printLiteral other
+
+/// The XML doc line giving a literal member's TypeScript type.
+let private literalRemarks (indent: string) (literal: FsLiteral) =
+    $"{indent}/// <remarks>TypeScript type: <c>{xmlEscape (Xantham.Generator.Shape.Spec.typeScriptLiteral literal)}</c></remarks>"
+
 let private splitLines (text: string) = text.Replace("\r\n", "\n").Split '\n'
 
 /// A line of doc prose, XML-escaped, with simple markdown inline elements rewritten as XML docs.
@@ -509,9 +561,24 @@ let private renderParamList (parameters: FsParam list) =
         |> String.concat ", "
         |> sprintf "(%s)"
 
-let private createAttribute (parameters: FsParam list) =
+/// The attributes of a `Create` overload. Literal members are written into the object; the
+/// expression is parenthesised, since `{` in statement position opens a block.
+let private createAttribute (overload: FsCreateOverload) =
+    let parameters = overload.Parameters
+
+    let literals =
+        overload.Literals
+        |> List.map (fun (key, value) -> $"{jsKey key}: {jsLiteral value}")
+
     if bindParameters parameters = parameters then
-        "[<ParamObject; Emit(\"$0\")>]"
+        match literals, parameters with
+        | [], _ -> "[<ParamObject; Emit(\"$0\")>]"
+        | literals, [] ->
+            let expression = "({ " + String.concat ", " literals + " })"
+            $"[<Emit({stringLit expression})>]"
+        | literals, _ ->
+            let expression = "({ " + String.concat ", " (literals @ [ "...$0" ]) + " })"
+            $"[<ParamObject; Emit({stringLit expression})>]"
     else
         let fields =
             parameters
@@ -522,9 +589,8 @@ let private createAttribute (parameters: FsParam list) =
                     $"...(${index} === undefined ? {{}} : {{{field}}})"
                 else
                     field)
-            |> String.concat ", "
 
-        let expression = "({" + fields + "})"
+        let expression = "({" + String.concat ", " (literals @ fields) + "})"
         $"[<Emit({stringLit expression})>]"
 
 /// A parameter inside an abstract member's signature. A rest tail carries `[<ParamArray>]`
@@ -673,6 +739,11 @@ let rec private renderMemberWith (attributes: Map<string, (string * string) list
     | FsProperty p ->
         [
             yield! docLines "    " p.Docs p.Tags
+
+            match p.Literal with
+            | Some literal -> yield literalRemarks "    " literal
+            | None -> ()
+
             let annotations = Map.tryFind p.Name attributes |> Option.defaultValue []
 
             for site, text in annotations do
@@ -797,6 +868,11 @@ let private renderClassMember attributes (m: FsMember) =
     | FsProperty p ->
         [
             yield! docLines "    " p.Docs p.Tags
+
+            match p.Literal with
+            | Some literal -> yield literalRemarks "    " literal
+            | None -> ()
+
             let reference = printType p.Type
             let annotations = Map.tryFind p.Name attributes |> Option.defaultValue []
 
@@ -909,7 +985,7 @@ let private renderInterface attributes (runtimePackage: string<importSpecifier>)
                 yield "    " + createAttribute overload
 
                 yield
-                    $"    static member Create {renderParamList overload} : {declRef decl.Name decl.TypeParameters} = jsNative"
+                    $"    static member Create {renderParamList overload.Parameters} : {declRef decl.Name decl.TypeParameters} = jsNative"
 
             // Class statics (§4.4), last so that the instance surface reads first and a
             // generated Create keeps the place it has held since phase B.
@@ -1150,10 +1226,10 @@ let private indented (indent: string) (line: string) = if line = "" then "" else
 /// off the full path rather than its own last segment.
 let rec private nestedBlocks
     (specifiers: Map<string list, string<importSpecifier>>)
-    (render: string list -> FsDecl -> string list)
+    (render: string list -> 'Entry -> string list)
     (indent: string)
     (entered: string list)
-    (entries: (string list * FsDecl) list)
+    (entries: (string list * 'Entry) list)
     : string list list =
     let opensAt =
         entries
@@ -1293,7 +1369,12 @@ let internal qualifyDecl foreign =
                             Parameters = entrypoint.Parameters |> List.map (qualifyParam foreign)
                             Inherits = entrypoint.Inherits |> Option.map (qualifyRef foreign)
                         })
-                CreateOverloads = decl.CreateOverloads |> List.map (List.map (qualifyParam foreign))
+                CreateOverloads =
+                    decl.CreateOverloads
+                    |> List.map (fun overload ->
+                        { overload with
+                            Parameters = List.map (qualifyParam foreign) overload.Parameters
+                        })
                 Statics = decl.Statics |> List.map (qualifyBound foreign)
             }
     | FsTaggedUnion decl ->
@@ -1417,7 +1498,8 @@ let private declErasedArities (decl: FsDecl) : int list =
         @ (d.Entrypoint
            |> Option.map (fun e -> e.Parameters |> List.collect ofParam)
            |> Option.defaultValue [])
-        @ (d.CreateOverloads |> List.collect (List.collect ofParam))
+        @ (d.CreateOverloads
+           |> List.collect (fun overload -> List.collect ofParam overload.Parameters))
         @ (d.Statics |> List.collect ofExportMember)
     | FsAbbrev d ->
         (d.TypeParameters |> List.collect ofTypeParam)
@@ -1510,6 +1592,24 @@ let private relativeQualification (scope: string list) (target: string) =
 
     segments[kept..] |> String.concat "."
 
+/// One block of a module level: a declaration, or the `[<Literal>]` values of a declaration's
+/// literal members, rendered in a module of the declaration's name.
+type private Block =
+    | Declared of FsDecl
+    | Constants of FsPropertyMember list
+
+let private renderConstants (members: FsPropertyMember list) =
+    [
+        for p in members do
+            match p.Literal with
+            | Some literal ->
+                yield! docLines "" p.Docs p.Tags
+                yield literalRemarks "" literal
+                yield "[<Literal>]"
+                yield $"let {ident p.Name} = {fsLiteralValue literal}"
+            | None -> ()
+    ]
+
 /// A group's declarations, each reference to another module's name qualified, rendered at
 /// `indent` in the order the shape tier fixed.
 let private renderBody
@@ -1580,7 +1680,24 @@ let private renderBody
             scope, references)
         |> Map.ofList
 
-    let render scope =
+    // The literal members a declaration's module declares: its own, less those named `Create`,
+    // named like a static, or named like a module nested under the declaration.
+    let constantsOf (name: string) decl =
+        match decl with
+        | FsInterface d when not (Map.containsKey name raw) ->
+            let statics = d.Statics |> List.map _.Name |> Set.ofList
+
+            d.Members
+            |> List.choose (function
+                | FsProperty p when p.Literal.IsSome -> Some p
+                | _ -> None)
+            |> List.filter (fun p ->
+                p.Name <> "Create"
+                && not (Set.contains p.Name statics)
+                && not (names |> List.exists (fun other -> other.StartsWith $"{name}.{p.Name}.")))
+        | _ -> []
+
+    let renderDecl scope =
         function
         | FsInterface decl ->
             let name = String.concat "." (scope @ [ decl.Name ])
@@ -1617,17 +1734,29 @@ let private renderBody
 
             renderExports attributes autoOpenExports group.RuntimePackage container
 
+    let render scope =
+        function
+        | Declared decl -> renderDecl scope decl
+        | Constants members -> renderConstants members
+
     let body =
         decls
-        |> List.map (fun decl ->
+        |> List.collect (fun decl ->
             match declName decl with
             | ""
             | null
-            | "global" -> [], decl
+            | "global" -> [ [], Declared decl ]
             | name ->
                 let modules, leaf = nestingOf name
                 let scoped = qualifyDecl (Map.find modules scopedReferences) decl
-                modules, underLeaf leaf scoped)
+
+                [
+                    yield modules, Declared(underLeaf leaf scoped)
+
+                    match constantsOf name decl with
+                    | [] -> ()
+                    | constants -> yield modules @ [ leaf ], Constants constants
+                ])
         |> nestedBlocks group.ModuleSpecifiers render indent []
         |> List.map (String.concat "\n")
         |> String.concat "\n\n"
@@ -1913,7 +2042,7 @@ let internal renderSourcesCustomized annotations raw (modules: GroupModule list)
                                     match decl with
                                     | FsInterface interface_ ->
                                         for overload in interface_.CreateOverloads do
-                                            yield! bound (interface_.Name + ".Create") overload
+                                            yield! bound (interface_.Name + ".Create") overload.Parameters
 
                                         for entrypoint in Option.toList interface_.Entrypoint do
                                             yield! bound interface_.Name entrypoint.Parameters

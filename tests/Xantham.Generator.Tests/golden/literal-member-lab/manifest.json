@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "package": "literal-member-lab",
+  "module": "LiteralMemberLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 6,
+    "widened": 3,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 26,
+      "exact": 1,
+      "ergonomic": 20,
+      "widened": 5
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 16,
+      "exact": 6,
+      "ergonomic": 10
+    }
+  ]
+}

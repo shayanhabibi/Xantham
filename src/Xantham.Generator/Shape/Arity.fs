@@ -78,7 +78,12 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
                         { entrypoint with
                             Parameters = entrypoint.Parameters |> List.map parameter
                         })
-                CreateOverloads = d.CreateOverloads |> List.map (List.map parameter)
+                CreateOverloads =
+                    d.CreateOverloads
+                    |> List.map (fun overload ->
+                        { overload with
+                            Parameters = List.map parameter overload.Parameters
+                        })
             }
     | FsAbbrev d ->
         FsAbbrev
@@ -287,7 +292,12 @@ let private repaired (model: ShapeModel) =
                             // And no Create parameter either: there is no value to pass,
                             // and writing the key as `undefined` is not what the author
                             // declared. The property still reads on the result.
-                            CreateOverloads = d.CreateOverloads |> List.map (List.filter (fun p -> p.Type <> FsUnit))
+                            CreateOverloads =
+                                d.CreateOverloads
+                                |> List.map (fun overload ->
+                                    { overload with
+                                        Parameters = List.filter (fun p -> p.Type <> FsUnit) overload.Parameters
+                                    })
                         }
                 | other -> other
 
