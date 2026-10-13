@@ -775,6 +775,16 @@ this section is one of them, and it now has a measurement: a conditional the che
 resolves (`type Decided = string extends string ? number : boolean`) never reaches the shaper
 as a conditional at all — it arrives as `float`, with no finding of any kind.
 
+*Experiment (2026-10-13, W9) — the bound rung.* Under `resolveConditionalConstraints` (off by
+default), a conditional with no usable branch, written over a bounded type parameter, reads the
+checker's distributive constraint (`getBaseConstraintOfType`): the conditional instantiated at
+the bound. `InstanceType<Request>` with `Request extends typeof IncomingMessage` maps to
+`IncomingMessage` and reports `TR068` (Widened), because the link to the parameter is lost. A
+union constraint is refused, since it is the branch union rejected above, and an alias's own
+body stays deferred. A concrete application such as `InstanceType<typeof IncomingMessage>`
+needs none of this: the checker has already resolved it. Measurements are in
+`2026-10-13-w9-early-resolve-findings.md`.
+
 ### 4.12 Tuples
 
 Fable F# tuples *are* JS arrays — a happy exact match:

@@ -16,6 +16,12 @@ argument, so `Model<string>` reads as two type arguments. Read heritage nodes an
 
 **Checker alias-symbol identity alone does not name a type.** A transformed type retains the symbol of the alias it came from, so the checker-declared type must equal the type being named before a source name is recovered. `NonNullable<Value>` matched the members of the nullable `Value` and reintroduced `null` on the strength of the shared symbol. A union application of a generic tagged alias is recognised only where its arms correspond to the declared form's arm for arm. An arm that is an instantiation open over a signature parameter reaches the shape tier identity-only, with no members, so it corresponds by its target rather than by its tag.
 
+**`Session.getConstraintOfType` is not the checker's `getConstraintOfType`.** It reads a
+substitution type's preloaded constraint handle. Ask `getBaseConstraintOfType` for a type's
+constraint. For a conditional over a bounded, naked type parameter it is the conditional
+instantiated at the bound. Otherwise it is the union of both branches, which §4.11 rejects as a
+mapping, and over a union bound it is the union of each member's branch.
+
 **`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof an author wrote `any`; a circular type alias is the error type. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
 
 **`keyof` over a declared type reaches Shape as that type's key literals.** `K extends keyof
@@ -345,6 +351,13 @@ literal named `Create` out of the module.
 test host's stdout, reproduced three times in one lane. `build.fsx` runs the Expecto executables
 directly, and nested builds carry a copy of the root `global.json` beside their scratch project
 inside the repository (`.claude/rules/tests.md`).
+
+**The CLI prefers its `xantham tsc init` cache to the parent walk.** Its compiler precedence is
+`XANTHAM_TSGO_EXE`, then the cache, then the walk up from the package. A stale cached compiler
+crashed on `type-fest` (`json: cannot marshal … +Inf` from `getDeclaredTypeOfSymbol`) while the
+test suite passed. When measuring with `dotnet run --project src/Xantham.Cli -- generate`, set
+`XANTHAM_TSGO_EXE` to the root install's `tsc.exe`, and check each off-mode `manifest.json`
+against the committed one.
 
 **`tools/workspace.fsx` exports `XANTHAM_TSGO_EXE` from any checkout**, not only a worktree, so
 the catalog suites run in the main checkout. Only a worktree skips `npm install`: the main

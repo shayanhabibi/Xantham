@@ -112,6 +112,24 @@ Record updates from `GeneratorConfig.Default` keep their previous behavior.
 `resolveNoInfer: true` maps TypeScript's `NoInfer<T>` directly to `T`.
 The default preserves `NoInfer<T>` through the support library.
 
+## Resolve conditionals at a bound (experimental)
+
+`resolveConditionalConstraints: true` writes a conditional type that stays open over a bounded
+type parameter as its value at that bound. `@types/node` writes a request listener's argument as
+`InstanceType<Request>`, where `Request extends typeof IncomingMessage`; with the key set, the
+argument binds as `IncomingMessage` instead of `obj`.
+
+```json title="Resolve conditionals at a bound"
+{
+  "resolveConditionalConstraints": true
+}
+```
+
+Each rewritten reference is reported as `TR068`, graded Widened: a listener declared for a
+subclass of the bound still reads the bound. A conditional over an unbounded parameter or a
+union bound, or one whose value at the bound is `any`, stays `obj` under `TR045`. The key is
+part of a catalogue's inference profile when set. The default is `false`.
+
 ## Write handler returns as unit
 
 A DOM-style handler declared `onclick: ((ev: MouseEvent) => any) | null` binds as
