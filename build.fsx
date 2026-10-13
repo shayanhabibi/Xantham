@@ -99,7 +99,8 @@ module Options =
 
     let noFormat =
         Input.option<bool> "--no-format"
-        |> Input.description "Skip source formatting locally; CI still checks formatting"
+        |> Input.description
+            "Skip source formatting locally, and the formatting of generated sources under generate; CI still checks formatting"
         |> Input.def false
 
     let config =
@@ -224,6 +225,65 @@ module Options =
         |> Input.description
             "Re-vendor the upstream compiler sources before generating. Hits the network, so it is off by default; bump the pin in tools/tsc-ast/upstream.json first."
         |> Input.def false
+
+/// Formats generated F# sources in place with the repository's Fantomas settings, including
+/// files listed in `.fantomasignore`. Each file is formatted as a copy under `tests/.scratch/`
+/// beside an empty `.fantomasignore`, which takes precedence over the repository's.
+module Generated =
+    open System.IO
+
+    let private scratch =
+        Path.Combine(__SOURCE_DIRECTORY__, "tests", ".scratch", "format-generated")
+
+    let format (files: string list) =
+        let files = files |> List.filter File.Exists
+        let names = files |> List.map Path.GetFileName
+
+        if List.length (List.distinct names) <> List.length names then
+            failwith $"Generated files to format share a file name: %A{names}"
+
+        if Directory.Exists scratch then
+            Directory.Delete(scratch, true)
+
+        Directory.CreateDirectory scratch |> ignore
+        File.WriteAllText(Path.Combine(scratch, ".fantomasignore"), "")
+
+        for file in files do
+            File.Copy(file, Path.Combine(scratch, Path.GetFileName file), true)
+
+        let fantomas =
+            System.Diagnostics.Process.Start(
+                System.Diagnostics.ProcessStartInfo(
+                    "dotnet",
+                    $"fantomas \"{scratch}\"",
+                    WorkingDirectory = __SOURCE_DIRECTORY__,
+                    UseShellExecute = false
+                )
+            )
+
+        fantomas.WaitForExit()
+
+        if fantomas.ExitCode <> 0 then
+            failwith $"fantomas exited with {fantomas.ExitCode} formatting generated sources"
+
+        for file in files do
+            File.Copy(Path.Combine(scratch, Path.GetFileName file), file, true)
+
+        Directory.Delete(scratch, true)
+
+    let private wire =
+        Path.Combine(__SOURCE_DIRECTORY__, "src", "Xantham.TypeScript.Wire")
+
+    /// The wire layers `generate ast|proto|session` write, and the test table beside them.
+    let wireLayers () =
+        [
+            yield! Directory.GetFiles(wire, "*.generated.fs")
+            yield!
+                Directory.GetFiles(
+                    Path.Combine(__SOURCE_DIRECTORY__, "tests", "Xantham.TypeScript.Wire.Tests"),
+                    "*.generated.fs"
+                )
+        ]
 
 module Stages =
     let restore =
@@ -407,6 +467,11 @@ module Stages =
         input {
             let! only = Options.generateOnly
             and! sync = Options.syncUpstream
+            and! noFormat = Options.noFormat
+
+            // A worktree reads the main checkout's `@types/node`, as it borrows the compiler.
+            let nodeTypes =
+                System.IO.Path.Combine(Workspace.nodeModulesRoot __SOURCE_DIRECTORY__, "node_modules", "@types", "node")
 
             return
                 stage "generate" {
@@ -464,7 +529,10 @@ module Stages =
                             )
 
                             System.IO.File.Delete(System.IO.Path.Combine(output, "FableCoreTsInput.fs"))
-                            System.IO.File.Delete(System.IO.Path.Combine(output, "symbols.jsonl")))
+
+                            // Before the stamp, which hashes the binding's text.
+                            if not noFormat then
+                                Generated.format [ System.IO.Path.Combine(output, "Fable.Core.TS.fs") ])
 
                         run "dotnet fsi tools/package-core-ts-catalog.fsx -- stamp"
                     }
@@ -473,8 +541,31 @@ module Stages =
                     stage "generate node-lib" {
                         when' (only |> Option.contains Options.NodeLib)
 
-                        run
-                            "dotnet run --project src/Xantham.Cli -- generate node_modules/@types/node -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
+                        run (
+                            cmd
+                                $"dotnet run --project src/Xantham.Cli -- generate \"{nodeTypes}\" -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
+                        )
+
+                        run (fun _ ->
+                            if not noFormat then
+                                Generated.format
+                                    [
+                                        System.IO.Path.Combine(
+                                            __SOURCE_DIRECTORY__,
+                                            "src",
+                                            "Xantham.Fable.Node",
+                                            "Node.fs"
+                                        )
+                                    ])
+                    }
+
+                    stage "format wire layers" {
+                        when' (
+                            not noFormat
+                            && [ Options.Ast; Options.Proto; Options.Session ] |> List.exists wanted
+                        )
+
+                        run (fun _ -> Generated.format (Generated.wireLayers ()))
                     }
                 }
         }

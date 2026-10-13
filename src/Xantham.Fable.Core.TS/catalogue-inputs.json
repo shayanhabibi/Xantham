@@ -2,7 +2,7 @@
   "bindings": [
     {
       "file": "Fable.Core.TS.fs",
-      "sha256": "9b74f626df26c41268854862fb2456eae7742f4f9e4cf94d3ce52fa91d9227ea"
+      "sha256": "7220ae7e244e559fcbd2ca40b0e358c38516ee00b32474ddd10872a5b40dc350"
     },
     {
       "file": "Fable.Core.TS.Extensions.fs",

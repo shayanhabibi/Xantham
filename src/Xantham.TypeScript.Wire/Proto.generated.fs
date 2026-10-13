@@ -92,86 +92,92 @@ module rec Proto =
         | Uri of uri: string
 
     ///  ReleaseParams are the parameters for the release method.
-    type ReleaseParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
-    }
+    type ReleaseParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
+        }
 
-    type BatchRequestsParams = {
-        [<JsonPropertyName "requests">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Requests: BatchRequest[] voption
-    } with
+    type BatchRequestsParams =
+        {
+            [<JsonPropertyName "requests">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Requests: BatchRequest[] voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            Requests = ValueNone
-        }: BatchRequestsParams)
+        static member val private DefaultValue = lazy ({ Requests = ValueNone }: BatchRequestsParams)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ BatchRequestsParams.Default with ... }` - rather than writing all 1 out.
         static member Default: BatchRequestsParams = BatchRequestsParams.DefaultValue.Value
 
-    type BatchRequestsResponse = {
-        [<JsonPropertyName "responses">]
-        Responses: BatchResponse[]
-    }
+    type BatchRequestsResponse =
+        {
+            [<JsonPropertyName "responses">]
+            Responses: BatchResponse[]
+        }
 
     ///  InitializeResponse is returned by the initialize method.
-    type InitializeResponse = {
-        ///  UseCaseSensitiveFileNames indicates whether the host file system is case-sensitive.
-        [<JsonPropertyName "useCaseSensitiveFileNames">]
-        UseCaseSensitiveFileNames: bool
+    type InitializeResponse =
+        {
+            ///  UseCaseSensitiveFileNames indicates whether the host file system is case-sensitive.
+            [<JsonPropertyName "useCaseSensitiveFileNames">]
+            UseCaseSensitiveFileNames: bool
 
-        ///  CurrentDirectory is the server's current working directory.
-        [<JsonPropertyName "currentDirectory">]
-        CurrentDirectory: string
-    }
+            ///  CurrentDirectory is the server's current working directory.
+            [<JsonPropertyName "currentDirectory">]
+            CurrentDirectory: string
+        }
 
     /// UpdateSnapshotParams are the parameters for creating a new snapshot.
     /// All fields are optional. With no fields set, the server adopts the latest LSP state.
-    type UpdateSnapshotParams = {
-        /// OpenProjects lists tsconfig.json files to open/load in the new snapshot.
-        /// Opens are ref-counted and persist across snapshots until closed.
-        [<JsonPropertyName "openProjects">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        OpenProjects: DocumentIdentifier[] voption
+    type UpdateSnapshotParams =
+        {
+            /// OpenProjects lists tsconfig.json files to open/load in the new snapshot.
+            /// Opens are ref-counted and persist across snapshots until closed.
+            [<JsonPropertyName "openProjects">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            OpenProjects: DocumentIdentifier[] voption
 
-        /// CloseProjects lists tsconfig.json files to release in the new snapshot.
-        /// A project is only unloaded once every API client that opened it closes it.
-        [<JsonPropertyName "closeProjects">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        CloseProjects: DocumentIdentifier[] voption
+            /// CloseProjects lists tsconfig.json files to release in the new snapshot.
+            /// A project is only unloaded once every API client that opened it closes it.
+            [<JsonPropertyName "closeProjects">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            CloseProjects: DocumentIdentifier[] voption
 
-        ///  FileChanges describes file system changes since the last snapshot.
-        [<JsonPropertyName "fileChanges">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        FileChanges: APIFileChanges voption
+            ///  FileChanges describes file system changes since the last snapshot.
+            [<JsonPropertyName "fileChanges">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            FileChanges: APIFileChanges voption
 
-        /// OpenFiles lists files to keep open for the API client, mirroring LSP's
-        /// textDocument/didOpen. For each file, ancestor directories are searched for a
-        /// tsconfig that contains it; if found, that configured project is loaded and
-        /// becomes the file's default project. Otherwise the file is loaded into the
-        /// inferred project (e.g. a node_modules d.ts not in any project's import graph).
-        /// Opens persist across snapshots until the file is closed.
-        [<JsonPropertyName "openFiles">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        OpenFiles: DocumentIdentifier[] voption
+            /// OpenFiles lists files to keep open for the API client, mirroring LSP's
+            /// textDocument/didOpen. For each file, ancestor directories are searched for a
+            /// tsconfig that contains it; if found, that configured project is loaded and
+            /// becomes the file's default project. Otherwise the file is loaded into the
+            /// inferred project (e.g. a node_modules d.ts not in any project's import graph).
+            /// Opens persist across snapshots until the file is closed.
+            [<JsonPropertyName "openFiles">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            OpenFiles: DocumentIdentifier[] voption
 
-        /// CloseFiles lists files to release in the new snapshot. A file is only fully
-        /// closed once every API client that opened it closes it.
-        [<JsonPropertyName "closeFiles">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        CloseFiles: DocumentIdentifier[] voption
-    } with
+            /// CloseFiles lists files to release in the new snapshot. A file is only fully
+            /// closed once every API client that opened it closes it.
+            [<JsonPropertyName "closeFiles">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            CloseFiles: DocumentIdentifier[] voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            OpenProjects = ValueNone
-            CloseProjects = ValueNone
-            FileChanges = ValueNone
-            OpenFiles = ValueNone
-            CloseFiles = ValueNone
-        }: UpdateSnapshotParams)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    OpenProjects = ValueNone
+                    CloseProjects = ValueNone
+                    FileChanges = ValueNone
+                    OpenFiles = ValueNone
+                    CloseFiles = ValueNone
+                }
+                : UpdateSnapshotParams)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
@@ -179,1407 +185,1498 @@ module rec Proto =
         static member Default: UpdateSnapshotParams = UpdateSnapshotParams.DefaultValue.Value
 
     ///  UpdateSnapshotResponse is returned by updateSnapshot.
-    type UpdateSnapshotResponse = {
-        ///  Snapshot is the handle for the newly created snapshot.
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type UpdateSnapshotResponse =
+        {
+            ///  Snapshot is the handle for the newly created snapshot.
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        ///  Projects is the list of projects in the snapshot.
-        [<JsonPropertyName "projects">]
-        Projects: ProjectResponse[]
+            ///  Projects is the list of projects in the snapshot.
+            [<JsonPropertyName "projects">]
+            Projects: ProjectResponse[]
 
-        /// Changes describes source file differences from the previous snapshot.
-        /// Nil for the first snapshot in a session.
-        [<JsonPropertyName "changes">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Changes: SnapshotChanges voption
-    }
+            /// Changes describes source file differences from the previous snapshot.
+            /// Nil for the first snapshot in a session.
+            [<JsonPropertyName "changes">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Changes: SnapshotChanges voption
+        }
 
     /// UpdateTemporarySnapshotParams are the parameters for creating a temporary
     /// snapshot that overrides a single file's content.
-    type UpdateTemporarySnapshotParams = {
-        ///  Snapshot is the current client snapshot on which to layer the temporary update.
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type UpdateTemporarySnapshotParams =
+        {
+            ///  Snapshot is the current client snapshot on which to layer the temporary update.
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        ///  File identifies the file whose content is temporarily overridden.
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            ///  File identifies the file whose content is temporarily overridden.
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        ///  NewText is the temporary content for the file.
-        [<JsonPropertyName "newText">]
-        NewText: string
-    }
+            ///  NewText is the temporary content for the file.
+            [<JsonPropertyName "newText">]
+            NewText: string
+        }
 
-    type CreateProgramParams = {
-        [<JsonPropertyName "rootFiles">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        RootFiles: DocumentIdentifier[] voption
+    type CreateProgramParams =
+        {
+            [<JsonPropertyName "rootFiles">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            RootFiles: DocumentIdentifier[] voption
 
-        [<JsonPropertyName "createProgramOptions">]
-        CreateProgramOptions: CreateProgramOptions
+            [<JsonPropertyName "createProgramOptions">]
+            CreateProgramOptions: CreateProgramOptions
 
-        [<JsonPropertyName "oldProgram">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        OldProgram: CreateProgramOldProgramParams voption
+            [<JsonPropertyName "oldProgram">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            OldProgram: CreateProgramOldProgramParams voption
 
-        [<JsonPropertyName "fileChanges">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        FileChanges: APIFileChanges voption
-    } with
+            [<JsonPropertyName "fileChanges">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            FileChanges: APIFileChanges voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            RootFiles = ValueNone
-            CreateProgramOptions = CreateProgramOptions.Default
-            OldProgram = ValueNone
-            FileChanges = ValueNone
-        }: CreateProgramParams)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    RootFiles = ValueNone
+                    CreateProgramOptions = CreateProgramOptions.Default
+                    OldProgram = ValueNone
+                    FileChanges = ValueNone
+                }
+                : CreateProgramParams)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ CreateProgramParams.Default with ... }` - rather than writing all 4 out.
         static member Default: CreateProgramParams = CreateProgramParams.DefaultValue.Value
 
-    type CreateProgramResponse = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type CreateProgramResponse =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Project: ProjectResponse voption
-    }
+            [<JsonPropertyName "project">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Project: ProjectResponse voption
+        }
 
-    type ParseCommandLineParams = {
-        [<JsonPropertyName "commandLine">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        CommandLine: string[] voption
-    } with
+    type ParseCommandLineParams =
+        {
+            [<JsonPropertyName "commandLine">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            CommandLine: string[] voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            CommandLine = ValueNone
-        }: ParseCommandLineParams)
+        static member val private DefaultValue = lazy ({ CommandLine = ValueNone }: ParseCommandLineParams)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ ParseCommandLineParams.Default with ... }` - rather than writing all 1 out.
         static member Default: ParseCommandLineParams = ParseCommandLineParams.DefaultValue.Value
 
-    type ConfigFileResponse = {
-        [<JsonPropertyName "fileNames">]
-        FileNames: string[]
+    type ConfigFileResponse =
+        {
+            [<JsonPropertyName "fileNames">]
+            FileNames: string[]
 
-        [<JsonPropertyName "options">]
-        Options: CompilerOptions
+            [<JsonPropertyName "options">]
+            Options: CompilerOptions
 
-        [<JsonPropertyName "projectReferences">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ProjectReferences: ProjectReference[] voption
+            [<JsonPropertyName "projectReferences">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ProjectReferences: ProjectReference[] voption
 
-        [<JsonPropertyName "typeAcquisition">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        TypeAcquisition: TypeAcquisition voption
+            [<JsonPropertyName "typeAcquisition">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            TypeAcquisition: TypeAcquisition voption
 
-        [<JsonPropertyName "compileOnSave">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        CompileOnSave: bool voption
+            [<JsonPropertyName "compileOnSave">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            CompileOnSave: bool voption
 
-        [<JsonPropertyName "raw">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Raw: JsonNode
+            [<JsonPropertyName "raw">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Raw: JsonNode
 
-        [<JsonPropertyName "errors">]
-        Errors: DiagnosticResponse[]
-    }
+            [<JsonPropertyName "errors">]
+            Errors: DiagnosticResponse[]
+        }
 
-    type ReadConfigFileParams = {
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
-    }
+    type ReadConfigFileParams =
+        {
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
+        }
 
-    type ReadConfigFileResponse = {
-        [<JsonPropertyName "config">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Config: JsonNode
+    type ReadConfigFileResponse =
+        {
+            [<JsonPropertyName "config">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Config: JsonNode
 
-        [<JsonPropertyName "error">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Error: DiagnosticResponse voption
-    } with
+            [<JsonPropertyName "error">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Error: DiagnosticResponse voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            Config = null
-            Error = ValueNone
-        }: ReadConfigFileResponse)
+        static member val private DefaultValue = lazy ({ Config = null; Error = ValueNone }: ReadConfigFileResponse)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ ReadConfigFileResponse.Default with ... }` - rather than writing all 2 out.
         static member Default: ReadConfigFileResponse = ReadConfigFileResponse.DefaultValue.Value
 
-    type ParseJsonConfigFileContentParams = {
-        [<JsonPropertyName "json">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Json: JsonNode
+    type ParseJsonConfigFileContentParams =
+        {
+            [<JsonPropertyName "json">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Json: JsonNode
 
-        [<JsonPropertyName "configDirectory">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ConfigDirectory: string voption
+            [<JsonPropertyName "configDirectory">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ConfigDirectory: string voption
 
-        [<JsonPropertyName "configFileName">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ConfigFileName: DocumentIdentifier voption
-    } with
+            [<JsonPropertyName "configFileName">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ConfigFileName: DocumentIdentifier voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            Json = null
-            ConfigDirectory = ValueNone
-            ConfigFileName = ValueNone
-        }: ParseJsonConfigFileContentParams)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    Json = null
+                    ConfigDirectory = ValueNone
+                    ConfigFileName = ValueNone
+                }
+                : ParseJsonConfigFileContentParams)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ ParseJsonConfigFileContentParams.Default with ... }` - rather than writing all 3 out.
-        static member Default: ParseJsonConfigFileContentParams = ParseJsonConfigFileContentParams.DefaultValue.Value
+        static member Default: ParseJsonConfigFileContentParams =
+            ParseJsonConfigFileContentParams.DefaultValue.Value
 
-    type ParseConfigFileParams = {
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
-    }
+    type ParseConfigFileParams =
+        {
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
+        }
 
-    type TranspileParams = {
-        [<JsonPropertyName "input">]
-        Input: string
+    type TranspileParams =
+        {
+            [<JsonPropertyName "input">]
+            Input: string
 
-        [<JsonPropertyName "options">]
-        Options: TranspileOptions
-    }
+            [<JsonPropertyName "options">]
+            Options: TranspileOptions
+        }
 
-    type TranspileOutputResponse = {
-        [<JsonPropertyName "outputText">]
-        OutputText: string
+    type TranspileOutputResponse =
+        {
+            [<JsonPropertyName "outputText">]
+            OutputText: string
 
-        [<JsonPropertyName "diagnostics">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Diagnostics: DiagnosticResponse[] voption
+            [<JsonPropertyName "diagnostics">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Diagnostics: DiagnosticResponse[] voption
 
-        [<JsonPropertyName "sourceMapText">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SourceMapText: string voption
-    }
+            [<JsonPropertyName "sourceMapText">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SourceMapText: string voption
+        }
 
-    type TranspileFromFileParams = {
-        [<JsonPropertyName "fileName">]
-        FileName: string
+    type TranspileFromFileParams =
+        {
+            [<JsonPropertyName "fileName">]
+            FileName: string
 
-        [<JsonPropertyName "options">]
-        Options: TranspileOptions
-    }
+            [<JsonPropertyName "options">]
+            Options: TranspileOptions
+        }
 
-    type GetDefaultProjectForFileParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetDefaultProjectForFileParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
-    }
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
+        }
 
     ///  @deprecated Use parsedCommandLine.fileNames.
-    type ProjectResponse = {
-        [<JsonPropertyName "id">]
-        Id: string
+    type ProjectResponse =
+        {
+            [<JsonPropertyName "id">]
+            Id: string
 
-        [<JsonPropertyName "configFileName">]
-        ConfigFileName: string
+            [<JsonPropertyName "configFileName">]
+            ConfigFileName: string
 
-        [<JsonPropertyName "currentDirectory">]
-        CurrentDirectory: string
+            [<JsonPropertyName "currentDirectory">]
+            CurrentDirectory: string
 
-        [<JsonPropertyName "parsedCommandLine">]
-        ParsedCommandLine: ConfigFileResponse
+            [<JsonPropertyName "parsedCommandLine">]
+            ParsedCommandLine: ConfigFileResponse
 
-        ///  @deprecated Use parsedCommandLine.fileNames.
-        [<JsonPropertyName "rootFiles">]
-        RootFiles: string[]
+            ///  @deprecated Use parsedCommandLine.fileNames.
+            [<JsonPropertyName "rootFiles">]
+            RootFiles: string[]
 
-        ///  @deprecated Use parsedCommandLine.options.
-        [<JsonPropertyName "compilerOptions">]
-        CompilerOptions: CompilerOptions
-    }
+            ///  @deprecated Use parsedCommandLine.options.
+            [<JsonPropertyName "compilerOptions">]
+            CompilerOptions: CompilerOptions
+        }
 
-    type GetSymbolAtPositionParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSymbolAtPositionParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        [<JsonPropertyName "position">]
-        Position: int
-    }
+            [<JsonPropertyName "position">]
+            Position: int
+        }
 
     /// Project is the project in which the symbol was first observed. It is the
     /// default project for follow-up lookups whose results can vary by project.
-    type SymbolResponse = {
-        [<JsonPropertyName "id">]
-        Id: int
+    type SymbolResponse =
+        {
+            [<JsonPropertyName "id">]
+            Id: int
 
-        /// Project is the project in which the symbol was first observed. It is the
-        /// default project for follow-up lookups whose results can vary by project.
-        [<JsonPropertyName "project">]
-        Project: string
+            /// Project is the project in which the symbol was first observed. It is the
+            /// default project for follow-up lookups whose results can vary by project.
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "name">]
-        Name: string
+            [<JsonPropertyName "name">]
+            Name: string
 
-        [<JsonPropertyName "flags">]
-        Flags: SymbolFlags
+            [<JsonPropertyName "flags">]
+            Flags: SymbolFlags
 
-        [<JsonPropertyName "checkFlags">]
-        CheckFlags: CheckFlags
+            [<JsonPropertyName "checkFlags">]
+            CheckFlags: CheckFlags
 
-        [<JsonPropertyName "declarations">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Declarations: string[] voption
+            [<JsonPropertyName "declarations">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Declarations: string[] voption
 
-        [<JsonPropertyName "valueDeclaration">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ValueDeclaration: string voption
+            [<JsonPropertyName "valueDeclaration">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ValueDeclaration: string voption
 
-        [<JsonPropertyName "parent">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Parent: int voption
+            [<JsonPropertyName "parent">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Parent: int voption
 
-        [<JsonPropertyName "exportSymbol">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ExportSymbol: int voption
-    }
+            [<JsonPropertyName "exportSymbol">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ExportSymbol: int voption
+        }
 
-    type GetSymbolsAtPositionsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSymbolsAtPositionsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        [<JsonPropertyName "positions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Positions: int[] voption
-    }
+            [<JsonPropertyName "positions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Positions: int[] voption
+        }
 
-    type GetSymbolAtLocationParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSymbolAtLocationParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "location">]
-        Location: string
-    }
+            [<JsonPropertyName "location">]
+            Location: string
+        }
 
-    type GetSymbolsAtLocationsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSymbolsAtLocationsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "locations">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Locations: string[] voption
-    }
+            [<JsonPropertyName "locations">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Locations: string[] voption
+        }
 
-    type GetSymbolOfSourceFileParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSymbolOfSourceFileParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
-    }
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
+        }
 
-    type GetSymbolsOfSourceFilesParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSymbolsOfSourceFilesParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "files">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Files: DocumentIdentifier[] voption
-    }
+            [<JsonPropertyName "files">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Files: DocumentIdentifier[] voption
+        }
 
-    type GetTypeOfSymbolParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypeOfSymbolParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "symbol">]
-        Symbol: int
-    }
+            [<JsonPropertyName "symbol">]
+            Symbol: int
+        }
 
     /// Value is literal type data. BigInt literals are encoded as signed decimal
     /// strings because JSON cannot represent bigint; absent values are null.
-    type TypeResponse = {
-        [<JsonPropertyName "id">]
-        Id: int
+    type TypeResponse =
+        {
+            [<JsonPropertyName "id">]
+            Id: int
 
-        [<JsonPropertyName "flags">]
-        Flags: TypeFlags
+            [<JsonPropertyName "flags">]
+            Flags: TypeFlags
 
-        [<JsonPropertyName "objectFlags">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ObjectFlags: ObjectFlags voption
+            [<JsonPropertyName "objectFlags">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ObjectFlags: ObjectFlags voption
 
-        [<JsonPropertyName "isTupleType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IsTupleType: bool voption
+            [<JsonPropertyName "isTupleType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IsTupleType: bool voption
 
-        /// Value is literal type data. BigInt literals are encoded as signed decimal
-        /// strings because JSON cannot represent bigint; absent values are null.
-        [<JsonPropertyName "value">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Value: JsonNode
+            /// Value is literal type data. BigInt literals are encoded as signed decimal
+            /// strings because JSON cannot represent bigint; absent values are null.
+            [<JsonPropertyName "value">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Value: JsonNode
 
-        ///  ObjectType / TypeReference / StringMappingType / IndexType target
-        [<JsonPropertyName "target">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Target: int voption
+            ///  ObjectType / TypeReference / StringMappingType / IndexType target
+            [<JsonPropertyName "target">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Target: int voption
 
-        ///  InterfaceType type parameters
-        [<JsonPropertyName "typeParameters">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        TypeParameters: int[] voption
+            ///  InterfaceType type parameters
+            [<JsonPropertyName "typeParameters">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            TypeParameters: int[] voption
 
-        [<JsonPropertyName "outerTypeParameters">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        OuterTypeParameters: int[] voption
+            [<JsonPropertyName "outerTypeParameters">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            OuterTypeParameters: int[] voption
 
-        [<JsonPropertyName "localTypeParameters">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        LocalTypeParameters: int[] voption
+            [<JsonPropertyName "localTypeParameters">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            LocalTypeParameters: int[] voption
 
-        ///  TupleType data
-        [<JsonPropertyName "elementFlags">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ElementFlags: ElementFlags[] voption
+            ///  TupleType data
+            [<JsonPropertyName "elementFlags">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ElementFlags: ElementFlags[] voption
 
-        [<JsonPropertyName "fixedLength">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        FixedLength: int voption
+            [<JsonPropertyName "fixedLength">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            FixedLength: int voption
 
-        [<JsonPropertyName "readonly">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Readonly: bool voption
+            [<JsonPropertyName "readonly">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Readonly: bool voption
 
-        [<JsonPropertyName "labeledElementDeclarations">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        LabeledElementDeclarations: string[] voption
+            [<JsonPropertyName "labeledElementDeclarations">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            LabeledElementDeclarations: string[] voption
 
-        ///  IndexedAccessType data
-        [<JsonPropertyName "objectType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ObjectType: int voption
+            ///  IndexedAccessType data
+            [<JsonPropertyName "objectType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ObjectType: int voption
 
-        [<JsonPropertyName "indexType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IndexType: int voption
+            [<JsonPropertyName "indexType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IndexType: int voption
 
-        ///  ConditionalType data
-        [<JsonPropertyName "checkType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        CheckType: int voption
+            ///  ConditionalType data
+            [<JsonPropertyName "checkType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            CheckType: int voption
 
-        [<JsonPropertyName "extendsType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ExtendsType: int voption
+            [<JsonPropertyName "extendsType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ExtendsType: int voption
 
-        ///  SubstitutionType data
-        [<JsonPropertyName "baseType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        BaseType: int voption
+            ///  SubstitutionType data
+            [<JsonPropertyName "baseType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            BaseType: int voption
 
-        [<JsonPropertyName "substConstraint">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SubstConstraint: int voption
+            [<JsonPropertyName "substConstraint">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SubstConstraint: int voption
 
-        ///  TemplateLiteralType text segments
-        [<JsonPropertyName "texts">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Texts: string[] voption
+            ///  TemplateLiteralType text segments
+            [<JsonPropertyName "texts">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Texts: string[] voption
 
-        ///  FreshableType data (LiteralType and computed enum types)
-        [<JsonPropertyName "freshType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        FreshType: int voption
+            ///  FreshableType data (LiteralType and computed enum types)
+            [<JsonPropertyName "freshType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            FreshType: int voption
 
-        [<JsonPropertyName "regularType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        RegularType: int voption
+            [<JsonPropertyName "regularType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            RegularType: int voption
 
-        ///  TypeParameter data
-        [<JsonPropertyName "isThisType">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IsThisType: bool voption
+            ///  TypeParameter data
+            [<JsonPropertyName "isThisType">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IsThisType: bool voption
 
-        ///  IntrinsicType data
-        [<JsonPropertyName "intrinsicName">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IntrinsicName: string voption
+            ///  IntrinsicType data
+            [<JsonPropertyName "intrinsicName">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IntrinsicName: string voption
 
-        ///  TypeAlias data
-        [<JsonPropertyName "aliasTypeArguments">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AliasTypeArguments: int[] voption
+            ///  TypeAlias data
+            [<JsonPropertyName "aliasTypeArguments">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AliasTypeArguments: int[] voption
 
-        [<JsonPropertyName "aliasSymbol">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AliasSymbol: int voption
+            [<JsonPropertyName "aliasSymbol">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AliasSymbol: int voption
 
-        ///  Symbol associated with structured types
-        [<JsonPropertyName "symbol">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Symbol: int voption
-    }
+            ///  Symbol associated with structured types
+            [<JsonPropertyName "symbol">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Symbol: int voption
+        }
 
-    type GetTypesOfSymbolsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypesOfSymbolsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "symbols">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Symbols: int[] voption
-    }
+            [<JsonPropertyName "symbols">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Symbols: int[] voption
+        }
 
-    type GetSourceFileParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSourceFileParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
-    }
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
+        }
 
     /// SourceFileResponse contains the binary-encoded AST data for a source file.
     /// The Data field is base64-encoded binary data in the encoder's format.
-    type SourceFileResponse = {
-        ///  Data is the base64-encoded binary AST data in the encoder's format.
-        [<JsonPropertyName "data">]
-        Data: string
-    }
+    type SourceFileResponse =
+        {
+            ///  Data is the base64-encoded binary AST data in the encoder's format.
+            [<JsonPropertyName "data">]
+            Data: string
+        }
 
-    type GetSourceFileNamesParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSourceFileNamesParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
-    }
+            [<JsonPropertyName "project">]
+            Project: string
+        }
 
     ///  SourceFileMetadata carries program-stored metadata about a single source file.
-    type SourceFileMetadata = {
-        [<JsonPropertyName "isDefaultLibrary">]
-        IsDefaultLibrary: bool
+    type SourceFileMetadata =
+        {
+            [<JsonPropertyName "isDefaultLibrary">]
+            IsDefaultLibrary: bool
 
-        [<JsonPropertyName "isFromExternalLibrary">]
-        IsFromExternalLibrary: bool
+            [<JsonPropertyName "isFromExternalLibrary">]
+            IsFromExternalLibrary: bool
 
-        [<JsonPropertyName "packageJsonType">]
-        PackageJsonType: string
+            [<JsonPropertyName "packageJsonType">]
+            PackageJsonType: string
 
-        [<JsonPropertyName "packageJsonDirectory">]
-        PackageJsonDirectory: string
+            [<JsonPropertyName "packageJsonDirectory">]
+            PackageJsonDirectory: string
 
-        [<JsonPropertyName "impliedNodeFormat">]
-        ImpliedNodeFormat: ModuleKind
-    }
+            [<JsonPropertyName "impliedNodeFormat">]
+            ImpliedNodeFormat: ModuleKind
+        }
 
     ///  GetProjectDiagnosticsParams are parameters for project-wide diagnostic methods.
-    type GetProjectDiagnosticsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetProjectDiagnosticsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
-    }
+            [<JsonPropertyName "project">]
+            Project: string
+        }
 
     ///  Optional: node handle for location context
-    type ResolveNameParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type ResolveNameParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "name">]
-        Name: string
+            [<JsonPropertyName "name">]
+            Name: string
 
-        ///  Optional: node handle for location context
-        [<JsonPropertyName "location">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Location: string voption
+            ///  Optional: node handle for location context
+            [<JsonPropertyName "location">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Location: string voption
 
-        ///  Optional: file for location context (alternative to Location)
-        [<JsonPropertyName "file">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ``File``: DocumentIdentifier voption
+            ///  Optional: file for location context (alternative to Location)
+            [<JsonPropertyName "file">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ``File``: DocumentIdentifier voption
 
-        ///  Optional: position in file for location context (with File)
-        [<JsonPropertyName "position">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Position: int voption
+            ///  Optional: position in file for location context (with File)
+            [<JsonPropertyName "position">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Position: int voption
 
-        ///  SymbolFlags for what kind of symbol to find
-        [<JsonPropertyName "meaning">]
-        Meaning: SymbolFlags
+            ///  SymbolFlags for what kind of symbol to find
+            [<JsonPropertyName "meaning">]
+            Meaning: SymbolFlags
 
-        ///  Whether to exclude global symbols
-        [<JsonPropertyName "excludeGlobals">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ExcludeGlobals: bool voption
-    }
+            ///  Whether to exclude global symbols
+            [<JsonPropertyName "excludeGlobals">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ExcludeGlobals: bool voption
+        }
 
     /// GetSymbolsInScopeParams are parameters for getSymbolsInScope, which returns
     /// all symbols visible at a given location.
-    type GetSymbolsInScopeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSymbolsInScopeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        ///  Optional: node handle for location context
-        [<JsonPropertyName "location">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Location: string voption
+            ///  Optional: node handle for location context
+            [<JsonPropertyName "location">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Location: string voption
 
-        ///  Optional: file for location context (alternative to Location)
-        [<JsonPropertyName "file">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ``File``: DocumentIdentifier voption
+            ///  Optional: file for location context (alternative to Location)
+            [<JsonPropertyName "file">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ``File``: DocumentIdentifier voption
 
-        ///  Optional: position in file for location context (with File)
-        [<JsonPropertyName "position">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Position: int voption
+            ///  Optional: position in file for location context (with File)
+            [<JsonPropertyName "position">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Position: int voption
 
-        ///  SymbolFlags for what kind of symbols to find
-        [<JsonPropertyName "meaning">]
-        Meaning: SymbolFlags
-    }
+            ///  SymbolFlags for what kind of symbols to find
+            [<JsonPropertyName "meaning">]
+            Meaning: SymbolFlags
+        }
 
-    type GetSignaturesOfTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSignaturesOfTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "type">]
-        ``Type``: int
+            [<JsonPropertyName "type">]
+            ``Type``: int
 
-        [<JsonPropertyName "kind">]
-        Kind: SignatureKind
-    }
+            [<JsonPropertyName "kind">]
+            Kind: SignatureKind
+        }
 
-    type SignatureResponse = {
-        [<JsonPropertyName "id">]
-        Id: int
+    type SignatureResponse =
+        {
+            [<JsonPropertyName "id">]
+            Id: int
 
-        [<JsonPropertyName "flags">]
-        Flags: SignatureFlags
+            [<JsonPropertyName "flags">]
+            Flags: SignatureFlags
 
-        [<JsonPropertyName "declaration">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Declaration: string voption
+            [<JsonPropertyName "declaration">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Declaration: string voption
 
-        [<JsonPropertyName "typeParameters">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        TypeParameters: int[] voption
+            [<JsonPropertyName "typeParameters">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            TypeParameters: int[] voption
 
-        [<JsonPropertyName "parameters">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Parameters: int[] voption
+            [<JsonPropertyName "parameters">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Parameters: int[] voption
 
-        [<JsonPropertyName "thisParameter">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ThisParameter: int voption
+            [<JsonPropertyName "thisParameter">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ThisParameter: int voption
 
-        [<JsonPropertyName "target">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Target: int voption
-    }
+            [<JsonPropertyName "target">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Target: int voption
+        }
 
-    type GetResolvedSignatureParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetResolvedSignatureParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "location">]
-        Location: string
-    }
+            [<JsonPropertyName "location">]
+            Location: string
+        }
 
-    type GetTypeAtLocationParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypeAtLocationParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "location">]
-        Location: string
-    }
+            [<JsonPropertyName "location">]
+            Location: string
+        }
 
-    type GetTypeAtLocationsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypeAtLocationsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "locations">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Locations: string[] voption
-    }
+            [<JsonPropertyName "locations">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Locations: string[] voption
+        }
 
-    type GetTypeAtPositionParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypeAtPositionParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        [<JsonPropertyName "position">]
-        Position: int
-    }
+            [<JsonPropertyName "position">]
+            Position: int
+        }
 
-    type GetTypesAtPositionsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypesAtPositionsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        [<JsonPropertyName "positions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Positions: int[] voption
-    }
+            [<JsonPropertyName "positions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Positions: int[] voption
+        }
 
     ///  GetSymbolPropertyParams is used for all symbol sub-property endpoints.
-    type GetSymbolPropertyParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSymbolPropertyParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "objectId">]
-        ObjectId: int
-    }
+            [<JsonPropertyName "objectId">]
+            ObjectId: int
+        }
 
     ///  GetTypePropertyParams is used for all type sub-property endpoints.
-    type GetTypePropertyParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypePropertyParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "objectId">]
-        ObjectId: int
-    }
+            [<JsonPropertyName "objectId">]
+            ObjectId: int
+        }
 
     ///  GetSignaturePropertyParams is used for all signature sub-property endpoints.
-    type GetSignaturePropertyParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSignaturePropertyParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "objectId">]
-        ObjectId: int
-    }
+            [<JsonPropertyName "objectId">]
+            ObjectId: int
+        }
 
     ///  GetContextualTypeParams returns the contextual type for a node.
-    type GetContextualTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetContextualTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "location">]
-        Location: string
-    }
+            [<JsonPropertyName "location">]
+            Location: string
+        }
 
     ///  GetBaseTypeOfLiteralTypeParams returns the base type of a literal type.
-    type GetBaseTypeOfLiteralTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetBaseTypeOfLiteralTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "type">]
-        ``Type``: int
-    }
+            [<JsonPropertyName "type">]
+            ``Type``: int
+        }
 
     ///  GetTypeFromTypeNodeParams are the parameters for the getTypeFromTypeNode method.
-    type GetTypeFromTypeNodeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypeFromTypeNodeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "location">]
-        Location: string
-    }
+            [<JsonPropertyName "location">]
+            Location: string
+        }
 
     ///  GetWidenedTypeParams are the parameters for the getWidenedType method.
-    type GetWidenedTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetWidenedTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "type">]
-        ``Type``: int
-    }
+            [<JsonPropertyName "type">]
+            ``Type``: int
+        }
 
     ///  GetParameterTypeParams are the parameters for the getParameterType method.
-    type GetParameterTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetParameterTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "signature">]
-        Signature: int
+            [<JsonPropertyName "signature">]
+            Signature: int
 
-        [<JsonPropertyName "index">]
-        Index: int
-    }
+            [<JsonPropertyName "index">]
+            Index: int
+        }
 
     ///  IsArrayLikeTypeParams checks whether a type is array-like.
-    type IsArrayLikeTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type IsArrayLikeTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "type">]
-        ``Type``: int
-    }
+            [<JsonPropertyName "type">]
+            ``Type``: int
+        }
 
     ///  IsTypeAssignableToParams checks assignability between two types.
-    type IsTypeAssignableToParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type IsTypeAssignableToParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "source">]
-        Source: int
+            [<JsonPropertyName "source">]
+            Source: int
 
-        [<JsonPropertyName "target">]
-        Target: int
-    }
+            [<JsonPropertyName "target">]
+            Target: int
+        }
 
     ///  GetTypeOfSymbolAtLocationParams returns the narrowed type of a symbol at a specific location.
-    type GetTypeOfSymbolAtLocationParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetTypeOfSymbolAtLocationParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "symbol">]
-        Symbol: int
+            [<JsonPropertyName "symbol">]
+            Symbol: int
 
-        [<JsonPropertyName "location">]
-        Location: string
-    }
+            [<JsonPropertyName "location">]
+            Location: string
+        }
 
     ///  TypeToTypeNodeParams are the parameters for the typeToTypeNode method.
-    type TypeToTypeNodeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type TypeToTypeNodeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "type">]
-        ``Type``: int
+            [<JsonPropertyName "type">]
+            ``Type``: int
 
-        [<JsonPropertyName "location">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Location: string voption
+            [<JsonPropertyName "location">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Location: string voption
 
-        [<JsonPropertyName "flags">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Flags: int voption
-    }
+            [<JsonPropertyName "flags">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Flags: int voption
+        }
 
     ///  SignatureToSignatureDeclarationParams are the parameters for the signatureToSignatureDeclaration method.
-    type SignatureToSignatureDeclarationParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type SignatureToSignatureDeclarationParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "signature">]
-        Signature: int
+            [<JsonPropertyName "signature">]
+            Signature: int
 
-        [<JsonPropertyName "kind">]
-        Kind: SyntaxKind
+            [<JsonPropertyName "kind">]
+            Kind: SyntaxKind
 
-        [<JsonPropertyName "location">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Location: string voption
+            [<JsonPropertyName "location">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Location: string voption
 
-        [<JsonPropertyName "flags">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Flags: NodeBuilderFlags voption
-    }
+            [<JsonPropertyName "flags">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Flags: NodeBuilderFlags voption
+        }
 
     ///  CheckerSignatureParams are parameters for checker methods that operate on a signature.
-    type CheckerSignatureParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type CheckerSignatureParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "signature">]
-        Signature: int
-    }
+            [<JsonPropertyName "signature">]
+            Signature: int
+        }
 
     ///  TypePredicateResponse is the response for getTypePredicateOfSignature.
-    type TypePredicateResponse = {
-        [<JsonPropertyName "kind">]
-        Kind: TypePredicateKind
+    type TypePredicateResponse =
+        {
+            [<JsonPropertyName "kind">]
+            Kind: TypePredicateKind
 
-        [<JsonPropertyName "parameterIndex">]
-        ParameterIndex: int
+            [<JsonPropertyName "parameterIndex">]
+            ParameterIndex: int
 
-        [<JsonPropertyName "parameterName">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ParameterName: string voption
+            [<JsonPropertyName "parameterName">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ParameterName: string voption
 
-        [<JsonPropertyName "type">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ``Type``: TypeResponse voption
-    }
+            [<JsonPropertyName "type">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ``Type``: TypeResponse voption
+        }
 
     ///  CheckerTypeParams are parameters for checker methods that operate on a type.
-    type CheckerTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type CheckerTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "type">]
-        ``Type``: int
-    }
+            [<JsonPropertyName "type">]
+            ``Type``: int
+        }
 
     ///  GetPropertyOfTypeParams are parameters for getPropertyOfType (a named property of a type).
-    type GetPropertyOfTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetPropertyOfTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "type">]
-        ``Type``: int
+            [<JsonPropertyName "type">]
+            ``Type``: int
 
-        [<JsonPropertyName "name">]
-        Name: string
-    }
+            [<JsonPropertyName "name">]
+            Name: string
+        }
 
     ///  IndexInfoResponse represents a single index signature.
-    type IndexInfoResponse = {
-        [<JsonPropertyName "keyType">]
-        KeyType: TypeResponse
+    type IndexInfoResponse =
+        {
+            [<JsonPropertyName "keyType">]
+            KeyType: TypeResponse
 
-        [<JsonPropertyName "valueType">]
-        ValueType: TypeResponse
+            [<JsonPropertyName "valueType">]
+            ValueType: TypeResponse
 
-        [<JsonPropertyName "isReadonly">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IsReadonly: bool voption
+            [<JsonPropertyName "isReadonly">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IsReadonly: bool voption
 
-        [<JsonPropertyName "declaration">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Declaration: string voption
-    }
+            [<JsonPropertyName "declaration">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Declaration: string voption
+        }
 
-    type GetImportAdderEditsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetImportAdderEditsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        [<JsonPropertyName "actions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Actions: ImportAdderAction[] voption
-    }
+            [<JsonPropertyName "actions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Actions: ImportAdderAction[] voption
+        }
 
-    type TextEdit = {
-        [<JsonPropertyName "pos">]
-        Pos: int
+    type TextEdit =
+        {
+            [<JsonPropertyName "pos">]
+            Pos: int
 
-        [<JsonPropertyName "end">]
-        ``End``: int
+            [<JsonPropertyName "end">]
+            ``End``: int
 
-        [<JsonPropertyName "newText">]
-        NewText: string
-    }
+            [<JsonPropertyName "newText">]
+            NewText: string
+        }
 
     ///  CheckerNodeParams are parameters for checker methods that operate on a node location.
-    type CheckerNodeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type CheckerNodeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "location">]
-        Location: string
-    }
+            [<JsonPropertyName "location">]
+            Location: string
+        }
 
     ///  CheckerSymbolParams are parameters for checker methods that operate on a symbol.
-    type CheckerSymbolParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type CheckerSymbolParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "symbol">]
-        Symbol: int
-    }
+            [<JsonPropertyName "symbol">]
+            Symbol: int
+        }
 
     ///  GetMemberInModuleExportsParams are parameters for getMemberInModuleExports.
-    type GetMemberInModuleExportsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetMemberInModuleExportsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "symbol">]
-        Symbol: int
+            [<JsonPropertyName "symbol">]
+            Symbol: int
 
-        [<JsonPropertyName "name">]
-        Name: string
-    }
+            [<JsonPropertyName "name">]
+            Name: string
+        }
 
     /// JSDocTagInfo is a single JSDoc tag, mirroring Strada's JSDocTagInfo but with the tag text
     /// rendered as a plain string rather than SymbolDisplayPart[].
-    type JSDocTagInfo = {
-        [<JsonPropertyName "name">]
-        Name: string
+    type JSDocTagInfo =
+        {
+            [<JsonPropertyName "name">]
+            Name: string
 
-        [<JsonPropertyName "text">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Text: string voption
-    }
+            [<JsonPropertyName "text">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Text: string voption
+        }
 
     ///  GetReferencesToSymbolInFileParams are the parameters for the getReferencesToSymbolInFile method.
-    type GetReferencesToSymbolInFileParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetReferencesToSymbolInFileParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        [<JsonPropertyName "symbol">]
-        Symbol: int
-    }
+            [<JsonPropertyName "symbol">]
+            Symbol: int
+        }
 
     ///  GetReferencedSymbolsForNodeParams are the parameters for the getReferencedSymbolsForNode method.
-    type GetReferencedSymbolsForNodeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetReferencedSymbolsForNodeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "node">]
-        Node: string
+            [<JsonPropertyName "node">]
+            Node: string
 
-        [<JsonPropertyName "position">]
-        Position: int
-    }
+            [<JsonPropertyName "position">]
+            Position: int
+        }
 
     ///  ReferencedSymbolEntry represents a symbol definition and its references.
-    type ReferencedSymbolEntry = {
-        [<JsonPropertyName "definition">]
-        Definition: string
+    type ReferencedSymbolEntry =
+        {
+            [<JsonPropertyName "definition">]
+            Definition: string
 
-        [<JsonPropertyName "symbol">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Symbol: SymbolResponse voption
+            [<JsonPropertyName "symbol">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Symbol: SymbolResponse voption
 
-        [<JsonPropertyName "references">]
-        References: string[]
-    }
+            [<JsonPropertyName "references">]
+            References: string[]
+        }
 
     ///  GetSignatureUsagesParams are the parameters for the getSignatureUsages method.
-    type GetSignatureUsagesParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetSignatureUsagesParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "signatureDecl">]
-        SignatureDecl: string
-    }
+            [<JsonPropertyName "signatureDecl">]
+            SignatureDecl: string
+        }
 
     ///  SignatureUsageResponse represents a single usage of a signature as a name-call pair.
-    type SignatureUsageResponse = {
-        [<JsonPropertyName "name">]
-        Name: string
+    type SignatureUsageResponse =
+        {
+            [<JsonPropertyName "name">]
+            Name: string
 
-        [<JsonPropertyName "call">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Call: string voption
-    }
+            [<JsonPropertyName "call">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Call: string voption
+        }
 
     ///  GetCompletionsAtPositionParams are the parameters for the getCompletionsAtPosition method.
-    type GetCompletionsAtPositionParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetCompletionsAtPositionParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        [<JsonPropertyName "position">]
-        Position: int
+            [<JsonPropertyName "position">]
+            Position: int
 
-        [<JsonPropertyName "triggerCharacter">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        TriggerCharacter: string voption
+            [<JsonPropertyName "triggerCharacter">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            TriggerCharacter: string voption
 
-        [<JsonPropertyName "includeSymbol">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IncludeSymbol: bool voption
-    }
+            [<JsonPropertyName "includeSymbol">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IncludeSymbol: bool voption
+        }
 
     ///  CompletionInfoResponse wraps a list of completion entries.
-    type CompletionInfoResponse = {
-        [<JsonPropertyName "isIncomplete">]
-        IsIncomplete: bool
+    type CompletionInfoResponse =
+        {
+            [<JsonPropertyName "isIncomplete">]
+            IsIncomplete: bool
 
-        [<JsonPropertyName "entries">]
-        Entries: CompletionEntryResponse[]
-    }
+            [<JsonPropertyName "entries">]
+            Entries: CompletionEntryResponse[]
+        }
 
     ///  GetDiagnosticsParams are parameters for per-file diagnostic methods.
-    type GetDiagnosticsParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetDiagnosticsParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "files">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Files: DocumentIdentifier[] voption
-    }
+            [<JsonPropertyName "files">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Files: DocumentIdentifier[] voption
+        }
 
     ///  DiagnosticResponse is the API response for a single diagnostic.
-    type DiagnosticResponse = {
-        ///  FileName is the path of the file this diagnostic belongs to, if any.
-        [<JsonPropertyName "fileName">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        FileName: string voption
+    type DiagnosticResponse =
+        {
+            ///  FileName is the path of the file this diagnostic belongs to, if any.
+            [<JsonPropertyName "fileName">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            FileName: string voption
 
-        ///  Pos is the start position of the diagnostic in the source file.
-        [<JsonPropertyName "pos">]
-        Pos: int
+            ///  Pos is the start position of the diagnostic in the source file.
+            [<JsonPropertyName "pos">]
+            Pos: int
 
-        ///  End is the end position of the diagnostic in the source file.
-        [<JsonPropertyName "end">]
-        ``End``: int
+            ///  End is the end position of the diagnostic in the source file.
+            [<JsonPropertyName "end">]
+            ``End``: int
 
-        ///  StartPosition is the zero-based line and UTF-16 character position of Pos.
-        [<JsonPropertyName "startPosition">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        StartPosition: DiagnosticPositionResponse voption
+            ///  StartPosition is the zero-based line and UTF-16 character position of Pos.
+            [<JsonPropertyName "startPosition">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            StartPosition: DiagnosticPositionResponse voption
 
-        ///  EndPosition is the zero-based line and UTF-16 character position of End.
-        [<JsonPropertyName "endPosition">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        EndPosition: DiagnosticPositionResponse voption
+            ///  EndPosition is the zero-based line and UTF-16 character position of End.
+            [<JsonPropertyName "endPosition">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            EndPosition: DiagnosticPositionResponse voption
 
-        ///  SourceLines contains the source lines needed to render this diagnostic with context.
-        [<JsonPropertyName "sourceLines">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SourceLines: DiagnosticSourceLineResponse[] voption
+            ///  SourceLines contains the source lines needed to render this diagnostic with context.
+            [<JsonPropertyName "sourceLines">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SourceLines: DiagnosticSourceLineResponse[] voption
 
-        ///  Code is the diagnostic error code.
-        [<JsonPropertyName "code">]
-        Code: int
+            ///  Code is the diagnostic error code.
+            [<JsonPropertyName "code">]
+            Code: int
 
-        ///  Category is the diagnostic category (error, warning, suggestion, message).
-        [<JsonPropertyName "category">]
-        Category: int
+            ///  Category is the diagnostic category (error, warning, suggestion, message).
+            [<JsonPropertyName "category">]
+            Category: int
 
-        ///  Source is a custom diagnostic-code prefix. An empty value uses the default "TS".
-        [<JsonPropertyName "source">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Source: string voption
+            ///  Source is a custom diagnostic-code prefix. An empty value uses the default "TS".
+            [<JsonPropertyName "source">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Source: string voption
 
-        ///  Text is the localized diagnostic message text.
-        [<JsonPropertyName "text">]
-        Text: string
+            ///  Text is the localized diagnostic message text.
+            [<JsonPropertyName "text">]
+            Text: string
 
-        ///  ReportsUnnecessary indicates this diagnostic highlights unnecessary code.
-        [<JsonPropertyName "reportsUnnecessary">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ReportsUnnecessary: bool voption
+            ///  ReportsUnnecessary indicates this diagnostic highlights unnecessary code.
+            [<JsonPropertyName "reportsUnnecessary">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ReportsUnnecessary: bool voption
 
-        ///  ReportsDeprecated indicates this diagnostic highlights deprecated code.
-        [<JsonPropertyName "reportsDeprecated">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ReportsDeprecated: bool voption
+            ///  ReportsDeprecated indicates this diagnostic highlights deprecated code.
+            [<JsonPropertyName "reportsDeprecated">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ReportsDeprecated: bool voption
 
-        ///  MessageChain contains chained diagnostic messages, if any.
-        [<JsonPropertyName "messageChain">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        MessageChain: DiagnosticResponse[] voption
+            ///  MessageChain contains chained diagnostic messages, if any.
+            [<JsonPropertyName "messageChain">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            MessageChain: DiagnosticResponse[] voption
 
-        ///  RelatedInformation contains related diagnostic information, if any.
-        [<JsonPropertyName "relatedInformation">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        RelatedInformation: DiagnosticResponse[] voption
-    }
+            ///  RelatedInformation contains related diagnostic information, if any.
+            [<JsonPropertyName "relatedInformation">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            RelatedInformation: DiagnosticResponse[] voption
+        }
 
     ///  PrintNodeParams are the parameters for the printNode method.
-    type PrintNodeParams = {
-        ///  base64-encoded binary AST data
-        [<JsonPropertyName "data">]
-        Data: string
+    type PrintNodeParams =
+        {
+            ///  base64-encoded binary AST data
+            [<JsonPropertyName "data">]
+            Data: string
 
-        [<JsonPropertyName "preserveSourceNewlines">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        PreserveSourceNewlines: bool voption
+            [<JsonPropertyName "preserveSourceNewlines">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            PreserveSourceNewlines: bool voption
 
-        [<JsonPropertyName "neverAsciiEscape">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NeverAsciiEscape: bool voption
+            [<JsonPropertyName "neverAsciiEscape">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NeverAsciiEscape: bool voption
 
-        [<JsonPropertyName "terminateUnterminatedLiterals">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        TerminateUnterminatedLiterals: bool voption
-    }
+            [<JsonPropertyName "terminateUnterminatedLiterals">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            TerminateUnterminatedLiterals: bool voption
+        }
 
     ///  FormatNodeForInsertionParams are the parameters for the formatNodeForInsertion method.
-    type FormatNodeForInsertionParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type FormatNodeForInsertionParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        ///  target file where the node will be inserted
-        [<JsonPropertyName "file">]
-        ``File``: DocumentIdentifier
+            ///  target file where the node will be inserted
+            [<JsonPropertyName "file">]
+            ``File``: DocumentIdentifier
 
-        ///  UTF-16 code-unit offset of the insertion position in the target file
-        [<JsonPropertyName "position">]
-        Position: int
+            ///  UTF-16 code-unit offset of the insertion position in the target file
+            [<JsonPropertyName "position">]
+            Position: int
 
-        ///  base64-encoded binary AST data for the synthesized node
-        [<JsonPropertyName "data">]
-        Data: string
-    }
+            ///  base64-encoded binary AST data for the synthesized node
+            [<JsonPropertyName "data">]
+            Data: string
+        }
 
-    type EmitParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type EmitParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "emitOnly">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        EmitOnly: int voption
-    }
+            [<JsonPropertyName "emitOnly">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            EmitOnly: int voption
+        }
 
-    type EmitResponse = {
-        [<JsonPropertyName "emitSkipped">]
-        EmitSkipped: bool
+    type EmitResponse =
+        {
+            [<JsonPropertyName "emitSkipped">]
+            EmitSkipped: bool
 
-        [<JsonPropertyName "diagnostics">]
-        Diagnostics: DiagnosticResponse[]
+            [<JsonPropertyName "diagnostics">]
+            Diagnostics: DiagnosticResponse[]
 
-        [<JsonPropertyName "emittedFiles">]
-        EmittedFiles: string[]
-    }
+            [<JsonPropertyName "emittedFiles">]
+            EmittedFiles: string[]
+        }
 
-    type EmitOutputResponse = {
-        [<JsonPropertyName "emitSkipped">]
-        EmitSkipped: bool
+    type EmitOutputResponse =
+        {
+            [<JsonPropertyName "emitSkipped">]
+            EmitSkipped: bool
 
-        [<JsonPropertyName "diagnostics">]
-        Diagnostics: DiagnosticResponse[]
+            [<JsonPropertyName "diagnostics">]
+            Diagnostics: DiagnosticResponse[]
 
-        [<JsonPropertyName "outputFiles">]
-        OutputFiles: EmitOutputFile[]
-    }
+            [<JsonPropertyName "outputFiles">]
+            OutputFiles: EmitOutputFile[]
+        }
 
-    type SelectedFilesEmitParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type SelectedFilesEmitParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
+            [<JsonPropertyName "project">]
+            Project: string
 
-        [<JsonPropertyName "files">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Files: DocumentIdentifier[] voption
-    }
+            [<JsonPropertyName "files">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Files: DocumentIdentifier[] voption
+        }
 
     ///  GetIntrinsicTypeParams is used for intrinsic type getters (anyType, stringType, etc.).
-    type GetIntrinsicTypeParams = {
-        [<JsonPropertyName "snapshot">]
-        Snapshot: int
+    type GetIntrinsicTypeParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            Snapshot: int
 
-        [<JsonPropertyName "project">]
-        Project: string
-    }
+            [<JsonPropertyName "project">]
+            Project: string
+        }
 
     /// WellKnownSymbolsResponse carries the handle ids of the per-checker singleton
     /// symbols (unknown, undefined, arguments) so the client can identify them by id
     /// without a round-trip on every check.
-    type WellKnownSymbolsResponse = {
-        [<JsonPropertyName "unknown">]
-        Unknown: int
+    type WellKnownSymbolsResponse =
+        {
+            [<JsonPropertyName "unknown">]
+            Unknown: int
 
-        [<JsonPropertyName "undefined">]
-        Undefined: int
+            [<JsonPropertyName "undefined">]
+            Undefined: int
 
-        [<JsonPropertyName "arguments">]
-        Arguments: int
-    }
+            [<JsonPropertyName "arguments">]
+            Arguments: int
+        }
 
     /// WellKnownSignaturesResponse carries the handle id of the per-checker singleton
     /// unknown signature (the signature the checker yields when a call cannot be
     /// resolved) so the client can identify it by id without a round-trip on every check.
-    type WellKnownSignaturesResponse = {
-        [<JsonPropertyName "unknown">]
-        Unknown: int
-    }
+    type WellKnownSignaturesResponse =
+        {
+            [<JsonPropertyName "unknown">]
+            Unknown: int
+        }
 
-    type ProfileParams = {
-        [<JsonPropertyName "dir">]
-        Dir: string
-    }
+    type ProfileParams =
+        {
+            [<JsonPropertyName "dir">]
+            Dir: string
+        }
 
-    type ProfileResult = {
-        [<JsonPropertyName "file">]
-        ``File``: string
-    }
+    type ProfileResult =
+        {
+            [<JsonPropertyName "file">]
+            ``File``: string
+        }
 
-    type BatchRequest = {
-        /// One of: `batchRequests`, `createProgram`, `emit`, `emitToString`, `formatNodeForInsertion`, `getAliasSymbolOfType`, `getAliasTypeArgumentsOfType`, `getAliasedSymbol`, `getAnyType`, `getApparentPropertiesOfType`, `getApparentType`, `getBaseConstraintOfType`, `getBaseTypeOfLiteralType`, `getBaseTypeOfType`, `getBaseTypes`, `getBigIntType`, `getBindDiagnostics`, `getBooleanType`, `getCheckTypeOfType`, `getCompletionsAtPosition`, `getConfigFileNames`, `getConfigFileParsingDiagnostics`, `getConfigSourceFile`, `getConstantValue`, `getConstraintOfType`, `getConstraintOfTypeParameter`, `getContextualType`, `getDeclarationDiagnostics`, `getDeclarationEmit`, `getDeclaredTypeOfSymbol`, `getDefaultFromTypeParameter`, `getDefaultProjectForFile`, `getDocumentationComment`, `getESSymbolType`, `getExportSpecifierLocalTargetSymbol`, `getExportSymbolOfSymbol`, `getExportsOfModule`, `getExportsOfSymbol`, `getExtendsTypeOfType`, `getFalseTypeOfConditionalType`, `getFreshTypeOfType`, `getFullyQualifiedName`, `getGlobalDiagnostics`, `getImmediateAliasedSymbol`, `getImportAdderEdits`, `getIndexInfosOfType`, `getIndexTypeOfType`, `getJavaScriptEmit`, `getJsDocTags`, `getLocalTypeParametersOfType`, `getMemberInModuleExports`, `getMembersOfSymbol`, `getNeverType`, `getNonMissingTypeOfSymbol`, `getNonNullableType`, `getNonPrimitiveType`, `getNullType`, `getNumberType`, `getObjectTypeOfType`, `getOuterTypeParametersOfType`, `getParameterType`, `getParametersOfSignature`, `getParentOfSymbol`, `getProgramDiagnostics`, `getPropertiesOfType`, `getPropertyOfType`, `getReducedType`, `getReferencedSymbolsForNode`, `getReferencesToSymbolInFile`, `getRegularTypeOfType`, `getResolvedSignature`, `getRestTypeOfSignature`, `getReturnTypeOfSignature`, `getSemanticDiagnostics`, `getShorthandAssignmentValueSymbol`, `getSignatureFromDeclaration`, `getSignatureUsages`, `getSignaturesOfType`, `getSourceFile`, `getSourceFileMetadata`, `getSourceFileNames`, `getStringType`, `getSuggestionDiagnostics`, `getSymbolAtLocation`, `getSymbolAtPosition`, `getSymbolOfSourceFile`, `getSymbolOfType`, `getSymbolsAtLocations`, `getSymbolsAtPositions`, `getSymbolsInScope`, `getSymbolsOfSourceFiles`, `getSyntacticDiagnostics`, `getTargetOfSignature`, `getTargetOfType`, `getTargetSymbol`, `getThisParameterOfSignature`, `getTrueTypeOfConditionalType`, `getTypeArguments`, `getTypeAtLocation`, `getTypeAtLocations`, `getTypeAtPosition`, `getTypeFromTypeNode`, `getTypeOfSymbol`, `getTypeOfSymbolAtLocation`, `getTypeParameterAtPosition`, `getTypeParametersOfSignature`, `getTypeParametersOfType`, `getTypePredicateOfSignature`, `getTypesAtPositions`, `getTypesOfSymbols`, `getTypesOfType`, `getUndefinedType`, `getUnknownType`, `getVoidType`, `getWellKnownSignatures`, `getWellKnownSymbols`, `getWidenedType`, `initialize`, `isArrayLikeType`, `isArrayType`, `isContextSensitive`, `isReadonlySymbol`, `isTypeAssignableTo`, `parseCommandLine`, `parseConfigFile`, `parseJsonConfigFileContent`, `printNode`, `readConfigFile`, `release`, `resolveName`, `saveHeapProfile`, `signatureToSignatureDeclaration`, `startCPUProfile`, `stopCPUProfile`, `transpileDeclaration`, `transpileDeclarationFromFile`, `transpileModule`, `transpileModuleFromFile`, `typeToString`, `typeToTypeNode`, `updateSnapshot`, `updateTemporarySnapshot`
-        [<JsonPropertyName "method">]
-        Method: string
+    type BatchRequest =
+        {
+            /// One of: `batchRequests`, `createProgram`, `emit`, `emitToString`, `formatNodeForInsertion`, `getAliasSymbolOfType`, `getAliasTypeArgumentsOfType`, `getAliasedSymbol`, `getAnyType`, `getApparentPropertiesOfType`, `getApparentType`, `getBaseConstraintOfType`, `getBaseTypeOfLiteralType`, `getBaseTypeOfType`, `getBaseTypes`, `getBigIntType`, `getBindDiagnostics`, `getBooleanType`, `getCheckTypeOfType`, `getCompletionsAtPosition`, `getConfigFileNames`, `getConfigFileParsingDiagnostics`, `getConfigSourceFile`, `getConstantValue`, `getConstraintOfType`, `getConstraintOfTypeParameter`, `getContextualType`, `getDeclarationDiagnostics`, `getDeclarationEmit`, `getDeclaredTypeOfSymbol`, `getDefaultFromTypeParameter`, `getDefaultProjectForFile`, `getDocumentationComment`, `getESSymbolType`, `getExportSpecifierLocalTargetSymbol`, `getExportSymbolOfSymbol`, `getExportsOfModule`, `getExportsOfSymbol`, `getExtendsTypeOfType`, `getFalseTypeOfConditionalType`, `getFreshTypeOfType`, `getFullyQualifiedName`, `getGlobalDiagnostics`, `getImmediateAliasedSymbol`, `getImportAdderEdits`, `getIndexInfosOfType`, `getIndexTypeOfType`, `getJavaScriptEmit`, `getJsDocTags`, `getLocalTypeParametersOfType`, `getMemberInModuleExports`, `getMembersOfSymbol`, `getNeverType`, `getNonMissingTypeOfSymbol`, `getNonNullableType`, `getNonPrimitiveType`, `getNullType`, `getNumberType`, `getObjectTypeOfType`, `getOuterTypeParametersOfType`, `getParameterType`, `getParametersOfSignature`, `getParentOfSymbol`, `getProgramDiagnostics`, `getPropertiesOfType`, `getPropertyOfType`, `getReducedType`, `getReferencedSymbolsForNode`, `getReferencesToSymbolInFile`, `getRegularTypeOfType`, `getResolvedSignature`, `getRestTypeOfSignature`, `getReturnTypeOfSignature`, `getSemanticDiagnostics`, `getShorthandAssignmentValueSymbol`, `getSignatureFromDeclaration`, `getSignatureUsages`, `getSignaturesOfType`, `getSourceFile`, `getSourceFileMetadata`, `getSourceFileNames`, `getStringType`, `getSuggestionDiagnostics`, `getSymbolAtLocation`, `getSymbolAtPosition`, `getSymbolOfSourceFile`, `getSymbolOfType`, `getSymbolsAtLocations`, `getSymbolsAtPositions`, `getSymbolsInScope`, `getSymbolsOfSourceFiles`, `getSyntacticDiagnostics`, `getTargetOfSignature`, `getTargetOfType`, `getTargetSymbol`, `getThisParameterOfSignature`, `getTrueTypeOfConditionalType`, `getTypeArguments`, `getTypeAtLocation`, `getTypeAtLocations`, `getTypeAtPosition`, `getTypeFromTypeNode`, `getTypeOfSymbol`, `getTypeOfSymbolAtLocation`, `getTypeParameterAtPosition`, `getTypeParametersOfSignature`, `getTypeParametersOfType`, `getTypePredicateOfSignature`, `getTypesAtPositions`, `getTypesOfSymbols`, `getTypesOfType`, `getUndefinedType`, `getUnknownType`, `getVoidType`, `getWellKnownSignatures`, `getWellKnownSymbols`, `getWidenedType`, `initialize`, `isArrayLikeType`, `isArrayType`, `isContextSensitive`, `isReadonlySymbol`, `isTypeAssignableTo`, `parseCommandLine`, `parseConfigFile`, `parseJsonConfigFileContent`, `printNode`, `readConfigFile`, `release`, `resolveName`, `saveHeapProfile`, `signatureToSignatureDeclaration`, `startCPUProfile`, `stopCPUProfile`, `transpileDeclaration`, `transpileDeclarationFromFile`, `transpileModule`, `transpileModuleFromFile`, `typeToString`, `typeToTypeNode`, `updateSnapshot`, `updateTemporarySnapshot`
+            [<JsonPropertyName "method">]
+            Method: string
 
-        [<JsonPropertyName "params">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        [<JsonConverter(typeof<RawJsonConverter>)>]
-        Params: byte[]
-    }
+            [<JsonPropertyName "params">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            [<JsonConverter(typeof<RawJsonConverter>)>]
+            Params: byte[]
+        }
 
-    type BatchResponse = {
-        /// One of: `batchRequests`, `createProgram`, `emit`, `emitToString`, `formatNodeForInsertion`, `getAliasSymbolOfType`, `getAliasTypeArgumentsOfType`, `getAliasedSymbol`, `getAnyType`, `getApparentPropertiesOfType`, `getApparentType`, `getBaseConstraintOfType`, `getBaseTypeOfLiteralType`, `getBaseTypeOfType`, `getBaseTypes`, `getBigIntType`, `getBindDiagnostics`, `getBooleanType`, `getCheckTypeOfType`, `getCompletionsAtPosition`, `getConfigFileNames`, `getConfigFileParsingDiagnostics`, `getConfigSourceFile`, `getConstantValue`, `getConstraintOfType`, `getConstraintOfTypeParameter`, `getContextualType`, `getDeclarationDiagnostics`, `getDeclarationEmit`, `getDeclaredTypeOfSymbol`, `getDefaultFromTypeParameter`, `getDefaultProjectForFile`, `getDocumentationComment`, `getESSymbolType`, `getExportSpecifierLocalTargetSymbol`, `getExportSymbolOfSymbol`, `getExportsOfModule`, `getExportsOfSymbol`, `getExtendsTypeOfType`, `getFalseTypeOfConditionalType`, `getFreshTypeOfType`, `getFullyQualifiedName`, `getGlobalDiagnostics`, `getImmediateAliasedSymbol`, `getImportAdderEdits`, `getIndexInfosOfType`, `getIndexTypeOfType`, `getJavaScriptEmit`, `getJsDocTags`, `getLocalTypeParametersOfType`, `getMemberInModuleExports`, `getMembersOfSymbol`, `getNeverType`, `getNonMissingTypeOfSymbol`, `getNonNullableType`, `getNonPrimitiveType`, `getNullType`, `getNumberType`, `getObjectTypeOfType`, `getOuterTypeParametersOfType`, `getParameterType`, `getParametersOfSignature`, `getParentOfSymbol`, `getProgramDiagnostics`, `getPropertiesOfType`, `getPropertyOfType`, `getReducedType`, `getReferencedSymbolsForNode`, `getReferencesToSymbolInFile`, `getRegularTypeOfType`, `getResolvedSignature`, `getRestTypeOfSignature`, `getReturnTypeOfSignature`, `getSemanticDiagnostics`, `getShorthandAssignmentValueSymbol`, `getSignatureFromDeclaration`, `getSignatureUsages`, `getSignaturesOfType`, `getSourceFile`, `getSourceFileMetadata`, `getSourceFileNames`, `getStringType`, `getSuggestionDiagnostics`, `getSymbolAtLocation`, `getSymbolAtPosition`, `getSymbolOfSourceFile`, `getSymbolOfType`, `getSymbolsAtLocations`, `getSymbolsAtPositions`, `getSymbolsInScope`, `getSymbolsOfSourceFiles`, `getSyntacticDiagnostics`, `getTargetOfSignature`, `getTargetOfType`, `getTargetSymbol`, `getThisParameterOfSignature`, `getTrueTypeOfConditionalType`, `getTypeArguments`, `getTypeAtLocation`, `getTypeAtLocations`, `getTypeAtPosition`, `getTypeFromTypeNode`, `getTypeOfSymbol`, `getTypeOfSymbolAtLocation`, `getTypeParameterAtPosition`, `getTypeParametersOfSignature`, `getTypeParametersOfType`, `getTypePredicateOfSignature`, `getTypesAtPositions`, `getTypesOfSymbols`, `getTypesOfType`, `getUndefinedType`, `getUnknownType`, `getVoidType`, `getWellKnownSignatures`, `getWellKnownSymbols`, `getWidenedType`, `initialize`, `isArrayLikeType`, `isArrayType`, `isContextSensitive`, `isReadonlySymbol`, `isTypeAssignableTo`, `parseCommandLine`, `parseConfigFile`, `parseJsonConfigFileContent`, `printNode`, `readConfigFile`, `release`, `resolveName`, `saveHeapProfile`, `signatureToSignatureDeclaration`, `startCPUProfile`, `stopCPUProfile`, `transpileDeclaration`, `transpileDeclarationFromFile`, `transpileModule`, `transpileModuleFromFile`, `typeToString`, `typeToTypeNode`, `updateSnapshot`, `updateTemporarySnapshot`
-        [<JsonPropertyName "method">]
-        Method: string
+    type BatchResponse =
+        {
+            /// One of: `batchRequests`, `createProgram`, `emit`, `emitToString`, `formatNodeForInsertion`, `getAliasSymbolOfType`, `getAliasTypeArgumentsOfType`, `getAliasedSymbol`, `getAnyType`, `getApparentPropertiesOfType`, `getApparentType`, `getBaseConstraintOfType`, `getBaseTypeOfLiteralType`, `getBaseTypeOfType`, `getBaseTypes`, `getBigIntType`, `getBindDiagnostics`, `getBooleanType`, `getCheckTypeOfType`, `getCompletionsAtPosition`, `getConfigFileNames`, `getConfigFileParsingDiagnostics`, `getConfigSourceFile`, `getConstantValue`, `getConstraintOfType`, `getConstraintOfTypeParameter`, `getContextualType`, `getDeclarationDiagnostics`, `getDeclarationEmit`, `getDeclaredTypeOfSymbol`, `getDefaultFromTypeParameter`, `getDefaultProjectForFile`, `getDocumentationComment`, `getESSymbolType`, `getExportSpecifierLocalTargetSymbol`, `getExportSymbolOfSymbol`, `getExportsOfModule`, `getExportsOfSymbol`, `getExtendsTypeOfType`, `getFalseTypeOfConditionalType`, `getFreshTypeOfType`, `getFullyQualifiedName`, `getGlobalDiagnostics`, `getImmediateAliasedSymbol`, `getImportAdderEdits`, `getIndexInfosOfType`, `getIndexTypeOfType`, `getJavaScriptEmit`, `getJsDocTags`, `getLocalTypeParametersOfType`, `getMemberInModuleExports`, `getMembersOfSymbol`, `getNeverType`, `getNonMissingTypeOfSymbol`, `getNonNullableType`, `getNonPrimitiveType`, `getNullType`, `getNumberType`, `getObjectTypeOfType`, `getOuterTypeParametersOfType`, `getParameterType`, `getParametersOfSignature`, `getParentOfSymbol`, `getProgramDiagnostics`, `getPropertiesOfType`, `getPropertyOfType`, `getReducedType`, `getReferencedSymbolsForNode`, `getReferencesToSymbolInFile`, `getRegularTypeOfType`, `getResolvedSignature`, `getRestTypeOfSignature`, `getReturnTypeOfSignature`, `getSemanticDiagnostics`, `getShorthandAssignmentValueSymbol`, `getSignatureFromDeclaration`, `getSignatureUsages`, `getSignaturesOfType`, `getSourceFile`, `getSourceFileMetadata`, `getSourceFileNames`, `getStringType`, `getSuggestionDiagnostics`, `getSymbolAtLocation`, `getSymbolAtPosition`, `getSymbolOfSourceFile`, `getSymbolOfType`, `getSymbolsAtLocations`, `getSymbolsAtPositions`, `getSymbolsInScope`, `getSymbolsOfSourceFiles`, `getSyntacticDiagnostics`, `getTargetOfSignature`, `getTargetOfType`, `getTargetSymbol`, `getThisParameterOfSignature`, `getTrueTypeOfConditionalType`, `getTypeArguments`, `getTypeAtLocation`, `getTypeAtLocations`, `getTypeAtPosition`, `getTypeFromTypeNode`, `getTypeOfSymbol`, `getTypeOfSymbolAtLocation`, `getTypeParameterAtPosition`, `getTypeParametersOfSignature`, `getTypeParametersOfType`, `getTypePredicateOfSignature`, `getTypesAtPositions`, `getTypesOfSymbols`, `getTypesOfType`, `getUndefinedType`, `getUnknownType`, `getVoidType`, `getWellKnownSignatures`, `getWellKnownSymbols`, `getWidenedType`, `initialize`, `isArrayLikeType`, `isArrayType`, `isContextSensitive`, `isReadonlySymbol`, `isTypeAssignableTo`, `parseCommandLine`, `parseConfigFile`, `parseJsonConfigFileContent`, `printNode`, `readConfigFile`, `release`, `resolveName`, `saveHeapProfile`, `signatureToSignatureDeclaration`, `startCPUProfile`, `stopCPUProfile`, `transpileDeclaration`, `transpileDeclarationFromFile`, `transpileModule`, `transpileModuleFromFile`, `typeToString`, `typeToTypeNode`, `updateSnapshot`, `updateTemporarySnapshot`
+            [<JsonPropertyName "method">]
+            Method: string
 
-        [<JsonPropertyName "result">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        [<JsonConverter(typeof<RawJsonConverter>)>]
-        Result: byte[]
+            [<JsonPropertyName "result">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            [<JsonConverter(typeof<RawJsonConverter>)>]
+            Result: byte[]
 
-        [<JsonPropertyName "error">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Error: string voption
-    }
+            [<JsonPropertyName "error">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Error: string voption
+        }
 
     /// APIFileChanges describes file changes to apply when updating a snapshot.
     /// Either InvalidateAll is true (discard all caches) or Changed/Created/Deleted
     /// list individual documents.
-    type APIFileChanges = {
-        [<JsonPropertyName "invalidateAll">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        InvalidateAll: bool voption
+    type APIFileChanges =
+        {
+            [<JsonPropertyName "invalidateAll">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            InvalidateAll: bool voption
 
-        [<JsonPropertyName "changed">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Changed: DocumentIdentifier[] voption
+            [<JsonPropertyName "changed">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Changed: DocumentIdentifier[] voption
 
-        [<JsonPropertyName "created">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Created: DocumentIdentifier[] voption
+            [<JsonPropertyName "created">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Created: DocumentIdentifier[] voption
 
-        [<JsonPropertyName "deleted">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Deleted: DocumentIdentifier[] voption
-    } with
+            [<JsonPropertyName "deleted">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Deleted: DocumentIdentifier[] voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            InvalidateAll = ValueNone
-            Changed = ValueNone
-            Created = ValueNone
-            Deleted = ValueNone
-        }: APIFileChanges)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    InvalidateAll = ValueNone
+                    Changed = ValueNone
+                    Created = ValueNone
+                    Deleted = ValueNone
+                }
+                : APIFileChanges)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
@@ -1589,585 +1686,602 @@ module rec Proto =
     /// SnapshotChanges describes what changed between the previous latest snapshot
     /// and the newly created snapshot. Changes are reported per-project so clients
     /// can track cache refs at the (snapshot, project) level.
-    type SnapshotChanges = {
-        /// ChangedProjects maps project handles to the file changes within that project.
-        /// Projects not listed here (and not in RemovedProjects) are unchanged.
-        [<JsonPropertyName "changedProjects">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ChangedProjects: JsonObject
+    type SnapshotChanges =
+        {
+            /// ChangedProjects maps project handles to the file changes within that project.
+            /// Projects not listed here (and not in RemovedProjects) are unchanged.
+            [<JsonPropertyName "changedProjects">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ChangedProjects: JsonObject
 
-        /// RemovedProjects lists project handles that were present in the previous
-        /// snapshot but absent from the new one.
-        [<JsonPropertyName "removedProjects">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        RemovedProjects: string[] voption
-    } with
+            /// RemovedProjects lists project handles that were present in the previous
+            /// snapshot but absent from the new one.
+            [<JsonPropertyName "removedProjects">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            RemovedProjects: string[] voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            ChangedProjects = null
-            RemovedProjects = ValueNone
-        }: SnapshotChanges)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    ChangedProjects = null
+                    RemovedProjects = ValueNone
+                }
+                : SnapshotChanges)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ SnapshotChanges.Default with ... }` - rather than writing all 2 out.
         static member Default: SnapshotChanges = SnapshotChanges.DefaultValue.Value
 
-    type CreateProgramOptions = {
-        [<JsonPropertyName "compilerOptions">]
-        CompilerOptions: CompilerOptions
+    type CreateProgramOptions =
+        {
+            [<JsonPropertyName "compilerOptions">]
+            CompilerOptions: CompilerOptions
 
-        [<JsonPropertyName "projectReferences">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ProjectReferences: ProjectReference[] voption
+            [<JsonPropertyName "projectReferences">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ProjectReferences: ProjectReference[] voption
 
-        [<JsonPropertyName "configFileParsingDiagnostics">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ConfigFileParsingDiagnostics: DiagnosticResponse[] voption
-    } with
+            [<JsonPropertyName "configFileParsingDiagnostics">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ConfigFileParsingDiagnostics: DiagnosticResponse[] voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            CompilerOptions = CompilerOptions.Default
-            ProjectReferences = ValueNone
-            ConfigFileParsingDiagnostics = ValueNone
-        }: CreateProgramOptions)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    CompilerOptions = CompilerOptions.Default
+                    ProjectReferences = ValueNone
+                    ConfigFileParsingDiagnostics = ValueNone
+                }
+                : CreateProgramOptions)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ CreateProgramOptions.Default with ... }` - rather than writing all 3 out.
         static member Default: CreateProgramOptions = CreateProgramOptions.DefaultValue.Value
 
-    type CreateProgramOldProgramParams = {
-        [<JsonPropertyName "snapshot">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Snapshot: int voption
+    type CreateProgramOldProgramParams =
+        {
+            [<JsonPropertyName "snapshot">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Snapshot: int voption
 
-        [<JsonPropertyName "project">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Project: string voption
-    } with
+            [<JsonPropertyName "project">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Project: string voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            Snapshot = ValueNone
-            Project = ValueNone
-        }: CreateProgramOldProgramParams)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    Snapshot = ValueNone
+                    Project = ValueNone
+                }
+                : CreateProgramOldProgramParams)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ CreateProgramOldProgramParams.Default with ... }` - rather than writing all 2 out.
-        static member Default: CreateProgramOldProgramParams = CreateProgramOldProgramParams.DefaultValue.Value
+        static member Default: CreateProgramOldProgramParams =
+            CreateProgramOldProgramParams.DefaultValue.Value
 
     ///  CompilerOptions contains the compiler options exposed by the API.
-    type CompilerOptions = {
-        [<JsonPropertyName "allowJs">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AllowJs: bool voption
-
-        [<JsonPropertyName "allowArbitraryExtensions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AllowArbitraryExtensions: bool voption
-
-        [<JsonPropertyName "allowImportingTsExtensions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AllowImportingTsExtensions: bool voption
-
-        [<JsonPropertyName "allowNonTsExtensions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AllowNonTsExtensions: bool voption
-
-        [<JsonPropertyName "allowUmdGlobalAccess">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AllowUmdGlobalAccess: bool voption
-
-        [<JsonPropertyName "allowUnreachableCode">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AllowUnreachableCode: bool voption
-
-        [<JsonPropertyName "allowUnusedLabels">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AllowUnusedLabels: bool voption
-
-        [<JsonPropertyName "assumeChangesOnlyAffectDirectDependencies">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        AssumeChangesOnlyAffectDirectDependencies: bool voption
-
-        [<JsonPropertyName "checkJs">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        CheckJs: bool voption
-
-        [<JsonPropertyName "customConditions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        CustomConditions: string[] voption
-
-        [<JsonPropertyName "composite">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Composite: bool voption
-
-        [<JsonPropertyName "emitDeclarationOnly">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        EmitDeclarationOnly: bool voption
-
-        [<JsonPropertyName "emitBOM">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        EmitBOM: bool voption
-
-        [<JsonPropertyName "emitDecoratorMetadata">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        EmitDecoratorMetadata: bool voption
-
-        [<JsonPropertyName "declaration">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Declaration: bool voption
-
-        [<JsonPropertyName "declarationDir">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DeclarationDir: string voption
-
-        [<JsonPropertyName "declarationMap">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DeclarationMap: bool voption
-
-        [<JsonPropertyName "deduplicatePackages">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DeduplicatePackages: bool voption
-
-        [<JsonPropertyName "disableSizeLimit">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DisableSizeLimit: bool voption
-
-        [<JsonPropertyName "disableSourceOfProjectReferenceRedirect">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DisableSourceOfProjectReferenceRedirect: bool voption
-
-        [<JsonPropertyName "disableSolutionSearching">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DisableSolutionSearching: bool voption
-
-        [<JsonPropertyName "disableReferencedProjectLoad">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DisableReferencedProjectLoad: bool voption
-
-        [<JsonPropertyName "erasableSyntaxOnly">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ErasableSyntaxOnly: bool voption
-
-        [<JsonPropertyName "exactOptionalPropertyTypes">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ExactOptionalPropertyTypes: bool voption
-
-        [<JsonPropertyName "experimentalDecorators">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ExperimentalDecorators: bool voption
-
-        [<JsonPropertyName "forceConsistentCasingInFileNames">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ForceConsistentCasingInFileNames: bool voption
-
-        [<JsonPropertyName "isolatedModules">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IsolatedModules: bool voption
-
-        [<JsonPropertyName "isolatedDeclarations">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IsolatedDeclarations: bool voption
-
-        [<JsonPropertyName "ignoreConfig">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IgnoreConfig: bool voption
-
-        [<JsonPropertyName "ignoreDeprecations">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IgnoreDeprecations: string voption
-
-        [<JsonPropertyName "importHelpers">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ImportHelpers: bool voption
-
-        [<JsonPropertyName "inlineSourceMap">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        InlineSourceMap: bool voption
-
-        [<JsonPropertyName "inlineSources">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        InlineSources: bool voption
-
-        [<JsonPropertyName "init">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Init: bool voption
-
-        [<JsonPropertyName "incremental">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Incremental: bool voption
-
-        [<JsonPropertyName "jsx">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Jsx: JsxEmit voption
-
-        [<JsonPropertyName "jsxFactory">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        JsxFactory: string voption
-
-        [<JsonPropertyName "jsxFragmentFactory">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        JsxFragmentFactory: string voption
-
-        [<JsonPropertyName "jsxImportSource">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        JsxImportSource: string voption
-
-        [<JsonPropertyName "lib">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Lib: string[] voption
-
-        [<JsonPropertyName "libReplacement">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        LibReplacement: bool voption
-
-        [<JsonPropertyName "locale">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Locale: string voption
-
-        [<JsonPropertyName "mapRoot">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        MapRoot: string voption
-
-        [<JsonPropertyName "module">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ``Module``: ModuleKind voption
-
-        [<JsonPropertyName "moduleResolution">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ModuleResolution: ModuleResolutionKind voption
-
-        [<JsonPropertyName "moduleSuffixes">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ModuleSuffixes: string[] voption
-
-        [<JsonPropertyName "moduleDetection">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ModuleDetection: ModuleDetectionKind voption
-
-        [<JsonPropertyName "newLine">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NewLine: NewLineKind voption
-
-        [<JsonPropertyName "noEmit">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoEmit: bool voption
-
-        [<JsonPropertyName "noCheck">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoCheck: bool voption
-
-        [<JsonPropertyName "noErrorTruncation">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoErrorTruncation: bool voption
-
-        [<JsonPropertyName "noFallthroughCasesInSwitch">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoFallthroughCasesInSwitch: bool voption
-
-        [<JsonPropertyName "noImplicitAny">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoImplicitAny: bool voption
-
-        [<JsonPropertyName "noImplicitThis">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoImplicitThis: bool voption
-
-        [<JsonPropertyName "noImplicitReturns">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoImplicitReturns: bool voption
-
-        [<JsonPropertyName "noEmitHelpers">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoEmitHelpers: bool voption
-
-        [<JsonPropertyName "noLib">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoLib: bool voption
-
-        [<JsonPropertyName "noPropertyAccessFromIndexSignature">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoPropertyAccessFromIndexSignature: bool voption
-
-        [<JsonPropertyName "noUncheckedIndexedAccess">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoUncheckedIndexedAccess: bool voption
-
-        [<JsonPropertyName "noEmitOnError">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoEmitOnError: bool voption
-
-        [<JsonPropertyName "noUnusedLocals">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoUnusedLocals: bool voption
-
-        [<JsonPropertyName "noUnusedParameters">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoUnusedParameters: bool voption
-
-        [<JsonPropertyName "noResolve">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoResolve: bool voption
-
-        [<JsonPropertyName "noImplicitOverride">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoImplicitOverride: bool voption
-
-        [<JsonPropertyName "noUncheckedSideEffectImports">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        NoUncheckedSideEffectImports: bool voption
-
-        [<JsonPropertyName "outDir">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        OutDir: string voption
-
-        [<JsonPropertyName "paths">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Paths: JsonObject
-
-        [<JsonPropertyName "preserveConstEnums">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        PreserveConstEnums: bool voption
-
-        [<JsonPropertyName "preserveSymlinks">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        PreserveSymlinks: bool voption
-
-        [<JsonPropertyName "project">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Project: string voption
-
-        [<JsonPropertyName "resolveJsonModule">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ResolveJsonModule: bool voption
-
-        [<JsonPropertyName "resolvePackageJsonExports">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ResolvePackageJsonExports: bool voption
-
-        [<JsonPropertyName "resolvePackageJsonImports">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ResolvePackageJsonImports: bool voption
-
-        [<JsonPropertyName "removeComments">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        RemoveComments: bool voption
-
-        [<JsonPropertyName "rewriteRelativeImportExtensions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        RewriteRelativeImportExtensions: bool voption
-
-        [<JsonPropertyName "reactNamespace">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ReactNamespace: string voption
-
-        [<JsonPropertyName "rootDir">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        RootDir: string voption
-
-        [<JsonPropertyName "rootDirs">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        RootDirs: string[] voption
-
-        [<JsonPropertyName "skipLibCheck">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SkipLibCheck: bool voption
-
-        [<JsonPropertyName "stableTypeOrdering">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        StableTypeOrdering: bool voption
-
-        [<JsonPropertyName "strict">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Strict: bool voption
-
-        [<JsonPropertyName "strictBindCallApply">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        StrictBindCallApply: bool voption
-
-        [<JsonPropertyName "strictBuiltinIteratorReturn">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        StrictBuiltinIteratorReturn: bool voption
-
-        [<JsonPropertyName "strictFunctionTypes">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        StrictFunctionTypes: bool voption
-
-        [<JsonPropertyName "strictNullChecks">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        StrictNullChecks: bool voption
-
-        [<JsonPropertyName "strictPropertyInitialization">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        StrictPropertyInitialization: bool voption
-
-        [<JsonPropertyName "stripInternal">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        StripInternal: bool voption
-
-        [<JsonPropertyName "skipDefaultLibCheck">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SkipDefaultLibCheck: bool voption
-
-        [<JsonPropertyName "sourceMap">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SourceMap: bool voption
-
-        [<JsonPropertyName "sourceRoot">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SourceRoot: string voption
-
-        [<JsonPropertyName "suppressOutputPathCheck">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SuppressOutputPathCheck: bool voption
-
-        [<JsonPropertyName "target">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Target: ScriptTarget voption
-
-        [<JsonPropertyName "traceResolution">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        TraceResolution: bool voption
-
-        [<JsonPropertyName "tsBuildInfoFile">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        TsBuildInfoFile: string voption
-
-        [<JsonPropertyName "typeRoots">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        TypeRoots: string[] voption
-
-        [<JsonPropertyName "types">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Types: string[] voption
-
-        [<JsonPropertyName "useDefineForClassFields">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        UseDefineForClassFields: bool voption
-
-        [<JsonPropertyName "useUnknownInCatchVariables">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        UseUnknownInCatchVariables: bool voption
-
-        [<JsonPropertyName "verbatimModuleSyntax">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        VerbatimModuleSyntax: bool voption
-
-        [<JsonPropertyName "maxNodeModuleJsDepth">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        MaxNodeModuleJsDepth: int voption
-
-        ///  Internal fields
-        [<JsonPropertyName "configFilePath">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ConfigFilePath: string voption
-    } with
-
-        static member val private DefaultValue = lazy ({
-            AllowJs = ValueNone
-            AllowArbitraryExtensions = ValueNone
-            AllowImportingTsExtensions = ValueNone
-            AllowNonTsExtensions = ValueNone
-            AllowUmdGlobalAccess = ValueNone
-            AllowUnreachableCode = ValueNone
-            AllowUnusedLabels = ValueNone
-            AssumeChangesOnlyAffectDirectDependencies = ValueNone
-            CheckJs = ValueNone
-            CustomConditions = ValueNone
-            Composite = ValueNone
-            EmitDeclarationOnly = ValueNone
-            EmitBOM = ValueNone
-            EmitDecoratorMetadata = ValueNone
-            Declaration = ValueNone
-            DeclarationDir = ValueNone
-            DeclarationMap = ValueNone
-            DeduplicatePackages = ValueNone
-            DisableSizeLimit = ValueNone
-            DisableSourceOfProjectReferenceRedirect = ValueNone
-            DisableSolutionSearching = ValueNone
-            DisableReferencedProjectLoad = ValueNone
-            ErasableSyntaxOnly = ValueNone
-            ExactOptionalPropertyTypes = ValueNone
-            ExperimentalDecorators = ValueNone
-            ForceConsistentCasingInFileNames = ValueNone
-            IsolatedModules = ValueNone
-            IsolatedDeclarations = ValueNone
-            IgnoreConfig = ValueNone
-            IgnoreDeprecations = ValueNone
-            ImportHelpers = ValueNone
-            InlineSourceMap = ValueNone
-            InlineSources = ValueNone
-            Init = ValueNone
-            Incremental = ValueNone
-            Jsx = ValueNone
-            JsxFactory = ValueNone
-            JsxFragmentFactory = ValueNone
-            JsxImportSource = ValueNone
-            Lib = ValueNone
-            LibReplacement = ValueNone
-            Locale = ValueNone
-            MapRoot = ValueNone
-            ``Module`` = ValueNone
-            ModuleResolution = ValueNone
-            ModuleSuffixes = ValueNone
-            ModuleDetection = ValueNone
-            NewLine = ValueNone
-            NoEmit = ValueNone
-            NoCheck = ValueNone
-            NoErrorTruncation = ValueNone
-            NoFallthroughCasesInSwitch = ValueNone
-            NoImplicitAny = ValueNone
-            NoImplicitThis = ValueNone
-            NoImplicitReturns = ValueNone
-            NoEmitHelpers = ValueNone
-            NoLib = ValueNone
-            NoPropertyAccessFromIndexSignature = ValueNone
-            NoUncheckedIndexedAccess = ValueNone
-            NoEmitOnError = ValueNone
-            NoUnusedLocals = ValueNone
-            NoUnusedParameters = ValueNone
-            NoResolve = ValueNone
-            NoImplicitOverride = ValueNone
-            NoUncheckedSideEffectImports = ValueNone
-            OutDir = ValueNone
-            Paths = null
-            PreserveConstEnums = ValueNone
-            PreserveSymlinks = ValueNone
-            Project = ValueNone
-            ResolveJsonModule = ValueNone
-            ResolvePackageJsonExports = ValueNone
-            ResolvePackageJsonImports = ValueNone
-            RemoveComments = ValueNone
-            RewriteRelativeImportExtensions = ValueNone
-            ReactNamespace = ValueNone
-            RootDir = ValueNone
-            RootDirs = ValueNone
-            SkipLibCheck = ValueNone
-            StableTypeOrdering = ValueNone
-            Strict = ValueNone
-            StrictBindCallApply = ValueNone
-            StrictBuiltinIteratorReturn = ValueNone
-            StrictFunctionTypes = ValueNone
-            StrictNullChecks = ValueNone
-            StrictPropertyInitialization = ValueNone
-            StripInternal = ValueNone
-            SkipDefaultLibCheck = ValueNone
-            SourceMap = ValueNone
-            SourceRoot = ValueNone
-            SuppressOutputPathCheck = ValueNone
-            Target = ValueNone
-            TraceResolution = ValueNone
-            TsBuildInfoFile = ValueNone
-            TypeRoots = ValueNone
-            Types = ValueNone
-            UseDefineForClassFields = ValueNone
-            UseUnknownInCatchVariables = ValueNone
-            VerbatimModuleSyntax = ValueNone
-            MaxNodeModuleJsDepth = ValueNone
-            ConfigFilePath = ValueNone
-        }: CompilerOptions)
+    type CompilerOptions =
+        {
+            [<JsonPropertyName "allowJs">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AllowJs: bool voption
+
+            [<JsonPropertyName "allowArbitraryExtensions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AllowArbitraryExtensions: bool voption
+
+            [<JsonPropertyName "allowImportingTsExtensions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AllowImportingTsExtensions: bool voption
+
+            [<JsonPropertyName "allowNonTsExtensions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AllowNonTsExtensions: bool voption
+
+            [<JsonPropertyName "allowUmdGlobalAccess">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AllowUmdGlobalAccess: bool voption
+
+            [<JsonPropertyName "allowUnreachableCode">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AllowUnreachableCode: bool voption
+
+            [<JsonPropertyName "allowUnusedLabels">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AllowUnusedLabels: bool voption
+
+            [<JsonPropertyName "assumeChangesOnlyAffectDirectDependencies">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            AssumeChangesOnlyAffectDirectDependencies: bool voption
+
+            [<JsonPropertyName "checkJs">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            CheckJs: bool voption
+
+            [<JsonPropertyName "customConditions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            CustomConditions: string[] voption
+
+            [<JsonPropertyName "composite">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Composite: bool voption
+
+            [<JsonPropertyName "emitDeclarationOnly">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            EmitDeclarationOnly: bool voption
+
+            [<JsonPropertyName "emitBOM">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            EmitBOM: bool voption
+
+            [<JsonPropertyName "emitDecoratorMetadata">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            EmitDecoratorMetadata: bool voption
+
+            [<JsonPropertyName "declaration">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Declaration: bool voption
+
+            [<JsonPropertyName "declarationDir">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DeclarationDir: string voption
+
+            [<JsonPropertyName "declarationMap">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DeclarationMap: bool voption
+
+            [<JsonPropertyName "deduplicatePackages">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DeduplicatePackages: bool voption
+
+            [<JsonPropertyName "disableSizeLimit">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DisableSizeLimit: bool voption
+
+            [<JsonPropertyName "disableSourceOfProjectReferenceRedirect">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DisableSourceOfProjectReferenceRedirect: bool voption
+
+            [<JsonPropertyName "disableSolutionSearching">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DisableSolutionSearching: bool voption
+
+            [<JsonPropertyName "disableReferencedProjectLoad">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DisableReferencedProjectLoad: bool voption
+
+            [<JsonPropertyName "erasableSyntaxOnly">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ErasableSyntaxOnly: bool voption
+
+            [<JsonPropertyName "exactOptionalPropertyTypes">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ExactOptionalPropertyTypes: bool voption
+
+            [<JsonPropertyName "experimentalDecorators">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ExperimentalDecorators: bool voption
+
+            [<JsonPropertyName "forceConsistentCasingInFileNames">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ForceConsistentCasingInFileNames: bool voption
+
+            [<JsonPropertyName "isolatedModules">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IsolatedModules: bool voption
+
+            [<JsonPropertyName "isolatedDeclarations">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IsolatedDeclarations: bool voption
+
+            [<JsonPropertyName "ignoreConfig">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IgnoreConfig: bool voption
+
+            [<JsonPropertyName "ignoreDeprecations">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IgnoreDeprecations: string voption
+
+            [<JsonPropertyName "importHelpers">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ImportHelpers: bool voption
+
+            [<JsonPropertyName "inlineSourceMap">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            InlineSourceMap: bool voption
+
+            [<JsonPropertyName "inlineSources">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            InlineSources: bool voption
+
+            [<JsonPropertyName "init">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Init: bool voption
+
+            [<JsonPropertyName "incremental">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Incremental: bool voption
+
+            [<JsonPropertyName "jsx">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Jsx: JsxEmit voption
+
+            [<JsonPropertyName "jsxFactory">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            JsxFactory: string voption
+
+            [<JsonPropertyName "jsxFragmentFactory">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            JsxFragmentFactory: string voption
+
+            [<JsonPropertyName "jsxImportSource">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            JsxImportSource: string voption
+
+            [<JsonPropertyName "lib">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Lib: string[] voption
+
+            [<JsonPropertyName "libReplacement">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            LibReplacement: bool voption
+
+            [<JsonPropertyName "locale">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Locale: string voption
+
+            [<JsonPropertyName "mapRoot">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            MapRoot: string voption
+
+            [<JsonPropertyName "module">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ``Module``: ModuleKind voption
+
+            [<JsonPropertyName "moduleResolution">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ModuleResolution: ModuleResolutionKind voption
+
+            [<JsonPropertyName "moduleSuffixes">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ModuleSuffixes: string[] voption
+
+            [<JsonPropertyName "moduleDetection">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ModuleDetection: ModuleDetectionKind voption
+
+            [<JsonPropertyName "newLine">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NewLine: NewLineKind voption
+
+            [<JsonPropertyName "noEmit">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoEmit: bool voption
+
+            [<JsonPropertyName "noCheck">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoCheck: bool voption
+
+            [<JsonPropertyName "noErrorTruncation">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoErrorTruncation: bool voption
+
+            [<JsonPropertyName "noFallthroughCasesInSwitch">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoFallthroughCasesInSwitch: bool voption
+
+            [<JsonPropertyName "noImplicitAny">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoImplicitAny: bool voption
+
+            [<JsonPropertyName "noImplicitThis">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoImplicitThis: bool voption
+
+            [<JsonPropertyName "noImplicitReturns">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoImplicitReturns: bool voption
+
+            [<JsonPropertyName "noEmitHelpers">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoEmitHelpers: bool voption
+
+            [<JsonPropertyName "noLib">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoLib: bool voption
+
+            [<JsonPropertyName "noPropertyAccessFromIndexSignature">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoPropertyAccessFromIndexSignature: bool voption
+
+            [<JsonPropertyName "noUncheckedIndexedAccess">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoUncheckedIndexedAccess: bool voption
+
+            [<JsonPropertyName "noEmitOnError">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoEmitOnError: bool voption
+
+            [<JsonPropertyName "noUnusedLocals">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoUnusedLocals: bool voption
+
+            [<JsonPropertyName "noUnusedParameters">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoUnusedParameters: bool voption
+
+            [<JsonPropertyName "noResolve">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoResolve: bool voption
+
+            [<JsonPropertyName "noImplicitOverride">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoImplicitOverride: bool voption
+
+            [<JsonPropertyName "noUncheckedSideEffectImports">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            NoUncheckedSideEffectImports: bool voption
+
+            [<JsonPropertyName "outDir">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            OutDir: string voption
+
+            [<JsonPropertyName "paths">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Paths: JsonObject
+
+            [<JsonPropertyName "preserveConstEnums">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            PreserveConstEnums: bool voption
+
+            [<JsonPropertyName "preserveSymlinks">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            PreserveSymlinks: bool voption
+
+            [<JsonPropertyName "project">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Project: string voption
+
+            [<JsonPropertyName "resolveJsonModule">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ResolveJsonModule: bool voption
+
+            [<JsonPropertyName "resolvePackageJsonExports">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ResolvePackageJsonExports: bool voption
+
+            [<JsonPropertyName "resolvePackageJsonImports">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ResolvePackageJsonImports: bool voption
+
+            [<JsonPropertyName "removeComments">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            RemoveComments: bool voption
+
+            [<JsonPropertyName "rewriteRelativeImportExtensions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            RewriteRelativeImportExtensions: bool voption
+
+            [<JsonPropertyName "reactNamespace">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ReactNamespace: string voption
+
+            [<JsonPropertyName "rootDir">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            RootDir: string voption
+
+            [<JsonPropertyName "rootDirs">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            RootDirs: string[] voption
+
+            [<JsonPropertyName "skipLibCheck">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SkipLibCheck: bool voption
+
+            [<JsonPropertyName "stableTypeOrdering">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            StableTypeOrdering: bool voption
+
+            [<JsonPropertyName "strict">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Strict: bool voption
+
+            [<JsonPropertyName "strictBindCallApply">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            StrictBindCallApply: bool voption
+
+            [<JsonPropertyName "strictBuiltinIteratorReturn">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            StrictBuiltinIteratorReturn: bool voption
+
+            [<JsonPropertyName "strictFunctionTypes">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            StrictFunctionTypes: bool voption
+
+            [<JsonPropertyName "strictNullChecks">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            StrictNullChecks: bool voption
+
+            [<JsonPropertyName "strictPropertyInitialization">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            StrictPropertyInitialization: bool voption
+
+            [<JsonPropertyName "stripInternal">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            StripInternal: bool voption
+
+            [<JsonPropertyName "skipDefaultLibCheck">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SkipDefaultLibCheck: bool voption
+
+            [<JsonPropertyName "sourceMap">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SourceMap: bool voption
+
+            [<JsonPropertyName "sourceRoot">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SourceRoot: string voption
+
+            [<JsonPropertyName "suppressOutputPathCheck">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SuppressOutputPathCheck: bool voption
+
+            [<JsonPropertyName "target">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Target: ScriptTarget voption
+
+            [<JsonPropertyName "traceResolution">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            TraceResolution: bool voption
+
+            [<JsonPropertyName "tsBuildInfoFile">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            TsBuildInfoFile: string voption
+
+            [<JsonPropertyName "typeRoots">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            TypeRoots: string[] voption
+
+            [<JsonPropertyName "types">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Types: string[] voption
+
+            [<JsonPropertyName "useDefineForClassFields">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            UseDefineForClassFields: bool voption
+
+            [<JsonPropertyName "useUnknownInCatchVariables">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            UseUnknownInCatchVariables: bool voption
+
+            [<JsonPropertyName "verbatimModuleSyntax">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            VerbatimModuleSyntax: bool voption
+
+            [<JsonPropertyName "maxNodeModuleJsDepth">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            MaxNodeModuleJsDepth: int voption
+
+            ///  Internal fields
+            [<JsonPropertyName "configFilePath">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ConfigFilePath: string voption
+        }
+
+        static member val private DefaultValue =
+            lazy
+                ({
+                    AllowJs = ValueNone
+                    AllowArbitraryExtensions = ValueNone
+                    AllowImportingTsExtensions = ValueNone
+                    AllowNonTsExtensions = ValueNone
+                    AllowUmdGlobalAccess = ValueNone
+                    AllowUnreachableCode = ValueNone
+                    AllowUnusedLabels = ValueNone
+                    AssumeChangesOnlyAffectDirectDependencies = ValueNone
+                    CheckJs = ValueNone
+                    CustomConditions = ValueNone
+                    Composite = ValueNone
+                    EmitDeclarationOnly = ValueNone
+                    EmitBOM = ValueNone
+                    EmitDecoratorMetadata = ValueNone
+                    Declaration = ValueNone
+                    DeclarationDir = ValueNone
+                    DeclarationMap = ValueNone
+                    DeduplicatePackages = ValueNone
+                    DisableSizeLimit = ValueNone
+                    DisableSourceOfProjectReferenceRedirect = ValueNone
+                    DisableSolutionSearching = ValueNone
+                    DisableReferencedProjectLoad = ValueNone
+                    ErasableSyntaxOnly = ValueNone
+                    ExactOptionalPropertyTypes = ValueNone
+                    ExperimentalDecorators = ValueNone
+                    ForceConsistentCasingInFileNames = ValueNone
+                    IsolatedModules = ValueNone
+                    IsolatedDeclarations = ValueNone
+                    IgnoreConfig = ValueNone
+                    IgnoreDeprecations = ValueNone
+                    ImportHelpers = ValueNone
+                    InlineSourceMap = ValueNone
+                    InlineSources = ValueNone
+                    Init = ValueNone
+                    Incremental = ValueNone
+                    Jsx = ValueNone
+                    JsxFactory = ValueNone
+                    JsxFragmentFactory = ValueNone
+                    JsxImportSource = ValueNone
+                    Lib = ValueNone
+                    LibReplacement = ValueNone
+                    Locale = ValueNone
+                    MapRoot = ValueNone
+                    ``Module`` = ValueNone
+                    ModuleResolution = ValueNone
+                    ModuleSuffixes = ValueNone
+                    ModuleDetection = ValueNone
+                    NewLine = ValueNone
+                    NoEmit = ValueNone
+                    NoCheck = ValueNone
+                    NoErrorTruncation = ValueNone
+                    NoFallthroughCasesInSwitch = ValueNone
+                    NoImplicitAny = ValueNone
+                    NoImplicitThis = ValueNone
+                    NoImplicitReturns = ValueNone
+                    NoEmitHelpers = ValueNone
+                    NoLib = ValueNone
+                    NoPropertyAccessFromIndexSignature = ValueNone
+                    NoUncheckedIndexedAccess = ValueNone
+                    NoEmitOnError = ValueNone
+                    NoUnusedLocals = ValueNone
+                    NoUnusedParameters = ValueNone
+                    NoResolve = ValueNone
+                    NoImplicitOverride = ValueNone
+                    NoUncheckedSideEffectImports = ValueNone
+                    OutDir = ValueNone
+                    Paths = null
+                    PreserveConstEnums = ValueNone
+                    PreserveSymlinks = ValueNone
+                    Project = ValueNone
+                    ResolveJsonModule = ValueNone
+                    ResolvePackageJsonExports = ValueNone
+                    ResolvePackageJsonImports = ValueNone
+                    RemoveComments = ValueNone
+                    RewriteRelativeImportExtensions = ValueNone
+                    ReactNamespace = ValueNone
+                    RootDir = ValueNone
+                    RootDirs = ValueNone
+                    SkipLibCheck = ValueNone
+                    StableTypeOrdering = ValueNone
+                    Strict = ValueNone
+                    StrictBindCallApply = ValueNone
+                    StrictBuiltinIteratorReturn = ValueNone
+                    StrictFunctionTypes = ValueNone
+                    StrictNullChecks = ValueNone
+                    StrictPropertyInitialization = ValueNone
+                    StripInternal = ValueNone
+                    SkipDefaultLibCheck = ValueNone
+                    SourceMap = ValueNone
+                    SourceRoot = ValueNone
+                    SuppressOutputPathCheck = ValueNone
+                    Target = ValueNone
+                    TraceResolution = ValueNone
+                    TsBuildInfoFile = ValueNone
+                    TypeRoots = ValueNone
+                    Types = ValueNone
+                    UseDefineForClassFields = ValueNone
+                    UseUnknownInCatchVariables = ValueNone
+                    VerbatimModuleSyntax = ValueNone
+                    MaxNodeModuleJsDepth = ValueNone
+                    ConfigFilePath = ValueNone
+                }
+                : CompilerOptions)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
@@ -2175,167 +2289,185 @@ module rec Proto =
         static member Default: CompilerOptions = CompilerOptions.DefaultValue.Value
 
     ///  Path is a normalized path on disk.
-    type ProjectReference = {
-        ///  Path is a normalized path on disk.
-        [<JsonPropertyName "path">]
-        Path: string
+    type ProjectReference =
+        {
+            ///  Path is a normalized path on disk.
+            [<JsonPropertyName "path">]
+            Path: string
 
-        ///  OriginalPath is the path as it was originally written.
-        [<JsonPropertyName "originalPath">]
-        OriginalPath: string
+            ///  OriginalPath is the path as it was originally written.
+            [<JsonPropertyName "originalPath">]
+            OriginalPath: string
 
-        ///  Circular indicates that this reference is intended to form a circularity.
-        [<JsonPropertyName "circular">]
-        Circular: bool
-    }
+            ///  Circular indicates that this reference is intended to form a circularity.
+            [<JsonPropertyName "circular">]
+            Circular: bool
+        }
 
-    type TypeAcquisition = {
-        [<JsonPropertyName "enable">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Enable: bool voption
+    type TypeAcquisition =
+        {
+            [<JsonPropertyName "enable">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Enable: bool voption
 
-        [<JsonPropertyName "include">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Include: string[] voption
+            [<JsonPropertyName "include">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Include: string[] voption
 
-        [<JsonPropertyName "exclude">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Exclude: string[] voption
+            [<JsonPropertyName "exclude">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Exclude: string[] voption
 
-        [<JsonPropertyName "disableFilenameBasedTypeAcquisition">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DisableFilenameBasedTypeAcquisition: bool voption
-    } with
+            [<JsonPropertyName "disableFilenameBasedTypeAcquisition">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DisableFilenameBasedTypeAcquisition: bool voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            Enable = ValueNone
-            Include = ValueNone
-            Exclude = ValueNone
-            DisableFilenameBasedTypeAcquisition = ValueNone
-        }: TypeAcquisition)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    Enable = ValueNone
+                    Include = ValueNone
+                    Exclude = ValueNone
+                    DisableFilenameBasedTypeAcquisition = ValueNone
+                }
+                : TypeAcquisition)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ TypeAcquisition.Default with ... }` - rather than writing all 4 out.
         static member Default: TypeAcquisition = TypeAcquisition.DefaultValue.Value
 
-    type TranspileOptions = {
-        [<JsonPropertyName "compilerOptions">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        CompilerOptions: CompilerOptions voption
+    type TranspileOptions =
+        {
+            [<JsonPropertyName "compilerOptions">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            CompilerOptions: CompilerOptions voption
 
-        [<JsonPropertyName "fileName">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        FileName: string voption
+            [<JsonPropertyName "fileName">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            FileName: string voption
 
-        [<JsonPropertyName "reportDiagnostics">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ReportDiagnostics: bool voption
-    } with
+            [<JsonPropertyName "reportDiagnostics">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ReportDiagnostics: bool voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            CompilerOptions = ValueNone
-            FileName = ValueNone
-            ReportDiagnostics = ValueNone
-        }: TranspileOptions)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    CompilerOptions = ValueNone
+                    FileName = ValueNone
+                    ReportDiagnostics = ValueNone
+                }
+                : TranspileOptions)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ TranspileOptions.Default with ... }` - rather than writing all 3 out.
         static member Default: TranspileOptions = TranspileOptions.DefaultValue.Value
 
-    type ImportAdderAction = {
-        [<JsonPropertyName "kind">]
-        Kind: string
+    type ImportAdderAction =
+        {
+            [<JsonPropertyName "kind">]
+            Kind: string
 
-        [<JsonPropertyName "symbol">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Symbol: int voption
+            [<JsonPropertyName "symbol">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Symbol: int voption
 
-        [<JsonPropertyName "isValidTypeOnlyUseSite">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        IsValidTypeOnlyUseSite: bool voption
-    }
+            [<JsonPropertyName "isValidTypeOnlyUseSite">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            IsValidTypeOnlyUseSite: bool voption
+        }
 
     ///  CompletionEntryResponse represents a single completion item.
-    type CompletionEntryResponse = {
-        [<JsonPropertyName "name">]
-        Name: string
+    type CompletionEntryResponse =
+        {
+            [<JsonPropertyName "name">]
+            Name: string
 
-        [<JsonPropertyName "kind">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Kind: int voption
+            [<JsonPropertyName "kind">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Kind: int voption
 
-        [<JsonPropertyName "sortText">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SortText: string voption
+            [<JsonPropertyName "sortText">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SortText: string voption
 
-        [<JsonPropertyName "insertText">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        InsertText: string voption
+            [<JsonPropertyName "insertText">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            InsertText: string voption
 
-        [<JsonPropertyName "filterText">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        FilterText: string voption
+            [<JsonPropertyName "filterText">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            FilterText: string voption
 
-        [<JsonPropertyName "detail">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Detail: string voption
+            [<JsonPropertyName "detail">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Detail: string voption
 
-        [<JsonPropertyName "labelDetails">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        LabelDetails: CompletionEntryLabelDetailsResponse voption
+            [<JsonPropertyName "labelDetails">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            LabelDetails: CompletionEntryLabelDetailsResponse voption
 
-        [<JsonPropertyName "symbol">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Symbol: SymbolResponse voption
-    }
+            [<JsonPropertyName "symbol">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Symbol: SymbolResponse voption
+        }
 
-    type DiagnosticPositionResponse = {
-        [<JsonPropertyName "line">]
-        Line: int
+    type DiagnosticPositionResponse =
+        {
+            [<JsonPropertyName "line">]
+            Line: int
 
-        [<JsonPropertyName "character">]
-        Character: int
-    }
+            [<JsonPropertyName "character">]
+            Character: int
+        }
 
-    type DiagnosticSourceLineResponse = {
-        [<JsonPropertyName "line">]
-        Line: int
+    type DiagnosticSourceLineResponse =
+        {
+            [<JsonPropertyName "line">]
+            Line: int
 
-        [<JsonPropertyName "text">]
-        Text: string
-    }
+            [<JsonPropertyName "text">]
+            Text: string
+        }
 
-    type EmitOutputFile = {
-        [<JsonPropertyName "fileName">]
-        FileName: string
+    type EmitOutputFile =
+        {
+            [<JsonPropertyName "fileName">]
+            FileName: string
 
-        [<JsonPropertyName "text">]
-        Text: string
+            [<JsonPropertyName "text">]
+            Text: string
 
-        [<JsonPropertyName "sourceFileName">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        SourceFileName: string voption
-    }
+            [<JsonPropertyName "sourceFileName">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            SourceFileName: string voption
+        }
 
     ///  ProjectFileChanges describes what source files changed within a single project.
-    type ProjectFileChanges = {
-        ///  ChangedFiles lists source file paths whose content differs.
-        [<JsonPropertyName "changedFiles">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ChangedFiles: string[] voption
+    type ProjectFileChanges =
+        {
+            ///  ChangedFiles lists source file paths whose content differs.
+            [<JsonPropertyName "changedFiles">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            ChangedFiles: string[] voption
 
-        ///  DeletedFiles lists source file paths removed from the project's program.
-        [<JsonPropertyName "deletedFiles">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        DeletedFiles: string[] voption
-    } with
+            ///  DeletedFiles lists source file paths removed from the project's program.
+            [<JsonPropertyName "deletedFiles">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            DeletedFiles: string[] voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            ChangedFiles = ValueNone
-            DeletedFiles = ValueNone
-        }: ProjectFileChanges)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    ChangedFiles = ValueNone
+                    DeletedFiles = ValueNone
+                }
+                : ProjectFileChanges)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
@@ -2343,25 +2475,30 @@ module rec Proto =
         static member Default: ProjectFileChanges = ProjectFileChanges.DefaultValue.Value
 
     ///  CompletionEntryLabelDetailsResponse holds additional label display text for a completion entry.
-    type CompletionEntryLabelDetailsResponse = {
-        [<JsonPropertyName "detail">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Detail: string voption
+    type CompletionEntryLabelDetailsResponse =
+        {
+            [<JsonPropertyName "detail">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Detail: string voption
 
-        [<JsonPropertyName "description">]
-        [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Description: string voption
-    } with
+            [<JsonPropertyName "description">]
+            [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
+            Description: string voption
+        }
 
-        static member val private DefaultValue = lazy ({
-            Detail = ValueNone
-            Description = ValueNone
-        }: CompletionEntryLabelDetailsResponse)
+        static member val private DefaultValue =
+            lazy
+                ({
+                    Detail = ValueNone
+                    Description = ValueNone
+                }
+                : CompletionEntryLabelDetailsResponse)
 
         /// The record with nothing set: every field is either optional or a default of its
         /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
         /// `{ CompletionEntryLabelDetailsResponse.Default with ... }` - rather than writing all 2 out.
-        static member Default: CompletionEntryLabelDetailsResponse = CompletionEntryLabelDetailsResponse.DefaultValue.Value
+        static member Default: CompletionEntryLabelDetailsResponse =
+            CompletionEntryLabelDetailsResponse.DefaultValue.Value
 
     /// Every method the server exposes. The comment on each records the parameter and result
     /// types the schema assigns it; `voption` marks a result the schema permits to be null.
@@ -2375,12 +2512,13 @@ module rec Proto =
         /// as a base64 string instead. `TscMailbox` needs to know which methods that applies
         /// to in order to hand callers the same bytes either way.
         let binaryResultMethods =
-            System.Collections.Generic.HashSet<string> [
-                "getSourceFile"
-                "getConfigSourceFile"
-                "typeToTypeNode"
-                "signatureToSignatureDeclaration"
-            ]
+            System.Collections.Generic.HashSet<string>
+                [
+                    "getSourceFile"
+                    "getConfigSourceFile"
+                    "typeToTypeNode"
+                    "signatureToSignatureDeclaration"
+                ]
 
         /// `ReleaseParams` -> `unit`
         [<Literal>]
@@ -2949,4 +3087,3 @@ module rec Proto =
         /// `ProfileParams` -> `ProfileResult`
         [<Literal>]
         let SaveHeapProfile = "saveHeapProfile"
-
