@@ -9218,7 +9218,7 @@ type Stringified<'ObjectType> = private Stringified__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Structured clone</remarks>
-type StructuredCloneable = obj option
+type StructuredCloneable = U50<string, float, bigint, bool, JS.ArrayBuffer, Fable.Core.TS.Dom.AudioData, JS.BigInt64Array, Fable.Core.TS.Es.BigUint64Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Dom.Blob, Fable.Core.TS.Es.Boolean, Fable.Core.TS.Dom.CryptoKey, Fable.Core.TS.Dom.DOMException, Fable.Core.TS.Dom.DOMMatrix, Fable.Core.TS.Dom.DOMMatrixReadOnly, Fable.Core.TS.Dom.DOMPoint, Fable.Core.TS.Dom.DOMPointReadOnly, Fable.Core.TS.Dom.DOMQuad, Fable.Core.TS.Dom.DOMRect, Fable.Core.TS.Dom.DOMRectReadOnly, JS.DataView, JS.Date, exn, Fable.Core.TS.Dom.File, Fable.Core.TS.Dom.FileList, Fable.Core.TS.Dom.FileSystemDirectoryHandle, Fable.Core.TS.Dom.FileSystemFileHandle, Fable.Core.TS.Dom.FileSystemHandle, Fable.Core.TS.Es.Float16Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, JS.Float32Array, JS.Float64Array, Fable.Core.TS.Dom.GPUCompilationInfo, Fable.Core.TS.Dom.GPUCompilationMessage, Fable.Core.TS.Dom.ImageBitmap, Fable.Core.TS.Dom.ImageData, JS.Int16Array, JS.Int32Array, JS.Int8Array, Fable.Core.TS.Es.Number, Fable.Core.TS.Dom.RTCCertificate, obj[], JS.Map<obj, obj>, JS.Set<obj>, Fable.Core.TS.Es.RegExp, Fable.Core.TS.Es.String, JS.Uint16Array, JS.Uint32Array, JS.Uint8Array, JS.Uint8ClampedArray, Fable.Core.TS.Dom.VideoFrame, StructuredCloneable2> option
 
 type StructuredCloneable2 =
     [<EmitIndexer>]
@@ -9842,7 +9842,7 @@ type TupleToUnion<'ArrayType> = private TupleToUnion__ of obj
 /// Matches any <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">typed array</a>, like <c>Uint8Array</c> or <c>Float64Array</c>.
 /// </summary>
 /// <remarks>@category Array</remarks>
-type TypedArray = obj
+type TypedArray = U12<JS.BigInt64Array, Fable.Core.TS.Es.BigUint64Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float16Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, JS.Float32Array, JS.Float64Array, JS.Int16Array, JS.Int32Array, JS.Int8Array, JS.Uint16Array, JS.Uint32Array, JS.Uint8Array, JS.Uint8ClampedArray>
 
 /// <summary>
 /// Create a deep version of another type where all optional keys are set to also accept <c>undefined</c>.
@@ -11994,3 +11994,135 @@ module TsConfigJson =
             | [<CompiledName("prioritypollinginterval")>] Prioritypollinginterval
             | [<CompiledName("usefsevents")>] Usefsevents
             | [<CompiledName("usefseventsonparentdirectory")>] Usefseventsonparentdirectory
+
+[<Erase>]
+type U12<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12> =
+    | Case1 of 't1
+    | Case2 of 't2
+    | Case3 of 't3
+    | Case4 of 't4
+    | Case5 of 't5
+    | Case6 of 't6
+    | Case7 of 't7
+    | Case8 of 't8
+    | Case9 of 't9
+    | Case10 of 't10
+    | Case11 of 't11
+    | Case12 of 't12
+
+    static member op_ErasedCast(x: 't1) = Case1 x
+    static member op_ErasedCast(x: 't2) = Case2 x
+    static member op_ErasedCast(x: 't3) = Case3 x
+    static member op_ErasedCast(x: 't4) = Case4 x
+    static member op_ErasedCast(x: 't5) = Case5 x
+    static member op_ErasedCast(x: 't6) = Case6 x
+    static member op_ErasedCast(x: 't7) = Case7 x
+    static member op_ErasedCast(x: 't8) = Case8 x
+    static member op_ErasedCast(x: 't9) = Case9 x
+    static member op_ErasedCast(x: 't10) = Case10 x
+    static member op_ErasedCast(x: 't11) = Case11 x
+    static member op_ErasedCast(x: 't12) = Case12 x
+
+[<Erase>]
+type U50<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20, 't21, 't22, 't23, 't24, 't25, 't26, 't27, 't28, 't29, 't30, 't31, 't32, 't33, 't34, 't35, 't36, 't37, 't38, 't39, 't40, 't41, 't42, 't43, 't44, 't45, 't46, 't47, 't48, 't49, 't50> =
+    | Case1 of 't1
+    | Case2 of 't2
+    | Case3 of 't3
+    | Case4 of 't4
+    | Case5 of 't5
+    | Case6 of 't6
+    | Case7 of 't7
+    | Case8 of 't8
+    | Case9 of 't9
+    | Case10 of 't10
+    | Case11 of 't11
+    | Case12 of 't12
+    | Case13 of 't13
+    | Case14 of 't14
+    | Case15 of 't15
+    | Case16 of 't16
+    | Case17 of 't17
+    | Case18 of 't18
+    | Case19 of 't19
+    | Case20 of 't20
+    | Case21 of 't21
+    | Case22 of 't22
+    | Case23 of 't23
+    | Case24 of 't24
+    | Case25 of 't25
+    | Case26 of 't26
+    | Case27 of 't27
+    | Case28 of 't28
+    | Case29 of 't29
+    | Case30 of 't30
+    | Case31 of 't31
+    | Case32 of 't32
+    | Case33 of 't33
+    | Case34 of 't34
+    | Case35 of 't35
+    | Case36 of 't36
+    | Case37 of 't37
+    | Case38 of 't38
+    | Case39 of 't39
+    | Case40 of 't40
+    | Case41 of 't41
+    | Case42 of 't42
+    | Case43 of 't43
+    | Case44 of 't44
+    | Case45 of 't45
+    | Case46 of 't46
+    | Case47 of 't47
+    | Case48 of 't48
+    | Case49 of 't49
+    | Case50 of 't50
+
+    static member op_ErasedCast(x: 't1) = Case1 x
+    static member op_ErasedCast(x: 't2) = Case2 x
+    static member op_ErasedCast(x: 't3) = Case3 x
+    static member op_ErasedCast(x: 't4) = Case4 x
+    static member op_ErasedCast(x: 't5) = Case5 x
+    static member op_ErasedCast(x: 't6) = Case6 x
+    static member op_ErasedCast(x: 't7) = Case7 x
+    static member op_ErasedCast(x: 't8) = Case8 x
+    static member op_ErasedCast(x: 't9) = Case9 x
+    static member op_ErasedCast(x: 't10) = Case10 x
+    static member op_ErasedCast(x: 't11) = Case11 x
+    static member op_ErasedCast(x: 't12) = Case12 x
+    static member op_ErasedCast(x: 't13) = Case13 x
+    static member op_ErasedCast(x: 't14) = Case14 x
+    static member op_ErasedCast(x: 't15) = Case15 x
+    static member op_ErasedCast(x: 't16) = Case16 x
+    static member op_ErasedCast(x: 't17) = Case17 x
+    static member op_ErasedCast(x: 't18) = Case18 x
+    static member op_ErasedCast(x: 't19) = Case19 x
+    static member op_ErasedCast(x: 't20) = Case20 x
+    static member op_ErasedCast(x: 't21) = Case21 x
+    static member op_ErasedCast(x: 't22) = Case22 x
+    static member op_ErasedCast(x: 't23) = Case23 x
+    static member op_ErasedCast(x: 't24) = Case24 x
+    static member op_ErasedCast(x: 't25) = Case25 x
+    static member op_ErasedCast(x: 't26) = Case26 x
+    static member op_ErasedCast(x: 't27) = Case27 x
+    static member op_ErasedCast(x: 't28) = Case28 x
+    static member op_ErasedCast(x: 't29) = Case29 x
+    static member op_ErasedCast(x: 't30) = Case30 x
+    static member op_ErasedCast(x: 't31) = Case31 x
+    static member op_ErasedCast(x: 't32) = Case32 x
+    static member op_ErasedCast(x: 't33) = Case33 x
+    static member op_ErasedCast(x: 't34) = Case34 x
+    static member op_ErasedCast(x: 't35) = Case35 x
+    static member op_ErasedCast(x: 't36) = Case36 x
+    static member op_ErasedCast(x: 't37) = Case37 x
+    static member op_ErasedCast(x: 't38) = Case38 x
+    static member op_ErasedCast(x: 't39) = Case39 x
+    static member op_ErasedCast(x: 't40) = Case40 x
+    static member op_ErasedCast(x: 't41) = Case41 x
+    static member op_ErasedCast(x: 't42) = Case42 x
+    static member op_ErasedCast(x: 't43) = Case43 x
+    static member op_ErasedCast(x: 't44) = Case44 x
+    static member op_ErasedCast(x: 't45) = Case45 x
+    static member op_ErasedCast(x: 't46) = Case46 x
+    static member op_ErasedCast(x: 't47) = Case47 x
+    static member op_ErasedCast(x: 't48) = Case48 x
+    static member op_ErasedCast(x: 't49) = Case49 x
+    static member op_ErasedCast(x: 't50) = Case50 x

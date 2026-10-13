@@ -4,15 +4,15 @@
   "module": "EsReuseLab",
   "counts": {
     "exact": 8,
-    "ergonomic": 0,
+    "ergonomic": 1,
     "widened": 0,
-    "escape": 1
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SE - shape-exports",
       "total": 2,
-      "escape": 2
+      "ergonomic": 2
     }
   ]
 }

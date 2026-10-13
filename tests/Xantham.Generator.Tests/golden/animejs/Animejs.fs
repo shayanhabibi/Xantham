@@ -985,9 +985,9 @@ type Segment =
 
 [<Interface>]
 type Segmenter =
-    abstract segment: (string -> obj) with get, set
+    abstract segment: (string -> Fable.Core.TS.Es.Iterable<Segment, obj, obj>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (segment: (string -> obj)) : Segmenter = jsNative
+    static member Create (segment: (string -> Fable.Core.TS.Es.Iterable<Segment, obj, obj>)) : Segmenter = jsNative
 
 type Timeline =
     inherit Timer

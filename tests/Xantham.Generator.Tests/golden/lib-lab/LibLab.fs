@@ -131,10 +131,10 @@ type Exports =
     [<Import("emit", "lib-lab")>]
     static member emit (detail: Fable.Core.TS.Dom.CustomEvent<string>) : unit = jsNative
     /// <summary>
-    /// <c>seq&lt;'T&gt;</c> is not a JS iterable, whatever the two have in common. Widened, and noted.
+    /// Core.TS binds the synchronous iteration protocol as its own JS interface, not as <c>seq&lt;'T&gt;</c>.
     /// </summary>
     [<Import("each", "lib-lab")>]
-    static member each (values: obj) : unit = jsNative
+    static member each (values: Fable.Core.TS.Es.Iterable<string, obj, obj>) : unit = jsNative
     /// <summary>
     /// Core.TS supplies the DOM Range without the former Browser package ambiguity.
     /// </summary>

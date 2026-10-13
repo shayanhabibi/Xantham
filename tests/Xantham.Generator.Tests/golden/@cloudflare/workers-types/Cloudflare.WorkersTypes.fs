@@ -250,7 +250,7 @@ type Console =
 
 type BufferSource = U2<JS.ArrayBuffer, JS.ArrayBufferView>
 
-type TypedArray = obj
+type TypedArray = U11<JS.BigInt64Array, Fable.Core.TS.Es.BigUint64Array<U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, JS.Float32Array, JS.Float64Array, JS.Int16Array, JS.Int32Array, JS.Int8Array, JS.Uint16Array, JS.Uint32Array, JS.Uint8Array, JS.Uint8ClampedArray>
 
 [<Interface>]
 type CompileError =
@@ -825,7 +825,7 @@ type URLPatternConstructor =
 
 type URLSearchParamsConstructor =
     [<EmitConstructor>]
-    abstract Create: ?init: obj -> URLSearchParams
+    abstract Create: ?init: U3<string, Fable.Core.TS.Es.Iterable<Fable.Core.TS.Es.Iterable<string, obj, obj>, obj, obj>, JS.Record<string, string>> -> URLSearchParams
 
 type WebSocketRequestResponsePairConstructor =
     [<EmitConstructor>]
@@ -2515,9 +2515,9 @@ type FormData =
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData/set">MDN Reference</a>
     /// </summary>
     abstract set: name: string * value: Blob * ?filename: string -> unit
-    abstract entries: unit -> obj
-    abstract keys: unit -> obj
-    abstract values: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.IterableIterator<(string * U2<string, File>), obj, obj>
+    abstract keys: unit -> Fable.Core.TS.Es.IterableIterator<string, obj, obj>
+    abstract values: unit -> Fable.Core.TS.Es.IterableIterator<U2<string, File>, obj, obj>
     abstract forEach<'This>: callback: FormData.ForEach.Callback * ?thisArg: 'This -> unit
 
 [<Interface>]
@@ -2562,7 +2562,7 @@ type Doctype =
 [<Interface>]
 type Element =
     abstract tagName: string with get, set
-    abstract attributes: obj
+    abstract attributes: Fable.Core.TS.Es.IterableIterator<string[], obj, obj>
     abstract removed: bool
     abstract namespaceURI: string
     abstract getAttribute: name: string -> string option
@@ -2579,7 +2579,7 @@ type Element =
     abstract setInnerContent: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Element
     abstract onEndTag: handler: (EndTag -> JS.Promise<unit> option) -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (tagName: string, attributes: obj, removed: bool, namespaceURI: string, getAttribute: (string -> string option), hasAttribute: (string -> bool), setAttribute: Func<string, string, Element>, removeAttribute: (string -> Element), before: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, after: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, prepend: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, append: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, replace: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, remove: (unit -> Element), removeAndKeepContent: (unit -> Element), setInnerContent: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, onEndTag: ((EndTag -> JS.Promise<unit> option) -> unit)) : Element = jsNative
+    static member Create (tagName: string, attributes: Fable.Core.TS.Es.IterableIterator<string[], obj, obj>, removed: bool, namespaceURI: string, getAttribute: (string -> string option), hasAttribute: (string -> bool), setAttribute: Func<string, string, Element>, removeAttribute: (string -> Element), before: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, after: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, prepend: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, append: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, replace: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, remove: (unit -> Element), removeAndKeepContent: (unit -> Element), setInnerContent: Func<U3<string, ReadableStream<obj>, Response>, ContentOptions option, Element>, onEndTag: ((EndTag -> JS.Promise<unit> option) -> unit)) : Element = jsNative
 
 [<Interface>]
 type EndTag =
@@ -2651,7 +2651,7 @@ type FetchEvent =
     [<Global("FetchEvent.BUBBLING_PHASE")>]
     static member BUBBLING_PHASE: float = jsNative
 
-type HeadersInit = obj
+type HeadersInit = U3<Headers, Fable.Core.TS.Es.Iterable<Fable.Core.TS.Es.Iterable<string, obj, obj>, obj, obj>, JS.Record<string, string>>
 
 /// <summary>
 /// The <b><c>Headers</c></b> interface of the Fetch API allows you to perform various actions on HTTP request and response headers. These actions include retrieving, setting, adding to, and removing headers from the list of the request's headers.
@@ -2698,11 +2698,11 @@ type Headers =
     /// </summary>
     abstract delete: name: string -> unit
     abstract forEach<'This>: callback: Headers.ForEach.Callback * ?thisArg: 'This -> unit
-    abstract entries: unit -> obj
-    abstract keys: unit -> obj
-    abstract values: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.IterableIterator<(string * string), obj, obj>
+    abstract keys: unit -> Fable.Core.TS.Es.IterableIterator<string, obj, obj>
+    abstract values: unit -> Fable.Core.TS.Es.IterableIterator<string, obj, obj>
 
-type BodyInit = obj
+type BodyInit = U9<string, JS.ArrayBuffer, JS.ArrayBufferView, JS.AsyncIterable<U2<JS.ArrayBuffer, JS.ArrayBufferView>>, Blob, FormData, Fable.Core.TS.Es.Iterable<U2<JS.ArrayBuffer, JS.ArrayBufferView>, obj, obj>, ReadableStream<JS.Uint8Array>, URLSearchParams>
 
 [<Interface>]
 type Body =
@@ -2992,9 +2992,9 @@ type QueueContentType =
 type Queue<'Body> =
     abstract metrics: unit -> JS.Promise<QueueMetrics>
     abstract send: message: 'Body * ?options: QueueSendOptions -> JS.Promise<QueueSendResponse>
-    abstract sendBatch: messages: obj * ?options: QueueSendBatchOptions -> JS.Promise<QueueSendBatchResponse>
+    abstract sendBatch: messages: Fable.Core.TS.Es.Iterable<MessageSendRequest<'Body>, obj, obj> * ?options: QueueSendBatchOptions -> JS.Promise<QueueSendBatchResponse>
     [<ParamObject; Emit("$0")>]
-    static member Create (metrics: (unit -> JS.Promise<QueueMetrics>), send: Func<'Body, QueueSendOptions option, JS.Promise<QueueSendResponse>>, sendBatch: Func<obj, QueueSendBatchOptions option, JS.Promise<QueueSendBatchResponse>>) : Queue<'Body> = jsNative
+    static member Create (metrics: (unit -> JS.Promise<QueueMetrics>), send: Func<'Body, QueueSendOptions option, JS.Promise<QueueSendResponse>>, sendBatch: Func<Fable.Core.TS.Es.Iterable<MessageSendRequest<'Body>, obj, obj>, QueueSendBatchOptions option, JS.Promise<QueueSendBatchResponse>>) : Queue<'Body> = jsNative
 
 [<Interface>]
 type QueueSendMetrics =
@@ -4370,9 +4370,9 @@ type URLSearchParams =
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams/sort">MDN Reference</a>
     /// </summary>
     abstract sort: unit -> unit
-    abstract entries: unit -> obj
-    abstract keys: unit -> obj
-    abstract values: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.IterableIterator<(string * string), obj, obj>
+    abstract keys: unit -> Fable.Core.TS.Es.IterableIterator<string, obj, obj>
+    abstract values: unit -> Fable.Core.TS.Es.IterableIterator<string, obj, obj>
     abstract forEach<'This>: callback: URLSearchParams.ForEach.Callback * ?thisArg: 'This -> unit
     abstract toString: unit -> string
 
@@ -4679,7 +4679,7 @@ type SqlStorageCursor<'T> =
     abstract next: unit -> U2<SqlStorageCursor.Next.Result<'T>, SqlStorageCursor.Next.Result2>
     abstract toArray: unit -> 'T[]
     abstract one: unit -> 'T
-    abstract raw: unit -> obj
+    abstract raw<'U>: unit -> Fable.Core.TS.Es.IterableIterator<'U, obj, obj>
     abstract columnNames: string[] with get, set
     abstract rowsRead: float
     abstract rowsWritten: float
@@ -5008,11 +5008,11 @@ type LoopbackColoLocalActorNamespace =
 [<Interface>]
 type SyncKvStorage =
     abstract get<'T>: key: string -> 'T option
-    abstract list: ?options: SyncKvListOptions -> obj
+    abstract list<'T>: ?options: SyncKvListOptions -> Fable.Core.TS.Es.Iterable<(string * 'T), obj, obj>
     abstract put<'T>: key: string * value: 'T -> unit
     abstract delete: key: string -> bool
     [<ParamObject; Emit("$0")>]
-    static member Create (get: (string -> 'T option), list: (SyncKvListOptions option -> obj), put: Action<string, 'T>, delete: (string -> bool)) : SyncKvStorage = jsNative
+    static member Create (get: (string -> 'T option), list: (SyncKvListOptions option -> Fable.Core.TS.Es.Iterable<(string * 'T), obj, obj>), put: Action<string, 'T>, delete: (string -> bool)) : SyncKvStorage = jsNative
 
 [<Interface>]
 type SyncKvListOptions =
@@ -5481,9 +5481,9 @@ type EventCounts =
     abstract size: float
     abstract get: eventType: string -> float option
     abstract has: eventType: string -> bool
-    abstract entries: unit -> obj
-    abstract keys: unit -> obj
-    abstract values: unit -> obj
+    abstract entries: unit -> Fable.Core.TS.Es.IterableIterator<string[], obj, obj>
+    abstract keys: unit -> Fable.Core.TS.Es.IterableIterator<string, obj, obj>
+    abstract values: unit -> Fable.Core.TS.Es.IterableIterator<float, obj, obj>
     abstract forEach: param1: EventCounts.ForEach.Param1 * ?param2: obj -> unit
 
 type SpanConstructor =
@@ -5868,7 +5868,7 @@ type AgentMemoryProfile =
     /// </summary>
     /// <param name="messages">- Conversation messages to extract memories from.</param>
     /// <param name="options">- Optional ingest options.</param>
-    abstract ingest: messages: obj * ?options: AgentMemoryIngestOptions -> JS.Promise<unit>
+    abstract ingest: messages: Fable.Core.TS.Es.Iterable<AgentMemoryMessage, obj, obj> * ?options: AgentMemoryIngestOptions -> JS.Promise<unit>
     /// <summary>
     /// Get a profile summary.
     /// </summary>
@@ -5899,7 +5899,7 @@ type AgentMemoryProfile =
     /// <param name="sessionId">- Session to delete.</param>
     abstract deleteSession: sessionId: string -> JS.Promise<unit>
     [<ParamObject; Emit("$0")>]
-    static member Create (get: (string -> JS.Promise<AgentMemoryMemory>), delete: (string -> JS.Promise<AgentMemoryMemory>), remember: (AgentMemoryIncomingMemory -> JS.Promise<AgentMemoryMemory>), ingest: Func<obj, AgentMemoryIngestOptions option, JS.Promise<unit>>, getSummary: (AgentMemoryGetSummaryOptions option -> JS.Promise<AgentMemoryGetSummaryResponse>), recall: Func<string, AgentMemoryRecallOptions option, JS.Promise<AgentMemoryRecallResult>>, list: (AgentMemoryListMemoriesOptions option -> JS.Promise<AgentMemoryListMemoriesResult>), deleteSession: (string -> JS.Promise<unit>)) : AgentMemoryProfile = jsNative
+    static member Create (get: (string -> JS.Promise<AgentMemoryMemory>), delete: (string -> JS.Promise<AgentMemoryMemory>), remember: (AgentMemoryIncomingMemory -> JS.Promise<AgentMemoryMemory>), ingest: Func<Fable.Core.TS.Es.Iterable<AgentMemoryMessage, obj, obj>, AgentMemoryIngestOptions option, JS.Promise<unit>>, getSummary: (AgentMemoryGetSummaryOptions option -> JS.Promise<AgentMemoryGetSummaryResponse>), recall: Func<string, AgentMemoryRecallOptions option, JS.Promise<AgentMemoryRecallResult>>, list: (AgentMemoryListMemoriesOptions option -> JS.Promise<AgentMemoryListMemoriesResult>), deleteSession: (string -> JS.Promise<unit>)) : AgentMemoryProfile = jsNative
 
 /// <summary>
 /// Namespace-level Agent Memory binding.
@@ -18794,7 +18794,7 @@ type Exports =
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams">MDN Reference</a>
     /// </summary>
     [<Global("URLSearchParams"); EmitConstructor>]
-    static member URLSearchParams (?init: obj) : URLSearchParams = jsNative
+    static member URLSearchParams (?init: U3<string, Fable.Core.TS.Es.Iterable<Fable.Core.TS.Es.Iterable<string, obj, obj>, obj, obj>, JS.Record<string, string>>) : URLSearchParams = jsNative
     /// <summary>
     /// The <b><c>URLPattern</c></b> interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
     /// <br /><br />
@@ -25978,3 +25978,29 @@ module WorkflowInstanceRestartOptions =
             | [<CompiledName("do")>] Do
             | [<CompiledName("sleep")>] Sleep
             | [<CompiledName("waitForEvent")>] WaitForEvent
+
+[<Erase>]
+type U11<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11> =
+    | Case1 of 't1
+    | Case2 of 't2
+    | Case3 of 't3
+    | Case4 of 't4
+    | Case5 of 't5
+    | Case6 of 't6
+    | Case7 of 't7
+    | Case8 of 't8
+    | Case9 of 't9
+    | Case10 of 't10
+    | Case11 of 't11
+
+    static member op_ErasedCast(x: 't1) = Case1 x
+    static member op_ErasedCast(x: 't2) = Case2 x
+    static member op_ErasedCast(x: 't3) = Case3 x
+    static member op_ErasedCast(x: 't4) = Case4 x
+    static member op_ErasedCast(x: 't5) = Case5 x
+    static member op_ErasedCast(x: 't6) = Case6 x
+    static member op_ErasedCast(x: 't7) = Case7 x
+    static member op_ErasedCast(x: 't8) = Case8 x
+    static member op_ErasedCast(x: 't9) = Case9 x
+    static member op_ErasedCast(x: 't10) = Case10 x
+    static member op_ErasedCast(x: 't11) = Case11 x

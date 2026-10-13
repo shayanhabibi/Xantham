@@ -4,8 +4,8 @@
   "module": "SolidJs",
   "counts": {
     "exact": 69,
-    "ergonomic": 178,
-    "widened": 94,
+    "ergonomic": 180,
+    "widened": 92,
     "escape": 1
   },
   "passes": [
@@ -46,10 +46,10 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 259,
+      "total": 253,
       "exact": 2,
       "ergonomic": 215,
-      "widened": 42
+      "widened": 36
     },
     {
       "pass": "SP - synthesize-paramobjects",

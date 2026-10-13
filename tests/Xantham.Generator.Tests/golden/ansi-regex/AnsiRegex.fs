@@ -49,4 +49,4 @@ type Exports =
     /// </code>
     /// </example>
     [<Import("default", "ansi-regex")>]
-    static member ansiRegex (?options: Options) : obj = jsNative
+    static member ansiRegex (?options: Options) : Fable.Core.TS.Es.RegExp = jsNative

@@ -16,6 +16,6 @@
 {"name":"Exports.mount","tier":"exact","findings":[]}
 {"name":"Exports.upload","tier":"exact","findings":[]}
 {"name":"Exports.emit","tier":"exact","findings":[]}
-{"name":"Exports.each","tier":"widened","findings":[{"name":"TR.NotAmongGeneratedDeclarations","key":"TR023","pass":"shape-exports","tier":"widened","symbol":"Exports.each(values)","fields":{"shown":"Iterable"},"message":"Iterable is not among the generated declarations; widened to obj"}]}
+{"name":"Exports.each","tier":"ergonomic","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.each(values)","message":"any maps to obj"},{"name":"TR.AnyToObj","key":"TR008","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.each(values)","message":"any maps to obj"}]}
 {"name":"Exports.select","tier":"exact","findings":[]}
 {"name":"Exports.respond","tier":"exact","findings":[]}

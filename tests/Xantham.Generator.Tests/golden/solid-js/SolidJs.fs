@@ -2238,7 +2238,7 @@ module Html =
     [<Erase>]
     type Exports =
         [<Import("default", "solid-js/html")>]
-        static member html (statics: obj, [<ParamArray>] args: obj[]) : U2<Fable.Core.TS.Dom.Node[], Fable.Core.TS.Dom.Node> = jsNative
+        static member html (statics: Fable.Core.TS.Es.TemplateStringsArray, [<ParamArray>] args: obj[]) : U2<Fable.Core.TS.Dom.Node[], Fable.Core.TS.Dom.Node> = jsNative
 
 module Index =
     [<Interface>]
@@ -2844,9 +2844,9 @@ module Web =
         [<Import("clearDelegatedEvents", "solid-js/web")>]
         static member clearDelegatedEvents (?d: Fable.Core.TS.Dom.Document) : unit = jsNative
         [<Import("spread", "solid-js/web")>]
-        static member spread<'T> (node: JsxDevRuntime.DOMElement, accessor: 'T, ?isSVG: obj, ?skipChildren: obj) : unit = jsNative
+        static member spread<'T> (node: JsxDevRuntime.DOMElement, accessor: 'T, ?isSVG: Fable.Core.TS.Es.Boolean, ?skipChildren: Fable.Core.TS.Es.Boolean) : unit = jsNative
         [<Import("assign", "solid-js/web")>]
-        static member assign (node: JsxDevRuntime.DOMElement, props: obj, ?isSVG: obj, ?skipChildren: obj, ?prevProps: obj, ?skipRef: obj) : unit = jsNative
+        static member assign (node: JsxDevRuntime.DOMElement, props: obj, ?isSVG: Fable.Core.TS.Es.Boolean, ?skipChildren: Fable.Core.TS.Es.Boolean, ?prevProps: obj, ?skipRef: Fable.Core.TS.Es.Boolean) : unit = jsNative
         [<Import("setAttribute", "solid-js/web")>]
         static member setAttribute (node: JsxDevRuntime.DOMElement, name: string, value: string) : unit = jsNative
         [<Import("setAttributeNS", "solid-js/web")>]
