@@ -2857,7 +2857,8 @@ output is unchanged. The full experiment record, with every measurement, is
 
 - Resolve's conditional derivation records `ConditionalFacts.Constraint` from
   `getBaseConstraintOfType`. It does so when no branch is taken, or the taken branch is an
-  `infer` variable, and the peeled check type is a type parameter that
+  `infer` variable (a type parameter declared under an `InferType` node), and the peeled
+  check type is a type parameter that
   `getConstraintOfTypeParameter` bounds. The constraint joins the frontier through the
   `conditional-constraint` channel and the catalogue's dependency edges.
 - An alias's own declaration (the alias's declared type equals the conditional) stays
@@ -2875,8 +2876,9 @@ IncomingMessage>`) is resolved by the checker before Resolve reads it. All 130 `
 Resolve, not in a separate pass before Resolve.
 
 `early-resolve-lab` (flag on) pins `TR068` at `RequestListener(req)`,
-`Server(requestListener)(req)`, `Server.on(listener)(req)` and
-`Exports.createServer(listener)(req)`, plus their rendered lines. It also pins `TR045` at
+`Server(requestListener)(req)`, `Server.on(listener)(req)`,
+`Exports.createServer(listener)(req)` and `Exports.instance(value)` (a taken `infer` branch),
+plus their rendered lines; the last stays `TR045` with the flag off. It also pins `TR045` at
 `Divergent`, `Instance` (an alias's own body), `Exports.divergent(value)` (unbounded),
 `Exports.returns(value)` (bound instantiates to `any`) and `Exports.either(value)` (union
 bound). The three `TR018` intersections over `InstanceType<Response>` are pinned unchanged,

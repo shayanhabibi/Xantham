@@ -127,8 +127,9 @@ argument binds as `IncomingMessage` instead of `obj`.
 
 Each rewritten reference is reported as `TR068`, graded Widened: a listener declared for a
 subclass of the bound still reads the bound. A conditional over an unbounded parameter or a
-union bound, or one whose value at the bound is `any`, stays `obj` under `TR045`. The key is
-part of a catalogue's inference profile when set. The default is `false`.
+union bound, one whose value at the bound is `any`, `unknown`, `never`, another conditional or
+one of its own branches, and an alias's own declaration all stay `obj` under `TR045`. The key
+is part of a catalogue's inference profile when set. The default is `false`.
 
 ## Write handler returns as unit
 

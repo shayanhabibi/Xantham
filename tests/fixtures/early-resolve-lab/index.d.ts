@@ -39,3 +39,5 @@ export declare class Outgoing {
 export declare function either<C extends typeof IncomingMessage | typeof Outgoing>(value: InstanceType<C>): void;
 // 7. The alias's own body stays deferred.
 export type Instance<C extends typeof IncomingMessage> = C extends abstract new (...args: any) => infer R ? R : never;
+// 8. An application of that alias over a bounded parameter: the taken branch is the `infer` variable.
+export declare function instance<C extends typeof IncomingMessage>(value: Instance<C>): void;

@@ -54,7 +54,9 @@ The prototype is opt-in: `resolveConditionalConstraints` in `xantham.json`, `fal
 default. When the flag is set, Resolve records `ConditionalFacts.Constraint` if all of these
 hold:
 
-- either no branch is taken, or the taken branch is an `infer` variable (`TypeParameter`);
+- either no branch is taken, or the taken branch is an `infer` variable (a type parameter
+  declared under an `InferType` node). A taken in-scope parameter maps to itself, so its
+  constraint is not recorded;
 - the peeled check type is a type parameter that `getConstraintOfTypeParameter` bounds;
 - the conditional has no alias, or its alias's declared type is a different type (an alias's
   own declaration body stays deferred);
@@ -76,7 +78,7 @@ branch ids. Symbol tiers (exact / ergonomic / widened / escape) did not move in 
 
 | Package | TR045 off | TR045 on (strict) | TR068 on (strict) | Permissive TR045 / TR068 | Binding diff (strict) |
 | --- | --- | --- | --- | --- | --- |
-| `early-resolve-lab` | 5 `InstanceType` | 1 (`Exports.either`, union bound) | 4 | — | 4 `obj` → `IncomingMessage` sites |
+| `early-resolve-lab` | 5 `InstanceType`, 1 `Instance` application | 1 (`Exports.either`, union bound) | 5 | — | 5 `obj` → `IncomingMessage` sites |
 | `@types/node` | 224 (130 `InstanceType`) | 93 (0 `InstanceType`) | 160 (159 `InstanceType`, 1 inline) | 43 / 210 | 101 lines replaced; compiles |
 | `type-fest` | 154 (152 alias bodies) | 152 | 2 (inline, inside alias bodies) | 152 / 2 | none |
 | `solid-js` | 56 (51 references) | 56 | 0 | 56 / 0 | none |
@@ -178,6 +180,13 @@ and no checker query answers those without the branch union. Enabling it for Nod
 `"resolveConditionalConstraints": true` to `src/Xantham.Fable.Node/xantham.json` and
 regenerating Node at integration. Node is not a catalogue consumer, so the profile does not
 matter there.
+
+T3's acceptance line, a code delta in the `type-fest` and `solid-js` goldens, is not met. With
+the flag unset by default both regenerate byte-identical; with it set, `solid-js` moves no
+finding and `type-fest` moves two manifest-only findings. The Node delta (130 `InstanceType`
+`TR045` to 0) is measured in scratch only, and nothing committed pins it until Node's
+`xantham.json` sets the flag and Node is regenerated. Adopting the flag for Node at
+integration, or accepting W9 as a findings record only, is a lead decision.
 
 Follow-ups this experiment surfaced, out of W9's scope:
 

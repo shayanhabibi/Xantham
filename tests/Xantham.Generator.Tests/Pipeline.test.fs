@@ -4669,7 +4669,7 @@ let pipelineTests =
 
         // W9: a conditional deferred over a bounded type parameter (`InstanceType<Request>`, as
         // @types/node's `http.RequestListener` writes it) reads its value at the bound under
-        // `TR066`. A concrete argument resolves before Resolve; an unbounded parameter, a bound
+        // `TR068`. A concrete argument resolves before Resolve; an unbounded parameter, a bound
         // that instantiates to `any`, a union bound and an alias's own body stay `obj` under
         // `TR045`.
         yield!
@@ -4698,10 +4698,16 @@ let pipelineTests =
                       Expect.equal
                           (sites rendered "TR068")
                           [ "Exports.createServer(listener)(req)", Widened
+                            "Exports.instance(value)", Widened
                             "RequestListener(req)", Widened
                             "Server(requestListener)(req)", Widened
                             "Server.on(listener)(req)", Widened ]
-                          "every InstanceType over a bounded parameter"
+                          "every InstanceType over a bounded parameter, and an infer branch over one"
+
+                      Expect.stringContains
+                          source
+                          "static member instance (value: IncomingMessage) : unit"
+                          "an application whose taken branch is an infer variable reads the bound"
 
                       Expect.stringContains
                           source
@@ -4742,6 +4748,11 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                       Expect.isEmpty (sites rendered "TR068") "nothing reads its bound unless selected"
+
+                      Expect.contains
+                          (sites rendered "TR045" |> List.map fst)
+                          "Exports.instance(value)"
+                          "an application whose taken branch is an infer variable stays obj"
                       Expect.equal
                           (instanceTypeDeferred rendered)
                           [ "Exports.createServer(listener)(req)"

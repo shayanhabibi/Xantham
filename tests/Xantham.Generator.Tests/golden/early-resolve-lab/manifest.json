@@ -5,7 +5,7 @@
   "counts": {
     "exact": 5,
     "ergonomic": 4,
-    "widened": 9,
+    "widened": 10,
     "escape": 0
   },
   "passes": [
@@ -40,9 +40,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 13,
-      "ergonomic": 6,
-      "widened": 7
+      "total": 16,
+      "ergonomic": 7,
+      "widened": 9
     },
     {
       "pass": "SP - synthesize-paramobjects",

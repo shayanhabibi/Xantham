@@ -894,6 +894,34 @@ let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : A
                        |> ValueOption.isSome
     }
 
+/// Whether a type parameter is declared by an `infer` clause: its declaration is a type parameter
+/// node under an `InferType` node.
+let private declaredByInfer (ctx: Context) (parameter: TypeResponse) : Async<bool> =
+    async {
+        let! symbol = ctx.Session.getSymbolOfType parameter.Id
+
+        match
+            symbol
+            |> ValueOption.bind _.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | None -> return false
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            return
+                match file with
+                | ValueNone -> false
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    node.Kind = SyntaxKind.TypeParameter
+                    && Node.parent node
+                       |> ValueOption.exists (fun parent -> parent.Kind = SyntaxKind.InferType)
+    }
+
 /// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
 /// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
 /// `lib.*.d.ts` file. A key referencing a package's own `unique symbol` reads `None`, including
@@ -1977,13 +2005,17 @@ let private deriveFacts
                         // branch is taken, or where the taken branch is an `infer` variable, over a
                         // check type that is a bounded type parameter. An alias's own declaration
                         // keeps its deferred body.
-                        let! constrained =
-                            let wanted =
-                                ctx.Config.ResolveConditionalConstraints
-                                && (match taken with
-                                    | None -> true
-                                    | Some(_, bare) -> bare.Flags.HasFlag TypeFlags.TypeParameter)
+                        let! wanted =
+                            if not ctx.Config.ResolveConditionalConstraints then
+                                async.Return false
+                            else
+                                match taken with
+                                | None -> async.Return true
+                                | Some(_, bare) when bare.Flags.HasFlag TypeFlags.TypeParameter ->
+                                    declaredByInfer ctx bare
+                                | Some _ -> async.Return false
 
+                        let! constrained =
                             if not wanted then
                                 async.Return None
                             else
