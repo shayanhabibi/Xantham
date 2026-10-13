@@ -2331,11 +2331,13 @@ declaration with a symbol member or `seq` reports `SP003` and carries no `Create
 reads `SymbolToStringTag`, iterates `bag` with `Seq.toList`, writes `convertible`'s
 `SymbolToStringTag`, and calls `SymbolToPrimitive` with and without its argument.
 
+Measured on W2 (`anyReturnAsUnit`, with W1 merged):
+
 | Golden | MB002 | MB008 | MB009 | exact / ergonomic / widened / escape |
 | --- | --- | --- | --- | --- |
-| `@cloudflare/workers-types` | 10 → 0 | 0 → 5 | 0 → 2 | 412/1067/374/111 → 412/1069/372/111 |
+| `@cloudflare/workers-types` | 10 → 0 | 0 → 5 | 0 → 2 | 412/1144/407/1 → 412/1147/404/1 |
 | `type-fest` | 2 → 2 | 0 | 0 | 26/64/205/2 → 26/64/205/2 |
-| Core.TS (T4) | 202 → 0 | 0 → 61 | 0 → 76 | 2073/1750/578/662 → 2073/1797/531/665 |
+| Core.TS (T4) | 202 → 0 | 0 → 61 | 0 → 76 | 2073/2125/860/5 → 2073/2203/785/5 |
 
 In `workers-types`, `TR023` is unchanged (37): the iterator member of the five iterables that
 inherit `seq` (`EventCounts`, `FormData`, `Headers`, `SqlStorageCursor`, `URLSearchParams`) and

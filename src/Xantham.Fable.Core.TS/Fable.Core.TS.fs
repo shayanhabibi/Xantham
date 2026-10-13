@@ -831,6 +831,9 @@ module Es =
         abstract toJSON: unit -> string
         abstract valueOf: unit -> unit
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type DurationConstructor =
         abstract from: item: DurationLike -> Duration
         abstract compare: one: DurationLike * two: DurationLike * ?options: DurationRelativeToOptions -> float
@@ -6833,6 +6836,9 @@ module Es =
         abstract valueOf: unit -> unit
         abstract toZonedDateTimeISO: timeZone: TimeZoneLike -> ZonedDateTime
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type InstantConstructor =
         abstract from: item: InstantLike -> Instant
         abstract fromEpochMilliseconds: epochMilliseconds: float -> Instant
@@ -7446,6 +7452,9 @@ module Es =
         abstract toJSON: unit -> string
         abstract valueOf: unit -> unit
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type PlainDateConstructor =
         abstract from: item: PlainDateLike * ?options: OverflowOptions -> PlainDate
         abstract compare: one: PlainDateLike * two: PlainDateLike -> float
@@ -7503,6 +7512,9 @@ module Es =
         abstract toPlainDate: unit -> PlainDate
         abstract toPlainTime: unit -> PlainTime
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type PlainDateTimeConstructor =
         abstract from: item: PlainDateTimeLike * ?options: OverflowOptions -> PlainDateTime
         abstract compare: one: PlainDateTimeLike * two: PlainDateTimeLike -> float
@@ -7554,7 +7566,6 @@ module Es =
         static member Create(timeZone: TimeZoneLike, ?plainTime: PlainTimeLike) : PlainDateToZonedDateTimeOptions =
             jsNative
 
-    [<Interface>]
     type PlainMonthDay =
         abstract calendarId: string
         abstract monthCode: string
@@ -7567,21 +7578,8 @@ module Es =
         abstract valueOf: unit -> unit
         abstract toPlainDate: item: PlainMonthDayToPlainDateOptions -> PlainDate
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                calendarId: string,
-                monthCode: string,
-                day: float,
-                ``with``: Func<PlainMonthDay.With.MonthDayLike, OverflowOptions option, PlainMonthDay>,
-                equals: (PlainMonthDayLike -> bool),
-                toString: (PlainDateToStringOptions option -> string),
-                toLocaleString: Func<LocalesArgument option, DateTimeFormatOptions option, string>,
-                toJSON: (unit -> string),
-                valueOf: (unit -> unit),
-                toPlainDate: (PlainMonthDayToPlainDateOptions -> PlainDate)
-            ) : PlainMonthDay =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type PlainMonthDayConstructor =
         abstract from: item: PlainMonthDayLike * ?options: OverflowOptions -> PlainMonthDay
@@ -7620,6 +7618,9 @@ module Es =
         abstract toJSON: unit -> string
         abstract valueOf: unit -> unit
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type PlainTimeConstructor =
         abstract from: item: PlainTimeLike * ?options: OverflowOptions -> PlainTime
         abstract compare: one: PlainTimeLike * two: PlainTimeLike -> float
@@ -7650,7 +7651,6 @@ module Es =
             ) : PlainTimeToStringOptions =
             jsNative
 
-    [<Interface>]
     type PlainYearMonth =
         abstract calendarId: string
         abstract era: string option
@@ -7684,42 +7684,8 @@ module Es =
         abstract valueOf: unit -> unit
         abstract toPlainDate: item: PlainYearMonthToPlainDateOptions -> PlainDate
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                calendarId: string,
-                year: float,
-                month: float,
-                monthCode: string,
-                daysInYear: float,
-                daysInMonth: float,
-                monthsInYear: float,
-                inLeapYear: bool,
-                ``with``: Func<PlainYearMonth.With.YearMonthLike, OverflowOptions option, PlainYearMonth>,
-                add: Func<DurationLike, OverflowOptions option, PlainYearMonth>,
-                subtract: Func<DurationLike, OverflowOptions option, PlainYearMonth>,
-                until:
-                    Func<
-                        PlainYearMonthLike,
-                        RoundingOptionsWithLargestUnit<PlainYearMonth.Until.Options.Item> option,
-                        Duration
-                     >,
-                since:
-                    Func<
-                        PlainYearMonthLike,
-                        RoundingOptionsWithLargestUnit<PlainYearMonth.Until.Options.Item> option,
-                        Duration
-                     >,
-                equals: (PlainYearMonthLike -> bool),
-                toString: (PlainDateToStringOptions option -> string),
-                toLocaleString: Func<LocalesArgument option, DateTimeFormatOptions option, string>,
-                toJSON: (unit -> string),
-                valueOf: (unit -> unit),
-                toPlainDate: (PlainYearMonthToPlainDateOptions -> PlainDate),
-                ?era: string,
-                ?eraYear: float
-            ) : PlainYearMonth =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type PlainYearMonthConstructor =
         abstract from: item: PlainYearMonthLike * ?options: OverflowOptions -> PlainYearMonth
@@ -8420,6 +8386,113 @@ module Es =
         [<ParamObject; Emit("$0")>]
         static member Create(segment: string, index: float, input: string, ?isWordLike: bool) : SegmentData = jsNative
 
+    type SegmentIterator<'T> =
+        inherit IteratorObject<'T, unit, obj>
+        abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
+        abstract ``return``: (unit option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
+        abstract throw: (obj option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
+
+        /// <summary>
+        /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
+        /// </summary>
+        /// <param name="callbackfn">A function that accepts up to two arguments to be used to transform values from the underlying iterator.</param>
+        abstract map<'U> :
+            callbackfn: Fable.Core.TS.Es.ArrayIterator.Map.Callbackfn<'T, 'U> -> IteratorObject<'U, unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are those from this iterator for which the provided predicate returns true.
+        /// </summary>
+        /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
+        /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
+        abstract filter<'S> :
+            predicate: Fable.Core.TS.Es.ArrayIterator.Filter.Predicate<'T> -> IteratorObject<'S, unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are those from this iterator for which the provided predicate returns true.
+        /// </summary>
+        /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
+        /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
+        abstract filter:
+            predicate: Fable.Core.TS.Es.ArrayIterator.Filter.Predicate2<'T> -> IteratorObject<'T, unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are the result of applying the callback to the values from this iterator and then flattening the resulting iterators or iterables.
+        /// </summary>
+        /// <param name="callback">A function that accepts up to two arguments to be used to transform values from the underlying iterator into new iterators or iterables to be flattened into the result.</param>
+        abstract flatMap<'U> :
+            callback: Fable.Core.TS.Es.ArrayIterator.FlatMap.Callback<'T, 'U> -> IteratorObject<'U, unit, obj>
+
+        /// <summary>
+        /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+        /// </summary>
+        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+        abstract reduce: callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn<'T> -> 'T
+        /// <summary>
+        /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+        /// </summary>
+        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+        abstract reduce: callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn2<'T> * initialValue: 'T -> 'T
+
+        /// <summary>
+        /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+        /// </summary>
+        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+        abstract reduce<'U> :
+            callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn3<'U, 'T> * initialValue: 'U -> 'U
+
+        /// <summary>
+        /// Performs the specified action for each element in the iterator.
+        /// </summary>
+        /// <param name="callbackfn">A function that accepts up to two arguments. forEach calls the callbackfn function one time for each element in the iterator.</param>
+        abstract forEach: callbackfn: Fable.Core.TS.Es.ArrayIterator.ForEach.Callbackfn<'T> -> unit
+        /// <summary>
+        /// Determines whether the specified callback function returns true for any element of this iterator.
+        /// </summary>
+        /// <param name="predicate">
+        /// A function that accepts up to two arguments. The some method calls
+        /// the predicate function for each element in this iterator until the predicate returns a value
+        /// true, or until the end of the iterator.
+        /// </param>
+        abstract some: predicate: Fable.Core.TS.Es.ArrayIterator.Some.Predicate<'T> -> bool
+        /// <summary>
+        /// Determines whether all the members of this iterator satisfy the specified test.
+        /// </summary>
+        /// <param name="predicate">
+        /// A function that accepts up to two arguments. The every method calls
+        /// the predicate function for each element in this iterator until the predicate returns
+        /// false, or until the end of this iterator.
+        /// </param>
+        abstract every: predicate: Fable.Core.TS.Es.ArrayIterator.Every.Predicate<'T> -> bool
+        /// <summary>
+        /// Returns the value of the first element in this iterator where predicate is true, and undefined
+        /// otherwise.
+        /// </summary>
+        /// <param name="predicate">
+        /// find calls predicate once for each element of this iterator, in
+        /// order, until it finds one where predicate returns true. If such an element is found, find
+        /// immediately returns that element value. Otherwise, find returns undefined.
+        /// </param>
+        abstract find<'S> : predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate<'T> -> 'S option
+        /// <summary>
+        /// Returns the value of the first element in this iterator where predicate is true, and undefined
+        /// otherwise.
+        /// </summary>
+        /// <param name="predicate">
+        /// find calls predicate once for each element of this iterator, in
+        /// order, until it finds one where predicate returns true. If such an element is found, find
+        /// immediately returns that element value. Otherwise, find returns undefined.
+        /// </param>
+        abstract find: predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate2<'T> -> 'T option
+
     [<Interface>]
     type Segmenter =
         /// <summary>
@@ -8481,8 +8554,8 @@ module Es =
             : SegmenterOptions =
             jsNative
 
-    [<Interface>]
     type Segments =
+        inherit seq<SegmentData>
         /// <summary>
         /// Returns an object describing the segment in the original string that includes the code unit at a specified index.
         /// <br /><br />
@@ -8490,9 +8563,6 @@ module Es =
         /// </summary>
         /// <param name="codeUnitIndex">- A number specifying the index of the code unit in the original input string. If the value is omitted, it defaults to <c>0</c>.</param>
         abstract containing: ?codeUnitIndex: float -> SegmentData option
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(containing: (float option -> SegmentData option)) : Segments = jsNative
 
     type Set2<'T> = delegate of target: 'T * p: obj * newValue: obj * receiver: obj -> bool
 
@@ -8685,6 +8755,9 @@ module Es =
         abstract toPlainTime: unit -> PlainTime
         abstract toPlainDateTime: unit -> PlainDateTime
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type ZonedDateTimeConstructor =
         abstract from: item: ZonedDateTimeLike * ?options: ZonedDateTimeFromOptions -> ZonedDateTime
         abstract compare: one: ZonedDateTimeLike * two: ZonedDateTimeLike -> float
@@ -8754,8 +8827,8 @@ module Es =
             ) : ZonedDateTimeToStringOptions =
             jsNative
 
-    [<Interface>]
     type Map<'K, 'V> =
+        inherit seq<('K * 'V)>
         /// <summary>
         /// Removes all elements from the Map.
         /// </summary>
@@ -8804,23 +8877,8 @@ module Es =
         /// <returns>The element associated with the specific key, which will be the newly computed value if no element previously existed.</returns>
         abstract getOrInsertComputed: key: 'K * callback: ('K -> 'V) -> 'V
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                clear: (unit -> unit),
-                delete: ('K -> bool),
-                forEach: Action<Map.ForEach.Callbackfn<'V, 'K>, obj option>,
-                get: ('K -> 'V option),
-                has: ('K -> bool),
-                set: Func<'K, 'V, Map<'K, 'V>>,
-                size: float,
-                entries: (unit -> MapIterator<('K * 'V)>),
-                keys: (unit -> MapIterator<'K>),
-                values: (unit -> MapIterator<'V>),
-                getOrInsert: Func<'K, 'V, 'V>,
-                getOrInsertComputed: Func<'K, ('K -> 'V), 'V>
-            ) : Map<'K, 'V> =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type MapConstructor =
         /// <summary>
@@ -8831,6 +8889,9 @@ module Es =
         abstract groupBy<'K, 'T> :
             items: Iterable<'T, obj, obj> * keySelector: MapConstructor.GroupBy.KeySelector<'T, 'K> -> Map<'K, 'T[]>
 
+        [<Emit("$0[Symbol.species]")>]
+        abstract SymbolSpecies: MapConstructor
+
         [<EmitConstructor>]
         abstract Create: unit -> Map<obj, obj>
 
@@ -8840,8 +8901,8 @@ module Es =
         [<EmitConstructor>]
         abstract Create<'K, 'V> : ?iterable: Iterable<('K * 'V), obj, obj> -> Map<'K, 'V>
 
-    [<Interface>]
     type ReadonlyMap<'K, 'V> =
+        inherit seq<('K * 'V)>
         abstract forEach: callbackfn: ReadonlyMap.ForEach.Callbackfn<'V, 'K> * ?thisArg: obj -> unit
         abstract get: key: 'K -> 'V option
         abstract has: key: 'K -> bool
@@ -8859,20 +8920,6 @@ module Es =
         /// </summary>
         abstract values: unit -> MapIterator<'V>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<ReadonlyMap.ForEach.Callbackfn<'V, 'K>, obj option>,
-                get: ('K -> 'V option),
-                has: ('K -> bool),
-                size: float,
-                entries: (unit -> MapIterator<('K * 'V)>),
-                keys: (unit -> MapIterator<'K>),
-                values: (unit -> MapIterator<'V>)
-            ) : ReadonlyMap<'K, 'V> =
-            jsNative
-
-    [<Interface>]
     type WeakMap<'K, 'V> =
         /// <summary>
         /// Removes the specified element from the WeakMap.
@@ -8901,17 +8948,8 @@ module Es =
         /// <returns>The element associated with the specific key, which will be the newly computed value if no element previously existed.</returns>
         abstract getOrInsertComputed: key: 'K * callback: ('K -> 'V) -> 'V
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                delete: ('K -> bool),
-                get: ('K -> 'V option),
-                has: ('K -> bool),
-                set: Func<'K, 'V, WeakMap<'K, 'V>>,
-                getOrInsert: Func<'K, 'V, 'V>,
-                getOrInsertComputed: Func<'K, ('K -> 'V), 'V>
-            ) : WeakMap<'K, 'V> =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type WeakMapConstructor =
         [<EmitConstructor>]
@@ -8920,8 +8958,8 @@ module Es =
         [<EmitConstructor>]
         abstract Create<'K, 'V> : ?iterable: Iterable<('K * 'V), obj, obj> -> WeakMap<'K, 'V>
 
-    [<Interface>]
     type Set<'T> =
+        inherit seq<'T>
         /// <summary>
         /// Appends a new element with a specified value to the end of the Set.
         /// </summary>
@@ -8970,37 +9008,21 @@ module Es =
         /// <returns>a boolean indicating whether this Set has no elements in common with the argument.</returns>
         abstract isDisjointFrom: other: ReadonlySetLike<obj> -> bool
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                add: ('T -> Set<'T>),
-                clear: (unit -> unit),
-                delete: ('T -> bool),
-                forEach: Action<Set.ForEach.Callbackfn<'T>, obj option>,
-                has: ('T -> bool),
-                size: float,
-                entries: (unit -> SetIterator<('T * 'T)>),
-                keys: (unit -> SetIterator<'T>),
-                values: (unit -> SetIterator<'T>),
-                union: (ReadonlySetLike<'U> -> Set<U2<'T, 'U>>),
-                intersection: (ReadonlySetLike<'U> -> Set<obj>),
-                difference: (ReadonlySetLike<'U> -> Set<'T>),
-                symmetricDifference: (ReadonlySetLike<'U> -> Set<U2<'T, 'U>>),
-                isSubsetOf: (ReadonlySetLike<obj> -> bool),
-                isSupersetOf: (ReadonlySetLike<obj> -> bool),
-                isDisjointFrom: (ReadonlySetLike<obj> -> bool)
-            ) : Set<'T> =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type SetConstructor =
+        [<Emit("$0[Symbol.species]")>]
+        abstract SymbolSpecies: SetConstructor
+
         [<EmitConstructor>]
         abstract Create<'T> : ?values: 'T[] -> Set<'T>
 
         [<EmitConstructor>]
         abstract Create<'T> : ?iterable: Iterable<'T, obj, obj> -> Set<'T>
 
-    [<Interface>]
     type ReadonlySet<'T> =
+        inherit seq<'T>
         /// <summary>
         /// Executes a provided function once per each value in the ReadonlySet object, in insertion order.
         /// </summary>
@@ -9036,26 +9058,6 @@ module Es =
         /// <returns>a boolean indicating whether this Set has no elements in common with the argument.</returns>
         abstract isDisjointFrom: other: ReadonlySetLike<obj> -> bool
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<ReadonlySet.ForEach.Callbackfn<'T>, obj option>,
-                has: ('T -> bool),
-                size: float,
-                entries: (unit -> SetIterator<('T * 'T)>),
-                keys: (unit -> SetIterator<'T>),
-                values: (unit -> SetIterator<'T>),
-                union: (ReadonlySetLike<'U> -> Set<U2<'T, 'U>>),
-                intersection: (ReadonlySetLike<'U> -> Set<obj>),
-                difference: (ReadonlySetLike<'U> -> Set<'T>),
-                symmetricDifference: (ReadonlySetLike<'U> -> Set<U2<'T, 'U>>),
-                isSubsetOf: (ReadonlySetLike<obj> -> bool),
-                isSupersetOf: (ReadonlySetLike<obj> -> bool),
-                isDisjointFrom: (ReadonlySetLike<obj> -> bool)
-            ) : ReadonlySet<'T> =
-            jsNative
-
-    [<Interface>]
     type WeakSet<'T> =
         /// <summary>
         /// Appends a new value to the end of the WeakSet.
@@ -9069,8 +9071,8 @@ module Es =
         /// <returns>a boolean indicating whether a value exists in the WeakSet or not.</returns>
         abstract has: value: 'T -> bool
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(add: ('T -> WeakSet<'T>), delete: ('T -> bool), has: ('T -> bool)) : WeakSet<'T> = jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type WeakSetConstructor =
         [<EmitConstructor>]
@@ -9194,6 +9196,9 @@ module Es =
         /// Returns the name of the function.
         /// </summary>
         abstract name: string
+
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
         [<EmitConstructor>]
         abstract Create: [<ParamArray>] args: obj[] -> Generator<obj, obj, obj>
@@ -9373,23 +9378,15 @@ module Es =
             ) : Iterator<'T, 'TReturn, 'TNext> =
             jsNative
 
-    type Iterable<'T, 'TReturn, 'TNext> = interface end
+    type Iterable<'T, 'TReturn, 'TNext> =
+        inherit seq<'T>
 
     /// <summary>
     /// Describes a user-defined Iterator that is also iterable.
     /// </summary>
-    [<Interface>]
     type IterableIterator<'T, 'TReturn, 'TNext> =
         inherit Iterator<'T, 'TReturn, 'TNext>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                next: (U2<obj[], 'TNext[]> -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>),
-                ?``return``: ('TReturn option -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>),
-                ?throw: (obj option -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>)
-            ) : IterableIterator<'T, 'TReturn, 'TNext> =
-            jsNative
+        inherit seq<'T>
 
     /// <summary>
     /// Describes an Iterator produced by the runtime that inherits from the intrinsic <c>Iterator.prototype</c>.
@@ -9397,6 +9394,7 @@ module Es =
     type IteratorObject<'T, 'TReturn, 'TNext> =
         inherit Iterator<'T, 'TReturn, 'TNext>
         inherit Disposable
+        inherit seq<'T>
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -9513,6 +9511,9 @@ module Es =
         /// immediately returns that element value. Otherwise, find returns undefined.
         /// </param>
         abstract find: predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate2<'T> -> 'T option
+
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     /// <summary>
     /// Defines the <c>TReturn</c> type used for built-in iterators produced by <c>Array</c>, <c>Map</c>, <c>Set</c>, and others.
@@ -9969,6 +9970,9 @@ module Es =
         /// </returns>
         abstract ``try``<'T, 'U> : callbackFn: ('U -> U2<'T, PromiseLike<'T>>) * [<ParamArray>] args: 'U -> Promise<obj>
 
+        [<Emit("$0[Symbol.species]")>]
+        abstract SymbolSpecies: PromiseConstructor
+
         [<EmitConstructor>]
         abstract Create<'T> : executor: PromiseConstructor.Executor<'T> -> Promise<'T>
 
@@ -10189,7 +10193,6 @@ module Es =
         [<EmitConstructor>]
         abstract Create<'T> : target: 'T * handler: ProxyHandler<'T> -> 'T
 
-    [<Interface>]
     type SharedArrayBuffer =
         /// <summary>
         /// Read-only. The length of the ArrayBuffer (in bytes).
@@ -10218,18 +10221,13 @@ module Es =
         /// </summary>
         abstract grow: ?newByteLength: float -> unit
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                byteLength: float,
-                slice: Func<float option, float option, SharedArrayBuffer>,
-                growable: bool,
-                maxByteLength: float,
-                grow: (float option -> unit)
-            ) : SharedArrayBuffer =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type SharedArrayBufferConstructor =
+        [<Emit("$0[Symbol.species]")>]
+        abstract SymbolSpecies: SharedArrayBufferConstructor
+
         [<EmitConstructor>]
         abstract Create: ?byteLength: float -> SharedArrayBuffer
 
@@ -10589,7 +10587,9 @@ module Es =
         /// </summary>
         abstract pause: ?n: float -> unit
 
-    [<Interface>]
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type AsyncGenerator<'T, 'TReturn, 'TNext> =
         inherit AsyncIteratorObject<'T, 'TReturn, 'TNext>
 
@@ -10599,16 +10599,8 @@ module Es =
 
         abstract throw: e: obj -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                next: (U2<obj[], 'TNext[]> -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                ``return``:
-                    (U2<'TReturn, PromiseLike<'TReturn>>
-                            -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                throw: (obj -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>)
-            ) : AsyncGenerator<'T, 'TReturn, 'TNext> =
-            jsNative
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncGenerator<'T, 'TReturn, 'TNext>
 
     type AsyncGeneratorFunction =
         /// <summary>
@@ -10665,44 +10657,28 @@ module Es =
             ) : AsyncIterator<'T, 'TReturn, 'TNext> =
             jsNative
 
-    type AsyncIterable<'T, 'TReturn, 'TNext> = interface end
+    type AsyncIterable<'T, 'TReturn, 'TNext> =
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIterator<'T, 'TReturn, 'TNext>
 
     /// <summary>
     /// Describes a user-defined AsyncIterator that is also async iterable.
     /// </summary>
-    [<Interface>]
     type AsyncIterableIterator<'T, 'TReturn, 'TNext> =
         inherit AsyncIterator<'T, 'TReturn, 'TNext>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                next: (U2<obj[], 'TNext[]> -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                ?``return``:
-                    (U2<'TReturn, PromiseLike<'TReturn>> option
-                            -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                ?throw: (obj option -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>)
-            ) : AsyncIterableIterator<'T, 'TReturn, 'TNext> =
-            jsNative
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIterableIterator<'T, 'TReturn, 'TNext>
 
     /// <summary>
     /// Describes an AsyncIterator produced by the runtime that inherits from the intrinsic <c>AsyncIterator.prototype</c>.
     /// </summary>
-    [<Interface>]
     type AsyncIteratorObject<'T, 'TReturn, 'TNext> =
         inherit AsyncIterator<'T, 'TReturn, 'TNext>
         inherit AsyncDisposable
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                next: (U2<obj[], 'TNext[]> -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                ?``return``:
-                    (U2<'TReturn, PromiseLike<'TReturn>> option
-                            -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                ?throw: (obj option -> Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>)
-            ) : AsyncIteratorObject<'T, 'TReturn, 'TNext> =
-            jsNative
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> AsyncIteratorObject<'T, 'TReturn, 'TNext>
 
     type FlatArray = obj
 
@@ -10801,7 +10777,6 @@ module Es =
             ) : BigIntToLocaleStringOptions =
             jsNative
 
-    [<Interface>]
     type BigInt =
         /// <summary>
         /// Returns a string representation of an object.
@@ -10817,14 +10792,8 @@ module Es =
         /// </summary>
         abstract valueOf: unit -> bigint
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                toString: (float option -> string),
-                toLocaleString: Func<LocalesArgument option, BigIntToLocaleStringOptions option, string>,
-                valueOf: (unit -> bigint)
-            ) : BigInt =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     [<Interface>]
     type BigIntConstructor =
@@ -10858,6 +10827,7 @@ module Es =
     /// requested number of bytes could not be allocated, an exception is raised.
     /// </summary>
     type BigInt64Array<'TArrayBuffer> =
+        inherit seq<bigint>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -11251,6 +11221,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: bigint -> BigInt64Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> bigint with get, set
 
@@ -11341,6 +11314,7 @@ module Es =
     /// requested number of bytes could not be allocated, an exception is raised.
     /// </summary>
     type BigUint64Array<'TArrayBuffer> =
+        inherit seq<bigint>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -11734,6 +11708,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: bigint -> BigUint64Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> bigint with get, set
 
@@ -11971,7 +11948,6 @@ module Es =
         [<Emit("$0($1...)")>]
         abstract Invoke: errors: Iterable<obj, obj, obj> * ?message: string * ?options: ErrorOptions -> AggregateError
 
-    [<Interface>]
     type WeakRef<'T> =
         /// <summary>
         /// Returns the WeakRef instance's target value, or undefined if the target value has been
@@ -11980,14 +11956,13 @@ module Es =
         /// </summary>
         abstract deref: unit -> 'T option
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(deref: (unit -> 'T option)) : WeakRef<'T> = jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type WeakRefConstructor =
         [<EmitConstructor>]
         abstract Create<'T> : target: 'T -> WeakRef<'T>
 
-    [<Interface>]
     type FinalizationRegistry<'T> =
         /// <summary>
         /// Registers a value with the registry.
@@ -12013,11 +11988,8 @@ module Es =
         /// </param>
         abstract unregister: unregisterToken: WeakKey -> bool
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (register: Action<WeakKey, 'T, WeakKey option>, unregister: (WeakKey -> bool))
-            : FinalizationRegistry<'T> =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type FinalizationRegistryConstructor =
         [<EmitConstructor>]
@@ -12066,6 +12038,7 @@ module Es =
     /// of bytes could not be allocated an exception is raised.
     /// </summary>
     type Float16Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -12514,6 +12487,9 @@ module Es =
         /// </summary>
         abstract values: unit -> ArrayIterator<float>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -12610,7 +12586,6 @@ module Es =
         [<EmitConstructor>]
         abstract Create<'T, 'TResult, 'TNext> : unit -> Iterator2<'T, 'TResult, 'TNext>
 
-    [<Interface>]
     type Symbol =
         /// <summary>
         /// Returns a string representation of an object.
@@ -12625,9 +12600,14 @@ module Es =
         /// </summary>
         abstract description: string option
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(toString: (unit -> string), valueOf: (unit -> obj), ?description: string) : Symbol =
-            jsNative
+        /// <summary>
+        /// Converts a Symbol object to a symbol.
+        /// </summary>
+        [<Emit("$0[Symbol.toPrimitive]($1...)")>]
+        abstract SymbolToPrimitive: hint: string -> obj
+
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type PropertyKey = obj
 
@@ -12950,7 +12930,6 @@ module Es =
     /// <summary>
     /// Creates a new function.
     /// </summary>
-    [<Interface>]
     type Function =
         /// <summary>
         /// Calls the function, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
@@ -12984,20 +12963,21 @@ module Es =
         /// </summary>
         abstract name: string
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                apply: Func<obj, obj option, obj>,
-                call: Func<obj, obj[], obj>,
-                bind: Func<obj, obj[], obj>,
-                toString: (unit -> string),
-                prototype: obj,
-                length: float,
-                arguments: obj,
-                caller: Function,
-                name: string
-            ) : Function =
-            jsNative
+        /// <summary>
+        /// Determines whether the given value inherits from this function if this function was used
+        /// as a constructor function.
+        /// <br /><br />
+        /// A constructor function can control which objects are recognized as its instances by
+        /// 'instanceof' by overriding this method.
+        /// </summary>
+        [<Emit("$0[Symbol.hasInstance]($1...)")>]
+        abstract SymbolHasInstance: value: obj -> bool
+
+        [<Emit("$0[Symbol.metadata]")>]
+        abstract SymbolMetadata: obj option with get
+
+        [<Emit("$0[Symbol.metadata] = $1")>]
+        abstract SymbolMetadata: obj option with set
 
     type FunctionConstructor =
         [<EmitConstructor>]
@@ -13099,6 +13079,7 @@ module Es =
             thisArg: obj * [<ParamArray>] args: 'A -> NewableFunction.Bind.ResultConstructor<'B, 'R>
 
     type IArguments =
+        inherit seq<obj>
         abstract length: float with get, set
         abstract callee: Function with get, set
 
@@ -13109,6 +13090,7 @@ module Es =
     /// Allows manipulation and formatting of text strings and determination and location of substrings within strings.
     /// </summary>
     type String =
+        inherit seq<string>
         /// <summary>
         /// Returns a string representation of a string.
         /// </summary>
@@ -14008,6 +13990,9 @@ module Es =
         /// <param name="x">A numeric expression.</param>
         abstract f16round: x: float -> float
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     /// <summary>
     /// Enables basic storage and retrieval of dates and times.
     /// </summary>
@@ -14288,6 +14273,17 @@ module Es =
         abstract toJSON: ?key: obj -> string
         abstract toTemporalInstant: unit -> Instant
 
+        /// <summary>
+        /// Converts a Date object to a string.
+        /// Converts a Date object to a number.
+        /// Converts a Date object to a string or number.
+        /// </summary>
+        /// <param name="hint">The strings "number", "string", or "default" to specify what primitive to return.</param>
+        /// <remarks>@throws {TypeError} If 'hint' was given something other than "number", "string", or "default".</remarks>
+        /// <returns>A number if 'hint' was "number", a string if 'hint' was "string" or "default".</returns>
+        [<Emit("$0[Symbol.toPrimitive]($1...)")>]
+        abstract SymbolToPrimitive: hint: string -> string
+
     type DateConstructor =
         /// <summary>
         /// Parses a string containing a date, and returns the number of milliseconds between that date and midnight, January 1, 1970.
@@ -14381,7 +14377,6 @@ module Es =
 
     type RegExpExecArray = string[]
 
-    [<Interface>]
     type RegExp =
         /// <summary>
         /// Executes a search on a string using a regular expression pattern, and returns an array containing the results of that search.
@@ -14451,25 +14446,83 @@ module Es =
         /// </summary>
         abstract unicodeSets: bool
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                exec: (string -> string[] option),
-                test: (string -> bool),
-                source: string,
-                ``global``: bool,
-                ignoreCase: bool,
-                multiline: bool,
-                lastIndex: float,
-                compile: Func<string, string option, RegExp>,
-                flags: string,
-                sticky: bool,
-                unicode: bool,
-                dotAll: bool,
-                hasIndices: bool,
-                unicodeSets: bool
-            ) : RegExp =
-            jsNative
+        /// <summary>
+        /// Matches a string with this regular expression, and returns an array containing the results of
+        /// that search.
+        /// </summary>
+        /// <param name="string">A string to search within.</param>
+        [<Emit("$0[Symbol.match]($1...)")>]
+        abstract SymbolMatch: string: string -> string[] option
+
+        /// <summary>
+        /// Replaces text in a string, using this regular expression.
+        /// </summary>
+        /// <param name="string">
+        /// A String object or string literal whose contents matching against
+        /// this regular expression will be replaced
+        /// </param>
+        /// <param name="replaceValue">
+        /// A String object or string literal containing the text to replace for every
+        /// successful match of this regular expression.
+        /// </param>
+        /// <param name="string">
+        /// A String object or string literal whose contents matching against
+        /// this regular expression will be replaced
+        /// </param>
+        /// <param name="replacer">A function that returns the replacement text.</param>
+        [<Emit("$0[Symbol.replace]($1...)")>]
+        abstract SymbolReplace: string: string * replaceValue: string -> string
+
+        /// <summary>
+        /// Replaces text in a string, using this regular expression.
+        /// </summary>
+        /// <param name="string">
+        /// A String object or string literal whose contents matching against
+        /// this regular expression will be replaced
+        /// </param>
+        /// <param name="replaceValue">
+        /// A String object or string literal containing the text to replace for every
+        /// successful match of this regular expression.
+        /// </param>
+        /// <param name="string">
+        /// A String object or string literal whose contents matching against
+        /// this regular expression will be replaced
+        /// </param>
+        /// <param name="replacer">A function that returns the replacement text.</param>
+        [<Emit("$0[Symbol.replace]($1...)")>]
+        abstract SymbolReplace: string: string * replacer: RegExp.SymbolReplace.Replacer -> string
+
+        /// <summary>
+        /// Finds the position beginning first substring match in a regular expression search
+        /// using this regular expression.
+        /// </summary>
+        /// <param name="string">The string to search within.</param>
+        [<Emit("$0[Symbol.search]($1...)")>]
+        abstract SymbolSearch: string: string -> float
+
+        /// <summary>
+        /// Returns an array of substrings that were delimited by strings in the original input that
+        /// match against this regular expression.
+        /// <br /><br />
+        /// If the regular expression contains capturing parentheses, then each time this
+        /// regular expression matches, the results (including any undefined results) of the
+        /// capturing parentheses are spliced.
+        /// </summary>
+        /// <param name="string">string value to split</param>
+        /// <param name="limit">
+        /// if not undefined, the output array is truncated so that it contains no more
+        /// than 'limit' elements.
+        /// </param>
+        [<Emit("$0[Symbol.split]($1...)")>]
+        abstract SymbolSplit: string: string * ?limit: float -> string[]
+
+        /// <summary>
+        /// Matches a string with this regular expression, and returns an iterable of matches
+        /// containing the results of that search.
+        /// </summary>
+        /// <param name="string">A string to search within.</param>
+        [<Emit("$0[Symbol.matchAll]($1...)")>]
+        abstract SymbolMatchAll: str: string -> RegExpStringIterator<string[]>
 
     type RegExpConstructor =
         /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
@@ -14524,6 +14577,9 @@ module Es =
         /// </code>
         /// </example>
         abstract escape: string: string -> string
+
+        [<Emit("$0[Symbol.species]")>]
+        abstract SymbolSpecies: RegExpConstructor
 
         [<EmitConstructor>]
         abstract Create: pattern: U2<string, RegExp> -> RegExp
@@ -14742,6 +14798,9 @@ module Es =
         /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
         abstract stringify: value: obj * ?replacer: U2<string, float>[] * ?space: U2<string, float> -> string
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type ReadonlyArray<'T> = 'T[]
 
     type ConcatArray<'T> =
@@ -14858,6 +14917,9 @@ module Es =
             ?thisArg: obj ->
                 Promise<obj[]>
 
+        [<Emit("$0[Symbol.species]")>]
+        abstract SymbolSpecies: ArrayConstructor
+
         [<EmitConstructor>]
         abstract Create: ?arrayLength: float -> obj[]
 
@@ -14924,7 +14986,6 @@ module Es =
     /// <summary>
     /// Represents the completion of an asynchronous operation
     /// </summary>
-    [<Interface>]
     type Promise<'T> =
         /// <summary>
         /// Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -14953,19 +15014,8 @@ module Es =
         /// <returns>A Promise for the completion of the callback.</returns>
         abstract ``finally``: ?onfinally: (unit -> unit) -> Promise<'T>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ``then``:
-                    Func<
-                        ('T -> U2<'TResult1, PromiseLike<'TResult1>>) option,
-                        (obj -> U2<'TResult2, PromiseLike<'TResult2>>) option,
-                        Promise<U2<'TResult1, 'TResult2>>
-                     >,
-                catch: ((obj -> U2<'TResult, PromiseLike<'TResult>>) option -> Promise<U2<'T, 'TResult>>),
-                ``finally``: ((unit -> unit) option -> Promise<'T>)
-            ) : Promise<'T> =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     /// <summary>
     /// Recursively unwraps the "awaited type" of a type. Non-promise "thenables" should resolve to <c>never</c>. This emulates the behavior of <c>await</c>.
@@ -15107,7 +15157,6 @@ module Es =
     /// but can be passed to a typed array or DataView Object to interpret the raw
     /// buffer as needed.
     /// </summary>
-    [<Interface>]
     type ArrayBuffer =
         /// <summary>
         /// Read-only. The length of the ArrayBuffer (in bytes).
@@ -15154,19 +15203,8 @@ module Es =
         /// </summary>
         abstract transferToFixedLength: ?newByteLength: float -> ArrayBuffer
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                byteLength: float,
-                slice: Func<float option, float option, ArrayBuffer>,
-                maxByteLength: float,
-                resizable: bool,
-                resize: (float option -> unit),
-                detached: bool,
-                transfer: (float option -> ArrayBuffer),
-                transferToFixedLength: (float option -> ArrayBuffer)
-            ) : ArrayBuffer =
-            jsNative
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     /// <summary>
     /// Allowed ArrayBuffer types for the buffer of an ArrayBufferView and related Typed Arrays.
@@ -15184,6 +15222,9 @@ module Es =
 
     type ArrayBufferConstructor =
         abstract isView: arg: obj -> bool
+
+        [<Emit("$0[Symbol.species]")>]
+        abstract SymbolSpecies: ArrayBufferConstructor
 
         [<EmitConstructor>]
         abstract Create: byteLength: float -> ArrayBuffer
@@ -15370,6 +15411,9 @@ module Es =
         /// <param name="littleEndian">If false or undefined, a big-endian value should be written.</param>
         abstract setFloat16: byteOffset: float * value: float * ?littleEndian: bool -> unit
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
     type DataViewConstructor =
         [<EmitConstructor>]
         abstract Create<'TArrayBuffer> :
@@ -15380,6 +15424,7 @@ module Es =
     /// number of bytes could not be allocated an exception is raised.
     /// </summary>
     type Int8Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -15832,6 +15877,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: float -> Int8Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -15928,6 +15976,7 @@ module Es =
     /// requested number of bytes could not be allocated an exception is raised.
     /// </summary>
     type Uint8Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -16412,6 +16461,9 @@ module Es =
         /// <returns>An object containing the number of bytes read and written.</returns>
         abstract setFromHex: string: string -> Uint8Array.SetFromHex.Result
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -16528,6 +16580,7 @@ module Es =
     /// If the requested number of bytes could not be allocated an exception is raised.
     /// </summary>
     type Uint8ClampedArray<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -16980,6 +17033,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: float -> Uint8ClampedArray<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -17076,6 +17132,7 @@ module Es =
     /// requested number of bytes could not be allocated an exception is raised.
     /// </summary>
     type Int16Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -17528,6 +17585,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: float -> Int16Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -17624,6 +17684,7 @@ module Es =
     /// requested number of bytes could not be allocated an exception is raised.
     /// </summary>
     type Uint16Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -18076,6 +18137,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: float -> Uint16Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -18172,6 +18236,7 @@ module Es =
     /// requested number of bytes could not be allocated an exception is raised.
     /// </summary>
     type Int32Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -18624,6 +18689,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: float -> Int32Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -18720,6 +18788,7 @@ module Es =
     /// requested number of bytes could not be allocated an exception is raised.
     /// </summary>
     type Uint32Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -19172,6 +19241,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: float -> Uint32Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -19268,6 +19340,7 @@ module Es =
     /// of bytes could not be allocated an exception is raised.
     /// </summary>
     type Float32Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -19720,6 +19793,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: float -> Float32Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -19816,6 +19892,7 @@ module Es =
     /// number of bytes could not be allocated an exception is raised.
     /// </summary>
     type Float64Array<'TArrayBuffer> =
+        inherit seq<float>
         /// <summary>
         /// The size in bytes of each element in the array.
         /// </summary>
@@ -20268,6 +20345,9 @@ module Es =
         /// <returns>A copy of the original array with the inserted value.</returns>
         abstract ``with``: index: float * value: float -> Float64Array<ArrayBuffer>
 
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+
         [<EmitIndexer>]
         abstract Item: float -> float with get, set
 
@@ -20359,9 +20439,13 @@ module Es =
         [<EmitConstructor>]
         abstract Create: unit -> Float64Array<ArrayBuffer>
 
-    type Disposable = interface end
+    type Disposable =
+        [<Emit("$0[Symbol.dispose]()")>]
+        abstract SymbolDispose: unit -> unit
 
-    type AsyncDisposable = interface end
+    type AsyncDisposable =
+        [<Emit("$0[Symbol.asyncDispose]()")>]
+        abstract SymbolAsyncDispose: unit -> PromiseLike<unit>
 
     [<Interface>]
     type SuppressedError =
@@ -20382,7 +20466,6 @@ module Es =
         [<Emit("$0($1...)")>]
         abstract Invoke: error: obj * suppressed: obj * ?message: string -> SuppressedError
 
-    [<Interface>]
     type DisposableStack =
         /// <summary>
         /// Returns a value indicating whether this stack has been disposed.
@@ -20447,23 +20530,16 @@ module Es =
         /// </example>
         abstract move: unit -> DisposableStack
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                disposed: bool,
-                dispose: (unit -> unit),
-                ``use``: ('T -> 'T),
-                adopt: Func<'T, ('T -> unit), 'T>,
-                defer: ((unit -> unit) -> unit),
-                move: (unit -> DisposableStack)
-            ) : DisposableStack =
-            jsNative
+        [<Emit("$0[Symbol.dispose]()")>]
+        abstract SymbolDispose: unit -> unit
+
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type DisposableStackConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> DisposableStack
 
-    [<Interface>]
     type AsyncDisposableStack =
         /// <summary>
         /// Returns a value indicating whether this stack has been disposed.
@@ -20528,17 +20604,11 @@ module Es =
         /// </example>
         abstract move: unit -> AsyncDisposableStack
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                disposed: bool,
-                disposeAsync: (unit -> Promise<unit>),
-                ``use``: ('T -> 'T),
-                adopt: Func<'T, ('T -> PromiseLike<unit> option), 'T>,
-                defer: ((unit -> PromiseLike<unit> option) -> unit),
-                move: (unit -> AsyncDisposableStack)
-            ) : AsyncDisposableStack =
-            jsNative
+        [<Emit("$0[Symbol.asyncDispose]()")>]
+        abstract SymbolAsyncDispose: unit -> Promise<unit>
+
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     type AsyncDisposableStackConstructor =
         [<EmitConstructor>]
@@ -22234,6 +22304,10 @@ module Es =
                 [<EmitConstructor>]
                 abstract Create: [<ParamArray>] args: 'A -> 'R
 
+    module RegExp =
+        module SymbolReplace =
+            type Replacer = delegate of substring: string * args: obj[] -> string
+
     module RelativeTimeFormatPart3 =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Type =
@@ -22284,7 +22358,9 @@ module Es =
 
     module String =
         module Match =
-            type Matcher = interface end
+            type Matcher =
+                [<Emit("$0[Symbol.match]($1...)")>]
+                abstract SymbolMatch: string: string -> string[] option
 
         module Normalize =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -22299,18 +22375,32 @@ module Es =
 
             type Replacer2 = delegate of substring: string * args: obj[] -> string
 
-            type SearchValue = interface end
+            type SearchValue =
+                [<Emit("$0[Symbol.replace]($1...)")>]
+                abstract SymbolReplace: string: string * replaceValue: string -> string
 
-            type SearchValue2 = interface end
+            type SearchValue2 =
+                [<Emit("$0[Symbol.replace]($1...)")>]
+                abstract SymbolReplace:
+                    string: string * replacer: Fable.Core.TS.Es.String.Replace.SearchValue2.SymbolReplace.Replacer ->
+                        string
+
+            module SearchValue2 =
+                module SymbolReplace =
+                    type Replacer = delegate of substring: string * args: obj[] -> string
 
         module ReplaceAll =
             type Replacer = delegate of substring: string * args: obj[] -> string
 
         module Search =
-            type Searcher = interface end
+            type Searcher =
+                [<Emit("$0[Symbol.search]($1...)")>]
+                abstract SymbolSearch: string: string -> float
 
         module Split =
-            type Splitter = interface end
+            type Splitter =
+                [<Emit("$0[Symbol.split]($1...)")>]
+                abstract SymbolSplit: string: string * ?limit: float -> string[]
 
     module StringConstructor =
         module Raw =
@@ -32106,7 +32196,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/AudioParamMap">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type AudioParamMap =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, AudioParam>
         abstract forEach: callbackfn: AudioParamMap.ForEach.Callbackfn * ?thisArg: obj -> unit
@@ -32124,19 +32213,6 @@ module Dom =
         /// Returns an iterable of values in the map
         /// </summary>
         abstract values: unit -> Fable.Core.TS.Es.MapIterator<AudioParam>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<AudioParamMap.ForEach.Callbackfn, obj option>,
-                get: (string -> AudioParam option),
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.MapIterator<(string * AudioParam)>),
-                keys: (unit -> Fable.Core.TS.Es.MapIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.MapIterator<AudioParam>)
-            ) : AudioParamMap =
-            jsNative
 
     type AudioParamMapConstructor =
         [<EmitConstructor>]
@@ -33713,6 +33789,7 @@ module Dom =
     /// </remarks>
     type CSSKeyframesRule =
         inherit CSSRule
+        inherit seq<CSSKeyframeRule>
         /// <summary>
         /// The read-only <b><c>cssRules</c></b> property of the CSSKeyframeRule interface returns a CSSRuleList containing the rules in the keyframes at-rule.
         /// <br /><br />
@@ -34356,6 +34433,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/CSSNumericArray">MDN Reference</a>
     /// </summary>
     type CSSNumericArray =
+        inherit seq<CSSNumericValue>
         /// <summary>
         /// The read-only <b><c>length</c></b> property of the CSSNumericArray interface returns the number of CSSNumericValue objects in the list.
         /// <br /><br />
@@ -35199,6 +35277,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/CSSRuleList">MDN Reference</a>
     /// </summary>
     type CSSRuleList =
+        inherit seq<CSSRule>
         /// <summary>
         /// The <b><c>length</c></b> property of the CSSRuleList interface returns the number of CSSRule objects in the list.
         /// <br /><br />
@@ -35516,6 +35595,7 @@ module Dom =
 
     type CSSStyleDeclaration =
         inherit CSSStyleProperties
+        inherit seq<string>
 
     type CSSStyleDeclarationConstructor =
         [<EmitConstructor>]
@@ -39066,6 +39146,7 @@ module Dom =
     /// </summary>
     type CSSTransformValue =
         inherit CSSStyleValue
+        inherit seq<CSSTransformComponent>
         /// <summary>
         /// The read-only <b><c>is2D</c></b> property of the CSSTransformValue interface returns whether the transform is 2D or 3D.
         /// <br /><br />
@@ -39208,6 +39289,7 @@ module Dom =
     /// </summary>
     type CSSUnparsedValue =
         inherit CSSStyleValue
+        inherit seq<CSSUnparsedSegment>
         /// <summary>
         /// The <b><c>length</c></b> read-only property of the CSSUnparsedValue interface returns the number of items in the object.
         /// <br /><br />
@@ -41130,7 +41212,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CustomStateSet">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type CustomStateSet =
         inherit Fable.Core.TS.Es.Set<string>
         /// <summary>
@@ -41168,28 +41249,6 @@ module Dom =
         /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
         abstract symmetricDifference<'U> :
             other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<CustomStateSet.ForEach.Callbackfn, obj option>,
-                add: (string -> CustomStateSet),
-                clear: (unit -> unit),
-                delete: (string -> bool),
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.SetIterator<(string * string)>),
-                keys: (unit -> Fable.Core.TS.Es.SetIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.SetIterator<string>),
-                union: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>),
-                intersection: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<obj>),
-                difference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<string>),
-                symmetricDifference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>),
-                isSubsetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isSupersetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isDisjointFrom: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool)
-            ) : CustomStateSet =
-            jsNative
 
     type CustomStateSetConstructor =
         [<EmitConstructor>]
@@ -42020,6 +42079,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/DOMRectList">MDN Reference</a>
     /// </summary>
     type DOMRectList =
+        inherit seq<DOMRect>
         /// <summary>
         /// The read-only <b><c>length</c></b> property of the DOMRectList interface returns the number of DOMRect objects in the list.
         /// <br /><br />
@@ -42134,6 +42194,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/DOMStringList">MDN Reference</a>
     /// </summary>
     type DOMStringList =
+        inherit seq<string>
         /// <summary>
         /// The read-only <b><c>length</c></b> property indicates the number of strings in the DOMStringList.
         /// <br /><br />
@@ -42179,6 +42240,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/DOMTokenList">MDN Reference</a>
     /// </summary>
     type DOMTokenList =
+        inherit seq<string>
         /// <summary>
         /// The read-only <b><c>length</c></b> property of the DOMTokenList interface is an integer representing the number of objects stored in the object.
         /// <br /><br />
@@ -42386,6 +42448,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/DataTransferItemList">MDN Reference</a>
     /// </summary>
     type DataTransferItemList =
+        inherit seq<DataTransferItem>
         /// <summary>
         /// The read-only <b><c>length</c></b> property of the DataTransferItemList interface returns the number of items currently in the drag item list.
         /// <br /><br />
@@ -45274,7 +45337,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventCounts">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type EventCounts =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, float>
         abstract forEach: callbackfn: EventCounts.ForEach.Callbackfn * ?thisArg: obj -> unit
@@ -45292,19 +45354,6 @@ module Dom =
         /// Returns an iterable of values in the map
         /// </summary>
         abstract values: unit -> Fable.Core.TS.Es.MapIterator<float>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<EventCounts.ForEach.Callbackfn, obj option>,
-                get: (string -> float option),
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.MapIterator<(string * float)>),
-                keys: (unit -> Fable.Core.TS.Es.MapIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.MapIterator<float>)
-            ) : EventCounts =
-            jsNative
 
     type EventCountsConstructor =
         [<EmitConstructor>]
@@ -45557,6 +45606,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/FileList">MDN Reference</a>
     /// </summary>
     type FileList =
+        inherit seq<File>
         /// <summary>
         /// The <b><c>length</c></b> read-only property of the FileList interface returns the number of files in the FileList.
         /// <br /><br />
@@ -45819,7 +45869,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemDirectoryHandle">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type FileSystemDirectoryHandle =
         inherit FileSystemHandle
         /// <summary>
@@ -45868,32 +45917,10 @@ module Dom =
         abstract values:
             unit -> FileSystemDirectoryHandleAsyncIterator<U2<FileSystemDirectoryHandle, FileSystemFileHandle>>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                kind: string,
-                getDirectoryHandle:
-                    Func<
-                        string,
-                        FileSystemGetDirectoryOptions option,
-                        Fable.Core.TS.Es.Promise<FileSystemDirectoryHandle>
-                     >,
-                getFileHandle:
-                    Func<string, FileSystemGetFileOptions option, Fable.Core.TS.Es.Promise<FileSystemFileHandle>>,
-                removeEntry: Func<string, FileSystemRemoveOptions option, Fable.Core.TS.Es.Promise<unit>>,
-                resolve: (FileSystemHandle -> Fable.Core.TS.Es.Promise<string[] option>),
-                entries:
-                    (unit
-                            -> FileSystemDirectoryHandleAsyncIterator<
-                                (string * U2<FileSystemDirectoryHandle, FileSystemFileHandle>)
-                                >),
-                keys: (unit -> FileSystemDirectoryHandleAsyncIterator<string>),
-                values:
-                    (unit -> FileSystemDirectoryHandleAsyncIterator<U2<FileSystemDirectoryHandle, FileSystemFileHandle>>),
-                name: string,
-                isSameEntry: (FileSystemHandle -> Fable.Core.TS.Es.Promise<bool>)
-            ) : FileSystemDirectoryHandle =
-            jsNative
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator:
+            unit ->
+                FileSystemDirectoryHandleAsyncIterator<(string * U2<FileSystemDirectoryHandle, FileSystemFileHandle>)>
 
     type FileSystemDirectoryHandleConstructor =
         [<EmitConstructor>]
@@ -46485,6 +46512,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/FormData">MDN Reference</a>
     /// </summary>
     type FormData =
+        inherit seq<(string * FormDataEntryValue)>
         /// <summary>
         /// The <b><c>append()</c></b> method of the FormData interface appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.
         /// <br /><br />
@@ -47981,7 +48009,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/GPUSupportedFeatures">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type GPUSupportedFeatures =
         inherit Fable.Core.TS.Es.ReadonlySet<string>
         /// <summary>
@@ -48010,25 +48037,6 @@ module Dom =
         /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
         abstract symmetricDifference<'U> :
             other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<GPUSupportedFeatures.ForEach.Callbackfn, obj option>,
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.SetIterator<(string * string)>),
-                keys: (unit -> Fable.Core.TS.Es.SetIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.SetIterator<string>),
-                union: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>),
-                intersection: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<obj>),
-                difference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<string>),
-                symmetricDifference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>),
-                isSubsetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isSupersetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isDisjointFrom: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool)
-            ) : GPUSupportedFeatures =
-            jsNative
 
     type GPUSupportedFeaturesConstructor =
         [<EmitConstructor>]
@@ -49367,6 +49375,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAllCollection">MDN Reference</a>
     /// </summary>
     type HTMLAllCollection =
+        inherit seq<Element>
         /// <summary>
         /// The <b><c>HTMLAllCollection.length</c></b> property returns the number of items in this HTMLAllCollection.
         /// <br /><br />
@@ -50126,6 +50135,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCollection">MDN Reference</a>
     /// </summary>
     type HTMLCollectionBase =
+        inherit seq<Element>
         /// <summary>
         /// The <b><c>HTMLCollection.length</c></b> property returns the number of items in a HTMLCollection.
         /// <br /><br />
@@ -50164,6 +50174,9 @@ module Dom =
         /// </summary>
         abstract item: index: float -> 'T option
         abstract namedItem: name: string -> 'T option
+
+        [<Emit("$0[Symbol.iterator]()")>]
+        abstract SymbolIterator: unit -> Fable.Core.TS.Es.ArrayIterator<'T>
 
         [<EmitIndexer>]
         abstract Item: float -> 'T with get, set
@@ -51459,6 +51472,7 @@ module Dom =
     /// </summary>
     type HTMLFormElement =
         inherit HTMLElement
+        inherit seq<Element>
         /// <summary>
         /// The <b><c>HTMLFormElement.acceptCharset</c></b> property represents the character encoding for the given &lt;form&gt; element.
         /// <br /><br />
@@ -54150,6 +54164,9 @@ module Dom =
         abstract item: index: float -> HTMLOptionElement option
         abstract namedItem: name: string -> HTMLOptionElement option
 
+        [<Emit("$0[Symbol.iterator]()")>]
+        abstract SymbolIterator: unit -> Fable.Core.TS.Es.ArrayIterator<HTMLOptionElement>
+
         [<EmitIndexer>]
         abstract Item: float -> HTMLOptionElement with get, set
 
@@ -54699,6 +54716,7 @@ module Dom =
     /// </summary>
     type HTMLSelectElement =
         inherit HTMLElement
+        inherit seq<HTMLOptionElement>
         /// <summary>
         /// The <b><c>autocomplete</c></b> property of the HTMLSelectElement interface indicates whether the value of the control can be automatically completed by the browser. It reflects the &lt;select&gt; element's autocomplete attribute.
         /// <br /><br />
@@ -56528,8 +56546,8 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Headers">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type Headers =
+        inherit seq<(string * string)>
         /// <summary>
         /// The <b><c>append()</c></b> method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
         /// <br /><br />
@@ -56580,22 +56598,6 @@ module Dom =
         /// </summary>
         abstract values: unit -> HeadersIterator<string>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                append: Action<string, string>,
-                delete: (string -> unit),
-                get: (string -> string option),
-                getSetCookie: (unit -> string[]),
-                has: (string -> bool),
-                set: Action<string, string>,
-                forEach: Action<Headers.ForEach.Callbackfn, obj option>,
-                entries: (unit -> HeadersIterator<(string * string)>),
-                keys: (unit -> HeadersIterator<string>),
-                values: (unit -> HeadersIterator<string>)
-            ) : Headers =
-            jsNative
-
     type HeadersConstructor =
         [<EmitConstructor>]
         abstract Create: ?init: HeadersInit -> Headers
@@ -56605,7 +56607,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Highlight">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type Highlight =
         inherit Fable.Core.TS.Es.Set<AbstractRange>
         /// <summary>
@@ -56656,31 +56657,6 @@ module Dom =
         abstract symmetricDifference<'U> :
             other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<'U, AbstractRange>>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                priority: float,
-                ``type``: HighlightType,
-                forEach: Action<Highlight.ForEach.Callbackfn, obj option>,
-                add: (AbstractRange -> Highlight),
-                clear: (unit -> unit),
-                delete: (AbstractRange -> bool),
-                has: (AbstractRange -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.SetIterator<(AbstractRange * AbstractRange)>),
-                keys: (unit -> Fable.Core.TS.Es.SetIterator<AbstractRange>),
-                values: (unit -> Fable.Core.TS.Es.SetIterator<AbstractRange>),
-                union: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<'U, AbstractRange>>),
-                intersection: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<obj>),
-                difference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<AbstractRange>),
-                symmetricDifference:
-                    (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<'U, AbstractRange>>),
-                isSubsetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isSupersetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isDisjointFrom: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool)
-            ) : Highlight =
-            jsNative
-
     type HighlightConstructor =
         [<EmitConstructor>]
         abstract Create: [<ParamArray>] initialRanges: AbstractRange[] -> Highlight
@@ -56690,7 +56666,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/HighlightRegistry">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type HighlightRegistry =
         inherit Fable.Core.TS.Es.Map<string, Highlight>
         /// <summary>
@@ -56734,24 +56709,6 @@ module Dom =
         /// </summary>
         /// <returns>The element associated with the specific key, which will be the newly computed value if no element previously existed.</returns>
         abstract getOrInsertComputed: key: string * callback: (string -> Highlight) -> Highlight
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<HighlightRegistry.ForEach.Callbackfn, obj option>,
-                clear: (unit -> unit),
-                delete: (string -> bool),
-                get: (string -> Highlight option),
-                has: (string -> bool),
-                set: Func<string, Highlight, HighlightRegistry>,
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.MapIterator<(string * Highlight)>),
-                keys: (unit -> Fable.Core.TS.Es.MapIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.MapIterator<Highlight>),
-                getOrInsert: Func<string, Highlight, Highlight>,
-                getOrInsertComputed: Func<string, (string -> Highlight), Highlight>
-            ) : HighlightRegistry =
-            jsNative
 
     type HighlightRegistryConstructor =
         [<EmitConstructor>]
@@ -58384,6 +58341,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/ImageTrackList">MDN Reference</a>
     /// </summary>
     type ImageTrackList =
+        inherit seq<ImageTrack>
         /// <summary>
         /// The <b><c>length</c></b> property of the ImageTrackList interface returns the length of the ImageTrackList.
         /// <br /><br />
@@ -59255,7 +59213,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIInputMap">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type MIDIInputMap =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, MIDIInput>
         abstract forEach: callbackfn: MIDIInputMap.ForEach.Callbackfn * ?thisArg: obj -> unit
@@ -59273,19 +59230,6 @@ module Dom =
         /// Returns an iterable of values in the map
         /// </summary>
         abstract values: unit -> Fable.Core.TS.Es.MapIterator<MIDIInput>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<MIDIInputMap.ForEach.Callbackfn, obj option>,
-                get: (string -> MIDIInput option),
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.MapIterator<(string * MIDIInput)>),
-                keys: (unit -> Fable.Core.TS.Es.MapIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.MapIterator<MIDIInput>)
-            ) : MIDIInputMap =
-            jsNative
 
     type MIDIInputMapConstructor =
         [<EmitConstructor>]
@@ -59371,7 +59315,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIOutputMap">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type MIDIOutputMap =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, MIDIOutput>
         abstract forEach: callbackfn: MIDIOutputMap.ForEach.Callbackfn * ?thisArg: obj -> unit
@@ -59389,19 +59332,6 @@ module Dom =
         /// Returns an iterable of values in the map
         /// </summary>
         abstract values: unit -> Fable.Core.TS.Es.MapIterator<MIDIOutput>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<MIDIOutputMap.ForEach.Callbackfn, obj option>,
-                get: (string -> MIDIOutput option),
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.MapIterator<(string * MIDIOutput)>),
-                keys: (unit -> Fable.Core.TS.Es.MapIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.MapIterator<MIDIOutput>)
-            ) : MIDIOutputMap =
-            jsNative
 
     type MIDIOutputMapConstructor =
         [<EmitConstructor>]
@@ -60037,8 +59967,8 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeyStatusMap">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type MediaKeyStatusMap =
+        inherit seq<(BufferSource * MediaKeyStatus)>
         /// <summary>
         /// The <b><c>size</c></b> read-only property of the MediaKeyStatusMap interface returns the number of key/value paIrs in the status map.
         /// <br /><br />
@@ -60061,19 +59991,6 @@ module Dom =
         abstract entries: unit -> MediaKeyStatusMapIterator<(BufferSource * MediaKeyStatus)>
         abstract keys: unit -> MediaKeyStatusMapIterator<BufferSource>
         abstract values: unit -> MediaKeyStatusMapIterator<MediaKeyStatus>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                size: float,
-                get: (BufferSource -> MediaKeyStatus option),
-                has: (BufferSource -> bool),
-                forEach: Action<MediaKeyStatusMap.ForEach.Callbackfn, obj option>,
-                entries: (unit -> MediaKeyStatusMapIterator<(BufferSource * MediaKeyStatus)>),
-                keys: (unit -> MediaKeyStatusMapIterator<BufferSource>),
-                values: (unit -> MediaKeyStatusMapIterator<MediaKeyStatus>)
-            ) : MediaKeyStatusMap =
-            jsNative
 
     type MediaKeyStatusMapConstructor =
         [<EmitConstructor>]
@@ -60165,6 +60082,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/MediaList">MDN Reference</a>
     /// </summary>
     type MediaList =
+        inherit seq<string>
         /// <summary>
         /// The read-only <b><c>length</c></b> property of the MediaList interface returns the number of media queries in the list.
         /// <br /><br />
@@ -61325,6 +61243,7 @@ module Dom =
     /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/MimeTypeArray">MDN Reference</a></remarks>
     /// <remarks>@deprecated</remarks>
     type MimeTypeArray =
+        inherit seq<MimeType>
         /// <remarks>@deprecated</remarks>
         abstract length: float
         /// <remarks>@deprecated</remarks>
@@ -61631,6 +61550,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/NamedNodeMap">MDN Reference</a>
     /// </summary>
     type NamedNodeMap =
+        inherit seq<Attr>
         /// <summary>
         /// The read-only <b><c>length</c></b> property of the NamedNodeMap interface is the number of objects stored in the map.
         /// <br /><br />
@@ -63076,6 +62996,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/NodeList">MDN Reference</a>
     /// </summary>
     type NodeList =
+        inherit seq<Node>
         /// <summary>
         /// The <b><c>NodeList.length</c></b> property returns the number of items in a NodeList.
         /// <br /><br />
@@ -63126,6 +63047,9 @@ module Dom =
         /// Returns an list of values in the list.
         /// </summary>
         abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<'TNode>
+
+        [<Emit("$0[Symbol.iterator]()")>]
+        abstract SymbolIterator: unit -> Fable.Core.TS.Es.ArrayIterator<'TNode>
 
         [<EmitIndexer>]
         abstract Item: float -> 'TNode with get, set
@@ -65835,6 +65759,7 @@ module Dom =
     /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Plugin">MDN Reference</a></remarks>
     /// <remarks>@deprecated</remarks>
     type Plugin =
+        inherit seq<MimeType>
         /// <summary>
         /// Returns the plugin's description.
         /// </summary>
@@ -65876,6 +65801,7 @@ module Dom =
     /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/PluginArray">MDN Reference</a></remarks>
     /// <remarks>@deprecated</remarks>
     type PluginArray =
+        inherit seq<Plugin>
         /// <remarks>@deprecated</remarks>
         abstract length: float
         /// <remarks>@deprecated</remarks>
@@ -68121,7 +68047,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/RTCStatsReport">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type RTCStatsReport =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, obj>
         abstract forEach: callbackfn: RTCStatsReport.ForEach.Callbackfn * ?thisArg: obj -> unit
@@ -68139,19 +68064,6 @@ module Dom =
         /// Returns an iterable of values in the map
         /// </summary>
         abstract values: unit -> Fable.Core.TS.Es.MapIterator<obj>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<RTCStatsReport.ForEach.Callbackfn, obj option>,
-                get: (string -> obj),
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.MapIterator<(string * obj)>),
-                keys: (unit -> Fable.Core.TS.Es.MapIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.MapIterator<obj>)
-            ) : RTCStatsReport =
-            jsNative
 
     type RTCStatsReportConstructor =
         [<EmitConstructor>]
@@ -68221,6 +68133,9 @@ module Dom =
         /// Returns an list of values in the list.
         /// </summary>
         abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<HTMLInputElement>
+
+        [<Emit("$0[Symbol.iterator]()")>]
+        abstract SymbolIterator: unit -> Fable.Core.TS.Es.ArrayIterator<HTMLInputElement>
 
         [<EmitIndexer>]
         abstract Item: float -> HTMLInputElement with get, set
@@ -68510,6 +68425,9 @@ module Dom =
         /// </summary>
         abstract tee: unit -> ReadableStream<'R> * ReadableStream<'R>
         abstract values: ?options: ReadableStreamIteratorOptions -> ReadableStreamAsyncIterator<'R>
+
+        [<Emit("$0[Symbol.asyncIterator]($1...)")>]
+        abstract SymbolAsyncIterator: ?options: ReadableStreamIteratorOptions -> ReadableStreamAsyncIterator<'R>
 
     type ReadableStreamConstructor =
         [<EmitConstructor>]
@@ -72419,6 +72337,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGLengthList">MDN Reference</a>
     /// </summary>
     type SVGLengthList =
+        inherit seq<SVGLength>
         /// <summary>
         /// The <b><c>length</c></b> property of the SVGLengthList interface returns the number of items in the list. It is an alias of numberOfItems to make SVG lists more array-like.
         /// <br /><br />
@@ -72887,6 +72806,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGNumberList">MDN Reference</a>
     /// </summary>
     type SVGNumberList =
+        inherit seq<SVGNumber>
         /// <summary>
         /// The <b><c>length</c></b> property of the SVGNumberList interface returns the number of items in the list. It is an alias of numberOfItems to make SVG lists more array-like.
         /// <br /><br />
@@ -73073,6 +72993,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPointList">MDN Reference</a>
     /// </summary>
     type SVGPointList =
+        inherit seq<DOMPoint>
         /// <summary>
         /// The <b><c>length</c></b> read-only property of the SVGPointList interface returns the number of items in the list.
         /// <br /><br />
@@ -73843,6 +73764,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGStringList">MDN Reference</a>
     /// </summary>
     type SVGStringList =
+        inherit seq<string>
         /// <summary>
         /// The <b><c>length</c></b> property of the SVGStringList interface returns the number of items in the list. It is an alias of numberOfItems to make SVG lists more array-like.
         /// <br /><br />
@@ -74520,6 +74442,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTransformList">MDN Reference</a>
     /// </summary>
     type SVGTransformList =
+        inherit seq<SVGTransform>
         /// <summary>
         /// The <b><c>length</c></b> read-only property of the SVGTransformList interface represents the number of items in the list.
         /// <br /><br />
@@ -75941,6 +75864,7 @@ module Dom =
     /// </summary>
     type SourceBufferList =
         inherit EventTarget
+        inherit seq<SourceBuffer>
         /// <summary>
         /// The <b><c>length</c></b> read-only property of the SourceBufferList interface returns the number of SourceBuffer objects in the list.
         /// <br /><br />
@@ -76141,6 +76065,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechRecognitionResult">MDN Reference</a>
     /// </summary>
     type SpeechRecognitionResult =
+        inherit seq<SpeechRecognitionAlternative>
         /// <summary>
         /// The <b><c>isFinal</c></b> read-only property of the SpeechRecognitionResult interface is a boolean value that states whether this result is final (true) or not (false) — if so, then this is the final time this result will be returned; if not, then this result is an interim result, and may be updated later on.
         /// <br /><br />
@@ -76174,6 +76099,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechRecognitionResultList">MDN Reference</a>
     /// </summary>
     type SpeechRecognitionResultList =
+        inherit seq<SpeechRecognitionResult>
         /// <summary>
         /// The <b><c>length</c></b> read-only property of the SpeechRecognitionResultList interface returns the length of the "array" — the number of SpeechRecognitionResult objects in the list.
         /// <br /><br />
@@ -76746,7 +76672,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/StylePropertyMap">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type StylePropertyMap =
         inherit StylePropertyMapReadOnly
         /// <summary>
@@ -76774,28 +76699,6 @@ module Dom =
         /// </summary>
         abstract set: property: string * [<ParamArray>] values: U2<string, CSSStyleValue>[] -> unit
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                append: Action<string, U2<string, CSSStyleValue>[]>,
-                clear: (unit -> unit),
-                delete: (string -> unit),
-                set: Action<string, U2<string, CSSStyleValue>[]>,
-                size: float,
-                get: (string -> CSSStyleValue option),
-                getAll: (string -> CSSStyleValue[]),
-                has: (string -> bool),
-                forEach: Action<StylePropertyMapReadOnly.ForEach.Callbackfn, obj option>,
-                entries:
-                    (unit
-                            -> StylePropertyMapReadOnlyIterator<
-                                (string * Fable.Core.TS.Es.Iterable<CSSStyleValue, obj, obj>)
-                                >),
-                keys: (unit -> StylePropertyMapReadOnlyIterator<string>),
-                values: (unit -> StylePropertyMapReadOnlyIterator<Fable.Core.TS.Es.Iterable<CSSStyleValue, obj, obj>>)
-            ) : StylePropertyMap =
-            jsNative
-
     type StylePropertyMapConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> StylePropertyMap
@@ -76805,8 +76708,8 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/StylePropertyMapReadOnly">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type StylePropertyMapReadOnly =
+        inherit seq<(string * Fable.Core.TS.Es.Iterable<CSSStyleValue, obj, obj>)>
         /// <summary>
         /// The <b><c>size</c></b> read-only property of the StylePropertyMapReadOnly interface returns an unsigned long integer containing the size of the StylePropertyMapReadOnly object.
         /// <br /><br />
@@ -76838,24 +76741,6 @@ module Dom =
 
         abstract keys: unit -> StylePropertyMapReadOnlyIterator<string>
         abstract values: unit -> StylePropertyMapReadOnlyIterator<Fable.Core.TS.Es.Iterable<CSSStyleValue, obj, obj>>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                size: float,
-                get: (string -> CSSStyleValue option),
-                getAll: (string -> CSSStyleValue[]),
-                has: (string -> bool),
-                forEach: Action<StylePropertyMapReadOnly.ForEach.Callbackfn, obj option>,
-                entries:
-                    (unit
-                            -> StylePropertyMapReadOnlyIterator<
-                                (string * Fable.Core.TS.Es.Iterable<CSSStyleValue, obj, obj>)
-                                >),
-                keys: (unit -> StylePropertyMapReadOnlyIterator<string>),
-                values: (unit -> StylePropertyMapReadOnlyIterator<Fable.Core.TS.Es.Iterable<CSSStyleValue, obj, obj>>)
-            ) : StylePropertyMapReadOnly =
-            jsNative
 
     type StylePropertyMapReadOnlyConstructor =
         [<EmitConstructor>]
@@ -76934,6 +76819,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/StyleSheetList">MDN Reference</a>
     /// </summary>
     type StyleSheetList =
+        inherit seq<CSSStyleSheet>
         /// <summary>
         /// The <b><c>length</c></b> read-only property of the StyleSheetList interface returns the number of CSSStyleSheet objects in the collection.
         /// <br /><br />
@@ -77968,6 +77854,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackCueList">MDN Reference</a>
     /// </summary>
     type TextTrackCueList =
+        inherit seq<TextTrackCue>
         /// <summary>
         /// The <b><c>length</c></b> read-only property of the TextTrackCueList interface returns the number of cues in the list.
         /// <br /><br />
@@ -78005,6 +77892,7 @@ module Dom =
     /// </summary>
     type TextTrackList =
         inherit EventTarget
+        inherit seq<TextTrack>
         /// <summary>
         /// The read-only TextTrackList property <b><c>length</c></b> returns the number of entries in the TextTrackList, each of which is a TextTrack representing one track in the media element.
         /// <br /><br />
@@ -78299,6 +78187,7 @@ module Dom =
     /// <a href="https://developer.mozilla.org/docs/Web/API/TouchList">MDN Reference</a>
     /// </summary>
     type TouchList =
+        inherit seq<Touch>
         /// <summary>
         /// The <b><c>length</c></b> read-only property indicates the number of items (touch points) in a given TouchList.
         /// <br /><br />
@@ -78838,8 +78727,8 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type URLSearchParams =
+        inherit seq<(string * string)>
         /// <summary>
         /// The <b><c>size</c></b> read-only property of the URLSearchParams interface indicates the total number of search parameter entries.
         /// <br /><br />
@@ -78902,25 +78791,6 @@ module Dom =
         /// Returns a list of values in the search params.
         /// </summary>
         abstract values: unit -> URLSearchParamsIterator<string>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                size: float,
-                append: Action<string, string>,
-                delete: Action<string, string option>,
-                get: (string -> string option),
-                getAll: (string -> string[]),
-                has: Func<string, string option, bool>,
-                set: Action<string, string>,
-                sort: (unit -> unit),
-                toString: (unit -> string),
-                forEach: Action<URLSearchParams.ForEach.Callbackfn, obj option>,
-                entries: (unit -> URLSearchParamsIterator<(string * string)>),
-                keys: (unit -> URLSearchParamsIterator<string>),
-                values: (unit -> URLSearchParamsIterator<string>)
-            ) : URLSearchParams =
-            jsNative
 
     type URLSearchParamsConstructor =
         [<EmitConstructor>]
@@ -79701,7 +79571,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/ViewTransitionTypeSet">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type ViewTransitionTypeSet =
         inherit Fable.Core.TS.Es.Set<string>
         /// <summary>
@@ -79739,28 +79608,6 @@ module Dom =
         /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
         abstract symmetricDifference<'U> :
             other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<ViewTransitionTypeSet.ForEach.Callbackfn, obj option>,
-                add: (string -> ViewTransitionTypeSet),
-                clear: (unit -> unit),
-                delete: (string -> bool),
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.SetIterator<(string * string)>),
-                keys: (unit -> Fable.Core.TS.Es.SetIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.SetIterator<string>),
-                union: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>),
-                intersection: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<obj>),
-                difference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<string>),
-                symmetricDifference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>),
-                isSubsetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isSupersetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isDisjointFrom: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool)
-            ) : ViewTransitionTypeSet =
-            jsNative
 
     type ViewTransitionTypeSetConstructor =
         [<EmitConstructor>]
@@ -80338,7 +80185,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WGSLLanguageFeatures">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type WGSLLanguageFeatures =
         inherit Fable.Core.TS.Es.ReadonlySet<string>
         /// <summary>
@@ -80367,25 +80213,6 @@ module Dom =
         /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
         abstract symmetricDifference<'U> :
             other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                forEach: Action<WGSLLanguageFeatures.ForEach.Callbackfn, obj option>,
-                has: (string -> bool),
-                size: float,
-                entries: (unit -> Fable.Core.TS.Es.SetIterator<(string * string)>),
-                keys: (unit -> Fable.Core.TS.Es.SetIterator<string>),
-                values: (unit -> Fable.Core.TS.Es.SetIterator<string>),
-                union: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>),
-                intersection: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<obj>),
-                difference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<string>),
-                symmetricDifference: (Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>),
-                isSubsetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isSupersetOf: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool),
-                isDisjointFrom: (Fable.Core.TS.Es.ReadonlySetLike<obj> -> bool)
-            ) : WGSLLanguageFeatures =
-            jsNative
 
     type WGSLLanguageFeaturesConstructor =
         [<EmitConstructor>]
@@ -90648,7 +90475,6 @@ module Dom =
         /// </param>
         abstract find: predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate2<'T> -> 'T option
 
-    [<Interface>]
     type FileSystemDirectoryHandleAsyncIterator<'T> =
         inherit Fable.Core.TS.Es.AsyncIteratorObject<'T, unit, obj>
 
@@ -90670,28 +90496,9 @@ module Dom =
                         U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
                         >) option with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                next:
-                    (obj[]
-                            -> Fable.Core.TS.Es.Promise<
-                                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                                >),
-                ?``return``:
-                    (Fable.Core.TS.Es.PromiseLike<unit> option
-                            -> Fable.Core.TS.Es.Promise<
-                                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                                >),
-                ?throw:
-                    (obj option
-                            -> Fable.Core.TS.Es.Promise<
-                                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                                >)
-            ) : FileSystemDirectoryHandleAsyncIterator<'T> =
-            jsNative
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> FileSystemDirectoryHandleAsyncIterator<'T>
 
-    [<Interface>]
     type ReadableStreamAsyncIterator<'T> =
         inherit Fable.Core.TS.Es.AsyncIteratorObject<'T, unit, obj>
 
@@ -90713,26 +90520,8 @@ module Dom =
                         U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
                         >) option with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                next:
-                    (obj[]
-                            -> Fable.Core.TS.Es.Promise<
-                                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                                >),
-                ?``return``:
-                    (Fable.Core.TS.Es.PromiseLike<unit> option
-                            -> Fable.Core.TS.Es.Promise<
-                                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                                >),
-                ?throw:
-                    (obj option
-                            -> Fable.Core.TS.Es.Promise<
-                                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                                >)
-            ) : ReadableStreamAsyncIterator<'T> =
-            jsNative
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> ReadableStreamAsyncIterator<'T>
 
     module AudioParamMap =
         module ForEach =

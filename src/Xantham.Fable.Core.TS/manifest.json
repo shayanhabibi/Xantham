@@ -4,15 +4,15 @@
   "module": "FableCoreTsInput",
   "counts": {
     "exact": 2073,
-    "ergonomic": 2125,
-    "widened": 860,
+    "ergonomic": 2203,
+    "widened": 785,
     "escape": 5
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 1019,
-      "exact": 1019
+      "total": 1047,
+      "exact": 1047
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -27,16 +27,16 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 897,
-      "ergonomic": 570,
-      "widened": 327
+      "total": 918,
+      "ergonomic": 586,
+      "widened": 332
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 83755,
-      "exact": 1664,
-      "ergonomic": 73368,
-      "widened": 8723
+      "total": 83620,
+      "exact": 1665,
+      "ergonomic": 73391,
+      "widened": 8564
     },
     {
       "pass": "SA - shape-aliases",
@@ -53,15 +53,20 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 3043,
-      "ergonomic": 3006,
-      "widened": 37
+      "total": 2673,
+      "ergonomic": 2670,
+      "widened": 3
+    },
+    {
+      "pass": "settle-symbol-members",
+      "total": 140,
+      "ergonomic": 140
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 185,
+      "total": 188,
       "exact": 161,
-      "widened": 24
+      "widened": 27
     },
     {
       "pass": "RA - repair-arity",
