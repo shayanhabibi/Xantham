@@ -4,8 +4,8 @@
   "module": "FableCoreTsInput",
   "counts": {
     "exact": 1302,
-    "ergonomic": 2203,
-    "widened": 785,
+    "ergonomic": 2397,
+    "widened": 591,
     "escape": 5
   },
   "passes": [
@@ -35,8 +35,8 @@
       "pass": "SI - shape-interfaces",
       "total": 83651,
       "exact": 879,
-      "ergonomic": 74213,
-      "widened": 8559
+      "ergonomic": 80728,
+      "widened": 2044
     },
     {
       "pass": "SA - shape-aliases",
@@ -53,8 +53,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2673,
-      "ergonomic": 2670,
+      "total": 2941,
+      "exact": 138,
+      "ergonomic": 2800,
       "widened": 3
     },
     {
