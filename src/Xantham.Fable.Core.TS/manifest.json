@@ -4,9 +4,9 @@
   "module": "FableCoreTsInput",
   "counts": {
     "exact": 2073,
-    "ergonomic": 1750,
-    "widened": 578,
-    "escape": 662
+    "ergonomic": 2125,
+    "widened": 860,
+    "escape": 5
   },
   "passes": [
     {
@@ -23,37 +23,33 @@
       "pass": "DT - detect-tagged-unions",
       "total": 4,
       "exact": 1,
-      "ergonomic": 2,
-      "escape": 1
+      "ergonomic": 3
     },
     {
       "pass": "shape-callbacks",
       "total": 897,
-      "ergonomic": 532,
-      "widened": 327,
-      "escape": 38
+      "ergonomic": 570,
+      "widened": 327
     },
     {
       "pass": "SI - shape-interfaces",
       "total": 83755,
       "exact": 1664,
-      "ergonomic": 55907,
-      "widened": 8723,
-      "escape": 17461
+      "ergonomic": 73368,
+      "widened": 8723
     },
     {
       "pass": "SA - shape-aliases",
       "total": 112,
-      "ergonomic": 19,
+      "ergonomic": 26,
       "widened": 81,
-      "escape": 12
+      "escape": 5
     },
     {
       "pass": "SE - shape-exports",
       "total": 438,
-      "ergonomic": 285,
-      "widened": 1,
-      "escape": 152
+      "ergonomic": 437,
+      "widened": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",

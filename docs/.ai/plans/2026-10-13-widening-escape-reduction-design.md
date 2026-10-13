@@ -76,6 +76,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W2.2** The Core.TS configuration selects `^on` for event-handler properties.
 - **W2.3** A selected return grades ergonomic, with a finding that records the source `any`.
 - **Acceptance:** the lab asserts a selected `on*` handler as `(ProgressEvent -> unit) option` and an unselected member as `obj`. In `animejs` and `workers-types`, output is unchanged unless their configuration sets a pattern.
+- **Status:** implemented on `agent/w2-unit-callback-returns` (2026-10-13). The key is `anyReturnAsUnit`, one .NET regular expression; a selected return reports `TR065`. `animejs` and `workers-types` are unchanged; `animejs` under `^on` moves 257 findings from `TR008` to `TR065`. Core.TS, regenerated under the T4 override, moves 15,987.
 
 ### W3. Node reuse of Core.TS ES types
 

@@ -440,6 +440,7 @@ let configTests =
             Expect.equal layout.DomModule "Dom" "the artifact keeps DOM in its own child"
             Expect.isTrue layout.AutoOpenEs "the artifact opens only its ECMAScript child"
             Expect.isFalse layout.AutoOpenDom "the artifact leaves its DOM child opt-in"
+            Expect.equal config.AnyReturnAsUnit (Some "^on") "the artifact writes on* handler returns as unit"
 
         testCase "compilerLib refuses malformed layouts with a configuration error" <| fun _ ->
             let refused json =

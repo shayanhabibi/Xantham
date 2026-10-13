@@ -2,6 +2,7 @@
   "lib": ["esnext", "dom"],
   "declarationCatalog": true,
   "groups": { "typescript/lib": "ship" },
+  "anyReturnAsUnit": "^on",
   "compilerLib": {
     "module": "Fable.Core.TS",
     "esModule": "Es",
