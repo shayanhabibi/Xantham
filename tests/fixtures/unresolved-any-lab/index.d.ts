@@ -18,3 +18,12 @@ export interface Probe {
     omitted;
     opaque: unknown;
 }
+
+// A written any and an omitted annotation as the interface's only findings.
+export interface Faithful {
+    written: any;
+    omitted;
+}
+
+// A rest-argument listener.
+export declare function listen(listener: (...args: any[]) => void): void;

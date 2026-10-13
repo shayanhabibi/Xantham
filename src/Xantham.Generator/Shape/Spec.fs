@@ -1588,10 +1588,11 @@ and internal typeRefOnPath
         elif has TypeFlags.Void || has TypeFlags.Undefined || has TypeFlags.Never then
             FsUnit, []
         elif has TypeFlags.Any then
-            // Four intrinsic names carry the Any flag: `any` (a written or omitted annotation, or
-            // a checker fallback such as a circular alias), `error` and `unresolved` (a reference
-            // the program leaves unresolved), and `intrinsic` (the body of a compiler-implemented
-            // alias).
+            // Four intrinsic names carry the Any flag: `any` (a written or omitted annotation, a
+            // shorthand ambient module, or a diagnosed circular return, accessor or import-alias
+            // annotation), `error` and `unresolved` (a reference the program leaves unresolved or
+            // invalid, and a circular type alias), and `intrinsic` (the body of a
+            // compiler-implemented alias).
             match facts.Response.IntrinsicName with
             | ValueSome "any" -> FsObj, [ Finding.make owner TypeReference.AnyToObj ]
             | ValueSome "intrinsic" -> FsObj, [ Finding.make owner TypeReference.IntrinsicMarkerToObj ]

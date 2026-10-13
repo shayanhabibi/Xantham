@@ -411,7 +411,7 @@ type TypeReference =
     | [<Widened>] LoneEnumMemberToString
     | [<Widened>] StringLiteralToString
     | [<Widened>] NumericLiteralToFloat
-    | [<Escape>] AnyToObj
+    | [<Ergonomic>] AnyToObj
     | [<Widened>] UnknownToObj
     | [<Ergonomic>] PolymorphicThisAsDeclaringType
     | [<Widened>] ThisOutsideDeclaration

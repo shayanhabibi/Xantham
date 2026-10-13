@@ -4387,10 +4387,11 @@ let pipelineTests =
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced
         // over an unresolved arm read `TR063` with the name the checker keeps; a written `any`,
-        // an omitted annotation and `unknown` keep their keys.
+        // an omitted annotation and `unknown` keep their keys. A faithful `any` grades ergonomic;
+        // a row stays escape only through a stated-type loss beside it.
         yield!
             fixtureTests "unresolved-any-lab" (handFixture "unresolved-any-lab") GeneratorConfig.Default (fun package ->
-                [ testCase "the checker's error type is reported apart from a written any" <| fun _ ->
+                [ testCase "unresolved-any-lab: the checker's error type is reported apart from a written any" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                       let reported symbol =
@@ -4405,7 +4406,39 @@ let pipelineTests =
                       Expect.equal (reported "Probe.either") [ "TR063", [ "" ] ] "a union the checker reduced to its error type"
                       Expect.equal (reported "Probe.written") [ "TR008", [] ] "a written any"
                       Expect.equal (reported "Probe.omitted") [ "TR008", [] ] "an omitted annotation"
-                      Expect.equal (reported "Probe.opaque") [ "TR009", [] ] "a written unknown" ])
+                      Expect.equal (reported "Probe.opaque") [ "TR009", [] ] "a written unknown"
+
+                  testCase "unresolved-any-lab: a faithful any grades ergonomic and an unresolved name stays escape" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let graded key =
+                          rendered.Findings
+                          |> List.filter (fun finding -> finding.Key = key)
+                          |> List.map (fun finding -> finding.Symbol, finding.Tier)
+                          |> List.sort
+
+                      let tiers = Render.symbolTiers rendered |> List.map (fun (name, tier, _) -> name, tier)
+
+                      Expect.equal
+                          (graded "TR008")
+                          [ "Exports.listen(listener)(args)", Ergonomic
+                            "Faithful.omitted", Ergonomic
+                            "Faithful.written", Ergonomic
+                            "Probe.omitted", Ergonomic
+                            "Probe.written", Ergonomic ]
+                          "a written any, an omitted annotation and a rest argument grade ergonomic"
+
+                      Expect.equal (graded "TR063" |> List.map snd |> List.distinct) [ Escape ] "an unresolved name stays escape"
+
+                      Expect.stringContains
+                          source
+                          "static member listen (listener: (obj[] -> unit)) : unit"
+                          "a rest-argument listener reads obj[] -> unit"
+
+                      Expect.contains tiers ("Exports.listen", Ergonomic) "a row whose only loss is a faithful any grades ergonomic"
+                      Expect.contains tiers ("Faithful", Ergonomic) "an interface of faithful any members grades ergonomic"
+                      Expect.contains tiers ("Probe", Escape) "a faithful any beside a stated-type loss stays escape" ])
 
         // Tagged unions over type parameters: the union binds the alias's own parameters, or the
         // ones it reads from the signature it is written in, and every reference applies them.

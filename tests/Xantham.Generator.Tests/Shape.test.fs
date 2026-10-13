@@ -325,7 +325,7 @@ let typeRefTests =
                 let reference, findings = Spec.typeRef Build.context model None "x" id
                 reference, findings |> List.map (fun f -> f.Key, f.Tier, f.Payload |> Array.map (snd >> string) |> Array.toList)
 
-            Expect.equal (read 10<typeId>) (FsObj, [ "TR008", Escape, [] ]) "a written any"
+            Expect.equal (read 10<typeId>) (FsObj, [ "TR008", Ergonomic, [] ]) "a written any"
             Expect.equal (read 11<typeId>) (FsObj, [ "TR063", Escape, [ "" ] ]) "the checker's error type"
             Expect.equal (read 12<typeId>) (FsObj, [ "TR063", Escape, [ "" ] ]) "an unresolved symbol's declared type"
             Expect.equal (read 13<typeId>) (FsObj, [ "TR063", Escape, [ "Schema" ] ]) "the reference as written"

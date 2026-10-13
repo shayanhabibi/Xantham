@@ -48,7 +48,7 @@ Fidelity tiers used throughout:
 | **Exact** | Same set of values, same operations, statically enforced. |
 | **Ergonomic** | Different shape, equivalent safety (e.g. options object → `[<ParamObject>]` overload). |
 | **Widened** | Strictly more values accepted/produced than TS allows (e.g. template literal → `string`). Safe to *read*, lossy to *write*. |
-| **Escape** | `obj` / dynamic. Present deliberately, marked, never silent. |
+| **Escape** | A stated type or declaration lost: at a reference position, `obj` in place of a type the source declares (`TR063`, `TR064`, `TR003`, `TR054`); elsewhere, a declaration not represented. Present deliberately, marked, never silent. |
 
 A hard lesson carried from the archive: the pre-Wire
 pipeline's worst failures were *silent* — a construct it did not understand was dropped and
@@ -183,7 +183,7 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 | `symbol` / `unique symbol` | `JS.Symbol` | Exact / Widened | unique symbols lose uniqueness; consider erased brand per unique symbol (open). |
 | `object` | `obj` | Widened | |
 | `unknown` | `obj` | Escape-ish | **Decided (D8):** `obj` for now. An erased `Unknown` wrapper forcing explicit narrowing may become a config toggle if it stays cheap to implement. |
-| `any` | `obj` | Escape | `TR008`. Intrinsic name `any`: a written or omitted annotation, or a checker fallback (a circular alias, an inference placeholder). |
+| `any` | `obj` | Ergonomic | `TR008`. Intrinsic name `any`: a written or omitted annotation, a shorthand ambient module, or a diagnosed circular return, accessor or import-alias annotation. A circular type alias is the error type (`TR063`). |
 | the checker's error type | `obj` | Escape | `TR063`, with the name the checker keeps (qualified through unresolved parents; empty once a union or optional position reduces it). Intrinsic name `error` or `unresolved`: a reference the program leaves unresolved or invalid, not a source `any`. |
 | `intrinsic` alias body | `obj` | Escape | `TR064`. The marker behind `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`. |
 | `void` (return) | `unit` | Exact | |

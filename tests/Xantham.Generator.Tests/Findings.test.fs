@@ -52,7 +52,7 @@ let findingsTests =
                     "TR.LoneEnumMemberToString TR005 widened"
                     "TR.StringLiteralToString TR006 widened"
                     "TR.NumericLiteralToFloat TR007 widened"
-                    "TR.AnyToObj TR008 escape"
+                    "TR.AnyToObj TR008 ergonomic"
                     "TR.UnknownToObj TR009 widened"
                     "TR.PolymorphicThisAsDeclaringType TR010 ergonomic"
                     "TR.ThisOutsideDeclaration TR011 widened"

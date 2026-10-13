@@ -2036,9 +2036,31 @@ Partas plugin gate. The operation regression was observed failing before the loo
 
 ## The checker's error type (2026-10-09)
 
-`TypeFlags.Any` covers four checker intrinsic names, and `any` includes the checker's own fallbacks (a circular alias, an inference placeholder) besides a written or omitted annotation, so `TR008` is not proof of authorship. `typeRef` reads `TypeResponse.IntrinsicName`: `any` keeps `TR008`; `error` and `unresolved` (a reference the program leaves unresolved or invalid) raise `TR063 ErrorTypeToObj` with the name the checker keeps; `intrinsic` (the body of `Uppercase` and its siblings) raises `TR064 IntrinsicMarkerToObj`. An Any without an intrinsic name is not claimed as a written `any`. Both are Escape, the tier `TR008` carries; the keys separate them. Resolve records the name from the error type's alias symbol, qualified through its unresolved parents (`NodeJS.Timeout`); a union, an intersection or an optional position the checker reduced over an error constituent carries none. A second export abbreviating the shared intrinsic marker (`Lowercase = Uppercase`) reports the same `TR064`.
+`TypeFlags.Any` covers four checker intrinsic names, and `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof of authorship. A circular type alias is the error type. `typeRef` reads `TypeResponse.IntrinsicName`: `any` keeps `TR008`; `error` and `unresolved` (a reference the program leaves unresolved or invalid) raise `TR063 ErrorTypeToObj` with the name the checker keeps; `intrinsic` (the body of `Uppercase` and its siblings) raises `TR064 IntrinsicMarkerToObj`. An Any without an intrinsic name is not claimed as a written `any`. `TR063` and `TR064` are Escape; `TR008` is Ergonomic (W1); the keys separate them. Resolve records the name from the error type's alias symbol, qualified through its unresolved parents (`NodeJS.Timeout`); a union, an intersection or an optional position the checker reduced over an error constituent carries none. A second export abbreviating the shared intrinsic marker (`Lowercase = Uppercase`) reports the same `TR064`.
 
 `unresolved-any-lab` pins an unresolved import, an undeclared name, a qualified name, an element position and a reduced union beside a written `any`, an omitted annotation and `unknown`. Committed corpus: `TR008` 841 to 830, `TR063` 0 to 17 (animejs 12: six members typed by the absent `three`, three sites typed by `InstanceParent`, which reduces to the nameless error type, two `NodeJS` references and one bare `TargetAdapterEntry`; the lab 5), `TR064` 0 to 5 (`compiler-lib-ownership-lab`'s `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`) and 0 to 5 in `Xantham.Fable.Core.TS`. Binding text is unchanged outside the lab.
+
+## Faithful any grades ergonomic (2026-10-13, W1 #132)
+
+`TR.AnyToObj` (`TR008`) is Ergonomic; its `FindingCodes.table` key and message are unchanged. Escape holds stated-type losses: on the `typeRef` path, `TR063 ErrorTypeToObj`, `TR064 IntrinsicMarkerToObj`, `TR003 MissingFromTypeTable` and `TR054 ReferencedArityUnconfirmed`. A symbol's tier is the worst of its findings, so a row with `TR008` beside a `TR063` stays escape.
+
+The case is regraded whole, not split. `typeRef` receives a type id and an owner, and every source of the intrinsic `any` (a written `any`, an omitted annotation, `type X = any`, a shorthand ambient module, a checker circular-annotation fallback) is the same singleton id with identical `TypeFacts`. A split keyed on reference sites would need per-file semantic diagnostics mapped to declarations and threaded into `typeRef`, and would still misgrade nested positions such as `Array<any>`. No golden carries a circularity signal.
+
+Exception: a diagnosed circular return, accessor or import-alias annotation (TS2577, TS2303) reaches `typeRef` as the intrinsic `any` and reads `TR008` at Ergonomic. These occur only in a broken declaration file, which reports the diagnostic. No lab probe pins them.
+
+`unresolved-any-lab` adds `Faithful` (a written `any` and an omitted annotation as the interface's only findings) and `listen(listener: (...args: any[]) => void)`, rendered `listener: (obj[] -> unit)`. Its test pins every `TR008` at Ergonomic (`Exports.listen(listener)(args)` among them), every `TR063` at Escape, the `Exports.listen` and `Faithful` rows at Ergonomic and the `Probe` row at Escape. `Findings.test.fs` and the `shape typeRef` unit pin the new tier.
+
+Measured on the two selected goldens (symbol tiers, exact / ergonomic / widened / escape):
+
+| Golden | Before | After | `TR008` at escape |
+| --- | --- | --- | --- |
+| `animejs` | 129 / 129 / 14 / 79 | 129 / 189 / 27 / 6 | 392 to 0 |
+| `@cloudflare/workers-types` | 412 / 1067 / 374 / 111 | 412 / 1144 / 407 / 1 | 168 to 0 |
+
+46 regraded rows land at Widened through another finding on the same symbol, which moves the widened baseline later workstreams measure against. The two `animejs` rows still escape with `TR008` (`TextSplitter`, `Adapters.Three.ThreeAdapter.RegisterPropertyResolver.Resolver`) each carry a `TR063`. Finding counts by key are unchanged.
+
+Binding text is byte-identical: outside the lab's own additions no golden `.fs` changed. Thirteen lab goldens moved tier only in `manifest.json` and `symbols.jsonl`: `compiler-lib-ownership-lab`, `uninhabited-intersection-lab`, `lib-ship-lab`, `catalog-library-entry-lab`, `catalog-subpath-lab`, `augmented-dom-lab`, `catalog-generic-defaults-lab`, `grouped-dom-aliases-lab`, `frontier-width-lab`, `inherit-lab`, `literal-overload-lab`, `member-shape-lab` and `optional-param-lab`. `solid-js`, `Xantham.Fable.Core.TS` and `Xantham.Fable.Node` were not regenerated (T4, T6); their reports still grade `TR008` Escape until integration.
+
 ## TypeScript library catalogue identity (2026-10-09)
 
 Catalogue sources for installed TypeScript `lib/lib.*.d.ts` files use logical package
