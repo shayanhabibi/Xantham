@@ -1203,6 +1203,13 @@ type SignatureSource =
         Comment: string
     }
 
+/// The JSDoc an overload's own declaration writes.
+type OverloadDoc =
+    /// The tag names written on the declaration's JSDoc.
+    | Documented of tagNames: Set<string>
+    /// The declaration carries no JSDoc of its own; it shares its siblings' documentation.
+    | Undocumented
+
 type ResolvedSignature =
     {
         Parameters: ResolvedMember list
@@ -1218,6 +1225,9 @@ type ResolvedSignature =
         /// The declaration's source text on one line, and the description of its own JSDoc.
         /// Carried by each signature of a set of two or more.
         Source: SignatureSource option
+        /// The JSDoc of the signature's own declaration, where the signature is one of several
+        /// overloads and the declaration is available.
+        OwnDoc: OverloadDoc option
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -1287,6 +1297,12 @@ type TypeFacts =
         /// The declared operand `M` of a type parameter written `K extends keyof M`, where the
         /// checker resolved the bound to `M`'s key literals (W8, #139).
         KeyOfOperand: int<typeId> option
+        /// The property types `KeyOfOperand` declares, by id: the values of a catalogued map,
+        /// whose own facts carry no members.
+        KeyOfValues: int<typeId> list
+        /// The operand `T` and value `V` of a mapped type written `{ [P in keyof T]: V }`, where
+        /// `V` is independent of `P` and the mapping carries no modifiers or `as` clause.
+        MappedRecord: (int<typeId> * int<typeId>) option
         /// `T extends U ? X : Y` (§4.11), where the type is one.
         Conditional: ConditionalFacts option
         UnionMembers: int<typeId> list
@@ -1331,6 +1347,8 @@ module TypeFacts =
             Constraint = None
             Default = None
             KeyOfOperand = None
+            KeyOfValues = []
+            MappedRecord = None
             Conditional = None
             UnionMembers = []
             NonNullableAlias = None

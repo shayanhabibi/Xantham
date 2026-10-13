@@ -2810,3 +2810,37 @@ predate the new members, so `catalog library identity` reports 86 changed entrie
 package` an API mismatch for `GlobalThis` until it is. `CatalogCompatibility.ApiVersion` is
 unchanged; whether W8's emitted-ABI change bumps it is left to integration. Node generated into
 scratch is unchanged by finding count, and its five key-type lines predate W8.
+
+### Review follow-up (2026-10-14)
+
+- **`PropertyRecord`.** Resolve reads a member-less mapped type's `MappedType` node into
+  `TypeFacts.MappedRecord`: the operand of a `keyof` constraint and the value node, where the
+  mapping has no modifiers, no `as` clause and a value that does not mention the key. With the
+  operand in scope, `objectRef` writes `PropertyRecord<'T, V>` (`propertyRecordRef`,
+  `TR.MappedAsPropertyRecord`, `TR067`, Ergonomic). A value that reads the key (`{ [P in keyof
+  T]: T[P] }`) stays a phantom (`SA002`).
+- **Catalogued maps.** A map reached from the compiler lib or a dependency derives no members.
+  Resolve reads the property types of `KeyOfOperand` into `TypeFacts.KeyOfValues`, and
+  `accessBound` decides the bound over those where the operand has no members.
+- **Overload tags.** `getJsDocTags` merges every overload's tags under the one symbol. Resolve
+  reads each overload's own leading JSDoc into `ResolvedSignature.OwnDoc` (only where a type has
+  several signatures); `signatureTags` keeps the tags that JSDoc writes, and an undocumented
+  overload keeps the shared tags other than `@deprecated`. Applied to interface methods,
+  symbol-keyed methods, class statics and exported functions.
+
+`tag-map-lab` gains `Stringified` (`PropertyRecord<'T, string>`), its negative `Mirrored`
+(phantom), and `Doc.libElements` over `HTMLElementTagNameMap` (`<'R when 'R :>
+Fable.Core.TS.Dom.Element>`, returning `HTMLCollectionOf<'R>`); only the `DeprecatedTagMap`
+overload of `createElement` carries `@deprecated`.
+
+| Golden | SA002 | TR067 | TR027 | `@deprecated` lines |
+| --- | --- | --- | --- | --- |
+| `type-fest` (selected) | 170 → 169 | 0 → 1 | 0 | — |
+| `solid-js` (selected) | 10 | 0 | 0 | unchanged (byte-identical) |
+| `keyof-lab` (T6) | 4 → 3 (`Flags<'T>`) | 0 → 1 | — | — |
+| `animejs` (T6) | — | 0 | 9 → 1 | 22 → 10 |
+| Core.TS (scratch, T4) | — | 0 | 152 | 714 (committed) → 540 |
+
+`compiler-lib-ownership-lab` drops two `@param` lines from `Date.toLocaleString: unit -> string`,
+whose own declaration documents no parameters. The W8 acceptance line (SA002, TR020, TR044 and
+DO005 falling in `type-fest` and `solid-js`) remains unmet in `solid-js` and is with the lead.

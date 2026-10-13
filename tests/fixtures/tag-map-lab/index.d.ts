@@ -58,6 +58,8 @@ export interface Doc {
     hasTag<K extends keyof TagMap>(tag: K): boolean;
     /** A map whose values do not inherit the bound: the result stays unconstrained and widens. */
     findLoose<K extends keyof LooseTagMap>(tag: K): ElemList<LooseTagMap[K]>;
+    /** A map the compiler lib declares: its values are catalogued rather than derived. */
+    libElements<K extends keyof HTMLElementTagNameMap>(qualifiedName: K): HTMLCollectionOf<HTMLElementTagNameMap[K]>;
 }
 export declare const doc: Doc;
 
@@ -66,3 +68,8 @@ export type ValuesOf<T> = T[keyof T];
 /** The negative: a key parameter with no default selects a narrower set than proptypelock states. */
 export type Picked<T, K extends keyof T> = T[K];
 export declare function valuesOf<T>(source: T): T[keyof T][];
+
+/** A mapped type whose value does not read the key. */
+export type Stringified<T> = { [P in keyof T]: string };
+/** The negative: a value that reads the key has no single value type. */
+export type Mirrored<T> = { [P in keyof T]: T[P] };

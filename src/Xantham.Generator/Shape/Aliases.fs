@@ -215,8 +215,7 @@ let shapeAliases: Pass<ShapeModel> =
                                         )
                                     else
 
-                                        // An indexed access carries no alias arguments, so a
-                                        // `T[keyof T]` body binds the operand it reads (W8, #139).
+                                        // Binds the operand a `T[keyof T]` body reads (W8, #139).
                                         let typeParameters, scope, parameterFindings =
                                             match valueOfOperand model facts with
                                             | Some objectId when

@@ -5765,6 +5765,11 @@ let pipelineTests =
                           "abstract findLoose<'R>: tag: typekeyof<LooseTagMap, 'R> -> ElemList<Elem>"
                           "a map whose values do not inherit the bound keeps 'R unconstrained, and the argument widens"
 
+                      Expect.stringContains
+                          source
+                          "abstract libElements<'R when 'R :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'R> -> Fable.Core.TS.Dom.HTMLCollectionOf<'R>"
+                          "a catalogued map's values carry the bound too"
+
                   testCase "tag-map-lab: a key used only as a key reads as keyof" <| fun _ ->
                       let source = generate () |> sourceOf
 
@@ -5782,6 +5787,43 @@ let pipelineTests =
                           "a signature's own parameter"
 
                       Expect.stringContains source "type Picked = obj" "a key with no default stays widened"
+
+                  testCase "tag-map-lab: a key-independent mapped type reads as PropertyRecord" <| fun _ ->
+                      let rendered = generate ()
+                      let source = sourceOf rendered
+
+                      Expect.stringContains
+                          source
+                          "type Stringified<'T> = PropertyRecord<'T, string>"
+                          "{ [P in keyof T]: V } is an indexer keyed by keyof<'T>"
+
+                      Expect.stringContains
+                          source
+                          "type Mirrored<'T> = private Mirrored__ of obj"
+                          "a value that reads the key stays a phantom"
+
+                      Expect.equal (symbolsOf rendered "TR067") [ "Stringified" ] "one finding per PropertyRecord"
+                      Expect.contains (symbolsOf rendered "SA002") "Mirrored" "the negative keeps its phantom finding"
+                      Expect.isFalse (List.contains "Stringified" (symbolsOf rendered "SA002")) "no phantom"
+
+                  testCase "tag-map-lab: an overload carries only its own declaration's tags" <| fun _ ->
+                      let lines = (generate () |> sourceOf).Replace("\r\n", "\n").Split '\n'
+
+                      let deprecatedBefore (signature: string) =
+                          let index = lines |> Array.findIndex (fun line -> line.Contains signature)
+                          lines[index - 1].Trim() = "/// <remarks>@deprecated</remarks>"
+
+                      Expect.isFalse
+                          (deprecatedBefore "abstract createElement<'R>: tagName: typekeyof<TagMap, 'R>")
+                          "the primary overload is not deprecated"
+
+                      Expect.isTrue
+                          (deprecatedBefore "abstract createElement<'R>: tagName: typekeyof<DeprecatedTagMap, 'R>")
+                          "the deprecated overload keeps its tag"
+
+                      Expect.isFalse
+                          (deprecatedBefore "abstract createElement: tagName: string")
+                          "the string overload is not deprecated"
 
                   testCase "tag-map-lab: findings name each key mapping" <| fun _ ->
                       let rendered = generate ()
@@ -5807,7 +5849,8 @@ let pipelineTests =
                             "Doc.createSvg"
                             "Doc.findLoose"
                             "Doc.getElementsByTagName"
-                            "Doc.hasTag" ]
+                            "Doc.hasTag"
+                            "Doc.libElements" ]
                           "one finding per key over a declared map"
 
                       Expect.equal

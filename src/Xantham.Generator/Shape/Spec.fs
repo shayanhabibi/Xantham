@@ -2038,6 +2038,7 @@ and internal objectRef
                     match
                         libBinding ctx model self owner facts
                         |> Option.orElseWith (fun () -> mappedBinding ctx model self owner facts)
+                        |> Option.orElseWith (fun () -> propertyRecordRef ctx model self owner facts)
                     with
                     | Some result -> result
                     | None ->
@@ -2086,6 +2087,25 @@ and internal objectRef
                                 |> Option.defaultValue "an anonymous object type"
 
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
+
+/// `{ [P in keyof T]: V }`, with `T` in scope and `V` independent of `P`, as the support
+/// package's `PropertyRecord<'T, V>`.
+and internal propertyRecordRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    : (FsTypeRef * Finding list) option =
+    facts.MappedRecord
+    |> Option.filter (fun _ -> facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+    |> Option.bind (fun (operand, value) -> Map.tryFind operand model.TypeVars |> Option.map (fun name -> name, value))
+    |> Option.map (fun (name, value) ->
+        let valueRef, valueFindings = typeRef ctx model self owner value
+
+        FsApp("PropertyRecord", [ FsTypeVar name; valueRef ]),
+        valueFindings
+        @ [ Finding.make owner (TypeReference.MappedAsPropertyRecord name) ])
 
 /// A compiler-lib type a shipped package binds: `Error` -> `exn` and `Promise` -> `JS.Promise<'T>`
 /// through `Naming.LibBindings`, with their explicit arity and loss rules; any DOM declaration, a
@@ -2230,8 +2250,8 @@ and internal appliedRef
     : FsTypeRef * Finding list =
     appliedRefTo ctx model self owner name [] arguments
 
-/// The nominal constraint a type parameter's declaration head writes, with the bound's id. A
-/// constraint the head drops reads as none: the same `constraintProvenNominal` the head applies.
+/// The nominal constraint a type parameter's declaration head writes, with the bound's id, or
+/// `None` where the head writes none (`constraintProvenNominal`).
 and internal statedConstraintOf
     (ctx: Context)
     (model: ShapeModel)
@@ -2964,7 +2984,11 @@ let internal accessBound
     let values =
         match Map.tryFind objectId model.Types with
         | Some operand when not operand.Members.IsEmpty -> operand.Members |> List.map _.TypeId
-        | _ -> []
+        | _ ->
+            Map.tryFind keyId model.Types
+            |> Option.filter (fun key -> key.KeyOfOperand = Some objectId)
+            |> Option.map _.KeyOfValues
+            |> Option.defaultValue []
 
     let isAccess (id: int<Measure.typeId>) =
         Map.tryFind id model.Types
@@ -3038,6 +3062,14 @@ let internal resultName (taken: Set<string>) =
 // ---------------------------------------------------------------------------------------------
 // Shared shaping of members and signatures.
 // ---------------------------------------------------------------------------------------------
+
+/// The member's tags an overload carries: those its own JSDoc writes, or, for an undocumented
+/// overload, the shared tags other than `@deprecated`.
+let internal signatureTags (tags: JSDocTagInfo list) (signature: ResolvedSignature) =
+    match signature.OwnDoc with
+    | Some(Documented names) -> tags |> List.filter (fun tag -> Set.contains tag.Name names)
+    | Some Undocumented -> tags |> List.filter (fun tag -> tag.Name <> "deprecated")
+    | None -> tags
 
 /// A resolved signature as an F# type-parameter list, parameter list and return reference.
 /// Rest parameters are marked from the signature flag; their array types read as-is, and a
@@ -3600,7 +3632,7 @@ let internal shapeMembers
                     Name = name
                     Docs = docs
                     Tags =
-                        m.Tags
+                        signatureTags m.Tags signature
                         |> List.filter (fun tag ->
                             match tag.Name, tag.Text with
                             | "param", ValueSome text -> not (Set.contains (text.Trim().Split(' ')[0]) removed)
@@ -3686,7 +3718,7 @@ let internal shapeMembers
                             {
                                 Name = Naming.memberName m.Symbol.Name
                                 Docs = m.Docs
-                                Tags = m.Tags
+                                Tags = signatureTags m.Tags signature
                                 TypeParameters = typeParameters
                                 Parameters = parameters
                                 Return = returns
@@ -3790,7 +3822,7 @@ let internal shapeMembers
                                 {
                                     Name = name
                                     Docs = m.Docs
-                                    Tags = m.Tags
+                                    Tags = signatureTags m.Tags signature
                                     TypeParameters = typeParameters
                                     Parameters = parameters
                                     Return = returns

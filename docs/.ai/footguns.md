@@ -29,6 +29,12 @@ keyof T> = T[K]` reaches Shape with no `AliasTypeArguments`, so `declTypeParams`
 parameters and the alias was emitted `type ValueOf = obj`. `shape-aliases` binds the operand a
 `T[keyof T]` body reads from `ObjectTypeId`; any other indexed-access alias keeps no parameters.
 
+**`getJsDocTags` merges every overload's tags.** Overloads share one symbol, so a
+`@deprecated` written on one `createElement` declaration reaches all of them. Resolve reads each
+overload's own leading JSDoc into `ResolvedSignature.OwnDoc`; `signatureTags` keeps the tags
+that JSDoc writes, and an undocumented overload keeps the shared tags other than `@deprecated`
+(solid-js documents only the first overload of `createSignal`).
+
 **A nullable union hides the application it was written over.** `x?: Job<string>` reaches the shape tier as `Job<string>`'s arms beside `undefined`, and arms no argument re-instantiates are the declared form's own, so a member-set match lands on `Job<T>` outside its scope. Read `TypeFacts.NonNullableApplication` (the union origin's application, from `getNonNullableType`) and apply its arguments; a declared form's own parameters apply only where they are in scope. An alias that already includes `null` (`Maybe<T> | undefined`) leaves no single application in the origin, and its reference depends on the member-set match.
 
 **Expecto's `--filter` is a hierarchy prefix.** A fixture's tests are named `generator e2e.<fixture> generates the committed goldens` and its extra cases `generator e2e.<case name>`, so a bare fixture name selects zero tests and reports success.

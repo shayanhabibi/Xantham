@@ -100,11 +100,9 @@ type CreateOptions =
     static member Create (?is: string) : CreateOptions = jsNative
 
 type Doc =
-    /// <remarks>@deprecated</remarks>
     abstract createElement<'R>: tagName: typekeyof<TagMap, 'R> * ?options: CreateOptions -> 'R
     /// <remarks>@deprecated</remarks>
     abstract createElement<'R>: tagName: typekeyof<DeprecatedTagMap, 'R> * ?options: CreateOptions -> 'R
-    /// <remarks>@deprecated</remarks>
     abstract createElement: tagName: string * ?options: CreateOptions -> Elem
     abstract getElementsByTagName<'R when 'R :> Elem>: qualifiedName: typekeyof<TagMap, 'R> -> ElemList<'R>
     abstract getElementsByTagName<'R when 'R :> Elem>: qualifiedName: typekeyof<SvgTagMap, 'R> -> ElemList<'R>
@@ -121,6 +119,10 @@ type Doc =
     /// A map whose values do not inherit the bound: the result stays unconstrained and widens.
     /// </summary>
     abstract findLoose<'R>: tag: typekeyof<LooseTagMap, 'R> -> ElemList<Elem>
+    /// <summary>
+    /// A map the compiler lib declares: its values are catalogued rather than derived.
+    /// </summary>
+    abstract libElements<'R when 'R :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'R> -> Fable.Core.TS.Dom.HTMLCollectionOf<'R>
 
 type ValueOf<'ObjectType> = proptypelock<'ObjectType>
 
@@ -130,6 +132,17 @@ type ValuesOf<'T> = proptypelock<'T>
 /// The negative: a key parameter with no default selects a narrower set than proptypelock states.
 /// </summary>
 type Picked = obj
+
+/// <summary>
+/// A mapped type whose value does not read the key.
+/// </summary>
+type Stringified<'T> = PropertyRecord<'T, string>
+
+/// <summary>
+/// The negative: a value that reads the key has no single value type.
+/// </summary>
+[<Erase>]
+type Mirrored<'T> = private Mirrored__ of obj
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

@@ -642,6 +642,7 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   | `T[K]`, `K extends keyof T = keyof T` (type-fest `ValueOf`) | `proptypelock<'T>`, Ergonomic (`TR066`) |
   | `K extends keyof M`, `M` a declared type, used only as a key | `keyof<M>`, `K` unbound (`TP011`) |
   | `K extends keyof M` plus `M[K]` | `typekeyof<M,'R>` at the key, `'R` at the access (`TP011`) |
+  | `{ [P in keyof T]: V }`, `T` in scope, `V` independent of `P` | `PropertyRecord<'T, V>`, Ergonomic (`TR067`) |
 
   So `get<T, K extends keyof T>(source: T, key: K): T[K]` emits
   `get<'T, 'R> (source: 'T, key: typekeyof<'T, 'R>) : 'R`, and Cloudflare's
@@ -663,7 +664,12 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   parameter the access is applied at (`getElementsByTagName<'R when 'R :> Element>`) where every
   value `M` declares inherits it nominally; otherwise the argument widens to the constraint
   (`TR027`). Each map is a distinct F# parameter type, so key-set overloads survive `DO005`.
-  `PropertyRecord` is not emitted: a generic mapped type reaches Shape with no members.
+  A catalogued map (`HTMLElementTagNameMap` reached from a package) derives no members, so
+  Resolve reads its property types into the key's `TypeFacts.KeyOfValues` and the bound is
+  decided over those. A generic mapped type reaches Shape with no members; Resolve reads its
+  `MappedType` node, and `{ [P in keyof T]: V }` with no modifiers, no `as` clause and a `V`
+  that does not mention `P` reads as `PropertyRecord<'T, V>` (`type-fest` `Stringified`). A
+  value that reads the key (`{ [P in keyof T]: T[P] }`) stays a phantom (`SA002`).
 
 Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
 `Record<string, T>`):

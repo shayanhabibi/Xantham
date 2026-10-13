@@ -147,6 +147,7 @@ module FindingCodes =
             "TR.IntrinsicMarkerToObj", "TR064"
             "TR.AnyReturnAsUnit", "TR065"
             "TR.ValueOfAsPropTypeLock", "TR066"
+            "TR.MappedAsPropertyRecord", "TR067"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -530,6 +531,9 @@ type TypeReference =
     /// W8 (#139). `T[keyof T]`, with `T` in scope, written as the support package's
     /// `proptypelock<'T>`: one of the operand's property types, unlocked by a `proptypekey`.
     | [<Ergonomic>] ValueOfAsPropTypeLock of operand: string
+    /// W8 (#139). `{ [P in keyof T]: V }`, with `T` in scope and `V` independent of `P`, written
+    /// as the support package's `PropertyRecord<'T, V>`: an indexer keyed by `keyof<'T>`.
+    | [<Ergonomic>] MappedAsPropertyRecord of operand: string
 
     interface IFindingKind with
         member this.Message =
@@ -653,6 +657,8 @@ type TypeReference =
             | IntrinsicMarkerToObj -> "intrinsic alias body is a compiler marker; widened to obj"
             | AnyReturnAsUnit -> "any return of a selected callback written as unit"
             | ValueOfAsPropTypeLock operand -> $"T[keyof T] reads as proptypelock<'{operand}> (§4.10)"
+            | MappedAsPropertyRecord operand ->
+                $"{{ [P in keyof T]: V }} reads as PropertyRecord<'{operand}, V> (§4.10)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]

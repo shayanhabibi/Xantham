@@ -4,8 +4,8 @@
   "module": "KeyofLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 13,
-    "widened": 7,
+    "ergonomic": 14,
+    "widened": 6,
     "escape": 0
   },
   "passes": [
@@ -17,8 +17,8 @@
     {
       "pass": "SA - shape-aliases",
       "total": 10,
-      "ergonomic": 2,
-      "widened": 8
+      "ergonomic": 3,
+      "widened": 7
     },
     {
       "pass": "SE - shape-exports",
