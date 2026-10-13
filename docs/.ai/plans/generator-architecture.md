@@ -2806,11 +2806,11 @@ inherit `Element`/`Node`, so `'E` stays unconstrained and the collection argumen
 
 Core.TS was generated into scratch only (T4) and compiled there: 193 `typekeyof` members, among
 them two `createElement` key overloads and four each on `querySelector` and `getElementsByTagName`, and 83
-`addEventListener<'E>`. It needs regenerating at integration: the committed catalogue's API hashes
-predate the new members, so `catalog library identity` reports 86 changed entries and `core-ts
-package` an API mismatch for `GlobalThis` until it is. `CatalogCompatibility.ApiVersion` is
-unchanged; whether W8's emitted-ABI change bumps it is left to integration. Node generated into
-scratch is unchanged by finding count, and its five key-type lines predate W8.
+`addEventListener<'E>`. At integration on `integ/w8` (2026-10-14), over W5–W7, Core.TS and Node are
+regenerated under the T4 override: Core.TS's TP011 0 → 3,170, TP002 3,499 → 329, TR044 1,209 → 5
+and DO005 17 → 0 (tiers 1302/2540/438/5 → 1302/2688/290/5); `CatalogCompatibility.ApiVersion`
+stays 8, the wave's single bump (W5). Node's findings and tiers do not move; 1,416 doc lines go,
+as an overload, a literal-keyed method (W5) included, carries only its own JSDoc's tags.
 
 ### Review follow-up (2026-10-14)
 
