@@ -553,11 +553,14 @@ module Stages =
             return
                 stage "test" {
                     when' (not skipTests)
+
                     run (fun _ ->
-                        if goldens
-                           && (update
-                               || not (System.String.IsNullOrWhiteSpace filter)
-                               || not (System.String.IsNullOrWhiteSpace shard)) then
+                        if
+                            goldens
+                            && (update
+                                || not (System.String.IsNullOrWhiteSpace filter)
+                                || not (System.String.IsNullOrWhiteSpace shard))
+                        then
                             Error "--goldens cannot be combined with --update, --filter or --shard"
                         else
                             Ok())
