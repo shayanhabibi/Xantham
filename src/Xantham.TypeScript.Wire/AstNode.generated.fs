@@ -138,8 +138,8 @@ module internal AstNode =
         /// True when `node` is a `ForInOrOfStatement`.
         let is (file: Ast.SourceFile) (node: int) =
             match Ast.kind file node with
-            | SyntaxKind.ForInStatement | SyntaxKind.ForOfStatement
-                -> true
+            | SyntaxKind.ForInStatement
+            | SyntaxKind.ForOfStatement -> true
             | _ -> false
 
         /// Slot 0, `awaitModifier`. The schema marks it optional.
@@ -251,8 +251,8 @@ module internal AstNode =
         /// True when `node` is a `CaseOrDefaultClause`.
         let is (file: Ast.SourceFile) (node: int) =
             match Ast.kind file node with
-            | SyntaxKind.CaseClause | SyntaxKind.DefaultClause
-                -> true
+            | SyntaxKind.CaseClause
+            | SyntaxKind.DefaultClause -> true
             | _ -> false
 
         /// Slot 0, `expression`.
@@ -350,8 +350,7 @@ module internal AstNode =
     module Block =
 
         /// True when `node` is a `Block`.
-        let is (file: Ast.SourceFile) (node: int) =
-            Ast.kind file node = SyntaxKind.Block
+        let is (file: Ast.SourceFile) (node: int) = Ast.kind file node = SyntaxKind.Block
 
         /// The `statements` list node itself.
         let statementsList (file: Ast.SourceFile) (node: int) =
@@ -364,8 +363,7 @@ module internal AstNode =
             | ValueNone -> Seq.empty
 
         /// `multiLine`, commonData bit 0.
-        let multiLine (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let multiLine (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `VariableStatement`.
     [<RequireQualifiedAccess>]
@@ -438,8 +436,8 @@ module internal AstNode =
         /// True when `node` is a `BindingPattern`.
         let is (file: Ast.SourceFile) (node: int) =
             match Ast.kind file node with
-            | SyntaxKind.ObjectBindingPattern | SyntaxKind.ArrayBindingPattern
-                -> true
+            | SyntaxKind.ObjectBindingPattern
+            | SyntaxKind.ArrayBindingPattern -> true
             | _ -> false
 
         /// The `elements` list node itself.
@@ -774,8 +772,8 @@ module internal AstNode =
         /// True when `node` is a `TypeAliasDeclaration`.
         let is (file: Ast.SourceFile) (node: int) =
             match Ast.kind file node with
-            | SyntaxKind.TypeAliasDeclaration | SyntaxKind.JSTypeAliasDeclaration
-                -> true
+            | SyntaxKind.TypeAliasDeclaration
+            | SyntaxKind.JSTypeAliasDeclaration -> true
             | _ -> false
 
         /// The `modifiers` list node itself. The schema marks it optional.
@@ -879,8 +877,8 @@ module internal AstNode =
         /// True when `node` is a `ImportDeclaration`.
         let is (file: Ast.SourceFile) (node: int) =
             match Ast.kind file node with
-            | SyntaxKind.ImportDeclaration | SyntaxKind.JSImportDeclaration
-                -> true
+            | SyntaxKind.ImportDeclaration
+            | SyntaxKind.JSImportDeclaration -> true
             | _ -> false
 
         /// The `modifiers` list node itself. The schema marks it optional.
@@ -974,8 +972,7 @@ module internal AstNode =
             Ast.childAtOrder file node Slot.ExportAssignment.Expression
 
         /// `isExportEquals`, commonData bit 0.
-        let isExportEquals (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let isExportEquals (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `NamespaceExportDeclaration`.
     [<RequireQualifiedAccess>]
@@ -1046,8 +1043,7 @@ module internal AstNode =
             Ast.childAtOrder file node Slot.ExportSpecifier.Name
 
         /// `isTypeOnly`, commonData bit 0.
-        let isTypeOnly (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let isTypeOnly (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `CallSignatureDeclaration`.
     [<RequireQualifiedAccess>]
@@ -1995,8 +1991,7 @@ module internal AstNode =
             | ValueNone -> Seq.empty
 
         /// `multiLine`, commonData bit 0.
-        let multiLine (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let multiLine (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `ObjectLiteralExpression`.
     [<RequireQualifiedAccess>]
@@ -2017,8 +2012,7 @@ module internal AstNode =
             | ValueNone -> Seq.empty
 
         /// `multiLine`, commonData bit 0.
-        let multiLine (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let multiLine (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `SpreadAssignment`.
     [<RequireQualifiedAccess>]
@@ -2399,8 +2393,7 @@ module internal AstNode =
             | ValueNone -> Seq.empty
 
         /// `multiLine`, commonData bit 0.
-        let multiLine (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let multiLine (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
         /// `token`, commonData bits 1-1.
         let token (file: Ast.SourceFile) (node: int) =
@@ -2900,12 +2893,10 @@ module internal AstNode =
     module JsxText =
 
         /// True when `node` is a `JsxText`.
-        let is (file: Ast.SourceFile) (node: int) =
-            Ast.kind file node = SyntaxKind.JsxText
+        let is (file: Ast.SourceFile) (node: int) = Ast.kind file node = SyntaxKind.JsxText
 
         /// `containsOnlyTriviaWhiteSpaces`, commonData bit 0.
-        let containsOnlyTriviaWhiteSpaces (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let containsOnlyTriviaWhiteSpaces (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `SyntaxList`.
     [<RequireQualifiedAccess>]
@@ -2930,8 +2921,7 @@ module internal AstNode =
     module JSDoc =
 
         /// True when `node` is a `JSDoc`.
-        let is (file: Ast.SourceFile) (node: int) =
-            Ast.kind file node = SyntaxKind.JSDoc
+        let is (file: Ast.SourceFile) (node: int) = Ast.kind file node = SyntaxKind.JSDoc
 
         /// The `comment` list node itself.
         let commentList (file: Ast.SourceFile) (node: int) =
@@ -3661,8 +3651,7 @@ module internal AstNode =
             Ast.childAtOrder file node Slot.ImportEqualsDeclaration.ModuleReference
 
         /// `isTypeOnly`, commonData bit 0.
-        let isTypeOnly (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let isTypeOnly (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `ExportDeclaration`.
     [<RequireQualifiedAccess>]
@@ -3695,8 +3684,7 @@ module internal AstNode =
             Ast.childAtOrder file node Slot.ExportDeclaration.Attributes
 
         /// `isTypeOnly`, commonData bit 0.
-        let isTypeOnly (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let isTypeOnly (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `ImportTypeNode`.
     [<RequireQualifiedAccess>]
@@ -3729,8 +3717,7 @@ module internal AstNode =
             | ValueNone -> Seq.empty
 
         /// `isTypeOf`, commonData bit 0.
-        let isTypeOf (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let isTypeOf (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `ImportClause`.
     [<RequireQualifiedAccess>]
@@ -3772,8 +3759,7 @@ module internal AstNode =
             Ast.childAtOrder file node Slot.ImportSpecifier.Name
 
         /// `isTypeOnly`, commonData bit 0.
-        let isTypeOnly (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let isTypeOnly (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `JSDocLink`.
     [<RequireQualifiedAccess>]
@@ -3880,8 +3866,7 @@ module internal AstNode =
             | ValueNone -> Seq.empty
 
         /// `isArrayType`, commonData bit 0.
-        let isArrayType (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let isArrayType (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
     /// Children of `JSDocParameterOrPropertyTag`.
     [<RequireQualifiedAccess>]
@@ -3890,8 +3875,8 @@ module internal AstNode =
         /// True when `node` is a `JSDocParameterOrPropertyTag`.
         let is (file: Ast.SourceFile) (node: int) =
             match Ast.kind file node with
-            | SyntaxKind.JSDocParameterTag | SyntaxKind.JSDocPropertyTag
-                -> true
+            | SyntaxKind.JSDocParameterTag
+            | SyntaxKind.JSDocPropertyTag -> true
             | _ -> false
 
         /// Slot 0, `tagName`.
@@ -3917,11 +3902,7 @@ module internal AstNode =
             | ValueNone -> Seq.empty
 
         /// `isBracketed`, commonData bit 0.
-        let isBracketed (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 1u <> 0u
+        let isBracketed (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 1u <> 0u
 
         /// `isNameFirst`, commonData bit 1.
-        let isNameFirst (file: Ast.SourceFile) (node: int) =
-            Ast.commonData file node &&& 2u <> 0u
-
-
+        let isNameFirst (file: Ast.SourceFile) (node: int) = Ast.commonData file node &&& 2u <> 0u

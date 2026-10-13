@@ -31,8 +31,14 @@ module Api =
     let updateSnapshot (channel: TscChannel) (parameters: UpdateSnapshotParams) : UpdateSnapshotResponse =
         ProtoJson.request<UpdateSnapshotParams, UpdateSnapshotResponse> channel Method.UpdateSnapshot parameters
 
-    let updateTemporarySnapshot (channel: TscChannel) (parameters: UpdateTemporarySnapshotParams) : UpdateSnapshotResponse =
-        ProtoJson.request<UpdateTemporarySnapshotParams, UpdateSnapshotResponse> channel Method.UpdateTemporarySnapshot parameters
+    let updateTemporarySnapshot
+        (channel: TscChannel)
+        (parameters: UpdateTemporarySnapshotParams)
+        : UpdateSnapshotResponse =
+        ProtoJson.request<UpdateTemporarySnapshotParams, UpdateSnapshotResponse>
+            channel
+            Method.UpdateTemporarySnapshot
+            parameters
 
     let createProgram (channel: TscChannel) (parameters: CreateProgramParams) : CreateProgramResponse =
         ProtoJson.request<CreateProgramParams, CreateProgramResponse> channel Method.CreateProgram parameters
@@ -43,8 +49,14 @@ module Api =
     let readConfigFile (channel: TscChannel) (parameters: ReadConfigFileParams) : ReadConfigFileResponse =
         ProtoJson.request<ReadConfigFileParams, ReadConfigFileResponse> channel Method.ReadConfigFile parameters
 
-    let parseJsonConfigFileContent (channel: TscChannel) (parameters: ParseJsonConfigFileContentParams) : ConfigFileResponse =
-        ProtoJson.request<ParseJsonConfigFileContentParams, ConfigFileResponse> channel Method.ParseJsonConfigFileContent parameters
+    let parseJsonConfigFileContent
+        (channel: TscChannel)
+        (parameters: ParseJsonConfigFileContentParams)
+        : ConfigFileResponse =
+        ProtoJson.request<ParseJsonConfigFileContentParams, ConfigFileResponse>
+            channel
+            Method.ParseJsonConfigFileContent
+            parameters
 
     let parseConfigFile (channel: TscChannel) (parameters: ParseConfigFileParams) : ConfigFileResponse =
         ProtoJson.request<ParseConfigFileParams, ConfigFileResponse> channel Method.ParseConfigFile parameters
@@ -53,16 +65,31 @@ module Api =
         ProtoJson.request<TranspileParams, TranspileOutputResponse> channel Method.TranspileModule parameters
 
     let transpileModuleFromFile (channel: TscChannel) (parameters: TranspileFromFileParams) : TranspileOutputResponse =
-        ProtoJson.request<TranspileFromFileParams, TranspileOutputResponse> channel Method.TranspileModuleFromFile parameters
+        ProtoJson.request<TranspileFromFileParams, TranspileOutputResponse>
+            channel
+            Method.TranspileModuleFromFile
+            parameters
 
     let transpileDeclaration (channel: TscChannel) (parameters: TranspileParams) : TranspileOutputResponse =
         ProtoJson.request<TranspileParams, TranspileOutputResponse> channel Method.TranspileDeclaration parameters
 
-    let transpileDeclarationFromFile (channel: TscChannel) (parameters: TranspileFromFileParams) : TranspileOutputResponse =
-        ProtoJson.request<TranspileFromFileParams, TranspileOutputResponse> channel Method.TranspileDeclarationFromFile parameters
+    let transpileDeclarationFromFile
+        (channel: TscChannel)
+        (parameters: TranspileFromFileParams)
+        : TranspileOutputResponse =
+        ProtoJson.request<TranspileFromFileParams, TranspileOutputResponse>
+            channel
+            Method.TranspileDeclarationFromFile
+            parameters
 
-    let getDefaultProjectForFile (channel: TscChannel) (parameters: GetDefaultProjectForFileParams) : ProjectResponse voption =
-        ProtoJson.requestOption<GetDefaultProjectForFileParams, ProjectResponse> channel Method.GetDefaultProjectForFile parameters
+    let getDefaultProjectForFile
+        (channel: TscChannel)
+        (parameters: GetDefaultProjectForFileParams)
+        : ProjectResponse voption =
+        ProtoJson.requestOption<GetDefaultProjectForFileParams, ProjectResponse>
+            channel
+            Method.GetDefaultProjectForFile
+            parameters
 
     let getSymbolAtPosition (channel: TscChannel) (parameters: GetSymbolAtPositionParams) : SymbolResponse voption =
         ProtoJson.requestOption<GetSymbolAtPositionParams, SymbolResponse> channel Method.GetSymbolAtPosition parameters
@@ -77,10 +104,16 @@ module Api =
         ProtoJson.request<GetSymbolsAtLocationsParams, SymbolResponse[]> channel Method.GetSymbolsAtLocations parameters
 
     let getSymbolOfSourceFile (channel: TscChannel) (parameters: GetSymbolOfSourceFileParams) : SymbolResponse voption =
-        ProtoJson.requestOption<GetSymbolOfSourceFileParams, SymbolResponse> channel Method.GetSymbolOfSourceFile parameters
+        ProtoJson.requestOption<GetSymbolOfSourceFileParams, SymbolResponse>
+            channel
+            Method.GetSymbolOfSourceFile
+            parameters
 
     let getSymbolsOfSourceFiles (channel: TscChannel) (parameters: GetSymbolsOfSourceFilesParams) : SymbolResponse[] =
-        ProtoJson.request<GetSymbolsOfSourceFilesParams, SymbolResponse[]> channel Method.GetSymbolsOfSourceFiles parameters
+        ProtoJson.request<GetSymbolsOfSourceFilesParams, SymbolResponse[]>
+            channel
+            Method.GetSymbolsOfSourceFiles
+            parameters
 
     let getTypeOfSymbol (channel: TscChannel) (parameters: GetTypeOfSymbolParams) : TypeResponse =
         ProtoJson.request<GetTypeOfSymbolParams, TypeResponse> channel Method.GetTypeOfSymbol parameters
@@ -147,7 +180,10 @@ module Api =
         ProtoJson.requestOption<GetSymbolPropertyParams, SymbolResponse[]> channel Method.GetExportsOfSymbol parameters
 
     let getExportSymbolOfSymbol (channel: TscChannel) (parameters: GetSymbolPropertyParams) : SymbolResponse voption =
-        ProtoJson.requestOption<GetSymbolPropertyParams, SymbolResponse> channel Method.GetExportSymbolOfSymbol parameters
+        ProtoJson.requestOption<GetSymbolPropertyParams, SymbolResponse>
+            channel
+            Method.GetExportSymbolOfSymbol
+            parameters
 
     let getSymbolOfType (channel: TscChannel) (parameters: GetTypePropertyParams) : SymbolResponse voption =
         ProtoJson.requestOption<GetTypePropertyParams, SymbolResponse> channel Method.GetSymbolOfType parameters
@@ -167,14 +203,29 @@ module Api =
     let getTypeParametersOfType (channel: TscChannel) (parameters: GetTypePropertyParams) : TypeResponse[] voption =
         ProtoJson.requestOption<GetTypePropertyParams, TypeResponse[]> channel Method.GetTypeParametersOfType parameters
 
-    let getOuterTypeParametersOfType (channel: TscChannel) (parameters: GetTypePropertyParams) : TypeResponse[] voption =
-        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse[]> channel Method.GetOuterTypeParametersOfType parameters
+    let getOuterTypeParametersOfType
+        (channel: TscChannel)
+        (parameters: GetTypePropertyParams)
+        : TypeResponse[] voption =
+        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse[]>
+            channel
+            Method.GetOuterTypeParametersOfType
+            parameters
 
-    let getLocalTypeParametersOfType (channel: TscChannel) (parameters: GetTypePropertyParams) : TypeResponse[] voption =
-        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse[]> channel Method.GetLocalTypeParametersOfType parameters
+    let getLocalTypeParametersOfType
+        (channel: TscChannel)
+        (parameters: GetTypePropertyParams)
+        : TypeResponse[] voption =
+        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse[]>
+            channel
+            Method.GetLocalTypeParametersOfType
+            parameters
 
     let getAliasTypeArgumentsOfType (channel: TscChannel) (parameters: GetTypePropertyParams) : TypeResponse[] voption =
-        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse[]> channel Method.GetAliasTypeArgumentsOfType parameters
+        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse[]>
+            channel
+            Method.GetAliasTypeArgumentsOfType
+            parameters
 
     let getAliasSymbolOfType (channel: TscChannel) (parameters: GetTypePropertyParams) : SymbolResponse voption =
         ProtoJson.requestOption<GetTypePropertyParams, SymbolResponse> channel Method.GetAliasSymbolOfType parameters
@@ -197,23 +248,50 @@ module Api =
     let getConstraintOfType (channel: TscChannel) (parameters: GetTypePropertyParams) : TypeResponse =
         ProtoJson.request<GetTypePropertyParams, TypeResponse> channel Method.GetConstraintOfType parameters
 
-    let getTypeParametersOfSignature (channel: TscChannel) (parameters: GetSignaturePropertyParams) : TypeResponse[] voption =
-        ProtoJson.requestOption<GetSignaturePropertyParams, TypeResponse[]> channel Method.GetTypeParametersOfSignature parameters
+    let getTypeParametersOfSignature
+        (channel: TscChannel)
+        (parameters: GetSignaturePropertyParams)
+        : TypeResponse[] voption =
+        ProtoJson.requestOption<GetSignaturePropertyParams, TypeResponse[]>
+            channel
+            Method.GetTypeParametersOfSignature
+            parameters
 
-    let getParametersOfSignature (channel: TscChannel) (parameters: GetSignaturePropertyParams) : SymbolResponse[] voption =
-        ProtoJson.requestOption<GetSignaturePropertyParams, SymbolResponse[]> channel Method.GetParametersOfSignature parameters
+    let getParametersOfSignature
+        (channel: TscChannel)
+        (parameters: GetSignaturePropertyParams)
+        : SymbolResponse[] voption =
+        ProtoJson.requestOption<GetSignaturePropertyParams, SymbolResponse[]>
+            channel
+            Method.GetParametersOfSignature
+            parameters
 
-    let getThisParameterOfSignature (channel: TscChannel) (parameters: GetSignaturePropertyParams) : SymbolResponse voption =
-        ProtoJson.requestOption<GetSignaturePropertyParams, SymbolResponse> channel Method.GetThisParameterOfSignature parameters
+    let getThisParameterOfSignature
+        (channel: TscChannel)
+        (parameters: GetSignaturePropertyParams)
+        : SymbolResponse voption =
+        ProtoJson.requestOption<GetSignaturePropertyParams, SymbolResponse>
+            channel
+            Method.GetThisParameterOfSignature
+            parameters
 
-    let getTargetOfSignature (channel: TscChannel) (parameters: GetSignaturePropertyParams) : SignatureResponse voption =
-        ProtoJson.requestOption<GetSignaturePropertyParams, SignatureResponse> channel Method.GetTargetOfSignature parameters
+    let getTargetOfSignature
+        (channel: TscChannel)
+        (parameters: GetSignaturePropertyParams)
+        : SignatureResponse voption =
+        ProtoJson.requestOption<GetSignaturePropertyParams, SignatureResponse>
+            channel
+            Method.GetTargetOfSignature
+            parameters
 
     let getContextualType (channel: TscChannel) (parameters: GetContextualTypeParams) : TypeResponse voption =
         ProtoJson.requestOption<GetContextualTypeParams, TypeResponse> channel Method.GetContextualType parameters
 
     let getBaseTypeOfLiteralType (channel: TscChannel) (parameters: GetBaseTypeOfLiteralTypeParams) : TypeResponse =
-        ProtoJson.request<GetBaseTypeOfLiteralTypeParams, TypeResponse> channel Method.GetBaseTypeOfLiteralType parameters
+        ProtoJson.request<GetBaseTypeOfLiteralTypeParams, TypeResponse>
+            channel
+            Method.GetBaseTypeOfLiteralType
+            parameters
 
     let getNonNullableType (channel: TscChannel) (parameters: GetTypePropertyParams) : TypeResponse =
         ProtoJson.request<GetTypePropertyParams, TypeResponse> channel Method.GetNonNullableType parameters
@@ -236,11 +314,20 @@ module Api =
     let isTypeAssignableTo (channel: TscChannel) (parameters: IsTypeAssignableToParams) : bool =
         ProtoJson.request<IsTypeAssignableToParams, bool> channel Method.IsTypeAssignableTo parameters
 
-    let getShorthandAssignmentValueSymbol (channel: TscChannel) (parameters: GetTypeAtLocationParams) : SymbolResponse voption =
-        ProtoJson.requestOption<GetTypeAtLocationParams, SymbolResponse> channel Method.GetShorthandAssignmentValueSymbol parameters
+    let getShorthandAssignmentValueSymbol
+        (channel: TscChannel)
+        (parameters: GetTypeAtLocationParams)
+        : SymbolResponse voption =
+        ProtoJson.requestOption<GetTypeAtLocationParams, SymbolResponse>
+            channel
+            Method.GetShorthandAssignmentValueSymbol
+            parameters
 
     let getTypeOfSymbolAtLocation (channel: TscChannel) (parameters: GetTypeOfSymbolAtLocationParams) : TypeResponse =
-        ProtoJson.request<GetTypeOfSymbolAtLocationParams, TypeResponse> channel Method.GetTypeOfSymbolAtLocation parameters
+        ProtoJson.request<GetTypeOfSymbolAtLocationParams, TypeResponse>
+            channel
+            Method.GetTypeOfSymbolAtLocation
+            parameters
 
     /// Returns the raw binary AST, not the schema's `SourceFileResponse` JSON envelope -
     /// see `ProtoJson.requestAst`.
@@ -264,8 +351,14 @@ module Api =
     let getRestTypeOfSignature (channel: TscChannel) (parameters: CheckerSignatureParams) : TypeResponse =
         ProtoJson.request<CheckerSignatureParams, TypeResponse> channel Method.GetRestTypeOfSignature parameters
 
-    let getTypePredicateOfSignature (channel: TscChannel) (parameters: CheckerSignatureParams) : TypePredicateResponse voption =
-        ProtoJson.requestOption<CheckerSignatureParams, TypePredicateResponse> channel Method.GetTypePredicateOfSignature parameters
+    let getTypePredicateOfSignature
+        (channel: TscChannel)
+        (parameters: CheckerSignatureParams)
+        : TypePredicateResponse voption =
+        ProtoJson.requestOption<CheckerSignatureParams, TypePredicateResponse>
+            channel
+            Method.GetTypePredicateOfSignature
+            parameters
 
     let getBaseTypes (channel: TscChannel) (parameters: CheckerTypeParams) : TypeResponse[] voption =
         ProtoJson.requestOption<CheckerTypeParams, TypeResponse[]> channel Method.GetBaseTypes parameters
@@ -289,10 +382,16 @@ module Api =
         ProtoJson.requestOption<CheckerTypeParams, IndexInfoResponse[]> channel Method.GetIndexInfosOfType parameters
 
     let getConstraintOfTypeParameter (channel: TscChannel) (parameters: GetTypePropertyParams) : TypeResponse voption =
-        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse> channel Method.GetConstraintOfTypeParameter parameters
+        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse>
+            channel
+            Method.GetConstraintOfTypeParameter
+            parameters
 
     let getDefaultFromTypeParameter (channel: TscChannel) (parameters: GetTypePropertyParams) : TypeResponse voption =
-        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse> channel Method.GetDefaultFromTypeParameter parameters
+        ProtoJson.requestOption<GetTypePropertyParams, TypeResponse>
+            channel
+            Method.GetDefaultFromTypeParameter
+            parameters
 
     let getBaseConstraintOfType (channel: TscChannel) (parameters: CheckerTypeParams) : TypeResponse voption =
         ProtoJson.requestOption<CheckerTypeParams, TypeResponse> channel Method.GetBaseConstraintOfType parameters
@@ -315,8 +414,14 @@ module Api =
     let getSignatureFromDeclaration (channel: TscChannel) (parameters: CheckerNodeParams) : SignatureResponse =
         ProtoJson.request<CheckerNodeParams, SignatureResponse> channel Method.GetSignatureFromDeclaration parameters
 
-    let getExportSpecifierLocalTargetSymbol (channel: TscChannel) (parameters: CheckerNodeParams) : SymbolResponse voption =
-        ProtoJson.requestOption<CheckerNodeParams, SymbolResponse> channel Method.GetExportSpecifierLocalTargetSymbol parameters
+    let getExportSpecifierLocalTargetSymbol
+        (channel: TscChannel)
+        (parameters: CheckerNodeParams)
+        : SymbolResponse voption =
+        ProtoJson.requestOption<CheckerNodeParams, SymbolResponse>
+            channel
+            Method.GetExportSpecifierLocalTargetSymbol
+            parameters
 
     let getAliasedSymbol (channel: TscChannel) (parameters: CheckerSymbolParams) : SymbolResponse =
         ProtoJson.request<CheckerSymbolParams, SymbolResponse> channel Method.GetAliasedSymbol parameters
@@ -333,8 +438,14 @@ module Api =
     let getExportsOfModule (channel: TscChannel) (parameters: CheckerSymbolParams) : SymbolResponse[] voption =
         ProtoJson.requestOption<CheckerSymbolParams, SymbolResponse[]> channel Method.GetExportsOfModule parameters
 
-    let getMemberInModuleExports (channel: TscChannel) (parameters: GetMemberInModuleExportsParams) : SymbolResponse voption =
-        ProtoJson.requestOption<GetMemberInModuleExportsParams, SymbolResponse> channel Method.GetMemberInModuleExports parameters
+    let getMemberInModuleExports
+        (channel: TscChannel)
+        (parameters: GetMemberInModuleExportsParams)
+        : SymbolResponse voption =
+        ProtoJson.requestOption<GetMemberInModuleExportsParams, SymbolResponse>
+            channel
+            Method.GetMemberInModuleExports
+            parameters
 
     let getJsDocTags (channel: TscChannel) (parameters: CheckerSymbolParams) : JSDocTagInfo[] voption =
         ProtoJson.requestOption<CheckerSymbolParams, JSDocTagInfo[]> channel Method.GetJsDocTags parameters
@@ -349,40 +460,100 @@ module Api =
         ProtoJson.request<CheckerSymbolParams, bool> channel Method.IsReadonlySymbol parameters
 
     let getReferencesToSymbolInFile (channel: TscChannel) (parameters: GetReferencesToSymbolInFileParams) : string[] =
-        ProtoJson.request<GetReferencesToSymbolInFileParams, string[]> channel Method.GetReferencesToSymbolInFile parameters
+        ProtoJson.request<GetReferencesToSymbolInFileParams, string[]>
+            channel
+            Method.GetReferencesToSymbolInFile
+            parameters
 
-    let getReferencedSymbolsForNode (channel: TscChannel) (parameters: GetReferencedSymbolsForNodeParams) : ReferencedSymbolEntry[] voption =
-        ProtoJson.requestOption<GetReferencedSymbolsForNodeParams, ReferencedSymbolEntry[]> channel Method.GetReferencedSymbolsForNode parameters
+    let getReferencedSymbolsForNode
+        (channel: TscChannel)
+        (parameters: GetReferencedSymbolsForNodeParams)
+        : ReferencedSymbolEntry[] voption =
+        ProtoJson.requestOption<GetReferencedSymbolsForNodeParams, ReferencedSymbolEntry[]>
+            channel
+            Method.GetReferencedSymbolsForNode
+            parameters
 
-    let getSignatureUsages (channel: TscChannel) (parameters: GetSignatureUsagesParams) : SignatureUsageResponse[] voption =
-        ProtoJson.requestOption<GetSignatureUsagesParams, SignatureUsageResponse[]> channel Method.GetSignatureUsages parameters
+    let getSignatureUsages
+        (channel: TscChannel)
+        (parameters: GetSignatureUsagesParams)
+        : SignatureUsageResponse[] voption =
+        ProtoJson.requestOption<GetSignatureUsagesParams, SignatureUsageResponse[]>
+            channel
+            Method.GetSignatureUsages
+            parameters
 
-    let getCompletionsAtPosition (channel: TscChannel) (parameters: GetCompletionsAtPositionParams) : CompletionInfoResponse voption =
-        ProtoJson.requestOption<GetCompletionsAtPositionParams, CompletionInfoResponse> channel Method.GetCompletionsAtPosition parameters
+    let getCompletionsAtPosition
+        (channel: TscChannel)
+        (parameters: GetCompletionsAtPositionParams)
+        : CompletionInfoResponse voption =
+        ProtoJson.requestOption<GetCompletionsAtPositionParams, CompletionInfoResponse>
+            channel
+            Method.GetCompletionsAtPosition
+            parameters
 
-    let getSyntacticDiagnostics (channel: TscChannel) (parameters: GetDiagnosticsParams) : DiagnosticResponse[] voption =
-        ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]> channel Method.GetSyntacticDiagnostics parameters
+    let getSyntacticDiagnostics
+        (channel: TscChannel)
+        (parameters: GetDiagnosticsParams)
+        : DiagnosticResponse[] voption =
+        ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]>
+            channel
+            Method.GetSyntacticDiagnostics
+            parameters
 
     let getBindDiagnostics (channel: TscChannel) (parameters: GetDiagnosticsParams) : DiagnosticResponse[] voption =
         ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]> channel Method.GetBindDiagnostics parameters
 
     let getSemanticDiagnostics (channel: TscChannel) (parameters: GetDiagnosticsParams) : DiagnosticResponse[] voption =
-        ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]> channel Method.GetSemanticDiagnostics parameters
+        ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]>
+            channel
+            Method.GetSemanticDiagnostics
+            parameters
 
-    let getSuggestionDiagnostics (channel: TscChannel) (parameters: GetDiagnosticsParams) : DiagnosticResponse[] voption =
-        ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]> channel Method.GetSuggestionDiagnostics parameters
+    let getSuggestionDiagnostics
+        (channel: TscChannel)
+        (parameters: GetDiagnosticsParams)
+        : DiagnosticResponse[] voption =
+        ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]>
+            channel
+            Method.GetSuggestionDiagnostics
+            parameters
 
-    let getDeclarationDiagnostics (channel: TscChannel) (parameters: GetDiagnosticsParams) : DiagnosticResponse[] voption =
-        ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]> channel Method.GetDeclarationDiagnostics parameters
+    let getDeclarationDiagnostics
+        (channel: TscChannel)
+        (parameters: GetDiagnosticsParams)
+        : DiagnosticResponse[] voption =
+        ProtoJson.requestOption<GetDiagnosticsParams, DiagnosticResponse[]>
+            channel
+            Method.GetDeclarationDiagnostics
+            parameters
 
-    let getProgramDiagnostics (channel: TscChannel) (parameters: GetProjectDiagnosticsParams) : DiagnosticResponse[] voption =
-        ProtoJson.requestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]> channel Method.GetProgramDiagnostics parameters
+    let getProgramDiagnostics
+        (channel: TscChannel)
+        (parameters: GetProjectDiagnosticsParams)
+        : DiagnosticResponse[] voption =
+        ProtoJson.requestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>
+            channel
+            Method.GetProgramDiagnostics
+            parameters
 
-    let getGlobalDiagnostics (channel: TscChannel) (parameters: GetProjectDiagnosticsParams) : DiagnosticResponse[] voption =
-        ProtoJson.requestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]> channel Method.GetGlobalDiagnostics parameters
+    let getGlobalDiagnostics
+        (channel: TscChannel)
+        (parameters: GetProjectDiagnosticsParams)
+        : DiagnosticResponse[] voption =
+        ProtoJson.requestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>
+            channel
+            Method.GetGlobalDiagnostics
+            parameters
 
-    let getConfigFileParsingDiagnostics (channel: TscChannel) (parameters: GetProjectDiagnosticsParams) : DiagnosticResponse[] voption =
-        ProtoJson.requestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]> channel Method.GetConfigFileParsingDiagnostics parameters
+    let getConfigFileParsingDiagnostics
+        (channel: TscChannel)
+        (parameters: GetProjectDiagnosticsParams)
+        : DiagnosticResponse[] voption =
+        ProtoJson.requestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>
+            channel
+            Method.GetConfigFileParsingDiagnostics
+            parameters
 
     let printNode (channel: TscChannel) (parameters: PrintNodeParams) : string =
         ProtoJson.request<PrintNodeParams, string> channel Method.PrintNode parameters
@@ -439,10 +610,19 @@ module Api =
         ProtoJson.request<GetIntrinsicTypeParams, TypeResponse> channel Method.GetNonPrimitiveType parameters
 
     let getWellKnownSymbols (channel: TscChannel) (parameters: GetIntrinsicTypeParams) : WellKnownSymbolsResponse =
-        ProtoJson.request<GetIntrinsicTypeParams, WellKnownSymbolsResponse> channel Method.GetWellKnownSymbols parameters
+        ProtoJson.request<GetIntrinsicTypeParams, WellKnownSymbolsResponse>
+            channel
+            Method.GetWellKnownSymbols
+            parameters
 
-    let getWellKnownSignatures (channel: TscChannel) (parameters: GetIntrinsicTypeParams) : WellKnownSignaturesResponse =
-        ProtoJson.request<GetIntrinsicTypeParams, WellKnownSignaturesResponse> channel Method.GetWellKnownSignatures parameters
+    let getWellKnownSignatures
+        (channel: TscChannel)
+        (parameters: GetIntrinsicTypeParams)
+        : WellKnownSignaturesResponse =
+        ProtoJson.request<GetIntrinsicTypeParams, WellKnownSignaturesResponse>
+            channel
+            Method.GetWellKnownSignatures
+            parameters
 
     let startCPUProfile (channel: TscChannel) (parameters: ProfileParams) =
         ProtoJson.requestUnit channel Method.StartCPUProfile parameters
@@ -474,55 +654,69 @@ module TscChannelExtensions =
 
         /// The fields of ReleaseParams, spread. Builds the record and calls the overload above.
         member inline this.release(snapshot: int) =
-            this.release(
-                { Snapshot = snapshot }
-                : ReleaseParams
-            )
+            this.release ({ Snapshot = snapshot }: ReleaseParams)
 
         member this.batchRequests(parameters: BatchRequestsParams) = Api.batchRequests this parameters
 
         /// The fields of BatchRequestsParams, spread. Builds the record and calls the overload above.
         member inline this.batchRequests([<Struct>] ?requests: BatchRequest[]) =
-            this.batchRequests(
-                { Requests = requests }
-                : BatchRequestsParams
-            )
+            this.batchRequests ({ Requests = requests }: BatchRequestsParams)
 
         member this.initialize() = Api.initialize this
 
         member this.updateSnapshot(parameters: UpdateSnapshotParams) = Api.updateSnapshot this parameters
 
         /// The fields of UpdateSnapshotParams, spread. Builds the record and calls the overload above.
-        member inline this.updateSnapshot([<Struct>] ?openProjects: DocumentIdentifier[], [<Struct>] ?closeProjects: DocumentIdentifier[], [<Struct>] ?fileChanges: APIFileChanges, [<Struct>] ?openFiles: DocumentIdentifier[], [<Struct>] ?closeFiles: DocumentIdentifier[]) =
-            this.updateSnapshot(
-                { OpenProjects = openProjects
-                  CloseProjects = closeProjects
-                  FileChanges = fileChanges
-                  OpenFiles = openFiles
-                  CloseFiles = closeFiles }
+        member inline this.updateSnapshot
+            (
+                [<Struct>] ?openProjects: DocumentIdentifier[],
+                [<Struct>] ?closeProjects: DocumentIdentifier[],
+                [<Struct>] ?fileChanges: APIFileChanges,
+                [<Struct>] ?openFiles: DocumentIdentifier[],
+                [<Struct>] ?closeFiles: DocumentIdentifier[]
+            ) =
+            this.updateSnapshot (
+                {
+                    OpenProjects = openProjects
+                    CloseProjects = closeProjects
+                    FileChanges = fileChanges
+                    OpenFiles = openFiles
+                    CloseFiles = closeFiles
+                }
                 : UpdateSnapshotParams
             )
 
-        member this.updateTemporarySnapshot(parameters: UpdateTemporarySnapshotParams) = Api.updateTemporarySnapshot this parameters
+        member this.updateTemporarySnapshot(parameters: UpdateTemporarySnapshotParams) =
+            Api.updateTemporarySnapshot this parameters
 
         /// The fields of UpdateTemporarySnapshotParams, spread. Builds the record and calls the overload above.
         member inline this.updateTemporarySnapshot(snapshot: int, file: DocumentIdentifier, newText: string) =
-            this.updateTemporarySnapshot(
-                { Snapshot = snapshot
-                  ``File`` = file
-                  NewText = newText }
+            this.updateTemporarySnapshot (
+                {
+                    Snapshot = snapshot
+                    ``File`` = file
+                    NewText = newText
+                }
                 : UpdateTemporarySnapshotParams
             )
 
         member this.createProgram(parameters: CreateProgramParams) = Api.createProgram this parameters
 
         /// The fields of CreateProgramParams, spread. Builds the record and calls the overload above.
-        member inline this.createProgram(createProgramOptions: CreateProgramOptions, [<Struct>] ?rootFiles: DocumentIdentifier[], [<Struct>] ?oldProgram: CreateProgramOldProgramParams, [<Struct>] ?fileChanges: APIFileChanges) =
-            this.createProgram(
-                { CreateProgramOptions = createProgramOptions
-                  RootFiles = rootFiles
-                  OldProgram = oldProgram
-                  FileChanges = fileChanges }
+        member inline this.createProgram
+            (
+                createProgramOptions: CreateProgramOptions,
+                [<Struct>] ?rootFiles: DocumentIdentifier[],
+                [<Struct>] ?oldProgram: CreateProgramOldProgramParams,
+                [<Struct>] ?fileChanges: APIFileChanges
+            ) =
+            this.createProgram (
+                {
+                    CreateProgramOptions = createProgramOptions
+                    RootFiles = rootFiles
+                    OldProgram = oldProgram
+                    FileChanges = fileChanges
+                }
                 : CreateProgramParams
             )
 
@@ -530,28 +724,33 @@ module TscChannelExtensions =
 
         /// The fields of ParseCommandLineParams, spread. Builds the record and calls the overload above.
         member inline this.parseCommandLine([<Struct>] ?commandLine: string[]) =
-            this.parseCommandLine(
-                { CommandLine = commandLine }
-                : ParseCommandLineParams
-            )
+            this.parseCommandLine ({ CommandLine = commandLine }: ParseCommandLineParams)
 
         member this.readConfigFile(parameters: ReadConfigFileParams) = Api.readConfigFile this parameters
 
         /// The fields of ReadConfigFileParams, spread. Builds the record and calls the overload above.
         member inline this.readConfigFile(file: DocumentIdentifier) =
-            this.readConfigFile(
-                { ``File`` = file }
-                : ReadConfigFileParams
-            )
+            this.readConfigFile ({ ``File`` = file }: ReadConfigFileParams)
 
-        member this.parseJsonConfigFileContent(parameters: ParseJsonConfigFileContentParams) = Api.parseJsonConfigFileContent this parameters
+        member this.parseJsonConfigFileContent(parameters: ParseJsonConfigFileContentParams) =
+            Api.parseJsonConfigFileContent this parameters
 
         /// The fields of ParseJsonConfigFileContentParams, spread. Builds the record and calls the overload above.
-        member inline this.parseJsonConfigFileContent([<Struct>] ?json: JsonNode, [<Struct>] ?configDirectory: string, [<Struct>] ?configFileName: DocumentIdentifier) =
-            this.parseJsonConfigFileContent(
-                { Json = (match json with ValueSome value -> value | ValueNone -> null)
-                  ConfigDirectory = configDirectory
-                  ConfigFileName = configFileName }
+        member inline this.parseJsonConfigFileContent
+            (
+                [<Struct>] ?json: JsonNode,
+                [<Struct>] ?configDirectory: string,
+                [<Struct>] ?configFileName: DocumentIdentifier
+            ) =
+            this.parseJsonConfigFileContent (
+                {
+                    Json =
+                        (match json with
+                         | ValueSome value -> value
+                         | ValueNone -> null)
+                    ConfigDirectory = configDirectory
+                    ConfigFileName = configFileName
+                }
                 : ParseJsonConfigFileContentParams
             )
 
@@ -559,82 +758,84 @@ module TscChannelExtensions =
 
         /// The fields of ParseConfigFileParams, spread. Builds the record and calls the overload above.
         member inline this.parseConfigFile(file: DocumentIdentifier) =
-            this.parseConfigFile(
-                { ``File`` = file }
-                : ParseConfigFileParams
-            )
+            this.parseConfigFile ({ ``File`` = file }: ParseConfigFileParams)
 
         member this.transpileModule(parameters: TranspileParams) = Api.transpileModule this parameters
 
         /// The fields of TranspileParams, spread. Builds the record and calls the overload above.
         member inline this.transpileModule(input: string, options: TranspileOptions) =
-            this.transpileModule(
-                { Input = input
-                  Options = options }
-                : TranspileParams
-            )
+            this.transpileModule ({ Input = input; Options = options }: TranspileParams)
 
-        member this.transpileModuleFromFile(parameters: TranspileFromFileParams) = Api.transpileModuleFromFile this parameters
+        member this.transpileModuleFromFile(parameters: TranspileFromFileParams) =
+            Api.transpileModuleFromFile this parameters
 
         /// The fields of TranspileFromFileParams, spread. Builds the record and calls the overload above.
         member inline this.transpileModuleFromFile(fileName: string, options: TranspileOptions) =
-            this.transpileModuleFromFile(
-                { FileName = fileName
-                  Options = options }
+            this.transpileModuleFromFile (
+                {
+                    FileName = fileName
+                    Options = options
+                }
                 : TranspileFromFileParams
             )
 
-        member this.transpileDeclaration(parameters: TranspileParams) = Api.transpileDeclaration this parameters
+        member this.transpileDeclaration(parameters: TranspileParams) =
+            Api.transpileDeclaration this parameters
 
         /// The fields of TranspileParams, spread. Builds the record and calls the overload above.
         member inline this.transpileDeclaration(input: string, options: TranspileOptions) =
-            this.transpileDeclaration(
-                { Input = input
-                  Options = options }
-                : TranspileParams
-            )
+            this.transpileDeclaration ({ Input = input; Options = options }: TranspileParams)
 
-        member this.transpileDeclarationFromFile(parameters: TranspileFromFileParams) = Api.transpileDeclarationFromFile this parameters
+        member this.transpileDeclarationFromFile(parameters: TranspileFromFileParams) =
+            Api.transpileDeclarationFromFile this parameters
 
         /// The fields of TranspileFromFileParams, spread. Builds the record and calls the overload above.
         member inline this.transpileDeclarationFromFile(fileName: string, options: TranspileOptions) =
-            this.transpileDeclarationFromFile(
-                { FileName = fileName
-                  Options = options }
+            this.transpileDeclarationFromFile (
+                {
+                    FileName = fileName
+                    Options = options
+                }
                 : TranspileFromFileParams
             )
 
-        member this.getDefaultProjectForFile(parameters: GetDefaultProjectForFileParams) = Api.getDefaultProjectForFile this parameters
+        member this.getDefaultProjectForFile(parameters: GetDefaultProjectForFileParams) =
+            Api.getDefaultProjectForFile this parameters
 
         /// The fields of GetDefaultProjectForFileParams, spread. Builds the record and calls the overload above.
         member inline this.getDefaultProjectForFile(snapshot: int, file: DocumentIdentifier) =
-            this.getDefaultProjectForFile(
-                { Snapshot = snapshot
-                  ``File`` = file }
-                : GetDefaultProjectForFileParams
-            )
+            this.getDefaultProjectForFile ({ Snapshot = snapshot; ``File`` = file }: GetDefaultProjectForFileParams)
 
         member this.getSymbolAtPosition(parameters: GetSymbolAtPositionParams) = Api.getSymbolAtPosition this parameters
 
         /// The fields of GetSymbolAtPositionParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int) =
-            this.getSymbolAtPosition(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Position = position }
+        member inline this.getSymbolAtPosition
+            (snapshot: int, project: string, file: DocumentIdentifier, position: int)
+            =
+            this.getSymbolAtPosition (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Position = position
+                }
                 : GetSymbolAtPositionParams
             )
 
-        member this.getSymbolsAtPositions(parameters: GetSymbolsAtPositionsParams) = Api.getSymbolsAtPositions this parameters
+        member this.getSymbolsAtPositions(parameters: GetSymbolsAtPositionsParams) =
+            Api.getSymbolsAtPositions this parameters
 
         /// The fields of GetSymbolsAtPositionsParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolsAtPositions(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[]) =
-            this.getSymbolsAtPositions(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Positions = positions }
+        member inline this.getSymbolsAtPositions
+            (snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[])
+            =
+            this.getSymbolsAtPositions (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Positions = positions
+                }
                 : GetSymbolsAtPositionsParams
             )
 
@@ -642,43 +843,56 @@ module TscChannelExtensions =
 
         /// The fields of GetSymbolAtLocationParams, spread. Builds the record and calls the overload above.
         member inline this.getSymbolAtLocation(snapshot: int, project: string, location: string) =
-            this.getSymbolAtLocation(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getSymbolAtLocation (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetSymbolAtLocationParams
             )
 
-        member this.getSymbolsAtLocations(parameters: GetSymbolsAtLocationsParams) = Api.getSymbolsAtLocations this parameters
+        member this.getSymbolsAtLocations(parameters: GetSymbolsAtLocationsParams) =
+            Api.getSymbolsAtLocations this parameters
 
         /// The fields of GetSymbolsAtLocationsParams, spread. Builds the record and calls the overload above.
         member inline this.getSymbolsAtLocations(snapshot: int, project: string, [<Struct>] ?locations: string[]) =
-            this.getSymbolsAtLocations(
-                { Snapshot = snapshot
-                  Project = project
-                  Locations = locations }
+            this.getSymbolsAtLocations (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Locations = locations
+                }
                 : GetSymbolsAtLocationsParams
             )
 
-        member this.getSymbolOfSourceFile(parameters: GetSymbolOfSourceFileParams) = Api.getSymbolOfSourceFile this parameters
+        member this.getSymbolOfSourceFile(parameters: GetSymbolOfSourceFileParams) =
+            Api.getSymbolOfSourceFile this parameters
 
         /// The fields of GetSymbolOfSourceFileParams, spread. Builds the record and calls the overload above.
         member inline this.getSymbolOfSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
-            this.getSymbolOfSourceFile(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file }
+            this.getSymbolOfSourceFile (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                }
                 : GetSymbolOfSourceFileParams
             )
 
-        member this.getSymbolsOfSourceFiles(parameters: GetSymbolsOfSourceFilesParams) = Api.getSymbolsOfSourceFiles this parameters
+        member this.getSymbolsOfSourceFiles(parameters: GetSymbolsOfSourceFilesParams) =
+            Api.getSymbolsOfSourceFiles this parameters
 
         /// The fields of GetSymbolsOfSourceFilesParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolsOfSourceFiles(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getSymbolsOfSourceFiles(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getSymbolsOfSourceFiles
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getSymbolsOfSourceFiles (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetSymbolsOfSourceFilesParams
             )
 
@@ -686,10 +900,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeOfSymbol(snapshot: int, project: string, symbol: int) =
-            this.getTypeOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getTypeOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : GetTypeOfSymbolParams
             )
 
@@ -697,32 +913,40 @@ module TscChannelExtensions =
 
         /// The fields of GetTypesOfSymbolsParams, spread. Builds the record and calls the overload above.
         member inline this.getTypesOfSymbols(snapshot: int, project: string, [<Struct>] ?symbols: int[]) =
-            this.getTypesOfSymbols(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbols = symbols }
+            this.getTypesOfSymbols (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbols = symbols
+                }
                 : GetTypesOfSymbolsParams
             )
 
-        member this.getDeclaredTypeOfSymbol(parameters: GetTypeOfSymbolParams) = Api.getDeclaredTypeOfSymbol this parameters
+        member this.getDeclaredTypeOfSymbol(parameters: GetTypeOfSymbolParams) =
+            Api.getDeclaredTypeOfSymbol this parameters
 
         /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getDeclaredTypeOfSymbol(snapshot: int, project: string, symbol: int) =
-            this.getDeclaredTypeOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getDeclaredTypeOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : GetTypeOfSymbolParams
             )
 
-        member this.getNonMissingTypeOfSymbol(parameters: GetTypeOfSymbolParams) = Api.getNonMissingTypeOfSymbol this parameters
+        member this.getNonMissingTypeOfSymbol(parameters: GetTypeOfSymbolParams) =
+            Api.getNonMissingTypeOfSymbol this parameters
 
         /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getNonMissingTypeOfSymbol(snapshot: int, project: string, symbol: int) =
-            this.getNonMissingTypeOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getNonMissingTypeOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : GetTypeOfSymbolParams
             )
 
@@ -730,10 +954,12 @@ module TscChannelExtensions =
 
         /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
         member inline this.getSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
-            this.getSourceFile(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file }
+            this.getSourceFile (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                }
                 : GetSourceFileParams
             )
 
@@ -741,20 +967,25 @@ module TscChannelExtensions =
 
         /// The fields of GetSourceFileNamesParams, spread. Builds the record and calls the overload above.
         member inline this.getSourceFileNames(snapshot: int, project: string) =
-            this.getSourceFileNames(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getSourceFileNames (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetSourceFileNamesParams
             )
 
-        member this.getSourceFileMetadata(parameters: GetSourceFileParams) = Api.getSourceFileMetadata this parameters
+        member this.getSourceFileMetadata(parameters: GetSourceFileParams) =
+            Api.getSourceFileMetadata this parameters
 
         /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
         member inline this.getSourceFileMetadata(snapshot: int, project: string, file: DocumentIdentifier) =
-            this.getSourceFileMetadata(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file }
+            this.getSourceFileMetadata (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                }
                 : GetSourceFileParams
             )
 
@@ -762,9 +993,11 @@ module TscChannelExtensions =
 
         /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getConfigFileNames(snapshot: int, project: string) =
-            this.getConfigFileNames(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getConfigFileNames (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetProjectDiagnosticsParams
             )
 
@@ -772,40 +1005,64 @@ module TscChannelExtensions =
 
         /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
         member inline this.getConfigSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
-            this.getConfigSourceFile(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file }
+            this.getConfigSourceFile (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                }
                 : GetSourceFileParams
             )
 
         member this.resolveName(parameters: ResolveNameParams) = Api.resolveName this parameters
 
         /// The fields of ResolveNameParams, spread. Builds the record and calls the overload above.
-        member inline this.resolveName(snapshot: int, project: string, name: string, meaning: SymbolFlags, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int, [<Struct>] ?excludeGlobals: bool) =
-            this.resolveName(
-                { Snapshot = snapshot
-                  Project = project
-                  Name = name
-                  Meaning = meaning
-                  Location = location
-                  ``File`` = file
-                  Position = position
-                  ExcludeGlobals = excludeGlobals }
+        member inline this.resolveName
+            (
+                snapshot: int,
+                project: string,
+                name: string,
+                meaning: SymbolFlags,
+                [<Struct>] ?location: string,
+                [<Struct>] ?file: DocumentIdentifier,
+                [<Struct>] ?position: int,
+                [<Struct>] ?excludeGlobals: bool
+            ) =
+            this.resolveName (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Name = name
+                    Meaning = meaning
+                    Location = location
+                    ``File`` = file
+                    Position = position
+                    ExcludeGlobals = excludeGlobals
+                }
                 : ResolveNameParams
             )
 
         member this.getSymbolsInScope(parameters: GetSymbolsInScopeParams) = Api.getSymbolsInScope this parameters
 
         /// The fields of GetSymbolsInScopeParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolsInScope(snapshot: int, project: string, meaning: SymbolFlags, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int) =
-            this.getSymbolsInScope(
-                { Snapshot = snapshot
-                  Project = project
-                  Meaning = meaning
-                  Location = location
-                  ``File`` = file
-                  Position = position }
+        member inline this.getSymbolsInScope
+            (
+                snapshot: int,
+                project: string,
+                meaning: SymbolFlags,
+                [<Struct>] ?location: string,
+                [<Struct>] ?file: DocumentIdentifier,
+                [<Struct>] ?position: int
+            ) =
+            this.getSymbolsInScope (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Meaning = meaning
+                    Location = location
+                    ``File`` = file
+                    Position = position
+                }
                 : GetSymbolsInScopeParams
             )
 
@@ -813,22 +1070,27 @@ module TscChannelExtensions =
 
         /// The fields of GetSignaturesOfTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getSignaturesOfType(snapshot: int, project: string, ``type``: int, kind: SignatureKind) =
-            this.getSignaturesOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type``
-                  Kind = kind }
+            this.getSignaturesOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                    Kind = kind
+                }
                 : GetSignaturesOfTypeParams
             )
 
-        member this.getResolvedSignature(parameters: GetResolvedSignatureParams) = Api.getResolvedSignature this parameters
+        member this.getResolvedSignature(parameters: GetResolvedSignatureParams) =
+            Api.getResolvedSignature this parameters
 
         /// The fields of GetResolvedSignatureParams, spread. Builds the record and calls the overload above.
         member inline this.getResolvedSignature(snapshot: int, project: string, location: string) =
-            this.getResolvedSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getResolvedSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetResolvedSignatureParams
             )
 
@@ -836,10 +1098,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypeAtLocationParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeAtLocation(snapshot: int, project: string, location: string) =
-            this.getTypeAtLocation(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getTypeAtLocation (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetTypeAtLocationParams
             )
 
@@ -847,10 +1111,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypeAtLocationsParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeAtLocations(snapshot: int, project: string, [<Struct>] ?locations: string[]) =
-            this.getTypeAtLocations(
-                { Snapshot = snapshot
-                  Project = project
-                  Locations = locations }
+            this.getTypeAtLocations (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Locations = locations
+                }
                 : GetTypeAtLocationsParams
             )
 
@@ -858,23 +1124,29 @@ module TscChannelExtensions =
 
         /// The fields of GetTypeAtPositionParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int) =
-            this.getTypeAtPosition(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Position = position }
+            this.getTypeAtPosition (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Position = position
+                }
                 : GetTypeAtPositionParams
             )
 
         member this.getTypesAtPositions(parameters: GetTypesAtPositionsParams) = Api.getTypesAtPositions this parameters
 
         /// The fields of GetTypesAtPositionsParams, spread. Builds the record and calls the overload above.
-        member inline this.getTypesAtPositions(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[]) =
-            this.getTypesAtPositions(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Positions = positions }
+        member inline this.getTypesAtPositions
+            (snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[])
+            =
+            this.getTypesAtPositions (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Positions = positions
+                }
                 : GetTypesAtPositionsParams
             )
 
@@ -882,10 +1154,12 @@ module TscChannelExtensions =
 
         /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getParentOfSymbol(snapshot: int, project: string, objectId: int) =
-            this.getParentOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getParentOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSymbolPropertyParams
             )
 
@@ -893,10 +1167,12 @@ module TscChannelExtensions =
 
         /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getMembersOfSymbol(snapshot: int, project: string, objectId: int) =
-            this.getMembersOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getMembersOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSymbolPropertyParams
             )
 
@@ -904,21 +1180,26 @@ module TscChannelExtensions =
 
         /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getExportsOfSymbol(snapshot: int, project: string, objectId: int) =
-            this.getExportsOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getExportsOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSymbolPropertyParams
             )
 
-        member this.getExportSymbolOfSymbol(parameters: GetSymbolPropertyParams) = Api.getExportSymbolOfSymbol this parameters
+        member this.getExportSymbolOfSymbol(parameters: GetSymbolPropertyParams) =
+            Api.getExportSymbolOfSymbol this parameters
 
         /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getExportSymbolOfSymbol(snapshot: int, project: string, objectId: int) =
-            this.getExportSymbolOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getExportSymbolOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSymbolPropertyParams
             )
 
@@ -926,10 +1207,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getSymbolOfType(snapshot: int, project: string, objectId: int) =
-            this.getSymbolOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getSymbolOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -937,10 +1220,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTargetOfType(snapshot: int, project: string, objectId: int) =
-            this.getTargetOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTargetOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -948,21 +1233,26 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getFreshTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getFreshTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getFreshTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getRegularTypeOfType(parameters: GetTypePropertyParams) = Api.getRegularTypeOfType this parameters
+        member this.getRegularTypeOfType(parameters: GetTypePropertyParams) =
+            Api.getRegularTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getRegularTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getRegularTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getRegularTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -970,65 +1260,82 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTypesOfType(snapshot: int, project: string, objectId: int) =
-            this.getTypesOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTypesOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getTypeParametersOfType(parameters: GetTypePropertyParams) = Api.getTypeParametersOfType this parameters
+        member this.getTypeParametersOfType(parameters: GetTypePropertyParams) =
+            Api.getTypeParametersOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeParametersOfType(snapshot: int, project: string, objectId: int) =
-            this.getTypeParametersOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTypeParametersOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getOuterTypeParametersOfType(parameters: GetTypePropertyParams) = Api.getOuterTypeParametersOfType this parameters
+        member this.getOuterTypeParametersOfType(parameters: GetTypePropertyParams) =
+            Api.getOuterTypeParametersOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getOuterTypeParametersOfType(snapshot: int, project: string, objectId: int) =
-            this.getOuterTypeParametersOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getOuterTypeParametersOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getLocalTypeParametersOfType(parameters: GetTypePropertyParams) = Api.getLocalTypeParametersOfType this parameters
+        member this.getLocalTypeParametersOfType(parameters: GetTypePropertyParams) =
+            Api.getLocalTypeParametersOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getLocalTypeParametersOfType(snapshot: int, project: string, objectId: int) =
-            this.getLocalTypeParametersOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getLocalTypeParametersOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getAliasTypeArgumentsOfType(parameters: GetTypePropertyParams) = Api.getAliasTypeArgumentsOfType this parameters
+        member this.getAliasTypeArgumentsOfType(parameters: GetTypePropertyParams) =
+            Api.getAliasTypeArgumentsOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getAliasTypeArgumentsOfType(snapshot: int, project: string, objectId: int) =
-            this.getAliasTypeArgumentsOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getAliasTypeArgumentsOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getAliasSymbolOfType(parameters: GetTypePropertyParams) = Api.getAliasSymbolOfType this parameters
+        member this.getAliasSymbolOfType(parameters: GetTypePropertyParams) =
+            Api.getAliasSymbolOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getAliasSymbolOfType(snapshot: int, project: string, objectId: int) =
-            this.getAliasSymbolOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getAliasSymbolOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1036,10 +1343,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getObjectTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getObjectTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getObjectTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1047,10 +1356,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getIndexTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getIndexTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getIndexTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1058,21 +1369,26 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getCheckTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getCheckTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getCheckTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getExtendsTypeOfType(parameters: GetTypePropertyParams) = Api.getExtendsTypeOfType this parameters
+        member this.getExtendsTypeOfType(parameters: GetTypePropertyParams) =
+            Api.getExtendsTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getExtendsTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getExtendsTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getExtendsTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1080,10 +1396,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getBaseTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getBaseTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getBaseTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1091,54 +1409,68 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getConstraintOfType(snapshot: int, project: string, objectId: int) =
-            this.getConstraintOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getConstraintOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getTypeParametersOfSignature(parameters: GetSignaturePropertyParams) = Api.getTypeParametersOfSignature this parameters
+        member this.getTypeParametersOfSignature(parameters: GetSignaturePropertyParams) =
+            Api.getTypeParametersOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeParametersOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getTypeParametersOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTypeParametersOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getParametersOfSignature(parameters: GetSignaturePropertyParams) = Api.getParametersOfSignature this parameters
+        member this.getParametersOfSignature(parameters: GetSignaturePropertyParams) =
+            Api.getParametersOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getParametersOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getParametersOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getParametersOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getThisParameterOfSignature(parameters: GetSignaturePropertyParams) = Api.getThisParameterOfSignature this parameters
+        member this.getThisParameterOfSignature(parameters: GetSignaturePropertyParams) =
+            Api.getThisParameterOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getThisParameterOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getThisParameterOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getThisParameterOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getTargetOfSignature(parameters: GetSignaturePropertyParams) = Api.getTargetOfSignature this parameters
+        member this.getTargetOfSignature(parameters: GetSignaturePropertyParams) =
+            Api.getTargetOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTargetOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getTargetOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTargetOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
@@ -1146,21 +1478,26 @@ module TscChannelExtensions =
 
         /// The fields of GetContextualTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getContextualType(snapshot: int, project: string, location: string) =
-            this.getContextualType(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getContextualType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetContextualTypeParams
             )
 
-        member this.getBaseTypeOfLiteralType(parameters: GetBaseTypeOfLiteralTypeParams) = Api.getBaseTypeOfLiteralType this parameters
+        member this.getBaseTypeOfLiteralType(parameters: GetBaseTypeOfLiteralTypeParams) =
+            Api.getBaseTypeOfLiteralType this parameters
 
         /// The fields of GetBaseTypeOfLiteralTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBaseTypeOfLiteralType(snapshot: int, project: string, ``type``: int) =
-            this.getBaseTypeOfLiteralType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getBaseTypeOfLiteralType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : GetBaseTypeOfLiteralTypeParams
             )
 
@@ -1168,10 +1505,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getNonNullableType(snapshot: int, project: string, objectId: int) =
-            this.getNonNullableType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getNonNullableType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1179,10 +1518,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypeFromTypeNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeFromTypeNode(snapshot: int, project: string, location: string) =
-            this.getTypeFromTypeNode(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getTypeFromTypeNode (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetTypeFromTypeNodeParams
             )
 
@@ -1190,10 +1531,12 @@ module TscChannelExtensions =
 
         /// The fields of GetWidenedTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getWidenedType(snapshot: int, project: string, ``type``: int) =
-            this.getWidenedType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getWidenedType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : GetWidenedTypeParams
             )
 
@@ -1201,23 +1544,28 @@ module TscChannelExtensions =
 
         /// The fields of GetParameterTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getParameterType(snapshot: int, project: string, signature: int, index: int) =
-            this.getParameterType(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature
-                  Index = index }
+            this.getParameterType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                    Index = index
+                }
                 : GetParameterTypeParams
             )
 
-        member this.getTypeParameterAtPosition(parameters: GetParameterTypeParams) = Api.getTypeParameterAtPosition this parameters
+        member this.getTypeParameterAtPosition(parameters: GetParameterTypeParams) =
+            Api.getTypeParameterAtPosition this parameters
 
         /// The fields of GetParameterTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeParameterAtPosition(snapshot: int, project: string, signature: int, index: int) =
-            this.getTypeParameterAtPosition(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature
-                  Index = index }
+            this.getTypeParameterAtPosition (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                    Index = index
+                }
                 : GetParameterTypeParams
             )
 
@@ -1225,10 +1573,12 @@ module TscChannelExtensions =
 
         /// The fields of IsArrayLikeTypeParams, spread. Builds the record and calls the overload above.
         member inline this.isArrayLikeType(snapshot: int, project: string, ``type``: int) =
-            this.isArrayLikeType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.isArrayLikeType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : IsArrayLikeTypeParams
             )
 
@@ -1236,74 +1586,101 @@ module TscChannelExtensions =
 
         /// The fields of IsTypeAssignableToParams, spread. Builds the record and calls the overload above.
         member inline this.isTypeAssignableTo(snapshot: int, project: string, source: int, target: int) =
-            this.isTypeAssignableTo(
-                { Snapshot = snapshot
-                  Project = project
-                  Source = source
-                  Target = target }
+            this.isTypeAssignableTo (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Source = source
+                    Target = target
+                }
                 : IsTypeAssignableToParams
             )
 
-        member this.getShorthandAssignmentValueSymbol(parameters: GetTypeAtLocationParams) = Api.getShorthandAssignmentValueSymbol this parameters
+        member this.getShorthandAssignmentValueSymbol(parameters: GetTypeAtLocationParams) =
+            Api.getShorthandAssignmentValueSymbol this parameters
 
         /// The fields of GetTypeAtLocationParams, spread. Builds the record and calls the overload above.
         member inline this.getShorthandAssignmentValueSymbol(snapshot: int, project: string, location: string) =
-            this.getShorthandAssignmentValueSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getShorthandAssignmentValueSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetTypeAtLocationParams
             )
 
-        member this.getTypeOfSymbolAtLocation(parameters: GetTypeOfSymbolAtLocationParams) = Api.getTypeOfSymbolAtLocation this parameters
+        member this.getTypeOfSymbolAtLocation(parameters: GetTypeOfSymbolAtLocationParams) =
+            Api.getTypeOfSymbolAtLocation this parameters
 
         /// The fields of GetTypeOfSymbolAtLocationParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeOfSymbolAtLocation(snapshot: int, project: string, symbol: int, location: string) =
-            this.getTypeOfSymbolAtLocation(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol
-                  Location = location }
+            this.getTypeOfSymbolAtLocation (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                    Location = location
+                }
                 : GetTypeOfSymbolAtLocationParams
             )
 
         member this.typeToTypeNode(parameters: TypeToTypeNodeParams) = Api.typeToTypeNode this parameters
 
         /// The fields of TypeToTypeNodeParams, spread. Builds the record and calls the overload above.
-        member inline this.typeToTypeNode(snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int) =
-            this.typeToTypeNode(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type``
-                  Location = location
-                  Flags = flags }
+        member inline this.typeToTypeNode
+            (snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int)
+            =
+            this.typeToTypeNode (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                    Location = location
+                    Flags = flags
+                }
                 : TypeToTypeNodeParams
             )
 
-        member this.signatureToSignatureDeclaration(parameters: SignatureToSignatureDeclarationParams) = Api.signatureToSignatureDeclaration this parameters
+        member this.signatureToSignatureDeclaration(parameters: SignatureToSignatureDeclarationParams) =
+            Api.signatureToSignatureDeclaration this parameters
 
         /// The fields of SignatureToSignatureDeclarationParams, spread. Builds the record and calls the overload above.
-        member inline this.signatureToSignatureDeclaration(snapshot: int, project: string, signature: int, kind: SyntaxKind, [<Struct>] ?location: string, [<Struct>] ?flags: NodeBuilderFlags) =
-            this.signatureToSignatureDeclaration(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature
-                  Kind = kind
-                  Location = location
-                  Flags = flags }
+        member inline this.signatureToSignatureDeclaration
+            (
+                snapshot: int,
+                project: string,
+                signature: int,
+                kind: SyntaxKind,
+                [<Struct>] ?location: string,
+                [<Struct>] ?flags: NodeBuilderFlags
+            ) =
+            this.signatureToSignatureDeclaration (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                    Kind = kind
+                    Location = location
+                    Flags = flags
+                }
                 : SignatureToSignatureDeclarationParams
             )
 
         member this.typeToString(parameters: TypeToTypeNodeParams) = Api.typeToString this parameters
 
         /// The fields of TypeToTypeNodeParams, spread. Builds the record and calls the overload above.
-        member inline this.typeToString(snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int) =
-            this.typeToString(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type``
-                  Location = location
-                  Flags = flags }
+        member inline this.typeToString
+            (snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int)
+            =
+            this.typeToString (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                    Location = location
+                    Flags = flags
+                }
                 : TypeToTypeNodeParams
             )
 
@@ -1311,43 +1688,54 @@ module TscChannelExtensions =
 
         /// The fields of GetContextualTypeParams, spread. Builds the record and calls the overload above.
         member inline this.isContextSensitive(snapshot: int, project: string, location: string) =
-            this.isContextSensitive(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.isContextSensitive (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetContextualTypeParams
             )
 
-        member this.getReturnTypeOfSignature(parameters: GetSignaturePropertyParams) = Api.getReturnTypeOfSignature this parameters
+        member this.getReturnTypeOfSignature(parameters: GetSignaturePropertyParams) =
+            Api.getReturnTypeOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getReturnTypeOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getReturnTypeOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getReturnTypeOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getRestTypeOfSignature(parameters: CheckerSignatureParams) = Api.getRestTypeOfSignature this parameters
+        member this.getRestTypeOfSignature(parameters: CheckerSignatureParams) =
+            Api.getRestTypeOfSignature this parameters
 
         /// The fields of CheckerSignatureParams, spread. Builds the record and calls the overload above.
         member inline this.getRestTypeOfSignature(snapshot: int, project: string, signature: int) =
-            this.getRestTypeOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature }
+            this.getRestTypeOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                }
                 : CheckerSignatureParams
             )
 
-        member this.getTypePredicateOfSignature(parameters: CheckerSignatureParams) = Api.getTypePredicateOfSignature this parameters
+        member this.getTypePredicateOfSignature(parameters: CheckerSignatureParams) =
+            Api.getTypePredicateOfSignature this parameters
 
         /// The fields of CheckerSignatureParams, spread. Builds the record and calls the overload above.
         member inline this.getTypePredicateOfSignature(snapshot: int, project: string, signature: int) =
-            this.getTypePredicateOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature }
+            this.getTypePredicateOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                }
                 : CheckerSignatureParams
             )
 
@@ -1355,10 +1743,12 @@ module TscChannelExtensions =
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBaseTypes(snapshot: int, project: string, ``type``: int) =
-            this.getBaseTypes(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getBaseTypes (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
@@ -1366,21 +1756,26 @@ module TscChannelExtensions =
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getPropertiesOfType(snapshot: int, project: string, ``type``: int) =
-            this.getPropertiesOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getPropertiesOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
-        member this.getApparentPropertiesOfType(parameters: GetTypePropertyParams) = Api.getApparentPropertiesOfType this parameters
+        member this.getApparentPropertiesOfType(parameters: GetTypePropertyParams) =
+            Api.getApparentPropertiesOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getApparentPropertiesOfType(snapshot: int, project: string, objectId: int) =
-            this.getApparentPropertiesOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getApparentPropertiesOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1388,10 +1783,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getApparentType(snapshot: int, project: string, objectId: int) =
-            this.getApparentType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getApparentType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1399,10 +1796,12 @@ module TscChannelExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getReducedType(snapshot: int, project: string, objectId: int) =
-            this.getReducedType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getReducedType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1410,11 +1809,13 @@ module TscChannelExtensions =
 
         /// The fields of GetPropertyOfTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getPropertyOfType(snapshot: int, project: string, ``type``: int, name: string) =
-            this.getPropertyOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type``
-                  Name = name }
+            this.getPropertyOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                    Name = name
+                }
                 : GetPropertyOfTypeParams
             )
 
@@ -1422,43 +1823,54 @@ module TscChannelExtensions =
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getIndexInfosOfType(snapshot: int, project: string, ``type``: int) =
-            this.getIndexInfosOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getIndexInfosOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
-        member this.getConstraintOfTypeParameter(parameters: GetTypePropertyParams) = Api.getConstraintOfTypeParameter this parameters
+        member this.getConstraintOfTypeParameter(parameters: GetTypePropertyParams) =
+            Api.getConstraintOfTypeParameter this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getConstraintOfTypeParameter(snapshot: int, project: string, objectId: int) =
-            this.getConstraintOfTypeParameter(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getConstraintOfTypeParameter (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getDefaultFromTypeParameter(parameters: GetTypePropertyParams) = Api.getDefaultFromTypeParameter this parameters
+        member this.getDefaultFromTypeParameter(parameters: GetTypePropertyParams) =
+            Api.getDefaultFromTypeParameter this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getDefaultFromTypeParameter(snapshot: int, project: string, objectId: int) =
-            this.getDefaultFromTypeParameter(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getDefaultFromTypeParameter (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getBaseConstraintOfType(parameters: CheckerTypeParams) = Api.getBaseConstraintOfType this parameters
+        member this.getBaseConstraintOfType(parameters: CheckerTypeParams) =
+            Api.getBaseConstraintOfType this parameters
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBaseConstraintOfType(snapshot: int, project: string, ``type``: int) =
-            this.getBaseConstraintOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getBaseConstraintOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
@@ -1466,44 +1878,56 @@ module TscChannelExtensions =
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeArguments(snapshot: int, project: string, ``type``: int) =
-            this.getTypeArguments(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getTypeArguments (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
         member this.getImportAdderEdits(parameters: GetImportAdderEditsParams) = Api.getImportAdderEdits this parameters
 
         /// The fields of GetImportAdderEditsParams, spread. Builds the record and calls the overload above.
-        member inline this.getImportAdderEdits(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?actions: ImportAdderAction[]) =
-            this.getImportAdderEdits(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Actions = actions }
+        member inline this.getImportAdderEdits
+            (snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?actions: ImportAdderAction[])
+            =
+            this.getImportAdderEdits (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Actions = actions
+                }
                 : GetImportAdderEditsParams
             )
 
-        member this.getTrueTypeOfConditionalType(parameters: GetTypePropertyParams) = Api.getTrueTypeOfConditionalType this parameters
+        member this.getTrueTypeOfConditionalType(parameters: GetTypePropertyParams) =
+            Api.getTrueTypeOfConditionalType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTrueTypeOfConditionalType(snapshot: int, project: string, objectId: int) =
-            this.getTrueTypeOfConditionalType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTrueTypeOfConditionalType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getFalseTypeOfConditionalType(parameters: GetTypePropertyParams) = Api.getFalseTypeOfConditionalType this parameters
+        member this.getFalseTypeOfConditionalType(parameters: GetTypePropertyParams) =
+            Api.getFalseTypeOfConditionalType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getFalseTypeOfConditionalType(snapshot: int, project: string, objectId: int) =
-            this.getFalseTypeOfConditionalType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getFalseTypeOfConditionalType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1511,32 +1935,40 @@ module TscChannelExtensions =
 
         /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getConstantValue(snapshot: int, project: string, location: string) =
-            this.getConstantValue(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getConstantValue (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : CheckerNodeParams
             )
 
-        member this.getSignatureFromDeclaration(parameters: CheckerNodeParams) = Api.getSignatureFromDeclaration this parameters
+        member this.getSignatureFromDeclaration(parameters: CheckerNodeParams) =
+            Api.getSignatureFromDeclaration this parameters
 
         /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getSignatureFromDeclaration(snapshot: int, project: string, location: string) =
-            this.getSignatureFromDeclaration(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getSignatureFromDeclaration (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : CheckerNodeParams
             )
 
-        member this.getExportSpecifierLocalTargetSymbol(parameters: CheckerNodeParams) = Api.getExportSpecifierLocalTargetSymbol this parameters
+        member this.getExportSpecifierLocalTargetSymbol(parameters: CheckerNodeParams) =
+            Api.getExportSpecifierLocalTargetSymbol this parameters
 
         /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getExportSpecifierLocalTargetSymbol(snapshot: int, project: string, location: string) =
-            this.getExportSpecifierLocalTargetSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getExportSpecifierLocalTargetSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : CheckerNodeParams
             )
 
@@ -1544,21 +1976,26 @@ module TscChannelExtensions =
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getAliasedSymbol(snapshot: int, project: string, symbol: int) =
-            this.getAliasedSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getAliasedSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getImmediateAliasedSymbol(parameters: CheckerSymbolParams) = Api.getImmediateAliasedSymbol this parameters
+        member this.getImmediateAliasedSymbol(parameters: CheckerSymbolParams) =
+            Api.getImmediateAliasedSymbol this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getImmediateAliasedSymbol(snapshot: int, project: string, symbol: int) =
-            this.getImmediateAliasedSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getImmediateAliasedSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
@@ -1566,21 +2003,26 @@ module TscChannelExtensions =
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getTargetSymbol(snapshot: int, project: string, symbol: int) =
-            this.getTargetSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getTargetSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getFullyQualifiedName(parameters: CheckerSymbolParams) = Api.getFullyQualifiedName this parameters
+        member this.getFullyQualifiedName(parameters: CheckerSymbolParams) =
+            Api.getFullyQualifiedName this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getFullyQualifiedName(snapshot: int, project: string, symbol: int) =
-            this.getFullyQualifiedName(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getFullyQualifiedName (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
@@ -1588,22 +2030,27 @@ module TscChannelExtensions =
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getExportsOfModule(snapshot: int, project: string, symbol: int) =
-            this.getExportsOfModule(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getExportsOfModule (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getMemberInModuleExports(parameters: GetMemberInModuleExportsParams) = Api.getMemberInModuleExports this parameters
+        member this.getMemberInModuleExports(parameters: GetMemberInModuleExportsParams) =
+            Api.getMemberInModuleExports this parameters
 
         /// The fields of GetMemberInModuleExportsParams, spread. Builds the record and calls the overload above.
         member inline this.getMemberInModuleExports(snapshot: int, project: string, symbol: int, name: string) =
-            this.getMemberInModuleExports(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol
-                  Name = name }
+            this.getMemberInModuleExports (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                    Name = name
+                }
                 : GetMemberInModuleExportsParams
             )
 
@@ -1611,21 +2058,26 @@ module TscChannelExtensions =
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getJsDocTags(snapshot: int, project: string, symbol: int) =
-            this.getJsDocTags(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getJsDocTags (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getDocumentationComment(parameters: CheckerSymbolParams) = Api.getDocumentationComment this parameters
+        member this.getDocumentationComment(parameters: CheckerSymbolParams) =
+            Api.getDocumentationComment this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getDocumentationComment(snapshot: int, project: string, symbol: int) =
-            this.getDocumentationComment(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getDocumentationComment (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
@@ -1633,10 +2085,12 @@ module TscChannelExtensions =
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.isArrayType(snapshot: int, project: string, ``type``: int) =
-            this.isArrayType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.isArrayType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
@@ -1644,34 +2098,44 @@ module TscChannelExtensions =
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.isReadonlySymbol(snapshot: int, project: string, symbol: int) =
-            this.isReadonlySymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.isReadonlySymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getReferencesToSymbolInFile(parameters: GetReferencesToSymbolInFileParams) = Api.getReferencesToSymbolInFile this parameters
+        member this.getReferencesToSymbolInFile(parameters: GetReferencesToSymbolInFileParams) =
+            Api.getReferencesToSymbolInFile this parameters
 
         /// The fields of GetReferencesToSymbolInFileParams, spread. Builds the record and calls the overload above.
-        member inline this.getReferencesToSymbolInFile(snapshot: int, project: string, file: DocumentIdentifier, symbol: int) =
-            this.getReferencesToSymbolInFile(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Symbol = symbol }
+        member inline this.getReferencesToSymbolInFile
+            (snapshot: int, project: string, file: DocumentIdentifier, symbol: int)
+            =
+            this.getReferencesToSymbolInFile (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Symbol = symbol
+                }
                 : GetReferencesToSymbolInFileParams
             )
 
-        member this.getReferencedSymbolsForNode(parameters: GetReferencedSymbolsForNodeParams) = Api.getReferencedSymbolsForNode this parameters
+        member this.getReferencedSymbolsForNode(parameters: GetReferencedSymbolsForNodeParams) =
+            Api.getReferencedSymbolsForNode this parameters
 
         /// The fields of GetReferencedSymbolsForNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getReferencedSymbolsForNode(snapshot: int, project: string, node: string, position: int) =
-            this.getReferencedSymbolsForNode(
-                { Snapshot = snapshot
-                  Project = project
-                  Node = node
-                  Position = position }
+            this.getReferencedSymbolsForNode (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Node = node
+                    Position = position
+                }
                 : GetReferencedSymbolsForNodeParams
             )
 
@@ -1679,35 +2143,53 @@ module TscChannelExtensions =
 
         /// The fields of GetSignatureUsagesParams, spread. Builds the record and calls the overload above.
         member inline this.getSignatureUsages(snapshot: int, project: string, signatureDecl: string) =
-            this.getSignatureUsages(
-                { Snapshot = snapshot
-                  Project = project
-                  SignatureDecl = signatureDecl }
+            this.getSignatureUsages (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    SignatureDecl = signatureDecl
+                }
                 : GetSignatureUsagesParams
             )
 
-        member this.getCompletionsAtPosition(parameters: GetCompletionsAtPositionParams) = Api.getCompletionsAtPosition this parameters
+        member this.getCompletionsAtPosition(parameters: GetCompletionsAtPositionParams) =
+            Api.getCompletionsAtPosition this parameters
 
         /// The fields of GetCompletionsAtPositionParams, spread. Builds the record and calls the overload above.
-        member inline this.getCompletionsAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int, [<Struct>] ?triggerCharacter: string, [<Struct>] ?includeSymbol: bool) =
-            this.getCompletionsAtPosition(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Position = position
-                  TriggerCharacter = triggerCharacter
-                  IncludeSymbol = includeSymbol }
+        member inline this.getCompletionsAtPosition
+            (
+                snapshot: int,
+                project: string,
+                file: DocumentIdentifier,
+                position: int,
+                [<Struct>] ?triggerCharacter: string,
+                [<Struct>] ?includeSymbol: bool
+            ) =
+            this.getCompletionsAtPosition (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Position = position
+                    TriggerCharacter = triggerCharacter
+                    IncludeSymbol = includeSymbol
+                }
                 : GetCompletionsAtPositionParams
             )
 
-        member this.getSyntacticDiagnostics(parameters: GetDiagnosticsParams) = Api.getSyntacticDiagnostics this parameters
+        member this.getSyntacticDiagnostics(parameters: GetDiagnosticsParams) =
+            Api.getSyntacticDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
-        member inline this.getSyntacticDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getSyntacticDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getSyntacticDiagnostics
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getSyntacticDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
@@ -1715,98 +2197,137 @@ module TscChannelExtensions =
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getBindDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getBindDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+            this.getBindDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getSemanticDiagnostics(parameters: GetDiagnosticsParams) = Api.getSemanticDiagnostics this parameters
+        member this.getSemanticDiagnostics(parameters: GetDiagnosticsParams) =
+            Api.getSemanticDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
-        member inline this.getSemanticDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getSemanticDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getSemanticDiagnostics
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getSemanticDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getSuggestionDiagnostics(parameters: GetDiagnosticsParams) = Api.getSuggestionDiagnostics this parameters
+        member this.getSuggestionDiagnostics(parameters: GetDiagnosticsParams) =
+            Api.getSuggestionDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
-        member inline this.getSuggestionDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getSuggestionDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getSuggestionDiagnostics
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getSuggestionDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getDeclarationDiagnostics(parameters: GetDiagnosticsParams) = Api.getDeclarationDiagnostics this parameters
+        member this.getDeclarationDiagnostics(parameters: GetDiagnosticsParams) =
+            Api.getDeclarationDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
-        member inline this.getDeclarationDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getDeclarationDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getDeclarationDiagnostics
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getDeclarationDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getProgramDiagnostics(parameters: GetProjectDiagnosticsParams) = Api.getProgramDiagnostics this parameters
+        member this.getProgramDiagnostics(parameters: GetProjectDiagnosticsParams) =
+            Api.getProgramDiagnostics this parameters
 
         /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getProgramDiagnostics(snapshot: int, project: string) =
-            this.getProgramDiagnostics(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getProgramDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetProjectDiagnosticsParams
             )
 
-        member this.getGlobalDiagnostics(parameters: GetProjectDiagnosticsParams) = Api.getGlobalDiagnostics this parameters
+        member this.getGlobalDiagnostics(parameters: GetProjectDiagnosticsParams) =
+            Api.getGlobalDiagnostics this parameters
 
         /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getGlobalDiagnostics(snapshot: int, project: string) =
-            this.getGlobalDiagnostics(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getGlobalDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetProjectDiagnosticsParams
             )
 
-        member this.getConfigFileParsingDiagnostics(parameters: GetProjectDiagnosticsParams) = Api.getConfigFileParsingDiagnostics this parameters
+        member this.getConfigFileParsingDiagnostics(parameters: GetProjectDiagnosticsParams) =
+            Api.getConfigFileParsingDiagnostics this parameters
 
         /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getConfigFileParsingDiagnostics(snapshot: int, project: string) =
-            this.getConfigFileParsingDiagnostics(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getConfigFileParsingDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetProjectDiagnosticsParams
             )
 
         member this.printNode(parameters: PrintNodeParams) = Api.printNode this parameters
 
         /// The fields of PrintNodeParams, spread. Builds the record and calls the overload above.
-        member inline this.printNode(data: string, [<Struct>] ?preserveSourceNewlines: bool, [<Struct>] ?neverAsciiEscape: bool, [<Struct>] ?terminateUnterminatedLiterals: bool) =
-            this.printNode(
-                { Data = data
-                  PreserveSourceNewlines = preserveSourceNewlines
-                  NeverAsciiEscape = neverAsciiEscape
-                  TerminateUnterminatedLiterals = terminateUnterminatedLiterals }
+        member inline this.printNode
+            (
+                data: string,
+                [<Struct>] ?preserveSourceNewlines: bool,
+                [<Struct>] ?neverAsciiEscape: bool,
+                [<Struct>] ?terminateUnterminatedLiterals: bool
+            ) =
+            this.printNode (
+                {
+                    Data = data
+                    PreserveSourceNewlines = preserveSourceNewlines
+                    NeverAsciiEscape = neverAsciiEscape
+                    TerminateUnterminatedLiterals = terminateUnterminatedLiterals
+                }
                 : PrintNodeParams
             )
 
-        member this.formatNodeForInsertion(parameters: FormatNodeForInsertionParams) = Api.formatNodeForInsertion this parameters
+        member this.formatNodeForInsertion(parameters: FormatNodeForInsertionParams) =
+            Api.formatNodeForInsertion this parameters
 
         /// The fields of FormatNodeForInsertionParams, spread. Builds the record and calls the overload above.
-        member inline this.formatNodeForInsertion(snapshot: int, project: string, file: DocumentIdentifier, position: int, data: string) =
-            this.formatNodeForInsertion(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Position = position
-                  Data = data }
+        member inline this.formatNodeForInsertion
+            (snapshot: int, project: string, file: DocumentIdentifier, position: int, data: string)
+            =
+            this.formatNodeForInsertion (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Position = position
+                    Data = data
+                }
                 : FormatNodeForInsertionParams
             )
 
@@ -1814,10 +2335,12 @@ module TscChannelExtensions =
 
         /// The fields of EmitParams, spread. Builds the record and calls the overload above.
         member inline this.emit(snapshot: int, project: string, [<Struct>] ?emitOnly: int) =
-            this.emit(
-                { Snapshot = snapshot
-                  Project = project
-                  EmitOnly = emitOnly }
+            this.emit (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    EmitOnly = emitOnly
+                }
                 : EmitParams
             )
 
@@ -1825,10 +2348,12 @@ module TscChannelExtensions =
 
         /// The fields of EmitParams, spread. Builds the record and calls the overload above.
         member inline this.emitToString(snapshot: int, project: string, [<Struct>] ?emitOnly: int) =
-            this.emitToString(
-                { Snapshot = snapshot
-                  Project = project
-                  EmitOnly = emitOnly }
+            this.emitToString (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    EmitOnly = emitOnly
+                }
                 : EmitParams
             )
 
@@ -1836,10 +2361,12 @@ module TscChannelExtensions =
 
         /// The fields of SelectedFilesEmitParams, spread. Builds the record and calls the overload above.
         member inline this.getJavaScriptEmit(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getJavaScriptEmit(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+            this.getJavaScriptEmit (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : SelectedFilesEmitParams
             )
 
@@ -1847,10 +2374,12 @@ module TscChannelExtensions =
 
         /// The fields of SelectedFilesEmitParams, spread. Builds the record and calls the overload above.
         member inline this.getDeclarationEmit(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getDeclarationEmit(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+            this.getDeclarationEmit (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : SelectedFilesEmitParams
             )
 
@@ -1858,9 +2387,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getAnyType(snapshot: int, project: string) =
-            this.getAnyType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getAnyType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1868,9 +2399,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getStringType(snapshot: int, project: string) =
-            this.getStringType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getStringType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1878,9 +2411,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getNumberType(snapshot: int, project: string) =
-            this.getNumberType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getNumberType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1888,9 +2423,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBooleanType(snapshot: int, project: string) =
-            this.getBooleanType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getBooleanType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1898,9 +2435,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getVoidType(snapshot: int, project: string) =
-            this.getVoidType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getVoidType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1908,9 +2447,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getUndefinedType(snapshot: int, project: string) =
-            this.getUndefinedType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getUndefinedType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1918,9 +2459,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getNullType(snapshot: int, project: string) =
-            this.getNullType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getNullType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1928,9 +2471,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getNeverType(snapshot: int, project: string) =
-            this.getNeverType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getNeverType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1938,9 +2483,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getUnknownType(snapshot: int, project: string) =
-            this.getUnknownType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getUnknownType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1948,9 +2495,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBigIntType(snapshot: int, project: string) =
-            this.getBigIntType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getBigIntType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1958,9 +2507,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getESSymbolType(snapshot: int, project: string) =
-            this.getESSymbolType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getESSymbolType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1968,9 +2519,11 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getNonPrimitiveType(snapshot: int, project: string) =
-            this.getNonPrimitiveType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getNonPrimitiveType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1978,19 +2531,24 @@ module TscChannelExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getWellKnownSymbols(snapshot: int, project: string) =
-            this.getWellKnownSymbols(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getWellKnownSymbols (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
-        member this.getWellKnownSignatures(parameters: GetIntrinsicTypeParams) = Api.getWellKnownSignatures this parameters
+        member this.getWellKnownSignatures(parameters: GetIntrinsicTypeParams) =
+            Api.getWellKnownSignatures this parameters
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getWellKnownSignatures(snapshot: int, project: string) =
-            this.getWellKnownSignatures(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getWellKnownSignatures (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1998,10 +2556,7 @@ module TscChannelExtensions =
 
         /// The fields of ProfileParams, spread. Builds the record and calls the overload above.
         member inline this.startCPUProfile(dir: string) =
-            this.startCPUProfile(
-                { Dir = dir }
-                : ProfileParams
-            )
+            this.startCPUProfile ({ Dir = dir }: ProfileParams)
 
         member this.stopCPUProfile() = Api.stopCPUProfile this
 
@@ -2009,8 +2564,4 @@ module TscChannelExtensions =
 
         /// The fields of ProfileParams, spread. Builds the record and calls the overload above.
         member inline this.saveHeapProfile(dir: string) =
-            this.saveHeapProfile(
-                { Dir = dir }
-                : ProfileParams
-            )
-
+            this.saveHeapProfile ({ Dir = dir }: ProfileParams)

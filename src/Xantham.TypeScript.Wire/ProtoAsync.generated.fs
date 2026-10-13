@@ -30,8 +30,14 @@ module AsyncApi =
     let updateSnapshot (mailbox: TscMailbox) (parameters: UpdateSnapshotParams) : Async<UpdateSnapshotResponse> =
         mailbox.Request<UpdateSnapshotParams, UpdateSnapshotResponse>(Method.UpdateSnapshot, parameters)
 
-    let updateTemporarySnapshot (mailbox: TscMailbox) (parameters: UpdateTemporarySnapshotParams) : Async<UpdateSnapshotResponse> =
-        mailbox.Request<UpdateTemporarySnapshotParams, UpdateSnapshotResponse>(Method.UpdateTemporarySnapshot, parameters)
+    let updateTemporarySnapshot
+        (mailbox: TscMailbox)
+        (parameters: UpdateTemporarySnapshotParams)
+        : Async<UpdateSnapshotResponse> =
+        mailbox.Request<UpdateTemporarySnapshotParams, UpdateSnapshotResponse>(
+            Method.UpdateTemporarySnapshot,
+            parameters
+        )
 
     let createProgram (mailbox: TscMailbox) (parameters: CreateProgramParams) : Async<CreateProgramResponse> =
         mailbox.Request<CreateProgramParams, CreateProgramResponse>(Method.CreateProgram, parameters)
@@ -42,8 +48,14 @@ module AsyncApi =
     let readConfigFile (mailbox: TscMailbox) (parameters: ReadConfigFileParams) : Async<ReadConfigFileResponse> =
         mailbox.Request<ReadConfigFileParams, ReadConfigFileResponse>(Method.ReadConfigFile, parameters)
 
-    let parseJsonConfigFileContent (mailbox: TscMailbox) (parameters: ParseJsonConfigFileContentParams) : Async<ConfigFileResponse> =
-        mailbox.Request<ParseJsonConfigFileContentParams, ConfigFileResponse>(Method.ParseJsonConfigFileContent, parameters)
+    let parseJsonConfigFileContent
+        (mailbox: TscMailbox)
+        (parameters: ParseJsonConfigFileContentParams)
+        : Async<ConfigFileResponse> =
+        mailbox.Request<ParseJsonConfigFileContentParams, ConfigFileResponse>(
+            Method.ParseJsonConfigFileContent,
+            parameters
+        )
 
     let parseConfigFile (mailbox: TscMailbox) (parameters: ParseConfigFileParams) : Async<ConfigFileResponse> =
         mailbox.Request<ParseConfigFileParams, ConfigFileResponse>(Method.ParseConfigFile, parameters)
@@ -51,34 +63,67 @@ module AsyncApi =
     let transpileModule (mailbox: TscMailbox) (parameters: TranspileParams) : Async<TranspileOutputResponse> =
         mailbox.Request<TranspileParams, TranspileOutputResponse>(Method.TranspileModule, parameters)
 
-    let transpileModuleFromFile (mailbox: TscMailbox) (parameters: TranspileFromFileParams) : Async<TranspileOutputResponse> =
+    let transpileModuleFromFile
+        (mailbox: TscMailbox)
+        (parameters: TranspileFromFileParams)
+        : Async<TranspileOutputResponse> =
         mailbox.Request<TranspileFromFileParams, TranspileOutputResponse>(Method.TranspileModuleFromFile, parameters)
 
     let transpileDeclaration (mailbox: TscMailbox) (parameters: TranspileParams) : Async<TranspileOutputResponse> =
         mailbox.Request<TranspileParams, TranspileOutputResponse>(Method.TranspileDeclaration, parameters)
 
-    let transpileDeclarationFromFile (mailbox: TscMailbox) (parameters: TranspileFromFileParams) : Async<TranspileOutputResponse> =
-        mailbox.Request<TranspileFromFileParams, TranspileOutputResponse>(Method.TranspileDeclarationFromFile, parameters)
+    let transpileDeclarationFromFile
+        (mailbox: TscMailbox)
+        (parameters: TranspileFromFileParams)
+        : Async<TranspileOutputResponse> =
+        mailbox.Request<TranspileFromFileParams, TranspileOutputResponse>(
+            Method.TranspileDeclarationFromFile,
+            parameters
+        )
 
-    let getDefaultProjectForFile (mailbox: TscMailbox) (parameters: GetDefaultProjectForFileParams) : Async<ProjectResponse voption> =
-        mailbox.RequestOption<GetDefaultProjectForFileParams, ProjectResponse>(Method.GetDefaultProjectForFile, parameters)
+    let getDefaultProjectForFile
+        (mailbox: TscMailbox)
+        (parameters: GetDefaultProjectForFileParams)
+        : Async<ProjectResponse voption> =
+        mailbox.RequestOption<GetDefaultProjectForFileParams, ProjectResponse>(
+            Method.GetDefaultProjectForFile,
+            parameters
+        )
 
-    let getSymbolAtPosition (mailbox: TscMailbox) (parameters: GetSymbolAtPositionParams) : Async<SymbolResponse voption> =
+    let getSymbolAtPosition
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolAtPositionParams)
+        : Async<SymbolResponse voption> =
         mailbox.RequestOption<GetSymbolAtPositionParams, SymbolResponse>(Method.GetSymbolAtPosition, parameters)
 
-    let getSymbolsAtPositions (mailbox: TscMailbox) (parameters: GetSymbolsAtPositionsParams) : Async<SymbolResponse[]> =
+    let getSymbolsAtPositions
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolsAtPositionsParams)
+        : Async<SymbolResponse[]> =
         mailbox.Request<GetSymbolsAtPositionsParams, SymbolResponse[]>(Method.GetSymbolsAtPositions, parameters)
 
-    let getSymbolAtLocation (mailbox: TscMailbox) (parameters: GetSymbolAtLocationParams) : Async<SymbolResponse voption> =
+    let getSymbolAtLocation
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolAtLocationParams)
+        : Async<SymbolResponse voption> =
         mailbox.RequestOption<GetSymbolAtLocationParams, SymbolResponse>(Method.GetSymbolAtLocation, parameters)
 
-    let getSymbolsAtLocations (mailbox: TscMailbox) (parameters: GetSymbolsAtLocationsParams) : Async<SymbolResponse[]> =
+    let getSymbolsAtLocations
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolsAtLocationsParams)
+        : Async<SymbolResponse[]> =
         mailbox.Request<GetSymbolsAtLocationsParams, SymbolResponse[]>(Method.GetSymbolsAtLocations, parameters)
 
-    let getSymbolOfSourceFile (mailbox: TscMailbox) (parameters: GetSymbolOfSourceFileParams) : Async<SymbolResponse voption> =
+    let getSymbolOfSourceFile
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolOfSourceFileParams)
+        : Async<SymbolResponse voption> =
         mailbox.RequestOption<GetSymbolOfSourceFileParams, SymbolResponse>(Method.GetSymbolOfSourceFile, parameters)
 
-    let getSymbolsOfSourceFiles (mailbox: TscMailbox) (parameters: GetSymbolsOfSourceFilesParams) : Async<SymbolResponse[]> =
+    let getSymbolsOfSourceFiles
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolsOfSourceFilesParams)
+        : Async<SymbolResponse[]> =
         mailbox.Request<GetSymbolsOfSourceFilesParams, SymbolResponse[]>(Method.GetSymbolsOfSourceFiles, parameters)
 
     let getTypeOfSymbol (mailbox: TscMailbox) (parameters: GetTypeOfSymbolParams) : Async<TypeResponse> =
@@ -102,7 +147,10 @@ module AsyncApi =
     let getSourceFileNames (mailbox: TscMailbox) (parameters: GetSourceFileNamesParams) : Async<string[]> =
         mailbox.Request<GetSourceFileNamesParams, string[]>(Method.GetSourceFileNames, parameters)
 
-    let getSourceFileMetadata (mailbox: TscMailbox) (parameters: GetSourceFileParams) : Async<SourceFileMetadata voption> =
+    let getSourceFileMetadata
+        (mailbox: TscMailbox)
+        (parameters: GetSourceFileParams)
+        : Async<SourceFileMetadata voption> =
         mailbox.RequestOption<GetSourceFileParams, SourceFileMetadata>(Method.GetSourceFileMetadata, parameters)
 
     let getConfigFileNames (mailbox: TscMailbox) (parameters: GetProjectDiagnosticsParams) : Async<string[] voption> =
@@ -141,13 +189,22 @@ module AsyncApi =
     let getParentOfSymbol (mailbox: TscMailbox) (parameters: GetSymbolPropertyParams) : Async<SymbolResponse voption> =
         mailbox.RequestOption<GetSymbolPropertyParams, SymbolResponse>(Method.GetParentOfSymbol, parameters)
 
-    let getMembersOfSymbol (mailbox: TscMailbox) (parameters: GetSymbolPropertyParams) : Async<SymbolResponse[] voption> =
+    let getMembersOfSymbol
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolPropertyParams)
+        : Async<SymbolResponse[] voption> =
         mailbox.RequestOption<GetSymbolPropertyParams, SymbolResponse[]>(Method.GetMembersOfSymbol, parameters)
 
-    let getExportsOfSymbol (mailbox: TscMailbox) (parameters: GetSymbolPropertyParams) : Async<SymbolResponse[] voption> =
+    let getExportsOfSymbol
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolPropertyParams)
+        : Async<SymbolResponse[] voption> =
         mailbox.RequestOption<GetSymbolPropertyParams, SymbolResponse[]>(Method.GetExportsOfSymbol, parameters)
 
-    let getExportSymbolOfSymbol (mailbox: TscMailbox) (parameters: GetSymbolPropertyParams) : Async<SymbolResponse voption> =
+    let getExportSymbolOfSymbol
+        (mailbox: TscMailbox)
+        (parameters: GetSymbolPropertyParams)
+        : Async<SymbolResponse voption> =
         mailbox.RequestOption<GetSymbolPropertyParams, SymbolResponse>(Method.GetExportSymbolOfSymbol, parameters)
 
     let getSymbolOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<SymbolResponse voption> =
@@ -165,16 +222,28 @@ module AsyncApi =
     let getTypesOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse[] voption> =
         mailbox.RequestOption<GetTypePropertyParams, TypeResponse[]>(Method.GetTypesOfType, parameters)
 
-    let getTypeParametersOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse[] voption> =
+    let getTypeParametersOfType
+        (mailbox: TscMailbox)
+        (parameters: GetTypePropertyParams)
+        : Async<TypeResponse[] voption> =
         mailbox.RequestOption<GetTypePropertyParams, TypeResponse[]>(Method.GetTypeParametersOfType, parameters)
 
-    let getOuterTypeParametersOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse[] voption> =
+    let getOuterTypeParametersOfType
+        (mailbox: TscMailbox)
+        (parameters: GetTypePropertyParams)
+        : Async<TypeResponse[] voption> =
         mailbox.RequestOption<GetTypePropertyParams, TypeResponse[]>(Method.GetOuterTypeParametersOfType, parameters)
 
-    let getLocalTypeParametersOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse[] voption> =
+    let getLocalTypeParametersOfType
+        (mailbox: TscMailbox)
+        (parameters: GetTypePropertyParams)
+        : Async<TypeResponse[] voption> =
         mailbox.RequestOption<GetTypePropertyParams, TypeResponse[]>(Method.GetLocalTypeParametersOfType, parameters)
 
-    let getAliasTypeArgumentsOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse[] voption> =
+    let getAliasTypeArgumentsOfType
+        (mailbox: TscMailbox)
+        (parameters: GetTypePropertyParams)
+        : Async<TypeResponse[] voption> =
         mailbox.RequestOption<GetTypePropertyParams, TypeResponse[]>(Method.GetAliasTypeArgumentsOfType, parameters)
 
     let getAliasSymbolOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<SymbolResponse voption> =
@@ -198,22 +267,43 @@ module AsyncApi =
     let getConstraintOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse> =
         mailbox.Request<GetTypePropertyParams, TypeResponse>(Method.GetConstraintOfType, parameters)
 
-    let getTypeParametersOfSignature (mailbox: TscMailbox) (parameters: GetSignaturePropertyParams) : Async<TypeResponse[] voption> =
-        mailbox.RequestOption<GetSignaturePropertyParams, TypeResponse[]>(Method.GetTypeParametersOfSignature, parameters)
+    let getTypeParametersOfSignature
+        (mailbox: TscMailbox)
+        (parameters: GetSignaturePropertyParams)
+        : Async<TypeResponse[] voption> =
+        mailbox.RequestOption<GetSignaturePropertyParams, TypeResponse[]>(
+            Method.GetTypeParametersOfSignature,
+            parameters
+        )
 
-    let getParametersOfSignature (mailbox: TscMailbox) (parameters: GetSignaturePropertyParams) : Async<SymbolResponse[] voption> =
+    let getParametersOfSignature
+        (mailbox: TscMailbox)
+        (parameters: GetSignaturePropertyParams)
+        : Async<SymbolResponse[] voption> =
         mailbox.RequestOption<GetSignaturePropertyParams, SymbolResponse[]>(Method.GetParametersOfSignature, parameters)
 
-    let getThisParameterOfSignature (mailbox: TscMailbox) (parameters: GetSignaturePropertyParams) : Async<SymbolResponse voption> =
-        mailbox.RequestOption<GetSignaturePropertyParams, SymbolResponse>(Method.GetThisParameterOfSignature, parameters)
+    let getThisParameterOfSignature
+        (mailbox: TscMailbox)
+        (parameters: GetSignaturePropertyParams)
+        : Async<SymbolResponse voption> =
+        mailbox.RequestOption<GetSignaturePropertyParams, SymbolResponse>(
+            Method.GetThisParameterOfSignature,
+            parameters
+        )
 
-    let getTargetOfSignature (mailbox: TscMailbox) (parameters: GetSignaturePropertyParams) : Async<SignatureResponse voption> =
+    let getTargetOfSignature
+        (mailbox: TscMailbox)
+        (parameters: GetSignaturePropertyParams)
+        : Async<SignatureResponse voption> =
         mailbox.RequestOption<GetSignaturePropertyParams, SignatureResponse>(Method.GetTargetOfSignature, parameters)
 
     let getContextualType (mailbox: TscMailbox) (parameters: GetContextualTypeParams) : Async<TypeResponse voption> =
         mailbox.RequestOption<GetContextualTypeParams, TypeResponse>(Method.GetContextualType, parameters)
 
-    let getBaseTypeOfLiteralType (mailbox: TscMailbox) (parameters: GetBaseTypeOfLiteralTypeParams) : Async<TypeResponse> =
+    let getBaseTypeOfLiteralType
+        (mailbox: TscMailbox)
+        (parameters: GetBaseTypeOfLiteralTypeParams)
+        : Async<TypeResponse> =
         mailbox.Request<GetBaseTypeOfLiteralTypeParams, TypeResponse>(Method.GetBaseTypeOfLiteralType, parameters)
 
     let getNonNullableType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse> =
@@ -237,10 +327,19 @@ module AsyncApi =
     let isTypeAssignableTo (mailbox: TscMailbox) (parameters: IsTypeAssignableToParams) : Async<bool> =
         mailbox.Request<IsTypeAssignableToParams, bool>(Method.IsTypeAssignableTo, parameters)
 
-    let getShorthandAssignmentValueSymbol (mailbox: TscMailbox) (parameters: GetTypeAtLocationParams) : Async<SymbolResponse voption> =
-        mailbox.RequestOption<GetTypeAtLocationParams, SymbolResponse>(Method.GetShorthandAssignmentValueSymbol, parameters)
+    let getShorthandAssignmentValueSymbol
+        (mailbox: TscMailbox)
+        (parameters: GetTypeAtLocationParams)
+        : Async<SymbolResponse voption> =
+        mailbox.RequestOption<GetTypeAtLocationParams, SymbolResponse>(
+            Method.GetShorthandAssignmentValueSymbol,
+            parameters
+        )
 
-    let getTypeOfSymbolAtLocation (mailbox: TscMailbox) (parameters: GetTypeOfSymbolAtLocationParams) : Async<TypeResponse> =
+    let getTypeOfSymbolAtLocation
+        (mailbox: TscMailbox)
+        (parameters: GetTypeOfSymbolAtLocationParams)
+        : Async<TypeResponse> =
         mailbox.Request<GetTypeOfSymbolAtLocationParams, TypeResponse>(Method.GetTypeOfSymbolAtLocation, parameters)
 
     /// Returns the decoded binary AST, not the schema's `SourceFileResponse` JSON envelope.
@@ -252,7 +351,10 @@ module AsyncApi =
     /// Returns the decoded binary AST, not the schema's `SourceFileResponse` JSON envelope.
     /// The mailbox normalises the two encodings the transport uses for it, so this is the
     /// same result whether the request travelled alone or inside a batch.
-    let signatureToSignatureDeclaration (mailbox: TscMailbox) (parameters: SignatureToSignatureDeclarationParams) : Async<Ast.SourceFile voption> =
+    let signatureToSignatureDeclaration
+        (mailbox: TscMailbox)
+        (parameters: SignatureToSignatureDeclarationParams)
+        : Async<Ast.SourceFile voption> =
         mailbox.RequestAst(Method.SignatureToSignatureDeclaration, parameters)
 
     let typeToString (mailbox: TscMailbox) (parameters: TypeToTypeNodeParams) : Async<JsonNode voption> =
@@ -267,8 +369,14 @@ module AsyncApi =
     let getRestTypeOfSignature (mailbox: TscMailbox) (parameters: CheckerSignatureParams) : Async<TypeResponse> =
         mailbox.Request<CheckerSignatureParams, TypeResponse>(Method.GetRestTypeOfSignature, parameters)
 
-    let getTypePredicateOfSignature (mailbox: TscMailbox) (parameters: CheckerSignatureParams) : Async<TypePredicateResponse voption> =
-        mailbox.RequestOption<CheckerSignatureParams, TypePredicateResponse>(Method.GetTypePredicateOfSignature, parameters)
+    let getTypePredicateOfSignature
+        (mailbox: TscMailbox)
+        (parameters: CheckerSignatureParams)
+        : Async<TypePredicateResponse voption> =
+        mailbox.RequestOption<CheckerSignatureParams, TypePredicateResponse>(
+            Method.GetTypePredicateOfSignature,
+            parameters
+        )
 
     let getBaseTypes (mailbox: TscMailbox) (parameters: CheckerTypeParams) : Async<TypeResponse[] voption> =
         mailbox.RequestOption<CheckerTypeParams, TypeResponse[]>(Method.GetBaseTypes, parameters)
@@ -276,7 +384,10 @@ module AsyncApi =
     let getPropertiesOfType (mailbox: TscMailbox) (parameters: CheckerTypeParams) : Async<SymbolResponse[] voption> =
         mailbox.RequestOption<CheckerTypeParams, SymbolResponse[]>(Method.GetPropertiesOfType, parameters)
 
-    let getApparentPropertiesOfType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<SymbolResponse[]> =
+    let getApparentPropertiesOfType
+        (mailbox: TscMailbox)
+        (parameters: GetTypePropertyParams)
+        : Async<SymbolResponse[]> =
         mailbox.Request<GetTypePropertyParams, SymbolResponse[]>(Method.GetApparentPropertiesOfType, parameters)
 
     let getApparentType (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse> =
@@ -291,10 +402,16 @@ module AsyncApi =
     let getIndexInfosOfType (mailbox: TscMailbox) (parameters: CheckerTypeParams) : Async<IndexInfoResponse[] voption> =
         mailbox.RequestOption<CheckerTypeParams, IndexInfoResponse[]>(Method.GetIndexInfosOfType, parameters)
 
-    let getConstraintOfTypeParameter (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse voption> =
+    let getConstraintOfTypeParameter
+        (mailbox: TscMailbox)
+        (parameters: GetTypePropertyParams)
+        : Async<TypeResponse voption> =
         mailbox.RequestOption<GetTypePropertyParams, TypeResponse>(Method.GetConstraintOfTypeParameter, parameters)
 
-    let getDefaultFromTypeParameter (mailbox: TscMailbox) (parameters: GetTypePropertyParams) : Async<TypeResponse voption> =
+    let getDefaultFromTypeParameter
+        (mailbox: TscMailbox)
+        (parameters: GetTypePropertyParams)
+        : Async<TypeResponse voption> =
         mailbox.RequestOption<GetTypePropertyParams, TypeResponse>(Method.GetDefaultFromTypeParameter, parameters)
 
     let getBaseConstraintOfType (mailbox: TscMailbox) (parameters: CheckerTypeParams) : Async<TypeResponse voption> =
@@ -318,13 +435,19 @@ module AsyncApi =
     let getSignatureFromDeclaration (mailbox: TscMailbox) (parameters: CheckerNodeParams) : Async<SignatureResponse> =
         mailbox.Request<CheckerNodeParams, SignatureResponse>(Method.GetSignatureFromDeclaration, parameters)
 
-    let getExportSpecifierLocalTargetSymbol (mailbox: TscMailbox) (parameters: CheckerNodeParams) : Async<SymbolResponse voption> =
+    let getExportSpecifierLocalTargetSymbol
+        (mailbox: TscMailbox)
+        (parameters: CheckerNodeParams)
+        : Async<SymbolResponse voption> =
         mailbox.RequestOption<CheckerNodeParams, SymbolResponse>(Method.GetExportSpecifierLocalTargetSymbol, parameters)
 
     let getAliasedSymbol (mailbox: TscMailbox) (parameters: CheckerSymbolParams) : Async<SymbolResponse> =
         mailbox.Request<CheckerSymbolParams, SymbolResponse>(Method.GetAliasedSymbol, parameters)
 
-    let getImmediateAliasedSymbol (mailbox: TscMailbox) (parameters: CheckerSymbolParams) : Async<SymbolResponse voption> =
+    let getImmediateAliasedSymbol
+        (mailbox: TscMailbox)
+        (parameters: CheckerSymbolParams)
+        : Async<SymbolResponse voption> =
         mailbox.RequestOption<CheckerSymbolParams, SymbolResponse>(Method.GetImmediateAliasedSymbol, parameters)
 
     let getTargetSymbol (mailbox: TscMailbox) (parameters: CheckerSymbolParams) : Async<SymbolResponse> =
@@ -336,8 +459,14 @@ module AsyncApi =
     let getExportsOfModule (mailbox: TscMailbox) (parameters: CheckerSymbolParams) : Async<SymbolResponse[] voption> =
         mailbox.RequestOption<CheckerSymbolParams, SymbolResponse[]>(Method.GetExportsOfModule, parameters)
 
-    let getMemberInModuleExports (mailbox: TscMailbox) (parameters: GetMemberInModuleExportsParams) : Async<SymbolResponse voption> =
-        mailbox.RequestOption<GetMemberInModuleExportsParams, SymbolResponse>(Method.GetMemberInModuleExports, parameters)
+    let getMemberInModuleExports
+        (mailbox: TscMailbox)
+        (parameters: GetMemberInModuleExportsParams)
+        : Async<SymbolResponse voption> =
+        mailbox.RequestOption<GetMemberInModuleExportsParams, SymbolResponse>(
+            Method.GetMemberInModuleExports,
+            parameters
+        )
 
     let getJsDocTags (mailbox: TscMailbox) (parameters: CheckerSymbolParams) : Async<JSDocTagInfo[] voption> =
         mailbox.RequestOption<CheckerSymbolParams, JSDocTagInfo[]>(Method.GetJsDocTags, parameters)
@@ -351,41 +480,92 @@ module AsyncApi =
     let isReadonlySymbol (mailbox: TscMailbox) (parameters: CheckerSymbolParams) : Async<bool> =
         mailbox.Request<CheckerSymbolParams, bool>(Method.IsReadonlySymbol, parameters)
 
-    let getReferencesToSymbolInFile (mailbox: TscMailbox) (parameters: GetReferencesToSymbolInFileParams) : Async<string[]> =
+    let getReferencesToSymbolInFile
+        (mailbox: TscMailbox)
+        (parameters: GetReferencesToSymbolInFileParams)
+        : Async<string[]> =
         mailbox.Request<GetReferencesToSymbolInFileParams, string[]>(Method.GetReferencesToSymbolInFile, parameters)
 
-    let getReferencedSymbolsForNode (mailbox: TscMailbox) (parameters: GetReferencedSymbolsForNodeParams) : Async<ReferencedSymbolEntry[] voption> =
-        mailbox.RequestOption<GetReferencedSymbolsForNodeParams, ReferencedSymbolEntry[]>(Method.GetReferencedSymbolsForNode, parameters)
+    let getReferencedSymbolsForNode
+        (mailbox: TscMailbox)
+        (parameters: GetReferencedSymbolsForNodeParams)
+        : Async<ReferencedSymbolEntry[] voption> =
+        mailbox.RequestOption<GetReferencedSymbolsForNodeParams, ReferencedSymbolEntry[]>(
+            Method.GetReferencedSymbolsForNode,
+            parameters
+        )
 
-    let getSignatureUsages (mailbox: TscMailbox) (parameters: GetSignatureUsagesParams) : Async<SignatureUsageResponse[] voption> =
+    let getSignatureUsages
+        (mailbox: TscMailbox)
+        (parameters: GetSignatureUsagesParams)
+        : Async<SignatureUsageResponse[] voption> =
         mailbox.RequestOption<GetSignatureUsagesParams, SignatureUsageResponse[]>(Method.GetSignatureUsages, parameters)
 
-    let getCompletionsAtPosition (mailbox: TscMailbox) (parameters: GetCompletionsAtPositionParams) : Async<CompletionInfoResponse voption> =
-        mailbox.RequestOption<GetCompletionsAtPositionParams, CompletionInfoResponse>(Method.GetCompletionsAtPosition, parameters)
+    let getCompletionsAtPosition
+        (mailbox: TscMailbox)
+        (parameters: GetCompletionsAtPositionParams)
+        : Async<CompletionInfoResponse voption> =
+        mailbox.RequestOption<GetCompletionsAtPositionParams, CompletionInfoResponse>(
+            Method.GetCompletionsAtPosition,
+            parameters
+        )
 
-    let getSyntacticDiagnostics (mailbox: TscMailbox) (parameters: GetDiagnosticsParams) : Async<DiagnosticResponse[] voption> =
+    let getSyntacticDiagnostics
+        (mailbox: TscMailbox)
+        (parameters: GetDiagnosticsParams)
+        : Async<DiagnosticResponse[] voption> =
         mailbox.RequestOption<GetDiagnosticsParams, DiagnosticResponse[]>(Method.GetSyntacticDiagnostics, parameters)
 
-    let getBindDiagnostics (mailbox: TscMailbox) (parameters: GetDiagnosticsParams) : Async<DiagnosticResponse[] voption> =
+    let getBindDiagnostics
+        (mailbox: TscMailbox)
+        (parameters: GetDiagnosticsParams)
+        : Async<DiagnosticResponse[] voption> =
         mailbox.RequestOption<GetDiagnosticsParams, DiagnosticResponse[]>(Method.GetBindDiagnostics, parameters)
 
-    let getSemanticDiagnostics (mailbox: TscMailbox) (parameters: GetDiagnosticsParams) : Async<DiagnosticResponse[] voption> =
+    let getSemanticDiagnostics
+        (mailbox: TscMailbox)
+        (parameters: GetDiagnosticsParams)
+        : Async<DiagnosticResponse[] voption> =
         mailbox.RequestOption<GetDiagnosticsParams, DiagnosticResponse[]>(Method.GetSemanticDiagnostics, parameters)
 
-    let getSuggestionDiagnostics (mailbox: TscMailbox) (parameters: GetDiagnosticsParams) : Async<DiagnosticResponse[] voption> =
+    let getSuggestionDiagnostics
+        (mailbox: TscMailbox)
+        (parameters: GetDiagnosticsParams)
+        : Async<DiagnosticResponse[] voption> =
         mailbox.RequestOption<GetDiagnosticsParams, DiagnosticResponse[]>(Method.GetSuggestionDiagnostics, parameters)
 
-    let getDeclarationDiagnostics (mailbox: TscMailbox) (parameters: GetDiagnosticsParams) : Async<DiagnosticResponse[] voption> =
+    let getDeclarationDiagnostics
+        (mailbox: TscMailbox)
+        (parameters: GetDiagnosticsParams)
+        : Async<DiagnosticResponse[] voption> =
         mailbox.RequestOption<GetDiagnosticsParams, DiagnosticResponse[]>(Method.GetDeclarationDiagnostics, parameters)
 
-    let getProgramDiagnostics (mailbox: TscMailbox) (parameters: GetProjectDiagnosticsParams) : Async<DiagnosticResponse[] voption> =
-        mailbox.RequestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>(Method.GetProgramDiagnostics, parameters)
+    let getProgramDiagnostics
+        (mailbox: TscMailbox)
+        (parameters: GetProjectDiagnosticsParams)
+        : Async<DiagnosticResponse[] voption> =
+        mailbox.RequestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>(
+            Method.GetProgramDiagnostics,
+            parameters
+        )
 
-    let getGlobalDiagnostics (mailbox: TscMailbox) (parameters: GetProjectDiagnosticsParams) : Async<DiagnosticResponse[] voption> =
-        mailbox.RequestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>(Method.GetGlobalDiagnostics, parameters)
+    let getGlobalDiagnostics
+        (mailbox: TscMailbox)
+        (parameters: GetProjectDiagnosticsParams)
+        : Async<DiagnosticResponse[] voption> =
+        mailbox.RequestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>(
+            Method.GetGlobalDiagnostics,
+            parameters
+        )
 
-    let getConfigFileParsingDiagnostics (mailbox: TscMailbox) (parameters: GetProjectDiagnosticsParams) : Async<DiagnosticResponse[] voption> =
-        mailbox.RequestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>(Method.GetConfigFileParsingDiagnostics, parameters)
+    let getConfigFileParsingDiagnostics
+        (mailbox: TscMailbox)
+        (parameters: GetProjectDiagnosticsParams)
+        : Async<DiagnosticResponse[] voption> =
+        mailbox.RequestOption<GetProjectDiagnosticsParams, DiagnosticResponse[]>(
+            Method.GetConfigFileParsingDiagnostics,
+            parameters
+        )
 
     let printNode (mailbox: TscMailbox) (parameters: PrintNodeParams) : Async<string> =
         mailbox.Request<PrintNodeParams, string>(Method.PrintNode, parameters)
@@ -441,10 +621,16 @@ module AsyncApi =
     let getNonPrimitiveType (mailbox: TscMailbox) (parameters: GetIntrinsicTypeParams) : Async<TypeResponse> =
         mailbox.Request<GetIntrinsicTypeParams, TypeResponse>(Method.GetNonPrimitiveType, parameters)
 
-    let getWellKnownSymbols (mailbox: TscMailbox) (parameters: GetIntrinsicTypeParams) : Async<WellKnownSymbolsResponse> =
+    let getWellKnownSymbols
+        (mailbox: TscMailbox)
+        (parameters: GetIntrinsicTypeParams)
+        : Async<WellKnownSymbolsResponse> =
         mailbox.Request<GetIntrinsicTypeParams, WellKnownSymbolsResponse>(Method.GetWellKnownSymbols, parameters)
 
-    let getWellKnownSignatures (mailbox: TscMailbox) (parameters: GetIntrinsicTypeParams) : Async<WellKnownSignaturesResponse> =
+    let getWellKnownSignatures
+        (mailbox: TscMailbox)
+        (parameters: GetIntrinsicTypeParams)
+        : Async<WellKnownSignaturesResponse> =
         mailbox.Request<GetIntrinsicTypeParams, WellKnownSignaturesResponse>(Method.GetWellKnownSignatures, parameters)
 
     let startCPUProfile (mailbox: TscMailbox) (parameters: ProfileParams) : Async<unit> =
@@ -475,246 +661,300 @@ module TscMailboxExtensions =
 
         /// The fields of ReleaseParams, spread. Builds the record and calls the overload above.
         member inline this.release(snapshot: int) =
-            this.release(
-                { Snapshot = snapshot }
-                : ReleaseParams
-            )
+            this.release ({ Snapshot = snapshot }: ReleaseParams)
 
         member this.initialize() = AsyncApi.initialize this
 
         member this.updateSnapshot(parameters: UpdateSnapshotParams) = AsyncApi.updateSnapshot this parameters
 
         /// The fields of UpdateSnapshotParams, spread. Builds the record and calls the overload above.
-        member inline this.updateSnapshot([<Struct>] ?openProjects: DocumentIdentifier[], [<Struct>] ?closeProjects: DocumentIdentifier[], [<Struct>] ?fileChanges: APIFileChanges, [<Struct>] ?openFiles: DocumentIdentifier[], [<Struct>] ?closeFiles: DocumentIdentifier[]) =
-            this.updateSnapshot(
-                { OpenProjects = openProjects
-                  CloseProjects = closeProjects
-                  FileChanges = fileChanges
-                  OpenFiles = openFiles
-                  CloseFiles = closeFiles }
+        member inline this.updateSnapshot
+            (
+                [<Struct>] ?openProjects: DocumentIdentifier[],
+                [<Struct>] ?closeProjects: DocumentIdentifier[],
+                [<Struct>] ?fileChanges: APIFileChanges,
+                [<Struct>] ?openFiles: DocumentIdentifier[],
+                [<Struct>] ?closeFiles: DocumentIdentifier[]
+            ) =
+            this.updateSnapshot (
+                {
+                    OpenProjects = openProjects
+                    CloseProjects = closeProjects
+                    FileChanges = fileChanges
+                    OpenFiles = openFiles
+                    CloseFiles = closeFiles
+                }
                 : UpdateSnapshotParams
             )
 
-        member this.updateTemporarySnapshot(parameters: UpdateTemporarySnapshotParams) = AsyncApi.updateTemporarySnapshot this parameters
+        member this.updateTemporarySnapshot(parameters: UpdateTemporarySnapshotParams) =
+            AsyncApi.updateTemporarySnapshot this parameters
 
         /// The fields of UpdateTemporarySnapshotParams, spread. Builds the record and calls the overload above.
         member inline this.updateTemporarySnapshot(snapshot: int, file: DocumentIdentifier, newText: string) =
-            this.updateTemporarySnapshot(
-                { Snapshot = snapshot
-                  ``File`` = file
-                  NewText = newText }
+            this.updateTemporarySnapshot (
+                {
+                    Snapshot = snapshot
+                    ``File`` = file
+                    NewText = newText
+                }
                 : UpdateTemporarySnapshotParams
             )
 
         member this.createProgram(parameters: CreateProgramParams) = AsyncApi.createProgram this parameters
 
         /// The fields of CreateProgramParams, spread. Builds the record and calls the overload above.
-        member inline this.createProgram(createProgramOptions: CreateProgramOptions, [<Struct>] ?rootFiles: DocumentIdentifier[], [<Struct>] ?oldProgram: CreateProgramOldProgramParams, [<Struct>] ?fileChanges: APIFileChanges) =
-            this.createProgram(
-                { CreateProgramOptions = createProgramOptions
-                  RootFiles = rootFiles
-                  OldProgram = oldProgram
-                  FileChanges = fileChanges }
+        member inline this.createProgram
+            (
+                createProgramOptions: CreateProgramOptions,
+                [<Struct>] ?rootFiles: DocumentIdentifier[],
+                [<Struct>] ?oldProgram: CreateProgramOldProgramParams,
+                [<Struct>] ?fileChanges: APIFileChanges
+            ) =
+            this.createProgram (
+                {
+                    CreateProgramOptions = createProgramOptions
+                    RootFiles = rootFiles
+                    OldProgram = oldProgram
+                    FileChanges = fileChanges
+                }
                 : CreateProgramParams
             )
 
-        member this.parseCommandLine(parameters: ParseCommandLineParams) = AsyncApi.parseCommandLine this parameters
+        member this.parseCommandLine(parameters: ParseCommandLineParams) =
+            AsyncApi.parseCommandLine this parameters
 
         /// The fields of ParseCommandLineParams, spread. Builds the record and calls the overload above.
         member inline this.parseCommandLine([<Struct>] ?commandLine: string[]) =
-            this.parseCommandLine(
-                { CommandLine = commandLine }
-                : ParseCommandLineParams
-            )
+            this.parseCommandLine ({ CommandLine = commandLine }: ParseCommandLineParams)
 
         member this.readConfigFile(parameters: ReadConfigFileParams) = AsyncApi.readConfigFile this parameters
 
         /// The fields of ReadConfigFileParams, spread. Builds the record and calls the overload above.
         member inline this.readConfigFile(file: DocumentIdentifier) =
-            this.readConfigFile(
-                { ``File`` = file }
-                : ReadConfigFileParams
-            )
+            this.readConfigFile ({ ``File`` = file }: ReadConfigFileParams)
 
-        member this.parseJsonConfigFileContent(parameters: ParseJsonConfigFileContentParams) = AsyncApi.parseJsonConfigFileContent this parameters
+        member this.parseJsonConfigFileContent(parameters: ParseJsonConfigFileContentParams) =
+            AsyncApi.parseJsonConfigFileContent this parameters
 
         /// The fields of ParseJsonConfigFileContentParams, spread. Builds the record and calls the overload above.
-        member inline this.parseJsonConfigFileContent([<Struct>] ?json: JsonNode, [<Struct>] ?configDirectory: string, [<Struct>] ?configFileName: DocumentIdentifier) =
-            this.parseJsonConfigFileContent(
-                { Json = (match json with ValueSome value -> value | ValueNone -> null)
-                  ConfigDirectory = configDirectory
-                  ConfigFileName = configFileName }
+        member inline this.parseJsonConfigFileContent
+            (
+                [<Struct>] ?json: JsonNode,
+                [<Struct>] ?configDirectory: string,
+                [<Struct>] ?configFileName: DocumentIdentifier
+            ) =
+            this.parseJsonConfigFileContent (
+                {
+                    Json =
+                        (match json with
+                         | ValueSome value -> value
+                         | ValueNone -> null)
+                    ConfigDirectory = configDirectory
+                    ConfigFileName = configFileName
+                }
                 : ParseJsonConfigFileContentParams
             )
 
-        member this.parseConfigFile(parameters: ParseConfigFileParams) = AsyncApi.parseConfigFile this parameters
+        member this.parseConfigFile(parameters: ParseConfigFileParams) =
+            AsyncApi.parseConfigFile this parameters
 
         /// The fields of ParseConfigFileParams, spread. Builds the record and calls the overload above.
         member inline this.parseConfigFile(file: DocumentIdentifier) =
-            this.parseConfigFile(
-                { ``File`` = file }
-                : ParseConfigFileParams
-            )
+            this.parseConfigFile ({ ``File`` = file }: ParseConfigFileParams)
 
-        member this.transpileModule(parameters: TranspileParams) = AsyncApi.transpileModule this parameters
+        member this.transpileModule(parameters: TranspileParams) =
+            AsyncApi.transpileModule this parameters
 
         /// The fields of TranspileParams, spread. Builds the record and calls the overload above.
         member inline this.transpileModule(input: string, options: TranspileOptions) =
-            this.transpileModule(
-                { Input = input
-                  Options = options }
-                : TranspileParams
-            )
+            this.transpileModule ({ Input = input; Options = options }: TranspileParams)
 
-        member this.transpileModuleFromFile(parameters: TranspileFromFileParams) = AsyncApi.transpileModuleFromFile this parameters
+        member this.transpileModuleFromFile(parameters: TranspileFromFileParams) =
+            AsyncApi.transpileModuleFromFile this parameters
 
         /// The fields of TranspileFromFileParams, spread. Builds the record and calls the overload above.
         member inline this.transpileModuleFromFile(fileName: string, options: TranspileOptions) =
-            this.transpileModuleFromFile(
-                { FileName = fileName
-                  Options = options }
+            this.transpileModuleFromFile (
+                {
+                    FileName = fileName
+                    Options = options
+                }
                 : TranspileFromFileParams
             )
 
-        member this.transpileDeclaration(parameters: TranspileParams) = AsyncApi.transpileDeclaration this parameters
+        member this.transpileDeclaration(parameters: TranspileParams) =
+            AsyncApi.transpileDeclaration this parameters
 
         /// The fields of TranspileParams, spread. Builds the record and calls the overload above.
         member inline this.transpileDeclaration(input: string, options: TranspileOptions) =
-            this.transpileDeclaration(
-                { Input = input
-                  Options = options }
-                : TranspileParams
-            )
+            this.transpileDeclaration ({ Input = input; Options = options }: TranspileParams)
 
-        member this.transpileDeclarationFromFile(parameters: TranspileFromFileParams) = AsyncApi.transpileDeclarationFromFile this parameters
+        member this.transpileDeclarationFromFile(parameters: TranspileFromFileParams) =
+            AsyncApi.transpileDeclarationFromFile this parameters
 
         /// The fields of TranspileFromFileParams, spread. Builds the record and calls the overload above.
         member inline this.transpileDeclarationFromFile(fileName: string, options: TranspileOptions) =
-            this.transpileDeclarationFromFile(
-                { FileName = fileName
-                  Options = options }
+            this.transpileDeclarationFromFile (
+                {
+                    FileName = fileName
+                    Options = options
+                }
                 : TranspileFromFileParams
             )
 
-        member this.getDefaultProjectForFile(parameters: GetDefaultProjectForFileParams) = AsyncApi.getDefaultProjectForFile this parameters
+        member this.getDefaultProjectForFile(parameters: GetDefaultProjectForFileParams) =
+            AsyncApi.getDefaultProjectForFile this parameters
 
         /// The fields of GetDefaultProjectForFileParams, spread. Builds the record and calls the overload above.
         member inline this.getDefaultProjectForFile(snapshot: int, file: DocumentIdentifier) =
-            this.getDefaultProjectForFile(
-                { Snapshot = snapshot
-                  ``File`` = file }
-                : GetDefaultProjectForFileParams
-            )
+            this.getDefaultProjectForFile ({ Snapshot = snapshot; ``File`` = file }: GetDefaultProjectForFileParams)
 
-        member this.getSymbolAtPosition(parameters: GetSymbolAtPositionParams) = AsyncApi.getSymbolAtPosition this parameters
+        member this.getSymbolAtPosition(parameters: GetSymbolAtPositionParams) =
+            AsyncApi.getSymbolAtPosition this parameters
 
         /// The fields of GetSymbolAtPositionParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int) =
-            this.getSymbolAtPosition(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Position = position }
+        member inline this.getSymbolAtPosition
+            (snapshot: int, project: string, file: DocumentIdentifier, position: int)
+            =
+            this.getSymbolAtPosition (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Position = position
+                }
                 : GetSymbolAtPositionParams
             )
 
-        member this.getSymbolsAtPositions(parameters: GetSymbolsAtPositionsParams) = AsyncApi.getSymbolsAtPositions this parameters
+        member this.getSymbolsAtPositions(parameters: GetSymbolsAtPositionsParams) =
+            AsyncApi.getSymbolsAtPositions this parameters
 
         /// The fields of GetSymbolsAtPositionsParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolsAtPositions(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[]) =
-            this.getSymbolsAtPositions(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Positions = positions }
+        member inline this.getSymbolsAtPositions
+            (snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[])
+            =
+            this.getSymbolsAtPositions (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Positions = positions
+                }
                 : GetSymbolsAtPositionsParams
             )
 
-        member this.getSymbolAtLocation(parameters: GetSymbolAtLocationParams) = AsyncApi.getSymbolAtLocation this parameters
+        member this.getSymbolAtLocation(parameters: GetSymbolAtLocationParams) =
+            AsyncApi.getSymbolAtLocation this parameters
 
         /// The fields of GetSymbolAtLocationParams, spread. Builds the record and calls the overload above.
         member inline this.getSymbolAtLocation(snapshot: int, project: string, location: string) =
-            this.getSymbolAtLocation(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getSymbolAtLocation (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetSymbolAtLocationParams
             )
 
-        member this.getSymbolsAtLocations(parameters: GetSymbolsAtLocationsParams) = AsyncApi.getSymbolsAtLocations this parameters
+        member this.getSymbolsAtLocations(parameters: GetSymbolsAtLocationsParams) =
+            AsyncApi.getSymbolsAtLocations this parameters
 
         /// The fields of GetSymbolsAtLocationsParams, spread. Builds the record and calls the overload above.
         member inline this.getSymbolsAtLocations(snapshot: int, project: string, [<Struct>] ?locations: string[]) =
-            this.getSymbolsAtLocations(
-                { Snapshot = snapshot
-                  Project = project
-                  Locations = locations }
+            this.getSymbolsAtLocations (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Locations = locations
+                }
                 : GetSymbolsAtLocationsParams
             )
 
-        member this.getSymbolOfSourceFile(parameters: GetSymbolOfSourceFileParams) = AsyncApi.getSymbolOfSourceFile this parameters
+        member this.getSymbolOfSourceFile(parameters: GetSymbolOfSourceFileParams) =
+            AsyncApi.getSymbolOfSourceFile this parameters
 
         /// The fields of GetSymbolOfSourceFileParams, spread. Builds the record and calls the overload above.
         member inline this.getSymbolOfSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
-            this.getSymbolOfSourceFile(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file }
+            this.getSymbolOfSourceFile (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                }
                 : GetSymbolOfSourceFileParams
             )
 
-        member this.getSymbolsOfSourceFiles(parameters: GetSymbolsOfSourceFilesParams) = AsyncApi.getSymbolsOfSourceFiles this parameters
+        member this.getSymbolsOfSourceFiles(parameters: GetSymbolsOfSourceFilesParams) =
+            AsyncApi.getSymbolsOfSourceFiles this parameters
 
         /// The fields of GetSymbolsOfSourceFilesParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolsOfSourceFiles(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getSymbolsOfSourceFiles(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getSymbolsOfSourceFiles
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getSymbolsOfSourceFiles (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetSymbolsOfSourceFilesParams
             )
 
-        member this.getTypeOfSymbol(parameters: GetTypeOfSymbolParams) = AsyncApi.getTypeOfSymbol this parameters
+        member this.getTypeOfSymbol(parameters: GetTypeOfSymbolParams) =
+            AsyncApi.getTypeOfSymbol this parameters
 
         /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeOfSymbol(snapshot: int, project: string, symbol: int) =
-            this.getTypeOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getTypeOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : GetTypeOfSymbolParams
             )
 
-        member this.getTypesOfSymbols(parameters: GetTypesOfSymbolsParams) = AsyncApi.getTypesOfSymbols this parameters
+        member this.getTypesOfSymbols(parameters: GetTypesOfSymbolsParams) =
+            AsyncApi.getTypesOfSymbols this parameters
 
         /// The fields of GetTypesOfSymbolsParams, spread. Builds the record and calls the overload above.
         member inline this.getTypesOfSymbols(snapshot: int, project: string, [<Struct>] ?symbols: int[]) =
-            this.getTypesOfSymbols(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbols = symbols }
+            this.getTypesOfSymbols (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbols = symbols
+                }
                 : GetTypesOfSymbolsParams
             )
 
-        member this.getDeclaredTypeOfSymbol(parameters: GetTypeOfSymbolParams) = AsyncApi.getDeclaredTypeOfSymbol this parameters
+        member this.getDeclaredTypeOfSymbol(parameters: GetTypeOfSymbolParams) =
+            AsyncApi.getDeclaredTypeOfSymbol this parameters
 
         /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getDeclaredTypeOfSymbol(snapshot: int, project: string, symbol: int) =
-            this.getDeclaredTypeOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getDeclaredTypeOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : GetTypeOfSymbolParams
             )
 
-        member this.getNonMissingTypeOfSymbol(parameters: GetTypeOfSymbolParams) = AsyncApi.getNonMissingTypeOfSymbol this parameters
+        member this.getNonMissingTypeOfSymbol(parameters: GetTypeOfSymbolParams) =
+            AsyncApi.getNonMissingTypeOfSymbol this parameters
 
         /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getNonMissingTypeOfSymbol(snapshot: int, project: string, symbol: int) =
-            this.getNonMissingTypeOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getNonMissingTypeOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : GetTypeOfSymbolParams
             )
 
@@ -722,239 +962,320 @@ module TscMailboxExtensions =
 
         /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
         member inline this.getSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
-            this.getSourceFile(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file }
+            this.getSourceFile (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                }
                 : GetSourceFileParams
             )
 
-        member this.getSourceFileNames(parameters: GetSourceFileNamesParams) = AsyncApi.getSourceFileNames this parameters
+        member this.getSourceFileNames(parameters: GetSourceFileNamesParams) =
+            AsyncApi.getSourceFileNames this parameters
 
         /// The fields of GetSourceFileNamesParams, spread. Builds the record and calls the overload above.
         member inline this.getSourceFileNames(snapshot: int, project: string) =
-            this.getSourceFileNames(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getSourceFileNames (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetSourceFileNamesParams
             )
 
-        member this.getSourceFileMetadata(parameters: GetSourceFileParams) = AsyncApi.getSourceFileMetadata this parameters
+        member this.getSourceFileMetadata(parameters: GetSourceFileParams) =
+            AsyncApi.getSourceFileMetadata this parameters
 
         /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
         member inline this.getSourceFileMetadata(snapshot: int, project: string, file: DocumentIdentifier) =
-            this.getSourceFileMetadata(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file }
+            this.getSourceFileMetadata (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                }
                 : GetSourceFileParams
             )
 
-        member this.getConfigFileNames(parameters: GetProjectDiagnosticsParams) = AsyncApi.getConfigFileNames this parameters
+        member this.getConfigFileNames(parameters: GetProjectDiagnosticsParams) =
+            AsyncApi.getConfigFileNames this parameters
 
         /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getConfigFileNames(snapshot: int, project: string) =
-            this.getConfigFileNames(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getConfigFileNames (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetProjectDiagnosticsParams
             )
 
-        member this.getConfigSourceFile(parameters: GetSourceFileParams) = AsyncApi.getConfigSourceFile this parameters
+        member this.getConfigSourceFile(parameters: GetSourceFileParams) =
+            AsyncApi.getConfigSourceFile this parameters
 
         /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
         member inline this.getConfigSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
-            this.getConfigSourceFile(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file }
+            this.getConfigSourceFile (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                }
                 : GetSourceFileParams
             )
 
         member this.resolveName(parameters: ResolveNameParams) = AsyncApi.resolveName this parameters
 
         /// The fields of ResolveNameParams, spread. Builds the record and calls the overload above.
-        member inline this.resolveName(snapshot: int, project: string, name: string, meaning: SymbolFlags, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int, [<Struct>] ?excludeGlobals: bool) =
-            this.resolveName(
-                { Snapshot = snapshot
-                  Project = project
-                  Name = name
-                  Meaning = meaning
-                  Location = location
-                  ``File`` = file
-                  Position = position
-                  ExcludeGlobals = excludeGlobals }
+        member inline this.resolveName
+            (
+                snapshot: int,
+                project: string,
+                name: string,
+                meaning: SymbolFlags,
+                [<Struct>] ?location: string,
+                [<Struct>] ?file: DocumentIdentifier,
+                [<Struct>] ?position: int,
+                [<Struct>] ?excludeGlobals: bool
+            ) =
+            this.resolveName (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Name = name
+                    Meaning = meaning
+                    Location = location
+                    ``File`` = file
+                    Position = position
+                    ExcludeGlobals = excludeGlobals
+                }
                 : ResolveNameParams
             )
 
-        member this.getSymbolsInScope(parameters: GetSymbolsInScopeParams) = AsyncApi.getSymbolsInScope this parameters
+        member this.getSymbolsInScope(parameters: GetSymbolsInScopeParams) =
+            AsyncApi.getSymbolsInScope this parameters
 
         /// The fields of GetSymbolsInScopeParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolsInScope(snapshot: int, project: string, meaning: SymbolFlags, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int) =
-            this.getSymbolsInScope(
-                { Snapshot = snapshot
-                  Project = project
-                  Meaning = meaning
-                  Location = location
-                  ``File`` = file
-                  Position = position }
+        member inline this.getSymbolsInScope
+            (
+                snapshot: int,
+                project: string,
+                meaning: SymbolFlags,
+                [<Struct>] ?location: string,
+                [<Struct>] ?file: DocumentIdentifier,
+                [<Struct>] ?position: int
+            ) =
+            this.getSymbolsInScope (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Meaning = meaning
+                    Location = location
+                    ``File`` = file
+                    Position = position
+                }
                 : GetSymbolsInScopeParams
             )
 
-        member this.getSignaturesOfType(parameters: GetSignaturesOfTypeParams) = AsyncApi.getSignaturesOfType this parameters
+        member this.getSignaturesOfType(parameters: GetSignaturesOfTypeParams) =
+            AsyncApi.getSignaturesOfType this parameters
 
         /// The fields of GetSignaturesOfTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getSignaturesOfType(snapshot: int, project: string, ``type``: int, kind: SignatureKind) =
-            this.getSignaturesOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type``
-                  Kind = kind }
+            this.getSignaturesOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                    Kind = kind
+                }
                 : GetSignaturesOfTypeParams
             )
 
-        member this.getResolvedSignature(parameters: GetResolvedSignatureParams) = AsyncApi.getResolvedSignature this parameters
+        member this.getResolvedSignature(parameters: GetResolvedSignatureParams) =
+            AsyncApi.getResolvedSignature this parameters
 
         /// The fields of GetResolvedSignatureParams, spread. Builds the record and calls the overload above.
         member inline this.getResolvedSignature(snapshot: int, project: string, location: string) =
-            this.getResolvedSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getResolvedSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetResolvedSignatureParams
             )
 
-        member this.getTypeAtLocation(parameters: GetTypeAtLocationParams) = AsyncApi.getTypeAtLocation this parameters
+        member this.getTypeAtLocation(parameters: GetTypeAtLocationParams) =
+            AsyncApi.getTypeAtLocation this parameters
 
         /// The fields of GetTypeAtLocationParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeAtLocation(snapshot: int, project: string, location: string) =
-            this.getTypeAtLocation(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getTypeAtLocation (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetTypeAtLocationParams
             )
 
-        member this.getTypeAtLocations(parameters: GetTypeAtLocationsParams) = AsyncApi.getTypeAtLocations this parameters
+        member this.getTypeAtLocations(parameters: GetTypeAtLocationsParams) =
+            AsyncApi.getTypeAtLocations this parameters
 
         /// The fields of GetTypeAtLocationsParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeAtLocations(snapshot: int, project: string, [<Struct>] ?locations: string[]) =
-            this.getTypeAtLocations(
-                { Snapshot = snapshot
-                  Project = project
-                  Locations = locations }
+            this.getTypeAtLocations (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Locations = locations
+                }
                 : GetTypeAtLocationsParams
             )
 
-        member this.getTypeAtPosition(parameters: GetTypeAtPositionParams) = AsyncApi.getTypeAtPosition this parameters
+        member this.getTypeAtPosition(parameters: GetTypeAtPositionParams) =
+            AsyncApi.getTypeAtPosition this parameters
 
         /// The fields of GetTypeAtPositionParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int) =
-            this.getTypeAtPosition(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Position = position }
+            this.getTypeAtPosition (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Position = position
+                }
                 : GetTypeAtPositionParams
             )
 
-        member this.getTypesAtPositions(parameters: GetTypesAtPositionsParams) = AsyncApi.getTypesAtPositions this parameters
+        member this.getTypesAtPositions(parameters: GetTypesAtPositionsParams) =
+            AsyncApi.getTypesAtPositions this parameters
 
         /// The fields of GetTypesAtPositionsParams, spread. Builds the record and calls the overload above.
-        member inline this.getTypesAtPositions(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[]) =
-            this.getTypesAtPositions(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Positions = positions }
+        member inline this.getTypesAtPositions
+            (snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[])
+            =
+            this.getTypesAtPositions (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Positions = positions
+                }
                 : GetTypesAtPositionsParams
             )
 
-        member this.getParentOfSymbol(parameters: GetSymbolPropertyParams) = AsyncApi.getParentOfSymbol this parameters
+        member this.getParentOfSymbol(parameters: GetSymbolPropertyParams) =
+            AsyncApi.getParentOfSymbol this parameters
 
         /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getParentOfSymbol(snapshot: int, project: string, objectId: int) =
-            this.getParentOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getParentOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSymbolPropertyParams
             )
 
-        member this.getMembersOfSymbol(parameters: GetSymbolPropertyParams) = AsyncApi.getMembersOfSymbol this parameters
+        member this.getMembersOfSymbol(parameters: GetSymbolPropertyParams) =
+            AsyncApi.getMembersOfSymbol this parameters
 
         /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getMembersOfSymbol(snapshot: int, project: string, objectId: int) =
-            this.getMembersOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getMembersOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSymbolPropertyParams
             )
 
-        member this.getExportsOfSymbol(parameters: GetSymbolPropertyParams) = AsyncApi.getExportsOfSymbol this parameters
+        member this.getExportsOfSymbol(parameters: GetSymbolPropertyParams) =
+            AsyncApi.getExportsOfSymbol this parameters
 
         /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getExportsOfSymbol(snapshot: int, project: string, objectId: int) =
-            this.getExportsOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getExportsOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSymbolPropertyParams
             )
 
-        member this.getExportSymbolOfSymbol(parameters: GetSymbolPropertyParams) = AsyncApi.getExportSymbolOfSymbol this parameters
+        member this.getExportSymbolOfSymbol(parameters: GetSymbolPropertyParams) =
+            AsyncApi.getExportSymbolOfSymbol this parameters
 
         /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getExportSymbolOfSymbol(snapshot: int, project: string, objectId: int) =
-            this.getExportSymbolOfSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getExportSymbolOfSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSymbolPropertyParams
             )
 
-        member this.getSymbolOfType(parameters: GetTypePropertyParams) = AsyncApi.getSymbolOfType this parameters
+        member this.getSymbolOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getSymbolOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getSymbolOfType(snapshot: int, project: string, objectId: int) =
-            this.getSymbolOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getSymbolOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getTargetOfType(parameters: GetTypePropertyParams) = AsyncApi.getTargetOfType this parameters
+        member this.getTargetOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getTargetOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTargetOfType(snapshot: int, project: string, objectId: int) =
-            this.getTargetOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTargetOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getFreshTypeOfType(parameters: GetTypePropertyParams) = AsyncApi.getFreshTypeOfType this parameters
+        member this.getFreshTypeOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getFreshTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getFreshTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getFreshTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getFreshTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getRegularTypeOfType(parameters: GetTypePropertyParams) = AsyncApi.getRegularTypeOfType this parameters
+        member this.getRegularTypeOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getRegularTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getRegularTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getRegularTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getRegularTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -962,219 +1283,278 @@ module TscMailboxExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTypesOfType(snapshot: int, project: string, objectId: int) =
-            this.getTypesOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTypesOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getTypeParametersOfType(parameters: GetTypePropertyParams) = AsyncApi.getTypeParametersOfType this parameters
+        member this.getTypeParametersOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getTypeParametersOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeParametersOfType(snapshot: int, project: string, objectId: int) =
-            this.getTypeParametersOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTypeParametersOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getOuterTypeParametersOfType(parameters: GetTypePropertyParams) = AsyncApi.getOuterTypeParametersOfType this parameters
+        member this.getOuterTypeParametersOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getOuterTypeParametersOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getOuterTypeParametersOfType(snapshot: int, project: string, objectId: int) =
-            this.getOuterTypeParametersOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getOuterTypeParametersOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getLocalTypeParametersOfType(parameters: GetTypePropertyParams) = AsyncApi.getLocalTypeParametersOfType this parameters
+        member this.getLocalTypeParametersOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getLocalTypeParametersOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getLocalTypeParametersOfType(snapshot: int, project: string, objectId: int) =
-            this.getLocalTypeParametersOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getLocalTypeParametersOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getAliasTypeArgumentsOfType(parameters: GetTypePropertyParams) = AsyncApi.getAliasTypeArgumentsOfType this parameters
+        member this.getAliasTypeArgumentsOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getAliasTypeArgumentsOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getAliasTypeArgumentsOfType(snapshot: int, project: string, objectId: int) =
-            this.getAliasTypeArgumentsOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getAliasTypeArgumentsOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getAliasSymbolOfType(parameters: GetTypePropertyParams) = AsyncApi.getAliasSymbolOfType this parameters
+        member this.getAliasSymbolOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getAliasSymbolOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getAliasSymbolOfType(snapshot: int, project: string, objectId: int) =
-            this.getAliasSymbolOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getAliasSymbolOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getObjectTypeOfType(parameters: GetTypePropertyParams) = AsyncApi.getObjectTypeOfType this parameters
+        member this.getObjectTypeOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getObjectTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getObjectTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getObjectTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getObjectTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getIndexTypeOfType(parameters: GetTypePropertyParams) = AsyncApi.getIndexTypeOfType this parameters
+        member this.getIndexTypeOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getIndexTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getIndexTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getIndexTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getIndexTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getCheckTypeOfType(parameters: GetTypePropertyParams) = AsyncApi.getCheckTypeOfType this parameters
+        member this.getCheckTypeOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getCheckTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getCheckTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getCheckTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getCheckTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getExtendsTypeOfType(parameters: GetTypePropertyParams) = AsyncApi.getExtendsTypeOfType this parameters
+        member this.getExtendsTypeOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getExtendsTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getExtendsTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getExtendsTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getExtendsTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getBaseTypeOfType(parameters: GetTypePropertyParams) = AsyncApi.getBaseTypeOfType this parameters
+        member this.getBaseTypeOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getBaseTypeOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getBaseTypeOfType(snapshot: int, project: string, objectId: int) =
-            this.getBaseTypeOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getBaseTypeOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getConstraintOfType(parameters: GetTypePropertyParams) = AsyncApi.getConstraintOfType this parameters
+        member this.getConstraintOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getConstraintOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getConstraintOfType(snapshot: int, project: string, objectId: int) =
-            this.getConstraintOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getConstraintOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getTypeParametersOfSignature(parameters: GetSignaturePropertyParams) = AsyncApi.getTypeParametersOfSignature this parameters
+        member this.getTypeParametersOfSignature(parameters: GetSignaturePropertyParams) =
+            AsyncApi.getTypeParametersOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeParametersOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getTypeParametersOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTypeParametersOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getParametersOfSignature(parameters: GetSignaturePropertyParams) = AsyncApi.getParametersOfSignature this parameters
+        member this.getParametersOfSignature(parameters: GetSignaturePropertyParams) =
+            AsyncApi.getParametersOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getParametersOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getParametersOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getParametersOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getThisParameterOfSignature(parameters: GetSignaturePropertyParams) = AsyncApi.getThisParameterOfSignature this parameters
+        member this.getThisParameterOfSignature(parameters: GetSignaturePropertyParams) =
+            AsyncApi.getThisParameterOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getThisParameterOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getThisParameterOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getThisParameterOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getTargetOfSignature(parameters: GetSignaturePropertyParams) = AsyncApi.getTargetOfSignature this parameters
+        member this.getTargetOfSignature(parameters: GetSignaturePropertyParams) =
+            AsyncApi.getTargetOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTargetOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getTargetOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTargetOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getContextualType(parameters: GetContextualTypeParams) = AsyncApi.getContextualType this parameters
+        member this.getContextualType(parameters: GetContextualTypeParams) =
+            AsyncApi.getContextualType this parameters
 
         /// The fields of GetContextualTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getContextualType(snapshot: int, project: string, location: string) =
-            this.getContextualType(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getContextualType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetContextualTypeParams
             )
 
-        member this.getBaseTypeOfLiteralType(parameters: GetBaseTypeOfLiteralTypeParams) = AsyncApi.getBaseTypeOfLiteralType this parameters
+        member this.getBaseTypeOfLiteralType(parameters: GetBaseTypeOfLiteralTypeParams) =
+            AsyncApi.getBaseTypeOfLiteralType this parameters
 
         /// The fields of GetBaseTypeOfLiteralTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBaseTypeOfLiteralType(snapshot: int, project: string, ``type``: int) =
-            this.getBaseTypeOfLiteralType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getBaseTypeOfLiteralType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : GetBaseTypeOfLiteralTypeParams
             )
 
-        member this.getNonNullableType(parameters: GetTypePropertyParams) = AsyncApi.getNonNullableType this parameters
+        member this.getNonNullableType(parameters: GetTypePropertyParams) =
+            AsyncApi.getNonNullableType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getNonNullableType(snapshot: int, project: string, objectId: int) =
-            this.getNonNullableType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getNonNullableType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getTypeFromTypeNode(parameters: GetTypeFromTypeNodeParams) = AsyncApi.getTypeFromTypeNode this parameters
+        member this.getTypeFromTypeNode(parameters: GetTypeFromTypeNodeParams) =
+            AsyncApi.getTypeFromTypeNode this parameters
 
         /// The fields of GetTypeFromTypeNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeFromTypeNode(snapshot: int, project: string, location: string) =
-            this.getTypeFromTypeNode(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getTypeFromTypeNode (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetTypeFromTypeNodeParams
             )
 
@@ -1182,164 +1562,215 @@ module TscMailboxExtensions =
 
         /// The fields of GetWidenedTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getWidenedType(snapshot: int, project: string, ``type``: int) =
-            this.getWidenedType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getWidenedType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : GetWidenedTypeParams
             )
 
-        member this.getParameterType(parameters: GetParameterTypeParams) = AsyncApi.getParameterType this parameters
+        member this.getParameterType(parameters: GetParameterTypeParams) =
+            AsyncApi.getParameterType this parameters
 
         /// The fields of GetParameterTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getParameterType(snapshot: int, project: string, signature: int, index: int) =
-            this.getParameterType(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature
-                  Index = index }
+            this.getParameterType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                    Index = index
+                }
                 : GetParameterTypeParams
             )
 
-        member this.getTypeParameterAtPosition(parameters: GetParameterTypeParams) = AsyncApi.getTypeParameterAtPosition this parameters
+        member this.getTypeParameterAtPosition(parameters: GetParameterTypeParams) =
+            AsyncApi.getTypeParameterAtPosition this parameters
 
         /// The fields of GetParameterTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeParameterAtPosition(snapshot: int, project: string, signature: int, index: int) =
-            this.getTypeParameterAtPosition(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature
-                  Index = index }
+            this.getTypeParameterAtPosition (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                    Index = index
+                }
                 : GetParameterTypeParams
             )
 
-        member this.isArrayLikeType(parameters: IsArrayLikeTypeParams) = AsyncApi.isArrayLikeType this parameters
+        member this.isArrayLikeType(parameters: IsArrayLikeTypeParams) =
+            AsyncApi.isArrayLikeType this parameters
 
         /// The fields of IsArrayLikeTypeParams, spread. Builds the record and calls the overload above.
         member inline this.isArrayLikeType(snapshot: int, project: string, ``type``: int) =
-            this.isArrayLikeType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.isArrayLikeType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : IsArrayLikeTypeParams
             )
 
-        member this.isTypeAssignableTo(parameters: IsTypeAssignableToParams) = AsyncApi.isTypeAssignableTo this parameters
+        member this.isTypeAssignableTo(parameters: IsTypeAssignableToParams) =
+            AsyncApi.isTypeAssignableTo this parameters
 
         /// The fields of IsTypeAssignableToParams, spread. Builds the record and calls the overload above.
         member inline this.isTypeAssignableTo(snapshot: int, project: string, source: int, target: int) =
-            this.isTypeAssignableTo(
-                { Snapshot = snapshot
-                  Project = project
-                  Source = source
-                  Target = target }
+            this.isTypeAssignableTo (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Source = source
+                    Target = target
+                }
                 : IsTypeAssignableToParams
             )
 
-        member this.getShorthandAssignmentValueSymbol(parameters: GetTypeAtLocationParams) = AsyncApi.getShorthandAssignmentValueSymbol this parameters
+        member this.getShorthandAssignmentValueSymbol(parameters: GetTypeAtLocationParams) =
+            AsyncApi.getShorthandAssignmentValueSymbol this parameters
 
         /// The fields of GetTypeAtLocationParams, spread. Builds the record and calls the overload above.
         member inline this.getShorthandAssignmentValueSymbol(snapshot: int, project: string, location: string) =
-            this.getShorthandAssignmentValueSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getShorthandAssignmentValueSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetTypeAtLocationParams
             )
 
-        member this.getTypeOfSymbolAtLocation(parameters: GetTypeOfSymbolAtLocationParams) = AsyncApi.getTypeOfSymbolAtLocation this parameters
+        member this.getTypeOfSymbolAtLocation(parameters: GetTypeOfSymbolAtLocationParams) =
+            AsyncApi.getTypeOfSymbolAtLocation this parameters
 
         /// The fields of GetTypeOfSymbolAtLocationParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeOfSymbolAtLocation(snapshot: int, project: string, symbol: int, location: string) =
-            this.getTypeOfSymbolAtLocation(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol
-                  Location = location }
+            this.getTypeOfSymbolAtLocation (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                    Location = location
+                }
                 : GetTypeOfSymbolAtLocationParams
             )
 
         member this.typeToTypeNode(parameters: TypeToTypeNodeParams) = AsyncApi.typeToTypeNode this parameters
 
         /// The fields of TypeToTypeNodeParams, spread. Builds the record and calls the overload above.
-        member inline this.typeToTypeNode(snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int) =
-            this.typeToTypeNode(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type``
-                  Location = location
-                  Flags = flags }
+        member inline this.typeToTypeNode
+            (snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int)
+            =
+            this.typeToTypeNode (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                    Location = location
+                    Flags = flags
+                }
                 : TypeToTypeNodeParams
             )
 
-        member this.signatureToSignatureDeclaration(parameters: SignatureToSignatureDeclarationParams) = AsyncApi.signatureToSignatureDeclaration this parameters
+        member this.signatureToSignatureDeclaration(parameters: SignatureToSignatureDeclarationParams) =
+            AsyncApi.signatureToSignatureDeclaration this parameters
 
         /// The fields of SignatureToSignatureDeclarationParams, spread. Builds the record and calls the overload above.
-        member inline this.signatureToSignatureDeclaration(snapshot: int, project: string, signature: int, kind: SyntaxKind, [<Struct>] ?location: string, [<Struct>] ?flags: NodeBuilderFlags) =
-            this.signatureToSignatureDeclaration(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature
-                  Kind = kind
-                  Location = location
-                  Flags = flags }
+        member inline this.signatureToSignatureDeclaration
+            (
+                snapshot: int,
+                project: string,
+                signature: int,
+                kind: SyntaxKind,
+                [<Struct>] ?location: string,
+                [<Struct>] ?flags: NodeBuilderFlags
+            ) =
+            this.signatureToSignatureDeclaration (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                    Kind = kind
+                    Location = location
+                    Flags = flags
+                }
                 : SignatureToSignatureDeclarationParams
             )
 
         member this.typeToString(parameters: TypeToTypeNodeParams) = AsyncApi.typeToString this parameters
 
         /// The fields of TypeToTypeNodeParams, spread. Builds the record and calls the overload above.
-        member inline this.typeToString(snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int) =
-            this.typeToString(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type``
-                  Location = location
-                  Flags = flags }
+        member inline this.typeToString
+            (snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int)
+            =
+            this.typeToString (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                    Location = location
+                    Flags = flags
+                }
                 : TypeToTypeNodeParams
             )
 
-        member this.isContextSensitive(parameters: GetContextualTypeParams) = AsyncApi.isContextSensitive this parameters
+        member this.isContextSensitive(parameters: GetContextualTypeParams) =
+            AsyncApi.isContextSensitive this parameters
 
         /// The fields of GetContextualTypeParams, spread. Builds the record and calls the overload above.
         member inline this.isContextSensitive(snapshot: int, project: string, location: string) =
-            this.isContextSensitive(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.isContextSensitive (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : GetContextualTypeParams
             )
 
-        member this.getReturnTypeOfSignature(parameters: GetSignaturePropertyParams) = AsyncApi.getReturnTypeOfSignature this parameters
+        member this.getReturnTypeOfSignature(parameters: GetSignaturePropertyParams) =
+            AsyncApi.getReturnTypeOfSignature this parameters
 
         /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getReturnTypeOfSignature(snapshot: int, project: string, objectId: int) =
-            this.getReturnTypeOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getReturnTypeOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetSignaturePropertyParams
             )
 
-        member this.getRestTypeOfSignature(parameters: CheckerSignatureParams) = AsyncApi.getRestTypeOfSignature this parameters
+        member this.getRestTypeOfSignature(parameters: CheckerSignatureParams) =
+            AsyncApi.getRestTypeOfSignature this parameters
 
         /// The fields of CheckerSignatureParams, spread. Builds the record and calls the overload above.
         member inline this.getRestTypeOfSignature(snapshot: int, project: string, signature: int) =
-            this.getRestTypeOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature }
+            this.getRestTypeOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                }
                 : CheckerSignatureParams
             )
 
-        member this.getTypePredicateOfSignature(parameters: CheckerSignatureParams) = AsyncApi.getTypePredicateOfSignature this parameters
+        member this.getTypePredicateOfSignature(parameters: CheckerSignatureParams) =
+            AsyncApi.getTypePredicateOfSignature this parameters
 
         /// The fields of CheckerSignatureParams, spread. Builds the record and calls the overload above.
         member inline this.getTypePredicateOfSignature(snapshot: int, project: string, signature: int) =
-            this.getTypePredicateOfSignature(
-                { Snapshot = snapshot
-                  Project = project
-                  Signature = signature }
+            this.getTypePredicateOfSignature (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Signature = signature
+                }
                 : CheckerSignatureParams
             )
 
@@ -1347,43 +1778,54 @@ module TscMailboxExtensions =
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBaseTypes(snapshot: int, project: string, ``type``: int) =
-            this.getBaseTypes(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getBaseTypes (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
-        member this.getPropertiesOfType(parameters: CheckerTypeParams) = AsyncApi.getPropertiesOfType this parameters
+        member this.getPropertiesOfType(parameters: CheckerTypeParams) =
+            AsyncApi.getPropertiesOfType this parameters
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getPropertiesOfType(snapshot: int, project: string, ``type``: int) =
-            this.getPropertiesOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getPropertiesOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
-        member this.getApparentPropertiesOfType(parameters: GetTypePropertyParams) = AsyncApi.getApparentPropertiesOfType this parameters
+        member this.getApparentPropertiesOfType(parameters: GetTypePropertyParams) =
+            AsyncApi.getApparentPropertiesOfType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getApparentPropertiesOfType(snapshot: int, project: string, objectId: int) =
-            this.getApparentPropertiesOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getApparentPropertiesOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getApparentType(parameters: GetTypePropertyParams) = AsyncApi.getApparentType this parameters
+        member this.getApparentType(parameters: GetTypePropertyParams) =
+            AsyncApi.getApparentType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getApparentType(snapshot: int, project: string, objectId: int) =
-            this.getApparentType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getApparentType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
@@ -1391,211 +1833,269 @@ module TscMailboxExtensions =
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getReducedType(snapshot: int, project: string, objectId: int) =
-            this.getReducedType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getReducedType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getPropertyOfType(parameters: GetPropertyOfTypeParams) = AsyncApi.getPropertyOfType this parameters
+        member this.getPropertyOfType(parameters: GetPropertyOfTypeParams) =
+            AsyncApi.getPropertyOfType this parameters
 
         /// The fields of GetPropertyOfTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getPropertyOfType(snapshot: int, project: string, ``type``: int, name: string) =
-            this.getPropertyOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type``
-                  Name = name }
+            this.getPropertyOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                    Name = name
+                }
                 : GetPropertyOfTypeParams
             )
 
-        member this.getIndexInfosOfType(parameters: CheckerTypeParams) = AsyncApi.getIndexInfosOfType this parameters
+        member this.getIndexInfosOfType(parameters: CheckerTypeParams) =
+            AsyncApi.getIndexInfosOfType this parameters
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getIndexInfosOfType(snapshot: int, project: string, ``type``: int) =
-            this.getIndexInfosOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getIndexInfosOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
-        member this.getConstraintOfTypeParameter(parameters: GetTypePropertyParams) = AsyncApi.getConstraintOfTypeParameter this parameters
+        member this.getConstraintOfTypeParameter(parameters: GetTypePropertyParams) =
+            AsyncApi.getConstraintOfTypeParameter this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getConstraintOfTypeParameter(snapshot: int, project: string, objectId: int) =
-            this.getConstraintOfTypeParameter(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getConstraintOfTypeParameter (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getDefaultFromTypeParameter(parameters: GetTypePropertyParams) = AsyncApi.getDefaultFromTypeParameter this parameters
+        member this.getDefaultFromTypeParameter(parameters: GetTypePropertyParams) =
+            AsyncApi.getDefaultFromTypeParameter this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getDefaultFromTypeParameter(snapshot: int, project: string, objectId: int) =
-            this.getDefaultFromTypeParameter(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getDefaultFromTypeParameter (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getBaseConstraintOfType(parameters: CheckerTypeParams) = AsyncApi.getBaseConstraintOfType this parameters
+        member this.getBaseConstraintOfType(parameters: CheckerTypeParams) =
+            AsyncApi.getBaseConstraintOfType this parameters
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBaseConstraintOfType(snapshot: int, project: string, ``type``: int) =
-            this.getBaseConstraintOfType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getBaseConstraintOfType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
-        member this.getTypeArguments(parameters: CheckerTypeParams) = AsyncApi.getTypeArguments this parameters
+        member this.getTypeArguments(parameters: CheckerTypeParams) =
+            AsyncApi.getTypeArguments this parameters
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getTypeArguments(snapshot: int, project: string, ``type``: int) =
-            this.getTypeArguments(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.getTypeArguments (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
-        member this.getImportAdderEdits(parameters: GetImportAdderEditsParams) = AsyncApi.getImportAdderEdits this parameters
+        member this.getImportAdderEdits(parameters: GetImportAdderEditsParams) =
+            AsyncApi.getImportAdderEdits this parameters
 
         /// The fields of GetImportAdderEditsParams, spread. Builds the record and calls the overload above.
-        member inline this.getImportAdderEdits(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?actions: ImportAdderAction[]) =
-            this.getImportAdderEdits(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Actions = actions }
+        member inline this.getImportAdderEdits
+            (snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?actions: ImportAdderAction[])
+            =
+            this.getImportAdderEdits (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Actions = actions
+                }
                 : GetImportAdderEditsParams
             )
 
-        member this.getTrueTypeOfConditionalType(parameters: GetTypePropertyParams) = AsyncApi.getTrueTypeOfConditionalType this parameters
+        member this.getTrueTypeOfConditionalType(parameters: GetTypePropertyParams) =
+            AsyncApi.getTrueTypeOfConditionalType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getTrueTypeOfConditionalType(snapshot: int, project: string, objectId: int) =
-            this.getTrueTypeOfConditionalType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getTrueTypeOfConditionalType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getFalseTypeOfConditionalType(parameters: GetTypePropertyParams) = AsyncApi.getFalseTypeOfConditionalType this parameters
+        member this.getFalseTypeOfConditionalType(parameters: GetTypePropertyParams) =
+            AsyncApi.getFalseTypeOfConditionalType this parameters
 
         /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
         member inline this.getFalseTypeOfConditionalType(snapshot: int, project: string, objectId: int) =
-            this.getFalseTypeOfConditionalType(
-                { Snapshot = snapshot
-                  Project = project
-                  ObjectId = objectId }
+            this.getFalseTypeOfConditionalType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ObjectId = objectId
+                }
                 : GetTypePropertyParams
             )
 
-        member this.getConstantValue(parameters: CheckerNodeParams) = AsyncApi.getConstantValue this parameters
+        member this.getConstantValue(parameters: CheckerNodeParams) =
+            AsyncApi.getConstantValue this parameters
 
         /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getConstantValue(snapshot: int, project: string, location: string) =
-            this.getConstantValue(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getConstantValue (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : CheckerNodeParams
             )
 
-        member this.getSignatureFromDeclaration(parameters: CheckerNodeParams) = AsyncApi.getSignatureFromDeclaration this parameters
+        member this.getSignatureFromDeclaration(parameters: CheckerNodeParams) =
+            AsyncApi.getSignatureFromDeclaration this parameters
 
         /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getSignatureFromDeclaration(snapshot: int, project: string, location: string) =
-            this.getSignatureFromDeclaration(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getSignatureFromDeclaration (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : CheckerNodeParams
             )
 
-        member this.getExportSpecifierLocalTargetSymbol(parameters: CheckerNodeParams) = AsyncApi.getExportSpecifierLocalTargetSymbol this parameters
+        member this.getExportSpecifierLocalTargetSymbol(parameters: CheckerNodeParams) =
+            AsyncApi.getExportSpecifierLocalTargetSymbol this parameters
 
         /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getExportSpecifierLocalTargetSymbol(snapshot: int, project: string, location: string) =
-            this.getExportSpecifierLocalTargetSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Location = location }
+            this.getExportSpecifierLocalTargetSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Location = location
+                }
                 : CheckerNodeParams
             )
 
-        member this.getAliasedSymbol(parameters: CheckerSymbolParams) = AsyncApi.getAliasedSymbol this parameters
+        member this.getAliasedSymbol(parameters: CheckerSymbolParams) =
+            AsyncApi.getAliasedSymbol this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getAliasedSymbol(snapshot: int, project: string, symbol: int) =
-            this.getAliasedSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getAliasedSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getImmediateAliasedSymbol(parameters: CheckerSymbolParams) = AsyncApi.getImmediateAliasedSymbol this parameters
+        member this.getImmediateAliasedSymbol(parameters: CheckerSymbolParams) =
+            AsyncApi.getImmediateAliasedSymbol this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getImmediateAliasedSymbol(snapshot: int, project: string, symbol: int) =
-            this.getImmediateAliasedSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getImmediateAliasedSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getTargetSymbol(parameters: CheckerSymbolParams) = AsyncApi.getTargetSymbol this parameters
+        member this.getTargetSymbol(parameters: CheckerSymbolParams) =
+            AsyncApi.getTargetSymbol this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getTargetSymbol(snapshot: int, project: string, symbol: int) =
-            this.getTargetSymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getTargetSymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getFullyQualifiedName(parameters: CheckerSymbolParams) = AsyncApi.getFullyQualifiedName this parameters
+        member this.getFullyQualifiedName(parameters: CheckerSymbolParams) =
+            AsyncApi.getFullyQualifiedName this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getFullyQualifiedName(snapshot: int, project: string, symbol: int) =
-            this.getFullyQualifiedName(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getFullyQualifiedName (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getExportsOfModule(parameters: CheckerSymbolParams) = AsyncApi.getExportsOfModule this parameters
+        member this.getExportsOfModule(parameters: CheckerSymbolParams) =
+            AsyncApi.getExportsOfModule this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getExportsOfModule(snapshot: int, project: string, symbol: int) =
-            this.getExportsOfModule(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getExportsOfModule (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getMemberInModuleExports(parameters: GetMemberInModuleExportsParams) = AsyncApi.getMemberInModuleExports this parameters
+        member this.getMemberInModuleExports(parameters: GetMemberInModuleExportsParams) =
+            AsyncApi.getMemberInModuleExports this parameters
 
         /// The fields of GetMemberInModuleExportsParams, spread. Builds the record and calls the overload above.
         member inline this.getMemberInModuleExports(snapshot: int, project: string, symbol: int, name: string) =
-            this.getMemberInModuleExports(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol
-                  Name = name }
+            this.getMemberInModuleExports (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                    Name = name
+                }
                 : GetMemberInModuleExportsParams
             )
 
@@ -1603,21 +2103,26 @@ module TscMailboxExtensions =
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getJsDocTags(snapshot: int, project: string, symbol: int) =
-            this.getJsDocTags(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getJsDocTags (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getDocumentationComment(parameters: CheckerSymbolParams) = AsyncApi.getDocumentationComment this parameters
+        member this.getDocumentationComment(parameters: CheckerSymbolParams) =
+            AsyncApi.getDocumentationComment this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.getDocumentationComment(snapshot: int, project: string, symbol: int) =
-            this.getDocumentationComment(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.getDocumentationComment (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
@@ -1625,180 +2130,252 @@ module TscMailboxExtensions =
 
         /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
         member inline this.isArrayType(snapshot: int, project: string, ``type``: int) =
-            this.isArrayType(
-                { Snapshot = snapshot
-                  Project = project
-                  ``Type`` = ``type`` }
+            this.isArrayType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``Type`` = ``type``
+                }
                 : CheckerTypeParams
             )
 
-        member this.isReadonlySymbol(parameters: CheckerSymbolParams) = AsyncApi.isReadonlySymbol this parameters
+        member this.isReadonlySymbol(parameters: CheckerSymbolParams) =
+            AsyncApi.isReadonlySymbol this parameters
 
         /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
         member inline this.isReadonlySymbol(snapshot: int, project: string, symbol: int) =
-            this.isReadonlySymbol(
-                { Snapshot = snapshot
-                  Project = project
-                  Symbol = symbol }
+            this.isReadonlySymbol (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Symbol = symbol
+                }
                 : CheckerSymbolParams
             )
 
-        member this.getReferencesToSymbolInFile(parameters: GetReferencesToSymbolInFileParams) = AsyncApi.getReferencesToSymbolInFile this parameters
+        member this.getReferencesToSymbolInFile(parameters: GetReferencesToSymbolInFileParams) =
+            AsyncApi.getReferencesToSymbolInFile this parameters
 
         /// The fields of GetReferencesToSymbolInFileParams, spread. Builds the record and calls the overload above.
-        member inline this.getReferencesToSymbolInFile(snapshot: int, project: string, file: DocumentIdentifier, symbol: int) =
-            this.getReferencesToSymbolInFile(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Symbol = symbol }
+        member inline this.getReferencesToSymbolInFile
+            (snapshot: int, project: string, file: DocumentIdentifier, symbol: int)
+            =
+            this.getReferencesToSymbolInFile (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Symbol = symbol
+                }
                 : GetReferencesToSymbolInFileParams
             )
 
-        member this.getReferencedSymbolsForNode(parameters: GetReferencedSymbolsForNodeParams) = AsyncApi.getReferencedSymbolsForNode this parameters
+        member this.getReferencedSymbolsForNode(parameters: GetReferencedSymbolsForNodeParams) =
+            AsyncApi.getReferencedSymbolsForNode this parameters
 
         /// The fields of GetReferencedSymbolsForNodeParams, spread. Builds the record and calls the overload above.
         member inline this.getReferencedSymbolsForNode(snapshot: int, project: string, node: string, position: int) =
-            this.getReferencedSymbolsForNode(
-                { Snapshot = snapshot
-                  Project = project
-                  Node = node
-                  Position = position }
+            this.getReferencedSymbolsForNode (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Node = node
+                    Position = position
+                }
                 : GetReferencedSymbolsForNodeParams
             )
 
-        member this.getSignatureUsages(parameters: GetSignatureUsagesParams) = AsyncApi.getSignatureUsages this parameters
+        member this.getSignatureUsages(parameters: GetSignatureUsagesParams) =
+            AsyncApi.getSignatureUsages this parameters
 
         /// The fields of GetSignatureUsagesParams, spread. Builds the record and calls the overload above.
         member inline this.getSignatureUsages(snapshot: int, project: string, signatureDecl: string) =
-            this.getSignatureUsages(
-                { Snapshot = snapshot
-                  Project = project
-                  SignatureDecl = signatureDecl }
+            this.getSignatureUsages (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    SignatureDecl = signatureDecl
+                }
                 : GetSignatureUsagesParams
             )
 
-        member this.getCompletionsAtPosition(parameters: GetCompletionsAtPositionParams) = AsyncApi.getCompletionsAtPosition this parameters
+        member this.getCompletionsAtPosition(parameters: GetCompletionsAtPositionParams) =
+            AsyncApi.getCompletionsAtPosition this parameters
 
         /// The fields of GetCompletionsAtPositionParams, spread. Builds the record and calls the overload above.
-        member inline this.getCompletionsAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int, [<Struct>] ?triggerCharacter: string, [<Struct>] ?includeSymbol: bool) =
-            this.getCompletionsAtPosition(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Position = position
-                  TriggerCharacter = triggerCharacter
-                  IncludeSymbol = includeSymbol }
+        member inline this.getCompletionsAtPosition
+            (
+                snapshot: int,
+                project: string,
+                file: DocumentIdentifier,
+                position: int,
+                [<Struct>] ?triggerCharacter: string,
+                [<Struct>] ?includeSymbol: bool
+            ) =
+            this.getCompletionsAtPosition (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Position = position
+                    TriggerCharacter = triggerCharacter
+                    IncludeSymbol = includeSymbol
+                }
                 : GetCompletionsAtPositionParams
             )
 
-        member this.getSyntacticDiagnostics(parameters: GetDiagnosticsParams) = AsyncApi.getSyntacticDiagnostics this parameters
+        member this.getSyntacticDiagnostics(parameters: GetDiagnosticsParams) =
+            AsyncApi.getSyntacticDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
-        member inline this.getSyntacticDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getSyntacticDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getSyntacticDiagnostics
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getSyntacticDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getBindDiagnostics(parameters: GetDiagnosticsParams) = AsyncApi.getBindDiagnostics this parameters
+        member this.getBindDiagnostics(parameters: GetDiagnosticsParams) =
+            AsyncApi.getBindDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getBindDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getBindDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+            this.getBindDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getSemanticDiagnostics(parameters: GetDiagnosticsParams) = AsyncApi.getSemanticDiagnostics this parameters
+        member this.getSemanticDiagnostics(parameters: GetDiagnosticsParams) =
+            AsyncApi.getSemanticDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
-        member inline this.getSemanticDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getSemanticDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getSemanticDiagnostics
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getSemanticDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getSuggestionDiagnostics(parameters: GetDiagnosticsParams) = AsyncApi.getSuggestionDiagnostics this parameters
+        member this.getSuggestionDiagnostics(parameters: GetDiagnosticsParams) =
+            AsyncApi.getSuggestionDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
-        member inline this.getSuggestionDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getSuggestionDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getSuggestionDiagnostics
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getSuggestionDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getDeclarationDiagnostics(parameters: GetDiagnosticsParams) = AsyncApi.getDeclarationDiagnostics this parameters
+        member this.getDeclarationDiagnostics(parameters: GetDiagnosticsParams) =
+            AsyncApi.getDeclarationDiagnostics this parameters
 
         /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
-        member inline this.getDeclarationDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getDeclarationDiagnostics(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+        member inline this.getDeclarationDiagnostics
+            (snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[])
+            =
+            this.getDeclarationDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : GetDiagnosticsParams
             )
 
-        member this.getProgramDiagnostics(parameters: GetProjectDiagnosticsParams) = AsyncApi.getProgramDiagnostics this parameters
+        member this.getProgramDiagnostics(parameters: GetProjectDiagnosticsParams) =
+            AsyncApi.getProgramDiagnostics this parameters
 
         /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getProgramDiagnostics(snapshot: int, project: string) =
-            this.getProgramDiagnostics(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getProgramDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetProjectDiagnosticsParams
             )
 
-        member this.getGlobalDiagnostics(parameters: GetProjectDiagnosticsParams) = AsyncApi.getGlobalDiagnostics this parameters
+        member this.getGlobalDiagnostics(parameters: GetProjectDiagnosticsParams) =
+            AsyncApi.getGlobalDiagnostics this parameters
 
         /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getGlobalDiagnostics(snapshot: int, project: string) =
-            this.getGlobalDiagnostics(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getGlobalDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetProjectDiagnosticsParams
             )
 
-        member this.getConfigFileParsingDiagnostics(parameters: GetProjectDiagnosticsParams) = AsyncApi.getConfigFileParsingDiagnostics this parameters
+        member this.getConfigFileParsingDiagnostics(parameters: GetProjectDiagnosticsParams) =
+            AsyncApi.getConfigFileParsingDiagnostics this parameters
 
         /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
         member inline this.getConfigFileParsingDiagnostics(snapshot: int, project: string) =
-            this.getConfigFileParsingDiagnostics(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getConfigFileParsingDiagnostics (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetProjectDiagnosticsParams
             )
 
         member this.printNode(parameters: PrintNodeParams) = AsyncApi.printNode this parameters
 
         /// The fields of PrintNodeParams, spread. Builds the record and calls the overload above.
-        member inline this.printNode(data: string, [<Struct>] ?preserveSourceNewlines: bool, [<Struct>] ?neverAsciiEscape: bool, [<Struct>] ?terminateUnterminatedLiterals: bool) =
-            this.printNode(
-                { Data = data
-                  PreserveSourceNewlines = preserveSourceNewlines
-                  NeverAsciiEscape = neverAsciiEscape
-                  TerminateUnterminatedLiterals = terminateUnterminatedLiterals }
+        member inline this.printNode
+            (
+                data: string,
+                [<Struct>] ?preserveSourceNewlines: bool,
+                [<Struct>] ?neverAsciiEscape: bool,
+                [<Struct>] ?terminateUnterminatedLiterals: bool
+            ) =
+            this.printNode (
+                {
+                    Data = data
+                    PreserveSourceNewlines = preserveSourceNewlines
+                    NeverAsciiEscape = neverAsciiEscape
+                    TerminateUnterminatedLiterals = terminateUnterminatedLiterals
+                }
                 : PrintNodeParams
             )
 
-        member this.formatNodeForInsertion(parameters: FormatNodeForInsertionParams) = AsyncApi.formatNodeForInsertion this parameters
+        member this.formatNodeForInsertion(parameters: FormatNodeForInsertionParams) =
+            AsyncApi.formatNodeForInsertion this parameters
 
         /// The fields of FormatNodeForInsertionParams, spread. Builds the record and calls the overload above.
-        member inline this.formatNodeForInsertion(snapshot: int, project: string, file: DocumentIdentifier, position: int, data: string) =
-            this.formatNodeForInsertion(
-                { Snapshot = snapshot
-                  Project = project
-                  ``File`` = file
-                  Position = position
-                  Data = data }
+        member inline this.formatNodeForInsertion
+            (snapshot: int, project: string, file: DocumentIdentifier, position: int, data: string)
+            =
+            this.formatNodeForInsertion (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    ``File`` = file
+                    Position = position
+                    Data = data
+                }
                 : FormatNodeForInsertionParams
             )
 
@@ -1806,10 +2383,12 @@ module TscMailboxExtensions =
 
         /// The fields of EmitParams, spread. Builds the record and calls the overload above.
         member inline this.emit(snapshot: int, project: string, [<Struct>] ?emitOnly: int) =
-            this.emit(
-                { Snapshot = snapshot
-                  Project = project
-                  EmitOnly = emitOnly }
+            this.emit (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    EmitOnly = emitOnly
+                }
                 : EmitParams
             )
 
@@ -1817,32 +2396,40 @@ module TscMailboxExtensions =
 
         /// The fields of EmitParams, spread. Builds the record and calls the overload above.
         member inline this.emitToString(snapshot: int, project: string, [<Struct>] ?emitOnly: int) =
-            this.emitToString(
-                { Snapshot = snapshot
-                  Project = project
-                  EmitOnly = emitOnly }
+            this.emitToString (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    EmitOnly = emitOnly
+                }
                 : EmitParams
             )
 
-        member this.getJavaScriptEmit(parameters: SelectedFilesEmitParams) = AsyncApi.getJavaScriptEmit this parameters
+        member this.getJavaScriptEmit(parameters: SelectedFilesEmitParams) =
+            AsyncApi.getJavaScriptEmit this parameters
 
         /// The fields of SelectedFilesEmitParams, spread. Builds the record and calls the overload above.
         member inline this.getJavaScriptEmit(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getJavaScriptEmit(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+            this.getJavaScriptEmit (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : SelectedFilesEmitParams
             )
 
-        member this.getDeclarationEmit(parameters: SelectedFilesEmitParams) = AsyncApi.getDeclarationEmit this parameters
+        member this.getDeclarationEmit(parameters: SelectedFilesEmitParams) =
+            AsyncApi.getDeclarationEmit this parameters
 
         /// The fields of SelectedFilesEmitParams, spread. Builds the record and calls the overload above.
         member inline this.getDeclarationEmit(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
-            this.getDeclarationEmit(
-                { Snapshot = snapshot
-                  Project = project
-                  Files = files }
+            this.getDeclarationEmit (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                    Files = files
+                }
                 : SelectedFilesEmitParams
             )
 
@@ -1850,9 +2437,11 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getAnyType(snapshot: int, project: string) =
-            this.getAnyType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getAnyType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1860,9 +2449,11 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getStringType(snapshot: int, project: string) =
-            this.getStringType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getStringType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1870,9 +2461,11 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getNumberType(snapshot: int, project: string) =
-            this.getNumberType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getNumberType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1880,9 +2473,11 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBooleanType(snapshot: int, project: string) =
-            this.getBooleanType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getBooleanType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1890,19 +2485,24 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getVoidType(snapshot: int, project: string) =
-            this.getVoidType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getVoidType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
-        member this.getUndefinedType(parameters: GetIntrinsicTypeParams) = AsyncApi.getUndefinedType this parameters
+        member this.getUndefinedType(parameters: GetIntrinsicTypeParams) =
+            AsyncApi.getUndefinedType this parameters
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getUndefinedType(snapshot: int, project: string) =
-            this.getUndefinedType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getUndefinedType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1910,9 +2510,11 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getNullType(snapshot: int, project: string) =
-            this.getNullType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getNullType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1920,9 +2522,11 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getNeverType(snapshot: int, project: string) =
-            this.getNeverType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getNeverType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1930,9 +2534,11 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getUnknownType(snapshot: int, project: string) =
-            this.getUnknownType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getUnknownType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
@@ -1940,69 +2546,78 @@ module TscMailboxExtensions =
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getBigIntType(snapshot: int, project: string) =
-            this.getBigIntType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getBigIntType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
-        member this.getESSymbolType(parameters: GetIntrinsicTypeParams) = AsyncApi.getESSymbolType this parameters
+        member this.getESSymbolType(parameters: GetIntrinsicTypeParams) =
+            AsyncApi.getESSymbolType this parameters
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getESSymbolType(snapshot: int, project: string) =
-            this.getESSymbolType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getESSymbolType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
-        member this.getNonPrimitiveType(parameters: GetIntrinsicTypeParams) = AsyncApi.getNonPrimitiveType this parameters
+        member this.getNonPrimitiveType(parameters: GetIntrinsicTypeParams) =
+            AsyncApi.getNonPrimitiveType this parameters
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getNonPrimitiveType(snapshot: int, project: string) =
-            this.getNonPrimitiveType(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getNonPrimitiveType (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
-        member this.getWellKnownSymbols(parameters: GetIntrinsicTypeParams) = AsyncApi.getWellKnownSymbols this parameters
+        member this.getWellKnownSymbols(parameters: GetIntrinsicTypeParams) =
+            AsyncApi.getWellKnownSymbols this parameters
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getWellKnownSymbols(snapshot: int, project: string) =
-            this.getWellKnownSymbols(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getWellKnownSymbols (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
-        member this.getWellKnownSignatures(parameters: GetIntrinsicTypeParams) = AsyncApi.getWellKnownSignatures this parameters
+        member this.getWellKnownSignatures(parameters: GetIntrinsicTypeParams) =
+            AsyncApi.getWellKnownSignatures this parameters
 
         /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
         member inline this.getWellKnownSignatures(snapshot: int, project: string) =
-            this.getWellKnownSignatures(
-                { Snapshot = snapshot
-                  Project = project }
+            this.getWellKnownSignatures (
+                {
+                    Snapshot = snapshot
+                    Project = project
+                }
                 : GetIntrinsicTypeParams
             )
 
-        member this.startCPUProfile(parameters: ProfileParams) = AsyncApi.startCPUProfile this parameters
+        member this.startCPUProfile(parameters: ProfileParams) =
+            AsyncApi.startCPUProfile this parameters
 
         /// The fields of ProfileParams, spread. Builds the record and calls the overload above.
         member inline this.startCPUProfile(dir: string) =
-            this.startCPUProfile(
-                { Dir = dir }
-                : ProfileParams
-            )
+            this.startCPUProfile ({ Dir = dir }: ProfileParams)
 
         member this.stopCPUProfile() = AsyncApi.stopCPUProfile this
 
-        member this.saveHeapProfile(parameters: ProfileParams) = AsyncApi.saveHeapProfile this parameters
+        member this.saveHeapProfile(parameters: ProfileParams) =
+            AsyncApi.saveHeapProfile this parameters
 
         /// The fields of ProfileParams, spread. Builds the record and calls the overload above.
         member inline this.saveHeapProfile(dir: string) =
-            this.saveHeapProfile(
-                { Dir = dir }
-                : ProfileParams
-            )
-
+            this.saveHeapProfile ({ Dir = dir }: ProfileParams)

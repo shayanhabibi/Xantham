@@ -542,9 +542,11 @@ module AstKind =
     /// True when the kind is one of the schema's `TriviaSyntaxKind`.
     let isTriviaKind (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.SingleLineCommentTrivia | SyntaxKind.MultiLineCommentTrivia | SyntaxKind.NewLineTrivia | SyntaxKind.WhitespaceTrivia
-        | SyntaxKind.ConflictMarkerTrivia
-            -> true
+        | SyntaxKind.SingleLineCommentTrivia
+        | SyntaxKind.MultiLineCommentTrivia
+        | SyntaxKind.NewLineTrivia
+        | SyntaxKind.WhitespaceTrivia
+        | SyntaxKind.ConflictMarkerTrivia -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `LiteralSyntaxKind`.
@@ -554,8 +556,9 @@ module AstKind =
     /// True when the kind is one of the schema's `PseudoLiteralSyntaxKind`.
     let isPseudoLiteralKind (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.TemplateHead | SyntaxKind.TemplateMiddle | SyntaxKind.TemplateTail
-            -> true
+        | SyntaxKind.TemplateHead
+        | SyntaxKind.TemplateMiddle
+        | SyntaxKind.TemplateTail -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `PunctuationSyntaxKind`.
@@ -569,28 +572,49 @@ module AstKind =
     /// True when the kind is one of the schema's `ModifierSyntaxKind`.
     let isModifierKind (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AbstractKeyword | SyntaxKind.AccessorKeyword | SyntaxKind.AsyncKeyword | SyntaxKind.ConstKeyword
-        | SyntaxKind.DeclareKeyword | SyntaxKind.DefaultKeyword | SyntaxKind.ExportKeyword | SyntaxKind.InKeyword
-        | SyntaxKind.PrivateKeyword | SyntaxKind.ProtectedKeyword | SyntaxKind.PublicKeyword | SyntaxKind.ReadonlyKeyword
-        | SyntaxKind.OutKeyword | SyntaxKind.OverrideKeyword | SyntaxKind.StaticKeyword
-            -> true
+        | SyntaxKind.AbstractKeyword
+        | SyntaxKind.AccessorKeyword
+        | SyntaxKind.AsyncKeyword
+        | SyntaxKind.ConstKeyword
+        | SyntaxKind.DeclareKeyword
+        | SyntaxKind.DefaultKeyword
+        | SyntaxKind.ExportKeyword
+        | SyntaxKind.InKeyword
+        | SyntaxKind.PrivateKeyword
+        | SyntaxKind.ProtectedKeyword
+        | SyntaxKind.PublicKeyword
+        | SyntaxKind.ReadonlyKeyword
+        | SyntaxKind.OutKeyword
+        | SyntaxKind.OverrideKeyword
+        | SyntaxKind.StaticKeyword -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `KeywordTypeSyntaxKind`.
     let isKeywordTypeKind (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AnyKeyword | SyntaxKind.BigIntKeyword | SyntaxKind.BooleanKeyword | SyntaxKind.IntrinsicKeyword
-        | SyntaxKind.NeverKeyword | SyntaxKind.NumberKeyword | SyntaxKind.ObjectKeyword | SyntaxKind.StringKeyword
-        | SyntaxKind.SymbolKeyword | SyntaxKind.UndefinedKeyword | SyntaxKind.UnknownKeyword | SyntaxKind.VoidKeyword
-            -> true
+        | SyntaxKind.AnyKeyword
+        | SyntaxKind.BigIntKeyword
+        | SyntaxKind.BooleanKeyword
+        | SyntaxKind.IntrinsicKeyword
+        | SyntaxKind.NeverKeyword
+        | SyntaxKind.NumberKeyword
+        | SyntaxKind.ObjectKeyword
+        | SyntaxKind.StringKeyword
+        | SyntaxKind.SymbolKeyword
+        | SyntaxKind.UndefinedKeyword
+        | SyntaxKind.UnknownKeyword
+        | SyntaxKind.VoidKeyword -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `KeywordExpressionSyntaxKind`.
     let isKeywordExpressionKind (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.NullKeyword | SyntaxKind.TrueKeyword | SyntaxKind.FalseKeyword | SyntaxKind.ThisKeyword
-        | SyntaxKind.SuperKeyword | SyntaxKind.ImportKeyword
-            -> true
+        | SyntaxKind.NullKeyword
+        | SyntaxKind.TrueKeyword
+        | SyntaxKind.FalseKeyword
+        | SyntaxKind.ThisKeyword
+        | SyntaxKind.SuperKeyword
+        | SyntaxKind.ImportKeyword -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `TokenSyntaxKind`.
@@ -600,9 +624,13 @@ module AstKind =
     /// True when the kind is one of the schema's `JsxTokenSyntaxKind`.
     let isJsxTokenKind (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.LessThanSlashToken | SyntaxKind.EndOfFile | SyntaxKind.ConflictMarkerTrivia | SyntaxKind.JsxText
-        | SyntaxKind.JsxTextAllWhiteSpaces | SyntaxKind.OpenBraceToken | SyntaxKind.LessThanToken
-            -> true
+        | SyntaxKind.LessThanSlashToken
+        | SyntaxKind.EndOfFile
+        | SyntaxKind.ConflictMarkerTrivia
+        | SyntaxKind.JsxText
+        | SyntaxKind.JsxTextAllWhiteSpaces
+        | SyntaxKind.OpenBraceToken
+        | SyntaxKind.LessThanToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `JSDocNodeSyntaxKind`.
@@ -612,55 +640,66 @@ module AstKind =
     /// True when the kind is one of the schema's `ImportPhaseModifierSyntaxKind`.
     let isImportPhaseModifierKind (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.TypeKeyword | SyntaxKind.DeferKeyword
-            -> true
+        | SyntaxKind.TypeKeyword
+        | SyntaxKind.DeferKeyword -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `PostfixUnaryOperator`.
     let isPostfixUnaryOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.PlusPlusToken | SyntaxKind.MinusMinusToken
-            -> true
+        | SyntaxKind.PlusPlusToken
+        | SyntaxKind.MinusMinusToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `PrefixUnaryOperator`.
     let isPrefixUnaryOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.PlusToken | SyntaxKind.MinusToken | SyntaxKind.TildeToken | SyntaxKind.ExclamationToken
-        | SyntaxKind.PlusPlusToken | SyntaxKind.MinusMinusToken
-            -> true
+        | SyntaxKind.PlusToken
+        | SyntaxKind.MinusToken
+        | SyntaxKind.TildeToken
+        | SyntaxKind.ExclamationToken
+        | SyntaxKind.PlusPlusToken
+        | SyntaxKind.MinusMinusToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `CompoundAssignmentOperator`.
     let isCompoundAssignmentOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.PlusEqualsToken | SyntaxKind.MinusEqualsToken | SyntaxKind.AsteriskAsteriskEqualsToken | SyntaxKind.AsteriskEqualsToken
-        | SyntaxKind.SlashEqualsToken | SyntaxKind.PercentEqualsToken | SyntaxKind.AmpersandEqualsToken | SyntaxKind.BarEqualsToken
-        | SyntaxKind.CaretEqualsToken | SyntaxKind.LessThanLessThanEqualsToken | SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken | SyntaxKind.GreaterThanGreaterThanEqualsToken
-        | SyntaxKind.BarBarEqualsToken | SyntaxKind.AmpersandAmpersandEqualsToken | SyntaxKind.QuestionQuestionEqualsToken
-            -> true
+        | SyntaxKind.PlusEqualsToken
+        | SyntaxKind.MinusEqualsToken
+        | SyntaxKind.AsteriskAsteriskEqualsToken
+        | SyntaxKind.AsteriskEqualsToken
+        | SyntaxKind.SlashEqualsToken
+        | SyntaxKind.PercentEqualsToken
+        | SyntaxKind.AmpersandEqualsToken
+        | SyntaxKind.BarEqualsToken
+        | SyntaxKind.CaretEqualsToken
+        | SyntaxKind.LessThanLessThanEqualsToken
+        | SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken
+        | SyntaxKind.GreaterThanGreaterThanEqualsToken
+        | SyntaxKind.BarBarEqualsToken
+        | SyntaxKind.AmpersandAmpersandEqualsToken
+        | SyntaxKind.QuestionQuestionEqualsToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `AssignmentOperator`.
     let isAssignmentOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.EqualsToken
-            -> true
-        | _ ->
-            isCompoundAssignmentOperator kind
+        | SyntaxKind.EqualsToken -> true
+        | _ -> isCompoundAssignmentOperator kind
 
     /// True when the kind is one of the schema's `ExponentiationOperator`.
     let isExponentiationOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AsteriskAsteriskToken
-            -> true
+        | SyntaxKind.AsteriskAsteriskToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `MultiplicativeOperator`.
     let isMultiplicativeOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AsteriskToken | SyntaxKind.SlashToken | SyntaxKind.PercentToken
-            -> true
+        | SyntaxKind.AsteriskToken
+        | SyntaxKind.SlashToken
+        | SyntaxKind.PercentToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `MultiplicativeOperatorOrHigher`.
@@ -670,8 +709,8 @@ module AstKind =
     /// True when the kind is one of the schema's `AdditiveOperator`.
     let isAdditiveOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.PlusToken | SyntaxKind.MinusToken
-            -> true
+        | SyntaxKind.PlusToken
+        | SyntaxKind.MinusToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `AdditiveOperatorOrHigher`.
@@ -681,8 +720,9 @@ module AstKind =
     /// True when the kind is one of the schema's `ShiftOperator`.
     let isShiftOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.LessThanLessThanToken | SyntaxKind.GreaterThanGreaterThanToken | SyntaxKind.GreaterThanGreaterThanGreaterThanToken
-            -> true
+        | SyntaxKind.LessThanLessThanToken
+        | SyntaxKind.GreaterThanGreaterThanToken
+        | SyntaxKind.GreaterThanGreaterThanGreaterThanToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ShiftOperatorOrHigher`.
@@ -692,9 +732,12 @@ module AstKind =
     /// True when the kind is one of the schema's `RelationalOperator`.
     let isRelationalOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.LessThanToken | SyntaxKind.LessThanEqualsToken | SyntaxKind.GreaterThanToken | SyntaxKind.GreaterThanEqualsToken
-        | SyntaxKind.InstanceOfKeyword | SyntaxKind.InKeyword
-            -> true
+        | SyntaxKind.LessThanToken
+        | SyntaxKind.LessThanEqualsToken
+        | SyntaxKind.GreaterThanToken
+        | SyntaxKind.GreaterThanEqualsToken
+        | SyntaxKind.InstanceOfKeyword
+        | SyntaxKind.InKeyword -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `RelationalOperatorOrHigher`.
@@ -704,8 +747,10 @@ module AstKind =
     /// True when the kind is one of the schema's `EqualityOperator`.
     let isEqualityOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.EqualsEqualsToken | SyntaxKind.EqualsEqualsEqualsToken | SyntaxKind.ExclamationEqualsEqualsToken | SyntaxKind.ExclamationEqualsToken
-            -> true
+        | SyntaxKind.EqualsEqualsToken
+        | SyntaxKind.EqualsEqualsEqualsToken
+        | SyntaxKind.ExclamationEqualsEqualsToken
+        | SyntaxKind.ExclamationEqualsToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `EqualityOperatorOrHigher`.
@@ -715,8 +760,9 @@ module AstKind =
     /// True when the kind is one of the schema's `BitwiseOperator`.
     let isBitwiseOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AmpersandToken | SyntaxKind.BarToken | SyntaxKind.CaretToken
-            -> true
+        | SyntaxKind.AmpersandToken
+        | SyntaxKind.BarToken
+        | SyntaxKind.CaretToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `BitwiseOperatorOrHigher`.
@@ -726,8 +772,8 @@ module AstKind =
     /// True when the kind is one of the schema's `LogicalOperator`.
     let isLogicalOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AmpersandAmpersandToken | SyntaxKind.BarBarToken
-            -> true
+        | SyntaxKind.AmpersandAmpersandToken
+        | SyntaxKind.BarBarToken -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `LogicalOperatorOrHigher`.
@@ -737,566 +783,781 @@ module AstKind =
     /// True when the kind is one of the schema's `AssignmentOperatorOrHigher`.
     let isAssignmentOperatorOrHigher (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.QuestionQuestionToken
-            -> true
-        | _ ->
-            isLogicalOperatorOrHigher kind || isAssignmentOperator kind
+        | SyntaxKind.QuestionQuestionToken -> true
+        | _ -> isLogicalOperatorOrHigher kind || isAssignmentOperator kind
 
     /// True when the kind is one of the schema's `BinaryOperator`.
     let isBinaryOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.CommaToken
-            -> true
-        | _ ->
-            isAssignmentOperatorOrHigher kind
+        | SyntaxKind.CommaToken -> true
+        | _ -> isAssignmentOperatorOrHigher kind
 
     /// True when the kind is one of the schema's `LogicalOrCoalescingAssignmentOperator`.
     let isLogicalOrCoalescingAssignmentOperator (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AmpersandAmpersandEqualsToken | SyntaxKind.BarBarEqualsToken | SyntaxKind.QuestionQuestionEqualsToken
-            -> true
+        | SyntaxKind.AmpersandAmpersandEqualsToken
+        | SyntaxKind.BarBarEqualsToken
+        | SyntaxKind.QuestionQuestionEqualsToken -> true
         | _ -> false
 
     /// Guards for the schema's *node* aliases - the unions `ast.json` declares over node
     /// types, as opposed to the kind aliases above. A member declared as an `Expression`
     /// holds any of these kinds, and these are what the typed layer's views are written on.
-
     /// True when the kind is one of the schema's `Expression` nodes.
     let isExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.PrivateIdentifier | SyntaxKind.ClassExpression | SyntaxKind.OmittedExpression
-        | SyntaxKind.NullKeyword | SyntaxKind.TrueKeyword | SyntaxKind.FalseKeyword | SyntaxKind.ThisKeyword
-        | SyntaxKind.SuperKeyword | SyntaxKind.ImportKeyword | SyntaxKind.StringLiteral | SyntaxKind.NumericLiteral
-        | SyntaxKind.BigIntLiteral | SyntaxKind.RegularExpressionLiteral | SyntaxKind.NoSubstitutionTemplateLiteral | SyntaxKind.BinaryExpression
-        | SyntaxKind.PrefixUnaryExpression | SyntaxKind.PostfixUnaryExpression | SyntaxKind.YieldExpression | SyntaxKind.ArrowFunction
-        | SyntaxKind.FunctionExpression | SyntaxKind.AsExpression | SyntaxKind.SatisfiesExpression | SyntaxKind.ConditionalExpression
-        | SyntaxKind.PropertyAccessExpression | SyntaxKind.ElementAccessExpression | SyntaxKind.CallExpression | SyntaxKind.NewExpression
-        | SyntaxKind.MetaProperty | SyntaxKind.NonNullExpression | SyntaxKind.SpreadElement | SyntaxKind.TemplateExpression
-        | SyntaxKind.TaggedTemplateExpression | SyntaxKind.ParenthesizedExpression | SyntaxKind.ArrayLiteralExpression | SyntaxKind.ObjectLiteralExpression
-        | SyntaxKind.DeleteExpression | SyntaxKind.TypeOfExpression | SyntaxKind.VoidExpression | SyntaxKind.AwaitExpression
-        | SyntaxKind.TypeAssertionExpression | SyntaxKind.ExpressionWithTypeArguments | SyntaxKind.SyntheticExpression | SyntaxKind.PartiallyEmittedExpression
-        | SyntaxKind.JsxElement | SyntaxKind.JsxAttributes | SyntaxKind.JsxNamespacedName | SyntaxKind.JsxOpeningElement
-        | SyntaxKind.JsxSelfClosingElement | SyntaxKind.JsxFragment | SyntaxKind.JsxOpeningFragment | SyntaxKind.JsxClosingFragment
-        | SyntaxKind.JsxExpression | SyntaxKind.JsxText | SyntaxKind.SyntheticReferenceExpression
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.PrivateIdentifier
+        | SyntaxKind.ClassExpression
+        | SyntaxKind.OmittedExpression
+        | SyntaxKind.NullKeyword
+        | SyntaxKind.TrueKeyword
+        | SyntaxKind.FalseKeyword
+        | SyntaxKind.ThisKeyword
+        | SyntaxKind.SuperKeyword
+        | SyntaxKind.ImportKeyword
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.BigIntLiteral
+        | SyntaxKind.RegularExpressionLiteral
+        | SyntaxKind.NoSubstitutionTemplateLiteral
+        | SyntaxKind.BinaryExpression
+        | SyntaxKind.PrefixUnaryExpression
+        | SyntaxKind.PostfixUnaryExpression
+        | SyntaxKind.YieldExpression
+        | SyntaxKind.ArrowFunction
+        | SyntaxKind.FunctionExpression
+        | SyntaxKind.AsExpression
+        | SyntaxKind.SatisfiesExpression
+        | SyntaxKind.ConditionalExpression
+        | SyntaxKind.PropertyAccessExpression
+        | SyntaxKind.ElementAccessExpression
+        | SyntaxKind.CallExpression
+        | SyntaxKind.NewExpression
+        | SyntaxKind.MetaProperty
+        | SyntaxKind.NonNullExpression
+        | SyntaxKind.SpreadElement
+        | SyntaxKind.TemplateExpression
+        | SyntaxKind.TaggedTemplateExpression
+        | SyntaxKind.ParenthesizedExpression
+        | SyntaxKind.ArrayLiteralExpression
+        | SyntaxKind.ObjectLiteralExpression
+        | SyntaxKind.DeleteExpression
+        | SyntaxKind.TypeOfExpression
+        | SyntaxKind.VoidExpression
+        | SyntaxKind.AwaitExpression
+        | SyntaxKind.TypeAssertionExpression
+        | SyntaxKind.ExpressionWithTypeArguments
+        | SyntaxKind.SyntheticExpression
+        | SyntaxKind.PartiallyEmittedExpression
+        | SyntaxKind.JsxElement
+        | SyntaxKind.JsxAttributes
+        | SyntaxKind.JsxNamespacedName
+        | SyntaxKind.JsxOpeningElement
+        | SyntaxKind.JsxSelfClosingElement
+        | SyntaxKind.JsxFragment
+        | SyntaxKind.JsxOpeningFragment
+        | SyntaxKind.JsxClosingFragment
+        | SyntaxKind.JsxExpression
+        | SyntaxKind.JsxText
+        | SyntaxKind.SyntheticReferenceExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `Statement` nodes.
     let isStatement (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.EmptyStatement | SyntaxKind.IfStatement | SyntaxKind.DoStatement | SyntaxKind.WhileStatement
-        | SyntaxKind.ForStatement | SyntaxKind.ForInStatement | SyntaxKind.ForOfStatement | SyntaxKind.BreakStatement
-        | SyntaxKind.ContinueStatement | SyntaxKind.ReturnStatement | SyntaxKind.WithStatement | SyntaxKind.SwitchStatement
-        | SyntaxKind.ThrowStatement | SyntaxKind.TryStatement | SyntaxKind.DebuggerStatement | SyntaxKind.LabeledStatement
-        | SyntaxKind.ExpressionStatement | SyntaxKind.Block | SyntaxKind.VariableStatement | SyntaxKind.MissingDeclaration
-        | SyntaxKind.FunctionDeclaration | SyntaxKind.ClassDeclaration | SyntaxKind.InterfaceDeclaration | SyntaxKind.TypeAliasDeclaration
-        | SyntaxKind.JSTypeAliasDeclaration | SyntaxKind.EnumDeclaration | SyntaxKind.ModuleBlock | SyntaxKind.NotEmittedStatement
-        | SyntaxKind.ImportDeclaration | SyntaxKind.JSImportDeclaration | SyntaxKind.ExportAssignment | SyntaxKind.NamespaceExportDeclaration
-        | SyntaxKind.ModuleDeclaration | SyntaxKind.ImportEqualsDeclaration | SyntaxKind.ExportDeclaration
-            -> true
+        | SyntaxKind.EmptyStatement
+        | SyntaxKind.IfStatement
+        | SyntaxKind.DoStatement
+        | SyntaxKind.WhileStatement
+        | SyntaxKind.ForStatement
+        | SyntaxKind.ForInStatement
+        | SyntaxKind.ForOfStatement
+        | SyntaxKind.BreakStatement
+        | SyntaxKind.ContinueStatement
+        | SyntaxKind.ReturnStatement
+        | SyntaxKind.WithStatement
+        | SyntaxKind.SwitchStatement
+        | SyntaxKind.ThrowStatement
+        | SyntaxKind.TryStatement
+        | SyntaxKind.DebuggerStatement
+        | SyntaxKind.LabeledStatement
+        | SyntaxKind.ExpressionStatement
+        | SyntaxKind.Block
+        | SyntaxKind.VariableStatement
+        | SyntaxKind.MissingDeclaration
+        | SyntaxKind.FunctionDeclaration
+        | SyntaxKind.ClassDeclaration
+        | SyntaxKind.InterfaceDeclaration
+        | SyntaxKind.TypeAliasDeclaration
+        | SyntaxKind.JSTypeAliasDeclaration
+        | SyntaxKind.EnumDeclaration
+        | SyntaxKind.ModuleBlock
+        | SyntaxKind.NotEmittedStatement
+        | SyntaxKind.ImportDeclaration
+        | SyntaxKind.JSImportDeclaration
+        | SyntaxKind.ExportAssignment
+        | SyntaxKind.NamespaceExportDeclaration
+        | SyntaxKind.ModuleDeclaration
+        | SyntaxKind.ImportEqualsDeclaration
+        | SyntaxKind.ExportDeclaration -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `TypeNode` nodes.
     let isTypeNode (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AnyKeyword | SyntaxKind.BigIntKeyword | SyntaxKind.BooleanKeyword | SyntaxKind.IntrinsicKeyword
-        | SyntaxKind.NeverKeyword | SyntaxKind.NumberKeyword | SyntaxKind.ObjectKeyword | SyntaxKind.StringKeyword
-        | SyntaxKind.SymbolKeyword | SyntaxKind.UndefinedKeyword | SyntaxKind.UnknownKeyword | SyntaxKind.VoidKeyword
-        | SyntaxKind.UnionType | SyntaxKind.IntersectionType | SyntaxKind.ConditionalType | SyntaxKind.TypeOperator
-        | SyntaxKind.InferType | SyntaxKind.ArrayType | SyntaxKind.IndexedAccessType | SyntaxKind.TypeReference
-        | SyntaxKind.LiteralType | SyntaxKind.ThisType | SyntaxKind.TypePredicate | SyntaxKind.TypeQuery
-        | SyntaxKind.MappedType | SyntaxKind.TypeLiteral | SyntaxKind.TupleType | SyntaxKind.NamedTupleMember
-        | SyntaxKind.OptionalType | SyntaxKind.RestType | SyntaxKind.ParenthesizedType | SyntaxKind.FunctionType
-        | SyntaxKind.ConstructorType | SyntaxKind.TemplateLiteralType | SyntaxKind.TemplateLiteralTypeSpan | SyntaxKind.JSDocTypeExpression
-        | SyntaxKind.JSDocNonNullableType | SyntaxKind.JSDocNullableType | SyntaxKind.JSDocAllType | SyntaxKind.JSDocVariadicType
-        | SyntaxKind.JSDocOptionalType | SyntaxKind.JSDocSignature | SyntaxKind.JSDocNameReference | SyntaxKind.ImportType
-        | SyntaxKind.JSDocTypeLiteral
-            -> true
+        | SyntaxKind.AnyKeyword
+        | SyntaxKind.BigIntKeyword
+        | SyntaxKind.BooleanKeyword
+        | SyntaxKind.IntrinsicKeyword
+        | SyntaxKind.NeverKeyword
+        | SyntaxKind.NumberKeyword
+        | SyntaxKind.ObjectKeyword
+        | SyntaxKind.StringKeyword
+        | SyntaxKind.SymbolKeyword
+        | SyntaxKind.UndefinedKeyword
+        | SyntaxKind.UnknownKeyword
+        | SyntaxKind.VoidKeyword
+        | SyntaxKind.UnionType
+        | SyntaxKind.IntersectionType
+        | SyntaxKind.ConditionalType
+        | SyntaxKind.TypeOperator
+        | SyntaxKind.InferType
+        | SyntaxKind.ArrayType
+        | SyntaxKind.IndexedAccessType
+        | SyntaxKind.TypeReference
+        | SyntaxKind.LiteralType
+        | SyntaxKind.ThisType
+        | SyntaxKind.TypePredicate
+        | SyntaxKind.TypeQuery
+        | SyntaxKind.MappedType
+        | SyntaxKind.TypeLiteral
+        | SyntaxKind.TupleType
+        | SyntaxKind.NamedTupleMember
+        | SyntaxKind.OptionalType
+        | SyntaxKind.RestType
+        | SyntaxKind.ParenthesizedType
+        | SyntaxKind.FunctionType
+        | SyntaxKind.ConstructorType
+        | SyntaxKind.TemplateLiteralType
+        | SyntaxKind.TemplateLiteralTypeSpan
+        | SyntaxKind.JSDocTypeExpression
+        | SyntaxKind.JSDocNonNullableType
+        | SyntaxKind.JSDocNullableType
+        | SyntaxKind.JSDocAllType
+        | SyntaxKind.JSDocVariadicType
+        | SyntaxKind.JSDocOptionalType
+        | SyntaxKind.JSDocSignature
+        | SyntaxKind.JSDocNameReference
+        | SyntaxKind.ImportType
+        | SyntaxKind.JSDocTypeLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `HeritageClauseElement` nodes.
     let isHeritageClauseElement (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.ExpressionWithTypeArguments | SyntaxKind.TypeReference
-            -> true
+        | SyntaxKind.ExpressionWithTypeArguments
+        | SyntaxKind.TypeReference -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `BlockOrExpression` nodes.
     let isBlockOrExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Block
-            -> true
-        | _ ->
-            isExpression kind
+        | SyntaxKind.Block -> true
+        | _ -> isExpression kind
 
     /// True when the kind is one of the schema's `NodeBody` nodes.
     let isNodeBody (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Block | SyntaxKind.ModuleBlock | SyntaxKind.ModuleDeclaration
-            -> true
-        | _ ->
-            isExpression kind
+        | SyntaxKind.Block
+        | SyntaxKind.ModuleBlock
+        | SyntaxKind.ModuleDeclaration -> true
+        | _ -> isExpression kind
 
     /// True when the kind is one of the schema's `AccessExpression` nodes.
     let isAccessExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.PropertyAccessExpression | SyntaxKind.ElementAccessExpression
-            -> true
+        | SyntaxKind.PropertyAccessExpression
+        | SyntaxKind.ElementAccessExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `DeclarationName` nodes.
     let isDeclarationName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.PrivateIdentifier | SyntaxKind.StringLiteral | SyntaxKind.NumericLiteral
-        | SyntaxKind.BigIntLiteral | SyntaxKind.NoSubstitutionTemplateLiteral | SyntaxKind.ComputedPropertyName | SyntaxKind.ObjectBindingPattern
-        | SyntaxKind.ArrayBindingPattern | SyntaxKind.ElementAccessExpression
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.PrivateIdentifier
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.BigIntLiteral
+        | SyntaxKind.NoSubstitutionTemplateLiteral
+        | SyntaxKind.ComputedPropertyName
+        | SyntaxKind.ObjectBindingPattern
+        | SyntaxKind.ArrayBindingPattern
+        | SyntaxKind.ElementAccessExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ModuleName` nodes.
     let isModuleName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.StringLiteral
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.StringLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ModuleExportName` nodes.
     let isModuleExportName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.StringLiteral
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.StringLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `PropertyName` nodes.
     let isPropertyName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.StringLiteral | SyntaxKind.NoSubstitutionTemplateLiteral | SyntaxKind.NumericLiteral
-        | SyntaxKind.ComputedPropertyName | SyntaxKind.PrivateIdentifier | SyntaxKind.BigIntLiteral
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NoSubstitutionTemplateLiteral
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.ComputedPropertyName
+        | SyntaxKind.PrivateIdentifier
+        | SyntaxKind.BigIntLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ModuleBody` nodes.
     let isModuleBody (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.ModuleBlock | SyntaxKind.ModuleDeclaration
-            -> true
+        | SyntaxKind.ModuleBlock
+        | SyntaxKind.ModuleDeclaration -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `JSDocFullName` nodes.
     let isJSDocFullName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.ModuleDeclaration
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.ModuleDeclaration -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ForInitializer` nodes.
     let isForInitializer (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.MissingDeclaration | SyntaxKind.VariableDeclarationList
-            -> true
-        | _ ->
-            isExpression kind
+        | SyntaxKind.MissingDeclaration
+        | SyntaxKind.VariableDeclarationList -> true
+        | _ -> isExpression kind
 
     /// True when the kind is one of the schema's `ModuleReference` nodes.
     let isModuleReference (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.QualifiedName | SyntaxKind.ExternalModuleReference
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.QualifiedName
+        | SyntaxKind.ExternalModuleReference -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `NamedImportBindings` nodes.
     let isNamedImportBindings (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.NamespaceImport | SyntaxKind.NamedImports
-            -> true
+        | SyntaxKind.NamespaceImport
+        | SyntaxKind.NamedImports -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `NamedExportBindings` nodes.
     let isNamedExportBindings (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.NamespaceExport | SyntaxKind.NamedExports
-            -> true
+        | SyntaxKind.NamespaceExport
+        | SyntaxKind.NamedExports -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `MemberName` nodes.
     let isMemberName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.PrivateIdentifier
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.PrivateIdentifier -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `EntityName` nodes.
     let isEntityName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.QualifiedName
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.QualifiedName -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `BindingName` nodes.
     let isBindingName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.ObjectBindingPattern | SyntaxKind.ArrayBindingPattern
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.ObjectBindingPattern
+        | SyntaxKind.ArrayBindingPattern -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `Modifier` nodes.
     let isModifier (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.AbstractKeyword | SyntaxKind.AccessorKeyword | SyntaxKind.AsyncKeyword | SyntaxKind.ConstKeyword
-        | SyntaxKind.DeclareKeyword | SyntaxKind.DefaultKeyword | SyntaxKind.ExportKeyword | SyntaxKind.InKeyword
-        | SyntaxKind.PrivateKeyword | SyntaxKind.ProtectedKeyword | SyntaxKind.PublicKeyword | SyntaxKind.ReadonlyKeyword
-        | SyntaxKind.OutKeyword | SyntaxKind.OverrideKeyword | SyntaxKind.StaticKeyword
-            -> true
+        | SyntaxKind.AbstractKeyword
+        | SyntaxKind.AccessorKeyword
+        | SyntaxKind.AsyncKeyword
+        | SyntaxKind.ConstKeyword
+        | SyntaxKind.DeclareKeyword
+        | SyntaxKind.DefaultKeyword
+        | SyntaxKind.ExportKeyword
+        | SyntaxKind.InKeyword
+        | SyntaxKind.PrivateKeyword
+        | SyntaxKind.ProtectedKeyword
+        | SyntaxKind.PublicKeyword
+        | SyntaxKind.ReadonlyKeyword
+        | SyntaxKind.OutKeyword
+        | SyntaxKind.OverrideKeyword
+        | SyntaxKind.StaticKeyword -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ModifierLike` nodes.
     let isModifierLike (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Decorator
-            -> true
-        | _ ->
-            isModifier kind
+        | SyntaxKind.Decorator -> true
+        | _ -> isModifier kind
 
     /// True when the kind is one of the schema's `JsxChild` nodes.
     let isJsxChild (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.JsxText | SyntaxKind.JsxExpression | SyntaxKind.JsxElement | SyntaxKind.JsxSelfClosingElement
-        | SyntaxKind.JsxFragment
-            -> true
+        | SyntaxKind.JsxText
+        | SyntaxKind.JsxExpression
+        | SyntaxKind.JsxElement
+        | SyntaxKind.JsxSelfClosingElement
+        | SyntaxKind.JsxFragment -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `JsxAttributeLike` nodes.
     let isJsxAttributeLike (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.JsxAttribute | SyntaxKind.JsxSpreadAttribute
-            -> true
+        | SyntaxKind.JsxAttribute
+        | SyntaxKind.JsxSpreadAttribute -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `JsxAttributeName` nodes.
     let isJsxAttributeName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.JsxNamespacedName
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.JsxNamespacedName -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `JsxAttributeValue` nodes.
     let isJsxAttributeValue (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.StringLiteral | SyntaxKind.JsxExpression | SyntaxKind.JsxElement | SyntaxKind.JsxSelfClosingElement
-        | SyntaxKind.JsxFragment
-            -> true
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.JsxExpression
+        | SyntaxKind.JsxElement
+        | SyntaxKind.JsxSelfClosingElement
+        | SyntaxKind.JsxFragment -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `JsxTagNameExpression` nodes.
     let isJsxTagNameExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.ThisKeyword | SyntaxKind.PropertyAccessExpression | SyntaxKind.JsxNamespacedName
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.ThisKeyword
+        | SyntaxKind.PropertyAccessExpression
+        | SyntaxKind.JsxNamespacedName -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ClassLikeDeclaration` nodes.
     let isClassLikeDeclaration (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.ClassDeclaration | SyntaxKind.ClassExpression
-            -> true
+        | SyntaxKind.ClassDeclaration
+        | SyntaxKind.ClassExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `AccessorDeclaration` nodes.
     let isAccessorDeclaration (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.GetAccessor | SyntaxKind.SetAccessor
-            -> true
+        | SyntaxKind.GetAccessor
+        | SyntaxKind.SetAccessor -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `TemplateLiteralLikeNode` nodes.
     let isTemplateLiteralLikeNode (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.TemplateHead | SyntaxKind.TemplateMiddle | SyntaxKind.TemplateTail
-            -> true
+        | SyntaxKind.TemplateHead
+        | SyntaxKind.TemplateMiddle
+        | SyntaxKind.TemplateTail -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `LiteralLikeNode` nodes.
     let isLiteralLikeNode (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.StringLiteral | SyntaxKind.NumericLiteral | SyntaxKind.BigIntLiteral | SyntaxKind.RegularExpressionLiteral
-        | SyntaxKind.JsxText
-            -> true
-        | _ ->
-            isTemplateLiteralLikeNode kind
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.BigIntLiteral
+        | SyntaxKind.RegularExpressionLiteral
+        | SyntaxKind.JsxText -> true
+        | _ -> isTemplateLiteralLikeNode kind
 
     /// True when the kind is one of the schema's `LiteralExpression` nodes.
     let isLiteralExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.StringLiteral | SyntaxKind.NumericLiteral | SyntaxKind.BigIntLiteral | SyntaxKind.RegularExpressionLiteral
-        | SyntaxKind.NoSubstitutionTemplateLiteral
-            -> true
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.BigIntLiteral
+        | SyntaxKind.RegularExpressionLiteral
+        | SyntaxKind.NoSubstitutionTemplateLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `UnionOrIntersectionTypeNode` nodes.
     let isUnionOrIntersectionTypeNode (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.UnionType | SyntaxKind.IntersectionType
-            -> true
+        | SyntaxKind.UnionType
+        | SyntaxKind.IntersectionType -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `TemplateMiddleOrTail` nodes.
     let isTemplateMiddleOrTail (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.TemplateMiddle | SyntaxKind.TemplateTail
-            -> true
+        | SyntaxKind.TemplateMiddle
+        | SyntaxKind.TemplateTail -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `TemplateLiteral` nodes.
     let isTemplateLiteral (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.TemplateExpression | SyntaxKind.NoSubstitutionTemplateLiteral
-            -> true
+        | SyntaxKind.TemplateExpression
+        | SyntaxKind.NoSubstitutionTemplateLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `TypePredicateParameterName` nodes.
     let isTypePredicateParameterName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.ThisType
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.ThisType -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ImportAttributeName` nodes.
     let isImportAttributeName (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.StringLiteral
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.StringLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `LeftHandSideExpression` nodes.
     let isLeftHandSideExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.PrivateIdentifier | SyntaxKind.ClassExpression | SyntaxKind.StringLiteral
-        | SyntaxKind.NumericLiteral | SyntaxKind.BigIntLiteral | SyntaxKind.RegularExpressionLiteral | SyntaxKind.FunctionExpression
-        | SyntaxKind.PropertyAccessExpression | SyntaxKind.ElementAccessExpression | SyntaxKind.CallExpression | SyntaxKind.NewExpression
-        | SyntaxKind.MetaProperty | SyntaxKind.NonNullExpression | SyntaxKind.TemplateExpression | SyntaxKind.TaggedTemplateExpression
-        | SyntaxKind.ParenthesizedExpression | SyntaxKind.ArrayLiteralExpression | SyntaxKind.ObjectLiteralExpression | SyntaxKind.ExpressionWithTypeArguments
-        | SyntaxKind.PartiallyEmittedExpression | SyntaxKind.JsxElement | SyntaxKind.JsxAttributes | SyntaxKind.JsxSelfClosingElement
-        | SyntaxKind.JsxFragment
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.PrivateIdentifier
+        | SyntaxKind.ClassExpression
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.BigIntLiteral
+        | SyntaxKind.RegularExpressionLiteral
+        | SyntaxKind.FunctionExpression
+        | SyntaxKind.PropertyAccessExpression
+        | SyntaxKind.ElementAccessExpression
+        | SyntaxKind.CallExpression
+        | SyntaxKind.NewExpression
+        | SyntaxKind.MetaProperty
+        | SyntaxKind.NonNullExpression
+        | SyntaxKind.TemplateExpression
+        | SyntaxKind.TaggedTemplateExpression
+        | SyntaxKind.ParenthesizedExpression
+        | SyntaxKind.ArrayLiteralExpression
+        | SyntaxKind.ObjectLiteralExpression
+        | SyntaxKind.ExpressionWithTypeArguments
+        | SyntaxKind.PartiallyEmittedExpression
+        | SyntaxKind.JsxElement
+        | SyntaxKind.JsxAttributes
+        | SyntaxKind.JsxSelfClosingElement
+        | SyntaxKind.JsxFragment -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `JSDocComment` nodes.
     let isJSDocComment (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.JSDocText | SyntaxKind.JSDocLink | SyntaxKind.JSDocLinkCode | SyntaxKind.JSDocLinkPlain
-            -> true
+        | SyntaxKind.JSDocText
+        | SyntaxKind.JSDocLink
+        | SyntaxKind.JSDocLinkCode
+        | SyntaxKind.JSDocLinkPlain -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `SignatureDeclaration` nodes.
     let isSignatureDeclaration (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.CallSignature | SyntaxKind.ConstructSignature | SyntaxKind.MethodSignature | SyntaxKind.IndexSignature
-        | SyntaxKind.FunctionType | SyntaxKind.ConstructorType | SyntaxKind.FunctionDeclaration | SyntaxKind.MethodDeclaration
-        | SyntaxKind.Constructor | SyntaxKind.FunctionExpression | SyntaxKind.ArrowFunction
-            -> true
-        | _ ->
-            isAccessorDeclaration kind
+        | SyntaxKind.CallSignature
+        | SyntaxKind.ConstructSignature
+        | SyntaxKind.MethodSignature
+        | SyntaxKind.IndexSignature
+        | SyntaxKind.FunctionType
+        | SyntaxKind.ConstructorType
+        | SyntaxKind.FunctionDeclaration
+        | SyntaxKind.MethodDeclaration
+        | SyntaxKind.Constructor
+        | SyntaxKind.FunctionExpression
+        | SyntaxKind.ArrowFunction -> true
+        | _ -> isAccessorDeclaration kind
 
     /// True when the kind is one of the schema's `StringLiteralLikeNode` nodes.
     let isStringLiteralLikeNode (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.StringLiteral | SyntaxKind.NoSubstitutionTemplateLiteral
-            -> true
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NoSubstitutionTemplateLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `NumericOrStringLikeLiteral` nodes.
     let isNumericOrStringLikeLiteral (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.NumericLiteral
-            -> true
-        | _ ->
-            isStringLiteralLikeNode kind
+        | SyntaxKind.NumericLiteral -> true
+        | _ -> isStringLiteralLikeNode kind
 
     /// True when the kind is one of the schema's `ObjectLiteralLikeNode` nodes.
     let isObjectLiteralLikeNode (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.ObjectLiteralExpression | SyntaxKind.ObjectBindingPattern
-            -> true
+        | SyntaxKind.ObjectLiteralExpression
+        | SyntaxKind.ObjectBindingPattern -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ObjectTypeDeclaration` nodes.
     let isObjectTypeDeclaration (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.InterfaceDeclaration | SyntaxKind.TypeLiteral
-            -> true
-        | _ ->
-            isClassLikeDeclaration kind
+        | SyntaxKind.InterfaceDeclaration
+        | SyntaxKind.TypeLiteral -> true
+        | _ -> isClassLikeDeclaration kind
 
     /// True when the kind is one of the schema's `JsxOpeningLikeElement` nodes.
     let isJsxOpeningLikeElement (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.JsxOpeningElement | SyntaxKind.JsxSelfClosingElement
-            -> true
+        | SyntaxKind.JsxOpeningElement
+        | SyntaxKind.JsxSelfClosingElement -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `NamedImportsOrExports` nodes.
     let isNamedImportsOrExports (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.NamedImports | SyntaxKind.NamedExports
-            -> true
+        | SyntaxKind.NamedImports
+        | SyntaxKind.NamedExports -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `BreakOrContinueStatement` nodes.
     let isBreakOrContinueStatement (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.BreakStatement | SyntaxKind.ContinueStatement
-            -> true
+        | SyntaxKind.BreakStatement
+        | SyntaxKind.ContinueStatement -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `CallLikeExpression` nodes.
     let isCallLikeExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.CallExpression | SyntaxKind.NewExpression | SyntaxKind.TaggedTemplateExpression | SyntaxKind.Decorator
-        | SyntaxKind.BinaryExpression
-            -> true
-        | _ ->
-            isJsxOpeningLikeElement kind
+        | SyntaxKind.CallExpression
+        | SyntaxKind.NewExpression
+        | SyntaxKind.TaggedTemplateExpression
+        | SyntaxKind.Decorator
+        | SyntaxKind.BinaryExpression -> true
+        | _ -> isJsxOpeningLikeElement kind
 
     /// True when the kind is one of the schema's `FunctionLikeDeclaration` nodes.
     let isFunctionLikeDeclaration (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.FunctionDeclaration | SyntaxKind.MethodDeclaration | SyntaxKind.GetAccessor | SyntaxKind.SetAccessor
-        | SyntaxKind.Constructor | SyntaxKind.FunctionExpression | SyntaxKind.ArrowFunction
-            -> true
+        | SyntaxKind.FunctionDeclaration
+        | SyntaxKind.MethodDeclaration
+        | SyntaxKind.GetAccessor
+        | SyntaxKind.SetAccessor
+        | SyntaxKind.Constructor
+        | SyntaxKind.FunctionExpression
+        | SyntaxKind.ArrowFunction -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `VariableOrParameterDeclaration` nodes.
     let isVariableOrParameterDeclaration (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.VariableDeclaration | SyntaxKind.Parameter
-            -> true
+        | SyntaxKind.VariableDeclaration
+        | SyntaxKind.Parameter -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `VariableOrPropertyDeclaration` nodes.
     let isVariableOrPropertyDeclaration (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.VariableDeclaration | SyntaxKind.PropertyDeclaration
-            -> true
+        | SyntaxKind.VariableDeclaration
+        | SyntaxKind.PropertyDeclaration -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `CallOrNewExpression` nodes.
     let isCallOrNewExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.CallExpression | SyntaxKind.NewExpression
-            -> true
+        | SyntaxKind.CallExpression
+        | SyntaxKind.NewExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ImportClauseOrBindingPattern` nodes.
     let isImportClauseOrBindingPattern (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.ImportClause | SyntaxKind.ObjectBindingPattern | SyntaxKind.ArrayBindingPattern
-            -> true
+        | SyntaxKind.ImportClause
+        | SyntaxKind.ObjectBindingPattern
+        | SyntaxKind.ArrayBindingPattern -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `AnyImportSyntax` nodes.
     let isAnyImportSyntax (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.ImportDeclaration | SyntaxKind.JSImportDeclaration | SyntaxKind.ImportEqualsDeclaration
-            -> true
+        | SyntaxKind.ImportDeclaration
+        | SyntaxKind.JSImportDeclaration
+        | SyntaxKind.ImportEqualsDeclaration -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `Declaration` nodes.
     let isDeclaration (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.VariableDeclaration | SyntaxKind.Parameter | SyntaxKind.BindingElement | SyntaxKind.MissingDeclaration
-        | SyntaxKind.FunctionDeclaration | SyntaxKind.ClassDeclaration | SyntaxKind.ClassExpression | SyntaxKind.InterfaceDeclaration
-        | SyntaxKind.TypeAliasDeclaration | SyntaxKind.JSTypeAliasDeclaration | SyntaxKind.EnumMember | SyntaxKind.EnumDeclaration
-        | SyntaxKind.ImportDeclaration | SyntaxKind.JSImportDeclaration | SyntaxKind.NamespaceImport | SyntaxKind.ExportAssignment
-        | SyntaxKind.NamespaceExportDeclaration | SyntaxKind.NamespaceExport | SyntaxKind.ExportSpecifier | SyntaxKind.CallSignature
-        | SyntaxKind.ConstructSignature | SyntaxKind.Constructor | SyntaxKind.GetAccessor | SyntaxKind.SetAccessor
-        | SyntaxKind.IndexSignature | SyntaxKind.MethodSignature | SyntaxKind.MethodDeclaration | SyntaxKind.PropertySignature
-        | SyntaxKind.PropertyDeclaration | SyntaxKind.SemicolonClassElement | SyntaxKind.ClassStaticBlockDeclaration | SyntaxKind.NoSubstitutionTemplateLiteral
-        | SyntaxKind.BinaryExpression | SyntaxKind.ArrowFunction | SyntaxKind.FunctionExpression | SyntaxKind.CallExpression
-        | SyntaxKind.ObjectLiteralExpression | SyntaxKind.SpreadAssignment | SyntaxKind.PropertyAssignment | SyntaxKind.ShorthandPropertyAssignment
-        | SyntaxKind.MappedType | SyntaxKind.TypeLiteral | SyntaxKind.NamedTupleMember | SyntaxKind.FunctionType
-        | SyntaxKind.ConstructorType | SyntaxKind.JsxAttributes | SyntaxKind.JsxAttribute | SyntaxKind.JSDocSignature
-        | SyntaxKind.SourceFile | SyntaxKind.ModuleDeclaration | SyntaxKind.ImportEqualsDeclaration | SyntaxKind.ExportDeclaration
-        | SyntaxKind.ImportClause | SyntaxKind.ImportSpecifier | SyntaxKind.TypeParameter | SyntaxKind.JSDocTypeLiteral
-            -> true
+        | SyntaxKind.VariableDeclaration
+        | SyntaxKind.Parameter
+        | SyntaxKind.BindingElement
+        | SyntaxKind.MissingDeclaration
+        | SyntaxKind.FunctionDeclaration
+        | SyntaxKind.ClassDeclaration
+        | SyntaxKind.ClassExpression
+        | SyntaxKind.InterfaceDeclaration
+        | SyntaxKind.TypeAliasDeclaration
+        | SyntaxKind.JSTypeAliasDeclaration
+        | SyntaxKind.EnumMember
+        | SyntaxKind.EnumDeclaration
+        | SyntaxKind.ImportDeclaration
+        | SyntaxKind.JSImportDeclaration
+        | SyntaxKind.NamespaceImport
+        | SyntaxKind.ExportAssignment
+        | SyntaxKind.NamespaceExportDeclaration
+        | SyntaxKind.NamespaceExport
+        | SyntaxKind.ExportSpecifier
+        | SyntaxKind.CallSignature
+        | SyntaxKind.ConstructSignature
+        | SyntaxKind.Constructor
+        | SyntaxKind.GetAccessor
+        | SyntaxKind.SetAccessor
+        | SyntaxKind.IndexSignature
+        | SyntaxKind.MethodSignature
+        | SyntaxKind.MethodDeclaration
+        | SyntaxKind.PropertySignature
+        | SyntaxKind.PropertyDeclaration
+        | SyntaxKind.SemicolonClassElement
+        | SyntaxKind.ClassStaticBlockDeclaration
+        | SyntaxKind.NoSubstitutionTemplateLiteral
+        | SyntaxKind.BinaryExpression
+        | SyntaxKind.ArrowFunction
+        | SyntaxKind.FunctionExpression
+        | SyntaxKind.CallExpression
+        | SyntaxKind.ObjectLiteralExpression
+        | SyntaxKind.SpreadAssignment
+        | SyntaxKind.PropertyAssignment
+        | SyntaxKind.ShorthandPropertyAssignment
+        | SyntaxKind.MappedType
+        | SyntaxKind.TypeLiteral
+        | SyntaxKind.NamedTupleMember
+        | SyntaxKind.FunctionType
+        | SyntaxKind.ConstructorType
+        | SyntaxKind.JsxAttributes
+        | SyntaxKind.JsxAttribute
+        | SyntaxKind.JSDocSignature
+        | SyntaxKind.SourceFile
+        | SyntaxKind.ModuleDeclaration
+        | SyntaxKind.ImportEqualsDeclaration
+        | SyntaxKind.ExportDeclaration
+        | SyntaxKind.ImportClause
+        | SyntaxKind.ImportSpecifier
+        | SyntaxKind.TypeParameter
+        | SyntaxKind.JSDocTypeLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ClassElement` nodes.
     let isClassElement (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Constructor | SyntaxKind.GetAccessor | SyntaxKind.SetAccessor | SyntaxKind.IndexSignature
-        | SyntaxKind.MethodDeclaration | SyntaxKind.PropertyDeclaration | SyntaxKind.SemicolonClassElement | SyntaxKind.ClassStaticBlockDeclaration
-            -> true
+        | SyntaxKind.Constructor
+        | SyntaxKind.GetAccessor
+        | SyntaxKind.SetAccessor
+        | SyntaxKind.IndexSignature
+        | SyntaxKind.MethodDeclaration
+        | SyntaxKind.PropertyDeclaration
+        | SyntaxKind.SemicolonClassElement
+        | SyntaxKind.ClassStaticBlockDeclaration -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `TypeElement` nodes.
     let isTypeElement (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.NotEmittedTypeElement | SyntaxKind.CallSignature | SyntaxKind.ConstructSignature | SyntaxKind.GetAccessor
-        | SyntaxKind.SetAccessor | SyntaxKind.IndexSignature | SyntaxKind.MethodSignature | SyntaxKind.PropertySignature
-            -> true
+        | SyntaxKind.NotEmittedTypeElement
+        | SyntaxKind.CallSignature
+        | SyntaxKind.ConstructSignature
+        | SyntaxKind.GetAccessor
+        | SyntaxKind.SetAccessor
+        | SyntaxKind.IndexSignature
+        | SyntaxKind.MethodSignature
+        | SyntaxKind.PropertySignature -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ObjectLiteralElement` nodes.
     let isObjectLiteralElement (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.GetAccessor | SyntaxKind.SetAccessor | SyntaxKind.MethodDeclaration | SyntaxKind.SpreadAssignment
-        | SyntaxKind.PropertyAssignment | SyntaxKind.ShorthandPropertyAssignment | SyntaxKind.JsxSpreadAttribute
-            -> true
+        | SyntaxKind.GetAccessor
+        | SyntaxKind.SetAccessor
+        | SyntaxKind.MethodDeclaration
+        | SyntaxKind.SpreadAssignment
+        | SyntaxKind.PropertyAssignment
+        | SyntaxKind.ShorthandPropertyAssignment
+        | SyntaxKind.JsxSpreadAttribute -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `JSDocTag` nodes.
     let isJSDocTag (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.JSDocTypeTag | SyntaxKind.JSDocUnknownTag | SyntaxKind.JSDocTemplateTag | SyntaxKind.JSDocReturnTag
-        | SyntaxKind.JSDocPublicTag | SyntaxKind.JSDocPrivateTag | SyntaxKind.JSDocProtectedTag | SyntaxKind.JSDocReadonlyTag
-        | SyntaxKind.JSDocOverrideTag | SyntaxKind.JSDocDeprecatedTag | SyntaxKind.JSDocSeeTag | SyntaxKind.JSDocImplementsTag
-        | SyntaxKind.JSDocAugmentsTag | SyntaxKind.JSDocSatisfiesTag | SyntaxKind.JSDocThrowsTag | SyntaxKind.JSDocThisTag
-        | SyntaxKind.JSDocImportTag | SyntaxKind.JSDocCallbackTag | SyntaxKind.JSDocOverloadTag | SyntaxKind.JSDocTypedefTag
-        | SyntaxKind.JSDocParameterTag | SyntaxKind.JSDocPropertyTag
-            -> true
+        | SyntaxKind.JSDocTypeTag
+        | SyntaxKind.JSDocUnknownTag
+        | SyntaxKind.JSDocTemplateTag
+        | SyntaxKind.JSDocReturnTag
+        | SyntaxKind.JSDocPublicTag
+        | SyntaxKind.JSDocPrivateTag
+        | SyntaxKind.JSDocProtectedTag
+        | SyntaxKind.JSDocReadonlyTag
+        | SyntaxKind.JSDocOverrideTag
+        | SyntaxKind.JSDocDeprecatedTag
+        | SyntaxKind.JSDocSeeTag
+        | SyntaxKind.JSDocImplementsTag
+        | SyntaxKind.JSDocAugmentsTag
+        | SyntaxKind.JSDocSatisfiesTag
+        | SyntaxKind.JSDocThrowsTag
+        | SyntaxKind.JSDocThisTag
+        | SyntaxKind.JSDocImportTag
+        | SyntaxKind.JSDocCallbackTag
+        | SyntaxKind.JSDocOverloadTag
+        | SyntaxKind.JSDocTypedefTag
+        | SyntaxKind.JSDocParameterTag
+        | SyntaxKind.JSDocPropertyTag -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ArrayBindingElement` nodes.
     let isArrayBindingElement (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.BindingElement | SyntaxKind.OmittedExpression
-            -> true
+        | SyntaxKind.BindingElement
+        | SyntaxKind.OmittedExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `AssertionExpression` nodes.
     let isAssertionExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.TypeAssertionExpression | SyntaxKind.AsExpression
-            -> true
+        | SyntaxKind.TypeAssertionExpression
+        | SyntaxKind.AsExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `BooleanLiteral` nodes.
     let isBooleanLiteral (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.TrueKeyword | SyntaxKind.FalseKeyword
-            -> true
+        | SyntaxKind.TrueKeyword
+        | SyntaxKind.FalseKeyword -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ConciseBody` nodes.
     let isConciseBody (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Block
-            -> true
-        | _ ->
-            isExpression kind
+        | SyntaxKind.Block -> true
+        | _ -> isExpression kind
 
     /// True when the kind is one of the schema's `ObjectDestructuringAssignment` nodes.
     let isObjectDestructuringAssignment (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.BinaryExpression
-            -> true
+        | SyntaxKind.BinaryExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ArrayDestructuringAssignment` nodes.
     let isArrayDestructuringAssignment (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.BinaryExpression
-            -> true
+        | SyntaxKind.BinaryExpression -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `DestructuringAssignment` nodes.
@@ -1306,68 +1567,96 @@ module AstKind =
     /// True when the kind is one of the schema's `LiteralToken` nodes.
     let isLiteralToken (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.NumericLiteral | SyntaxKind.BigIntLiteral | SyntaxKind.StringLiteral | SyntaxKind.JsxText
-        | SyntaxKind.RegularExpressionLiteral | SyntaxKind.NoSubstitutionTemplateLiteral
-            -> true
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.BigIntLiteral
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.JsxText
+        | SyntaxKind.RegularExpressionLiteral
+        | SyntaxKind.NoSubstitutionTemplateLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `ObjectLiteralElementLike` nodes.
     let isObjectLiteralElementLike (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.PropertyAssignment | SyntaxKind.ShorthandPropertyAssignment | SyntaxKind.SpreadAssignment | SyntaxKind.MethodDeclaration
-        | SyntaxKind.GetAccessor | SyntaxKind.SetAccessor
-            -> true
+        | SyntaxKind.PropertyAssignment
+        | SyntaxKind.ShorthandPropertyAssignment
+        | SyntaxKind.SpreadAssignment
+        | SyntaxKind.MethodDeclaration
+        | SyntaxKind.GetAccessor
+        | SyntaxKind.SetAccessor -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `PropertyNameLiteral` nodes.
     let isPropertyNameLiteral (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.StringLiteral | SyntaxKind.NumericLiteral
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NumericLiteral -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `PseudoLiteralToken` nodes.
     let isPseudoLiteralToken (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.TemplateHead | SyntaxKind.TemplateMiddle | SyntaxKind.TemplateTail
-            -> true
+        | SyntaxKind.TemplateHead
+        | SyntaxKind.TemplateMiddle
+        | SyntaxKind.TemplateTail -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `TemplateLiteralToken` nodes.
     let isTemplateLiteralToken (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.NoSubstitutionTemplateLiteral
-            -> true
-        | _ ->
-            isPseudoLiteralToken kind
+        | SyntaxKind.NoSubstitutionTemplateLiteral -> true
+        | _ -> isPseudoLiteralToken kind
 
     /// True when the kind is one of the schema's `FunctionBody` nodes.
     let isFunctionBody (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Block
-            -> true
+        | SyntaxKind.Block -> true
         | _ -> false
 
     /// True when the kind is one of the schema's `IncrementExpression` nodes.
     let isIncrementExpression (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.PrivateIdentifier | SyntaxKind.ClassExpression | SyntaxKind.StringLiteral
-        | SyntaxKind.NumericLiteral | SyntaxKind.BigIntLiteral | SyntaxKind.RegularExpressionLiteral | SyntaxKind.PrefixUnaryExpression
-        | SyntaxKind.PostfixUnaryExpression | SyntaxKind.FunctionExpression | SyntaxKind.PropertyAccessExpression | SyntaxKind.ElementAccessExpression
-        | SyntaxKind.CallExpression | SyntaxKind.NewExpression | SyntaxKind.MetaProperty | SyntaxKind.NonNullExpression
-        | SyntaxKind.TemplateExpression | SyntaxKind.TaggedTemplateExpression | SyntaxKind.ParenthesizedExpression | SyntaxKind.ArrayLiteralExpression
-        | SyntaxKind.ObjectLiteralExpression | SyntaxKind.ExpressionWithTypeArguments | SyntaxKind.PartiallyEmittedExpression | SyntaxKind.JsxElement
-        | SyntaxKind.JsxAttributes | SyntaxKind.JsxSelfClosingElement | SyntaxKind.JsxFragment
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.PrivateIdentifier
+        | SyntaxKind.ClassExpression
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.BigIntLiteral
+        | SyntaxKind.RegularExpressionLiteral
+        | SyntaxKind.PrefixUnaryExpression
+        | SyntaxKind.PostfixUnaryExpression
+        | SyntaxKind.FunctionExpression
+        | SyntaxKind.PropertyAccessExpression
+        | SyntaxKind.ElementAccessExpression
+        | SyntaxKind.CallExpression
+        | SyntaxKind.NewExpression
+        | SyntaxKind.MetaProperty
+        | SyntaxKind.NonNullExpression
+        | SyntaxKind.TemplateExpression
+        | SyntaxKind.TaggedTemplateExpression
+        | SyntaxKind.ParenthesizedExpression
+        | SyntaxKind.ArrayLiteralExpression
+        | SyntaxKind.ObjectLiteralExpression
+        | SyntaxKind.ExpressionWithTypeArguments
+        | SyntaxKind.PartiallyEmittedExpression
+        | SyntaxKind.JsxElement
+        | SyntaxKind.JsxAttributes
+        | SyntaxKind.JsxSelfClosingElement
+        | SyntaxKind.JsxFragment -> true
         | _ -> false
 
     /// True when the node's data word is an index into the string table, so its text is read
     /// straight from there. `Ast.text` handles both this and `hasExtendedText`.
     let hasStringText (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.Identifier | SyntaxKind.PrivateIdentifier | SyntaxKind.JsxText | SyntaxKind.JSDocText
-        | SyntaxKind.JSDocLink | SyntaxKind.JSDocLinkPlain | SyntaxKind.JSDocLinkCode
-            -> true
+        | SyntaxKind.Identifier
+        | SyntaxKind.PrivateIdentifier
+        | SyntaxKind.JsxText
+        | SyntaxKind.JSDocText
+        | SyntaxKind.JSDocLink
+        | SyntaxKind.JSDocLinkPlain
+        | SyntaxKind.JSDocLinkCode -> true
         | _ -> false
 
     /// True when the node's text lives in its extended-data record rather than in the data word.
@@ -1376,9 +1665,14 @@ module AstKind =
     /// client rather than described by the schema, so it is not included.
     let hasExtendedText (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.StringLiteral | SyntaxKind.NumericLiteral | SyntaxKind.BigIntLiteral | SyntaxKind.RegularExpressionLiteral
-        | SyntaxKind.NoSubstitutionTemplateLiteral | SyntaxKind.TemplateHead | SyntaxKind.TemplateMiddle | SyntaxKind.TemplateTail
-            -> true
+        | SyntaxKind.StringLiteral
+        | SyntaxKind.NumericLiteral
+        | SyntaxKind.BigIntLiteral
+        | SyntaxKind.RegularExpressionLiteral
+        | SyntaxKind.NoSubstitutionTemplateLiteral
+        | SyntaxKind.TemplateHead
+        | SyntaxKind.TemplateMiddle
+        | SyntaxKind.TemplateTail -> true
         | _ -> false
 
     /// The kind's schema name. A table rather than `ToString()`, which reflects.
@@ -2137,7 +2431,15 @@ module internal Slot =
         let Initializer = 5<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "dotDotDotToken"; "name"; "questionToken"; "type"; "initializer" |]
+        let Names =
+            [|
+                "modifiers"
+                "dotDotDotToken"
+                "name"
+                "questionToken"
+                "type"
+                "initializer"
+            |]
 
     /// Slots of `SyntaxKind.BindingElement`.
     [<RequireQualifiedAccess>]
@@ -2206,7 +2508,16 @@ module internal Slot =
         let Body = 6<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "asteriskToken"; "name"; "typeParameters"; "parameters"; "type"; "body" |]
+        let Names =
+            [|
+                "modifiers"
+                "asteriskToken"
+                "name"
+                "typeParameters"
+                "parameters"
+                "type"
+                "body"
+            |]
 
     /// Slots of `SyntaxKind.ClassDeclaration`.
     [<RequireQualifiedAccess>]
@@ -2233,7 +2544,8 @@ module internal Slot =
         let Members = 4<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "name"; "typeParameters"; "heritageClauses"; "members" |]
+        let Names =
+            [| "modifiers"; "name"; "typeParameters"; "heritageClauses"; "members" |]
 
     /// Slots of `SyntaxKind.ClassExpression`.
     [<RequireQualifiedAccess>]
@@ -2260,7 +2572,8 @@ module internal Slot =
         let Members = 4<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "name"; "typeParameters"; "heritageClauses"; "members" |]
+        let Names =
+            [| "modifiers"; "name"; "typeParameters"; "heritageClauses"; "members" |]
 
     /// Slots of `SyntaxKind.HeritageClause`.
     [<RequireQualifiedAccess>]
@@ -2298,7 +2611,8 @@ module internal Slot =
         let Members = 4<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "name"; "typeParameters"; "heritageClauses"; "members" |]
+        let Names =
+            [| "modifiers"; "name"; "typeParameters"; "heritageClauses"; "members" |]
 
     /// Slots of `TypeAliasDeclaration`, which is 2 kinds (`TypeAliasDeclaration` and others).
     [<RequireQualifiedAccess>]
@@ -2589,7 +2903,8 @@ module internal Slot =
         let Body = 5<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "name"; "typeParameters"; "parameters"; "type"; "body" |]
+        let Names =
+            [| "modifiers"; "name"; "typeParameters"; "parameters"; "type"; "body" |]
 
     /// Slots of `SyntaxKind.SetAccessor`.
     [<RequireQualifiedAccess>]
@@ -2620,7 +2935,8 @@ module internal Slot =
         let Body = 5<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "name"; "typeParameters"; "parameters"; "type"; "body" |]
+        let Names =
+            [| "modifiers"; "name"; "typeParameters"; "parameters"; "type"; "body" |]
 
     /// Slots of `SyntaxKind.IndexSignature`.
     [<RequireQualifiedAccess>]
@@ -2670,7 +2986,15 @@ module internal Slot =
         let Type = 5<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "name"; "postfixToken"; "typeParameters"; "parameters"; "type" |]
+        let Names =
+            [|
+                "modifiers"
+                "name"
+                "postfixToken"
+                "typeParameters"
+                "parameters"
+                "type"
+            |]
 
     /// Slots of `SyntaxKind.MethodDeclaration`.
     [<RequireQualifiedAccess>]
@@ -2709,7 +3033,17 @@ module internal Slot =
         let Body = 7<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "asteriskToken"; "name"; "postfixToken"; "typeParameters"; "parameters"; "type"; "body" |]
+        let Names =
+            [|
+                "modifiers"
+                "asteriskToken"
+                "name"
+                "postfixToken"
+                "typeParameters"
+                "parameters"
+                "type"
+                "body"
+            |]
 
     /// Slots of `SyntaxKind.PropertySignature`.
     [<RequireQualifiedAccess>]
@@ -2873,7 +3207,15 @@ module internal Slot =
         let Body = 5<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "typeParameters"; "parameters"; "type"; "equalsGreaterThanToken"; "body" |]
+        let Names =
+            [|
+                "modifiers"
+                "typeParameters"
+                "parameters"
+                "type"
+                "equalsGreaterThanToken"
+                "body"
+            |]
 
     /// Slots of `SyntaxKind.FunctionExpression`.
     [<RequireQualifiedAccess>]
@@ -2908,7 +3250,16 @@ module internal Slot =
         let Body = 6<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "asteriskToken"; "name"; "typeParameters"; "parameters"; "type"; "body" |]
+        let Names =
+            [|
+                "modifiers"
+                "asteriskToken"
+                "name"
+                "typeParameters"
+                "parameters"
+                "type"
+                "body"
+            |]
 
     /// Slots of `SyntaxKind.AsExpression`.
     [<RequireQualifiedAccess>]
@@ -2965,7 +3316,8 @@ module internal Slot =
         let WhenFalse = 4<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "condition"; "questionToken"; "whenTrue"; "colonToken"; "whenFalse" |]
+        let Names =
+            [| "condition"; "questionToken"; "whenTrue"; "colonToken"; "whenFalse" |]
 
     /// Slots of `SyntaxKind.PropertyAccessExpression`.
     [<RequireQualifiedAccess>]
@@ -3233,7 +3585,15 @@ module internal Slot =
         let ObjectAssignmentInitializer = 5<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "modifiers"; "name"; "postfixToken"; "type"; "equalsToken"; "objectAssignmentInitializer" |]
+        let Names =
+            [|
+                "modifiers"
+                "name"
+                "postfixToken"
+                "type"
+                "equalsToken"
+                "objectAssignmentInitializer"
+            |]
 
     /// Slots of `SyntaxKind.DeleteExpression`.
     [<RequireQualifiedAccess>]
@@ -3517,7 +3877,15 @@ module internal Slot =
         let Members = 5<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "readonlyToken"; "typeParameter"; "nameType"; "questionToken"; "type"; "members" |]
+        let Names =
+            [|
+                "readonlyToken"
+                "typeParameter"
+                "nameType"
+                "questionToken"
+                "type"
+                "members"
+            |]
 
     /// Slots of `SyntaxKind.TypeLiteral`.
     [<RequireQualifiedAccess>]
@@ -4231,7 +4599,8 @@ module internal Slot =
         let Comment = 4<astSlot>
 
         /// The slot names in slot order, matching the encoder's `childProperties`.
-        let Names = [| "tagName"; "importClause"; "moduleSpecifier"; "attributes"; "comment" |]
+        let Names =
+            [| "tagName"; "importClause"; "moduleSpecifier"; "attributes"; "comment" |]
 
     /// Slots of `SyntaxKind.JSDocCallbackTag`.
     [<RequireQualifiedAccess>]
@@ -4576,340 +4945,179 @@ module internal Slot =
     /// gives the same `order` the TypeScript client's `getNamedChild` uses.
     let names (kind: SyntaxKind) =
         match kind with
-        | SyntaxKind.QualifiedName
-            -> QualifiedName.Names
-        | SyntaxKind.ComputedPropertyName
-            -> ComputedPropertyName.Names
-        | SyntaxKind.Decorator
-            -> Decorator.Names
-        | SyntaxKind.IfStatement
-            -> IfStatement.Names
-        | SyntaxKind.DoStatement
-            -> DoStatement.Names
-        | SyntaxKind.WhileStatement
-            -> WhileStatement.Names
-        | SyntaxKind.ForStatement
-            -> ForStatement.Names
-        | SyntaxKind.ForInStatement | SyntaxKind.ForOfStatement
-            -> ForInOrOfStatement.Names
-        | SyntaxKind.BreakStatement
-            -> BreakStatement.Names
-        | SyntaxKind.ContinueStatement
-            -> ContinueStatement.Names
-        | SyntaxKind.ReturnStatement
-            -> ReturnStatement.Names
-        | SyntaxKind.WithStatement
-            -> WithStatement.Names
-        | SyntaxKind.SwitchStatement
-            -> SwitchStatement.Names
-        | SyntaxKind.CaseBlock
-            -> CaseBlock.Names
-        | SyntaxKind.CaseClause | SyntaxKind.DefaultClause
-            -> CaseOrDefaultClause.Names
-        | SyntaxKind.ThrowStatement
-            -> ThrowStatement.Names
-        | SyntaxKind.TryStatement
-            -> TryStatement.Names
-        | SyntaxKind.CatchClause
-            -> CatchClause.Names
-        | SyntaxKind.LabeledStatement
-            -> LabeledStatement.Names
-        | SyntaxKind.ExpressionStatement
-            -> ExpressionStatement.Names
-        | SyntaxKind.Block
-            -> Block.Names
-        | SyntaxKind.VariableStatement
-            -> VariableStatement.Names
-        | SyntaxKind.VariableDeclaration
-            -> VariableDeclaration.Names
-        | SyntaxKind.VariableDeclarationList
-            -> VariableDeclarationList.Names
-        | SyntaxKind.ObjectBindingPattern | SyntaxKind.ArrayBindingPattern
-            -> BindingPattern.Names
-        | SyntaxKind.Parameter
-            -> ParameterDeclaration.Names
-        | SyntaxKind.BindingElement
-            -> BindingElement.Names
-        | SyntaxKind.MissingDeclaration
-            -> MissingDeclaration.Names
-        | SyntaxKind.FunctionDeclaration
-            -> FunctionDeclaration.Names
-        | SyntaxKind.ClassDeclaration
-            -> ClassDeclaration.Names
-        | SyntaxKind.ClassExpression
-            -> ClassExpression.Names
-        | SyntaxKind.HeritageClause
-            -> HeritageClause.Names
-        | SyntaxKind.InterfaceDeclaration
-            -> InterfaceDeclaration.Names
-        | SyntaxKind.TypeAliasDeclaration | SyntaxKind.JSTypeAliasDeclaration
-            -> TypeAliasDeclaration.Names
-        | SyntaxKind.EnumMember
-            -> EnumMember.Names
-        | SyntaxKind.EnumDeclaration
-            -> EnumDeclaration.Names
-        | SyntaxKind.ModuleBlock
-            -> ModuleBlock.Names
-        | SyntaxKind.ImportDeclaration | SyntaxKind.JSImportDeclaration
-            -> ImportDeclaration.Names
-        | SyntaxKind.ExternalModuleReference
-            -> ExternalModuleReference.Names
-        | SyntaxKind.NamespaceImport
-            -> NamespaceImport.Names
-        | SyntaxKind.NamedImports
-            -> NamedImports.Names
-        | SyntaxKind.ExportAssignment
-            -> ExportAssignment.Names
-        | SyntaxKind.NamespaceExportDeclaration
-            -> NamespaceExportDeclaration.Names
-        | SyntaxKind.NamespaceExport
-            -> NamespaceExport.Names
-        | SyntaxKind.NamedExports
-            -> NamedExports.Names
-        | SyntaxKind.ExportSpecifier
-            -> ExportSpecifier.Names
-        | SyntaxKind.CallSignature
-            -> CallSignatureDeclaration.Names
-        | SyntaxKind.ConstructSignature
-            -> ConstructSignatureDeclaration.Names
-        | SyntaxKind.Constructor
-            -> ConstructorDeclaration.Names
-        | SyntaxKind.GetAccessor
-            -> GetAccessorDeclaration.Names
-        | SyntaxKind.SetAccessor
-            -> SetAccessorDeclaration.Names
-        | SyntaxKind.IndexSignature
-            -> IndexSignatureDeclaration.Names
-        | SyntaxKind.MethodSignature
-            -> MethodSignatureDeclaration.Names
-        | SyntaxKind.MethodDeclaration
-            -> MethodDeclaration.Names
-        | SyntaxKind.PropertySignature
-            -> PropertySignatureDeclaration.Names
-        | SyntaxKind.PropertyDeclaration
-            -> PropertyDeclaration.Names
-        | SyntaxKind.ClassStaticBlockDeclaration
-            -> ClassStaticBlockDeclaration.Names
-        | SyntaxKind.BinaryExpression
-            -> BinaryExpression.Names
-        | SyntaxKind.PrefixUnaryExpression
-            -> PrefixUnaryExpression.Names
-        | SyntaxKind.PostfixUnaryExpression
-            -> PostfixUnaryExpression.Names
-        | SyntaxKind.YieldExpression
-            -> YieldExpression.Names
-        | SyntaxKind.ArrowFunction
-            -> ArrowFunction.Names
-        | SyntaxKind.FunctionExpression
-            -> FunctionExpression.Names
-        | SyntaxKind.AsExpression
-            -> AsExpression.Names
-        | SyntaxKind.SatisfiesExpression
-            -> SatisfiesExpression.Names
-        | SyntaxKind.ConditionalExpression
-            -> ConditionalExpression.Names
-        | SyntaxKind.PropertyAccessExpression
-            -> PropertyAccessExpression.Names
-        | SyntaxKind.ElementAccessExpression
-            -> ElementAccessExpression.Names
-        | SyntaxKind.CallExpression
-            -> CallExpression.Names
-        | SyntaxKind.NewExpression
-            -> NewExpression.Names
-        | SyntaxKind.MetaProperty
-            -> MetaProperty.Names
-        | SyntaxKind.NonNullExpression
-            -> NonNullExpression.Names
-        | SyntaxKind.SpreadElement
-            -> SpreadElement.Names
-        | SyntaxKind.TemplateExpression
-            -> TemplateExpression.Names
-        | SyntaxKind.TemplateSpan
-            -> TemplateSpan.Names
-        | SyntaxKind.TaggedTemplateExpression
-            -> TaggedTemplateExpression.Names
-        | SyntaxKind.ParenthesizedExpression
-            -> ParenthesizedExpression.Names
-        | SyntaxKind.ArrayLiteralExpression
-            -> ArrayLiteralExpression.Names
-        | SyntaxKind.ObjectLiteralExpression
-            -> ObjectLiteralExpression.Names
-        | SyntaxKind.SpreadAssignment
-            -> SpreadAssignment.Names
-        | SyntaxKind.PropertyAssignment
-            -> PropertyAssignment.Names
-        | SyntaxKind.ShorthandPropertyAssignment
-            -> ShorthandPropertyAssignment.Names
-        | SyntaxKind.DeleteExpression
-            -> DeleteExpression.Names
-        | SyntaxKind.TypeOfExpression
-            -> TypeOfExpression.Names
-        | SyntaxKind.VoidExpression
-            -> VoidExpression.Names
-        | SyntaxKind.AwaitExpression
-            -> AwaitExpression.Names
-        | SyntaxKind.TypeAssertionExpression
-            -> TypeAssertion.Names
-        | SyntaxKind.UnionType
-            -> UnionTypeNode.Names
-        | SyntaxKind.IntersectionType
-            -> IntersectionTypeNode.Names
-        | SyntaxKind.ConditionalType
-            -> ConditionalTypeNode.Names
-        | SyntaxKind.TypeOperator
-            -> TypeOperatorNode.Names
-        | SyntaxKind.InferType
-            -> InferTypeNode.Names
-        | SyntaxKind.ArrayType
-            -> ArrayTypeNode.Names
-        | SyntaxKind.IndexedAccessType
-            -> IndexedAccessTypeNode.Names
-        | SyntaxKind.TypeReference
-            -> TypeReferenceNode.Names
-        | SyntaxKind.ExpressionWithTypeArguments
-            -> ExpressionWithTypeArguments.Names
-        | SyntaxKind.LiteralType
-            -> LiteralTypeNode.Names
-        | SyntaxKind.TypePredicate
-            -> TypePredicateNode.Names
-        | SyntaxKind.ImportAttribute
-            -> ImportAttribute.Names
-        | SyntaxKind.ImportAttributes
-            -> ImportAttributes.Names
-        | SyntaxKind.TypeQuery
-            -> TypeQueryNode.Names
-        | SyntaxKind.MappedType
-            -> MappedTypeNode.Names
-        | SyntaxKind.TypeLiteral
-            -> TypeLiteralNode.Names
-        | SyntaxKind.TupleType
-            -> TupleTypeNode.Names
-        | SyntaxKind.NamedTupleMember
-            -> NamedTupleMember.Names
-        | SyntaxKind.OptionalType
-            -> OptionalTypeNode.Names
-        | SyntaxKind.RestType
-            -> RestTypeNode.Names
-        | SyntaxKind.ParenthesizedType
-            -> ParenthesizedTypeNode.Names
-        | SyntaxKind.FunctionType
-            -> FunctionTypeNode.Names
-        | SyntaxKind.ConstructorType
-            -> ConstructorTypeNode.Names
-        | SyntaxKind.TemplateLiteralType
-            -> TemplateLiteralTypeNode.Names
-        | SyntaxKind.TemplateLiteralTypeSpan
-            -> TemplateLiteralTypeSpan.Names
-        | SyntaxKind.SyntheticExpression
-            -> SyntheticExpression.Names
-        | SyntaxKind.PartiallyEmittedExpression
-            -> PartiallyEmittedExpression.Names
-        | SyntaxKind.JsxElement
-            -> JsxElement.Names
-        | SyntaxKind.JsxAttributes
-            -> JsxAttributes.Names
-        | SyntaxKind.JsxNamespacedName
-            -> JsxNamespacedName.Names
-        | SyntaxKind.JsxOpeningElement
-            -> JsxOpeningElement.Names
-        | SyntaxKind.JsxSelfClosingElement
-            -> JsxSelfClosingElement.Names
-        | SyntaxKind.JsxFragment
-            -> JsxFragment.Names
-        | SyntaxKind.JsxAttribute
-            -> JsxAttribute.Names
-        | SyntaxKind.JsxSpreadAttribute
-            -> JsxSpreadAttribute.Names
-        | SyntaxKind.JsxClosingElement
-            -> JsxClosingElement.Names
-        | SyntaxKind.JsxExpression
-            -> JsxExpression.Names
-        | SyntaxKind.SyntaxList
-            -> SyntaxList.Names
-        | SyntaxKind.JSDoc
-            -> JSDoc.Names
-        | SyntaxKind.JSDocTypeExpression
-            -> JSDocTypeExpression.Names
-        | SyntaxKind.JSDocNonNullableType
-            -> JSDocNonNullableType.Names
-        | SyntaxKind.JSDocNullableType
-            -> JSDocNullableType.Names
-        | SyntaxKind.JSDocVariadicType
-            -> JSDocVariadicType.Names
-        | SyntaxKind.JSDocOptionalType
-            -> JSDocOptionalType.Names
-        | SyntaxKind.JSDocTypeTag
-            -> JSDocTypeTag.Names
-        | SyntaxKind.JSDocUnknownTag
-            -> JSDocUnknownTag.Names
-        | SyntaxKind.JSDocTemplateTag
-            -> JSDocTemplateTag.Names
-        | SyntaxKind.JSDocReturnTag
-            -> JSDocReturnTag.Names
-        | SyntaxKind.JSDocPublicTag
-            -> JSDocPublicTag.Names
-        | SyntaxKind.JSDocPrivateTag
-            -> JSDocPrivateTag.Names
-        | SyntaxKind.JSDocProtectedTag
-            -> JSDocProtectedTag.Names
-        | SyntaxKind.JSDocReadonlyTag
-            -> JSDocReadonlyTag.Names
-        | SyntaxKind.JSDocOverrideTag
-            -> JSDocOverrideTag.Names
-        | SyntaxKind.JSDocDeprecatedTag
-            -> JSDocDeprecatedTag.Names
-        | SyntaxKind.JSDocSeeTag
-            -> JSDocSeeTag.Names
-        | SyntaxKind.JSDocImplementsTag
-            -> JSDocImplementsTag.Names
-        | SyntaxKind.JSDocAugmentsTag
-            -> JSDocAugmentsTag.Names
-        | SyntaxKind.JSDocSatisfiesTag
-            -> JSDocSatisfiesTag.Names
-        | SyntaxKind.JSDocThrowsTag
-            -> JSDocThrowsTag.Names
-        | SyntaxKind.JSDocThisTag
-            -> JSDocThisTag.Names
-        | SyntaxKind.JSDocImportTag
-            -> JSDocImportTag.Names
-        | SyntaxKind.JSDocCallbackTag
-            -> JSDocCallbackTag.Names
-        | SyntaxKind.JSDocOverloadTag
-            -> JSDocOverloadTag.Names
-        | SyntaxKind.JSDocTypedefTag
-            -> JSDocTypedefTag.Names
-        | SyntaxKind.JSDocSignature
-            -> JSDocSignature.Names
-        | SyntaxKind.JSDocNameReference
-            -> JSDocNameReference.Names
-        | SyntaxKind.SourceFile
-            -> SourceFile.Names
-        | SyntaxKind.ModuleDeclaration
-            -> ModuleDeclaration.Names
-        | SyntaxKind.ImportEqualsDeclaration
-            -> ImportEqualsDeclaration.Names
-        | SyntaxKind.ExportDeclaration
-            -> ExportDeclaration.Names
-        | SyntaxKind.ImportType
-            -> ImportTypeNode.Names
-        | SyntaxKind.ImportClause
-            -> ImportClause.Names
-        | SyntaxKind.ImportSpecifier
-            -> ImportSpecifier.Names
-        | SyntaxKind.JSDocLink
-            -> JSDocLink.Names
-        | SyntaxKind.JSDocLinkPlain
-            -> JSDocLinkPlain.Names
-        | SyntaxKind.JSDocLinkCode
-            -> JSDocLinkCode.Names
-        | SyntaxKind.TypeParameter
-            -> TypeParameterDeclaration.Names
-        | SyntaxKind.SyntheticReferenceExpression
-            -> SyntheticReferenceExpression.Names
-        | SyntaxKind.JSDocTypeLiteral
-            -> JSDocTypeLiteral.Names
-        | SyntaxKind.JSDocParameterTag | SyntaxKind.JSDocPropertyTag
-            -> JSDocParameterOrPropertyTag.Names
+        | SyntaxKind.QualifiedName -> QualifiedName.Names
+        | SyntaxKind.ComputedPropertyName -> ComputedPropertyName.Names
+        | SyntaxKind.Decorator -> Decorator.Names
+        | SyntaxKind.IfStatement -> IfStatement.Names
+        | SyntaxKind.DoStatement -> DoStatement.Names
+        | SyntaxKind.WhileStatement -> WhileStatement.Names
+        | SyntaxKind.ForStatement -> ForStatement.Names
+        | SyntaxKind.ForInStatement
+        | SyntaxKind.ForOfStatement -> ForInOrOfStatement.Names
+        | SyntaxKind.BreakStatement -> BreakStatement.Names
+        | SyntaxKind.ContinueStatement -> ContinueStatement.Names
+        | SyntaxKind.ReturnStatement -> ReturnStatement.Names
+        | SyntaxKind.WithStatement -> WithStatement.Names
+        | SyntaxKind.SwitchStatement -> SwitchStatement.Names
+        | SyntaxKind.CaseBlock -> CaseBlock.Names
+        | SyntaxKind.CaseClause
+        | SyntaxKind.DefaultClause -> CaseOrDefaultClause.Names
+        | SyntaxKind.ThrowStatement -> ThrowStatement.Names
+        | SyntaxKind.TryStatement -> TryStatement.Names
+        | SyntaxKind.CatchClause -> CatchClause.Names
+        | SyntaxKind.LabeledStatement -> LabeledStatement.Names
+        | SyntaxKind.ExpressionStatement -> ExpressionStatement.Names
+        | SyntaxKind.Block -> Block.Names
+        | SyntaxKind.VariableStatement -> VariableStatement.Names
+        | SyntaxKind.VariableDeclaration -> VariableDeclaration.Names
+        | SyntaxKind.VariableDeclarationList -> VariableDeclarationList.Names
+        | SyntaxKind.ObjectBindingPattern
+        | SyntaxKind.ArrayBindingPattern -> BindingPattern.Names
+        | SyntaxKind.Parameter -> ParameterDeclaration.Names
+        | SyntaxKind.BindingElement -> BindingElement.Names
+        | SyntaxKind.MissingDeclaration -> MissingDeclaration.Names
+        | SyntaxKind.FunctionDeclaration -> FunctionDeclaration.Names
+        | SyntaxKind.ClassDeclaration -> ClassDeclaration.Names
+        | SyntaxKind.ClassExpression -> ClassExpression.Names
+        | SyntaxKind.HeritageClause -> HeritageClause.Names
+        | SyntaxKind.InterfaceDeclaration -> InterfaceDeclaration.Names
+        | SyntaxKind.TypeAliasDeclaration
+        | SyntaxKind.JSTypeAliasDeclaration -> TypeAliasDeclaration.Names
+        | SyntaxKind.EnumMember -> EnumMember.Names
+        | SyntaxKind.EnumDeclaration -> EnumDeclaration.Names
+        | SyntaxKind.ModuleBlock -> ModuleBlock.Names
+        | SyntaxKind.ImportDeclaration
+        | SyntaxKind.JSImportDeclaration -> ImportDeclaration.Names
+        | SyntaxKind.ExternalModuleReference -> ExternalModuleReference.Names
+        | SyntaxKind.NamespaceImport -> NamespaceImport.Names
+        | SyntaxKind.NamedImports -> NamedImports.Names
+        | SyntaxKind.ExportAssignment -> ExportAssignment.Names
+        | SyntaxKind.NamespaceExportDeclaration -> NamespaceExportDeclaration.Names
+        | SyntaxKind.NamespaceExport -> NamespaceExport.Names
+        | SyntaxKind.NamedExports -> NamedExports.Names
+        | SyntaxKind.ExportSpecifier -> ExportSpecifier.Names
+        | SyntaxKind.CallSignature -> CallSignatureDeclaration.Names
+        | SyntaxKind.ConstructSignature -> ConstructSignatureDeclaration.Names
+        | SyntaxKind.Constructor -> ConstructorDeclaration.Names
+        | SyntaxKind.GetAccessor -> GetAccessorDeclaration.Names
+        | SyntaxKind.SetAccessor -> SetAccessorDeclaration.Names
+        | SyntaxKind.IndexSignature -> IndexSignatureDeclaration.Names
+        | SyntaxKind.MethodSignature -> MethodSignatureDeclaration.Names
+        | SyntaxKind.MethodDeclaration -> MethodDeclaration.Names
+        | SyntaxKind.PropertySignature -> PropertySignatureDeclaration.Names
+        | SyntaxKind.PropertyDeclaration -> PropertyDeclaration.Names
+        | SyntaxKind.ClassStaticBlockDeclaration -> ClassStaticBlockDeclaration.Names
+        | SyntaxKind.BinaryExpression -> BinaryExpression.Names
+        | SyntaxKind.PrefixUnaryExpression -> PrefixUnaryExpression.Names
+        | SyntaxKind.PostfixUnaryExpression -> PostfixUnaryExpression.Names
+        | SyntaxKind.YieldExpression -> YieldExpression.Names
+        | SyntaxKind.ArrowFunction -> ArrowFunction.Names
+        | SyntaxKind.FunctionExpression -> FunctionExpression.Names
+        | SyntaxKind.AsExpression -> AsExpression.Names
+        | SyntaxKind.SatisfiesExpression -> SatisfiesExpression.Names
+        | SyntaxKind.ConditionalExpression -> ConditionalExpression.Names
+        | SyntaxKind.PropertyAccessExpression -> PropertyAccessExpression.Names
+        | SyntaxKind.ElementAccessExpression -> ElementAccessExpression.Names
+        | SyntaxKind.CallExpression -> CallExpression.Names
+        | SyntaxKind.NewExpression -> NewExpression.Names
+        | SyntaxKind.MetaProperty -> MetaProperty.Names
+        | SyntaxKind.NonNullExpression -> NonNullExpression.Names
+        | SyntaxKind.SpreadElement -> SpreadElement.Names
+        | SyntaxKind.TemplateExpression -> TemplateExpression.Names
+        | SyntaxKind.TemplateSpan -> TemplateSpan.Names
+        | SyntaxKind.TaggedTemplateExpression -> TaggedTemplateExpression.Names
+        | SyntaxKind.ParenthesizedExpression -> ParenthesizedExpression.Names
+        | SyntaxKind.ArrayLiteralExpression -> ArrayLiteralExpression.Names
+        | SyntaxKind.ObjectLiteralExpression -> ObjectLiteralExpression.Names
+        | SyntaxKind.SpreadAssignment -> SpreadAssignment.Names
+        | SyntaxKind.PropertyAssignment -> PropertyAssignment.Names
+        | SyntaxKind.ShorthandPropertyAssignment -> ShorthandPropertyAssignment.Names
+        | SyntaxKind.DeleteExpression -> DeleteExpression.Names
+        | SyntaxKind.TypeOfExpression -> TypeOfExpression.Names
+        | SyntaxKind.VoidExpression -> VoidExpression.Names
+        | SyntaxKind.AwaitExpression -> AwaitExpression.Names
+        | SyntaxKind.TypeAssertionExpression -> TypeAssertion.Names
+        | SyntaxKind.UnionType -> UnionTypeNode.Names
+        | SyntaxKind.IntersectionType -> IntersectionTypeNode.Names
+        | SyntaxKind.ConditionalType -> ConditionalTypeNode.Names
+        | SyntaxKind.TypeOperator -> TypeOperatorNode.Names
+        | SyntaxKind.InferType -> InferTypeNode.Names
+        | SyntaxKind.ArrayType -> ArrayTypeNode.Names
+        | SyntaxKind.IndexedAccessType -> IndexedAccessTypeNode.Names
+        | SyntaxKind.TypeReference -> TypeReferenceNode.Names
+        | SyntaxKind.ExpressionWithTypeArguments -> ExpressionWithTypeArguments.Names
+        | SyntaxKind.LiteralType -> LiteralTypeNode.Names
+        | SyntaxKind.TypePredicate -> TypePredicateNode.Names
+        | SyntaxKind.ImportAttribute -> ImportAttribute.Names
+        | SyntaxKind.ImportAttributes -> ImportAttributes.Names
+        | SyntaxKind.TypeQuery -> TypeQueryNode.Names
+        | SyntaxKind.MappedType -> MappedTypeNode.Names
+        | SyntaxKind.TypeLiteral -> TypeLiteralNode.Names
+        | SyntaxKind.TupleType -> TupleTypeNode.Names
+        | SyntaxKind.NamedTupleMember -> NamedTupleMember.Names
+        | SyntaxKind.OptionalType -> OptionalTypeNode.Names
+        | SyntaxKind.RestType -> RestTypeNode.Names
+        | SyntaxKind.ParenthesizedType -> ParenthesizedTypeNode.Names
+        | SyntaxKind.FunctionType -> FunctionTypeNode.Names
+        | SyntaxKind.ConstructorType -> ConstructorTypeNode.Names
+        | SyntaxKind.TemplateLiteralType -> TemplateLiteralTypeNode.Names
+        | SyntaxKind.TemplateLiteralTypeSpan -> TemplateLiteralTypeSpan.Names
+        | SyntaxKind.SyntheticExpression -> SyntheticExpression.Names
+        | SyntaxKind.PartiallyEmittedExpression -> PartiallyEmittedExpression.Names
+        | SyntaxKind.JsxElement -> JsxElement.Names
+        | SyntaxKind.JsxAttributes -> JsxAttributes.Names
+        | SyntaxKind.JsxNamespacedName -> JsxNamespacedName.Names
+        | SyntaxKind.JsxOpeningElement -> JsxOpeningElement.Names
+        | SyntaxKind.JsxSelfClosingElement -> JsxSelfClosingElement.Names
+        | SyntaxKind.JsxFragment -> JsxFragment.Names
+        | SyntaxKind.JsxAttribute -> JsxAttribute.Names
+        | SyntaxKind.JsxSpreadAttribute -> JsxSpreadAttribute.Names
+        | SyntaxKind.JsxClosingElement -> JsxClosingElement.Names
+        | SyntaxKind.JsxExpression -> JsxExpression.Names
+        | SyntaxKind.SyntaxList -> SyntaxList.Names
+        | SyntaxKind.JSDoc -> JSDoc.Names
+        | SyntaxKind.JSDocTypeExpression -> JSDocTypeExpression.Names
+        | SyntaxKind.JSDocNonNullableType -> JSDocNonNullableType.Names
+        | SyntaxKind.JSDocNullableType -> JSDocNullableType.Names
+        | SyntaxKind.JSDocVariadicType -> JSDocVariadicType.Names
+        | SyntaxKind.JSDocOptionalType -> JSDocOptionalType.Names
+        | SyntaxKind.JSDocTypeTag -> JSDocTypeTag.Names
+        | SyntaxKind.JSDocUnknownTag -> JSDocUnknownTag.Names
+        | SyntaxKind.JSDocTemplateTag -> JSDocTemplateTag.Names
+        | SyntaxKind.JSDocReturnTag -> JSDocReturnTag.Names
+        | SyntaxKind.JSDocPublicTag -> JSDocPublicTag.Names
+        | SyntaxKind.JSDocPrivateTag -> JSDocPrivateTag.Names
+        | SyntaxKind.JSDocProtectedTag -> JSDocProtectedTag.Names
+        | SyntaxKind.JSDocReadonlyTag -> JSDocReadonlyTag.Names
+        | SyntaxKind.JSDocOverrideTag -> JSDocOverrideTag.Names
+        | SyntaxKind.JSDocDeprecatedTag -> JSDocDeprecatedTag.Names
+        | SyntaxKind.JSDocSeeTag -> JSDocSeeTag.Names
+        | SyntaxKind.JSDocImplementsTag -> JSDocImplementsTag.Names
+        | SyntaxKind.JSDocAugmentsTag -> JSDocAugmentsTag.Names
+        | SyntaxKind.JSDocSatisfiesTag -> JSDocSatisfiesTag.Names
+        | SyntaxKind.JSDocThrowsTag -> JSDocThrowsTag.Names
+        | SyntaxKind.JSDocThisTag -> JSDocThisTag.Names
+        | SyntaxKind.JSDocImportTag -> JSDocImportTag.Names
+        | SyntaxKind.JSDocCallbackTag -> JSDocCallbackTag.Names
+        | SyntaxKind.JSDocOverloadTag -> JSDocOverloadTag.Names
+        | SyntaxKind.JSDocTypedefTag -> JSDocTypedefTag.Names
+        | SyntaxKind.JSDocSignature -> JSDocSignature.Names
+        | SyntaxKind.JSDocNameReference -> JSDocNameReference.Names
+        | SyntaxKind.SourceFile -> SourceFile.Names
+        | SyntaxKind.ModuleDeclaration -> ModuleDeclaration.Names
+        | SyntaxKind.ImportEqualsDeclaration -> ImportEqualsDeclaration.Names
+        | SyntaxKind.ExportDeclaration -> ExportDeclaration.Names
+        | SyntaxKind.ImportType -> ImportTypeNode.Names
+        | SyntaxKind.ImportClause -> ImportClause.Names
+        | SyntaxKind.ImportSpecifier -> ImportSpecifier.Names
+        | SyntaxKind.JSDocLink -> JSDocLink.Names
+        | SyntaxKind.JSDocLinkPlain -> JSDocLinkPlain.Names
+        | SyntaxKind.JSDocLinkCode -> JSDocLinkCode.Names
+        | SyntaxKind.TypeParameter -> TypeParameterDeclaration.Names
+        | SyntaxKind.SyntheticReferenceExpression -> SyntheticReferenceExpression.Names
+        | SyntaxKind.JSDocTypeLiteral -> JSDocTypeLiteral.Names
+        | SyntaxKind.JSDocParameterTag
+        | SyntaxKind.JSDocPropertyTag -> JSDocParameterOrPropertyTag.Names
         | _ -> Array.empty
 
 /// Byte offsets into the `SourceFile` node's extended-data record.
