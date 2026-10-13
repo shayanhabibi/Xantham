@@ -993,6 +993,18 @@ module Naming =
         | name when Char.IsLetter name[0] -> name
         | name -> "N" + name
 
+    /// The PascalCase form a string literal takes as a method-name suffix: `"close"` ->
+    /// `Close`, `"utf-8"` -> `Utf8`, `"2d"` -> `2d`.
+    let literalSuffix (text: string) =
+        let cleaned =
+            text
+            |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '-')
+            |> String.Concat
+
+        match pascalSegment cleaned with
+        | "" -> "Empty"
+        | name -> name
+
     /// The DU case name for a numeric-literal union member (D12): `1` -> `N1`,
     /// `1.5` -> `N1_5`, `-1` -> `NMinus1`.
     let enumCaseOfNumber (value: float) =
@@ -1179,6 +1191,14 @@ type ResolvedIndex =
         IsReadonly: bool
     }
 
+/// A signature declaration as written: `on(event: "close", listener: () => void): this`.
+type SignatureSource =
+    {
+        Spelling: string
+        /// The description of the JSDoc written above the declaration, before its first tag.
+        Comment: string
+    }
+
 type ResolvedSignature =
     {
         Parameters: ResolvedMember list
@@ -1191,6 +1211,9 @@ type ResolvedSignature =
         /// marks the class as one written to be derived from (§4.4).
         IsAbstract: bool
         ReturnTypeId: int<typeId>
+        /// The declaration's source text on one line, and the description of its own JSDoc.
+        /// Carried by each signature of a set of two or more.
+        Source: SignatureSource option
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -1441,7 +1464,8 @@ type FsIndexerMember =
     }
 
 /// An interface member. Overloads are consecutive `FsMethod` entries sharing a name -
-/// overloaded abstract members are legal F#.
+/// overloaded abstract members are legal F#. A literal-keyed overload is an `FsLiteralKeyed`
+/// entry under a name of its own.
 /// A construct signature of a *constructor object* - the thing `typeof Request` names, and the
 /// type of a `declare var Request: { new (...): Request }` (§4.4). F# has no first-class
 /// constructor-object type, so the object is declared as an interface of its own and each of
@@ -1474,6 +1498,11 @@ type FsMember =
     /// reached as `$0[Symbol.<symbol>]` through `[<Emit>]`. The inner member is an
     /// `FsProperty` or an `FsMethod`.
     | FsSymbolKeyed of symbol: string * FsMember
+    /// An overload keyed by string literals, declared as a method of its own and reached
+    /// through `[<Emit>]` as a call to `target` with each literal written before the F#
+    /// argument at its index: `onClose` is `$0.on('close', $1)`. The inner member is an
+    /// `FsMethod`.
+    | FsLiteralKeyed of target: string * literals: (int * string) list * FsMember
 
 /// How a value export is bound to its JavaScript module.
 type ImportBinding =

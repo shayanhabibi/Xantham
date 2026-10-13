@@ -600,8 +600,59 @@ let private declRef (name: string) (typeParameters: FsTypeParam list) =
 
         $"{ident name}<{parameters}>"
 
+/// A JavaScript single-quoted string literal.
+let private jsQuote (text: string) =
+    let escaped =
+        text.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", "\\r")
+
+    $"'{escaped}'"
+
+let private jsIdentifier =
+    System.Text.RegularExpressions.Regex @"^[A-Za-z_$][A-Za-z0-9_$]*$"
+
+/// The Emit template of a literal-keyed method (W5): a call to `target` on the receiver with
+/// each literal written before the F# argument at its index. From the first optional or rest
+/// parameter at or after the last literal, the remaining arguments spread as `$k...` and an
+/// omitted optional argument is absent: `$0.log('warn', $1...)`.
+let internal literalCallTemplate (target: string) (literals: (int * string) list) (parameters: FsParam list) =
+    let receiver =
+        if jsIdentifier.IsMatch target then
+            $"$0.{target}"
+        else
+            $"$0[{jsQuote target}]"
+
+    let last = literals |> List.map fst |> List.fold max 0
+
+    let spread =
+        parameters
+        |> List.indexed
+        |> List.tryFind (fun (index, p) -> index >= last && (p.Optional || p.Rest))
+        |> Option.map fst
+
+    let arguments =
+        [
+            for index in 0 .. parameters.Length do
+                for position, text in literals do
+                    if position = index then
+                        yield jsQuote text
+
+                if index < parameters.Length then
+                    match spread with
+                    | Some from when index = from -> yield $"${index + 1}..."
+                    | Some from when index > from -> ()
+                    | _ -> yield $"${index + 1}"
+        ]
+
+    let joined = String.concat ", " arguments
+    $"{receiver}({joined})"
+
 let rec private renderMemberWith (attributes: Map<string, (string * string) list>) (m: FsMember) =
     match m with
+    | FsLiteralKeyed(target, literals, (FsMethod m as inner)) ->
+        let existing = Map.tryFind m.Name attributes |> Option.defaultValue []
+        let emit = $"Emit({stringLit (literalCallTemplate target literals m.Parameters)})"
+        renderMemberWith (Map.add m.Name (existing @ [ "member", emit ]) attributes) inner
+    | FsLiteralKeyed(_, _, inner) -> renderMemberWith attributes inner
     | FsSymbolKeyed(symbol, inner) ->
         // `$0[Symbol.<symbol>]` reaches the symbol key: a read-only property at the member site,
         // a writable one per accessor, and a method as a call.
@@ -772,6 +823,20 @@ let private renderClassMember attributes (m: FsMember) =
 
                 yield $"        with {attributes getter}get (): {reference} = jsNative"
                 yield $"        and {attributes setter}set (_: {reference}): unit = jsNative"
+        ]
+    // A literal-keyed method is concrete: an abstract slot would oblige every derived class to
+    // implement a method JavaScript reaches through another key.
+    | FsLiteralKeyed(target, literals, FsMethod m) ->
+        [
+            yield! docLines "    " m.Docs m.Tags
+
+            for _, text in Map.tryFind m.Name attributes |> Option.defaultValue [] do
+                yield $"    [<{text}>]"
+
+            yield $"    [<Emit({stringLit (literalCallTemplate target literals m.Parameters)})>]"
+
+            yield
+                $"    member _.{declHead m.Name m.TypeParameters}{renderParamList m.Parameters} : {printType m.Return} = jsNative"
         ]
     | other -> renderMemberWith attributes other
 
@@ -1199,6 +1264,7 @@ let rec private qualifyMember foreign =
                 Return = qualifyRef foreign m.Return
             }
     | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, qualifyMember foreign inner)
+    | FsLiteralKeyed(target, literals, inner) -> FsLiteralKeyed(target, literals, qualifyMember foreign inner)
 
 let private qualifyBound foreign (m: FsExportMember) =
     { m with
@@ -1322,7 +1388,8 @@ let private declErasedArities (decl: FsDecl) : int list =
 
     let rec ofMember =
         function
-        | FsSymbolKeyed(_, inner) -> ofMember inner
+        | FsSymbolKeyed(_, inner)
+        | FsLiteralKeyed(_, _, inner) -> ofMember inner
         | FsProperty p -> erasedArities p.Type
         | FsIndexer i -> erasedArities i.Key @ erasedArities i.Value
         | FsMethod m ->

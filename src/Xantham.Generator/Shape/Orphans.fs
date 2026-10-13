@@ -45,6 +45,7 @@ let rec private memberNames (m: FsMember) =
     | FsConstructor c
     | FsInvoke c -> typeParamNames c.TypeParameters @ paramNames c.Parameters @ namesOf c.Return
     | FsSymbolKeyed(_, inner) -> memberNames inner
+    | FsLiteralKeyed(_, _, inner) -> memberNames inner
 
 let private exportMemberNames (m: FsExportMember) =
     typeParamNames m.TypeParameters

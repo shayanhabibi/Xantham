@@ -2151,6 +2151,63 @@ let private symbolMembers () =
         "number"
         (convertible.SymbolToPrimitive "number")
 
+/// W5 (#136): a literal overload reaches JavaScript as a call to its method with the literal
+/// written in.
+let private literalMethods () =
+    let socket = LiteralMethodLab.Exports.socket
+    let mutable closed = None
+    socket.onClose (fun hadError -> closed <- Some hadError) |> ignore
+
+    check
+        "an Emit-backed literal method calls on with the literal and the listener"
+        (emitJsExpr socket "$0.calls.some(c => c[0] === 'close' && c[1] === 2)")
+
+    socket.emitClose true |> ignore
+    equal "the listener receives the emitted argument" (Some true) closed
+
+    let mutable connected = false
+    socket.onConnect (fun () -> connected <- true) |> ignore
+    socket.emitConnect () |> ignore
+    check "a nullary listener runs on a nullary emit" connected
+
+    let mutable attempt = ""
+
+    socket.onConnectionAttempt (
+        LiteralMethodLab.Socket.On.Listener(fun ip port family -> attempt <- $"{ip}:{port}:{family}")
+    )
+    |> ignore
+
+    socket.emit ("connectionAttempt", box "host", box 80., box 4.) |> ignore
+    equal "a delegate listener receives every argument" "host:80:4" attempt
+
+    let mutable custom = 0
+    socket.on ("custom", fun _ -> custom <- custom + 1) |> ignore
+    socket.emit ("custom", box 1) |> ignore
+    equal "the generic overload stays reachable" 1 custom
+
+    socket.onEnd (fun () -> ()) |> ignore
+    check "a literal method a base also declares is callable" (emitJsExpr socket "$0.listeners.end.length === 1")
+
+    let dialog = LiteralMethodLab.Exports.dialog
+    dialog.on_Close (fun () -> ()) |> ignore
+    check "a colliding name still calls on with its literal" (emitJsExpr dialog "$0.listeners.close.length === 1")
+
+    let store = LiteralMethodLab.Exports.store
+    equal "a literal after an argument is written in its position" "text:k" (store.readText "k")
+    equal "the generic overload passes its arguments alone" "plain:k" (store.read "k")
+
+    let logger = LiteralMethodLab.Exports.logger
+    logger.logWarn ()
+
+    check
+        "an omitted optional argument is absent"
+        (emitJsExpr logger "$0.lastArgs.length === 1 && $0.lastArgs[0] === 'warn'")
+
+    logger.logWarn "m"
+    check "a supplied optional argument follows the literal" (emitJsExpr logger "$0.lastArgs.join() === 'warn,m'")
+    logger.logInfo ("a", "b")
+    check "a rest argument spreads after the literal" (emitJsExpr logger "$0.lastArgs.join() === 'info,a,b'")
+
 [<EntryPoint>]
 let main _ =
     dependencyEntrypoint ()
@@ -2189,6 +2246,7 @@ let main _ =
     callableHybrids ()
     callableOverloads ()
     symbolMembers ()
+    literalMethods ()
     patternParameters ()
     exportLayout ()
     subpathLab ()

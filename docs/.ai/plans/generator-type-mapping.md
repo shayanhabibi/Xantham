@@ -207,7 +207,8 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 - Single literal type (e.g. `kind: "click"`) → the StringEnum/enum case type where one
   exists; else the literal's base primitive, Widened, with the literal recorded in the doc
   comment. In tagged-union positions the tag is consumed by `[<TypeScriptTaggedUnion>]`
-  instead.
+  instead. A required literal parameter of a method overload set is a method of its own
+  (§4.8).
 - `boolean` literals `true`/`false` → `bool`, Widened, doc-noted.
 
 Wire: `TypeFlags` distinguishes every literal kind; `Value` carries the payload (bigint as
@@ -466,10 +467,17 @@ always was.
   with a rest parameter has no optional tail: `setTimeout(cb, delay?, ...args)` keeps `delay`
   required, of `option` type, where `?delay` ahead of the rest would be FS1212 (landed
   2026-09-02).
-- **Overloads** → overloaded abstract members / static members (legal in F#). Where
-  overloads differ only in literal-typed params (the `addEventListener` pattern:
-  `on(event: "click", cb: MouseCb)`), emit one member per literal with a synthesized name
-  (`onClick`) *in addition to* the general form — Ergonomic tier, config-gated.
+- **Overloads** → overloaded abstract members / static members (legal in F#). An overload
+  keyed by a string literal (a required, non-rest parameter typed by one string literal, in a
+  method of two or more signatures) is a method of its own, named as the method plus the
+  literal in PascalCase (`on(event: "close", cb)` → `onClose(cb)`), `on_Close` where the
+  declaration already has a member of that name. It is reached through
+  `[<Emit("$0.on('close', $1)")>]` and documented with its TypeScript signature; the
+  overloads without a literal keep the TypeScript name, so `on(event: string, ...)` stays
+  (`MB010`, Ergonomic; unconditional, landed 2026-10-13, W5). A required property holding a
+  separable overloaded callback, such as an intersection's member, reads the same way.
+  Exported functions, class statics, optional callbacks and literals nested in a parameter
+  type keep the retained-literal mapping of §4.2.
 - Optional params → F# optional params (`?x: T`) on members; trailing-only, as in TS.
 - Rest params → `[<ParamArray>]`.
 - `this` parameter → `getThisParameterOfSignature`; usually drop (Fable binds `this` via the

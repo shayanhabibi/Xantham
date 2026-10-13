@@ -1161,6 +1161,42 @@ let rec internal literalErasedKey (model: ShapeModel) (depth: int) (typeId: int<
 
             $"{target}({parts})"
 
+/// The string literals keying a method overload (W5), by parameter position: each required,
+/// non-rest parameter typed by a lone string literal. A literal holding Emit macro syntax
+/// (`$`, `{` or `}`) is excluded.
+let internal literalKeys (model: ShapeModel) (signature: ResolvedSignature) : (int * string) list =
+    let last = signature.Parameters.Length - 1
+
+    signature.Parameters
+    |> List.indexed
+    |> List.choose (fun (index, p) ->
+        if p.Optional || (signature.HasRest && index = last) then
+            None
+        else
+            match Map.tryFind p.TypeId model.Types with
+            | Some facts when flag TypeFlags.StringLiteral facts && not (flag TypeFlags.EnumLiteral facts) ->
+                match literalOf facts with
+                | Some(LitString text) when text.IndexOfAny [| '$'; '{'; '}' |] < 0 -> Some(index, text)
+                | _ -> None
+            | _ -> None)
+
+/// Whether a member's overloads are written as one method per literal key (W5): two or more
+/// call signatures, at least one keyed by a literal, on a method or on a required property
+/// holding a pure callback whose signatures F# tells apart. An intersection's member is such a
+/// property: `Element & { setAttribute(name: "draw", ...): void }`. `literalOverloadSets` and
+/// `shapeMembers` share this test.
+let internal isLiteralKeyed (model: ShapeModel) (m: ResolvedMember) (memberFacts: TypeFacts) =
+    let signatures = memberFacts.CallSignatures
+
+    (hasAny SymbolFlags.Method m.Symbol.Flags
+     || (not m.Optional
+         && isPureCallback memberFacts
+         && callSignaturesSeparable model memberFacts))
+    && not (isSymbolKeyed m.Symbol.Name)
+    && not (m.Symbol.Name.Contains '`')
+    && signatures.Length >= 2
+    && signatures |> List.exists (literalKeys model >> List.isEmpty >> not)
+
 /// One member whose overload set stays distinct because a literal-typed parameter separates it.
 type internal LiteralOverloadSet =
     {
@@ -1179,7 +1215,9 @@ type internal LiteralOverloadSet =
 ///
 /// A member's call signatures group by their parameter types with literals erased: a group of
 /// two or more is a collision F# would reject. Within a group, a position whose signatures each
-/// carry at most one literal and disagree on which one is a position the literal keeps.
+/// carry at most one literal and disagree on which one is a position the literal keeps. A
+/// method's literal-keyed overloads are methods of their own (`isLiteralKeyed`), so retention
+/// covers nested literals, optional callbacks and exported functions.
 let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
     let existing = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
 
@@ -1303,11 +1341,20 @@ let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
             | Some facts ->
                 let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
 
+                // A literal-keyed method's keyed overloads are methods of their own (W5), so
+                // only its other overloads can collide.
                 let members =
                     facts.Members
                     |> List.choose (fun m ->
                         Map.tryFind m.TypeId model.Types
-                        |> Option.map (fun memberFacts -> m.Symbol.Name, memberFacts.CallSignatures))
+                        |> Option.map (fun memberFacts ->
+                            let signatures =
+                                if isLiteralKeyed model m memberFacts then
+                                    memberFacts.CallSignatures |> List.filter (literalKeys model >> List.isEmpty)
+                                else
+                                    memberFacts.CallSignatures
+
+                            m.Symbol.Name, signatures))
 
                 setsFor owner order members
             | _ -> [])
@@ -3246,6 +3293,99 @@ let internal shapeMembers
     let mutable findings = []
     let emit finding = findings <- findings @ [ finding ]
 
+    // W5: names a literal-keyed overload's method takes, by JavaScript key and literals. The
+    // member names of the type, inherited ones included, are taken from the start.
+    let mutable taken =
+        facts.Members
+        |> List.map (fun m -> Naming.memberName m.Symbol.Name)
+        |> Set.ofList
+
+    let mutable literalNames = Map.empty
+
+    // The method an overload keyed by `literals` reads as: `on("close", listener)` is
+    // `onClose(listener)`, or `on_Close` where a member already has that name.
+    let literalKeyedMethod (m: ResolvedMember) (signature: ResolvedSignature) (literals: (int * string) list) =
+        let target = Naming.memberName m.Symbol.Name
+        let texts = literals |> List.map snd
+
+        let name =
+            match Map.tryFind (target, texts) literalNames with
+            | Some name -> name
+            | None ->
+                let suffix = texts |> List.map Naming.literalSuffix |> String.concat ""
+                let plain = target + suffix
+                let separated = target + "_" + suffix
+
+                let name =
+                    [ plain; separated ]
+                    |> List.tryFind (fun name -> not (Set.contains name taken))
+                    |> Option.defaultWith (fun () ->
+                        Seq.initInfinite (fun i -> $"{separated}{i + 2}")
+                        |> Seq.find (fun name -> not (Set.contains name taken)))
+
+                taken <- Set.add name taken
+                literalNames <- Map.add (target, texts) name literalNames
+
+                emit (
+                    Finding.make
+                        $"{self}.{m.Symbol.Name}"
+                        (Members.LiteralOverloadAsMethod(String.concat ", " texts, name))
+                )
+
+                name
+
+        let positions = literals |> List.map fst |> Set.ofList
+
+        let reduced =
+            { signature with
+                Parameters =
+                    signature.Parameters
+                    |> List.indexed
+                    |> List.filter (fun (index, _) -> not (Set.contains index positions))
+                    |> List.map snd
+            }
+
+        let typeParameters, parameters, returns, signatureFindings =
+            shapeSignature ctx model (Some self) $"{self}.{name}" reduced
+
+        findings <- findings @ signatureFindings
+
+        let removed =
+            literals
+            |> List.map (fun (index, _) -> signature.Parameters[index].Symbol.Name)
+            |> Set.ofList
+
+        // The overload's own JSDoc, then its TypeScript signature.
+        let docs =
+            match signature.Source with
+            | Some source ->
+                let fence = "```ts\n" + source.Spelling + "\n```"
+
+                if source.Comment = "" then
+                    fence
+                else
+                    source.Comment + "\n\n" + fence
+            | None -> m.Docs
+
+        FsLiteralKeyed(
+            target,
+            literals |> List.mapi (fun before (index, text) -> index - before, text),
+            FsMethod
+                {
+                    Name = name
+                    Docs = docs
+                    Tags =
+                        m.Tags
+                        |> List.filter (fun tag ->
+                            match tag.Name, tag.Text with
+                            | "param", ValueSome text -> not (Set.contains (text.Trim().Split(' ')[0]) removed)
+                            | _ -> true)
+                    TypeParameters = typeParameters
+                    Parameters = parameters
+                    Return = returns
+                }
+        )
+
     let members =
         facts.Members
         |> List.filter (fun m ->
@@ -3303,44 +3443,38 @@ let internal shapeMembers
                         Some memberFacts
                     | _ -> None
 
-            match methodFacts, recoverableCallbackFacts with
-            | Some memberFacts, _ ->
+            // Writes each call signature as an overload of one method, or as a method of its own
+            // where a literal keys it (W5). Only the member's declared type is keyed.
+            let overloads (declared: bool) (memberFacts: TypeFacts) =
+                let keyed = declared && isLiteralKeyed model m memberFacts
+
                 memberFacts.CallSignatures
                 |> List.map (fun signature ->
-                    let typeParameters, parameters, returns, signatureFindings =
-                        shapeSignature ctx model (Some self) owner signature
+                    match if keyed then literalKeys model signature else [] with
+                    | [] ->
+                        let typeParameters, parameters, returns, signatureFindings =
+                            shapeSignature ctx model (Some self) owner signature
 
-                    findings <- findings @ signatureFindings
+                        findings <- findings @ signatureFindings
 
-                    FsMethod
-                        {
-                            Name = Naming.memberName m.Symbol.Name
-                            Docs = m.Docs
-                            Tags = m.Tags
-                            TypeParameters = typeParameters
-                            Parameters = parameters
-                            Return = returns
-                        })
+                        FsMethod
+                            {
+                                Name = Naming.memberName m.Symbol.Name
+                                Docs = m.Docs
+                                Tags = m.Tags
+                                TypeParameters = typeParameters
+                                Parameters = parameters
+                                Return = returns
+                            }
+                    | literals -> literalKeyedMethod m signature literals)
+
+            match methodFacts, recoverableCallbackFacts with
+            | Some memberFacts, _ -> overloads true memberFacts
             | None, Some memberFacts ->
                 if agreed.IsSome then
                     emit (Finding.make owner TypeReference.IntersectionOperandsIdentical)
 
-                memberFacts.CallSignatures
-                |> List.map (fun signature ->
-                    let typeParameters, parameters, returns, signatureFindings =
-                        shapeSignature ctx model (Some self) owner signature
-
-                    findings <- findings @ signatureFindings
-
-                    FsMethod
-                        {
-                            Name = Naming.memberName m.Symbol.Name
-                            Docs = m.Docs
-                            Tags = m.Tags
-                            TypeParameters = typeParameters
-                            Parameters = parameters
-                            Return = returns
-                        })
+                overloads agreed.IsNone memberFacts
             | None, None ->
                 let reference, refFindings =
                     typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) (Some self) owner effectiveTypeId

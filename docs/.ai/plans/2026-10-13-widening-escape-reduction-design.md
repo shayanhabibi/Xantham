@@ -104,6 +104,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W5.3** Each such method carries `[<Emit("$0.on('close', $1)")>]` and an XML doc with the TypeScript signature. Curried listeners need no delegate: `string -> float -> unit` is called as `(host, port)` (probe 6).
 - **W5.4** W5.2 and W5.3 apply to every literal-keyed method, including `on`, `once`, `addListener`, `prependListener` and `prependOnceListener`.
 - **Acceptance:** the lab asserts a `Socket`-shaped emitter with listener shapes that collide today, a name collision (`on_Close`), and no DO001 or TR006 on them. The RunGate holds an Emit-on-abstract-member check. In `workers-types` and `animejs`, TR006 and DO001 fall.
+- **Status:** integrated on `integ/w5` (2026-10-14), stacked on `develop` after W2–W4. A literal overload reports `MB010`; `CatalogCompatibility.ApiVersion` is 8. TR006 falls from 228 to 221 in `workers-types` and from 21 to 20 in `animejs`, where DO001 falls from 1 to 0. Core.TS and Node are regenerated under the T4 override: Core.TS reads 784 methods (`MB010`) and TR056 falls from 786 to 0; in Node, TR006 falls from 5,063 to 673 and DO001 from 1,904 to 27.
 
 ### W6. Literal members: module, docs and Create
 

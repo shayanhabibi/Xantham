@@ -1987,7 +1987,9 @@ let shapePassTests =
                      | FsMethod m -> m.Name
                      | FsConstructor _ -> "Create"
                      | FsIndexer _ -> "Item"
-                     | FsInvoke _ -> "Invoke"))
+                     | FsInvoke _ -> "Invoke"
+                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsLiteralKeyed (target, _, _) -> target))
                 [ "name"; "at" ]
                 "both member sets, in the checker's order"
 
@@ -2040,7 +2042,9 @@ let shapePassTests =
                      | FsMethod m -> m.Name
                      | FsIndexer _ -> "Item"
                      | FsConstructor _ -> "Create"
-                     | FsInvoke _ -> "Invoke"))
+                     | FsInvoke _ -> "Invoke"
+                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsLiteralKeyed (target, _, _) -> target))
                 [ "extra"; "name" ]
                 "and the inherited member is still declared here"
 
@@ -3814,7 +3818,9 @@ let shapePassTests =
                          | FsProperty p -> p.Type
                          | FsConstructor c -> c.Return
                          | FsInvoke c -> c.Return
-                         | FsIndexer i -> i.Value))
+                         | FsIndexer i -> i.Value
+                         | FsSymbolKeyed _
+                         | FsLiteralKeyed _ -> failwith "no keyed member is expected"))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
 
@@ -3952,7 +3958,12 @@ let shapePassTests =
             let owner =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
                     SymbolName = Some ((fun value -> value * uom<symbolName>) "Store")
-                    Members = [ Build.resolvedMember (Build.symbol 100 "read" SymbolFlags.Method) 20 ]
+                    // An optional property holding the overloaded callback: a method's top-level
+                    // literals are methods of their own (W5), and retention serves optional
+                    // callback properties, nested literals and exports.
+                    Members =
+                        [ { Build.resolvedMember (Build.symbol 100 "read" SymbolFlags.Property) 20 with
+                              Optional = true } ]
                 }
 
             { Build.shapeModel
@@ -5672,4 +5683,259 @@ let symbolKeyedMemberTests =
 
             Expect.equal decls["Resource"].Members [ dispose ] "the member stays"
             Expect.equal findings [ "MB009", "Resource.[Symbol.dispose]" ] "one MB009"
+    ]
+
+/// W5 (#136): an overload keyed by a string literal is a method of its own.
+[<Tests>]
+let literalKeyedMethodTests =
+    let literal id (text: string) =
+        { Build.facts
+              { Build.typeResponse id TypeFlags.StringLiteral with
+                  Value = JsonValue.Create text } with
+            SymbolName = None }
+
+    let literals =
+        [ literal 30 "close"
+          literal 31 "end"
+          literal 32 "utf-8"
+          literal 33 "utf8"
+          literal 34 "data"
+          literal 36 "a$b"
+          { literal 35 "Up" with
+              Response =
+                  { (literal 35 "Up").Response with
+                      Flags = TypeFlags.StringLiteral ||| TypeFlags.EnumLiteral } } ]
+
+    let param id name typeId =
+        Build.resolvedMember (Build.symbol id name SymbolFlags.Property) typeId
+
+    let methodMember id name typeId =
+        Build.resolvedMember (Build.symbol id name SymbolFlags.Method) typeId
+
+    let callable id signatures =
+        { Build.facts (Build.typeResponse id TypeFlags.Object) with
+            CallSignatures = signatures }
+
+    let modelOf (members: ResolvedMember list) (table: TypeFacts list) =
+        let owner =
+            { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                SymbolName = Some((fun value -> value * uom<symbolName>) "Socket")
+                Members = members }
+
+        { Build.shapeModel (Build.primitives @ literals @ table @ [ owner ]) with
+            DeclNames = Map.ofList [ 10<typeId>, "Socket" ] },
+        owner
+
+    let shape members table =
+        let model, owner = modelOf members table
+        Spec.shapeMembers Build.context model Set.empty "Socket" owner
+
+    let describe =
+        function
+        | FsMethod m -> m.Name, None
+        | FsLiteralKeyed(target, keys, FsMethod m) -> m.Name, Some(target, keys)
+        | _ -> "?", None
+
+    // on(event: string, listener: string); on(event: "close", listener: string);
+    // on(event: "end", listener: string)
+    let onSignatures =
+        [ Build.signature [ param 101 "event" 1; param 102 "listener" 1 ] 4
+          Build.signature [ param 103 "event" 30; param 104 "listener" 1 ] 4
+          Build.signature [ param 105 "event" 31; param 106 "listener" 1 ] 4 ]
+
+    testList "literal-keyed methods" [
+        testCase "each literal overload is a method of its own beside the generic one" <| fun _ ->
+            let members, _ = shape [ methodMember 100 "on" 20 ] [ callable 20 onSignatures ]
+
+            Expect.equal
+                (members |> List.map describe)
+                [ "on", None
+                  "onClose", Some("on", [ 0, "close" ])
+                  "onEnd", Some("on", [ 0, "end" ]) ]
+                "the generic overload keeps the TypeScript name"
+
+            match members[1] with
+            | FsLiteralKeyed(_, _, FsMethod m) ->
+                Expect.equal (m.Parameters |> List.map _.Name) [ "listener" ] "the literal parameter is removed"
+            | other -> failtest $"unexpected {other}"
+
+        testCase "a required property holding the overloads is keyed, an optional one is not" <| fun _ ->
+            let property optional =
+                { Build.resolvedMember (Build.symbol 100 "on" SymbolFlags.Property) 20 with
+                    Optional = optional }
+
+            let required, _ = shape [ property false ] [ callable 20 onSignatures ]
+
+            Expect.equal
+                (required |> List.map (describe >> fst))
+                [ "on"; "onClose"; "onEnd" ]
+                "an intersection's member is a property whose overloads read as methods"
+
+            let optional, _ = shape [ property true ] [ callable 20 onSignatures ]
+            Expect.isFalse (optional |> List.exists (function FsLiteralKeyed _ -> true | _ -> false)) "an optional callback stays a property"
+
+        testCase "the findings name the method and leave no widened literal" <| fun _ ->
+            let _, findings = shape [ methodMember 100 "on" 20 ] [ callable 20 onSignatures ]
+
+            Expect.equal
+                (findings |> List.filter (fun f -> f.Key.StartsWith "MB" || f.Key = "TR006") |> List.map (fun f -> f.Key, f.Symbol, f.Tier))
+                [ "MB010", "Socket.on", Ergonomic; "MB010", "Socket.on", Ergonomic ]
+                "one MB010 per literal, and no TR006"
+
+        testCase "a member of the name separates the parts with an underscore" <| fun _ ->
+            let members, findings =
+                shape [ Build.resolvedMember (Build.symbol 99 "onEnd" SymbolFlags.Property) 1; methodMember 100 "on" 20 ] [ callable 20 onSignatures ]
+
+            Expect.contains (members |> List.map describe) ("on_End", Some("on", [ 0, "end" ])) "on_End"
+            Expect.contains (members |> List.map describe) ("onClose", Some("on", [ 0, "close" ])) "onClose is free"
+
+            Expect.isTrue
+                (findings |> List.exists (fun f -> f.Key = "MB010" && f.Kind.Message.Contains "on_End"))
+                "the message names the separated form"
+
+        testCase "two literals with one PascalCase form take distinct names" <| fun _ ->
+            let signatures =
+                [ Build.signature [ param 101 "encoding" 1 ] 4
+                  Build.signature [ param 102 "encoding" 32 ] 4
+                  Build.signature [ param 103 "encoding" 33 ] 4 ]
+
+            let members, _ = shape [ methodMember 100 "write" 20 ] [ callable 20 signatures ]
+
+            Expect.equal (members |> List.map (describe >> fst)) [ "write"; "writeUtf8"; "write_Utf8" ] "the second is separated"
+
+        testCase "two overloads of one literal share its method" <| fun _ ->
+            let signatures =
+                [ Build.signature [ param 101 "event" 1; param 102 "listener" 1 ] 4
+                  Build.signature [ param 103 "event" 34; param 104 "listener" 1 ] 4
+                  Build.signature [ param 105 "event" 34; param 106 "listener" 2 ] 4 ]
+
+            let members, findings = shape [ methodMember 100 "on" 20 ] [ callable 20 signatures ]
+
+            Expect.equal (members |> List.map (describe >> fst)) [ "on"; "onData"; "onData" ] "overloads of onData"
+            Expect.equal (findings |> List.filter (fun f -> f.Key = "MB010")).Length 1 "one finding per method"
+
+        testCase "a single signature, an enum literal, an optional and a dollar keep the method" <| fun _ ->
+            let single, singleFindings =
+                shape [ methodMember 100 "tag" 20 ] [ callable 20 [ Build.signature [ param 101 "name" 30 ] 4 ] ]
+
+            Expect.equal (single |> List.map describe) [ "tag", None ] "one signature"
+            Expect.contains (singleFindings |> List.map _.Key) "TR006" "the literal widens"
+
+            for typeId, optional, label in [ 35, false, "an enum literal"; 30, true, "an optional parameter"; 36, false, "a literal holding $" ] do
+                let keyless =
+                    { param 103 "event" typeId with
+                        Optional = optional }
+
+                let members, _ =
+                    shape
+                        [ methodMember 100 "on" 20 ]
+                        [ callable 20 [ Build.signature [ param 101 "event" 1 ] 4; Build.signature [ keyless ] 4 ] ]
+
+                Expect.equal (members |> List.map (describe >> fst)) [ "on"; "on" ] label
+
+        testCase "the signature's own JSDoc and spelling are its docs" <| fun _ ->
+            let documented =
+                { Build.signature [ param 103 "event" 30; param 104 "listener" 1 ] 4 with
+                    Source =
+                        Some
+                            { Spelling = "on(event: \"close\", listener: string): this"
+                              Comment = "Closes." } }
+
+            let undocumented =
+                { Build.signature [ param 105 "event" 31; param 106 "listener" 1 ] 4 with
+                    Source = Some { Spelling = "on(event: \"end\", listener: string): this"; Comment = "" } }
+
+            let generic =
+                { Build.signature [ param 101 "event" 1; param 102 "listener" 1 ] 4 with
+                    Source = Some { Spelling = "on(event: string, listener: string): this"; Comment = "" } }
+
+            let documentedMember = { methodMember 100 "on" 20 with Docs = "Listens." }
+            let members, _ = shape [ documentedMember ] [ callable 20 [ generic; documented; undocumented ] ]
+
+            match members with
+            | [ FsMethod plain; FsLiteralKeyed(_, _, FsMethod keyed); FsLiteralKeyed(_, _, FsMethod fallback) ] ->
+                Expect.equal keyed.Docs "Closes.\n\n```ts\non(event: \"close\", listener: string): this\n```" "its own description, then the spelling"
+                Expect.equal fallback.Docs "```ts\non(event: \"end\", listener: string): this\n```" "the spelling alone where it has none"
+                Expect.equal plain.Docs "Listens." "the generic overload keeps the member's"
+            | other -> failtest $"unexpected {other}"
+
+        testCase "a literal-keyed method's literals are not retained" <| fun _ ->
+            let signatures =
+                [ Build.signature [ param 103 "event" 30; param 104 "listener" 1 ] 4
+                  Build.signature [ param 105 "event" 31; param 106 "listener" 1 ] 4 ]
+
+            let model, _ = modelOf [ methodMember 100 "on" 20 ] [ callable 20 signatures ]
+            Expect.isEmpty (Spec.literalOverloads model) "the methods carry the literals"
+
+        testCase "a literal-keyed member refuses Create as an overload does" <| fun _ ->
+            let keyed =
+                FsLiteralKeyed(
+                    "on",
+                    [ 0, "close" ],
+                    FsMethod
+                        { Name = "onClose"
+                          Docs = ""
+                          Tags = []
+                          TypeParameters = []
+                          Parameters = []
+                          Return = FsUnit }
+                )
+
+            let decl =
+                { Name = "Socket"
+                  Docs = ""
+                  Tags = []
+                  Order = None
+                  TypeParameters = []
+                  Inherits = []
+                  Members = [ keyed ]
+                  Entrypoint = None
+                  CreateOverloads = []
+                  Statics = [] }
+
+            let model = { Build.shapeModel [] with Decls = [ FsInterface decl ] }
+            let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
+
+            Expect.isTrue
+                (findings |> List.exists (fun f -> f.Key = "SP003" && f.Kind.Message.Contains "overloaded method"))
+                "SP003"
+
+            match shaped.Decls with
+            | [ FsInterface d ] -> Expect.isEmpty d.CreateOverloads "no Create"
+            | other -> failtest $"unexpected {other}"
+
+        testCase "dedupe-overloads drops a literal-keyed method repeating a signature" <| fun _ ->
+            let onData =
+                FsLiteralKeyed(
+                    "on",
+                    [ 0, "data" ],
+                    FsMethod
+                        { Name = "onData"
+                          Docs = ""
+                          Tags = []
+                          TypeParameters = []
+                          Parameters = [ { Name = "listener"; Optional = false; Rest = false; Type = FsString } ]
+                          Return = FsUnit }
+                )
+
+            let decl =
+                { Name = "Socket"
+                  Docs = ""
+                  Tags = []
+                  Order = None
+                  TypeParameters = []
+                  Inherits = []
+                  Members = [ onData; onData ]
+                  Entrypoint = None
+                  CreateOverloads = []
+                  Statics = [] }
+
+            let model = { Build.shapeModel [] with Decls = [ FsInterface decl ] }
+            let deduped, findings = Build.runPass Overloads.dedupeOverloads model
+
+            Expect.equal (findings |> List.map (fun f -> f.Key, f.Symbol)) [ "DO001", "Socket.onData" ] "DO001"
+
+            match deduped.Decls with
+            | [ FsInterface d ] -> Expect.equal d.Members.Length 1 "one survivor"
+            | other -> failtest $"unexpected {other}"
     ]

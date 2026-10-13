@@ -17,13 +17,15 @@ let rec private shapedMemberName (m: FsMember) =
     | FsConstructor _ -> "Create"
     | FsInvoke _ -> "Invoke"
     | FsSymbolKeyed(_, inner) -> shapedMemberName inner
+    | FsLiteralKeyed(_, _, inner) -> shapedMemberName inner
 
 /// Whether F# admits a static beside an instance member of the same name. Only between two
 /// methods (`Response.json` is both): property over property is FS0441, method over property
 /// FS0434, and a static property under an abstract method is FS3214 at every use.
 let private staticFitsBeside (instance: FsMember) (isMethod: bool) =
     match instance with
-    | FsMethod _ -> isMethod
+    | FsMethod _
+    | FsLiteralKeyed _ -> isMethod
     | FsProperty _
     | FsIndexer _
     | FsConstructor _
