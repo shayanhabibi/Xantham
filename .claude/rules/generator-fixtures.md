@@ -63,7 +63,9 @@ handed over having only ever run the fast loop has not been gated.
 
 **Exception — widening and escape work items (W1–W9, issues #131–#140).** These never run the
 full corpus. Each proves its change on a lab fixture, then regenerates only its two selected
-goldens, and regenerates Core.TS or Node only under a recorded override. The rules (T1–T6) and the
+goldens, and regenerates Core.TS or Node only under a recorded override. When the pull request is
+created, every test golden is regenerated with `dotnet fsi build.fsx -- test --goldens`, which
+writes the goldens without running the suite. The rules (T1–T6) and the
 golden selection table are in §5 of
 `docs/.ai/plans/2026-10-13-widening-escape-reduction-design.md`; they replace this section and
 "Large fixtures" below for those items.

@@ -180,6 +180,15 @@ module Options =
             "Regenerate the golden corpus before asserting against it. Runs the suite twice: once writing, once checking."
         |> Input.def false
 
+    /// Pull-request regeneration: every golden is rewritten and no test is checked. The write
+    /// pass runs only the test cases whose names contain "golden", which are the cases that write
+    /// a golden, so the rest of the suite does not run.
+    let goldensOnly =
+        Input.option<bool> "--goldens"
+        |> Input.description
+            "Regenerate every golden and run nothing else: the write pass only, limited to test cases named \"golden\"."
+        |> Input.def false
+
     let testFilter =
         Input.option<string> "--filter"
         |> Input.description
@@ -488,6 +497,7 @@ module Stages =
             and! runGate = Options.runGate
             and! isCI = Baked.Common.isCI
             and! shard = Options.testShard
+            and! goldens = Options.goldensOnly
 
             // Each test project is an Expecto console app and runs as its built executable, with
             // output streamed as written. `--filter` is Expecto's own hint: a prefix of the `.`-joined full test name.
@@ -495,7 +505,7 @@ module Stages =
             // have to be part of the format string rather than a pre-baked `" --filter ..."` hole.
             let suites = Spec.testProjects |> List.filter _.Name.EndsWith(".Tests")
 
-            let suite (name: string) =
+            let suite (name: string) (goldenWriters: bool) =
                 stage name {
                     if not (System.String.IsNullOrWhiteSpace shard) then
                         stage "sharded suites" {
@@ -520,7 +530,11 @@ module Stages =
                         let assembly = System.IO.Path.Combine(output, project.Name + ".dll")
 
                         let command =
-                            if isCI && System.String.IsNullOrWhiteSpace filter then
+                            if goldenWriters && isCI then
+                                cmd $"dotnet {assembly} --filter-test-case golden --debug --no-spinner"
+                            elif goldenWriters then
+                                cmd $"dotnet {assembly} --filter-test-case golden"
+                            elif isCI && System.String.IsNullOrWhiteSpace filter then
                                 cmd $"dotnet {assembly} --debug --no-spinner"
                             elif isCI then
                                 cmd $"dotnet {assembly} --filter {filter} --debug --no-spinner"
@@ -539,6 +553,15 @@ module Stages =
             return
                 stage "test" {
                     when' (not skipTests)
+                    run (fun _ ->
+                        if goldens
+                           && (update
+                               || not (System.String.IsNullOrWhiteSpace filter)
+                               || not (System.String.IsNullOrWhiteSpace shard)) then
+                            Error "--goldens cannot be combined with --update, --filter or --shard"
+                        else
+                            Ok())
+
                     run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} --no-restore -v q")
 
                     // Regeneration is a *separate* run of the same suite, not a mode of the
@@ -546,12 +569,15 @@ module Stages =
                     // goldens, so asserting in that same pass would only assert that a file
                     // equals what was just written to it. Child processes inherit the variable.
                     stage "regenerate goldens" {
-                        when' update
+                        when' (update || goldens)
                         envVars [ ("XANTHAM_UPDATE_GOLDEN", "1") ]
-                        suite "write"
+                        suite "write" goldens
                     }
 
-                    suite "check"
+                    stage "checked suites" {
+                        when' (not goldens)
+                        suite "check" false
+                    }
                     // The Fable *run* gate (§5 of the architecture plan): the linked goldens compiled
                     // by Fable and executed under node against the fixtures' JavaScript runtimes.
                     // `--noCache` because Fable's up-to-date check missed a changed linked golden once,
