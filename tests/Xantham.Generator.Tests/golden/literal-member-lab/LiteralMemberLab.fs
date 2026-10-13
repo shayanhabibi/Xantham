@@ -76,6 +76,22 @@ module MethodSignal =
     let kind = "method"
 
 /// <summary>
+/// A writable string discriminant.
+/// </summary>
+[<Interface>]
+type WritableSignal =
+    /// <remarks>TypeScript type: <c>"writable"</c></remarks>
+    abstract kind: string with get, set
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ kind: 'writable', ...$0 })")>]
+    static member Create (name: string) : WritableSignal = jsNative
+
+module WritableSignal =
+    /// <remarks>TypeScript type: <c>"writable"</c></remarks>
+    [<Literal>]
+    let kind = "writable"
+
+/// <summary>
 /// Constants only.
 /// </summary>
 [<Interface>]
@@ -152,12 +168,12 @@ type Level2 =
 /// </summary>
 [<Interface>]
 type NotLiterals =
-    abstract kind: string with get, set
+    abstract mode: string option with get, set
     abstract optional: float option
     abstract flag: bool
     abstract level: float
     [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, flag: bool, level: float, ?optional: float) : NotLiterals = jsNative
+    static member Create (flag: bool, level: float, ?mode: string, ?optional: float) : NotLiterals = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

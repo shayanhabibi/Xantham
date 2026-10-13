@@ -3831,7 +3831,7 @@ let shapePassTests =
                 Expect.equal derived.Members [ paramObjectProperty "pointerId" FsFloat ] "the derived copy drops"
             | decls -> failtest $"expected both interfaces back, got %A{decls}"
 
-        testCase "shape-interfaces marks a required readonly single-literal member" <| fun _ ->
+        testCase "shape-interfaces marks a required single-literal member, readonly or writable" <| fun _ ->
             // `interface Event { readonly AT_TARGET: 2; level: 2; readonly optional?: 2 }`
             let eventSymbol = Build.symbol 110 "Event" SymbolFlags.Interface
 
@@ -3866,9 +3866,9 @@ let shapePassTests =
                          | FsProperty p -> Some(p.Name, p.Type, p.Literal)
                          | _ -> None))
                     [ "AT_TARGET", FsFloat, Some(LitNumber 2.0)
-                      "level", FsFloat, None
+                      "level", FsFloat, Some(LitNumber 2.0)
                       "optional", FsOption FsFloat, None ]
-                    "only the required readonly member carries its literal"
+                    "only the optional member lacks its literal"
             | decls -> failtest $"expected one interface, got %A{decls}"
 
             Expect.equal
@@ -3876,9 +3876,9 @@ let shapePassTests =
                  |> List.filter (fun f -> f.Key = "MB011" || f.Key = "TR007")
                  |> List.map (fun f -> f.Key, f.Symbol, f.Message))
                 [ "MB011", "Event.AT_TARGET", "literal member 2: read as its primitive, declared as a [<Literal>], written by Create"
-                  "TR007", "Event.level", (Finding.make "" TypeReference.NumericLiteralToFloat).Message
+                  "MB011", "Event.level", "literal member 2: read as its primitive, declared as a [<Literal>], written by Create"
                   "TR007", "Event.optional", (Finding.make "" TypeReference.NumericLiteralToFloat).Message ]
-                "the literal member replaces its widening; the others keep it"
+                "a literal member replaces its widening; the optional one keeps it"
 
         testCase "a constructor object keeps its own Create and reports nothing" <| fun _ ->
             let decl =

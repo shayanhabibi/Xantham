@@ -32,7 +32,7 @@ The baseline below comes from the committed `symbols.jsonl` files of Xantham.Fab
 | Grade | A finding's tier: exact, ergonomic, widened or escape, recorded per symbol in `manifest.json` |
 | Faithful `obj` | An `obj` emitted for a source `any`, where the source states no narrower type |
 | Stated-type loss | An `obj` emitted in place of a type the source declares, such as an uncatalogued reference |
-| Literal member | A readonly member whose declared type is a single string or numeric literal, such as `readonly AT_TARGET: 2` |
+| Literal member | A required member, readonly or writable, whose declared type is a single string or numeric literal, such as `readonly AT_TARGET: 2` or `kind: "method"`. Optional ones stay `Create` parameters |
 | Literal overload | An overload whose discriminating parameter is a string literal, such as `on(event: "close", …)` |
 | Key type | `keyof<'T>`, `typekeyof<'T, 'R>`, `proptypelock<'T>` or `proptypekey<'T, 'R>` from `Xantham.Fable.Core` |
 | Probe | A scratch Fable 5.2.0 project compiled with Fable 5.17.2 and run under node, recorded in section 6 |
@@ -108,7 +108,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 
 ### W6. Literal members: module, docs and Create
 
-- **W6.1** The literal members of a type get a same-named module of `[<Literal>]` values (`Event.AT_TARGET = 2.`). This includes types that also have methods. In `module rec`, the module sits beside `[<Interface>] type Event` without breaking `Event.Create` (probe 8).
+- **W6.1** The required single-literal members of a type, readonly or writable, get a same-named module of `[<Literal>]` values (`Event.AT_TARGET = 2.`). This includes types that also have methods. In `module rec`, the module sits beside `[<Interface>] type Event` without breaking `Event.Create` (probe 8).
 - **W6.2** The interface keeps its literal members for instance access (`e.AT_TARGET`), each with an XML doc giving its TypeScript literal type.
 - **W6.3** A `[<ParamObject>] Create` leaves literal members, including inherited ones, out of its parameters and writes them into its Emit, wrapped in parentheses (probe 10):
   - discriminant: `[<ParamObject; Emit("({ kind: 'method', ...$0 })")>]`

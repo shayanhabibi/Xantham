@@ -2566,10 +2566,11 @@ it is regenerated; Node carries the `TR006`/`DO001` reduction.
 
 ## Literal members (2026-10-13, W6 #137)
 
-A literal member is a property that `shapeMembers` reads as required, readonly and typed by one
-string or numeric literal, where the literal is not an enum member or a union
-(`Spec.literalMemberValue`). Optional and writable literal members, boolean literals, enum
-members, symbol-keyed members, methods and the exclusive-arm fold's members keep their earlier
+A literal member is a property that `shapeMembers` reads as required and typed by one string
+or numeric literal, readonly or writable, where the literal is not an enum member or a union
+(`Spec.literalMemberValue`). A writable single-literal property can hold only that value, so it
+is a literal member too (lead amendment, 2026-10-14). Optional literal members, boolean literals,
+enum members, symbol-keyed members, methods and the exclusive-arm fold's members keep their earlier
 mapping. The member carries its value on `FsPropertyMember.Literal`, and its findings change
 from `TR007`/`TR006` (Widened) to `MB.LiteralMemberAsConstant` (`MB011`, Ergonomic).
 
@@ -2597,11 +2598,8 @@ from `TR007`/`TR006` (Widened) to `MB.LiteralMemberAsConstant` (`MB011`, Ergonom
   `\u2028`, `\u2029` and `\xHH` for other control characters, and writes `$`, `{` and `}` as
   `\x24`, `\x7B` and `\x7D`, which Fable's Emit macro would otherwise read.
 - **Catalog.** The canonical declaration API text hashes a property as name, readonly and type,
-  and leaves out `Create`. Neither `Literal` nor `FsCreateOverload.Literals` joins it, so
-  `CatalogCompatibility.ApiVersion` stays 6 and a scratch Core.TS catalogue regenerated with the
-  pinned compiler matches the committed `declarations.json` in every identity and API hash; only
-  the generator hash moves. `catalog library identity` passes (27) against the committed
-  Core.TS.
+  and leaves out `Create`. Neither `Literal` nor `FsCreateOverload.Literals` joins it, so W6
+  needs no `CatalogCompatibility.ApiVersion` bump of its own (W5 took it to 8).
 - **Expression access.** In an expression, the fully qualified
   `LiteralMemberLab.PhaseEvent.AT_TARGET` resolves to the interface's instance property
   (FS0806); a pattern resolves it to the literal.
@@ -2613,14 +2611,15 @@ Lab `literal-member-lab`: `PhaseEvent` (methods beside `NONE`/`CAPTURING_PHASE`/
 `BUBBLING_PHASE`) gets `module PhaseEvent` and a `Create` writing the four constants;
 `PointerPhaseEvent` gets no module and a `Create` writing the inherited four; `MethodSignal`,
 `Tagged<T>` and `Phases` (literals alone, parameterless `Create`) carry their discriminant or
-constants; `Quoted` pins the escaped marker, `-1` and `0.5`. `MB011` stands on all fifteen
-literal members (the inherited four of `PointerPhaseEvent` included), `SP005` on the six
-`Create`s. In `NotLiterals`, the writable `kind` keeps `TR006`, the optional `optional` keeps
-`TR007`, `level: Level.High` keeps `TR004`, `flag: true` is `bool`, and all four stay `Create`
-parameters under `Emit("$0")`. The RunGate matches `event.eventPhase` against
+constants; `WritableSignal`'s writable `kind: "writable"` is a literal member like a readonly
+one; `Quoted` pins the escaped marker, `-1` and `0.5`. `MB011` stands on all sixteen
+literal members (the inherited four of `PointerPhaseEvent` included), `SP005` on the seven
+`Create`s. In `NotLiterals`, the optional writable `mode` keeps `TR006`, the optional readonly
+`optional` keeps `TR007`, `level: Level.High` keeps `TR004`, `flag: true` is `bool`, and all
+four stay `Create` parameters under `Emit("$0")`. The RunGate matches `event.eventPhase` against
 `PhaseEvent.AT_TARGET` (compiled to `event.eventPhase === 2`, with no `AT_TARGET` read), runs a
 statement-position `Create`, reads the inherited constants off `PointerPhaseEvent.Create`, the
-discriminants of `MethodSignal` and `Tagged<string>`, the JSON of `Phases.Create()`, and the
+discriminants of `MethodSignal`, `WritableSignal` and `Tagged<string>`, the JSON of `Phases.Create()`, and the
 escaped marker through a module abbreviation.
 
 Measured on the selected goldens:

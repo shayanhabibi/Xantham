@@ -5425,7 +5425,7 @@ let pipelineTests =
                           [ "Choice"; "Dialog"; "Drawable"; "Emitter"; "Logger"; "Socket"; "Store" ]
                           "a literal-keyed member refuses Create as an overload does" ])
 
-        // W6 (#137): a readonly member typed by one string or numeric literal reads its
+        // W6 (#137): a required member typed by one string or numeric literal reads its
         // primitive, is a `[<Literal>]` in the declaration's same-named module, and is written by
         // `Create` rather than passed to it.
         let literalMemberLab = handFixture "literal-member-lab"
@@ -5457,6 +5457,8 @@ let pipelineTests =
                       Expect.stringContains source "    let NONE = 0.0" "every constant is declared"
                       Expect.stringContains source "module MethodSignal =" "a discriminant gets a module"
                       Expect.stringContains source "    let kind = \"method\"" "a string literal is a string"
+                      Expect.stringContains source "module WritableSignal =" "a writable discriminant gets a module"
+                      Expect.stringContains source "    let kind = \"writable\"" "a writable literal is declared"
                       Expect.stringContains source "module Tagged =" "a generic declaration gets a module"
                       Expect.stringContains source "    let NEGATIVE = -1.0" "a negative literal"
                       Expect.stringContains source "    let HALF = 0.5" "a fractional literal"
@@ -5490,6 +5492,12 @@ let pipelineTests =
                           (fst (createOf source "MethodSignal"))
                           "[<ParamObject; Emit(\"({ kind: 'method', ...$0 })\")>]"
                           "a discriminant"
+
+                      Expect.equal
+                          (createOf source "WritableSignal")
+                          ("[<ParamObject; Emit(\"({ kind: 'writable', ...$0 })\")>]",
+                           "static member Create (name: string) : WritableSignal = jsNative")
+                          "a writable discriminant is written, not passed"
 
                       Expect.equal
                           (createOf source "Phases")
@@ -5536,17 +5544,18 @@ let pipelineTests =
                              "Quoted.HALF"
                              "Quoted.NEGATIVE"
                              "Quoted.marker"
-                             "Tagged.kind" ]
+                             "Tagged.kind"
+                             "WritableSignal.kind" ]
                            |> List.sort)
-                          "every readonly single-literal member"
+                          "every required single-literal member, readonly or writable"
 
-                      Expect.equal (symbolsOf "TR007") [ "NotLiterals.optional" ] "an optional literal member widens"
-                      Expect.equal (symbolsOf "TR006") [ "NotLiterals.kind" ] "a writable literal member widens"
+                      Expect.equal (symbolsOf "TR007") [ "NotLiterals.optional" ] "an optional readonly literal member widens"
+                      Expect.equal (symbolsOf "TR006") [ "NotLiterals.mode" ] "an optional writable literal member widens"
                       Expect.contains (symbolsOf "TR004") "NotLiterals.level" "an enum member is not a literal member"
 
                       Expect.equal
                           (symbolsOf "SP005")
-                          [ "MethodSignal"; "PhaseEvent"; "Phases"; "PointerPhaseEvent"; "Quoted"; "Tagged" ]
+                          [ "MethodSignal"; "PhaseEvent"; "Phases"; "PointerPhaseEvent"; "Quoted"; "Tagged"; "WritableSignal" ]
                           "every Create that writes a literal"
 
                       Expect.isTrue
@@ -5563,7 +5572,7 @@ let pipelineTests =
 
                       Expect.equal attribute "[<ParamObject; Emit(\"$0\")>]" "no literal is written"
 
-                      for parameter in [ "kind: string"; "flag: bool"; "?optional" ] do
+                      for parameter in [ "?mode"; "flag: bool"; "?optional" ] do
                           Expect.stringContains create parameter $"{parameter} stays a parameter" ])
     ]
 

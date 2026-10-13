@@ -710,7 +710,7 @@ type Members =
     | [<Ergonomic>] SymbolKeyedMemberAsEmit of symbol: string * name: string
     /// W5. An overload keyed by a string literal reads as a method of its own through `[<Emit>]`.
     | [<Ergonomic>] LiteralOverloadAsMethod of literal: string * name: string
-    /// W6. A readonly member typed by one string or numeric literal: the instance reads its
+    /// W6. A required member typed by one string or numeric literal: the instance reads its
     /// primitive, the literal is a `[<Literal>]` in the declaration's same-named module, and
     /// `Create` writes it.
     | [<Ergonomic>] LiteralMemberAsConstant of literal: string

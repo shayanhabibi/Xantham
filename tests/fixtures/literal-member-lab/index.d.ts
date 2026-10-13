@@ -21,6 +21,12 @@ export interface MethodSignal {
     name: string;
 }
 
+/** A writable string discriminant. */
+export interface WritableSignal {
+    kind: "writable";
+    name: string;
+}
+
 /** Constants only. */
 export interface Phases {
     readonly NONE: 0;
@@ -48,7 +54,7 @@ export declare enum Level {
 
 /** None of these is a literal member. */
 export interface NotLiterals {
-    kind: "mutable";
+    mode?: "fast";
     readonly optional?: 1;
     readonly flag: true;
     readonly level: Level.High;

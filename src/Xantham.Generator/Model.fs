@@ -1418,7 +1418,7 @@ type FsPropertyMember =
         Tags: JSDocTagInfo list
         ReadOnly: bool
         Type: FsTypeRef
-        /// The value of a literal member: a required readonly property typed by one string or
+        /// The value of a literal member: a required property typed by one string or
         /// numeric literal. `Type` is the literal's primitive.
         Literal: FsLiteral option
     }

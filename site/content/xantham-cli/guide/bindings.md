@@ -70,7 +70,7 @@ A binding is rooted in a generated F# module.
 - **Ambient modules** follow their import paths: `inspector/promises` becomes
   `Inspector.Promises`.
 - **Anonymous option objects and callbacks** are named under the member that uses them.
-- **Constants**: a required readonly member typed by one string or numeric literal
+- **Constants**: a required member typed by one string or numeric literal, readonly or writable
   (`readonly AT_TARGET: 2`) is also a `[<Literal>]` in a module of the type's name, so the
   pattern in
   `match e.eventPhase with | Event.AT_TARGET -> ...` compiles to `e.eventPhase === 2`.

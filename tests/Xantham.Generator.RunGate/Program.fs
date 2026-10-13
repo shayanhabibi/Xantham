@@ -2242,6 +2242,12 @@ let private literalMembers () =
         (emitJsExpr pointer "$0.AT_TARGET === 2 && $0.NONE === 0 && $0.BUBBLING_PHASE === 3 && $0.pointerId === 7")
 
     equal "a discriminant is written by Create" "method" (LiteralMemberLab.MethodSignal.Create(name = "n")).kind
+
+    equal
+        "a writable discriminant is written by Create"
+        "writable"
+        (LiteralMemberLab.WritableSignal.Create(name = "n")).kind
+
     equal "a constants-only Create" """{"NONE":0,"DONE":1}""" (json (LiteralMemberLab.Phases.Create()))
 
     // In an expression, `LiteralMemberLab.Quoted.marker` names the interface's instance
