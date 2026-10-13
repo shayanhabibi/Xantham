@@ -2877,11 +2877,12 @@ Resolve, not in a separate pass before Resolve.
 
 `early-resolve-lab` (flag on) pins `TR068` at `RequestListener(req)`,
 `Server(requestListener)(req)`, `Server.on(listener)(req)`,
-`Exports.createServer(listener)(req)` and `Exports.instance(value)` (a taken `infer` branch),
-plus their rendered lines; the last stays `TR045` with the flag off. It also pins `TR045` at
-`Divergent`, `Instance` (an alias's own body), `Exports.divergent(value)` (unbounded),
-`Exports.returns(value)` (bound instantiates to `any`) and `Exports.either(value)` (union
-bound). The three `TR018` intersections over `InstanceType<Response>` are pinned unchanged,
+`Exports.createServer(listener)(req)`, `Exports.instance(value)` (a taken `infer` branch) and
+`Exports.flag(value)` (a bound whose value is `boolean`, written `bool`), plus their rendered
+lines; the last two stay `TR045` with the flag off. It also pins `TR045` at `Divergent`,
+`Instance` (an alias's own body), `Exports.divergent(value)` (unbounded),
+`Exports.returns(value)` (bound instantiates to `any`), `Exports.either(value)` (union bound)
+and `Exports.same(value)` (a bound whose value is one of its own branches). The three `TR018` intersections over `InstanceType<Response>` are pinned unchanged,
 and `ConcreteListener` carries no finding. Its baseline testcase pins every `InstanceType` site
 at `TR045` with the flag off. `shape typeRef`, `generator config` and `catalog library ambient
 authentication` pin the rung, the loader and the profile.

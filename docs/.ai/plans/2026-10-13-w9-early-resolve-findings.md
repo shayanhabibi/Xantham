@@ -78,7 +78,7 @@ branch ids. Symbol tiers (exact / ergonomic / widened / escape) did not move in 
 
 | Package | TR045 off | TR045 on (strict) | TR068 on (strict) | Permissive TR045 / TR068 | Binding diff (strict) |
 | --- | --- | --- | --- | --- | --- |
-| `early-resolve-lab` | 5 `InstanceType`, 1 `Instance` application | 1 (`Exports.either`, union bound) | 5 | — | 5 `obj` → `IncomingMessage` sites |
+| `early-resolve-lab` | 12: the 6 negatives, 5 `InstanceType`/`Instance` sites, `Exports.flag` | 6: the negatives `Divergent`, `Instance`, `Exports.divergent`, `Exports.returns`, `Exports.either`, `Exports.same` | 6 | — | 5 `obj` → `IncomingMessage` sites, 1 `obj` → `bool` |
 | `@types/node` | 224 (130 `InstanceType`) | 93 (0 `InstanceType`) | 160 (159 `InstanceType`, 1 inline) | 43 / 210 | 101 lines replaced; compiles |
 | `type-fest` | 154 (152 alias bodies) | 152 | 2 (inline, inside alias bodies) | 152 / 2 | none |
 | `solid-js` | 56 (51 references) | 56 | 0 | 56 / 0 | none |
@@ -162,7 +162,7 @@ Notes on the rows:
   contravariant position (a value the consumer hands in) it admits arguments TypeScript would
   reject.
 - **Nested applications** resolve in turn and report one `TR068` each, so `TR068` counts
-  findings and not symbols. Node: 159 findings over 90 symbols.
+  findings and not symbols. Node: 159 `InstanceType` findings (160 `TR068` in total) over 90 symbols.
 
 ## Recommendation
 

@@ -70,6 +70,10 @@ type Exports =
     static member either (value: obj) : unit = jsNative
     [<Import("instance", "early-resolve-lab")>]
     static member instance (value: IncomingMessage) : unit = jsNative
+    [<Import("flag", "early-resolve-lab")>]
+    static member flag (value: bool) : unit = jsNative
+    [<Import("same", "early-resolve-lab")>]
+    static member same (value: obj) : unit = jsNative
 
 module CreateServer =
     module Listener =

@@ -4698,11 +4698,22 @@ let pipelineTests =
                       Expect.equal
                           (sites rendered "TR068")
                           [ "Exports.createServer(listener)(req)", Widened
+                            "Exports.flag(value)", Widened
                             "Exports.instance(value)", Widened
                             "RequestListener(req)", Widened
                             "Server(requestListener)(req)", Widened
                             "Server.on(listener)(req)", Widened ]
-                          "every InstanceType over a bounded parameter, and an infer branch over one"
+                          "every InstanceType over a bounded parameter, an infer branch over one, and a boolean bound"
+
+                      Expect.stringContains
+                          source
+                          "static member flag (value: bool) : unit"
+                          "a bound whose value is boolean reads bool"
+
+                      Expect.stringContains
+                          source
+                          "static member same (value: obj) : unit"
+                          "a bound whose value is one of the conditional's own branches stays obj"
 
                       Expect.stringContains
                           source
@@ -4737,6 +4748,7 @@ let pipelineTests =
                             "Exports.divergent(value)"
                             "Exports.either(value)"
                             "Exports.returns(value)"
+                            "Exports.same(value)"
                             "Instance" ] do
                           Expect.contains deferred symbol $"{symbol} stays deferred"
 
@@ -4753,6 +4765,12 @@ let pipelineTests =
                           (sites rendered "TR045" |> List.map fst)
                           "Exports.instance(value)"
                           "an application whose taken branch is an infer variable stays obj"
+
+                      Expect.contains
+                          (sites rendered "TR045" |> List.map fst)
+                          "Exports.flag(value)"
+                          "a boolean bound stays obj"
+
                       Expect.equal
                           (instanceTypeDeferred rendered)
                           [ "Exports.createServer(listener)(req)"

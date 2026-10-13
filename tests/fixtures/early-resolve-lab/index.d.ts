@@ -41,3 +41,7 @@ export declare function either<C extends typeof IncomingMessage | typeof Outgoin
 export type Instance<C extends typeof IncomingMessage> = C extends abstract new (...args: any) => infer R ? R : never;
 // 8. An application of that alias over a bounded parameter: the taken branch is the `infer` variable.
 export declare function instance<C extends typeof IncomingMessage>(value: Instance<C>): void;
+// 9. A bound whose value is `boolean`: the one union the bound rung accepts.
+export declare function flag<T extends boolean>(value: T extends string ? number : T): void;
+// 10. A bound whose value is one of the conditional's own branches.
+export declare function same<T extends number>(value: T extends string ? boolean : number): void;

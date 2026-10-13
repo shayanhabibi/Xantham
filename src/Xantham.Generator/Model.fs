@@ -1245,9 +1245,10 @@ type ConditionalFacts =
         /// The branch the mapping takes, named for the manifest and carried by id. Absent where
         /// both branches are reachable and inhabited.
         Branch: (string * int<typeId>) option
-        /// The conditional instantiated at its check type's bound, carried by id. Present only
-        /// under `resolveConditionalConstraints`, for a conditional that is not its alias's own
-        /// declaration and whose branch is absent or an `infer` variable.
+        /// The conditional instantiated at its check type's bound, carried by id. Set under
+        /// `resolveConditionalConstraints` for a conditional applied over a bounded type parameter,
+        /// where the branch is absent or an `infer` variable and the bound's value is a usable
+        /// type (§4.11).
         Constraint: int<typeId> option
     }
 
