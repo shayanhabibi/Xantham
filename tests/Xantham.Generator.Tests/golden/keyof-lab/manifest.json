@@ -4,8 +4,8 @@
   "module": "KeyofLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 12,
-    "widened": 8,
+    "ergonomic": 13,
+    "widened": 7,
     "escape": 0
   },
   "passes": [
@@ -23,8 +23,7 @@
     {
       "pass": "SE - shape-exports",
       "total": 3,
-      "ergonomic": 2,
-      "widened": 1
+      "ergonomic": 3
     },
     {
       "pass": "SP - synthesize-paramobjects",

@@ -693,6 +693,53 @@ let private implementedTypes (ctx: Context) (symbol: SymbolResponse voption) : A
         return contracts |> Array.concat |> Array.distinctBy _.TypeId |> Array.toList
     }
 
+/// The operand `M` of a type parameter declared `K extends keyof M`. The checker resolves `keyof`
+/// over a declared type to the type's key literals, so the operand is read off the constraint
+/// node.
+let private keyOfOperandOf (ctx: Context) (parameter: SymbolResponse) : Async<TypeResponse voption> =
+    async {
+        match
+            parameter.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | None -> return ValueNone
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            let operand =
+                match file with
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    if node.Kind = SyntaxKind.TypeParameter then
+                        Node.retag<AnyNode, TypeParameterDeclaration> node
+                        |> TypeParameterDeclaration.``constraint``
+                        |> ValueOption.filter (fun bound -> bound.Kind = SyntaxKind.TypeOperator)
+                        |> ValueOption.map Node.retag<TypeNode, TypeOperatorNode>
+                        |> ValueOption.filter (fun bound ->
+                            TypeOperatorNode.operator bound = ValueSome SyntaxKind.KeyOfKeyword)
+                        |> ValueOption.bind TypeOperatorNode.``type``
+                    else
+                        ValueNone
+                | ValueNone -> ValueNone
+
+            match operand with
+            | ValueSome operand ->
+                let location =
+                    NodeHandle.format
+                        {
+                            Index = Node.index operand
+                            Kind = operand.Kind
+                            Path = handle.Path
+                        }
+
+                let! resolved = ctx.Session.getTypeFromTypeNode location
+                return ValueSome resolved
+            | ValueNone -> return ValueNone
+    }
+
 /// Whether a parameter declares the `?` that makes it omittable.
 ///
 /// For a parameter the marker lives on the declaration node alone, reached through the symbol's
@@ -1577,6 +1624,7 @@ let private deriveFacts
                             IntersectionMembers = []
                             Constraint = None
                             Default = None
+                            KeyOfOperand = None
                             Conditional = None
                             UnionMembers = []
                             NonNullableAlias = None
@@ -1595,6 +1643,15 @@ let private deriveFacts
             let! bound = ctx.Session.getConstraintOfTypeParameter ty.Id
             let! fallback = ctx.Session.getDefaultFromTypeParameter ty.Id
 
+            let! keyOfOperand =
+                match bound, symbol with
+                | ValueSome bound, ValueSome symbol when
+                    bound.Flags.HasFlag TypeFlags.Union
+                    || bound.Flags.HasFlag TypeFlags.StringLiteral
+                    ->
+                    keyOfOperandOf ctx symbol
+                | _ -> async { return ValueNone }
+
             return
                 { TypeFacts.shallow ty with
                     SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
@@ -1603,10 +1660,12 @@ let private deriveFacts
                         |> Option.map (fun value -> value * uom<Measure.declFile>)
                     Constraint = bound |> ValueOption.map _.TypeId |> ValueOption.toOption
                     Default = fallback |> ValueOption.map _.TypeId |> ValueOption.toOption
+                    KeyOfOperand = keyOfOperand |> ValueOption.map _.TypeId |> ValueOption.toOption
                 },
                 [
                     yield! channel trace "constraint" (ValueOption.toList bound)
                     yield! channel trace "default" (ValueOption.toList fallback)
+                    yield! channel trace "keyof-operand" (ValueOption.toList keyOfOperand)
                 ]
         elif has TypeFlags.Index then
             // `keyof T` at an operand the checker could not finish (§4.10). The operand is the

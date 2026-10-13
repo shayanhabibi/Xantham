@@ -53,9 +53,9 @@ type WorkerEventMap =
 /// </summary>
 [<Interface>]
 type Registrar =
-    abstract on<'Type>: ``type``: 'Type * handler: (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit) -> unit
+    abstract on<'R>: ``type``: typekeyof<WorkerEventMap, 'R> * handler: ('R -> unit) -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (on: Action<'Type, (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit)>) : Registrar = jsNative
+    static member Create (on: Action<typekeyof<WorkerEventMap, 'R>, ('R -> unit)>) : Registrar = jsNative
 
 /// <summary>
 /// What every value of a dispatch target's map is at least.
@@ -195,15 +195,15 @@ type Feed<'EventMap> =
 type Exports =
     /// <summary>
     /// <c>Concrete[Type]</c> under <c>Type extends keyof Concrete</c>, in parameter position and again
-    /// inside the callback. Both resolve to the union of the map's value types.
+    /// inside the callback. Both read as the value the key selects.
     /// </summary>
     [<Import("addEventListener", "indexed-access-lab")>]
-    static member addEventListener<'Type> (``type``: 'Type, handler: (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit)) : unit = jsNative
+    static member addEventListener<'R> (``type``: typekeyof<WorkerEventMap, 'R>, handler: ('R -> unit)) : unit = jsNative
     /// <summary>
     /// The same access returned rather than taken.
     /// </summary>
     [<Import("lastEvent", "indexed-access-lab")>]
-    static member lastEvent<'Type> (``type``: 'Type) : U3<FetchEvent, QueueEvent, ScheduledEvent> = jsNative
+    static member lastEvent<'R> (``type``: typekeyof<WorkerEventMap, 'R>) : 'R = jsNative
     /// <summary>
     /// <c>EventMap[keyof EventMap]</c> over a parameter bounded by an index signature: the bound's
     /// value type is what the access selects, whichever key it lands on.
@@ -211,17 +211,22 @@ type Exports =
     [<Import("Target", "indexed-access-lab"); EmitConstructor>]
     static member Target<'EventMap> () : Target<'EventMap> = jsNative
     /// <summary>
-    /// The access resolves, and the union it resolves to is wider than the cap.
+    /// A key over a map whose value union is wider than the cap.
     /// </summary>
     [<Import("onWide", "indexed-access-lab")>]
-    static member onWide<'Type> (``type``: 'Type, handler: (U12<E01, E02, E03, E04, E05, E06, E07, E08, E09, E10, E11, E12> -> unit)) : unit = jsNative
+    static member onWide<'R> (``type``: typekeyof<WideEventMap, 'R>, handler: ('R -> unit)) : unit = jsNative
+    /// <summary>
+    /// Every value of the map at once: the access is the twelve-arm union.
+    /// </summary>
+    [<Import("anyWide", "indexed-access-lab")>]
+    static member anyWide (``event``: U12<E01, E02, E03, E04, E05, E06, E07, E08, E09, E10, E11, E12>) : unit = jsNative
     /// <summary>
     /// A nested access, in parameter and in return position. The outer operand is <c>ModelMap[Name]</c>,
     /// which declares no keys of its own, so nothing names what <c>"inputs"</c> selects and both
     /// accesses stay widened.
     /// </summary>
     [<Import("runModel", "indexed-access-lab")>]
-    static member runModel<'Name> (name: 'Name, input: obj) : obj = jsNative
+    static member runModel (name: keyof<ModelMap>, input: obj) : obj = jsNative
     /// <summary>
     /// A dispatch target whose map is only ever bounded, never given.
     /// </summary>

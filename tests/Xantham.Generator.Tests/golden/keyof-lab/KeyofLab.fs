@@ -225,4 +225,4 @@ type Exports =
     /// <c>T[keyof T]</c> - the value-of idiom.
     /// </summary>
     [<Import("values", "keyof-lab")>]
-    static member values<'T> (source: 'T) : obj[] = jsNative
+    static member values<'T> (source: 'T) : proptypelock<'T>[] = jsNative

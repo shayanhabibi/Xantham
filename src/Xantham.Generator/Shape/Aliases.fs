@@ -215,8 +215,15 @@ let shapeAliases: Pass<ShapeModel> =
                                         )
                                     else
 
+                                        // An indexed access carries no alias arguments, so a
+                                        // `T[keyof T]` body binds the operand it reads (W8, #139).
                                         let typeParameters, scope, parameterFindings =
-                                            declTypeParams ctx model name facts
+                                            match valueOfOperand model facts with
+                                            | Some objectId when
+                                                (declParamIds facts @ freeParamsOf model facts.Response.TypeId).IsEmpty
+                                                ->
+                                                typeParamsOf ctx model name [ objectId ]
+                                            | _ -> declTypeParams ctx model name facts
 
                                         let scoped = { model with TypeVars = scope }
 

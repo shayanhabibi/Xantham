@@ -1751,22 +1751,22 @@ let pipelineTests =
 
                     Expect.stringContains source "abstract all: unit -> keyof<'T>[]" "keyof T in return position"
 
-                    // `T[keyof T]` is a different animal: no key variable selects it, so there
-                    // is nothing to name the value type. It stays widened, and says so.
+                    // `T[keyof T]` - the value-of idiom (W8, #139): one of T's property types,
+                    // which the support package's `proptypelock<'T>` states.
                     Expect.stringContains
                         source
-                        "static member values<'T> (source: 'T) : obj[] = jsNative"
-                        "the value-of idiom has no F# form"
+                        "static member values<'T> (source: 'T) : proptypelock<'T>[] = jsNative"
+                        "the value-of idiom is proptypelock"
 
                     Expect.isTrue
                         (rendered.Findings
-                         |> List.exists (fun f -> f.Symbol = "Exports.values()" && f.Tier = Widened))
-                        "and the widening is recorded against the member"
+                         |> List.exists (fun f -> f.Symbol = "Exports.values()" && f.Key = "TR066" && f.Tier = Ergonomic))
+                        "and the mapping is recorded against the member"
 
                     Expect.contains
                         (Render.symbolTiers rendered |> List.map (fun (name, tier, _) -> name, tier))
-                        ("Exports.values", Widened)
-                        "so the member's manifest row grades widened"
+                        ("Exports.values", Ergonomic)
+                        "so the member's manifest row grades ergonomic"
 
                   testCase "a type-level computation over an open operand emits an erased phantom" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -3573,33 +3573,37 @@ let pipelineTests =
                               "Solo.tag(name)"
                               "the literal that separates nothing is still reported as widened" ])
 
-        // Wave nine lane AP, item 2. A `keyof` bound separates an overload set in TypeScript and
-        // reaches F# erased: .NET keeps constraints out of a method signature, and a key set has
-        // no F# name to stand over. The drop is its own loss rather than a plain collision.
+        // Wave nine lane AP, item 2. A `keyof` bound separates an overload set in TypeScript. W8
+        // (#139) writes the key over the map's name, so the set survives in F#; a nominal bound,
+        // which .NET keeps out of a method signature, still collides and drops.
         yield!
             fixtureTests
                 "keyof-overload-lab"
                 (handFixture "keyof-overload-lab")
                 GeneratorConfig.Default
                 (fun package ->
-                    [ testCase "a key-set bound reaches the signature erased" <| fun _ ->
+                    [ testCase "a key-set bound is written as the map's typekeyof" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          // `HtmlTags[K]` resolves to the union of the map's value types (lane
-                          // CD); the bound `K` was taken over is still nowhere in the signature,
-                          // which is what makes the two overloads collide.
+                          // W8 (#139): the key is written over the map it was taken over, so the
+                          // two overloads take different F# parameter types and both survive.
                           Expect.stringContains
                               source
-                              "abstract find<'K>: selector: 'K -> U2<Div, Span>"
-                              "the bound is nowhere in the F# signature"
+                              "abstract find<'R>: selector: typekeyof<HtmlTags, 'R> -> 'R"
+                              "the first map"
+
+                          Expect.stringContains
+                              source
+                              "abstract find<'R>: selector: typekeyof<SvgTags, 'R> -> 'R"
+                              "and the second"
 
                           Expect.stringContains
                               source
                               "abstract find: selector: string -> Div"
                               "the overload taking a plain string survives beside it"
 
-                      testCase "a key-set drop and a nominal drop report different losses" <| fun _ ->
+                      testCase "a key-set bound no longer drops, and a nominal drop still does" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                           let symbolsOf key =
@@ -3609,7 +3613,7 @@ let pipelineTests =
                               |> List.distinct
                               |> List.sort
 
-                          Expect.equal (symbolsOf "DO005") [ "Finder.find" ] "the key-set collision reports its own loss"
+                          Expect.isEmpty (symbolsOf "DO005") "no key-set overload collides"
 
                           Expect.equal
                               (symbolsOf "DO001")
@@ -4730,7 +4734,8 @@ let pipelineTests =
         // index now resolves to the union of the value types those keys select; the shapes where
         // the index reaches past those keys stay widened. Wave fifteen item 3 lifted the
         // erased-union cap, so a value union past `Fable.Core`'s shipped arity renders against
-        // a `U<n>` this file's own footer declares, rather than widening to `obj`.
+        // a `U<n>` this file's own footer declares, rather than widening to `obj`. W8 (#139)
+        // writes a key over a declared map as `typekeyof<Map,'R>`, so `Map[K]` is `'R`.
         yield!
             fixtureTests "indexed-access-lab" (handFixture "indexed-access-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "an access confined to the operand's own keys resolves to the value union" <| fun _ ->
@@ -4739,21 +4744,27 @@ let pipelineTests =
 
                       // `Concrete[Type]` under `Type extends keyof Concrete`, in the three
                       // positions the corpus writes it: a parameter, a callback's parameter, and
-                      // a return.
+                      // a return. The key is written over the declared map (W8, #139), so the
+                      // access is the value the key selects.
                       Expect.stringContains
                           source
-                          "static member addEventListener<'Type> (``type``: 'Type, handler: (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit)) : unit"
-                          "the map's value types, as an erased union"
+                          "static member addEventListener<'R> (``type``: typekeyof<WorkerEventMap, 'R>, handler: ('R -> unit)) : unit"
+                          "the value the key selects"
 
                       Expect.stringContains
                           source
-                          "static member lastEvent<'Type> (``type``: 'Type) : U3<FetchEvent, QueueEvent, ScheduledEvent>"
-                          "and the same union returned"
+                          "static member lastEvent<'R> (``type``: typekeyof<WorkerEventMap, 'R>) : 'R"
+                          "and the same value returned"
 
                       Expect.stringContains
                           source
-                          "abstract on<'Type>: ``type``: 'Type * handler: (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit) -> unit"
+                          "abstract on<'R>: ``type``: typekeyof<WorkerEventMap, 'R> * handler: ('R -> unit) -> unit"
                           "and on a member"
+
+                      Expect.stringContains
+                          source
+                          "static member runModel (name: keyof<ModelMap>, input: obj) : obj"
+                          "a key whose access is nested reads as keyof"
 
                       // `EventMap[keyof EventMap]` over a parameter bounded by an index
                       // signature: the bound's value type is what any key selects.
@@ -4765,7 +4776,7 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "handler: (U12<E01, E02, E03, E04, E05, E06, E07, E08, E09, E10, E11, E12> -> unit)"
+                          "static member anyWide (``event``: U12<E01, E02, E03, E04, E05, E06, E07, E08, E09, E10, E11, E12>) : unit"
                           "the twelve-member value union, against a footer-declared U12"
 
                       let keysFor symbol =
@@ -4774,7 +4785,7 @@ let pipelineTests =
                           |> List.map (fun f -> f.Key, f.Message)
 
                       Expect.equal
-                          (keysFor "onWide(handler)(event)")
+                          (keysFor "Exports.anyWide(event)")
                           []
                           "the access resolves, and the union it resolved to renders exactly rather than widening"
 
@@ -5698,6 +5709,119 @@ let pipelineTests =
                           "the alias declaration and the function-typed constant"
                       Expect.equal (sitesOf rendered "TR027") [ "Container.queryLike()" ] "the structural bound"
                       Expect.equal (sitesOf rendered "TP006") [ "Container.queryLike" ] "the structural bound" ])
+
+        // W8 (#139): a key over a declared map reads as `typekeyof<Map,'R>` with `'R` at the
+        // access, so tag-map overloads stay distinct; `T[keyof T]` reads as `proptypelock<'T>`.
+        yield!
+            fixtureTests "tag-map-lab" (handFixture "tag-map-lab") GeneratorConfig.Default (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                let symbolsOf (rendered: RenderModel) key =
+                    rendered.Findings
+                    |> List.filter (fun f -> f.Key = key)
+                    |> List.map _.Symbol
+                    |> List.distinct
+                    |> List.sort
+
+                [ testCase "tag-map-lab: a tag-map method takes a typekeyof key and returns its value" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "abstract createElement<'R>: tagName: typekeyof<TagMap, 'R> * ?options: CreateOptions -> 'R"
+                          "W8.1: the primary map"
+
+                      Expect.stringContains
+                          source
+                          "abstract createElement<'R>: tagName: typekeyof<DeprecatedTagMap, 'R> * ?options: CreateOptions -> 'R"
+                          "W8.2: the deprecated map is a second overload"
+
+                      Expect.stringContains
+                          source
+                          "abstract createElement: tagName: string * ?options: CreateOptions -> Elem"
+                          "the string overload survives beside both"
+
+                      Expect.stringContains
+                          source
+                          "abstract createSvg<'R>: tagName: typekeyof<SvgTagMap, 'R> -> 'R"
+                          "a single key overload"
+
+                  testCase "tag-map-lab: a constrained result carries the constraint on its own parameter" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "abstract getElementsByTagName<'R when 'R :> Elem>: qualifiedName: typekeyof<TagMap, 'R> -> ElemList<'R>"
+                          "W8.4: every TagMap value inherits Elem"
+
+                      Expect.stringContains
+                          source
+                          "abstract getElementsByTagName<'R when 'R :> Elem>: qualifiedName: typekeyof<SvgTagMap, 'R> -> ElemList<'R>"
+                          "and every SvgTagMap value"
+
+                      Expect.stringContains
+                          source
+                          "abstract findLoose<'R>: tag: typekeyof<LooseTagMap, 'R> -> ElemList<Elem>"
+                          "a map whose values do not inherit the bound keeps 'R unconstrained, and the argument widens"
+
+                  testCase "tag-map-lab: a key used only as a key reads as keyof" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "abstract hasTag: tag: keyof<TagMap> -> bool" "no result variable"
+
+                  testCase "tag-map-lab: T[keyof T] reads as proptypelock" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "type ValueOf<'ObjectType> = proptypelock<'ObjectType>" "W8.5: a defaulted key"
+                      Expect.stringContains source "type ValuesOf<'T> = proptypelock<'T>" "a written keyof"
+
+                      Expect.stringContains
+                          source
+                          "static member valuesOf<'T> (source: 'T) : proptypelock<'T>[] = jsNative"
+                          "a signature's own parameter"
+
+                      Expect.stringContains source "type Picked = obj" "a key with no default stays widened"
+
+                  testCase "tag-map-lab: findings name each key mapping" <| fun _ ->
+                      let rendered = generate ()
+                      let symbolsOf = symbolsOf rendered
+
+                      Expect.isEmpty (symbolsOf "DO005") "no key-set overload is dropped"
+                      Expect.isEmpty (symbolsOf "DO001") "no overload collides"
+                      Expect.isEmpty (symbolsOf "TR044") "no value union fails the constraint"
+
+                      Expect.isEmpty
+                          (symbolsOf "TP002" |> List.filter (fun symbol -> symbol.StartsWith "Doc."))
+                          "no key bound is dropped"
+
+                      Expect.isTrue
+                          (symbolsOf "TR027" |> List.forall (fun symbol -> symbol.StartsWith "Doc.findLoose"))
+                          "only the loose map widens its argument"
+
+                      Expect.isNonEmpty (symbolsOf "TR027") "the loose map's argument widens"
+
+                      Expect.equal
+                          (symbolsOf "TP011")
+                          [ "Doc.createElement"
+                            "Doc.createSvg"
+                            "Doc.findLoose"
+                            "Doc.getElementsByTagName"
+                            "Doc.hasTag" ]
+                          "one finding per key over a declared map"
+
+                      Expect.equal
+                          (symbolsOf "TR066")
+                          [ "Exports.valuesOf()"; "ValueOf"; "ValuesOf" ]
+                          "one finding per value-of access"
+
+                      Expect.equal (symbolsOf "TR020") [ "Picked" ] "the narrower key set stays widened"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "TP011" || f.Key = "TR066")
+                           |> List.forall (fun f -> f.Tier = Ergonomic))
+                          "both mappings are ergonomic" ])
     ]
 
 [<Tests>]

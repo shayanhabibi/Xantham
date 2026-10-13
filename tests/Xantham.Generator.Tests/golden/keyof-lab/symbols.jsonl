@@ -22,4 +22,4 @@
 {"name":"Exports.pick","tier":"exact","findings":[]}
 {"name":"Exports.get","tier":"ergonomic","findings":[{"name":"TP.KeyWithIndexedAccess","key":"TP004","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.get","fields":{"operand":"T","result":"R"},"message":"key over \u0027T\u0027 with its indexed access reads as typekeyof\u003C\u0027T,\u0027R\u003E (\u00A74.10)"}]}
 {"name":"Exports.keys","tier":"ergonomic","findings":[{"name":"TR.KeyOfOpenOperand","key":"TR015","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.keys()","fields":{"name":"T"},"message":"keyof over an open operand reads as keyof\u003C\u0027T\u003E (\u00A74.10)"}]}
-{"name":"Exports.values","tier":"widened","findings":[{"name":"TR.IndexedAccessNoForm","key":"TR020","pass":"shape-exports","tier":"widened","symbol":"Exports.values()","message":"indexed access has no F# form here; widened to obj"}]}
+{"name":"Exports.values","tier":"ergonomic","findings":[{"name":"TR.ValueOfAsPropTypeLock","key":"TR066","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.values()","fields":{"operand":"T"},"message":"T[keyof T] reads as proptypelock\u003C\u0027T\u003E (\u00A74.10)"}]}

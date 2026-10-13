@@ -26,7 +26,7 @@ export interface WorkerEventMap {
 
 /**
  * `Concrete[Type]` under `Type extends keyof Concrete`, in parameter position and again
- * inside the callback. Both resolve to the union of the map's value types.
+ * inside the callback. Both read as the value the key selects.
  */
 export declare function addEventListener<Type extends keyof WorkerEventMap>(
     type: Type,
@@ -115,11 +115,14 @@ export interface WideEventMap {
     e12: E12;
 }
 
-/** The access resolves, and the union it resolves to is wider than the cap. */
+/** A key over a map whose value union is wider than the cap. */
 export declare function onWide<Type extends keyof WideEventMap>(
     type: Type,
     handler: (event: WideEventMap[Type]) => void,
 ): void;
+
+/** Every value of the map at once: the access is the twelve-arm union. */
+export declare function anyWide(event: WideEventMap[keyof WideEventMap]): void;
 
 // ---------------------------------------------------------------------------
 // The soundness boundary: two shapes that stay widened.
