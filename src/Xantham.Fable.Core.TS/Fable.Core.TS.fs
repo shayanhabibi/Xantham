@@ -6838,44 +6838,9 @@ module Es =
         /// </summary>
         abstract sessionStorage: Fable.Core.TS.Dom.Storage with get, set
 
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U32<
-                        Fable.Core.TS.Dom.Event,
-                        Fable.Core.TS.Dom.UIEvent,
-                        Fable.Core.TS.Dom.AnimationEvent,
-                        Fable.Core.TS.Dom.PointerEvent,
-                        Fable.Core.TS.Dom.InputEvent,
-                        Fable.Core.TS.Dom.ToggleEvent,
-                        Fable.Core.TS.Dom.BeforeUnloadEvent,
-                        Fable.Core.TS.Dom.FocusEvent,
-                        Fable.Core.TS.Dom.CompositionEvent,
-                        Fable.Core.TS.Dom.ClipboardEvent,
-                        Fable.Core.TS.Dom.MouseEvent,
-                        Fable.Core.TS.Dom.DeviceMotionEvent,
-                        Fable.Core.TS.Dom.DeviceOrientationEvent,
-                        Fable.Core.TS.Dom.DragEvent,
-                        Fable.Core.TS.Dom.ErrorEvent,
-                        Fable.Core.TS.Dom.FormDataEvent,
-                        Fable.Core.TS.Dom.GamepadEvent,
-                        Fable.Core.TS.Dom.HashChangeEvent,
-                        Fable.Core.TS.Dom.KeyboardEvent,
-                        Fable.Core.TS.Dom.MessageEvent<obj>,
-                        Fable.Core.TS.Dom.PageTransitionEvent,
-                        Fable.Core.TS.Dom.PageRevealEvent,
-                        Fable.Core.TS.Dom.PageSwapEvent,
-                        Fable.Core.TS.Dom.PopStateEvent,
-                        Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>,
-                        Fable.Core.TS.Dom.PromiseRejectionEvent,
-                        Fable.Core.TS.Dom.SecurityPolicyViolationEvent,
-                        Fable.Core.TS.Dom.StorageEvent,
-                        Fable.Core.TS.Dom.SubmitEvent,
-                        Fable.Core.TS.Dom.TouchEvent,
-                        Fable.Core.TS.Dom.TransitionEvent,
-                        Fable.Core.TS.Dom.WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<Fable.Core.TS.Dom.WindowEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> ->
                 unit
 
@@ -6885,44 +6850,9 @@ module Es =
             ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> ->
                 unit
 
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U32<
-                        Fable.Core.TS.Dom.Event,
-                        Fable.Core.TS.Dom.UIEvent,
-                        Fable.Core.TS.Dom.AnimationEvent,
-                        Fable.Core.TS.Dom.PointerEvent,
-                        Fable.Core.TS.Dom.InputEvent,
-                        Fable.Core.TS.Dom.ToggleEvent,
-                        Fable.Core.TS.Dom.BeforeUnloadEvent,
-                        Fable.Core.TS.Dom.FocusEvent,
-                        Fable.Core.TS.Dom.CompositionEvent,
-                        Fable.Core.TS.Dom.ClipboardEvent,
-                        Fable.Core.TS.Dom.MouseEvent,
-                        Fable.Core.TS.Dom.DeviceMotionEvent,
-                        Fable.Core.TS.Dom.DeviceOrientationEvent,
-                        Fable.Core.TS.Dom.DragEvent,
-                        Fable.Core.TS.Dom.ErrorEvent,
-                        Fable.Core.TS.Dom.FormDataEvent,
-                        Fable.Core.TS.Dom.GamepadEvent,
-                        Fable.Core.TS.Dom.HashChangeEvent,
-                        Fable.Core.TS.Dom.KeyboardEvent,
-                        Fable.Core.TS.Dom.MessageEvent<obj>,
-                        Fable.Core.TS.Dom.PageTransitionEvent,
-                        Fable.Core.TS.Dom.PageRevealEvent,
-                        Fable.Core.TS.Dom.PageSwapEvent,
-                        Fable.Core.TS.Dom.PopStateEvent,
-                        Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>,
-                        Fable.Core.TS.Dom.PromiseRejectionEvent,
-                        Fable.Core.TS.Dom.SecurityPolicyViolationEvent,
-                        Fable.Core.TS.Dom.StorageEvent,
-                        Fable.Core.TS.Dom.SubmitEvent,
-                        Fable.Core.TS.Dom.TouchEvent,
-                        Fable.Core.TS.Dom.TransitionEvent,
-                        Fable.Core.TS.Dom.WheelEvent
-                    >
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<Fable.Core.TS.Dom.WindowEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> ->
                 unit
 
@@ -10039,9 +9969,7 @@ module Es =
         /// Creates a new resolved promise for the provided value.
         /// </summary>
         /// <returns>A resolved promise.</returns>
-        /// <param name="value">A promise.</param>
         /// <returns>A promise whose internal state matches the provided promise.</returns>
-        /// <param name="value">A promise.</param>
         /// <returns>A promise whose internal state matches the provided promise.</returns>
         abstract resolve: unit -> JS.Promise<unit>
         /// <summary>
@@ -14217,10 +14145,6 @@ module Es =
         /// Returns a value as a string value appropriate to the host environment's current locale.
         /// Converts a date and time to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleString: unit -> string
         /// <summary>
         /// Returns a value as a string value appropriate to the host environment's current locale.
@@ -14244,10 +14168,6 @@ module Es =
         /// Returns a date as a string value appropriate to the host environment's current locale.
         /// Converts a date to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleDateString: unit -> string
         /// <summary>
         /// Returns a date as a string value appropriate to the host environment's current locale.
@@ -14271,10 +14191,6 @@ module Es =
         /// Returns a time as a string value appropriate to the host environment's current locale.
         /// Converts a time to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleTimeString: unit -> string
         /// <summary>
         /// Returns a time as a string value appropriate to the host environment's current locale.
@@ -14482,9 +14398,6 @@ module Es =
         /// Converts a Date object to a number.
         /// Converts a Date object to a string or number.
         /// </summary>
-        /// <param name="hint">The strings "number", "string", or "default" to specify what primitive to return.</param>
-        /// <remarks>@throws {TypeError} If 'hint' was given something other than "number", "string", or "default".</remarks>
-        /// <returns>A number if 'hint' was "number", a string if 'hint' was "string" or "default".</returns>
         [<Emit("$0[Symbol.toPrimitive]($1...)")>]
         abstract SymbolToPrimitive: hint: string -> string
 
@@ -30972,8 +30885,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<AbortSignalEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -30991,8 +30907,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<AbortSignalEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -31087,8 +31006,11 @@ module Dom =
         /// </summary>
         abstract onerror: (ErrorEvent -> unit) option with get, set
 
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (ErrorEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<AbstractWorkerEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         abstract addEventListener:
             ``type``: string *
@@ -31096,8 +31018,11 @@ module Dom =
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (ErrorEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<AbstractWorkerEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         abstract removeEventListener:
             ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
@@ -31353,8 +31278,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (AnimationPlaybackEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<AnimationEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -31373,8 +31300,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (AnimationPlaybackEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<AnimationEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -32001,8 +31931,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<AudioDecoderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -32020,8 +31953,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<AudioDecoderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -32128,8 +32064,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<AudioEncoderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -32147,8 +32086,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<AudioEncoderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -32579,8 +32521,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<AudioScheduledSourceNodeEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -32598,8 +32543,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<AudioScheduledSourceNodeEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -32669,8 +32617,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (ErrorEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<AudioWorkletNodeEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -32688,8 +32639,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (ErrorEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<AudioWorkletNodeEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -33055,8 +33009,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<BaseAudioContextEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -33074,8 +33031,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<BaseAudioContextEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -33400,8 +33360,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (MessageEvent<obj> -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<BroadcastChannelEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -33419,8 +33382,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (MessageEvent<obj> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<BroadcastChannelEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -41031,8 +40997,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (CookieChangeEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<CookieStoreEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -41050,8 +41019,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (CookieChangeEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<CookieStoreEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -43597,74 +43569,8 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElement">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
-        abstract createElement<'K> :
-            tagName: 'K * ?options: ElementCreationOptions ->
-                U63<
-                    HTMLAnchorElement,
-                    HTMLElement,
-                    HTMLAreaElement,
-                    HTMLAudioElement,
-                    HTMLBaseElement,
-                    HTMLQuoteElement,
-                    HTMLBodyElement,
-                    HTMLBRElement,
-                    HTMLButtonElement,
-                    HTMLCanvasElement,
-                    HTMLTableCaptionElement,
-                    HTMLTableColElement,
-                    HTMLDataElement,
-                    HTMLDataListElement,
-                    HTMLModElement,
-                    HTMLDetailsElement,
-                    HTMLDialogElement,
-                    HTMLDivElement,
-                    HTMLDListElement,
-                    HTMLEmbedElement,
-                    HTMLFieldSetElement,
-                    HTMLFormElement,
-                    HTMLHeadingElement,
-                    HTMLHeadElement,
-                    HTMLHRElement,
-                    HTMLHtmlElement,
-                    HTMLIFrameElement,
-                    HTMLImageElement,
-                    HTMLInputElement,
-                    HTMLLabelElement,
-                    HTMLLegendElement,
-                    HTMLLIElement,
-                    HTMLLinkElement,
-                    HTMLMapElement,
-                    HTMLMenuElement,
-                    HTMLMetaElement,
-                    HTMLMeterElement,
-                    HTMLObjectElement,
-                    HTMLOListElement,
-                    HTMLOptGroupElement,
-                    HTMLOptionElement,
-                    HTMLOutputElement,
-                    HTMLParagraphElement,
-                    HTMLPictureElement,
-                    HTMLPreElement,
-                    HTMLProgressElement,
-                    HTMLScriptElement,
-                    HTMLSelectElement,
-                    HTMLSlotElement,
-                    HTMLSourceElement,
-                    HTMLSpanElement,
-                    HTMLStyleElement,
-                    HTMLTableElement,
-                    HTMLTableSectionElement,
-                    HTMLTableCellElement,
-                    HTMLTemplateElement,
-                    HTMLTextAreaElement,
-                    HTMLTimeElement,
-                    HTMLTitleElement,
-                    HTMLTableRowElement,
-                    HTMLTrackElement,
-                    HTMLUListElement,
-                    HTMLVideoElement
-                 >
+        abstract createElement<'E> :
+            tagName: typekeyof<HTMLElementTagNameMap, 'E> * ?options: ElementCreationOptions -> 'E
 
         /// <summary>
         /// In an HTML document, the <b><c>document.createElement()</c></b> method creates the HTML element specified by localName, or an HTMLUnknownElement if localName isn't recognized.
@@ -43672,6 +43578,14 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElement">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
+        abstract createElement<'E> :
+            tagName: typekeyof<HTMLElementDeprecatedTagNameMap, 'E> * ?options: ElementCreationOptions -> 'E
+
+        /// <summary>
+        /// In an HTML document, the <b><c>document.createElement()</c></b> method creates the HTML element specified by localName, or an HTMLUnknownElement if localName isn't recognized.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElement">MDN Reference</a>
+        /// </summary>
         abstract createElement: tagName: string * ?options: ElementCreationOptions -> HTMLElement
 
         /// <summary>
@@ -43691,73 +43605,7 @@ module Dom =
         /// </code>
         /// </summary>
         [<Emit("$0.createElementNS('http://www.w3.org/2000/svg', $1)")>]
-        abstract createElementNSHttpWwwW3Org2000Svg<'K> :
-            qualifiedName: 'K ->
-                U63<
-                    SVGAElement,
-                    SVGAnimateElement,
-                    SVGAnimateMotionElement,
-                    SVGAnimateTransformElement,
-                    SVGCircleElement,
-                    SVGClipPathElement,
-                    SVGDefsElement,
-                    SVGDescElement,
-                    SVGEllipseElement,
-                    SVGFEBlendElement,
-                    SVGFEColorMatrixElement,
-                    SVGFEComponentTransferElement,
-                    SVGFECompositeElement,
-                    SVGFEConvolveMatrixElement,
-                    SVGFEDiffuseLightingElement,
-                    SVGFEDisplacementMapElement,
-                    SVGFEDistantLightElement,
-                    SVGFEDropShadowElement,
-                    SVGFEFloodElement,
-                    SVGFEFuncAElement,
-                    SVGFEFuncBElement,
-                    SVGFEFuncGElement,
-                    SVGFEFuncRElement,
-                    SVGFEGaussianBlurElement,
-                    SVGFEImageElement,
-                    SVGFEMergeElement,
-                    SVGFEMergeNodeElement,
-                    SVGFEMorphologyElement,
-                    SVGFEOffsetElement,
-                    SVGFEPointLightElement,
-                    SVGFESpecularLightingElement,
-                    SVGFESpotLightElement,
-                    SVGFETileElement,
-                    SVGFETurbulenceElement,
-                    SVGFilterElement,
-                    SVGForeignObjectElement,
-                    SVGGElement,
-                    SVGImageElement,
-                    SVGLineElement,
-                    SVGLinearGradientElement,
-                    SVGMarkerElement,
-                    SVGMaskElement,
-                    SVGMetadataElement,
-                    SVGMPathElement,
-                    SVGPathElement,
-                    SVGPatternElement,
-                    SVGPolygonElement,
-                    SVGPolylineElement,
-                    SVGRadialGradientElement,
-                    SVGRectElement,
-                    SVGScriptElement,
-                    SVGSetElement,
-                    SVGStopElement,
-                    SVGStyleElement,
-                    SVGSVGElement,
-                    SVGSwitchElement,
-                    SVGSymbolElement,
-                    SVGTextElement,
-                    SVGTextPathElement,
-                    SVGTitleElement,
-                    SVGTSpanElement,
-                    SVGUseElement,
-                    SVGViewElement
-                 >
+        abstract createElementNSHttpWwwW3Org2000Svg<'E> : qualifiedName: typekeyof<SVGElementTagNameMap, 'E> -> 'E
 
         /// <summary>
         /// <code lang="ts">
@@ -43773,7 +43621,8 @@ module Dom =
         /// </code>
         /// </summary>
         [<Emit("$0.createElementNS('http://www.w3.org/1998/Math/MathML', $1)")>]
-        abstract createElementNSHttpWwwW3Org1998MathMathML<'K> : qualifiedName: 'K -> MathMLElement
+        abstract createElementNSHttpWwwW3Org1998MathMathML<'E> :
+            qualifiedName: typekeyof<MathMLElementTagNameMap, 'E> -> 'E
 
         /// <summary>
         /// <code lang="ts">
@@ -43815,7 +43664,6 @@ module Dom =
         /// createEvent(eventInterface: "AnimationPlaybackEvent"): AnimationPlaybackEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('AnimationPlaybackEvent')")>]
         abstract createEventAnimationPlaybackEvent: unit -> AnimationPlaybackEvent
 
@@ -43824,7 +43672,6 @@ module Dom =
         /// createEvent(eventInterface: "AudioProcessingEvent"): AudioProcessingEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('AudioProcessingEvent')")>]
         abstract createEventAudioProcessingEvent: unit -> AudioProcessingEvent
 
@@ -43833,7 +43680,6 @@ module Dom =
         /// createEvent(eventInterface: "BeforeUnloadEvent"): BeforeUnloadEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('BeforeUnloadEvent')")>]
         abstract createEventBeforeUnloadEvent: unit -> BeforeUnloadEvent
 
@@ -43842,7 +43688,6 @@ module Dom =
         /// createEvent(eventInterface: "BlobEvent"): BlobEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('BlobEvent')")>]
         abstract createEventBlobEvent: unit -> BlobEvent
 
@@ -43851,7 +43696,6 @@ module Dom =
         /// createEvent(eventInterface: "ClipboardEvent"): ClipboardEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('ClipboardEvent')")>]
         abstract createEventClipboardEvent: unit -> ClipboardEvent
 
@@ -43860,7 +43704,6 @@ module Dom =
         /// createEvent(eventInterface: "CloseEvent"): CloseEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('CloseEvent')")>]
         abstract createEventCloseEvent: unit -> CloseEvent
 
@@ -43869,7 +43712,6 @@ module Dom =
         /// createEvent(eventInterface: "CommandEvent"): CommandEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('CommandEvent')")>]
         abstract createEventCommandEvent: unit -> CommandEvent
 
@@ -43878,7 +43720,6 @@ module Dom =
         /// createEvent(eventInterface: "CompositionEvent"): CompositionEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('CompositionEvent')")>]
         abstract createEventCompositionEvent: unit -> CompositionEvent
 
@@ -43887,7 +43728,6 @@ module Dom =
         /// createEvent(eventInterface: "ContentVisibilityAutoStateChangeEvent"): ContentVisibilityAutoStateChangeEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('ContentVisibilityAutoStateChangeEvent')")>]
         abstract createEventContentVisibilityAutoStateChangeEvent: unit -> ContentVisibilityAutoStateChangeEvent
 
@@ -43896,7 +43736,6 @@ module Dom =
         /// createEvent(eventInterface: "CookieChangeEvent"): CookieChangeEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('CookieChangeEvent')")>]
         abstract createEventCookieChangeEvent: unit -> CookieChangeEvent
 
@@ -43905,7 +43744,6 @@ module Dom =
         /// createEvent(eventInterface: "CustomEvent"): CustomEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('CustomEvent')")>]
         abstract createEventCustomEvent: unit -> CustomEvent<obj>
 
@@ -43914,7 +43752,6 @@ module Dom =
         /// createEvent(eventInterface: "DeviceMotionEvent"): DeviceMotionEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('DeviceMotionEvent')")>]
         abstract createEventDeviceMotionEvent: unit -> DeviceMotionEvent
 
@@ -43923,7 +43760,6 @@ module Dom =
         /// createEvent(eventInterface: "DeviceOrientationEvent"): DeviceOrientationEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('DeviceOrientationEvent')")>]
         abstract createEventDeviceOrientationEvent: unit -> DeviceOrientationEvent
 
@@ -43932,7 +43768,6 @@ module Dom =
         /// createEvent(eventInterface: "DragEvent"): DragEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('DragEvent')")>]
         abstract createEventDragEvent: unit -> DragEvent
 
@@ -43941,7 +43776,6 @@ module Dom =
         /// createEvent(eventInterface: "ErrorEvent"): ErrorEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('ErrorEvent')")>]
         abstract createEventErrorEvent: unit -> ErrorEvent
 
@@ -43950,7 +43784,6 @@ module Dom =
         /// createEvent(eventInterface: "Event"): Event
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('Event')")>]
         abstract createEventEvent: unit -> Event
 
@@ -43959,7 +43792,6 @@ module Dom =
         /// createEvent(eventInterface: "Events"): Event
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('Events')")>]
         abstract createEventEvents: unit -> Event
 
@@ -43968,7 +43800,6 @@ module Dom =
         /// createEvent(eventInterface: "FocusEvent"): FocusEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('FocusEvent')")>]
         abstract createEventFocusEvent: unit -> FocusEvent
 
@@ -43977,7 +43808,6 @@ module Dom =
         /// createEvent(eventInterface: "FontFaceSetLoadEvent"): FontFaceSetLoadEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('FontFaceSetLoadEvent')")>]
         abstract createEventFontFaceSetLoadEvent: unit -> FontFaceSetLoadEvent
 
@@ -43986,7 +43816,6 @@ module Dom =
         /// createEvent(eventInterface: "FormDataEvent"): FormDataEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('FormDataEvent')")>]
         abstract createEventFormDataEvent: unit -> FormDataEvent
 
@@ -43995,7 +43824,6 @@ module Dom =
         /// createEvent(eventInterface: "GPUUncapturedErrorEvent"): GPUUncapturedErrorEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('GPUUncapturedErrorEvent')")>]
         abstract createEventGPUUncapturedErrorEvent: unit -> GPUUncapturedErrorEvent
 
@@ -44004,7 +43832,6 @@ module Dom =
         /// createEvent(eventInterface: "GamepadEvent"): GamepadEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('GamepadEvent')")>]
         abstract createEventGamepadEvent: unit -> GamepadEvent
 
@@ -44013,7 +43840,6 @@ module Dom =
         /// createEvent(eventInterface: "HashChangeEvent"): HashChangeEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('HashChangeEvent')")>]
         abstract createEventHashChangeEvent: unit -> HashChangeEvent
 
@@ -44022,7 +43848,6 @@ module Dom =
         /// createEvent(eventInterface: "IDBVersionChangeEvent"): IDBVersionChangeEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('IDBVersionChangeEvent')")>]
         abstract createEventIDBVersionChangeEvent: unit -> IDBVersionChangeEvent
 
@@ -44031,7 +43856,6 @@ module Dom =
         /// createEvent(eventInterface: "InputEvent"): InputEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('InputEvent')")>]
         abstract createEventInputEvent: unit -> InputEvent
 
@@ -44040,7 +43864,6 @@ module Dom =
         /// createEvent(eventInterface: "KeyboardEvent"): KeyboardEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('KeyboardEvent')")>]
         abstract createEventKeyboardEvent: unit -> KeyboardEvent
 
@@ -44049,7 +43872,6 @@ module Dom =
         /// createEvent(eventInterface: "MIDIConnectionEvent"): MIDIConnectionEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MIDIConnectionEvent')")>]
         abstract createEventMIDIConnectionEvent: unit -> MIDIConnectionEvent
 
@@ -44058,7 +43880,6 @@ module Dom =
         /// createEvent(eventInterface: "MIDIMessageEvent"): MIDIMessageEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MIDIMessageEvent')")>]
         abstract createEventMIDIMessageEvent: unit -> MIDIMessageEvent
 
@@ -44067,7 +43888,6 @@ module Dom =
         /// createEvent(eventInterface: "MediaEncryptedEvent"): MediaEncryptedEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MediaEncryptedEvent')")>]
         abstract createEventMediaEncryptedEvent: unit -> MediaEncryptedEvent
 
@@ -44076,7 +43896,6 @@ module Dom =
         /// createEvent(eventInterface: "MediaKeyMessageEvent"): MediaKeyMessageEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MediaKeyMessageEvent')")>]
         abstract createEventMediaKeyMessageEvent: unit -> MediaKeyMessageEvent
 
@@ -44085,7 +43904,6 @@ module Dom =
         /// createEvent(eventInterface: "MediaQueryListEvent"): MediaQueryListEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MediaQueryListEvent')")>]
         abstract createEventMediaQueryListEvent: unit -> MediaQueryListEvent
 
@@ -44094,7 +43912,6 @@ module Dom =
         /// createEvent(eventInterface: "MediaStreamTrackEvent"): MediaStreamTrackEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MediaStreamTrackEvent')")>]
         abstract createEventMediaStreamTrackEvent: unit -> MediaStreamTrackEvent
 
@@ -44103,7 +43920,6 @@ module Dom =
         /// createEvent(eventInterface: "MessageEvent"): MessageEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MessageEvent')")>]
         abstract createEventMessageEvent: unit -> MessageEvent<obj>
 
@@ -44112,7 +43928,6 @@ module Dom =
         /// createEvent(eventInterface: "MouseEvent"): MouseEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MouseEvent')")>]
         abstract createEventMouseEvent: unit -> MouseEvent
 
@@ -44121,7 +43936,6 @@ module Dom =
         /// createEvent(eventInterface: "MouseEvents"): MouseEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('MouseEvents')")>]
         abstract createEventMouseEvents: unit -> MouseEvent
 
@@ -44130,7 +43944,6 @@ module Dom =
         /// createEvent(eventInterface: "NavigateEvent"): NavigateEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('NavigateEvent')")>]
         abstract createEventNavigateEvent: unit -> NavigateEvent
 
@@ -44139,7 +43952,6 @@ module Dom =
         /// createEvent(eventInterface: "NavigationCurrentEntryChangeEvent"): NavigationCurrentEntryChangeEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('NavigationCurrentEntryChangeEvent')")>]
         abstract createEventNavigationCurrentEntryChangeEvent: unit -> NavigationCurrentEntryChangeEvent
 
@@ -44148,7 +43960,6 @@ module Dom =
         /// createEvent(eventInterface: "OfflineAudioCompletionEvent"): OfflineAudioCompletionEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('OfflineAudioCompletionEvent')")>]
         abstract createEventOfflineAudioCompletionEvent: unit -> OfflineAudioCompletionEvent
 
@@ -44157,7 +43968,6 @@ module Dom =
         /// createEvent(eventInterface: "PageRevealEvent"): PageRevealEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PageRevealEvent')")>]
         abstract createEventPageRevealEvent: unit -> PageRevealEvent
 
@@ -44166,7 +43976,6 @@ module Dom =
         /// createEvent(eventInterface: "PageSwapEvent"): PageSwapEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PageSwapEvent')")>]
         abstract createEventPageSwapEvent: unit -> PageSwapEvent
 
@@ -44175,7 +43984,6 @@ module Dom =
         /// createEvent(eventInterface: "PageTransitionEvent"): PageTransitionEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PageTransitionEvent')")>]
         abstract createEventPageTransitionEvent: unit -> PageTransitionEvent
 
@@ -44184,7 +43992,6 @@ module Dom =
         /// createEvent(eventInterface: "PaymentMethodChangeEvent"): PaymentMethodChangeEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PaymentMethodChangeEvent')")>]
         abstract createEventPaymentMethodChangeEvent: unit -> PaymentMethodChangeEvent
 
@@ -44193,7 +44000,6 @@ module Dom =
         /// createEvent(eventInterface: "PaymentRequestUpdateEvent"): PaymentRequestUpdateEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PaymentRequestUpdateEvent')")>]
         abstract createEventPaymentRequestUpdateEvent: unit -> PaymentRequestUpdateEvent
 
@@ -44202,7 +44008,6 @@ module Dom =
         /// createEvent(eventInterface: "PictureInPictureEvent"): PictureInPictureEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PictureInPictureEvent')")>]
         abstract createEventPictureInPictureEvent: unit -> PictureInPictureEvent
 
@@ -44211,7 +44016,6 @@ module Dom =
         /// createEvent(eventInterface: "PointerEvent"): PointerEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PointerEvent')")>]
         abstract createEventPointerEvent: unit -> PointerEvent
 
@@ -44220,7 +44024,6 @@ module Dom =
         /// createEvent(eventInterface: "PopStateEvent"): PopStateEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PopStateEvent')")>]
         abstract createEventPopStateEvent: unit -> PopStateEvent
 
@@ -44229,7 +44032,6 @@ module Dom =
         /// createEvent(eventInterface: "ProgressEvent"): ProgressEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('ProgressEvent')")>]
         abstract createEventProgressEvent: unit -> ProgressEvent<EventTarget>
 
@@ -44238,7 +44040,6 @@ module Dom =
         /// createEvent(eventInterface: "PromiseRejectionEvent"): PromiseRejectionEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('PromiseRejectionEvent')")>]
         abstract createEventPromiseRejectionEvent: unit -> PromiseRejectionEvent
 
@@ -44247,7 +44048,6 @@ module Dom =
         /// createEvent(eventInterface: "RTCDTMFToneChangeEvent"): RTCDTMFToneChangeEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('RTCDTMFToneChangeEvent')")>]
         abstract createEventRTCDTMFToneChangeEvent: unit -> RTCDTMFToneChangeEvent
 
@@ -44256,7 +44056,6 @@ module Dom =
         /// createEvent(eventInterface: "RTCDataChannelEvent"): RTCDataChannelEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('RTCDataChannelEvent')")>]
         abstract createEventRTCDataChannelEvent: unit -> RTCDataChannelEvent
 
@@ -44265,7 +44064,6 @@ module Dom =
         /// createEvent(eventInterface: "RTCErrorEvent"): RTCErrorEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('RTCErrorEvent')")>]
         abstract createEventRTCErrorEvent: unit -> RTCErrorEvent
 
@@ -44274,7 +44072,6 @@ module Dom =
         /// createEvent(eventInterface: "RTCPeerConnectionIceErrorEvent"): RTCPeerConnectionIceErrorEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('RTCPeerConnectionIceErrorEvent')")>]
         abstract createEventRTCPeerConnectionIceErrorEvent: unit -> RTCPeerConnectionIceErrorEvent
 
@@ -44283,7 +44080,6 @@ module Dom =
         /// createEvent(eventInterface: "RTCPeerConnectionIceEvent"): RTCPeerConnectionIceEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('RTCPeerConnectionIceEvent')")>]
         abstract createEventRTCPeerConnectionIceEvent: unit -> RTCPeerConnectionIceEvent
 
@@ -44292,7 +44088,6 @@ module Dom =
         /// createEvent(eventInterface: "RTCTrackEvent"): RTCTrackEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('RTCTrackEvent')")>]
         abstract createEventRTCTrackEvent: unit -> RTCTrackEvent
 
@@ -44301,7 +44096,6 @@ module Dom =
         /// createEvent(eventInterface: "SecurityPolicyViolationEvent"): SecurityPolicyViolationEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('SecurityPolicyViolationEvent')")>]
         abstract createEventSecurityPolicyViolationEvent: unit -> SecurityPolicyViolationEvent
 
@@ -44310,7 +44104,6 @@ module Dom =
         /// createEvent(eventInterface: "SpeechRecognitionErrorEvent"): SpeechRecognitionErrorEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('SpeechRecognitionErrorEvent')")>]
         abstract createEventSpeechRecognitionErrorEvent: unit -> SpeechRecognitionErrorEvent
 
@@ -44319,7 +44112,6 @@ module Dom =
         /// createEvent(eventInterface: "SpeechRecognitionEvent"): SpeechRecognitionEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('SpeechRecognitionEvent')")>]
         abstract createEventSpeechRecognitionEvent: unit -> SpeechRecognitionEvent
 
@@ -44328,7 +44120,6 @@ module Dom =
         /// createEvent(eventInterface: "SpeechSynthesisErrorEvent"): SpeechSynthesisErrorEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('SpeechSynthesisErrorEvent')")>]
         abstract createEventSpeechSynthesisErrorEvent: unit -> SpeechSynthesisErrorEvent
 
@@ -44337,7 +44128,6 @@ module Dom =
         /// createEvent(eventInterface: "SpeechSynthesisEvent"): SpeechSynthesisEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('SpeechSynthesisEvent')")>]
         abstract createEventSpeechSynthesisEvent: unit -> SpeechSynthesisEvent
 
@@ -44346,7 +44136,6 @@ module Dom =
         /// createEvent(eventInterface: "StorageEvent"): StorageEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('StorageEvent')")>]
         abstract createEventStorageEvent: unit -> StorageEvent
 
@@ -44355,7 +44144,6 @@ module Dom =
         /// createEvent(eventInterface: "SubmitEvent"): SubmitEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('SubmitEvent')")>]
         abstract createEventSubmitEvent: unit -> SubmitEvent
 
@@ -44364,7 +44152,6 @@ module Dom =
         /// createEvent(eventInterface: "TaskPriorityChangeEvent"): TaskPriorityChangeEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('TaskPriorityChangeEvent')")>]
         abstract createEventTaskPriorityChangeEvent: unit -> TaskPriorityChangeEvent
 
@@ -44373,7 +44160,6 @@ module Dom =
         /// createEvent(eventInterface: "TextEvent"): TextEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('TextEvent')")>]
         abstract createEventTextEvent: unit -> TextEvent
 
@@ -44382,7 +44168,6 @@ module Dom =
         /// createEvent(eventInterface: "ToggleEvent"): ToggleEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('ToggleEvent')")>]
         abstract createEventToggleEvent: unit -> ToggleEvent
 
@@ -44391,7 +44176,6 @@ module Dom =
         /// createEvent(eventInterface: "TouchEvent"): TouchEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('TouchEvent')")>]
         abstract createEventTouchEvent: unit -> TouchEvent
 
@@ -44400,7 +44184,6 @@ module Dom =
         /// createEvent(eventInterface: "TrackEvent"): TrackEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('TrackEvent')")>]
         abstract createEventTrackEvent: unit -> TrackEvent
 
@@ -44409,7 +44192,6 @@ module Dom =
         /// createEvent(eventInterface: "TransitionEvent"): TransitionEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('TransitionEvent')")>]
         abstract createEventTransitionEvent: unit -> TransitionEvent
 
@@ -44418,7 +44200,6 @@ module Dom =
         /// createEvent(eventInterface: "UIEvent"): UIEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('UIEvent')")>]
         abstract createEventUIEvent: unit -> UIEvent
 
@@ -44427,7 +44208,6 @@ module Dom =
         /// createEvent(eventInterface: "UIEvents"): UIEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('UIEvents')")>]
         abstract createEventUIEvents: unit -> UIEvent
 
@@ -44436,7 +44216,6 @@ module Dom =
         /// createEvent(eventInterface: "WebGLContextEvent"): WebGLContextEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('WebGLContextEvent')")>]
         abstract createEventWebGLContextEvent: unit -> WebGLContextEvent
 
@@ -44445,14 +44224,12 @@ module Dom =
         /// createEvent(eventInterface: "WheelEvent"): WheelEvent
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         [<Emit("$0.createEvent('WheelEvent')")>]
         abstract createEventWheelEvent: unit -> WheelEvent
 
         /// <summary>
         /// Creates an event of the type specified. The returned object should be first initialized and can then be passed to EventTarget.dispatchEvent.
         /// </summary>
-        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Document/createEvent">MDN Reference</a></remarks>
         abstract createEvent: eventInterface: string -> Event
         /// <summary>
         /// The <b><c>Document.createNodeIterator()</c></b> method returns a new NodeIterator object.
@@ -44523,19 +44300,45 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByName">MDN Reference</a>
         /// </summary>
         abstract getElementsByName: elementName: string -> NodeListOf<HTMLElement>
+
+        /// <summary>
+        /// The <b><c>getElementsByTagName</c></b> method of Document interface returns an HTMLCollection of elements with the given tag name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagName">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagName<'E when 'E :> Element> :
+            qualifiedName: typekeyof<HTMLElementTagNameMap, 'E> -> HTMLCollectionOf<'E>
+
+        /// <summary>
+        /// The <b><c>getElementsByTagName</c></b> method of Document interface returns an HTMLCollection of elements with the given tag name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagName">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagName<'E when 'E :> Element> :
+            qualifiedName: typekeyof<SVGElementTagNameMap, 'E> -> HTMLCollectionOf<'E>
+
+        /// <summary>
+        /// The <b><c>getElementsByTagName</c></b> method of Document interface returns an HTMLCollection of elements with the given tag name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagName">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagName<'E when 'E :> Element> :
+            qualifiedName: typekeyof<MathMLElementTagNameMap, 'E> -> HTMLCollectionOf<'E>
+
         /// <summary>
         /// The <b><c>getElementsByTagName</c></b> method of Document interface returns an HTMLCollection of elements with the given tag name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagName">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract getElementsByTagName<'K> : qualifiedName: 'K -> HTMLCollectionOf<Element>
+        abstract getElementsByTagName<'E when 'E :> Element> :
+            qualifiedName: typekeyof<HTMLElementDeprecatedTagNameMap, 'E> -> HTMLCollectionOf<'E>
+
         /// <summary>
         /// The <b><c>getElementsByTagName</c></b> method of Document interface returns an HTMLCollection of elements with the given tag name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementsByTagName">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract getElementsByTagName: qualifiedName: string -> HTMLCollectionOf<Element>
 
         /// <summary>
@@ -44663,32 +44466,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U20<
-                        Event,
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        KeyboardEvent,
-                        ProgressEvent<EventTarget>,
-                        SecurityPolicyViolationEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<DocumentEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -44697,33 +44477,8 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U20<
-                        Event,
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        KeyboardEvent,
-                        ProgressEvent<EventTarget>,
-                        SecurityPolicyViolationEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
-            ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<DocumentEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, EventListenerOptions> ->
                 unit
 
     type DocumentConstructor =
@@ -45409,80 +45164,24 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/checkVisibility">MDN Reference</a>
         /// </summary>
         abstract checkVisibility: ?options: CheckVisibilityOptions -> bool
-
         /// <summary>
         /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
         /// </summary>
-        abstract closest<'K> :
-            selector: 'K ->
-                U63<
-                    HTMLAnchorElement,
-                    HTMLElement,
-                    HTMLAreaElement,
-                    HTMLAudioElement,
-                    HTMLBaseElement,
-                    HTMLQuoteElement,
-                    HTMLBodyElement,
-                    HTMLBRElement,
-                    HTMLButtonElement,
-                    HTMLCanvasElement,
-                    HTMLTableCaptionElement,
-                    HTMLTableColElement,
-                    HTMLDataElement,
-                    HTMLDataListElement,
-                    HTMLModElement,
-                    HTMLDetailsElement,
-                    HTMLDialogElement,
-                    HTMLDivElement,
-                    HTMLDListElement,
-                    HTMLEmbedElement,
-                    HTMLFieldSetElement,
-                    HTMLFormElement,
-                    HTMLHeadingElement,
-                    HTMLHeadElement,
-                    HTMLHRElement,
-                    HTMLHtmlElement,
-                    HTMLIFrameElement,
-                    HTMLImageElement,
-                    HTMLInputElement,
-                    HTMLLabelElement,
-                    HTMLLegendElement,
-                    HTMLLIElement,
-                    HTMLLinkElement,
-                    HTMLMapElement,
-                    HTMLMenuElement,
-                    HTMLMetaElement,
-                    HTMLMeterElement,
-                    HTMLObjectElement,
-                    HTMLOListElement,
-                    HTMLOptGroupElement,
-                    HTMLOptionElement,
-                    HTMLOutputElement,
-                    HTMLParagraphElement,
-                    HTMLPictureElement,
-                    HTMLPreElement,
-                    HTMLProgressElement,
-                    HTMLScriptElement,
-                    HTMLSelectElement,
-                    HTMLSlotElement,
-                    HTMLSourceElement,
-                    HTMLSpanElement,
-                    HTMLStyleElement,
-                    HTMLTableElement,
-                    HTMLTableSectionElement,
-                    HTMLTableCellElement,
-                    HTMLTemplateElement,
-                    HTMLTextAreaElement,
-                    HTMLTimeElement,
-                    HTMLTitleElement,
-                    HTMLTableRowElement,
-                    HTMLTrackElement,
-                    HTMLUListElement,
-                    HTMLVideoElement
-                 > option
-
+        abstract closest<'E> : selector: typekeyof<HTMLElementTagNameMap, 'E> -> 'E option
+        /// <summary>
+        /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
+        /// </summary>
+        abstract closest<'E> : selector: typekeyof<SVGElementTagNameMap, 'E> -> 'E option
+        /// <summary>
+        /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
+        /// </summary>
+        abstract closest<'E> : selector: typekeyof<MathMLElementTagNameMap, 'E> -> 'E option
         /// <summary>
         /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
         /// <br /><br />
@@ -45543,19 +45242,45 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByClassName">MDN Reference</a>
         /// </summary>
         abstract getElementsByClassName: classNames: string -> HTMLCollectionOf<Element>
+
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagName<'E when 'E :> Element> :
+            qualifiedName: typekeyof<HTMLElementTagNameMap, 'E> -> HTMLCollectionOf<'E>
+
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagName<'E when 'E :> Element> :
+            qualifiedName: typekeyof<SVGElementTagNameMap, 'E> -> HTMLCollectionOf<'E>
+
+        /// <summary>
+        /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+        /// </summary>
+        abstract getElementsByTagName<'E when 'E :> Element> :
+            qualifiedName: typekeyof<MathMLElementTagNameMap, 'E> -> HTMLCollectionOf<'E>
+
         /// <summary>
         /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract getElementsByTagName<'K> : qualifiedName: 'K -> HTMLCollectionOf<Element>
+        abstract getElementsByTagName<'E when 'E :> Element> :
+            qualifiedName: typekeyof<HTMLElementDeprecatedTagNameMap, 'E> -> HTMLCollectionOf<'E>
+
         /// <summary>
         /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract getElementsByTagName: qualifiedName: string -> HTMLCollectionOf<Element>
 
         /// <summary>
@@ -45644,7 +45369,19 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
         /// </summary>
-        abstract matches<'K> : selectors: 'K -> bool
+        abstract matches: selectors: keyof<HTMLElementTagNameMap> -> bool
+        /// <summary>
+        /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
+        /// </summary>
+        abstract matches: selectors: keyof<SVGElementTagNameMap> -> bool
+        /// <summary>
+        /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
+        /// </summary>
+        abstract matches: selectors: keyof<MathMLElementTagNameMap> -> bool
         /// <summary>
         /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
         /// <br /><br />
@@ -45791,8 +45528,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<ElementEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -45810,8 +45550,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<ElementEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -46413,8 +46154,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (U2<Event, MessageEvent<obj>> -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<EventSourceEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -46442,8 +46185,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (U2<Event, MessageEvent<obj>> -> obj) * ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<EventSourceEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -46751,8 +46496,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (ProgressEvent<FileReader> -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<FileReaderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -46771,8 +46518,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (ProgressEvent<FileReader> -> obj) * ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<FileReaderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -47476,8 +47225,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (FontFaceSetLoadEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<FontFaceSetEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -47495,8 +47247,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (FontFaceSetLoadEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<FontFaceSetEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -48541,8 +48296,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (GPUUncapturedErrorEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<GPUDeviceEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -48561,8 +48318,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (GPUUncapturedErrorEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<GPUDeviceEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -50406,32 +50166,9 @@ module Dom =
         /// </summary>
         abstract onwheel: (WheelEvent -> unit) option with get, set
 
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U20<
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        Event,
-                        ToggleEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        KeyboardEvent,
-                        ProgressEvent<EventTarget>,
-                        SecurityPolicyViolationEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<GlobalEventHandlersEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -50441,32 +50178,9 @@ module Dom =
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U20<
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        Event,
-                        ToggleEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        KeyboardEvent,
-                        ProgressEvent<EventTarget>,
-                        SecurityPolicyViolationEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<GlobalEventHandlersEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -50733,42 +50447,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U30<
-                        UIEvent,
-                        Event,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        BeforeUnloadEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        KeyboardEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        ProgressEvent<EventTarget>,
-                        PromiseRejectionEvent,
-                        SecurityPolicyViolationEvent,
-                        StorageEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<HTMLBodyElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -50777,42 +50458,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U30<
-                        UIEvent,
-                        Event,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        BeforeUnloadEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        KeyboardEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        ProgressEvent<EventTarget>,
-                        PromiseRejectionEvent,
-                        SecurityPolicyViolationEvent,
-                        StorageEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<HTMLBodyElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -51428,6 +51076,28 @@ module Dom =
         /// </summary>
         abstract togglePopover: ?options: U2<bool, TogglePopoverOptions> -> bool
 
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<HTMLElementEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<HTMLElementEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
+
     type HTMLElementConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> HTMLElement
@@ -51779,42 +51449,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U30<
-                        UIEvent,
-                        Event,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        BeforeUnloadEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        KeyboardEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        ProgressEvent<EventTarget>,
-                        PromiseRejectionEvent,
-                        SecurityPolicyViolationEvent,
-                        StorageEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<HTMLFrameSetElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -51823,42 +51460,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U30<
-                        UIEvent,
-                        Event,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        BeforeUnloadEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        KeyboardEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        ProgressEvent<EventTarget>,
-                        PromiseRejectionEvent,
-                        SecurityPolicyViolationEvent,
-                        StorageEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<HTMLFrameSetElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -53184,33 +52788,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U21<
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        Event,
-                        ToggleEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        MediaEncryptedEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        KeyboardEvent,
-                        ProgressEvent<EventTarget>,
-                        SecurityPolicyViolationEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<HTMLMediaElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -53219,33 +52799,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U21<
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        Event,
-                        ToggleEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        MediaEncryptedEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        KeyboardEvent,
-                        ProgressEvent<EventTarget>,
-                        SecurityPolicyViolationEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<HTMLMediaElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -55325,34 +54881,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U22<
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        Event,
-                        ToggleEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        MediaEncryptedEvent,
-                        PictureInPictureEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        KeyboardEvent,
-                        ProgressEvent<EventTarget>,
-                        SecurityPolicyViolationEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<HTMLVideoElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -55361,34 +54892,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U22<
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        Event,
-                        ToggleEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        MediaEncryptedEvent,
-                        PictureInPictureEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        KeyboardEvent,
-                        ProgressEvent<EventTarget>,
-                        SecurityPolicyViolationEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<HTMLVideoElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -55913,9 +55419,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<Event, IDBVersionChangeEvent> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<IDBDatabaseEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -55935,9 +55441,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<Event, IDBVersionChangeEvent> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<IDBDatabaseEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -56618,9 +56124,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<IDBVersionChangeEvent, Event> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<IDBOpenDBRequestEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -56629,9 +56135,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<IDBVersionChangeEvent, Event> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<IDBOpenDBRequestEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -56705,8 +56211,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<IDBRequestEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -56724,8 +56233,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<IDBRequestEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -56822,8 +56334,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<IDBTransactionEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -56841,8 +56356,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<IDBTransactionEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -58025,8 +57543,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (MIDIConnectionEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MIDIAccessEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -58044,8 +57565,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (MIDIConnectionEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MIDIAccessEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -58132,9 +57656,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<MIDIMessageEvent, MIDIConnectionEvent> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MIDIInputEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -58143,9 +57667,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<MIDIMessageEvent, MIDIConnectionEvent> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MIDIInputEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -58358,8 +57882,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (MIDIConnectionEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MIDIPortEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -58377,8 +57904,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (MIDIConnectionEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MIDIPortEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -58407,6 +57935,28 @@ module Dom =
         inherit ElementCSSInlineStyle
         inherit GlobalEventHandlers
         inherit HTMLOrSVGElement
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MathMLElementEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MathMLElementEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
     type MathMLElementConstructor =
         [<EmitConstructor>]
@@ -58542,8 +58092,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MediaDevicesEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -58561,8 +58114,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MediaDevicesEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -58862,9 +58418,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<Event, MediaKeyMessageEvent> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MediaKeySessionEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -58884,8 +58440,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (U2<Event, MediaKeyMessageEvent> -> obj) * ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MediaKeySessionEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -59148,8 +58706,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (MediaQueryListEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MediaQueryListEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -59167,8 +58728,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (MediaQueryListEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MediaQueryListEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -59346,9 +58910,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U3<BlobEvent, ErrorEvent, Event> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MediaRecorderEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -59368,9 +58932,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U3<BlobEvent, ErrorEvent, Event> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MediaRecorderEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -59542,8 +59106,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MediaSourceEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -59561,8 +59128,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MediaSourceEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -59687,8 +59257,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (MediaStreamTrackEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MediaStreamEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -59707,8 +59279,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (MediaStreamTrackEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MediaStreamEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -59877,8 +59452,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MediaStreamTrackEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -59896,8 +59474,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MediaStreamTrackEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -60070,8 +59651,11 @@ module Dom =
         /// </summary>
         abstract onmessageerror: (MessageEvent<obj> -> unit) option with get, set
 
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (MessageEvent<obj> -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MessageEventTargetEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         abstract addEventListener:
             ``type``: string *
@@ -60079,8 +59663,11 @@ module Dom =
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (MessageEvent<obj> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MessageEventTargetEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         abstract removeEventListener:
             ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
@@ -60126,6 +59713,28 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/MessagePort/start">MDN Reference</a>
         /// </summary>
         abstract start: unit -> unit
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<MessagePortEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<MessagePortEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
     type MessagePortConstructor =
         [<EmitConstructor>]
@@ -60747,9 +60356,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U4<NavigationCurrentEntryChangeEvent, NavigateEvent, ErrorEvent, Event> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<NavigationEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -60769,9 +60378,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U4<NavigationCurrentEntryChangeEvent, NavigateEvent, ErrorEvent, Event> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<NavigationEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -60990,8 +60599,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<NavigationHistoryEntryEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -61009,8 +60621,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<NavigationHistoryEntryEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -62372,8 +61987,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<NotificationEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -62391,8 +62009,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<NotificationEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -62757,9 +62378,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<OfflineAudioCompletionEvent, Event> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<OfflineAudioContextEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -62768,9 +62389,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<OfflineAudioCompletionEvent, Event> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<OfflineAudioContextEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -62876,8 +62497,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<OffscreenCanvasEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -62895,8 +62519,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<OffscreenCanvasEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -63300,101 +62927,75 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/prepend">MDN Reference</a>
         /// </summary>
         abstract prepend: [<ParamArray>] nodes: U2<string, Node>[] -> unit
-
+        /// <summary>
+        /// Returns the first element that is a descendant of node that matches selectors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+        /// </summary>
+        abstract querySelector<'E> : selectors: typekeyof<HTMLElementTagNameMap, 'E> -> 'E option
+        /// <summary>
+        /// Returns the first element that is a descendant of node that matches selectors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+        /// </summary>
+        abstract querySelector<'E> : selectors: typekeyof<SVGElementTagNameMap, 'E> -> 'E option
+        /// <summary>
+        /// Returns the first element that is a descendant of node that matches selectors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+        /// </summary>
+        abstract querySelector<'E> : selectors: typekeyof<MathMLElementTagNameMap, 'E> -> 'E option
         /// <summary>
         /// Returns the first element that is a descendant of node that matches selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract querySelector<'K> :
-            selectors: 'K ->
-                U63<
-                    HTMLAnchorElement,
-                    HTMLElement,
-                    HTMLAreaElement,
-                    HTMLAudioElement,
-                    HTMLBaseElement,
-                    HTMLQuoteElement,
-                    HTMLBodyElement,
-                    HTMLBRElement,
-                    HTMLButtonElement,
-                    HTMLCanvasElement,
-                    HTMLTableCaptionElement,
-                    HTMLTableColElement,
-                    HTMLDataElement,
-                    HTMLDataListElement,
-                    HTMLModElement,
-                    HTMLDetailsElement,
-                    HTMLDialogElement,
-                    HTMLDivElement,
-                    HTMLDListElement,
-                    HTMLEmbedElement,
-                    HTMLFieldSetElement,
-                    HTMLFormElement,
-                    HTMLHeadingElement,
-                    HTMLHeadElement,
-                    HTMLHRElement,
-                    HTMLHtmlElement,
-                    HTMLIFrameElement,
-                    HTMLImageElement,
-                    HTMLInputElement,
-                    HTMLLabelElement,
-                    HTMLLegendElement,
-                    HTMLLIElement,
-                    HTMLLinkElement,
-                    HTMLMapElement,
-                    HTMLMenuElement,
-                    HTMLMetaElement,
-                    HTMLMeterElement,
-                    HTMLObjectElement,
-                    HTMLOListElement,
-                    HTMLOptGroupElement,
-                    HTMLOptionElement,
-                    HTMLOutputElement,
-                    HTMLParagraphElement,
-                    HTMLPictureElement,
-                    HTMLPreElement,
-                    HTMLProgressElement,
-                    HTMLScriptElement,
-                    HTMLSelectElement,
-                    HTMLSlotElement,
-                    HTMLSourceElement,
-                    HTMLSpanElement,
-                    HTMLStyleElement,
-                    HTMLTableElement,
-                    HTMLTableSectionElement,
-                    HTMLTableCellElement,
-                    HTMLTemplateElement,
-                    HTMLTextAreaElement,
-                    HTMLTimeElement,
-                    HTMLTitleElement,
-                    HTMLTableRowElement,
-                    HTMLTrackElement,
-                    HTMLUListElement,
-                    HTMLVideoElement
-                 > option
-
+        abstract querySelector<'E> : selectors: typekeyof<HTMLElementDeprecatedTagNameMap, 'E> -> 'E option
         /// <summary>
         /// Returns the first element that is a descendant of node that matches selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract querySelector<'E when 'E :> Element> : selectors: string -> 'E option
+
+        /// <summary>
+        /// Returns all element descendants of node that match selectors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+        /// </summary>
+        abstract querySelectorAll<'E when 'E :> Node> :
+            selectors: typekeyof<HTMLElementTagNameMap, 'E> -> NodeListOf<'E>
+
+        /// <summary>
+        /// Returns all element descendants of node that match selectors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+        /// </summary>
+        abstract querySelectorAll<'E when 'E :> Node> : selectors: typekeyof<SVGElementTagNameMap, 'E> -> NodeListOf<'E>
+
+        /// <summary>
+        /// Returns all element descendants of node that match selectors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+        /// </summary>
+        abstract querySelectorAll<'E when 'E :> Node> :
+            selectors: typekeyof<MathMLElementTagNameMap, 'E> -> NodeListOf<'E>
+
         /// <summary>
         /// Returns all element descendants of node that match selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
-        abstract querySelectorAll<'K> : selectors: 'K -> NodeListOf<Node>
+        abstract querySelectorAll<'E when 'E :> Node> :
+            selectors: typekeyof<HTMLElementDeprecatedTagNameMap, 'E> -> NodeListOf<'E>
+
         /// <summary>
         /// Returns all element descendants of node that match selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract querySelectorAll<'E when 'E :> Element> : selectors: string -> NodeListOf<'E>
         /// <summary>
         /// Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes.
@@ -63649,9 +63250,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<PaymentMethodChangeEvent, PaymentRequestUpdateEvent> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<PaymentRequestEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -63671,9 +63272,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<PaymentMethodChangeEvent, PaymentRequestUpdateEvent> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<PaymentRequestEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -63827,8 +63428,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (PaymentRequestUpdateEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<PaymentResponseEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -63847,8 +63450,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (PaymentRequestUpdateEvent -> obj) * ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<PaymentResponseEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -63986,8 +63591,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<PerformanceEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -64005,8 +63613,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<PerformanceEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -64850,8 +64461,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<PermissionStatusEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -64869,8 +64483,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<PermissionStatusEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -64986,8 +64603,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<PictureInPictureWindowEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -65005,8 +64625,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<PictureInPictureWindowEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -65722,8 +65345,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (RTCDTMFToneChangeEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<RTCDTMFSenderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -65742,8 +65367,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (RTCDTMFToneChangeEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<RTCDTMFSenderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -65956,9 +65584,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U3<Event, RTCErrorEvent, MessageEvent<obj>> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<RTCDataChannelEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -65978,9 +65606,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U3<Event, RTCErrorEvent, MessageEvent<obj>> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<RTCDataChannelEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -66083,8 +65711,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (U2<RTCErrorEvent, Event> -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<RTCDtlsTransportEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -66103,8 +65733,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (U2<RTCErrorEvent, Event> -> obj) * ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<RTCDtlsTransportEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -66501,8 +66133,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<RTCIceTransportEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -66520,8 +66155,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<RTCIceTransportEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -66683,7 +66321,6 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/addIceCandidate">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract addIceCandidate: ?candidate: RTCIceCandidateInit -> JS.Promise<unit>
 
         /// <summary>
@@ -66724,7 +66361,6 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/createAnswer">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract createAnswer: ?options: RTCAnswerOptions -> JS.Promise<RTCSessionDescriptionInit>
 
         /// <summary>
@@ -66748,7 +66384,6 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/createOffer">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract createOffer: ?options: RTCOfferOptions -> JS.Promise<RTCSessionDescriptionInit>
 
         /// <summary>
@@ -66816,7 +66451,6 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/setLocalDescription">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract setLocalDescription: ?description: RTCLocalSessionDescriptionInit -> JS.Promise<unit>
 
         /// <summary>
@@ -66836,7 +66470,6 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection/setRemoteDescription">MDN Reference</a>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         abstract setRemoteDescription: description: RTCSessionDescriptionInit -> JS.Promise<unit>
 
         /// <summary>
@@ -66856,11 +66489,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U5<Event, RTCDataChannelEvent, RTCPeerConnectionIceEvent, RTCPeerConnectionIceErrorEvent, RTCTrackEvent>
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<RTCPeerConnectionEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -66880,11 +66511,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U5<Event, RTCDataChannelEvent, RTCPeerConnectionIceEvent, RTCPeerConnectionIceErrorEvent, RTCTrackEvent>
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<RTCPeerConnectionEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -67290,8 +66919,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<RTCSctpTransportEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -67309,8 +66941,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<RTCSctpTransportEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -68070,8 +67705,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<RemotePlaybackEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -68089,8 +67727,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<RemotePlaybackEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -69340,6 +68981,28 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement/viewportElement">MDN Reference</a>
         /// </summary>
         abstract viewportElement: SVGElement option
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<SVGElementEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<SVGElementEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
     type SVGElementConstructor =
         [<EmitConstructor>]
@@ -72407,42 +72070,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U30<
-                        UIEvent,
-                        Event,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        BeforeUnloadEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        KeyboardEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        ProgressEvent<EventTarget>,
-                        PromiseRejectionEvent,
-                        SecurityPolicyViolationEvent,
-                        StorageEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<SVGSVGElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -72451,42 +72081,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U30<
-                        UIEvent,
-                        Event,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        BeforeUnloadEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        KeyboardEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        ProgressEvent<EventTarget>,
-                        PromiseRejectionEvent,
-                        SecurityPolicyViolationEvent,
-                        StorageEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<SVGSVGElementEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -73574,8 +73171,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<ScreenOrientationEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -73593,8 +73193,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<ScreenOrientationEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -73641,8 +73244,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (AudioProcessingEvent -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<ScriptProcessorNodeEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -73660,8 +73266,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (AudioProcessingEvent -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<ScriptProcessorNodeEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -73999,8 +73608,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (U2<ErrorEvent, Event> -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<ServiceWorkerEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -74008,8 +73619,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (U2<ErrorEvent, Event> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<ServiceWorkerEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
     type ServiceWorkerConstructor =
         [<EmitConstructor>]
@@ -74092,8 +73706,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (U2<Event, MessageEvent<obj>> -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<ServiceWorkerContainerEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -74112,8 +73728,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (U2<Event, MessageEvent<obj>> -> obj) * ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<ServiceWorkerContainerEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -74221,8 +73839,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<ServiceWorkerRegistrationEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -74240,8 +73861,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<ServiceWorkerRegistrationEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -74332,8 +73956,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<ShadowRootEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -74351,8 +73978,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<ShadowRootEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -74503,8 +74133,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<SourceBufferEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -74522,8 +74155,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<SourceBufferEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -74568,8 +74204,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<SourceBufferListEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -74587,8 +74226,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<SourceBufferListEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -74873,8 +74515,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<SpeechSynthesisEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -74892,8 +74537,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<SpeechSynthesisEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -75129,9 +74777,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<SpeechSynthesisEvent, SpeechSynthesisErrorEvent> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<SpeechSynthesisUtteranceEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -75151,9 +74799,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<SpeechSynthesisEvent, SpeechSynthesisErrorEvent> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<SpeechSynthesisUtteranceEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -76064,9 +75712,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<Event, TaskPriorityChangeEvent> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<TaskSignalEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -76075,9 +75723,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<Event, TaskPriorityChangeEvent> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<TaskSignalEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -76529,8 +76177,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<TextTrackEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -76548,8 +76199,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<TextTrackEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -76623,8 +76277,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<TextTrackCueEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -76642,8 +76299,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<TextTrackCueEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -76733,8 +76393,10 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (U2<TrackEvent, Event> -> obj) * ?options: U2<bool, AddEventListenerOptions> ->
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<TextTrackListEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
         /// <summary>
@@ -76753,8 +76415,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (U2<TrackEvent, Event> -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<TextTrackListEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -78041,8 +77706,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<VideoDecoderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -78060,8 +77728,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<VideoDecoderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -78150,8 +77821,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<VideoEncoderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -78169,8 +77843,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<VideoEncoderEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -78569,8 +78246,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<VisualViewportEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -78588,8 +78268,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<VisualViewportEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -79601,8 +79284,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, AddEventListenerOptions> -> unit
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<WakeLockSentinelEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -79620,8 +79306,11 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K * listener: (Event -> obj) * ?options: U2<bool, EventListenerOptions> -> unit
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<WakeLockSentinelEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
 
         /// <summary>
         /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
@@ -90870,9 +90559,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U3<CloseEvent, Event, MessageEvent<obj>> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<WebSocketEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -90892,9 +90581,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U3<CloseEvent, Event, MessageEvent<obj>> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<WebSocketEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -91724,44 +91413,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U32<
-                        Event,
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        BeforeUnloadEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DeviceMotionEvent,
-                        DeviceOrientationEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        KeyboardEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        ProgressEvent<EventTarget>,
-                        PromiseRejectionEvent,
-                        SecurityPolicyViolationEvent,
-                        StorageEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<WindowEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -91770,45 +91424,8 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U32<
-                        Event,
-                        UIEvent,
-                        AnimationEvent,
-                        PointerEvent,
-                        InputEvent,
-                        ToggleEvent,
-                        BeforeUnloadEvent,
-                        FocusEvent,
-                        CompositionEvent,
-                        ClipboardEvent,
-                        MouseEvent,
-                        DeviceMotionEvent,
-                        DeviceOrientationEvent,
-                        DragEvent,
-                        ErrorEvent,
-                        FormDataEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        KeyboardEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        ProgressEvent<EventTarget>,
-                        PromiseRejectionEvent,
-                        SecurityPolicyViolationEvent,
-                        StorageEvent,
-                        SubmitEvent,
-                        TouchEvent,
-                        TransitionEvent,
-                        WheelEvent
-                    >
-                        -> obj) *
-            ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<WindowEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, EventListenerOptions> ->
                 unit
 
         [<EmitIndexer>]
@@ -91952,23 +91569,9 @@ module Dom =
         /// </remarks>
         abstract onunload: (Event -> unit) option with get, set
 
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U11<
-                        Event,
-                        BeforeUnloadEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        PromiseRejectionEvent,
-                        StorageEvent
-                    >
-                        -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<WindowEventHandlersEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -91978,23 +91581,9 @@ module Dom =
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener:
-                (U11<
-                        Event,
-                        BeforeUnloadEvent,
-                        GamepadEvent,
-                        HashChangeEvent,
-                        MessageEvent<obj>,
-                        PageTransitionEvent,
-                        PageRevealEvent,
-                        PageSwapEvent,
-                        PopStateEvent,
-                        PromiseRejectionEvent,
-                        StorageEvent
-                    >
-                        -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<WindowEventHandlersEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -92154,9 +91743,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<ErrorEvent, MessageEvent<obj>> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<WorkerEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -92165,10 +91754,8 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<ErrorEvent, MessageEvent<obj>> -> obj) *
-            ?options: U2<bool, EventListenerOptions> ->
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<WorkerEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, EventListenerOptions> ->
                 unit
 
     type WorkerConstructor =
@@ -92527,9 +92114,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<ProgressEvent<XMLHttpRequestEventTarget>, Event> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<XMLHttpRequestEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -92538,9 +92125,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (U2<ProgressEvent<XMLHttpRequestEventTarget>, Event> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<XMLHttpRequestEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -92644,9 +92231,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
         /// </summary>
-        abstract addEventListener<'K> :
-            ``type``: 'K *
-            listener: (ProgressEvent<XMLHttpRequestEventTarget> -> obj) *
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<XMLHttpRequestEventTargetEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, AddEventListenerOptions> ->
                 unit
 
@@ -92666,9 +92253,9 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
         /// </summary>
-        abstract removeEventListener<'K> :
-            ``type``: 'K *
-            listener: (ProgressEvent<XMLHttpRequestEventTarget> -> obj) *
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<XMLHttpRequestEventTargetEventMap, 'E> *
+            listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
 
@@ -96954,435 +96541,3 @@ module Dom =
 
                     [<ParamObject; Emit("$0")>]
                     static member Create(?highWaterMark: float) : Strategy = jsNative
-
-[<Erase>]
-type U11<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11> =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-
-[<Erase>]
-type U20<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20>
-    =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-    | Case12 of 't12
-    | Case13 of 't13
-    | Case14 of 't14
-    | Case15 of 't15
-    | Case16 of 't16
-    | Case17 of 't17
-    | Case18 of 't18
-    | Case19 of 't19
-    | Case20 of 't20
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-    static member op_ErasedCast(x: 't12) = Case12 x
-    static member op_ErasedCast(x: 't13) = Case13 x
-    static member op_ErasedCast(x: 't14) = Case14 x
-    static member op_ErasedCast(x: 't15) = Case15 x
-    static member op_ErasedCast(x: 't16) = Case16 x
-    static member op_ErasedCast(x: 't17) = Case17 x
-    static member op_ErasedCast(x: 't18) = Case18 x
-    static member op_ErasedCast(x: 't19) = Case19 x
-    static member op_ErasedCast(x: 't20) = Case20 x
-
-[<Erase>]
-type U21<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20, 't21>
-    =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-    | Case12 of 't12
-    | Case13 of 't13
-    | Case14 of 't14
-    | Case15 of 't15
-    | Case16 of 't16
-    | Case17 of 't17
-    | Case18 of 't18
-    | Case19 of 't19
-    | Case20 of 't20
-    | Case21 of 't21
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-    static member op_ErasedCast(x: 't12) = Case12 x
-    static member op_ErasedCast(x: 't13) = Case13 x
-    static member op_ErasedCast(x: 't14) = Case14 x
-    static member op_ErasedCast(x: 't15) = Case15 x
-    static member op_ErasedCast(x: 't16) = Case16 x
-    static member op_ErasedCast(x: 't17) = Case17 x
-    static member op_ErasedCast(x: 't18) = Case18 x
-    static member op_ErasedCast(x: 't19) = Case19 x
-    static member op_ErasedCast(x: 't20) = Case20 x
-    static member op_ErasedCast(x: 't21) = Case21 x
-
-[<Erase>]
-type U22<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20, 't21, 't22>
-    =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-    | Case12 of 't12
-    | Case13 of 't13
-    | Case14 of 't14
-    | Case15 of 't15
-    | Case16 of 't16
-    | Case17 of 't17
-    | Case18 of 't18
-    | Case19 of 't19
-    | Case20 of 't20
-    | Case21 of 't21
-    | Case22 of 't22
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-    static member op_ErasedCast(x: 't12) = Case12 x
-    static member op_ErasedCast(x: 't13) = Case13 x
-    static member op_ErasedCast(x: 't14) = Case14 x
-    static member op_ErasedCast(x: 't15) = Case15 x
-    static member op_ErasedCast(x: 't16) = Case16 x
-    static member op_ErasedCast(x: 't17) = Case17 x
-    static member op_ErasedCast(x: 't18) = Case18 x
-    static member op_ErasedCast(x: 't19) = Case19 x
-    static member op_ErasedCast(x: 't20) = Case20 x
-    static member op_ErasedCast(x: 't21) = Case21 x
-    static member op_ErasedCast(x: 't22) = Case22 x
-
-[<Erase>]
-type U30<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20, 't21, 't22, 't23, 't24, 't25, 't26, 't27, 't28, 't29, 't30>
-    =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-    | Case12 of 't12
-    | Case13 of 't13
-    | Case14 of 't14
-    | Case15 of 't15
-    | Case16 of 't16
-    | Case17 of 't17
-    | Case18 of 't18
-    | Case19 of 't19
-    | Case20 of 't20
-    | Case21 of 't21
-    | Case22 of 't22
-    | Case23 of 't23
-    | Case24 of 't24
-    | Case25 of 't25
-    | Case26 of 't26
-    | Case27 of 't27
-    | Case28 of 't28
-    | Case29 of 't29
-    | Case30 of 't30
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-    static member op_ErasedCast(x: 't12) = Case12 x
-    static member op_ErasedCast(x: 't13) = Case13 x
-    static member op_ErasedCast(x: 't14) = Case14 x
-    static member op_ErasedCast(x: 't15) = Case15 x
-    static member op_ErasedCast(x: 't16) = Case16 x
-    static member op_ErasedCast(x: 't17) = Case17 x
-    static member op_ErasedCast(x: 't18) = Case18 x
-    static member op_ErasedCast(x: 't19) = Case19 x
-    static member op_ErasedCast(x: 't20) = Case20 x
-    static member op_ErasedCast(x: 't21) = Case21 x
-    static member op_ErasedCast(x: 't22) = Case22 x
-    static member op_ErasedCast(x: 't23) = Case23 x
-    static member op_ErasedCast(x: 't24) = Case24 x
-    static member op_ErasedCast(x: 't25) = Case25 x
-    static member op_ErasedCast(x: 't26) = Case26 x
-    static member op_ErasedCast(x: 't27) = Case27 x
-    static member op_ErasedCast(x: 't28) = Case28 x
-    static member op_ErasedCast(x: 't29) = Case29 x
-    static member op_ErasedCast(x: 't30) = Case30 x
-
-[<Erase>]
-type U32<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20, 't21, 't22, 't23, 't24, 't25, 't26, 't27, 't28, 't29, 't30, 't31, 't32>
-    =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-    | Case12 of 't12
-    | Case13 of 't13
-    | Case14 of 't14
-    | Case15 of 't15
-    | Case16 of 't16
-    | Case17 of 't17
-    | Case18 of 't18
-    | Case19 of 't19
-    | Case20 of 't20
-    | Case21 of 't21
-    | Case22 of 't22
-    | Case23 of 't23
-    | Case24 of 't24
-    | Case25 of 't25
-    | Case26 of 't26
-    | Case27 of 't27
-    | Case28 of 't28
-    | Case29 of 't29
-    | Case30 of 't30
-    | Case31 of 't31
-    | Case32 of 't32
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-    static member op_ErasedCast(x: 't12) = Case12 x
-    static member op_ErasedCast(x: 't13) = Case13 x
-    static member op_ErasedCast(x: 't14) = Case14 x
-    static member op_ErasedCast(x: 't15) = Case15 x
-    static member op_ErasedCast(x: 't16) = Case16 x
-    static member op_ErasedCast(x: 't17) = Case17 x
-    static member op_ErasedCast(x: 't18) = Case18 x
-    static member op_ErasedCast(x: 't19) = Case19 x
-    static member op_ErasedCast(x: 't20) = Case20 x
-    static member op_ErasedCast(x: 't21) = Case21 x
-    static member op_ErasedCast(x: 't22) = Case22 x
-    static member op_ErasedCast(x: 't23) = Case23 x
-    static member op_ErasedCast(x: 't24) = Case24 x
-    static member op_ErasedCast(x: 't25) = Case25 x
-    static member op_ErasedCast(x: 't26) = Case26 x
-    static member op_ErasedCast(x: 't27) = Case27 x
-    static member op_ErasedCast(x: 't28) = Case28 x
-    static member op_ErasedCast(x: 't29) = Case29 x
-    static member op_ErasedCast(x: 't30) = Case30 x
-    static member op_ErasedCast(x: 't31) = Case31 x
-    static member op_ErasedCast(x: 't32) = Case32 x
-
-[<Erase>]
-type U63<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20, 't21, 't22, 't23, 't24, 't25, 't26, 't27, 't28, 't29, 't30, 't31, 't32, 't33, 't34, 't35, 't36, 't37, 't38, 't39, 't40, 't41, 't42, 't43, 't44, 't45, 't46, 't47, 't48, 't49, 't50, 't51, 't52, 't53, 't54, 't55, 't56, 't57, 't58, 't59, 't60, 't61, 't62, 't63>
-    =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-    | Case12 of 't12
-    | Case13 of 't13
-    | Case14 of 't14
-    | Case15 of 't15
-    | Case16 of 't16
-    | Case17 of 't17
-    | Case18 of 't18
-    | Case19 of 't19
-    | Case20 of 't20
-    | Case21 of 't21
-    | Case22 of 't22
-    | Case23 of 't23
-    | Case24 of 't24
-    | Case25 of 't25
-    | Case26 of 't26
-    | Case27 of 't27
-    | Case28 of 't28
-    | Case29 of 't29
-    | Case30 of 't30
-    | Case31 of 't31
-    | Case32 of 't32
-    | Case33 of 't33
-    | Case34 of 't34
-    | Case35 of 't35
-    | Case36 of 't36
-    | Case37 of 't37
-    | Case38 of 't38
-    | Case39 of 't39
-    | Case40 of 't40
-    | Case41 of 't41
-    | Case42 of 't42
-    | Case43 of 't43
-    | Case44 of 't44
-    | Case45 of 't45
-    | Case46 of 't46
-    | Case47 of 't47
-    | Case48 of 't48
-    | Case49 of 't49
-    | Case50 of 't50
-    | Case51 of 't51
-    | Case52 of 't52
-    | Case53 of 't53
-    | Case54 of 't54
-    | Case55 of 't55
-    | Case56 of 't56
-    | Case57 of 't57
-    | Case58 of 't58
-    | Case59 of 't59
-    | Case60 of 't60
-    | Case61 of 't61
-    | Case62 of 't62
-    | Case63 of 't63
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-    static member op_ErasedCast(x: 't12) = Case12 x
-    static member op_ErasedCast(x: 't13) = Case13 x
-    static member op_ErasedCast(x: 't14) = Case14 x
-    static member op_ErasedCast(x: 't15) = Case15 x
-    static member op_ErasedCast(x: 't16) = Case16 x
-    static member op_ErasedCast(x: 't17) = Case17 x
-    static member op_ErasedCast(x: 't18) = Case18 x
-    static member op_ErasedCast(x: 't19) = Case19 x
-    static member op_ErasedCast(x: 't20) = Case20 x
-    static member op_ErasedCast(x: 't21) = Case21 x
-    static member op_ErasedCast(x: 't22) = Case22 x
-    static member op_ErasedCast(x: 't23) = Case23 x
-    static member op_ErasedCast(x: 't24) = Case24 x
-    static member op_ErasedCast(x: 't25) = Case25 x
-    static member op_ErasedCast(x: 't26) = Case26 x
-    static member op_ErasedCast(x: 't27) = Case27 x
-    static member op_ErasedCast(x: 't28) = Case28 x
-    static member op_ErasedCast(x: 't29) = Case29 x
-    static member op_ErasedCast(x: 't30) = Case30 x
-    static member op_ErasedCast(x: 't31) = Case31 x
-    static member op_ErasedCast(x: 't32) = Case32 x
-    static member op_ErasedCast(x: 't33) = Case33 x
-    static member op_ErasedCast(x: 't34) = Case34 x
-    static member op_ErasedCast(x: 't35) = Case35 x
-    static member op_ErasedCast(x: 't36) = Case36 x
-    static member op_ErasedCast(x: 't37) = Case37 x
-    static member op_ErasedCast(x: 't38) = Case38 x
-    static member op_ErasedCast(x: 't39) = Case39 x
-    static member op_ErasedCast(x: 't40) = Case40 x
-    static member op_ErasedCast(x: 't41) = Case41 x
-    static member op_ErasedCast(x: 't42) = Case42 x
-    static member op_ErasedCast(x: 't43) = Case43 x
-    static member op_ErasedCast(x: 't44) = Case44 x
-    static member op_ErasedCast(x: 't45) = Case45 x
-    static member op_ErasedCast(x: 't46) = Case46 x
-    static member op_ErasedCast(x: 't47) = Case47 x
-    static member op_ErasedCast(x: 't48) = Case48 x
-    static member op_ErasedCast(x: 't49) = Case49 x
-    static member op_ErasedCast(x: 't50) = Case50 x
-    static member op_ErasedCast(x: 't51) = Case51 x
-    static member op_ErasedCast(x: 't52) = Case52 x
-    static member op_ErasedCast(x: 't53) = Case53 x
-    static member op_ErasedCast(x: 't54) = Case54 x
-    static member op_ErasedCast(x: 't55) = Case55 x
-    static member op_ErasedCast(x: 't56) = Case56 x
-    static member op_ErasedCast(x: 't57) = Case57 x
-    static member op_ErasedCast(x: 't58) = Case58 x
-    static member op_ErasedCast(x: 't59) = Case59 x
-    static member op_ErasedCast(x: 't60) = Case60 x
-    static member op_ErasedCast(x: 't61) = Case61 x
-    static member op_ErasedCast(x: 't62) = Case62 x
-    static member op_ErasedCast(x: 't63) = Case63 x
