@@ -41,7 +41,7 @@ The baseline below comes from the committed `symbols.jsonl` files of Xantham.Fab
 
 The specification is met when the escape tier holds only stated-type losses, and every workstream meets its acceptance criteria in section 4.
 
-- **Escape means a lost stated type.** A faithful `any` → `obj` no longer grades escape. Escaped symbols fall from 1,241 to about 20, the escapes that TR008 does not cause.
+- **Escape means a lost stated type.** A faithful `any` → `obj` no longer grades escape. In W1's selected goldens, no TR008 finding grades escape. Corpus-wide totals are measured at integration.
 - **Each workstream states the codes it removes.** Its lab fixture tests assert the exact finding changes. In the regenerated goldens, those codes fall by about the stated scale. New codes may appear there as previously escaped types are now resolved further; each is read in the golden diff and noted in the phase record.
 - **Every change is visible in the goldens.** A behaviour change lands with its golden diff read and committed, the CompileGate green, and the phase record in `docs/.ai/plans/` updated in the same commit.
 - **Emitted runtime shapes are proven.** Any new `[<Emit>]` form gets a RunGate check before it is applied corpus-wide.
@@ -67,14 +67,14 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W1.1** TR008 (`any` → `obj`) grades **ergonomic**. Its `FindingCodes.table` key is unchanged.
 - **W1.2** Escape is reserved for stated-type losses, such as TR023.
 - **W1.3** W1.1 applies to rest-argument listeners: `(...args: any[]) => void` → `obj[] -> unit`.
-- **Acceptance:** escaped symbols across the corpora fall to about 20.
+- **Acceptance:** the lab asserts TR008 at ergonomic, a rest-argument listener, and a TR023 that stays escape. In `animejs` and `workers-types`, no TR008 finding grades escape.
 
 ### W2. Author-selected => any returns as unit
 
 - **W2.1** Generator configuration accepts a member-name pattern, a filter or regex, that selects which callback `=> any` returns emit as `unit`. Unselected members remain `obj`.
 - **W2.2** The Core.TS configuration selects `^on` for event-handler properties.
 - **W2.3** A selected return grades ergonomic, with a finding that records the source `any`.
-- **Acceptance:** Core.TS emits `onabort: (ProgressEvent -> unit) option`, and the 16,017 handler-return findings are removed.
+- **Acceptance:** the lab asserts a selected `on*` handler as `(ProgressEvent -> unit) option` and an unselected member as `obj`. In `animejs` and `workers-types`, output is unchanged unless their configuration sets a pattern.
 
 ### W3. Node reuse of Core.TS ES types
 
@@ -84,14 +84,14 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
   - **Ruled out:** `@types/node` does not re-declare these names. Its compatibility shims merge into `Disposable`, `AsyncDisposable`, `SymbolConstructor`, the typed arrays and `IteratorObject`.
   - **Partial lead:** Node loads `lib="es2020"`. `SharedArrayBuffer` and `RegExp` have declarations in later lib files (es2022, es2024), so their declaration sets differ between the two programs. That cannot explain `ArrayLike`, `Iterable`, `ArrayIterator` or `AsyncGeneratorFunction`. Each of those is declared in a single lib file within es2020.
 - **W3.2** Fix catalog reuse so that Node references the Core.TS types.
-- **Acceptance:** Node's `ArrayBufferLike` keeps all three arms, the six names resolve to Core.TS types, and TR023 in Node falls by at least 524 (347 + 96 + 36 + 26 + 19, plus `ArrayLike`).
+- **Acceptance:** a two-package lab, modelled on `cross-package-lab`, references `ArrayLike` and `ArrayBufferLike` from a dependent package with no TR023. In `workers-types` and `solid-js`, TR023 and TR035 do not rise. Node holds nearly all of W3's hits, so a Node regeneration under override T4 is expected.
 
 ### W4. Symbol-keyed members
 
 - **W4.1** Symbol-keyed members are emitted.
 - **W4.2** `[Symbol.iterator]` is expressed as `inherit seq<'T>` (probe 7).
 - **W4.3** Other well-known symbols emit as named members through `[<Emit>]`, such as `[<Emit("$0[Symbol.dispose]()")>]` and the getter `[<Emit("$0[Symbol.toStringTag]")>]` (probe 7).
-- **Acceptance:** `Disposable` is non-empty, `Segments` iterates without a cast, and a RunGate check covers one Emit-backed symbol member.
+- **Acceptance:** the lab asserts a non-empty `Disposable`, an iterable that iterates without a cast, and a `toStringTag` getter. A RunGate check covers one Emit-backed symbol member. In `workers-types` and `type-fest`, MB002 falls.
 
 ### W5. One method per literal overload
 
@@ -99,7 +99,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W5.2** Each literal overload becomes its own method, named as the method name plus the literal in PascalCase (`onClose`). On a collision with an existing member, `_` separates the parts (`on_Close`).
 - **W5.3** Each such method carries `[<Emit("$0.on('close', $1)")>]` and an XML doc with the TypeScript signature. Curried listeners need no delegate: `string -> float -> unit` is called as `(host, port)` (probe 6).
 - **W5.4** W5.2 and W5.3 apply to every literal-keyed method, including `on`, `once`, `addListener`, `prependListener` and `prependOnceListener`.
-- **Acceptance:** `Socket` exposes a method for each of its 15 `on` literals, with no DO001 or TR006 findings on them, and the RunGate holds an Emit-on-abstract-member check.
+- **Acceptance:** the lab asserts a `Socket`-shaped emitter with listener shapes that collide today, a name collision (`on_Close`), and no DO001 or TR006 on them. The RunGate holds an Emit-on-abstract-member check. In `workers-types` and `animejs`, TR006 and DO001 fall.
 
 ### W6. Literal members: module, docs and Create
 
@@ -109,7 +109,10 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
   - discriminant: `[<ParamObject; Emit("({ kind: 'method', ...$0 })")>]`
   - constants: `[<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]`
 - **W6.4** String literal values are written in the Emit as escaped JavaScript string literals.
-- **Acceptance:** `match e.eventPhase with | Event.AT_TARGET -> …` compiles to `e.eventPhase === 2`, `ClassMethodDecoratorContext.Create(name, static)` produces `{ kind: "method", … }`, an Event subtype's `Create` takes no constant parameters, and the 164 TR007-decided symbols reach ergonomic.
+- **Acceptance:**
+  - The lab asserts an `Event`-shaped type with methods and numeric constants, a subtype that inherits them, a string discriminant, and a value that needs escaping.
+  - The RunGate checks that `match e.eventPhase with | Event.AT_TARGET` compiles to `e.eventPhase === 2`, and that a subtype's `Create` takes no constant parameters.
+  - In `solid-js` and `animejs`, TR007 falls.
 
 ### W7. Type parameters in scope
 
@@ -117,7 +120,13 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W7.2** The delegate repeats a constraint only when the constraint type is an interface or class. An erased-union constraint such as `ArrayBufferLike` (`U2<ArrayBuffer, SharedArrayBuffer>`) is sealed and rejected by F# (FS0698, probe 5). Such a parameter stays unconstrained, as its owner `BigInt64Array<'TArrayBuffer>` already is.
 - **W7.3** Global and namespace functions emit as methods. Code that reassigns a global function uses unsafe primitives.
 - **W7.4** A method type parameter keeps the constraint its use site needs: `querySelectorAll<'E when 'E :> Element>: selectors: string -> NodeListOf<'E>`. Inside a function, `'E` is inferred from how the result is used. A module-level binding states `'E`, because F# has no form of TypeScript's `= Element` default (FS0030, probe 4).
-- **Acceptance:** `structuredClone` keeps `'T`, `addAbortSignal` keeps `'T :> Stream.Stream` (its 92 TR012 findings removed), and `querySelectorAll<HTMLInputElement>` returns `NodeListOf<HTMLInputElement>`.
+- **Acceptance:** the lab asserts each of the following, all compiled by the CompileGate:
+  - a hoisted delegate with an interface constraint and with a union constraint
+  - a generic global function
+  - a constrained namespace function
+  - a method type parameter used only in its return
+
+  In `solid-js` and `animejs`, TR012, TR013, TR027 and TP006 fall.
 
 ### W8. Key types for aliases and tag maps
 
@@ -136,13 +145,13 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W8.3** Where a method has more than one key overload, callers name the map: `typekeyof<HTMLElementTagNameMap, _> _.canvas`. This is the accepted calling form. With a single key overload, `typekeyof _.canvas` infers it alone (probe 1).
 - **W8.4** A tag-map method whose result type is constrained carries the constraint on its own type parameter: `getElementsByTagName<'E when 'E :> Element>` returns `HTMLCollectionOf<'E>` (probe 3).
 - **W8.5** Type-level aliases with a Core counterpart emit that counterpart (`ValueOf<T>` → `proptypelock<'T>`). Others remain phantoms.
-- **Acceptance:** tag-map results are typed by their key in the CompileGate, `U63` is absent from them, and their TR044 and DO005 findings are removed.
+- **Acceptance:** the lab asserts two tag maps with a primary and a deprecated overload, a constrained result, and a `ValueOf`-style alias. The RunGate checks that the key emits the bare tag string. In `type-fest` and `solid-js`, SA002, TR020, TR044 and DO005 fall.
 
 ### W9. Early resolve pass (experiment)
 
 - **W9.1** Before Resolve, ask the checker for the resolved type of each reference whose alias is generic but whose arguments are concrete, such as `InstanceType<typeof IncomingMessage>`. Later passes then see `IncomingMessage`.
 - **W9.2** The Wire session already exposes `getTypeAtLocation`, `typeToString` and `getTypeOfSymbol`, and Resolve already calls `getTypeAtLocation` (probe 9).
-- **Outcome:** a written finding, measured on `http.RequestListener`, on whether the approach holds. W9 does not commit to shipping.
+- **Outcome:** a written finding on whether the approach holds. It is measured on a lab that reproduces `http.RequestListener`'s `InstanceType` use, and on TR045 deltas in `type-fest` and `solid-js`. W9 does not commit to shipping.
 
 ## 5. Sequencing and verification
 
@@ -171,13 +180,42 @@ flowchart LR
     G --> W4
 ```
 
-Every workstream follows the same verification steps:
+### Test constraints
 
-1. Prove the change on a lab fixture (`.claude/rules/generator-fixtures.md`). The lab test asserts the exact finding changes.
-2. Regenerate the goldens with `build.fsx -- test --update`, and read the diff before committing it.
-3. Regenerate Core.TS (`generate --only compiler-lib`) and Node (`generate --only node-lib`). Compare `symbols.jsonl` code counts against the section 1 baseline.
-4. Keep the CompileGate green. Run `--run-gate` for every new Emit form.
-5. Update the phase record in `docs/.ai/plans/` in the same commit.
+These rules govern every test run for W1–W9. For these work items they replace the "run everything before commit" rule in `.claude/rules/generator-fixtures.md`. The labs carry the proof. Goldens confirm the change at scale on the packages it hits most.
+
+| # | Rule |
+| --- | --- |
+| T1 | The full corpus is never run: no unfiltered `build.fsx -- test`, and no regeneration of every golden |
+| T2 | Each requirement is proven first on a lab fixture (`tests/fixtures/<feature>-lab/`) and per-pass unit tests. The lab test asserts the exact finding changes, including the negatives |
+| T3 | Only after the lab passes, the workstream regenerates its two selected goldens, listed below: `dotnet fsi build.fsx -- test --quick --update --filter "<golden>"`. Acceptance is measured as code deltas in those goldens |
+| T4 | Core.TS and Node are not regenerated. Override: the implementer may regenerate one when the selected goldens cannot show the change, and records the reason in the sub-issue |
+| T5 | Any runtime, RunGate, compile or unit test that a requirement needs may be written and run, including `--run-gate` for a new Emit form |
+| T6 | Unselected goldens are not regenerated by a work item. Their drift is reconciled once, at integration |
+
+Goldens are selected as the two test goldens with the most hits for the workstream's codes, counted from the committed `symbols.jsonl` on 2026-10-13. A tie goes to the golden with fewer symbols.
+
+| WS | Codes counted | Golden 1 (hits) | Golden 2 (hits) |
+| --- | --- | --- | --- |
+| W1 | TR008 | `animejs` (392) | `@cloudflare/workers-types` (168) |
+| W2 | TR008 on `on*` members | `animejs` (257) | `@cloudflare/workers-types` (5) |
+| W3 | TR023, TR035 | `@cloudflare/workers-types` (48) | `solid-js` (41) |
+| W4 | MB002 | `@cloudflare/workers-types` (10) | `type-fest` (2, tie with `solid-js`) |
+| W5 | TR006, DO001 | `@cloudflare/workers-types` (230) | `animejs` (22) |
+| W6 | TR007 | `solid-js` (54) | `animejs` (18) |
+| W7 | TR012, TR013, TR027, TP006 | `solid-js` (38) | `animejs` (7, tie with `workers-types`) |
+| W8 | SA002, TR020, TR044, DO005 | `type-fest` (178) | `solid-js` (80) |
+| W9 | TR045 | `type-fest` (154) | `solid-js` (56) |
+
+`ansi-regex` and `cross-package-dep` have no hits and are never selected. W3 and W4 have few golden hits, so their labs carry the proof, and W3 is expected to use the T4 override for Node.
+
+Each workstream follows these steps:
+
+1. Write the lab fixture and unit tests, run them, and see them fail for the right reason (T2).
+2. Implement the change until the lab and unit tests pass: `dotnet fsi build.fsx -- test --quick --update --filter "<feature>-lab"`.
+3. Regenerate the two selected goldens (T3). Read the code counts from their `manifest.json` and grep `symbols.jsonl` for specific findings. Large golden diffs are not read in full.
+4. Run the tests the requirements need (T5) and keep `dotnet build Xantham.slnx` (the CompileGate) green.
+5. Update the phase record in `docs/.ai/plans/` in the same commit, with the lab results and golden deltas.
 
 ## 6. Evidence
 
@@ -210,6 +248,10 @@ No items remain open. W3.1 is the only open investigation inside the specificati
 | Does a `typekeyof` call need an annotation? | Accepted where there are several key overloads | W8.3 |
 | Does the key cover `getElementsByTagName`? | Yes | W8.4 |
 | Can `querySelectorAll` keep `'E`'s constraint? | Yes. A module-level binding states `'E` | W7.4 |
+| May a work item run the full corpus? | No. Lab first, then two selected goldens | T1–T3 |
+| Are Core.TS and Node selectable goldens? | No, test goldens only, with an implementer override | T4 |
+| How is acceptance verified without a full run? | Per selected golden | Section 4 acceptance, T3 |
+| How many goldens per workstream? | The top two by hit count | Section 5 selection table |
 | Standalone discriminant interfaces, `string \| symbol` keys, type-guard narrowing | Deferred | Section 8 |
 
 ## 8. Deferred items
