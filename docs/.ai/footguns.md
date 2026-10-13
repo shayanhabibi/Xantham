@@ -144,6 +144,16 @@ the corresponding lab under `tests/fixtures/` is the reducer.
   bound and apply the ordinary argument check at concrete uses. Dropping the bound on a callback's
   type parameter can give its result a different F# constraint from the exported generic alias
   with the same catalog identity. The generic-defaults lab covers this without nullable types.
+- **A widen-mode consumer does not read the Core.TS catalogue.** `Xantham.Fable.Node` lists no
+  `declarationReferences`, so its compiler library takes the default `widen` and
+  `DeclarationCatalog.applyWithProducer` returns before loading any catalogue. A catalogue is
+  accepted only under an equal inference profile (`lib`, `types`, `groups`, `resolveNoInfer`), and
+  @types/node's program (es2020, through its own `/// <reference lib>`) differs from Core.TS's
+  `esnext`/`dom` ship profile, so listing the catalogue alone fails validation. Under `widen`,
+  `Shape.libBinding` is the only route from a compiler-lib type to a name: `Naming.LibBindings`
+  first, then Core.TS by bare symbol name for DOM files. An ECMAScript name outside the table
+  (`ArrayLike`, `SharedArrayBuffer`, `Iterable`, `RegExp`) widens to `obj` with TR023, and a union
+  holding one, such as `ArrayBufferLike`, reports TR035 (W3, #134).
 
 ## Generator passes
 
