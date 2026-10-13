@@ -153,6 +153,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W8.4** A tag-map method whose result type is constrained carries the constraint on its own type parameter: `getElementsByTagName<'E when 'E :> Element>` returns `HTMLCollectionOf<'E>` (probe 3).
 - **W8.5** Type-level aliases with a Core counterpart emit that counterpart (`ValueOf<T>` → `proptypelock<'T>`). Others remain phantoms.
 - **Acceptance:** the lab asserts two tag maps with a primary and a deprecated overload, a constrained result, and a `ValueOf`-style alias. The RunGate checks that the key emits the bare tag string. In `type-fest` and `solid-js`, SA002, TR020, TR044 and DO005 fall.
+- **Status:** implemented on `agent/w8-key-types` (`tag-map-lab`, codes `TR066` and `TP011`). `type-fest` TR020 8 → 7; `solid-js` unchanged. The tag-map reduction is in Core.TS, measured under T4 (TR044 1,209 → 5, DO005 17 → 0, TP002 3,307 → 137) and recorded in the W8 phase record of `generator-architecture.md`.
 
 ### W9. Early resolve pass (experiment)
 

@@ -638,7 +638,10 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   | `keyof T`, `T` in scope | `keyof<'T>` |
   | `K extends keyof T` used only as a key | `keyof<'T>`, `K` unbound |
   | `K extends keyof T` plus `T[K]` | `typekeyof<'T,'R>` at the key, `'R` at the access, `K` replaced by `'R` |
-  | `T[keyof T]` | `obj`, Widened — nothing names the value type |
+  | `T[keyof T]`, `T` in scope | `proptypelock<'T>`, Ergonomic (`TR066`) |
+  | `T[K]`, `K extends keyof T = keyof T` (type-fest `ValueOf`) | `proptypelock<'T>`, Ergonomic (`TR066`) |
+  | `K extends keyof M`, `M` a declared type, used only as a key | `keyof<M>`, `K` unbound (`TP011`) |
+  | `K extends keyof M` plus `M[K]` | `typekeyof<M,'R>` at the key, `'R` at the access (`TP011`) |
 
   So `get<T, K extends keyof T>(source: T, key: K): T[K]` emits
   `get<'T, 'R> (source: 'T, key: typekeyof<'T, 'R>) : 'R`, and Cloudflare's
@@ -649,8 +652,18 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   a name. The resolve tier now follows index operands and both halves of an indexed access;
   without that the table was not closed over them.
 
-  `proptypekey`/`proptypelock` and `PropertyRecord` are not emitted yet: no fixture has
-  needed them, and `T[keyof T]` widens loudly rather than guessing.
+  *Extended (2026-10-13, W8 #139).* `T[keyof T]` reads as `proptypelock<'T>`, one of `T`'s
+  property types that a `proptypekey` unlocks. A key parameter with no default (`T[K]`,
+  `K extends keyof T`) selects a narrower set than `proptypelock` states, and stays `obj`
+  (`TR020`). A key over a declared map (`HTMLElementTagNameMap`) is written over the map's own
+  name, so `createElement<K extends keyof HTMLElementTagNameMap>(tagName: K):
+  HTMLElementTagNameMap[K]` reads `createElement<'R>: tagName: typekeyof<HTMLElementTagNameMap,
+  'R> -> 'R`. The checker resolves `keyof M` to `M`'s key literals, so Resolve reads `M` off the
+  constraint node (`TypeFacts.KeyOfOperand`). `'R` carries the constraint of the generic
+  parameter the access is applied at (`getElementsByTagName<'R when 'R :> Element>`) where every
+  value `M` declares inherits it nominally; otherwise the argument widens to the constraint
+  (`TR027`). Each map is a distinct F# parameter type, so key-set overloads survive `DO005`.
+  `PropertyRecord` is not emitted: a generic mapped type reaches Shape with no members.
 
 Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
 `Record<string, T>`):

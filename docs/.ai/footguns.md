@@ -18,6 +18,17 @@ argument, so `Model<string>` reads as two type arguments. Read heritage nodes an
 
 **`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof an author wrote `any`; a circular type alias is the error type. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
 
+**`keyof` over a declared type reaches Shape as that type's key literals.** `K extends keyof
+TagMap` arrives with its constraint resolved to `"div" | "canvas"`; only a `keyof` over a type
+parameter stays an `Index` type with a target. Resolve reads the operand of a literal-bounded
+type parameter off its constraint node into `TypeFacts.KeyOfOperand`; a pass that inspects the
+constraint alone cannot tell `keyof TagMap` from a written literal union.
+
+**An indexed-access type carries no alias arguments.** `type ValueOf<T, K extends keyof T =
+keyof T> = T[K]` reaches Shape with no `AliasTypeArguments`, so `declTypeParams` sees no
+parameters and the alias was emitted `type ValueOf = obj`. `shape-aliases` binds the operand a
+`T[keyof T]` body reads from `ObjectTypeId`; any other indexed-access alias keeps no parameters.
+
 **A nullable union hides the application it was written over.** `x?: Job<string>` reaches the shape tier as `Job<string>`'s arms beside `undefined`, and arms no argument re-instantiates are the declared form's own, so a member-set match lands on `Job<T>` outside its scope. Read `TypeFacts.NonNullableApplication` (the union origin's application, from `getNonNullableType`) and apply its arguments; a declared form's own parameters apply only where they are in scope. An alias that already includes `null` (`Maybe<T> | undefined`) leaves no single application in the origin, and its reference depends on the member-set match.
 
 **Expecto's `--filter` is a hierarchy prefix.** A fixture's tests are named `generator e2e.<fixture> generates the committed goldens` and its extra cases `generator e2e.<case name>`, so a bare fixture name selects zero tests and reports success.

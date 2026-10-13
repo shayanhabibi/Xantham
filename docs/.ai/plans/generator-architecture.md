@@ -2732,3 +2732,81 @@ The pull-request regeneration (`test --goldens`) also moves `@cloudflare/workers
 Core.TS and Node are regenerated at integration on `integ/w7` (2026-10-14), over W5 and W6,
 under the T4 override. Every W7 count equals the scratch measurement above; the tiers move from
 1302/2397/591/5 to 1302/2540/438/5 in Core.TS and from 775/2094/760/5 to 775/2198/608/5 in Node.
+
+## Key types for tag maps and value-of aliases (2026-10-13, W8 #139)
+
+A key over a declared map and a value-of access are written with `Xantham.Fable.Core`'s key
+types (§4.10 of `generator-type-mapping.md`).
+
+- The checker resolves `keyof M` over a declared `M` to `M`'s key literals, so the bound of
+  `K extends keyof HTMLElementTagNameMap` reaches Shape as a literal union. For a type parameter
+  whose bound is a union or a string literal, Resolve reads the declaration's constraint node and,
+  where it is a `keyof` type operator, records `getTypeFromTypeNode` of its operand as
+  `TypeFacts.KeyOfOperand`. `keyCandidates` takes that operand ahead of an `Index` bound.
+- `KeyBinding` carries the operand as an `FsTypeRef` (the in-scope `'T`, or the map's written
+  reference) and `TypedKeyOf` the operand's id and the result's constraint. `indexedAccessRef`
+  matches the access to its binding by operand id.
+- `shapeSignature` partitions keys whose operand is out of scope: an operand that is not a type
+  parameter and whose reference is an `FsNamed` or `FsApp` with no Widened or Escape finding is a
+  map. The key reads `typekeyof<M,'R>` with `'R` at `M[K]` when a parameter or return reaches the
+  access, `keyof<M>` otherwise (`TP.KeyOverDeclaredMap`, `TP011`, Ergonomic). Any other operand
+  keeps the ordinary type parameter and its `TP002`.
+- `accessBound` gives `'R` the constraint of the generic parameter the access is applied at
+  (`statedConstraintOf`, lifted out of `appliedRefTo`), where every member value of `M` satisfies
+  it nominally. `appliedRefTo` passes a result variable bound with that constraint without
+  `TR027`. Otherwise `'R` stays unconstrained and the argument widens to the constraint (`TR027`).
+- `valueOfOperand` recognises `T[keyof T]`, and `T[K]` where `K`'s constraint and default are both
+  `keyof T`. Over an in-scope `T`, after `indexedAccessValues` declines, the access reads
+  `proptypelock<'T>` (`TR.ValueOfAsPropTypeLock`, `TR066`, Ergonomic). A key with no default
+  stays `TR020`. `shape-aliases` binds the operand of such an alias body, which carries no alias
+  arguments: `type ValueOf<'ObjectType> = proptypelock<'ObjectType>`.
+- `proptypelock` joins `Naming.SupportBindings`, so a package declaring the name reaches the
+  support package's as `JS.proptypelock`.
+- Each map is a distinct F# parameter type, so a key-set overload set (`createElement` over
+  `HTMLElementTagNameMap` and `HTMLElementDeprecatedTagNameMap`) survives `dedupe-overloads`
+  rather than dropping under `DO005`. A call naming one of several key overloads states the map:
+  `typekeyof<HTMLElementTagNameMap, _> _.canvas`.
+
+Lab `tag-map-lab`: `Doc.createElement` reads `typekeyof<TagMap, 'R>` and
+`typekeyof<DeprecatedTagMap, 'R>` beside the `string` overload; `getElementsByTagName<'R when 'R
+:> Elem>` returns `ElemList<'R>` over `TagMap` and `SvgTagMap`; `createSvg` has the single key
+overload; `hasTag` reads `keyof<TagMap>`; `findLoose`, over a map whose value does not inherit
+`Elem`, keeps `'R` unconstrained and writes `ElemList<Elem>` under `TR027`. `ValueOf`,
+`ValuesOf` and `valuesOf` read `proptypelock`; `Picked<T, K extends keyof T>` stays `obj`
+(`TR020`). No `DO005`, `DO001` or `TR044`; `TP011` on the five `Doc` methods. The RunGate calls
+each method and reads the key back: `createElement("canvas")`, `createElement("marquee")`,
+`createSvg("circle")`, `getElementsByTagName("div")` and `hasTag("div")`. `map key binding` and
+`shape typeRef` pin the binding, the constraint and its nominal guard, and the value-of forms.
+
+`keyof-overload-lab` keeps both `find` overloads (`DO005` 1 → 0; `DO001` stays on `pick`).
+`keyof-lab` `values` reads `proptypelock<'T>[]`. `indexed-access-lab` `addEventListener`,
+`lastEvent` and `Registrar.on` read `typekeyof<WorkerEventMap, 'R>`, and `runModel`, whose access
+is nested, reads `keyof<ModelMap>`; the fixture gains `anyWide(WideEventMap[keyof
+WideEventMap])` to keep the footer-declared `U12` coverage `onWide` carried.
+
+Measured goldens (finding counts):
+
+| Golden | TR020 | TR044 | DO005 | TP002 | TR027 | TP011 | TR066 | SA002 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `type-fest` (selected) | 8 → 7 | 0 | 0 | 144 | 0 | 0 | 0 → 1 | 170 |
+| `solid-js` (selected) | 70 | 0 | 0 | 157 | 0 | 0 | 0 | 10 |
+| `@cloudflare/workers-types` (T6) | 5 | 8 → 6 | 0 | 95 → 93 | 2 | 0 → 2 | 0 | — |
+| `animejs` (T6) | 17 → 0 | 0 | 13 → 0 | 26 → 6 | 1 → 9 | 0 → 20 | 0 | — |
+| Core.TS (scratch, T4) | 2 | 1,209 → 5 | 17 → 0 | 3,307 → 137 | 152 | 0 → 3,170 | 0 | — |
+
+`solid-js` is byte-identical: its `Store` accesses are bounded by its own conditional `KeyOf`
+alias and `T[number]`, neither a `keyof` over a declared type. type-fest's 170 `SA002` are
+type-level computations with no Core counterpart. `workers-types`' `addEventListener` reads
+`<'R when 'R :> Event>` over `WorkerGlobalScopeEventMap`. `animejs` flattens DOM element members
+in: its `getElementsByTagName` and `querySelectorAll` overloads cannot prove the lib map's values
+inherit `Element`/`Node`, so `'R` stays unconstrained and the collection argument widens
+(`TR027` +8). Symbol tiers: `type-fest` 26/65/204/2 → 26/66/203/2, `workers-types` ergonomic
+1,161 → 1,163 and widened 390 → 388.
+
+Core.TS was generated into scratch only (T4) and compiled there: 193 `typekeyof` members, among
+them two `createElement` key overloads and four each on `querySelector` and `getElementsByTagName`, and 83
+`addEventListener<'R>`. It needs regenerating at integration: the committed catalogue's API hashes
+predate the new members, so `catalog library identity` reports 86 changed entries and `core-ts
+package` an API mismatch for `GlobalThis` until it is. `CatalogCompatibility.ApiVersion` is
+unchanged; whether W8's emitted-ABI change bumps it is left to integration. Node generated into
+scratch is unchanged by finding count, and its five key-type lines predate W8.
