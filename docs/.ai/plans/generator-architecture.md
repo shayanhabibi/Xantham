@@ -2729,7 +2729,6 @@ The pull-request regeneration (`test --goldens`) also moves `@cloudflare/workers
 `WorkflowEntrypoint.Run.Event<'T>` binds its owner's `'T`, `TP002` 95 → 96) and `type-fest`
 (`ObservableLike.Subscribe.Observer<'ValueType>`, `TR013` 2 → 1).
 
-Core.TS and Node were measured from scratch regenerations and are not committed: parallel lanes
-change both, and the lead regenerates them once at integration. The scratch Core.TS compiles
-against Fable.Core 5.2.0 with `Fable.Core.TS.Extensions.fs`. Until Core.TS is regenerated, tests
-comparing a consumer against the committed Core.TS catalogue may fail on this branch.
+Core.TS and Node are regenerated at integration on `integ/w7` (2026-10-14), over W5 and W6,
+under the T4 override. Every W7 count equals the scratch measurement above; the tiers move from
+1302/2397/591/5 to 1302/2540/438/5 in Core.TS and from 775/2094/760/5 to 775/2198/608/5 in Node.

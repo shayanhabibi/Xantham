@@ -133,6 +133,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
   - a method type parameter used only in its return
 
   In `solid-js` and `animejs`, TR012, TR013, TR027 and TP006 fall.
+- **Status:** integrated on `integ/w7` (2026-10-14), stacked on W6. In `animejs`, TR012 falls from 2 to 0, TR013 from 3 to 0, TR027 from 1 to 0 and TP006 from 1 to 0; in `solid-js`, TR013 falls from 23 to 15. Core.TS and Node are regenerated under the T4 override: in Core.TS, TR012 falls from 190 to 0, TR027 from 152 to 0 and TP006 from 154 to 2; in Node, TR012 falls from 102 to 0 and TR013 from 250 to 19. `Store.DEV.isWrappable` (a readonly property typed `typeof f`, TR013) is left for a follow-up.
 
 ### W8. Key types for aliases and tag maps
 
