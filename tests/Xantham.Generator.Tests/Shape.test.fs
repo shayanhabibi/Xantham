@@ -1987,7 +1987,9 @@ let shapePassTests =
                      | FsMethod m -> m.Name
                      | FsConstructor _ -> "Create"
                      | FsIndexer _ -> "Item"
-                     | FsInvoke _ -> "Invoke"))
+                     | FsInvoke _ -> "Invoke"
+                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsLiteralKeyed (target, _, _) -> target))
                 [ "name"; "at" ]
                 "both member sets, in the checker's order"
 
@@ -2040,7 +2042,9 @@ let shapePassTests =
                      | FsMethod m -> m.Name
                      | FsIndexer _ -> "Item"
                      | FsConstructor _ -> "Create"
-                     | FsInvoke _ -> "Invoke"))
+                     | FsInvoke _ -> "Invoke"
+                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsLiteralKeyed (target, _, _) -> target))
                 [ "extra"; "name" ]
                 "and the inherited member is still declared here"
 
@@ -3814,7 +3818,9 @@ let shapePassTests =
                          | FsProperty p -> p.Type
                          | FsConstructor c -> c.Return
                          | FsInvoke c -> c.Return
-                         | FsIndexer i -> i.Value))
+                         | FsIndexer i -> i.Value
+                         | FsSymbolKeyed _
+                         | FsLiteralKeyed _ -> failwith "no keyed member is expected"))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
 
