@@ -477,12 +477,12 @@ type Eases =
 [<Interface>]
 type Easings =
     abstract Spring: SpringConstructor with get, set
-    abstract spring: (SpringParams option -> Spring) with get, set
-    abstract createSpring: (SpringParams option -> Spring) with get, set
-    abstract cubicBezier: Func<float option, float option, float option, float option, EasingFunction> with get, set
-    abstract steps: Func<float option, bool option, EasingFunction> with get, set
-    abstract linear: (TimelinePosition[] -> EasingFunction) with get, set
-    abstract irregular: Func<float option, float option, EasingFunction> with get, set
+    abstract spring: ?parameters: SpringParams -> Spring
+    abstract createSpring: ?parameters: SpringParams -> Spring
+    abstract cubicBezier: ?mX1: float * ?mY1: float * ?mX2: float * ?mY2: float -> EasingFunction
+    abstract steps: ?steps: float * ?fromStart: bool -> EasingFunction
+    abstract linear: [<ParamArray>] args: TimelinePosition[] -> EasingFunction
+    abstract irregular: ?length: float * ?randomness: float -> EasingFunction
     abstract eases: Eases with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (Spring: SpringConstructor, spring: (SpringParams option -> Spring), createSpring: (SpringParams option -> Spring), cubicBezier: Func<float option, float option, float option, float option, EasingFunction>, steps: Func<float option, bool option, EasingFunction>, linear: (TimelinePosition[] -> EasingFunction), irregular: Func<float option, float option, EasingFunction>, eases: Eases) : Easings = jsNative
@@ -902,9 +902,9 @@ type Scope =
 
 [<Interface>]
 type Svg =
-    abstract createMotionPath: Func<TargetsParam, float option, Svg.CreateMotionPath.Result> with get, set
-    abstract createDrawable: Func<TargetsParam, float option, float option, DrawableSVGGeometry[]> with get, set
-    abstract morphTo: Func<TargetsParam, float option, AutoLayoutParams.Ease> with get, set
+    abstract createMotionPath: path: TargetsParam * ?offset: float -> Svg.CreateMotionPath.Result
+    abstract createDrawable: selector: TargetsParam * ?start: float * ?``end``: float -> DrawableSVGGeometry[]
+    abstract morphTo: path2: TargetsParam * ?precision: float -> AutoLayoutParams.Ease
     [<ParamObject; Emit("$0")>]
     static member Create (createMotionPath: Func<TargetsParam, float option, Svg.CreateMotionPath.Result>, createDrawable: Func<TargetsParam, float option, float option, DrawableSVGGeometry[]>, morphTo: Func<TargetsParam, float option, AutoLayoutParams.Ease>) : Svg = jsNative
 
@@ -915,9 +915,9 @@ type Text =
     /// </summary>
     /// <remarks>@class</remarks>
     abstract TextSplitter: TextSplitterConstructor with get, set
-    abstract splitText: Func<U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter> with get, set
-    abstract split: Func<U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter> with get, set
-    abstract scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result) with get, set
+    abstract splitText: target: U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList> * ?parameters: TextSplitterParams -> TextSplitter
+    abstract split: target: U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList> * ?parameters: TextSplitterParams -> TextSplitter
+    abstract scrambleText: ?``params``: ScrambleTextParams -> Text.ScrambleText.Result
     [<ParamObject; Emit("$0")>]
     static member Create (TextSplitter: TextSplitterConstructor, splitText: Func<U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result)) : Text = jsNative
 
@@ -3550,7 +3550,7 @@ type DrawableSVGGeometry =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract querySelectorAll: selectors: string -> Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.Node>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
     /// Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes.
     /// <br /><br />
@@ -3797,11 +3797,11 @@ type Utils =
     /// </summary>
     /// <remarks>@type {RandomNumberGenerator}</remarks>
     abstract random: RandomNumberGenerator
-    abstract createSeededRandom: Func<float option, float option, float option, float option, RandomNumberGenerator> with get, set
-    abstract randomPick: (U2<string, obj[]> -> obj) with get, set
-    abstract shuffle: Func<obj[], RandomNumberGenerator option, obj[]> with get, set
-    abstract sync: ((Timer -> obj) option -> Timer) with get, set
-    abstract keepTime: Func<(obj[] -> obj), (obj[] -> obj)> with get, set
+    abstract createSeededRandom: ?seed: float * ?seededMin: float * ?seededMax: float * ?seededDecimalLength: float -> RandomNumberGenerator
+    abstract randomPick<'T>: items: U2<string, 'T[]> -> U2<string, 'T>
+    abstract shuffle: items: obj[] * ?rnd: RandomNumberGenerator -> obj[]
+    abstract sync: ?callback: (Timer -> obj) -> Timer
+    abstract keepTime<'T>: ``constructor``: (obj[] -> 'T) -> (obj[] -> obj)
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -3873,9 +3873,9 @@ type Utils =
     abstract ``$``: targets: DOMTargetsParam -> DOMTarget[]
     abstract ``$``: targets: JSTargetsParam -> JSTarget[]
     abstract ``$``: targets: TargetsParam -> Target[]
-    abstract set: Func<TargetsParam, AnimationParams, JSAnimation> with get, set
-    abstract remove: Func<TargetsParam, U3<JSAnimation, Timeline, WAAPIAnimation> option, string option, Target[]> with get, set
-    abstract cleanInlineStyles: (Renderable -> Renderable) with get, set
+    abstract set: targets: TargetsParam * parameters: AnimationParams -> JSAnimation
+    abstract remove: targets: TargetsParam * ?renderable: U3<JSAnimation, Timeline, WAAPIAnimation> * ?propertyName: string -> Target[]
+    abstract cleanInlineStyles<'T>: renderable: 'T -> 'T
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -3896,9 +3896,9 @@ type Utils =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     abstract stagger: ``val``: string * string * ?``params``: StaggerParams -> Utils.Stagger.Result2
-    abstract forEachChildren: Action<obj, Fable.Core.TS.Es.Function, bool option, string option, string option> with get, set
-    abstract addChild: Action<obj, obj, Fable.Core.TS.Es.Function option, string option, string option> with get, set
-    abstract removeChild: Action<obj, obj, string option, string option> with get, set
+    abstract forEachChildren: parent: obj * callback: Fable.Core.TS.Es.Function * ?reverse: bool * ?prevProp: string * ?nextProp: string -> unit
+    abstract addChild: parent: obj * child: obj * ?sortMethod: Fable.Core.TS.Es.Function * ?prevProp: string * ?nextProp: string -> unit
+    abstract removeChild: parent: obj * child: obj * ?prevProp: string * ?nextProp: string -> unit
 
 type RandomNumberGenerator = delegate of min: float option * max: float option * decimalLength: float option -> float
 
@@ -3951,16 +3951,12 @@ type WAAPIAnimation =
     /// <returns>Promise&lt;this&gt;</returns>
     abstract ``then``: ?callback: (WAAPIAnimation -> obj) -> JS.Promise<obj>
 
-type Animate = delegate of targets: DOMTargetsParam * ``params``: WAAPIAnimationParams -> WAAPIAnimation
-
-type EasingToLinear = delegate of fn: EasingFunction * samples: float option -> string
-
 [<Interface>]
 type Waapi =
-    abstract animate: Animate with get, set
-    abstract convertEase: EasingToLinear with get, set
+    abstract animate: targets: DOMTargetsParam * ``params``: WAAPIAnimationParams -> WAAPIAnimation
+    abstract convertEase: fn: EasingFunction * ?samples: float -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (animate: Animate, convertEase: EasingToLinear) : Waapi = jsNative
+    static member Create (animate: Func<DOMTargetsParam, WAAPIAnimationParams, WAAPIAnimation>, convertEase: Func<EasingFunction, float option, string>) : Waapi = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

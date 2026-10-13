@@ -10573,19 +10573,19 @@ module Globals =
     /// <remarks>@category Observable</remarks>
     [<Interface>]
     type ObservableLike<'ValueType> =
-        abstract subscribe: ?observer: ObservableLike.Subscribe.Observer -> Unsubscribable
+        abstract subscribe: ?observer: ObservableLike.Subscribe.Observer<'ValueType> -> Unsubscribable
         [<ParamObject; Emit("$0")>]
-        static member Create (subscribe: (ObservableLike.Subscribe.Observer option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
+        static member Create (subscribe: (ObservableLike.Subscribe.Observer<'ValueType> option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
 
     module ObservableLike =
         module Subscribe =
             [<Interface>]
-            type Observer =
-                abstract next: (obj -> unit) option with get, set
+            type Observer<'ValueType> =
+                abstract next: ('ValueType -> unit) option with get, set
                 abstract error: (obj -> unit) option with get, set
                 abstract complete: (unit -> unit) option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?next: (obj -> unit), ?error: (obj -> unit), ?complete: (unit -> unit)) : Observer = jsNative
+                static member Create (?next: ('ValueType -> unit), ?error: (obj -> unit), ?complete: (unit -> unit)) : Observer<'ValueType> = jsNative
 
 module Jsonifiable2 =
     [<Interface>]

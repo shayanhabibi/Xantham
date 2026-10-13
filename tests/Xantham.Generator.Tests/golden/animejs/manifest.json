@@ -4,15 +4,15 @@
   "module": "Animejs",
   "counts": {
     "exact": 126,
-    "ergonomic": 190,
+    "ergonomic": 188,
     "widened": 26,
     "escape": 6
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 72,
-      "exact": 72
+      "total": 70,
+      "exact": 70
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -21,17 +21,17 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 163,
+      "total": 159,
       "exact": 1,
-      "ergonomic": 161,
+      "ergonomic": 157,
       "escape": 1
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1918,
+      "total": 1931,
       "exact": 24,
-      "ergonomic": 1805,
-      "widened": 80,
+      "ergonomic": 1826,
+      "widened": 72,
       "escape": 9
     },
     {
@@ -55,8 +55,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 141,
-      "ergonomic": 141
+      "total": 165,
+      "ergonomic": 165
     },
     {
       "pass": "DO - dedupe-overloads",
