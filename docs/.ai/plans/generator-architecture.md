@@ -2701,7 +2701,7 @@ reads `JS.NoInfer<'T>`. Remaining: `TR013` on `NoInfer` (the alias declaration) 
 `compiler-lib-ownership-lab` entry gains `declare function pick<T>`: `GlobalThis` writes every
 global function as a method (`pick<'T>: items: 'T[] -> 'T`, `parseInt: string: string * ?radix:
 float -> float`). Lab `lab` `Utils.clamp` is a method, its `Clamp` delegate is gone, and the
-RunGate calls `utils.clamp(5.0, 0.0, 1.0)`.
+RunGate calls `utils.clamp(5.0, 0.0, 1.0)`; `test --run-gate` passes its 535 Fable checks.
 
 | Golden | TR012 | TR013 | TR027 | TP006 | TP002 | exact / ergonomic / widened / escape |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -2716,7 +2716,9 @@ methods (`TR055` 70 → 62, `SY006` 25 → 23, `MB001` 328 → 361 as optional p
 through `NoInfer`: the 8 `CreateResource.Options2/4` sites. Its remaining `TR013` are rank-2
 callback parameters, `Store<T> = T`, the `NoInfer` alias declarations and `Store.DEV.isWrappable`
 (a property typed `typeof isWrappable`), and its `TP006` are conditional-erased parameters; none
-is a W7 construct. Node's remaining `TR013` are `Assert.Assert`/`AssertStrict` (members of a
+is a W7 construct. The spec's acceptance line ("In solid-js and animejs, TR012, TR013, TR027 and
+TP006 fall") is met for `animejs` only: in `solid-js`, `TP006` stays 15 and `TR012`/`TR027` start at
+0; this gap is raised with the lead rather than amended. Node's remaining `TR013` are `Assert.Assert`/`AssertStrict` (members of a
 `Pick<typeof assert, …>` mapped type, not function symbols), `AsyncLocalStorage.snapshot` and
 `Stream.PipelineDestination`. In Node, functions of a function+namespace merge's namespace
 (`Mkdtemp.__promisify__`) become overloaded methods, so `DO001` +6 settles overloads equal after

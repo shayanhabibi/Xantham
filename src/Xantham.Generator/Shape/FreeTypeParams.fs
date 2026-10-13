@@ -7,9 +7,9 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
-/// The type-parameter ids a declaration reads without binding, in first-use order (§4.9). A
-/// signature's own parameters are bound inside it, and another named declaration binds its own,
-/// so the walk reads only its arguments; a hoisted anonymous declaration is walked into.
+/// The type-parameter ids a declaration reads without binding, in first-use order (§4.9). The
+/// walk reads a named declaration's type arguments and walks into a hoisted anonymous
+/// declaration; a signature's own type parameters are bound inside it.
 let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int<Measure.typeId> list =
     let mutable found = []
     let mutable visited = Set.empty
@@ -35,9 +35,7 @@ let private freeTypeParams (model: ShapeModel) (root: int<Measure.typeId>) : int
                     && Map.containsKey typeId model.DeclNames
                     && (facts.SymbolName |> Option.exists (isSyntheticName >> not))
                 then
-                    // A declaration of its own binds what it declares; its arguments are read.
-                    // An instantiation's arguments belong to the enclosing scope, and a declared
-                    // form's arguments are the parameters of the declaration it is written inside.
+                    // Both the declared form and an instantiation have their arguments read.
                     for argument in facts.TypeArguments do
                         go bound argument
                 else
