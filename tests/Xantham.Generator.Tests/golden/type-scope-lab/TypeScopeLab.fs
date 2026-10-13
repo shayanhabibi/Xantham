@@ -134,8 +134,21 @@ type Ns =
     /// </summary>
     abstract format: (obj -> string)
     abstract relabel<'T when 'T :> Shape>: shape: 'T * label: string -> 'T
+    /// <summary>
+    /// A function merged with a namespace stays a property; the namespace's function is a method.
+    /// </summary>
+    abstract tagged: Tagged with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (identity: ('T -> 'T), measure: ('T -> 'T), version: string, format: (obj -> string), relabel: Func<'T, string, 'T>) : Ns = jsNative
+    static member Create (identity: ('T -> 'T), measure: ('T -> 'T), version: string, format: (obj -> string), relabel: Func<'T, string, 'T>, tagged: Tagged) : Ns = jsNative
+
+[<Interface>]
+type Tagged =
+    abstract kind: string
+    abstract strip: value: string -> string
+    [<Emit("$0($1...)")>]
+    abstract Invoke: value: string -> string
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: string, strip: (string -> string)) : Tagged = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

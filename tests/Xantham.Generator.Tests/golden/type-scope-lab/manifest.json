@@ -4,7 +4,7 @@
   "module": "TypeScopeLab",
   "counts": {
     "exact": 3,
-    "ergonomic": 15,
+    "ergonomic": 16,
     "widened": 3,
     "escape": 0
   },
@@ -21,9 +21,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 13,
+      "total": 14,
       "exact": 1,
-      "ergonomic": 9,
+      "ergonomic": 10,
       "widened": 3
     },
     {
@@ -38,8 +38,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 28,
-      "ergonomic": 24,
+      "total": 30,
+      "ergonomic": 26,
       "widened": 4
     }
   ]

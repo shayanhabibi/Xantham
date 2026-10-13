@@ -2682,8 +2682,9 @@ method, and a method type parameter keeps a constraint that inherits its use sit
   namespace) and `Anonymous.signatureShaped` (no delegate is minted for a method's type).
   TypeScript rejects assignment to a function declaration (TS2630), so the setter the property
   form carried was not part of the contract, and no finding records it. A `const` of a
-  function type stays a property. `Customization/Semantics.fs` still classifies on
-  `SymbolFlags.Method` (`docs/.ai/footguns.md`).
+  function type stays a property. `Customization/Semantics.fs` classifies members through
+  `Spec.emitsAsMethodWith`, so a customization sees a namespace function as the method it
+  renders (a property replacement fails with `customization/property-required`).
 - **W7.4.** `appliedRefTo` accepts a type variable whose written constraint is the bound or
   inherits it (`satisfiesNominally`): `querySelectorAll<'E when 'E :> Element>: selectors:
   string -> NodeListOf<'E>`. A structural-only bound still widens with `TR027`.
@@ -2692,7 +2693,8 @@ method, and a method type parameter keeps a constraint that inherits its use sit
 Lab `type-scope-lab`: `Grid.Each.Visit<'T when 'T :> Shape>` and `Store.Each.Visit<'B>` (union
 bound dropped, `TP002` on `Store` and the delegate); `Ns.identity<'T>`, `Ns.measure<'T when 'T
 :> Shape>` and the re-exported `Ns.relabel` are methods, `Ns.version` and `Ns.format` (a generic
-function-typed `const`) stay properties; `Registry.find<'T when 'T :> Shape>` is a static method;
+function-typed `const`) stay properties, as does `Ns.tagged` (a function+namespace merge) while
+its namespace's `strip` is a method; `Registry.find<'T when 'T :> Shape>` is a static method;
 `Container.queryAll<'E when 'E :> TaggedEntry>` returns `EntryList<'E>`; `Create.Options<'T>`
 reads `JS.NoInfer<'T>`. Remaining: `TR013` on `NoInfer` (the alias declaration) and
 `Ns.format(value)`, `TR027`/`TP006` on `Container.queryLike` (structural bound). The

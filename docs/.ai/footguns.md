@@ -238,8 +238,8 @@ widens with `TR012`/`TR013` (188 typed-array delegates in Core.TS before W7).
 **A namespace member's symbol is an `Alias` when it is re-exported.** `export { f } from "./f"`
 inside a namespace object gives `ResolvedMember.Symbol` the `Alias` flag, not `Function`.
 Decide method form on `ResolvedMember.ResolvesToFunction` through `Spec.emitsAsMethod`, never on
-`SymbolFlags` alone; `Customization/Semantics.fs` still classifies on `SymbolFlags.Method`, so a
-customization naming a namespace function sees a property.
+`SymbolFlags` alone. `Customization/Semantics.fs` classifies through the same predicate
+(`Spec.emitsAsMethodWith`), so a customization contract and the rendered member agree.
 
 **A finding needs a row in `FindingCodes.table`, not just a registered union.** Registering the
 kind in `FindingCatalogue` is enough to compile and enough for the pass to run; the missing code

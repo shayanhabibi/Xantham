@@ -3237,12 +3237,16 @@ let internal iteratedElement (model: ShapeModel) (iteratorTypeId: int<Measure.ty
 
 /// Whether a member is written as a method: a method symbol, or a required `function`
 /// declaration of a namespace object, `globalThis` or a class's merged namespace whose type is a
-/// callback alone (W7.3).
-let internal emitsAsMethod (model: ShapeModel) (m: ResolvedMember) =
+/// callback alone (W7.3). `facts` looks up the member's type.
+let internal emitsAsMethodWith (facts: int<Measure.typeId> -> TypeFacts option) (m: ResolvedMember) =
     hasAny SymbolFlags.Method m.Symbol.Flags
     || (m.ResolvesToFunction
         && not m.Optional
-        && Map.tryFind m.TypeId model.Types |> Option.exists isPureCallback)
+        && facts m.TypeId |> Option.exists isPureCallback)
+
+/// `emitsAsMethodWith` over the model's resolved types.
+let internal emitsAsMethod (model: ShapeModel) (m: ResolvedMember) =
+    emitsAsMethodWith (fun id -> Map.tryFind id model.Types) m
 
 /// A *lifecycle hook*: a method a declaration marks `?`, which the platform calls on an object
 /// that provides it. The name is identifier-shaped, because the emission names an interface

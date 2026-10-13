@@ -2071,7 +2071,10 @@ let pipelineTests =
 
                           Expect.stringContains entry "abstract pick<'T>: items: 'T[] -> 'T" "a generic global function"
                           Expect.stringContains entry "abstract inspect: items: Item[] -> Brief" "a global function"
-                          Expect.isFalse (entry.Contains "abstract parseInt: Func<") "a lib global function is a method too"
+                          Expect.stringContains
+                              entry
+                              "abstract parseInt: string: string * ?radix: float -> float"
+                              "a lib global function is a method too"
                           Expect.stringContains entry "static member pick<'T>" "the global export is unchanged"
 
                       // Fable.Promise and Async.AwaitPromise are written against JS.Promise, so a
@@ -5657,6 +5660,16 @@ let pipelineTests =
                           source
                           "static member find<'T when 'T :> Shape>"
                           "a class's merged namespace function is a static method"
+
+                      let taggedLine =
+                          lines |> Array.tryFind (fun line -> line.TrimStart().StartsWith "abstract tagged:")
+
+                      Expect.isSome taggedLine "a function merged with a namespace is a member"
+                      Expect.stringContains taggedLine.Value "with get, set" "a function merged with a namespace stays a property"
+                      Expect.stringContains
+                          source
+                          "abstract strip: value: string -> string"
+                          "a function inside the merged namespace is a method"
 
                   testCase "type-scope-lab: a return-only method parameter keeps its constraint (W7.4)" <| fun _ ->
                       let source = generate () |> sourceOf
