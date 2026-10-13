@@ -4,8 +4,8 @@
   "module": "Node",
   "counts": {
     "exact": 775,
-    "ergonomic": 2025,
-    "widened": 829,
+    "ergonomic": 2094,
+    "widened": 760,
     "escape": 5
   },
   "passes": [
@@ -41,8 +41,8 @@
       "pass": "SI - shape-interfaces",
       "total": 26803,
       "exact": 377,
-      "ergonomic": 22413,
-      "widened": 4013
+      "ergonomic": 22595,
+      "widened": 3831
     },
     {
       "pass": "SA - shape-aliases",
@@ -66,7 +66,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2042,
+      "total": 2112,
+      "exact": 70,
       "ergonomic": 2021,
       "widened": 21
     },

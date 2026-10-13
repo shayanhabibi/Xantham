@@ -17210,15 +17210,26 @@ type Crypto =
 
 [<Interface>]
 type CryptoKeyConstructor =
+    /// <remarks>TypeScript type: <c>0</c></remarks>
     abstract length: float
+    /// <remarks>TypeScript type: <c>"CryptoKey"</c></remarks>
     abstract name: string
     abstract prototype: CryptoKey
 
     [<Emit("$0($1...)")>]
     abstract Invoke: ``_``: CryptoKeyConstructor2 -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(length: float, name: string, prototype: CryptoKey) : CryptoKeyConstructor = jsNative
+    [<ParamObject; Emit("({ length: 0, name: 'CryptoKey', ...$0 })")>]
+    static member Create(prototype: CryptoKey) : CryptoKeyConstructor = jsNative
+
+module CryptoKeyConstructor =
+    /// <remarks>TypeScript type: <c>0</c></remarks>
+    [<Literal>]
+    let length = 0.0
+
+    /// <remarks>TypeScript type: <c>"CryptoKey"</c></remarks>
+    [<Literal>]
+    let name = "CryptoKey"
 
 [<Interface>]
 type CryptoKeyConstructor2 =
@@ -30104,6 +30115,7 @@ type _TextEncoderStream =
     /// <summary>
     /// Returns "utf-8".
     /// </summary>
+    /// <remarks>TypeScript type: <c>"utf-8"</c></remarks>
     abstract encoding: string
 
     abstract readable:
@@ -30113,6 +30125,14 @@ type _TextEncoderStream =
 
     [<Emit("$0[Symbol.toStringTag]")>]
     abstract SymbolToStringTag: string
+
+module _TextEncoderStream =
+    /// <summary>
+    /// Returns "utf-8".
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"utf-8"</c></remarks>
+    [<Literal>]
+    let encoding = "utf-8"
 
 type _TransformStream<'O, 'I> = Stream.Web.TransformStream<'I, 'O>
 
@@ -34570,65 +34590,226 @@ type AbortSignalConstructor =
     [<EmitConstructor>]
     abstract Create: unit -> AbortSignal
 
+[<Interface>]
 type DOMException =
     inherit DOMException2
 
+    [<ParamObject;
+      Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+    static member Create(code: float, message: string, name: string, ?stack: string) : DOMException = jsNative
+
+[<Interface>]
 type DOMException2 =
     abstract code: float
     abstract message: string
     abstract name: string
+    /// <remarks>TypeScript type: <c>1</c></remarks>
     abstract INDEX_SIZE_ERR: float
+    /// <remarks>TypeScript type: <c>2</c></remarks>
     abstract DOMSTRING_SIZE_ERR: float
+    /// <remarks>TypeScript type: <c>3</c></remarks>
     abstract HIERARCHY_REQUEST_ERR: float
+    /// <remarks>TypeScript type: <c>4</c></remarks>
     abstract WRONG_DOCUMENT_ERR: float
+    /// <remarks>TypeScript type: <c>5</c></remarks>
     abstract INVALID_CHARACTER_ERR: float
+    /// <remarks>TypeScript type: <c>6</c></remarks>
     abstract NO_DATA_ALLOWED_ERR: float
+    /// <remarks>TypeScript type: <c>7</c></remarks>
     abstract NO_MODIFICATION_ALLOWED_ERR: float
+    /// <remarks>TypeScript type: <c>8</c></remarks>
     abstract NOT_FOUND_ERR: float
+    /// <remarks>TypeScript type: <c>9</c></remarks>
     abstract NOT_SUPPORTED_ERR: float
+    /// <remarks>TypeScript type: <c>10</c></remarks>
     abstract INUSE_ATTRIBUTE_ERR: float
+    /// <remarks>TypeScript type: <c>11</c></remarks>
     abstract INVALID_STATE_ERR: float
+    /// <remarks>TypeScript type: <c>12</c></remarks>
     abstract SYNTAX_ERR: float
+    /// <remarks>TypeScript type: <c>13</c></remarks>
     abstract INVALID_MODIFICATION_ERR: float
+    /// <remarks>TypeScript type: <c>14</c></remarks>
     abstract NAMESPACE_ERR: float
+    /// <remarks>TypeScript type: <c>15</c></remarks>
     abstract INVALID_ACCESS_ERR: float
+    /// <remarks>TypeScript type: <c>16</c></remarks>
     abstract VALIDATION_ERR: float
+    /// <remarks>TypeScript type: <c>17</c></remarks>
     abstract TYPE_MISMATCH_ERR: float
+    /// <remarks>TypeScript type: <c>18</c></remarks>
     abstract SECURITY_ERR: float
+    /// <remarks>TypeScript type: <c>19</c></remarks>
     abstract NETWORK_ERR: float
+    /// <remarks>TypeScript type: <c>20</c></remarks>
     abstract ABORT_ERR: float
+    /// <remarks>TypeScript type: <c>21</c></remarks>
     abstract URL_MISMATCH_ERR: float
+    /// <remarks>TypeScript type: <c>22</c></remarks>
     abstract QUOTA_EXCEEDED_ERR: float
+    /// <remarks>TypeScript type: <c>23</c></remarks>
     abstract TIMEOUT_ERR: float
+    /// <remarks>TypeScript type: <c>24</c></remarks>
     abstract INVALID_NODE_TYPE_ERR: float
+    /// <remarks>TypeScript type: <c>25</c></remarks>
     abstract DATA_CLONE_ERR: float
     abstract stack: string option with get, set
 
+    [<ParamObject;
+      Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+    static member Create(code: float, message: string, name: string, ?stack: string) : DOMException2 = jsNative
+
+module DOMException2 =
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let INDEX_SIZE_ERR = 1.0
+
+    /// <remarks>TypeScript type: <c>2</c></remarks>
+    [<Literal>]
+    let DOMSTRING_SIZE_ERR = 2.0
+
+    /// <remarks>TypeScript type: <c>3</c></remarks>
+    [<Literal>]
+    let HIERARCHY_REQUEST_ERR = 3.0
+
+    /// <remarks>TypeScript type: <c>4</c></remarks>
+    [<Literal>]
+    let WRONG_DOCUMENT_ERR = 4.0
+
+    /// <remarks>TypeScript type: <c>5</c></remarks>
+    [<Literal>]
+    let INVALID_CHARACTER_ERR = 5.0
+
+    /// <remarks>TypeScript type: <c>6</c></remarks>
+    [<Literal>]
+    let NO_DATA_ALLOWED_ERR = 6.0
+
+    /// <remarks>TypeScript type: <c>7</c></remarks>
+    [<Literal>]
+    let NO_MODIFICATION_ALLOWED_ERR = 7.0
+
+    /// <remarks>TypeScript type: <c>8</c></remarks>
+    [<Literal>]
+    let NOT_FOUND_ERR = 8.0
+
+    /// <remarks>TypeScript type: <c>9</c></remarks>
+    [<Literal>]
+    let NOT_SUPPORTED_ERR = 9.0
+
+    /// <remarks>TypeScript type: <c>10</c></remarks>
+    [<Literal>]
+    let INUSE_ATTRIBUTE_ERR = 10.0
+
+    /// <remarks>TypeScript type: <c>11</c></remarks>
+    [<Literal>]
+    let INVALID_STATE_ERR = 11.0
+
+    /// <remarks>TypeScript type: <c>12</c></remarks>
+    [<Literal>]
+    let SYNTAX_ERR = 12.0
+
+    /// <remarks>TypeScript type: <c>13</c></remarks>
+    [<Literal>]
+    let INVALID_MODIFICATION_ERR = 13.0
+
+    /// <remarks>TypeScript type: <c>14</c></remarks>
+    [<Literal>]
+    let NAMESPACE_ERR = 14.0
+
+    /// <remarks>TypeScript type: <c>15</c></remarks>
+    [<Literal>]
+    let INVALID_ACCESS_ERR = 15.0
+
+    /// <remarks>TypeScript type: <c>16</c></remarks>
+    [<Literal>]
+    let VALIDATION_ERR = 16.0
+
+    /// <remarks>TypeScript type: <c>17</c></remarks>
+    [<Literal>]
+    let TYPE_MISMATCH_ERR = 17.0
+
+    /// <remarks>TypeScript type: <c>18</c></remarks>
+    [<Literal>]
+    let SECURITY_ERR = 18.0
+
+    /// <remarks>TypeScript type: <c>19</c></remarks>
+    [<Literal>]
+    let NETWORK_ERR = 19.0
+
+    /// <remarks>TypeScript type: <c>20</c></remarks>
+    [<Literal>]
+    let ABORT_ERR = 20.0
+
+    /// <remarks>TypeScript type: <c>21</c></remarks>
+    [<Literal>]
+    let URL_MISMATCH_ERR = 21.0
+
+    /// <remarks>TypeScript type: <c>22</c></remarks>
+    [<Literal>]
+    let QUOTA_EXCEEDED_ERR = 22.0
+
+    /// <remarks>TypeScript type: <c>23</c></remarks>
+    [<Literal>]
+    let TIMEOUT_ERR = 23.0
+
+    /// <remarks>TypeScript type: <c>24</c></remarks>
+    [<Literal>]
+    let INVALID_NODE_TYPE_ERR = 24.0
+
+    /// <remarks>TypeScript type: <c>25</c></remarks>
+    [<Literal>]
+    let DATA_CLONE_ERR = 25.0
+
 type DOMExceptionConstructor =
+    /// <remarks>TypeScript type: <c>1</c></remarks>
     abstract INDEX_SIZE_ERR: float
+    /// <remarks>TypeScript type: <c>2</c></remarks>
     abstract DOMSTRING_SIZE_ERR: float
+    /// <remarks>TypeScript type: <c>3</c></remarks>
     abstract HIERARCHY_REQUEST_ERR: float
+    /// <remarks>TypeScript type: <c>4</c></remarks>
     abstract WRONG_DOCUMENT_ERR: float
+    /// <remarks>TypeScript type: <c>5</c></remarks>
     abstract INVALID_CHARACTER_ERR: float
+    /// <remarks>TypeScript type: <c>6</c></remarks>
     abstract NO_DATA_ALLOWED_ERR: float
+    /// <remarks>TypeScript type: <c>7</c></remarks>
     abstract NO_MODIFICATION_ALLOWED_ERR: float
+    /// <remarks>TypeScript type: <c>8</c></remarks>
     abstract NOT_FOUND_ERR: float
+    /// <remarks>TypeScript type: <c>9</c></remarks>
     abstract NOT_SUPPORTED_ERR: float
+    /// <remarks>TypeScript type: <c>10</c></remarks>
     abstract INUSE_ATTRIBUTE_ERR: float
+    /// <remarks>TypeScript type: <c>11</c></remarks>
     abstract INVALID_STATE_ERR: float
+    /// <remarks>TypeScript type: <c>12</c></remarks>
     abstract SYNTAX_ERR: float
+    /// <remarks>TypeScript type: <c>13</c></remarks>
     abstract INVALID_MODIFICATION_ERR: float
+    /// <remarks>TypeScript type: <c>14</c></remarks>
     abstract NAMESPACE_ERR: float
+    /// <remarks>TypeScript type: <c>15</c></remarks>
     abstract INVALID_ACCESS_ERR: float
+    /// <remarks>TypeScript type: <c>16</c></remarks>
     abstract VALIDATION_ERR: float
+    /// <remarks>TypeScript type: <c>17</c></remarks>
     abstract TYPE_MISMATCH_ERR: float
+    /// <remarks>TypeScript type: <c>18</c></remarks>
     abstract SECURITY_ERR: float
+    /// <remarks>TypeScript type: <c>19</c></remarks>
     abstract NETWORK_ERR: float
+    /// <remarks>TypeScript type: <c>20</c></remarks>
     abstract ABORT_ERR: float
+    /// <remarks>TypeScript type: <c>21</c></remarks>
     abstract URL_MISMATCH_ERR: float
+    /// <remarks>TypeScript type: <c>22</c></remarks>
     abstract QUOTA_EXCEEDED_ERR: float
+    /// <remarks>TypeScript type: <c>23</c></remarks>
     abstract TIMEOUT_ERR: float
+    /// <remarks>TypeScript type: <c>24</c></remarks>
     abstract INVALID_NODE_TYPE_ERR: float
+    /// <remarks>TypeScript type: <c>25</c></remarks>
     abstract DATA_CLONE_ERR: float
 
     [<EmitConstructor>]
@@ -34636,6 +34817,107 @@ type DOMExceptionConstructor =
 
     [<EmitConstructor>]
     abstract Create: ?message: string * ?options: DOMException.Options -> DOMException
+
+module DOMExceptionConstructor =
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let INDEX_SIZE_ERR = 1.0
+
+    /// <remarks>TypeScript type: <c>2</c></remarks>
+    [<Literal>]
+    let DOMSTRING_SIZE_ERR = 2.0
+
+    /// <remarks>TypeScript type: <c>3</c></remarks>
+    [<Literal>]
+    let HIERARCHY_REQUEST_ERR = 3.0
+
+    /// <remarks>TypeScript type: <c>4</c></remarks>
+    [<Literal>]
+    let WRONG_DOCUMENT_ERR = 4.0
+
+    /// <remarks>TypeScript type: <c>5</c></remarks>
+    [<Literal>]
+    let INVALID_CHARACTER_ERR = 5.0
+
+    /// <remarks>TypeScript type: <c>6</c></remarks>
+    [<Literal>]
+    let NO_DATA_ALLOWED_ERR = 6.0
+
+    /// <remarks>TypeScript type: <c>7</c></remarks>
+    [<Literal>]
+    let NO_MODIFICATION_ALLOWED_ERR = 7.0
+
+    /// <remarks>TypeScript type: <c>8</c></remarks>
+    [<Literal>]
+    let NOT_FOUND_ERR = 8.0
+
+    /// <remarks>TypeScript type: <c>9</c></remarks>
+    [<Literal>]
+    let NOT_SUPPORTED_ERR = 9.0
+
+    /// <remarks>TypeScript type: <c>10</c></remarks>
+    [<Literal>]
+    let INUSE_ATTRIBUTE_ERR = 10.0
+
+    /// <remarks>TypeScript type: <c>11</c></remarks>
+    [<Literal>]
+    let INVALID_STATE_ERR = 11.0
+
+    /// <remarks>TypeScript type: <c>12</c></remarks>
+    [<Literal>]
+    let SYNTAX_ERR = 12.0
+
+    /// <remarks>TypeScript type: <c>13</c></remarks>
+    [<Literal>]
+    let INVALID_MODIFICATION_ERR = 13.0
+
+    /// <remarks>TypeScript type: <c>14</c></remarks>
+    [<Literal>]
+    let NAMESPACE_ERR = 14.0
+
+    /// <remarks>TypeScript type: <c>15</c></remarks>
+    [<Literal>]
+    let INVALID_ACCESS_ERR = 15.0
+
+    /// <remarks>TypeScript type: <c>16</c></remarks>
+    [<Literal>]
+    let VALIDATION_ERR = 16.0
+
+    /// <remarks>TypeScript type: <c>17</c></remarks>
+    [<Literal>]
+    let TYPE_MISMATCH_ERR = 17.0
+
+    /// <remarks>TypeScript type: <c>18</c></remarks>
+    [<Literal>]
+    let SECURITY_ERR = 18.0
+
+    /// <remarks>TypeScript type: <c>19</c></remarks>
+    [<Literal>]
+    let NETWORK_ERR = 19.0
+
+    /// <remarks>TypeScript type: <c>20</c></remarks>
+    [<Literal>]
+    let ABORT_ERR = 20.0
+
+    /// <remarks>TypeScript type: <c>21</c></remarks>
+    [<Literal>]
+    let URL_MISMATCH_ERR = 21.0
+
+    /// <remarks>TypeScript type: <c>22</c></remarks>
+    [<Literal>]
+    let QUOTA_EXCEEDED_ERR = 22.0
+
+    /// <remarks>TypeScript type: <c>23</c></remarks>
+    [<Literal>]
+    let TIMEOUT_ERR = 23.0
+
+    /// <remarks>TypeScript type: <c>24</c></remarks>
+    [<Literal>]
+    let INVALID_NODE_TYPE_ERR = 24.0
+
+    /// <remarks>TypeScript type: <c>25</c></remarks>
+    [<Literal>]
+    let DATA_CLONE_ERR = 25.0
 
 [<Interface>]
 type CustomEvent<'T> =
@@ -34779,8 +35061,11 @@ type EventTargetConstructor =
 type EventSource =
     abstract dispatchEvent: ``event``: Event2 -> bool
     abstract close: unit -> unit
+    /// <remarks>TypeScript type: <c>2</c></remarks>
     abstract CLOSED: float
+    /// <remarks>TypeScript type: <c>0</c></remarks>
     abstract CONNECTING: float
+    /// <remarks>TypeScript type: <c>1</c></remarks>
     abstract OPEN: float
     abstract onerror: (obj -> obj) with get, set
     abstract onmessage: (obj -> obj) with get, set
@@ -34793,13 +35078,47 @@ type EventSource =
     abstract removeEventListener<'K> : ``type``: 'K * listener: (obj -> obj) * ?options: obj -> unit
     abstract removeEventListener: ``type``: string * listener: obj * ?options: obj -> unit
 
+module EventSource =
+    /// <remarks>TypeScript type: <c>2</c></remarks>
+    [<Literal>]
+    let CLOSED = 2.0
+
+    /// <remarks>TypeScript type: <c>0</c></remarks>
+    [<Literal>]
+    let CONNECTING = 0.0
+
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let OPEN = 1.0
+
+    type ReadyState =
+        | N0 = 0
+        | N1 = 1
+        | N2 = 2
+
 type EventSourceConstructor =
+    /// <remarks>TypeScript type: <c>2</c></remarks>
     abstract CLOSED: float
+    /// <remarks>TypeScript type: <c>0</c></remarks>
     abstract CONNECTING: float
+    /// <remarks>TypeScript type: <c>1</c></remarks>
     abstract OPEN: float
 
     [<EmitConstructor>]
     abstract Create: url: U2<string, URL> * ?init: obj -> obj
+
+module EventSourceConstructor =
+    /// <remarks>TypeScript type: <c>2</c></remarks>
+    [<Literal>]
+    let CLOSED = 2.0
+
+    /// <remarks>TypeScript type: <c>0</c></remarks>
+    [<Literal>]
+    let CONNECTING = 0.0
+
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let OPEN = 1.0
 
 [<Interface>]
 type EventSourceInit =
@@ -35040,10 +35359,11 @@ type Request =
     abstract url: string
     abstract keepalive: bool
     abstract signal: AbortSignal
+    /// <remarks>TypeScript type: <c>"half"</c></remarks>
     abstract duplex: string
     abstract clone: (unit -> obj)
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("({ duplex: 'half', ...$0 })")>]
     static member Create
         (
             bodyUsed: bool,
@@ -35065,11 +35385,76 @@ type Request =
             url: string,
             keepalive: bool,
             signal: AbortSignal,
-            duplex: string,
             clone: (unit -> obj),
             ?body: Stream.Web.ReadableStream<obj>
         ) : Request =
         jsNative
+
+module Request =
+    /// <remarks>TypeScript type: <c>"half"</c></remarks>
+    [<Literal>]
+    let duplex = "half"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Cache =
+        | [<CompiledName("default")>] Default
+        | [<CompiledName("force-cache")>] ForceCache
+        | [<CompiledName("no-cache")>] NoCache
+        | [<CompiledName("no-store")>] NoStore
+        | [<CompiledName("only-if-cached")>] OnlyIfCached
+        | [<CompiledName("reload")>] Reload
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Credentials =
+        | [<CompiledName("include")>] Include
+        | [<CompiledName("omit")>] Omit
+        | [<CompiledName("same-origin")>] SameOrigin
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Destination =
+        | [<CompiledName("")>] Empty
+        | [<CompiledName("audio")>] Audio
+        | [<CompiledName("audioworklet")>] Audioworklet
+        | [<CompiledName("document")>] Document
+        | [<CompiledName("embed")>] Embed
+        | [<CompiledName("font")>] Font
+        | [<CompiledName("image")>] Image
+        | [<CompiledName("manifest")>] Manifest
+        | [<CompiledName("object")>] Object
+        | [<CompiledName("paintworklet")>] Paintworklet
+        | [<CompiledName("report")>] Report
+        | [<CompiledName("script")>] Script
+        | [<CompiledName("sharedworker")>] Sharedworker
+        | [<CompiledName("style")>] Style
+        | [<CompiledName("track")>] Track
+        | [<CompiledName("video")>] Video
+        | [<CompiledName("worker")>] Worker
+        | [<CompiledName("xslt")>] Xslt
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Mode =
+        | [<CompiledName("cors")>] Cors
+        | [<CompiledName("navigate")>] Navigate
+        | [<CompiledName("no-cors")>] NoCors
+        | [<CompiledName("same-origin")>] SameOrigin
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Redirect =
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("follow")>] Follow
+        | [<CompiledName("manual")>] Manual
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ReferrerPolicy =
+        | [<CompiledName("")>] Empty
+        | [<CompiledName("no-referrer")>] NoReferrer
+        | [<CompiledName("no-referrer-when-downgrade")>] NoReferrerWhenDowngrade
+        | [<CompiledName("origin")>] Origin
+        | [<CompiledName("origin-when-cross-origin")>] OriginWhenCrossOrigin
+        | [<CompiledName("same-origin")>] SameOrigin
+        | [<CompiledName("strict-origin")>] StrictOrigin
+        | [<CompiledName("strict-origin-when-cross-origin")>] StrictOriginWhenCrossOrigin
+        | [<CompiledName("unsafe-url")>] UnsafeUrl
 
 [<Interface>]
 type RequestInit =
@@ -36482,6 +36867,7 @@ module Assert =
         /// <summary>
         /// Value is always <c>ERR_ASSERTION</c> to show that the error is an assertion error.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"ERR_ASSERTION"</c></remarks>
         member _.code
             with get (): string = jsNative
             and set (_: string): unit = jsNative
@@ -36569,6 +36955,14 @@ module Assert =
         static member stackTraceLimit
             with get (): float = jsNative
             and set (_: float): unit = jsNative
+
+    module AssertionError =
+        /// <summary>
+        /// Value is always <c>ERR_ASSERTION</c> to show that the error is an assertion error.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"ERR_ASSERTION"</c></remarks>
+        [<Literal>]
+        let code = "ERR_ASSERTION"
 
     /// <summary>
     /// This feature is deprecated and will be removed in a future version.
@@ -41389,11 +41783,17 @@ module Buffer =
     module ToJSON =
         [<Interface>]
         type Result =
+            /// <remarks>TypeScript type: <c>"Buffer"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: float[] with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: float[]) : Result = jsNative
+            [<ParamObject; Emit("({ type: 'Buffer', ...$0 })")>]
+            static member Create(data: float[]) : Result = jsNative
+
+        module Result =
+            /// <remarks>TypeScript type: <c>"Buffer"</c></remarks>
+            [<Literal>]
+            let ``type`` = "Buffer"
 
 module BufferConstructor =
     module From =
@@ -56278,10 +56678,16 @@ module Crypto =
 
     [<Interface>]
     type JwkKeyExportOptions =
+        /// <remarks>TypeScript type: <c>"jwk"</c></remarks>
         abstract format: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(format: string) : JwkKeyExportOptions = jsNative
+        [<Emit("({ format: 'jwk' })")>]
+        static member Create() : JwkKeyExportOptions = jsNative
+
+    module JwkKeyExportOptions =
+        /// <remarks>TypeScript type: <c>"jwk"</c></remarks>
+        [<Literal>]
+        let format = "jwk"
 
     type JsonWebKey =
         abstract crv: string option with get, set
@@ -69491,10 +69897,16 @@ module Crypto =
     [<Interface>]
     type JsonWebKeyInput =
         abstract key: JsonWebKey with get, set
+        /// <remarks>TypeScript type: <c>"jwk"</c></remarks>
         abstract format: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(key: JsonWebKey, format: string) : JsonWebKeyInput = jsNative
+        [<ParamObject; Emit("({ format: 'jwk', ...$0 })")>]
+        static member Create(key: JsonWebKey) : JsonWebKeyInput = jsNative
+
+    module JsonWebKeyInput =
+        /// <remarks>TypeScript type: <c>"jwk"</c></remarks>
+        [<Literal>]
+        let format = "jwk"
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type DSAEncoding =
@@ -69546,9 +69958,9 @@ module Crypto =
         inherit JsonWebKeyInput
         inherit SigningOptions
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ format: 'jwk', ...$0 })")>]
         static member Create
-            (key: JsonWebKey, format: string, ?padding: float, ?saltLength: float, ?dsaEncoding: DSAEncoding)
+            (key: JsonWebKey, ?padding: float, ?saltLength: float, ?dsaEncoding: DSAEncoding)
             : SignJsonWebKeyInput =
             jsNative
 
@@ -69586,9 +69998,9 @@ module Crypto =
         inherit JsonWebKeyInput
         inherit SigningOptions
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ format: 'jwk', ...$0 })")>]
         static member Create
-            (key: JsonWebKey, format: string, ?padding: float, ?saltLength: float, ?dsaEncoding: DSAEncoding)
+            (key: JsonWebKey, ?padding: float, ?saltLength: float, ?dsaEncoding: DSAEncoding)
             : VerifyJsonWebKeyInput =
             jsNative
 
@@ -80281,21 +80693,31 @@ module Crypto =
         type PrivateKeyEncoding<'PrivF> =
             inherit Crypto.BasePrivateKeyEncodingOptions<'PrivF>
             abstract format: 'PrivF with get, set
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
             abstract ``type``: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (format: 'PrivF, ``type``: string, ?cipher: string, ?passphrase: string)
-                : PrivateKeyEncoding<'PrivF> =
+            [<ParamObject; Emit("({ type: 'pkcs8', ...$0 })")>]
+            static member Create(format: 'PrivF, ?cipher: string, ?passphrase: string) : PrivateKeyEncoding<'PrivF> =
                 jsNative
+
+        module PrivateKeyEncoding =
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
+            [<Literal>]
+            let ``type`` = "pkcs8"
 
         [<Interface>]
         type PublicKeyEncoding<'PubF> =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
             abstract ``type``: string with get, set
             abstract format: 'PubF with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+            [<ParamObject; Emit("({ type: 'spki', ...$0 })")>]
+            static member Create(format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+
+        module PublicKeyEncoding =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
+            [<Literal>]
+            let ``type`` = "spki"
 
     module Decipher =
         module Compose =
@@ -80475,42 +80897,62 @@ module Crypto =
         type PrivateKeyEncoding<'PrivF> =
             inherit Crypto.BasePrivateKeyEncodingOptions<'PrivF>
             abstract format: 'PrivF with get, set
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
             abstract ``type``: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (format: 'PrivF, ``type``: string, ?cipher: string, ?passphrase: string)
-                : PrivateKeyEncoding<'PrivF> =
+            [<ParamObject; Emit("({ type: 'pkcs8', ...$0 })")>]
+            static member Create(format: 'PrivF, ?cipher: string, ?passphrase: string) : PrivateKeyEncoding<'PrivF> =
                 jsNative
+
+        module PrivateKeyEncoding =
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
+            [<Literal>]
+            let ``type`` = "pkcs8"
 
         [<Interface>]
         type PublicKeyEncoding<'PubF> =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
             abstract ``type``: string with get, set
             abstract format: 'PubF with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+            [<ParamObject; Emit("({ type: 'spki', ...$0 })")>]
+            static member Create(format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+
+        module PublicKeyEncoding =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
+            [<Literal>]
+            let ``type`` = "spki"
 
     module ED448KeyPairOptions =
         [<Interface>]
         type PrivateKeyEncoding<'PrivF> =
             inherit Crypto.BasePrivateKeyEncodingOptions<'PrivF>
             abstract format: 'PrivF with get, set
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
             abstract ``type``: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (format: 'PrivF, ``type``: string, ?cipher: string, ?passphrase: string)
-                : PrivateKeyEncoding<'PrivF> =
+            [<ParamObject; Emit("({ type: 'pkcs8', ...$0 })")>]
+            static member Create(format: 'PrivF, ?cipher: string, ?passphrase: string) : PrivateKeyEncoding<'PrivF> =
                 jsNative
+
+        module PrivateKeyEncoding =
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
+            [<Literal>]
+            let ``type`` = "pkcs8"
 
         [<Interface>]
         type PublicKeyEncoding<'PubF> =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
             abstract ``type``: string with get, set
             abstract format: 'PubF with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+            [<ParamObject; Emit("({ type: 'spki', ...$0 })")>]
+            static member Create(format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+
+        module PublicKeyEncoding =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
+            [<Literal>]
+            let ``type`` = "spki"
 
     module GenerateKey =
         type Callback = delegate of err: exn option * key: Crypto.KeyObject -> unit
@@ -80822,21 +81264,31 @@ module Crypto =
         type PrivateKeyEncoding<'PrivF> =
             inherit Crypto.BasePrivateKeyEncodingOptions<'PrivF>
             abstract format: 'PrivF with get, set
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
             abstract ``type``: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (format: 'PrivF, ``type``: string, ?cipher: string, ?passphrase: string)
-                : PrivateKeyEncoding<'PrivF> =
+            [<ParamObject; Emit("({ type: 'pkcs8', ...$0 })")>]
+            static member Create(format: 'PrivF, ?cipher: string, ?passphrase: string) : PrivateKeyEncoding<'PrivF> =
                 jsNative
+
+        module PrivateKeyEncoding =
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
+            [<Literal>]
+            let ``type`` = "pkcs8"
 
         [<Interface>]
         type PublicKeyEncoding<'PubF> =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
             abstract ``type``: string with get, set
             abstract format: 'PubF with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+            [<ParamObject; Emit("({ type: 'spki', ...$0 })")>]
+            static member Create(format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+
+        module PublicKeyEncoding =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
+            [<Literal>]
+            let ``type`` = "spki"
 
     module RandomBytes =
         type Callback = delegate of err: exn option * buf: NonSharedBuffer -> unit
@@ -80901,42 +81353,62 @@ module Crypto =
         type PrivateKeyEncoding<'PrivF> =
             inherit Crypto.BasePrivateKeyEncodingOptions<'PrivF>
             abstract format: 'PrivF with get, set
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
             abstract ``type``: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (format: 'PrivF, ``type``: string, ?cipher: string, ?passphrase: string)
-                : PrivateKeyEncoding<'PrivF> =
+            [<ParamObject; Emit("({ type: 'pkcs8', ...$0 })")>]
+            static member Create(format: 'PrivF, ?cipher: string, ?passphrase: string) : PrivateKeyEncoding<'PrivF> =
                 jsNative
+
+        module PrivateKeyEncoding =
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
+            [<Literal>]
+            let ``type`` = "pkcs8"
 
         [<Interface>]
         type PublicKeyEncoding<'PubF> =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
             abstract ``type``: string with get, set
             abstract format: 'PubF with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+            [<ParamObject; Emit("({ type: 'spki', ...$0 })")>]
+            static member Create(format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+
+        module PublicKeyEncoding =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
+            [<Literal>]
+            let ``type`` = "spki"
 
     module X448KeyPairOptions =
         [<Interface>]
         type PrivateKeyEncoding<'PrivF> =
             inherit Crypto.BasePrivateKeyEncodingOptions<'PrivF>
             abstract format: 'PrivF with get, set
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
             abstract ``type``: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (format: 'PrivF, ``type``: string, ?cipher: string, ?passphrase: string)
-                : PrivateKeyEncoding<'PrivF> =
+            [<ParamObject; Emit("({ type: 'pkcs8', ...$0 })")>]
+            static member Create(format: 'PrivF, ?cipher: string, ?passphrase: string) : PrivateKeyEncoding<'PrivF> =
                 jsNative
+
+        module PrivateKeyEncoding =
+            /// <remarks>TypeScript type: <c>"pkcs8"</c></remarks>
+            [<Literal>]
+            let ``type`` = "pkcs8"
 
         [<Interface>]
         type PublicKeyEncoding<'PubF> =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
             abstract ``type``: string with get, set
             abstract format: 'PubF with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+            [<ParamObject; Emit("({ type: 'spki', ...$0 })")>]
+            static member Create(format: 'PubF) : PublicKeyEncoding<'PubF> = jsNative
+
+        module PublicKeyEncoding =
+            /// <remarks>TypeScript type: <c>"spki"</c></remarks>
+            [<Literal>]
+            let ``type`` = "spki"
 
     module X509Certificate =
         module CheckEmail =
@@ -84076,18 +84548,30 @@ module Dns =
     [<Interface>]
     type AnyARecord =
         inherit RecordWithTtl
+        /// <remarks>TypeScript type: <c>"A"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, address: string, ttl: float) : AnyARecord = jsNative
+        [<ParamObject; Emit("({ type: 'A', ...$0 })")>]
+        static member Create(address: string, ttl: float) : AnyARecord = jsNative
+
+    module AnyARecord =
+        /// <remarks>TypeScript type: <c>"A"</c></remarks>
+        [<Literal>]
+        let ``type`` = "A"
 
     [<Interface>]
     type AnyAaaaRecord =
         inherit RecordWithTtl
+        /// <remarks>TypeScript type: <c>"AAAA"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, address: string, ttl: float) : AnyAaaaRecord = jsNative
+        [<ParamObject; Emit("({ type: 'AAAA', ...$0 })")>]
+        static member Create(address: string, ttl: float) : AnyAaaaRecord = jsNative
+
+    module AnyAaaaRecord =
+        /// <remarks>TypeScript type: <c>"AAAA"</c></remarks>
+        [<Literal>]
+        let ``type`` = "AAAA"
 
     [<Interface>]
     type CaaRecord =
@@ -84113,12 +84597,12 @@ module Dns =
     [<Interface>]
     type AnyCaaRecord =
         inherit CaaRecord
+        /// <remarks>TypeScript type: <c>"CAA"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ type: 'CAA', ...$0 })")>]
         static member Create
             (
-                ``type``: string,
                 critical: float,
                 ?issue: string,
                 ?issuewild: string,
@@ -84127,6 +84611,11 @@ module Dns =
                 ?contactphone: string
             ) : AnyCaaRecord =
             jsNative
+
+    module AnyCaaRecord =
+        /// <remarks>TypeScript type: <c>"CAA"</c></remarks>
+        [<Literal>]
+        let ``type`` = "CAA"
 
     [<Interface>]
     type MxRecord =
@@ -84139,10 +84628,16 @@ module Dns =
     [<Interface>]
     type AnyMxRecord =
         inherit MxRecord
+        /// <remarks>TypeScript type: <c>"MX"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, priority: float, exchange: string) : AnyMxRecord = jsNative
+        [<ParamObject; Emit("({ type: 'MX', ...$0 })")>]
+        static member Create(priority: float, exchange: string) : AnyMxRecord = jsNative
+
+    module AnyMxRecord =
+        /// <remarks>TypeScript type: <c>"MX"</c></remarks>
+        [<Literal>]
+        let ``type`` = "MX"
 
     [<Interface>]
     type NaptrRecord =
@@ -84162,20 +84657,19 @@ module Dns =
     [<Interface>]
     type AnyNaptrRecord =
         inherit NaptrRecord
+        /// <remarks>TypeScript type: <c>"NAPTR"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ type: 'NAPTR', ...$0 })")>]
         static member Create
-            (
-                ``type``: string,
-                flags: string,
-                service: string,
-                regexp: string,
-                replacement: string,
-                order: float,
-                preference: float
-            ) : AnyNaptrRecord =
+            (flags: string, service: string, regexp: string, replacement: string, order: float, preference: float)
+            : AnyNaptrRecord =
             jsNative
+
+    module AnyNaptrRecord =
+        /// <remarks>TypeScript type: <c>"NAPTR"</c></remarks>
+        [<Literal>]
+        let ``type`` = "NAPTR"
 
     [<Interface>]
     type SoaRecord =
@@ -84203,12 +84697,12 @@ module Dns =
     [<Interface>]
     type AnySoaRecord =
         inherit SoaRecord
+        /// <remarks>TypeScript type: <c>"SOA"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ type: 'SOA', ...$0 })")>]
         static member Create
             (
-                ``type``: string,
                 nsname: string,
                 hostmaster: string,
                 serial: float,
@@ -84218,6 +84712,11 @@ module Dns =
                 minttl: float
             ) : AnySoaRecord =
             jsNative
+
+    module AnySoaRecord =
+        /// <remarks>TypeScript type: <c>"SOA"</c></remarks>
+        [<Literal>]
+        let ``type`` = "SOA"
 
     [<Interface>]
     type SrvRecord =
@@ -84232,13 +84731,16 @@ module Dns =
     [<Interface>]
     type AnySrvRecord =
         inherit SrvRecord
+        /// <remarks>TypeScript type: <c>"SRV"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (``type``: string, priority: float, weight: float, port: float, name: string)
-            : AnySrvRecord =
-            jsNative
+        [<ParamObject; Emit("({ type: 'SRV', ...$0 })")>]
+        static member Create(priority: float, weight: float, port: float, name: string) : AnySrvRecord = jsNative
+
+    module AnySrvRecord =
+        /// <remarks>TypeScript type: <c>"SRV"</c></remarks>
+        [<Literal>]
+        let ``type`` = "SRV"
 
     [<Interface>]
     type TlsaRecord =
@@ -84256,45 +84758,75 @@ module Dns =
     [<Interface>]
     type AnyTlsaRecord =
         inherit TlsaRecord
+        /// <remarks>TypeScript type: <c>"TLSA"</c></remarks>
         abstract ``type``: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ type: 'TLSA', ...$0 })")>]
         static member Create
-            (``type``: string, certUsage: float, selector: float, ``match``: float, data: Fable.Core.TS.Es.ArrayBuffer)
+            (certUsage: float, selector: float, ``match``: float, data: Fable.Core.TS.Es.ArrayBuffer)
             : AnyTlsaRecord =
             jsNative
 
+    module AnyTlsaRecord =
+        /// <remarks>TypeScript type: <c>"TLSA"</c></remarks>
+        [<Literal>]
+        let ``type`` = "TLSA"
+
     [<Interface>]
     type AnyTxtRecord =
+        /// <remarks>TypeScript type: <c>"TXT"</c></remarks>
         abstract ``type``: string with get, set
         abstract entries: string[] with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, entries: string[]) : AnyTxtRecord = jsNative
+        [<ParamObject; Emit("({ type: 'TXT', ...$0 })")>]
+        static member Create(entries: string[]) : AnyTxtRecord = jsNative
+
+    module AnyTxtRecord =
+        /// <remarks>TypeScript type: <c>"TXT"</c></remarks>
+        [<Literal>]
+        let ``type`` = "TXT"
 
     [<Interface>]
     type AnyNsRecord =
+        /// <remarks>TypeScript type: <c>"NS"</c></remarks>
         abstract ``type``: string with get, set
         abstract value: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, value: string) : AnyNsRecord = jsNative
+        [<ParamObject; Emit("({ type: 'NS', ...$0 })")>]
+        static member Create(value: string) : AnyNsRecord = jsNative
+
+    module AnyNsRecord =
+        /// <remarks>TypeScript type: <c>"NS"</c></remarks>
+        [<Literal>]
+        let ``type`` = "NS"
 
     [<Interface>]
     type AnyPtrRecord =
+        /// <remarks>TypeScript type: <c>"PTR"</c></remarks>
         abstract ``type``: string with get, set
         abstract value: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, value: string) : AnyPtrRecord = jsNative
+        [<ParamObject; Emit("({ type: 'PTR', ...$0 })")>]
+        static member Create(value: string) : AnyPtrRecord = jsNative
+
+    module AnyPtrRecord =
+        /// <remarks>TypeScript type: <c>"PTR"</c></remarks>
+        [<Literal>]
+        let ``type`` = "PTR"
 
     [<Interface>]
     type AnyCnameRecord =
+        /// <remarks>TypeScript type: <c>"CNAME"</c></remarks>
         abstract ``type``: string with get, set
         abstract value: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: string, value: string) : AnyCnameRecord = jsNative
+        [<ParamObject; Emit("({ type: 'CNAME', ...$0 })")>]
+        static member Create(value: string) : AnyCnameRecord = jsNative
+
+    module AnyCnameRecord =
+        /// <remarks>TypeScript type: <c>"CNAME"</c></remarks>
+        [<Literal>]
+        let ``type`` = "CNAME"
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type AnyRecord =
@@ -85106,29 +85638,53 @@ module Dns =
         /// <remarks>@since v16.4.0, v14.18.0</remarks>
         /// <param name="order">must be <c>'ipv4first'</c>, <c>'ipv6first'</c> or <c>'verbatim'</c>.</param>
         abstract setDefaultResultOrder: (Dns.LookupOptions.Order -> unit) with get, set
+        /// <remarks>TypeScript type: <c>"ENODATA"</c></remarks>
         abstract NODATA: string
+        /// <remarks>TypeScript type: <c>"EFORMERR"</c></remarks>
         abstract FORMERR: string
+        /// <remarks>TypeScript type: <c>"ESERVFAIL"</c></remarks>
         abstract SERVFAIL: string
+        /// <remarks>TypeScript type: <c>"ENOTFOUND"</c></remarks>
         abstract NOTFOUND: string
+        /// <remarks>TypeScript type: <c>"ENOTIMP"</c></remarks>
         abstract NOTIMP: string
+        /// <remarks>TypeScript type: <c>"EREFUSED"</c></remarks>
         abstract REFUSED: string
+        /// <remarks>TypeScript type: <c>"EBADQUERY"</c></remarks>
         abstract BADQUERY: string
+        /// <remarks>TypeScript type: <c>"EBADNAME"</c></remarks>
         abstract BADNAME: string
+        /// <remarks>TypeScript type: <c>"EBADFAMILY"</c></remarks>
         abstract BADFAMILY: string
+        /// <remarks>TypeScript type: <c>"EBADRESP"</c></remarks>
         abstract BADRESP: string
+        /// <remarks>TypeScript type: <c>"ECONNREFUSED"</c></remarks>
         abstract CONNREFUSED: string
+        /// <remarks>TypeScript type: <c>"ETIMEOUT"</c></remarks>
         abstract TIMEOUT: string
+        /// <remarks>TypeScript type: <c>"EOF"</c></remarks>
         abstract EOF: string
+        /// <remarks>TypeScript type: <c>"EFILE"</c></remarks>
         abstract FILE: string
+        /// <remarks>TypeScript type: <c>"ENOMEM"</c></remarks>
         abstract NOMEM: string
+        /// <remarks>TypeScript type: <c>"EDESTRUCTION"</c></remarks>
         abstract DESTRUCTION: string
+        /// <remarks>TypeScript type: <c>"EBADSTR"</c></remarks>
         abstract BADSTR: string
+        /// <remarks>TypeScript type: <c>"EBADFLAGS"</c></remarks>
         abstract BADFLAGS: string
+        /// <remarks>TypeScript type: <c>"ENONAME"</c></remarks>
         abstract NONAME: string
+        /// <remarks>TypeScript type: <c>"EBADHINTS"</c></remarks>
         abstract BADHINTS: string
+        /// <remarks>TypeScript type: <c>"ENOTINITIALIZED"</c></remarks>
         abstract NOTINITIALIZED: string
+        /// <remarks>TypeScript type: <c>"ELOADIPHLPAPI"</c></remarks>
         abstract LOADIPHLPAPI: string
+        /// <remarks>TypeScript type: <c>"EADDRGETNETWORKPARAMS"</c></remarks>
         abstract ADDRGETNETWORKPARAMS: string
+        /// <remarks>TypeScript type: <c>"ECANCELLED"</c></remarks>
         abstract CANCELLED: string
         /// <summary>
         /// An independent resolver for DNS requests.
@@ -85174,910 +85730,104 @@ module Dns =
         /// <remarks>@since v10.6.0</remarks>
         abstract Resolver: ResolverConstructor with get, set
 
-    /// <summary>The package's value exports, each bound to its import.</summary>
-    [<Erase>]
-    type Exports =
-        /// <summary>
-        /// Limits returned address types to the types of non-loopback addresses configured on the system. For example, IPv4 addresses are
-        /// only returned if the current system has at least one IPv4 address configured.
-        /// </summary>
-        [<Import("ADDRCONFIG", "node:dns")>]
-        static member ADDRCONFIG: float = jsNative
-
-        /// <summary>
-        /// If the IPv6 family was specified, but no IPv6 addresses were found, then return IPv4 mapped IPv6 addresses. It is not supported
-        /// on some operating systems (e.g. FreeBSD 10.1).
-        /// </summary>
-        [<Import("V4MAPPED", "node:dns")>]
-        static member V4MAPPED: float = jsNative
-
-        /// <summary>
-        /// If <c>dns.V4MAPPED</c> is specified, return resolved IPv6 addresses as
-        /// well as IPv4 mapped IPv6 addresses.
-        /// </summary>
-        [<Import("ALL", "node:dns")>]
-        static member ALL: float = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, family: float, callback: Lookup.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, options: LookupOneOptions, callback: Lookup.Callback2) : unit = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, options: LookupAllOptions, callback: Lookup.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, options: LookupOptions, callback: Lookup.Callback4) : unit = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, callback: Lookup.Callback5) : unit = jsNative
-
-        /// <summary>
-        /// Resolves the given <c>address</c> and <c>port</c> into a host name and service using
-        /// the operating system's underlying <c>getnameinfo</c> implementation.
-        /// <br /><br />
-        /// If <c>address</c> is not a valid IP address, a <c>TypeError</c> will be thrown.
-        /// The <c>port</c> will be coerced to a number. If it is not a legal port, a <c>TypeError</c> will be thrown.
-        /// <br /><br />
-        /// On an error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is the error code.
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// dns.lookupService('127.0.0.1', 22, (err, hostname, service) =&gt; {
-        ///   console.log(hostname, service);
-        ///   // Prints: localhost ssh
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, it returns a <c>Promise</c> for an <c>Object</c> with <c>hostname</c> and <c>service</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.11.14</remarks>
-        [<Import("lookupService", "node:dns")>]
-        static member lookupService(address: string, port: float, callback: LookupService.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, callback: Resolve.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: Resolve.Promisify.Rrtype, callback: Resolve.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback4) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback5) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback6) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback7) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback8) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback9) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback10) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback11) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve4", "node:dns")>]
-        static member resolve4(hostname: string, callback: Resolve4.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve4", "node:dns")>]
-        static member resolve4(hostname: string, options: ResolveWithTtlOptions, callback: Resolve4.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve4", "node:dns")>]
-        static member resolve4(hostname: string, options: ResolveOptions, callback: Resolve4.Callback3) : unit =
-            jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv6 addresses.
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve6", "node:dns")>]
-        static member resolve6(hostname: string, callback: Resolve6.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv6 addresses.
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve6", "node:dns")>]
-        static member resolve6(hostname: string, options: ResolveWithTtlOptions, callback: Resolve6.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv6 addresses.
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve6", "node:dns")>]
-        static member resolve6(hostname: string, options: ResolveOptions, callback: Resolve6.Callback3) : unit =
-            jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve <c>CNAME</c> records for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of canonical name records available for the <c>hostname</c> (e.g. <c>['bar.example.com']</c>).
-        /// </summary>
-        /// <remarks>@since v0.3.2</remarks>
-        [<Import("resolveCname", "node:dns")>]
-        static member resolveCname(hostname: string, callback: ResolveCname.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve <c>CAA</c> records for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of certification authority authorization records
-        /// available for the <c>hostname</c> (e.g. <c>[{critical: 0, iodef: 'mailto:pki@example.com'}, {critical: 128, issue: 'pki.example.com'}]</c>).
-        /// </summary>
-        /// <remarks>@since v15.0.0, v14.17.0</remarks>
-        [<Import("resolveCaa", "node:dns")>]
-        static member resolveCaa(hostname: string, callback: ResolveCaa.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve mail exchange records (<c>MX</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
-        /// contain an array of objects containing both a <c>priority</c> and <c>exchange</c> property (e.g. <c>[{priority: 10, exchange: 'mx.example.com'}, ...]</c>).
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        [<Import("resolveMx", "node:dns")>]
-        static member resolveMx(hostname: string, callback: ResolveMx.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve regular expression-based records (<c>NAPTR</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will contain an array of
-        /// objects with the following properties:
-        /// <br /><br />
-        /// * <c>flags</c>
-        /// * <c>service</c>
-        /// * <c>regexp</c>
-        /// * <c>replacement</c>
-        /// * <c>order</c>
-        /// * <c>preference</c>
-        /// <code lang="js">
-        /// {
-        ///   flags: 's',
-        ///   service: 'SIP+D2U',
-        ///   regexp: '',
-        ///   replacement: '_sip._udp.example.com',
-        ///   order: 30,
-        ///   preference: 100
-        /// }
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.9.12</remarks>
-        [<Import("resolveNaptr", "node:dns")>]
-        static member resolveNaptr(hostname: string, callback: ResolveNaptr.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve name server records (<c>NS</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
-        /// contain an array of name server records available for <c>hostname</c> (e.g. <c>['ns1.example.com', 'ns2.example.com']</c>).
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("resolveNs", "node:dns")>]
-        static member resolveNs(hostname: string, callback: ResolveNs.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve pointer records (<c>PTR</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
-        /// be an array of strings containing the reply records.
-        /// </summary>
-        /// <remarks>@since v6.0.0</remarks>
-        [<Import("resolvePtr", "node:dns")>]
-        static member resolvePtr(hostname: string, callback: ResolvePtr.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a start of authority record (<c>SOA</c> record) for
-        /// the <c>hostname</c>. The <c>address</c> argument passed to the <c>callback</c> function will
-        /// be an object with the following properties:
-        /// <br /><br />
-        /// * <c>nsname</c>
-        /// * <c>hostmaster</c>
-        /// * <c>serial</c>
-        /// * <c>refresh</c>
-        /// * <c>retry</c>
-        /// * <c>expire</c>
-        /// * <c>minttl</c>
-        /// <code lang="js">
-        /// {
-        ///   nsname: 'ns.example.com',
-        ///   hostmaster: 'root.example.com',
-        ///   serial: 2013101809,
-        ///   refresh: 10000,
-        ///   retry: 2400,
-        ///   expire: 604800,
-        ///   minttl: 3600
-        /// }
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.11.10</remarks>
-        [<Import("resolveSoa", "node:dns")>]
-        static member resolveSoa(hostname: string, callback: ResolveSoa.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve service records (<c>SRV</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
-        /// be an array of objects with the following properties:
-        /// <br /><br />
-        /// * <c>priority</c>
-        /// * <c>weight</c>
-        /// * <c>port</c>
-        /// * <c>name</c>
-        /// <code lang="js">
-        /// {
-        ///   priority: 10,
-        ///   weight: 5,
-        ///   port: 21223,
-        ///   name: 'service.example.com'
-        /// }
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        [<Import("resolveSrv", "node:dns")>]
-        static member resolveSrv(hostname: string, callback: ResolveSrv.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve certificate associations (<c>TLSA</c> records) for
-        /// the <c>hostname</c>. The <c>records</c> argument passed to the <c>callback</c> function is an
-        /// array of objects with these properties:
-        /// <br /><br />
-        /// * <c>certUsage</c>
-        /// * <c>selector</c>
-        /// * <c>match</c>
-        /// * <c>data</c>
-        /// <code lang="js">
-        /// {
-        ///   certUsage: 3,
-        ///   selector: 1,
-        ///   match: 1,
-        ///   data: [ArrayBuffer]
-        /// }
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v22.15.0</remarks>
-        [<Import("resolveTlsa", "node:dns")>]
-        static member resolveTlsa(hostname: string, callback: ResolveTlsa.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve text queries (<c>TXT</c> records) for the <c>hostname</c>. The <c>records</c> argument passed to the <c>callback</c> function is a
-        /// two-dimensional array of the text records available for <c>hostname</c> (e.g.<c>[ ['v=spf1 ip4:0.0.0.0 ', '~all' ] ]</c>). Each sub-array contains TXT chunks of
-        /// one record. Depending on the use case, these could be either joined together or
-        /// treated separately.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        [<Import("resolveTxt", "node:dns")>]
-        static member resolveTxt(hostname: string, callback: ResolveTxt.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve all records (also known as <c>ANY</c> or <c>*</c> query).
-        /// The <c>ret</c> argument passed to the <c>callback</c> function will be an array containing
-        /// various types of records. Each object has a property <c>type</c> that indicates the
-        /// type of the current record. And depending on the <c>type</c>, additional properties
-        /// will be present on the object:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// Here is an example of the <c>ret</c> object passed to the callback:
-        /// <code lang="js">
-        /// [ { type: 'A', address: '127.0.0.1', ttl: 299 },
-        ///   { type: 'CNAME', value: 'example.com' },
-        ///   { type: 'MX', exchange: 'alt4.aspmx.l.example.com', priority: 50 },
-        ///   { type: 'NS', value: 'ns1.example.com' },
-        ///   { type: 'TXT', entries: [ 'v=spf1 include:_spf.example.com ~all' ] },
-        ///   { type: 'SOA',
-        ///     nsname: 'ns1.example.com',
-        ///     hostmaster: 'admin.example.com',
-        ///     serial: 156696742,
-        ///     refresh: 900,
-        ///     retry: 900,
-        ///     expire: 1800,
-        ///     minttl: 60 } ]
-        /// </code>
-        /// <br /><br />
-        /// DNS server operators may choose not to respond to <c>ANY</c> queries. It may be better to call individual methods like resolve4, resolveMx, and so on. For more details, see
-        /// <a href="https://tools.ietf.org/html/rfc8482">RFC 8482</a>.
-        /// </summary>
-        [<Import("resolveAny", "node:dns")>]
-        static member resolveAny(hostname: string, callback: ResolveAny.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Performs a reverse DNS query that resolves an IPv4 or IPv6 address to an
-        /// array of host names.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object, where <c>err.code</c> is
-        /// one of the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#error-codes">DNS error codes</a>.
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        [<Import("reverse", "node:dns")>]
-        static member reverse(ip: string, callback: Dns.Reverse.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Get the default value for <c>order</c> in lookup and <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#dnspromiseslookuphostname-options"><c>dnsPromises.lookup()</c></a>.
-        /// The value could be:
-        /// <br /><br />
-        /// * <c>ipv4first</c>: for <c>order</c> defaulting to <c>ipv4first</c>.
-        /// * <c>ipv6first</c>: for <c>order</c> defaulting to <c>ipv6first</c>.
-        /// * <c>verbatim</c>: for <c>order</c> defaulting to <c>verbatim</c>.
-        /// </summary>
-        /// <remarks>@since v18.17.0</remarks>
-        [<Import("getDefaultResultOrder", "node:dns")>]
-        static member getDefaultResultOrder() : Dns.LookupOptions.Order = jsNative
-
-        /// <summary>
-        /// Sets the IP address and port of servers to be used when performing DNS
-        /// resolution. The <c>servers</c> argument is an array of <a href="https://tools.ietf.org/html/rfc5952#section-6">RFC 5952</a> formatted
-        /// addresses. If the port is the IANA default DNS port (53) it can be omitted.
-        /// <code lang="js">
-        /// dns.setServers([
-        ///   '4.4.4.4',
-        ///   '[2001:4860:4860::8888]',
-        ///   '4.4.4.4:1053',
-        ///   '[2001:4860:4860::8888]:1053',
-        /// ]);
-        /// </code>
-        /// <br /><br />
-        /// An error will be thrown if an invalid address is provided.
-        /// <br /><br />
-        /// The <c>dns.setServers()</c> method must not be called while a DNS query is in
-        /// progress.
-        /// <br /><br />
-        /// The setServers method affects only resolve, <c>dns.resolve*()</c> and reverse (and specifically _not_ lookup).
-        /// <br /><br />
-        /// This method works much like <a href="https://man7.org/linux/man-pages/man5/resolv.conf.5.html">resolve.conf</a>.
-        /// That is, if attempting to resolve with the first server provided results in a <c>NOTFOUND</c> error, the <c>resolve()</c> method will _not_ attempt to resolve with
-        /// subsequent servers provided. Fallback DNS servers will only be used if the
-        /// earlier ones time out or result in some other error.
-        /// </summary>
-        /// <remarks>@since v0.11.3</remarks>
-        /// <param name="servers">array of <a href="https://datatracker.ietf.org/doc/html/rfc5952#section-6">RFC 5952</a> formatted addresses</param>
-        [<Import("setServers", "node:dns")>]
-        static member setServers(servers: string[]) : unit = jsNative
-
-        /// <summary>
-        /// Returns an array of IP address strings, formatted according to <a href="https://tools.ietf.org/html/rfc5952#section-6">RFC 5952</a>,
-        /// that are currently configured for DNS resolution. A string will include a port
-        /// section if a custom port is used.
-        /// <code lang="js">
-        /// [
-        ///   '4.4.4.4',
-        ///   '2001:4860:4860::8888',
-        ///   '4.4.4.4:1053',
-        ///   '[2001:4860:4860::8888]:1053',
-        /// ]
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.11.3</remarks>
-        [<Import("getServers", "node:dns")>]
-        static member getServers() : string[] = jsNative
-
-        /// <summary>
-        /// Set the default value of <c>order</c> in lookup and <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#dnspromiseslookuphostname-options"><c>dnsPromises.lookup()</c></a>.
-        /// The value could be:
-        /// <br /><br />
-        /// * <c>ipv4first</c>: sets default <c>order</c> to <c>ipv4first</c>.
-        /// * <c>ipv6first</c>: sets default <c>order</c> to <c>ipv6first</c>.
-        /// * <c>verbatim</c>: sets default <c>order</c> to <c>verbatim</c>.
-        /// <br /><br />
-        /// The default is <c>verbatim</c> and setDefaultResultOrder have higher
-        /// priority than <a href="https://nodejs.org/docs/latest-v22.x/api/cli.html#--dns-result-orderorder"><c>--dns-result-order</c></a>. When using
-        /// <a href="https://nodejs.org/docs/latest-v22.x/api/worker_threads.html">worker threads</a>, setDefaultResultOrder from the main
-        /// thread won't affect the default dns orders in workers.
-        /// </summary>
-        /// <remarks>@since v16.4.0, v14.18.0</remarks>
-        /// <param name="order">must be <c>'ipv4first'</c>, <c>'ipv6first'</c> or <c>'verbatim'</c>.</param>
-        [<Import("setDefaultResultOrder", "node:dns")>]
-        static member setDefaultResultOrder(order: Dns.LookupOptions.Order) : unit = jsNative
-
-        [<Import("NODATA", "node:dns")>]
-        static member NODATA: string = jsNative
-
-        [<Import("FORMERR", "node:dns")>]
-        static member FORMERR: string = jsNative
-
-        [<Import("SERVFAIL", "node:dns")>]
-        static member SERVFAIL: string = jsNative
-
-        [<Import("NOTFOUND", "node:dns")>]
-        static member NOTFOUND: string = jsNative
-
-        [<Import("NOTIMP", "node:dns")>]
-        static member NOTIMP: string = jsNative
-
-        [<Import("REFUSED", "node:dns")>]
-        static member REFUSED: string = jsNative
-
-        [<Import("BADQUERY", "node:dns")>]
-        static member BADQUERY: string = jsNative
-
-        [<Import("BADNAME", "node:dns")>]
-        static member BADNAME: string = jsNative
-
-        [<Import("BADFAMILY", "node:dns")>]
-        static member BADFAMILY: string = jsNative
-
-        [<Import("BADRESP", "node:dns")>]
-        static member BADRESP: string = jsNative
-
-        [<Import("CONNREFUSED", "node:dns")>]
-        static member CONNREFUSED: string = jsNative
-
-        [<Import("TIMEOUT", "node:dns")>]
-        static member TIMEOUT: string = jsNative
-
-        [<Import("EOF", "node:dns")>]
-        static member EOF: string = jsNative
-
-        [<Import("FILE", "node:dns")>]
-        static member FILE: string = jsNative
-
-        [<Import("NOMEM", "node:dns")>]
-        static member NOMEM: string = jsNative
-
-        [<Import("DESTRUCTION", "node:dns")>]
-        static member DESTRUCTION: string = jsNative
-
-        [<Import("BADSTR", "node:dns")>]
-        static member BADSTR: string = jsNative
-
-        [<Import("BADFLAGS", "node:dns")>]
-        static member BADFLAGS: string = jsNative
-
-        [<Import("NONAME", "node:dns")>]
-        static member NONAME: string = jsNative
-
-        [<Import("BADHINTS", "node:dns")>]
-        static member BADHINTS: string = jsNative
-
-        [<Import("NOTINITIALIZED", "node:dns")>]
-        static member NOTINITIALIZED: string = jsNative
-
-        [<Import("LOADIPHLPAPI", "node:dns")>]
-        static member LOADIPHLPAPI: string = jsNative
-
-        [<Import("ADDRGETNETWORKPARAMS", "node:dns")>]
-        static member ADDRGETNETWORKPARAMS: string = jsNative
-
-        [<Import("CANCELLED", "node:dns")>]
-        static member CANCELLED: string = jsNative
-
-        /// <summary>
-        /// An independent resolver for DNS requests.
-        /// <br /><br />
-        /// Creating a new resolver uses the default server settings. Setting
-        /// the servers used for a resolver using <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#dnssetserversservers"><c>resolver.setServers()</c></a> does not affect
-        /// other resolvers:
-        /// <code lang="js">
-        /// import { Resolver } from 'node:dns';
-        /// const resolver = new Resolver();
-        /// resolver.setServers(['4.4.4.4']);
-        ///
-        /// // This request will use the server at 4.4.4.4, independent of global settings.
-        /// resolver.resolve4('example.org', (err, addresses) =&gt; {
-        ///   // ...
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The following methods from the <c>node:dns</c> module are available:
-        /// <br /><br />
-        /// * <c>resolver.getServers()</c>
-        /// * <c>resolver.resolve()</c>
-        /// * <c>resolver.resolve4()</c>
-        /// * <c>resolver.resolve6()</c>
-        /// * <c>resolver.resolveAny()</c>
-        /// * <c>resolver.resolveCaa()</c>
-        /// * <c>resolver.resolveCname()</c>
-        /// * <c>resolver.resolveMx()</c>
-        /// * <c>resolver.resolveNaptr()</c>
-        /// * <c>resolver.resolveNs()</c>
-        /// * <c>resolver.resolvePtr()</c>
-        /// * <c>resolver.resolveSoa()</c>
-        /// * <c>resolver.resolveSrv()</c>
-        /// * <c>resolver.resolveTxt()</c>
-        /// * <c>resolver.reverse()</c>
-        /// * <c>resolver.setServers()</c>
-        /// </summary>
-        /// <remarks>@since v8.3.0</remarks>
-        [<Import("Resolver", "node:dns"); EmitConstructor>]
-        static member Resolver(?options: ResolverOptions) : Resolver = jsNative
-
-        [<Import("promises", "node:dns")>]
-        static member promises: Promises = jsNative
-
-    module LookupOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Order =
-            | [<CompiledName("ipv4first")>] Ipv4first
-            | [<CompiledName("ipv6first")>] Ipv6first
-            | [<CompiledName("verbatim")>] Verbatim
-
     /// <summary>node:dns/promises</summary>
     module Promises =
+        /// <remarks>TypeScript type: <c>"ENODATA"</c></remarks>
+        [<Literal>]
+        let NODATA = "ENODATA"
+
+        /// <remarks>TypeScript type: <c>"EFORMERR"</c></remarks>
+        [<Literal>]
+        let FORMERR = "EFORMERR"
+
+        /// <remarks>TypeScript type: <c>"ESERVFAIL"</c></remarks>
+        [<Literal>]
+        let SERVFAIL = "ESERVFAIL"
+
+        /// <remarks>TypeScript type: <c>"ENOTFOUND"</c></remarks>
+        [<Literal>]
+        let NOTFOUND = "ENOTFOUND"
+
+        /// <remarks>TypeScript type: <c>"ENOTIMP"</c></remarks>
+        [<Literal>]
+        let NOTIMP = "ENOTIMP"
+
+        /// <remarks>TypeScript type: <c>"EREFUSED"</c></remarks>
+        [<Literal>]
+        let REFUSED = "EREFUSED"
+
+        /// <remarks>TypeScript type: <c>"EBADQUERY"</c></remarks>
+        [<Literal>]
+        let BADQUERY = "EBADQUERY"
+
+        /// <remarks>TypeScript type: <c>"EBADNAME"</c></remarks>
+        [<Literal>]
+        let BADNAME = "EBADNAME"
+
+        /// <remarks>TypeScript type: <c>"EBADFAMILY"</c></remarks>
+        [<Literal>]
+        let BADFAMILY = "EBADFAMILY"
+
+        /// <remarks>TypeScript type: <c>"EBADRESP"</c></remarks>
+        [<Literal>]
+        let BADRESP = "EBADRESP"
+
+        /// <remarks>TypeScript type: <c>"ECONNREFUSED"</c></remarks>
+        [<Literal>]
+        let CONNREFUSED = "ECONNREFUSED"
+
+        /// <remarks>TypeScript type: <c>"ETIMEOUT"</c></remarks>
+        [<Literal>]
+        let TIMEOUT = "ETIMEOUT"
+
+        /// <remarks>TypeScript type: <c>"EOF"</c></remarks>
+        [<Literal>]
+        let EOF = "EOF"
+
+        /// <remarks>TypeScript type: <c>"EFILE"</c></remarks>
+        [<Literal>]
+        let FILE = "EFILE"
+
+        /// <remarks>TypeScript type: <c>"ENOMEM"</c></remarks>
+        [<Literal>]
+        let NOMEM = "ENOMEM"
+
+        /// <remarks>TypeScript type: <c>"EDESTRUCTION"</c></remarks>
+        [<Literal>]
+        let DESTRUCTION = "EDESTRUCTION"
+
+        /// <remarks>TypeScript type: <c>"EBADSTR"</c></remarks>
+        [<Literal>]
+        let BADSTR = "EBADSTR"
+
+        /// <remarks>TypeScript type: <c>"EBADFLAGS"</c></remarks>
+        [<Literal>]
+        let BADFLAGS = "EBADFLAGS"
+
+        /// <remarks>TypeScript type: <c>"ENONAME"</c></remarks>
+        [<Literal>]
+        let NONAME = "ENONAME"
+
+        /// <remarks>TypeScript type: <c>"EBADHINTS"</c></remarks>
+        [<Literal>]
+        let BADHINTS = "EBADHINTS"
+
+        /// <remarks>TypeScript type: <c>"ENOTINITIALIZED"</c></remarks>
+        [<Literal>]
+        let NOTINITIALIZED = "ENOTINITIALIZED"
+
+        /// <remarks>TypeScript type: <c>"ELOADIPHLPAPI"</c></remarks>
+        [<Literal>]
+        let LOADIPHLPAPI = "ELOADIPHLPAPI"
+
+        /// <remarks>TypeScript type: <c>"EADDRGETNETWORKPARAMS"</c></remarks>
+        [<Literal>]
+        let ADDRGETNETWORKPARAMS = "EADDRGETNETWORKPARAMS"
+
+        /// <remarks>TypeScript type: <c>"ECANCELLED"</c></remarks>
+        [<Literal>]
+        let CANCELLED = "ECANCELLED"
+
         /// <summary>
         /// An independent resolver for DNS requests.
         /// <br /><br />
@@ -87213,6 +86963,908 @@ module Dns =
                     [<ParamObject; Emit("$0")>]
                     static member Create(hostname: string, service: string) : Item = jsNative
 
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        /// <summary>
+        /// Limits returned address types to the types of non-loopback addresses configured on the system. For example, IPv4 addresses are
+        /// only returned if the current system has at least one IPv4 address configured.
+        /// </summary>
+        [<Import("ADDRCONFIG", "node:dns")>]
+        static member ADDRCONFIG: float = jsNative
+
+        /// <summary>
+        /// If the IPv6 family was specified, but no IPv6 addresses were found, then return IPv4 mapped IPv6 addresses. It is not supported
+        /// on some operating systems (e.g. FreeBSD 10.1).
+        /// </summary>
+        [<Import("V4MAPPED", "node:dns")>]
+        static member V4MAPPED: float = jsNative
+
+        /// <summary>
+        /// If <c>dns.V4MAPPED</c> is specified, return resolved IPv6 addresses as
+        /// well as IPv4 mapped IPv6 addresses.
+        /// </summary>
+        [<Import("ALL", "node:dns")>]
+        static member ALL: float = jsNative
+
+        /// <summary>
+        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+        /// IPv4 and IPv6 addresses are both returned if found.
+        /// <br /><br />
+        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+        /// properties <c>address</c> and <c>family</c>.
+        /// <br /><br />
+        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+        /// the host name does not exist but also when the lookup fails in other ways
+        /// such as no available file descriptors.
+        /// <br /><br />
+        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+        /// The implementation uses an operating system facility that can associate names
+        /// with addresses and vice versa. This implementation can have subtle but
+        /// important consequences on the behavior of any Node.js program. Please take some
+        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+        /// before using <c>dns.lookup()</c>.
+        /// <br /><br />
+        /// Example usage:
+        /// <code lang="js">
+        /// import dns from 'node:dns';
+        /// const options = {
+        ///   family: 6,
+        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+        /// };
+        /// dns.lookup('example.com', options, (err, address, family) =&gt;
+        ///   console.log('address: %j family: IPv%s', address, family));
+        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+        ///
+        /// // When options.all is true, the result will be an Array.
+        /// options.all = true;
+        /// dns.lookup('example.com', options, (err, addresses) =&gt;
+        ///   console.log('addresses: %j', addresses));
+        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+        /// </code>
+        /// <br /><br />
+        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        [<Import("lookup", "node:dns")>]
+        static member lookup(hostname: string, family: float, callback: Lookup.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+        /// IPv4 and IPv6 addresses are both returned if found.
+        /// <br /><br />
+        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+        /// properties <c>address</c> and <c>family</c>.
+        /// <br /><br />
+        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+        /// the host name does not exist but also when the lookup fails in other ways
+        /// such as no available file descriptors.
+        /// <br /><br />
+        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+        /// The implementation uses an operating system facility that can associate names
+        /// with addresses and vice versa. This implementation can have subtle but
+        /// important consequences on the behavior of any Node.js program. Please take some
+        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+        /// before using <c>dns.lookup()</c>.
+        /// <br /><br />
+        /// Example usage:
+        /// <code lang="js">
+        /// import dns from 'node:dns';
+        /// const options = {
+        ///   family: 6,
+        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+        /// };
+        /// dns.lookup('example.com', options, (err, address, family) =&gt;
+        ///   console.log('address: %j family: IPv%s', address, family));
+        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+        ///
+        /// // When options.all is true, the result will be an Array.
+        /// options.all = true;
+        /// dns.lookup('example.com', options, (err, addresses) =&gt;
+        ///   console.log('addresses: %j', addresses));
+        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+        /// </code>
+        /// <br /><br />
+        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        [<Import("lookup", "node:dns")>]
+        static member lookup(hostname: string, options: LookupOneOptions, callback: Lookup.Callback2) : unit = jsNative
+
+        /// <summary>
+        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+        /// IPv4 and IPv6 addresses are both returned if found.
+        /// <br /><br />
+        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+        /// properties <c>address</c> and <c>family</c>.
+        /// <br /><br />
+        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+        /// the host name does not exist but also when the lookup fails in other ways
+        /// such as no available file descriptors.
+        /// <br /><br />
+        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+        /// The implementation uses an operating system facility that can associate names
+        /// with addresses and vice versa. This implementation can have subtle but
+        /// important consequences on the behavior of any Node.js program. Please take some
+        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+        /// before using <c>dns.lookup()</c>.
+        /// <br /><br />
+        /// Example usage:
+        /// <code lang="js">
+        /// import dns from 'node:dns';
+        /// const options = {
+        ///   family: 6,
+        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+        /// };
+        /// dns.lookup('example.com', options, (err, address, family) =&gt;
+        ///   console.log('address: %j family: IPv%s', address, family));
+        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+        ///
+        /// // When options.all is true, the result will be an Array.
+        /// options.all = true;
+        /// dns.lookup('example.com', options, (err, addresses) =&gt;
+        ///   console.log('addresses: %j', addresses));
+        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+        /// </code>
+        /// <br /><br />
+        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        [<Import("lookup", "node:dns")>]
+        static member lookup(hostname: string, options: LookupAllOptions, callback: Lookup.Callback3) : unit = jsNative
+
+        /// <summary>
+        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+        /// IPv4 and IPv6 addresses are both returned if found.
+        /// <br /><br />
+        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+        /// properties <c>address</c> and <c>family</c>.
+        /// <br /><br />
+        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+        /// the host name does not exist but also when the lookup fails in other ways
+        /// such as no available file descriptors.
+        /// <br /><br />
+        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+        /// The implementation uses an operating system facility that can associate names
+        /// with addresses and vice versa. This implementation can have subtle but
+        /// important consequences on the behavior of any Node.js program. Please take some
+        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+        /// before using <c>dns.lookup()</c>.
+        /// <br /><br />
+        /// Example usage:
+        /// <code lang="js">
+        /// import dns from 'node:dns';
+        /// const options = {
+        ///   family: 6,
+        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+        /// };
+        /// dns.lookup('example.com', options, (err, address, family) =&gt;
+        ///   console.log('address: %j family: IPv%s', address, family));
+        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+        ///
+        /// // When options.all is true, the result will be an Array.
+        /// options.all = true;
+        /// dns.lookup('example.com', options, (err, addresses) =&gt;
+        ///   console.log('addresses: %j', addresses));
+        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+        /// </code>
+        /// <br /><br />
+        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        [<Import("lookup", "node:dns")>]
+        static member lookup(hostname: string, options: LookupOptions, callback: Lookup.Callback4) : unit = jsNative
+
+        /// <summary>
+        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+        /// IPv4 and IPv6 addresses are both returned if found.
+        /// <br /><br />
+        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+        /// properties <c>address</c> and <c>family</c>.
+        /// <br /><br />
+        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+        /// the host name does not exist but also when the lookup fails in other ways
+        /// such as no available file descriptors.
+        /// <br /><br />
+        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+        /// The implementation uses an operating system facility that can associate names
+        /// with addresses and vice versa. This implementation can have subtle but
+        /// important consequences on the behavior of any Node.js program. Please take some
+        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+        /// before using <c>dns.lookup()</c>.
+        /// <br /><br />
+        /// Example usage:
+        /// <code lang="js">
+        /// import dns from 'node:dns';
+        /// const options = {
+        ///   family: 6,
+        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+        /// };
+        /// dns.lookup('example.com', options, (err, address, family) =&gt;
+        ///   console.log('address: %j family: IPv%s', address, family));
+        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+        ///
+        /// // When options.all is true, the result will be an Array.
+        /// options.all = true;
+        /// dns.lookup('example.com', options, (err, addresses) =&gt;
+        ///   console.log('addresses: %j', addresses));
+        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+        /// </code>
+        /// <br /><br />
+        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        [<Import("lookup", "node:dns")>]
+        static member lookup(hostname: string, callback: Lookup.Callback5) : unit = jsNative
+
+        /// <summary>
+        /// Resolves the given <c>address</c> and <c>port</c> into a host name and service using
+        /// the operating system's underlying <c>getnameinfo</c> implementation.
+        /// <br /><br />
+        /// If <c>address</c> is not a valid IP address, a <c>TypeError</c> will be thrown.
+        /// The <c>port</c> will be coerced to a number. If it is not a legal port, a <c>TypeError</c> will be thrown.
+        /// <br /><br />
+        /// On an error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is the error code.
+        /// <code lang="js">
+        /// import dns from 'node:dns';
+        /// dns.lookupService('127.0.0.1', 22, (err, hostname, service) =&gt; {
+        ///   console.log(hostname, service);
+        ///   // Prints: localhost ssh
+        /// });
+        /// </code>
+        /// <br /><br />
+        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+        /// version, it returns a <c>Promise</c> for an <c>Object</c> with <c>hostname</c> and <c>service</c> properties.
+        /// </summary>
+        /// <remarks>@since v0.11.14</remarks>
+        [<Import("lookupService", "node:dns")>]
+        static member lookupService(address: string, port: float, callback: LookupService.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, callback: Resolve.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: Resolve.Promisify.Rrtype, callback: Resolve.Callback2) : unit =
+            jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback3) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback4) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback5) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback6) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback7) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback8) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback9) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback10) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        /// <param name="rrtype">Resource record type.</param>
+        [<Import("resolve", "node:dns")>]
+        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback11) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+        /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
+        /// </summary>
+        /// <remarks>@since v0.1.16</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        [<Import("resolve4", "node:dns")>]
+        static member resolve4(hostname: string, callback: Resolve4.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+        /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
+        /// </summary>
+        /// <remarks>@since v0.1.16</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        [<Import("resolve4", "node:dns")>]
+        static member resolve4(hostname: string, options: ResolveWithTtlOptions, callback: Resolve4.Callback2) : unit =
+            jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+        /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
+        /// </summary>
+        /// <remarks>@since v0.1.16</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        [<Import("resolve4", "node:dns")>]
+        static member resolve4(hostname: string, options: ResolveOptions, callback: Resolve4.Callback3) : unit =
+            jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+        /// will contain an array of IPv6 addresses.
+        /// </summary>
+        /// <remarks>@since v0.1.16</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        [<Import("resolve6", "node:dns")>]
+        static member resolve6(hostname: string, callback: Resolve6.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+        /// will contain an array of IPv6 addresses.
+        /// </summary>
+        /// <remarks>@since v0.1.16</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        [<Import("resolve6", "node:dns")>]
+        static member resolve6(hostname: string, options: ResolveWithTtlOptions, callback: Resolve6.Callback2) : unit =
+            jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+        /// will contain an array of IPv6 addresses.
+        /// </summary>
+        /// <remarks>@since v0.1.16</remarks>
+        /// <param name="hostname">Host name to resolve.</param>
+        [<Import("resolve6", "node:dns")>]
+        static member resolve6(hostname: string, options: ResolveOptions, callback: Resolve6.Callback3) : unit =
+            jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve <c>CNAME</c> records for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+        /// will contain an array of canonical name records available for the <c>hostname</c> (e.g. <c>['bar.example.com']</c>).
+        /// </summary>
+        /// <remarks>@since v0.3.2</remarks>
+        [<Import("resolveCname", "node:dns")>]
+        static member resolveCname(hostname: string, callback: ResolveCname.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve <c>CAA</c> records for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+        /// will contain an array of certification authority authorization records
+        /// available for the <c>hostname</c> (e.g. <c>[{critical: 0, iodef: 'mailto:pki@example.com'}, {critical: 128, issue: 'pki.example.com'}]</c>).
+        /// </summary>
+        /// <remarks>@since v15.0.0, v14.17.0</remarks>
+        [<Import("resolveCaa", "node:dns")>]
+        static member resolveCaa(hostname: string, callback: ResolveCaa.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve mail exchange records (<c>MX</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
+        /// contain an array of objects containing both a <c>priority</c> and <c>exchange</c> property (e.g. <c>[{priority: 10, exchange: 'mx.example.com'}, ...]</c>).
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        [<Import("resolveMx", "node:dns")>]
+        static member resolveMx(hostname: string, callback: ResolveMx.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve regular expression-based records (<c>NAPTR</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will contain an array of
+        /// objects with the following properties:
+        /// <br /><br />
+        /// * <c>flags</c>
+        /// * <c>service</c>
+        /// * <c>regexp</c>
+        /// * <c>replacement</c>
+        /// * <c>order</c>
+        /// * <c>preference</c>
+        /// <code lang="js">
+        /// {
+        ///   flags: 's',
+        ///   service: 'SIP+D2U',
+        ///   regexp: '',
+        ///   replacement: '_sip._udp.example.com',
+        ///   order: 30,
+        ///   preference: 100
+        /// }
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v0.9.12</remarks>
+        [<Import("resolveNaptr", "node:dns")>]
+        static member resolveNaptr(hostname: string, callback: ResolveNaptr.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve name server records (<c>NS</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
+        /// contain an array of name server records available for <c>hostname</c> (e.g. <c>['ns1.example.com', 'ns2.example.com']</c>).
+        /// </summary>
+        /// <remarks>@since v0.1.90</remarks>
+        [<Import("resolveNs", "node:dns")>]
+        static member resolveNs(hostname: string, callback: ResolveNs.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve pointer records (<c>PTR</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
+        /// be an array of strings containing the reply records.
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        [<Import("resolvePtr", "node:dns")>]
+        static member resolvePtr(hostname: string, callback: ResolvePtr.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve a start of authority record (<c>SOA</c> record) for
+        /// the <c>hostname</c>. The <c>address</c> argument passed to the <c>callback</c> function will
+        /// be an object with the following properties:
+        /// <br /><br />
+        /// * <c>nsname</c>
+        /// * <c>hostmaster</c>
+        /// * <c>serial</c>
+        /// * <c>refresh</c>
+        /// * <c>retry</c>
+        /// * <c>expire</c>
+        /// * <c>minttl</c>
+        /// <code lang="js">
+        /// {
+        ///   nsname: 'ns.example.com',
+        ///   hostmaster: 'root.example.com',
+        ///   serial: 2013101809,
+        ///   refresh: 10000,
+        ///   retry: 2400,
+        ///   expire: 604800,
+        ///   minttl: 3600
+        /// }
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v0.11.10</remarks>
+        [<Import("resolveSoa", "node:dns")>]
+        static member resolveSoa(hostname: string, callback: ResolveSoa.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve service records (<c>SRV</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
+        /// be an array of objects with the following properties:
+        /// <br /><br />
+        /// * <c>priority</c>
+        /// * <c>weight</c>
+        /// * <c>port</c>
+        /// * <c>name</c>
+        /// <code lang="js">
+        /// {
+        ///   priority: 10,
+        ///   weight: 5,
+        ///   port: 21223,
+        ///   name: 'service.example.com'
+        /// }
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        [<Import("resolveSrv", "node:dns")>]
+        static member resolveSrv(hostname: string, callback: ResolveSrv.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve certificate associations (<c>TLSA</c> records) for
+        /// the <c>hostname</c>. The <c>records</c> argument passed to the <c>callback</c> function is an
+        /// array of objects with these properties:
+        /// <br /><br />
+        /// * <c>certUsage</c>
+        /// * <c>selector</c>
+        /// * <c>match</c>
+        /// * <c>data</c>
+        /// <code lang="js">
+        /// {
+        ///   certUsage: 3,
+        ///   selector: 1,
+        ///   match: 1,
+        ///   data: [ArrayBuffer]
+        /// }
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v22.15.0</remarks>
+        [<Import("resolveTlsa", "node:dns")>]
+        static member resolveTlsa(hostname: string, callback: ResolveTlsa.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve text queries (<c>TXT</c> records) for the <c>hostname</c>. The <c>records</c> argument passed to the <c>callback</c> function is a
+        /// two-dimensional array of the text records available for <c>hostname</c> (e.g.<c>[ ['v=spf1 ip4:0.0.0.0 ', '~all' ] ]</c>). Each sub-array contains TXT chunks of
+        /// one record. Depending on the use case, these could be either joined together or
+        /// treated separately.
+        /// </summary>
+        /// <remarks>@since v0.1.27</remarks>
+        [<Import("resolveTxt", "node:dns")>]
+        static member resolveTxt(hostname: string, callback: ResolveTxt.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Uses the DNS protocol to resolve all records (also known as <c>ANY</c> or <c>*</c> query).
+        /// The <c>ret</c> argument passed to the <c>callback</c> function will be an array containing
+        /// various types of records. Each object has a property <c>type</c> that indicates the
+        /// type of the current record. And depending on the <c>type</c>, additional properties
+        /// will be present on the object:
+        /// <br /><br />
+        /// &lt;omitted&gt;
+        /// <br /><br />
+        /// Here is an example of the <c>ret</c> object passed to the callback:
+        /// <code lang="js">
+        /// [ { type: 'A', address: '127.0.0.1', ttl: 299 },
+        ///   { type: 'CNAME', value: 'example.com' },
+        ///   { type: 'MX', exchange: 'alt4.aspmx.l.example.com', priority: 50 },
+        ///   { type: 'NS', value: 'ns1.example.com' },
+        ///   { type: 'TXT', entries: [ 'v=spf1 include:_spf.example.com ~all' ] },
+        ///   { type: 'SOA',
+        ///     nsname: 'ns1.example.com',
+        ///     hostmaster: 'admin.example.com',
+        ///     serial: 156696742,
+        ///     refresh: 900,
+        ///     retry: 900,
+        ///     expire: 1800,
+        ///     minttl: 60 } ]
+        /// </code>
+        /// <br /><br />
+        /// DNS server operators may choose not to respond to <c>ANY</c> queries. It may be better to call individual methods like resolve4, resolveMx, and so on. For more details, see
+        /// <a href="https://tools.ietf.org/html/rfc8482">RFC 8482</a>.
+        /// </summary>
+        [<Import("resolveAny", "node:dns")>]
+        static member resolveAny(hostname: string, callback: ResolveAny.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Performs a reverse DNS query that resolves an IPv4 or IPv6 address to an
+        /// array of host names.
+        /// <br /><br />
+        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object, where <c>err.code</c> is
+        /// one of the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#error-codes">DNS error codes</a>.
+        /// </summary>
+        /// <remarks>@since v0.1.16</remarks>
+        [<Import("reverse", "node:dns")>]
+        static member reverse(ip: string, callback: Dns.Reverse.Callback) : unit = jsNative
+
+        /// <summary>
+        /// Get the default value for <c>order</c> in lookup and <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#dnspromiseslookuphostname-options"><c>dnsPromises.lookup()</c></a>.
+        /// The value could be:
+        /// <br /><br />
+        /// * <c>ipv4first</c>: for <c>order</c> defaulting to <c>ipv4first</c>.
+        /// * <c>ipv6first</c>: for <c>order</c> defaulting to <c>ipv6first</c>.
+        /// * <c>verbatim</c>: for <c>order</c> defaulting to <c>verbatim</c>.
+        /// </summary>
+        /// <remarks>@since v18.17.0</remarks>
+        [<Import("getDefaultResultOrder", "node:dns")>]
+        static member getDefaultResultOrder() : Dns.LookupOptions.Order = jsNative
+
+        /// <summary>
+        /// Sets the IP address and port of servers to be used when performing DNS
+        /// resolution. The <c>servers</c> argument is an array of <a href="https://tools.ietf.org/html/rfc5952#section-6">RFC 5952</a> formatted
+        /// addresses. If the port is the IANA default DNS port (53) it can be omitted.
+        /// <code lang="js">
+        /// dns.setServers([
+        ///   '4.4.4.4',
+        ///   '[2001:4860:4860::8888]',
+        ///   '4.4.4.4:1053',
+        ///   '[2001:4860:4860::8888]:1053',
+        /// ]);
+        /// </code>
+        /// <br /><br />
+        /// An error will be thrown if an invalid address is provided.
+        /// <br /><br />
+        /// The <c>dns.setServers()</c> method must not be called while a DNS query is in
+        /// progress.
+        /// <br /><br />
+        /// The setServers method affects only resolve, <c>dns.resolve*()</c> and reverse (and specifically _not_ lookup).
+        /// <br /><br />
+        /// This method works much like <a href="https://man7.org/linux/man-pages/man5/resolv.conf.5.html">resolve.conf</a>.
+        /// That is, if attempting to resolve with the first server provided results in a <c>NOTFOUND</c> error, the <c>resolve()</c> method will _not_ attempt to resolve with
+        /// subsequent servers provided. Fallback DNS servers will only be used if the
+        /// earlier ones time out or result in some other error.
+        /// </summary>
+        /// <remarks>@since v0.11.3</remarks>
+        /// <param name="servers">array of <a href="https://datatracker.ietf.org/doc/html/rfc5952#section-6">RFC 5952</a> formatted addresses</param>
+        [<Import("setServers", "node:dns")>]
+        static member setServers(servers: string[]) : unit = jsNative
+
+        /// <summary>
+        /// Returns an array of IP address strings, formatted according to <a href="https://tools.ietf.org/html/rfc5952#section-6">RFC 5952</a>,
+        /// that are currently configured for DNS resolution. A string will include a port
+        /// section if a custom port is used.
+        /// <code lang="js">
+        /// [
+        ///   '4.4.4.4',
+        ///   '2001:4860:4860::8888',
+        ///   '4.4.4.4:1053',
+        ///   '[2001:4860:4860::8888]:1053',
+        /// ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v0.11.3</remarks>
+        [<Import("getServers", "node:dns")>]
+        static member getServers() : string[] = jsNative
+
+        /// <summary>
+        /// Set the default value of <c>order</c> in lookup and <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#dnspromiseslookuphostname-options"><c>dnsPromises.lookup()</c></a>.
+        /// The value could be:
+        /// <br /><br />
+        /// * <c>ipv4first</c>: sets default <c>order</c> to <c>ipv4first</c>.
+        /// * <c>ipv6first</c>: sets default <c>order</c> to <c>ipv6first</c>.
+        /// * <c>verbatim</c>: sets default <c>order</c> to <c>verbatim</c>.
+        /// <br /><br />
+        /// The default is <c>verbatim</c> and setDefaultResultOrder have higher
+        /// priority than <a href="https://nodejs.org/docs/latest-v22.x/api/cli.html#--dns-result-orderorder"><c>--dns-result-order</c></a>. When using
+        /// <a href="https://nodejs.org/docs/latest-v22.x/api/worker_threads.html">worker threads</a>, setDefaultResultOrder from the main
+        /// thread won't affect the default dns orders in workers.
+        /// </summary>
+        /// <remarks>@since v16.4.0, v14.18.0</remarks>
+        /// <param name="order">must be <c>'ipv4first'</c>, <c>'ipv6first'</c> or <c>'verbatim'</c>.</param>
+        [<Import("setDefaultResultOrder", "node:dns")>]
+        static member setDefaultResultOrder(order: Dns.LookupOptions.Order) : unit = jsNative
+
+        [<Import("NODATA", "node:dns")>]
+        static member NODATA: string = jsNative
+
+        [<Import("FORMERR", "node:dns")>]
+        static member FORMERR: string = jsNative
+
+        [<Import("SERVFAIL", "node:dns")>]
+        static member SERVFAIL: string = jsNative
+
+        [<Import("NOTFOUND", "node:dns")>]
+        static member NOTFOUND: string = jsNative
+
+        [<Import("NOTIMP", "node:dns")>]
+        static member NOTIMP: string = jsNative
+
+        [<Import("REFUSED", "node:dns")>]
+        static member REFUSED: string = jsNative
+
+        [<Import("BADQUERY", "node:dns")>]
+        static member BADQUERY: string = jsNative
+
+        [<Import("BADNAME", "node:dns")>]
+        static member BADNAME: string = jsNative
+
+        [<Import("BADFAMILY", "node:dns")>]
+        static member BADFAMILY: string = jsNative
+
+        [<Import("BADRESP", "node:dns")>]
+        static member BADRESP: string = jsNative
+
+        [<Import("CONNREFUSED", "node:dns")>]
+        static member CONNREFUSED: string = jsNative
+
+        [<Import("TIMEOUT", "node:dns")>]
+        static member TIMEOUT: string = jsNative
+
+        [<Import("EOF", "node:dns")>]
+        static member EOF: string = jsNative
+
+        [<Import("FILE", "node:dns")>]
+        static member FILE: string = jsNative
+
+        [<Import("NOMEM", "node:dns")>]
+        static member NOMEM: string = jsNative
+
+        [<Import("DESTRUCTION", "node:dns")>]
+        static member DESTRUCTION: string = jsNative
+
+        [<Import("BADSTR", "node:dns")>]
+        static member BADSTR: string = jsNative
+
+        [<Import("BADFLAGS", "node:dns")>]
+        static member BADFLAGS: string = jsNative
+
+        [<Import("NONAME", "node:dns")>]
+        static member NONAME: string = jsNative
+
+        [<Import("BADHINTS", "node:dns")>]
+        static member BADHINTS: string = jsNative
+
+        [<Import("NOTINITIALIZED", "node:dns")>]
+        static member NOTINITIALIZED: string = jsNative
+
+        [<Import("LOADIPHLPAPI", "node:dns")>]
+        static member LOADIPHLPAPI: string = jsNative
+
+        [<Import("ADDRGETNETWORKPARAMS", "node:dns")>]
+        static member ADDRGETNETWORKPARAMS: string = jsNative
+
+        [<Import("CANCELLED", "node:dns")>]
+        static member CANCELLED: string = jsNative
+
+        /// <summary>
+        /// An independent resolver for DNS requests.
+        /// <br /><br />
+        /// Creating a new resolver uses the default server settings. Setting
+        /// the servers used for a resolver using <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#dnssetserversservers"><c>resolver.setServers()</c></a> does not affect
+        /// other resolvers:
+        /// <code lang="js">
+        /// import { Resolver } from 'node:dns';
+        /// const resolver = new Resolver();
+        /// resolver.setServers(['4.4.4.4']);
+        ///
+        /// // This request will use the server at 4.4.4.4, independent of global settings.
+        /// resolver.resolve4('example.org', (err, addresses) =&gt; {
+        ///   // ...
+        /// });
+        /// </code>
+        /// <br /><br />
+        /// The following methods from the <c>node:dns</c> module are available:
+        /// <br /><br />
+        /// * <c>resolver.getServers()</c>
+        /// * <c>resolver.resolve()</c>
+        /// * <c>resolver.resolve4()</c>
+        /// * <c>resolver.resolve6()</c>
+        /// * <c>resolver.resolveAny()</c>
+        /// * <c>resolver.resolveCaa()</c>
+        /// * <c>resolver.resolveCname()</c>
+        /// * <c>resolver.resolveMx()</c>
+        /// * <c>resolver.resolveNaptr()</c>
+        /// * <c>resolver.resolveNs()</c>
+        /// * <c>resolver.resolvePtr()</c>
+        /// * <c>resolver.resolveSoa()</c>
+        /// * <c>resolver.resolveSrv()</c>
+        /// * <c>resolver.resolveTxt()</c>
+        /// * <c>resolver.reverse()</c>
+        /// * <c>resolver.setServers()</c>
+        /// </summary>
+        /// <remarks>@since v8.3.0</remarks>
+        [<Import("Resolver", "node:dns"); EmitConstructor>]
+        static member Resolver(?options: ResolverOptions) : Resolver = jsNative
+
+        [<Import("promises", "node:dns")>]
+        static member promises: Promises = jsNative
+
+    module LookupOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Order =
+            | [<CompiledName("ipv4first")>] Ipv4first
+            | [<CompiledName("ipv6first")>] Ipv6first
+            | [<CompiledName("verbatim")>] Verbatim
+
     module Reverse =
         type Callback = delegate of err: ErrnoException option * hostnames: string[] -> unit
 
@@ -88289,12 +88941,6 @@ module Domain =
 module Event2 =
     type EventPhase =
         | N0 = 0
-        | N2 = 2
-
-module EventSource =
-    type ReadyState =
-        | N0 = 0
-        | N1 = 1
         | N2 = 2
 
 /// <summary>node:events</summary>
@@ -91131,10 +91777,16 @@ module Fs =
 
     [<Interface>]
     type BufferEncodingOption2 =
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
         abstract encoding: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(encoding: string) : BufferEncodingOption2 = jsNative
+        [<Emit("({ encoding: 'buffer' })")>]
+        static member Create() : BufferEncodingOption2 = jsNative
+
+    module BufferEncodingOption2 =
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+        [<Literal>]
+        let encoding = "buffer"
 
     [<Interface>]
     type ObjectEncodingOptions =
@@ -95357,13 +96009,19 @@ module Fs =
     [<Interface>]
     type WatchOptionsWithBufferEncoding =
         inherit WatchOptions
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
         abstract encoding: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
         static member Create
-            (encoding: string, ?signal: AbortSignal, ?persistent: bool, ?recursive: bool)
+            (?signal: AbortSignal, ?persistent: bool, ?recursive: bool)
             : WatchOptionsWithBufferEncoding =
             jsNative
+
+    module WatchOptionsWithBufferEncoding =
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+        [<Literal>]
+        let encoding = "buffer"
 
     [<Interface>]
     type WatchOptionsWithStringEncoding =
@@ -102970,12 +103628,12 @@ module Fs =
         [<Interface>]
         type WatchOptionsWithBufferEncoding =
             inherit WatchOptions
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
             abstract encoding: string with get, set
 
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
             static member Create
                 (
-                    encoding: string,
                     ?signal: AbortSignal,
                     ?persistent: bool,
                     ?recursive: bool,
@@ -102983,6 +103641,11 @@ module Fs =
                     ?overflow: Fs.Promises.WatchOptions.Overflow
                 ) : WatchOptionsWithBufferEncoding =
                 jsNative
+
+        module WatchOptionsWithBufferEncoding =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+            [<Literal>]
+            let encoding = "buffer"
 
         [<Interface>]
         type WatchOptionsWithStringEncoding =
@@ -104552,12 +105215,18 @@ module Fs =
 
             [<Interface>]
             type Options2 =
+                /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
                 abstract encoding: string with get, set
                 abstract withFileTypes: bool option with get, set
                 abstract recursive: bool option with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(encoding: string, ?withFileTypes: bool, ?recursive: bool) : Options2 = jsNative
+                [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
+                static member Create(?withFileTypes: bool, ?recursive: bool) : Options2 = jsNative
+
+            module Options2 =
+                /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+                [<Literal>]
+                let encoding = "buffer"
 
             [<Interface>]
             type Options3 =
@@ -104581,12 +105250,18 @@ module Fs =
 
             [<Interface>]
             type Options5 =
+                /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
                 abstract encoding: string with get, set
                 abstract withFileTypes: bool with get, set
                 abstract recursive: bool option with get, set
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(encoding: string, withFileTypes: bool, ?recursive: bool) : Options5 = jsNative
+                [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
+                static member Create(withFileTypes: bool, ?recursive: bool) : Options5 = jsNative
+
+            module Options5 =
+                /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+                [<Literal>]
+                let encoding = "buffer"
 
         module Stat =
             [<Interface>]
@@ -104705,12 +105380,18 @@ module Fs =
 
         [<Interface>]
         type Options2 =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
             abstract encoding: string with get, set
             abstract withFileTypes: bool option with get, set
             abstract recursive: bool option with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(encoding: string, ?withFileTypes: bool, ?recursive: bool) : Options2 = jsNative
+            [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
+            static member Create(?withFileTypes: bool, ?recursive: bool) : Options2 = jsNative
+
+        module Options2 =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+            [<Literal>]
+            let encoding = "buffer"
 
         [<Interface>]
         type Options3 =
@@ -104733,12 +105414,18 @@ module Fs =
 
         [<Interface>]
         type Options5 =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
             abstract encoding: string with get, set
             abstract withFileTypes: bool with get, set
             abstract recursive: bool option with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(encoding: string, withFileTypes: bool, ?recursive: bool) : Options5 = jsNative
+            [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
+            static member Create(withFileTypes: bool, ?recursive: bool) : Options5 = jsNative
+
+        module Options5 =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+            [<Literal>]
+            let encoding = "buffer"
 
     module StatSyncFn =
         [<Interface>]
@@ -104893,15 +105580,18 @@ module Gc =
     [<Interface>]
     type Options =
         inherit GCOptions
+        /// <remarks>TypeScript type: <c>"async"</c></remarks>
         abstract execution: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (execution: string, ?flavor: Gc.Options.Flavor, ?``type``: Gc.Options.Type, ?filename: string)
-            : Options =
+        [<ParamObject; Emit("({ execution: 'async', ...$0 })")>]
+        static member Create(?flavor: Gc.Options.Flavor, ?``type``: Gc.Options.Type, ?filename: string) : Options =
             jsNative
 
     module Options =
+        /// <remarks>TypeScript type: <c>"async"</c></remarks>
+        [<Literal>]
+        let execution = "async"
+
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Flavor =
             | [<CompiledName("last-resort")>] LastResort
@@ -126798,6 +127488,7 @@ module Http2 =
         /// an empty string.
         /// </summary>
         /// <remarks>@since v8.4.0</remarks>
+        /// <remarks>TypeScript type: <c>""</c></remarks>
         abstract statusMessage: string with get, set
         /// <summary>
         /// This method adds HTTP trailing headers (a header but at the end of the
@@ -128575,6 +129266,36 @@ module Http2 =
             with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
             and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
 
+    module Http2ServerResponse =
+        /// <summary>
+        /// Status message is not supported by HTTP/2 (RFC 7540 8.1.2.4). It returns
+        /// an empty string.
+        /// </summary>
+        /// <remarks>@since v8.4.0</remarks>
+        /// <remarks>TypeScript type: <c>""</c></remarks>
+        [<Literal>]
+        let statusMessage = ""
+
+        module Compose =
+            [<Interface>]
+            type Options =
+                abstract signal: AbortSignal with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(signal: AbortSignal) : Options = jsNative
+
+        module CreatePushResponse =
+            type Callback =
+                delegate of err: exn option * res: Http2.Http2ServerResponse<Http2.Http2ServerRequest> -> unit
+
+        module Pipe =
+            [<Interface>]
+            type Options =
+                abstract ``end``: bool option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?``end``: bool) : Options = jsNative
+
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
@@ -129283,27 +130004,6 @@ module Http2 =
 
         module PrependOnceListener =
             type Listener = delegate of hadError: bool * code: float -> unit
-
-    module Http2ServerResponse =
-        module Compose =
-            [<Interface>]
-            type Options =
-                abstract signal: AbortSignal with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(signal: AbortSignal) : Options = jsNative
-
-        module CreatePushResponse =
-            type Callback =
-                delegate of err: exn option * res: Http2.Http2ServerResponse<Http2.Http2ServerRequest> -> unit
-
-        module Pipe =
-            [<Interface>]
-            type Options =
-                abstract ``end``: bool option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(?``end``: bool) : Options = jsNative
 
     module Http2Session =
         module AddListener =
@@ -149746,39 +150446,37 @@ module Os =
     [<Interface>]
     type NetworkInterfaceInfoIPv4 =
         inherit NetworkInterfaceBase
+        /// <remarks>TypeScript type: <c>"IPv4"</c></remarks>
         abstract family: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ family: 'IPv4', ...$0 })")>]
         static member Create
-            (
-                family: string,
-                address: string,
-                netmask: string,
-                mac: string,
-                ``internal``: bool,
-                ?cidr: string,
-                ?scopeid: float
-            ) : NetworkInterfaceInfoIPv4 =
+            (address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string, ?scopeid: float)
+            : NetworkInterfaceInfoIPv4 =
             jsNative
+
+    module NetworkInterfaceInfoIPv4 =
+        /// <remarks>TypeScript type: <c>"IPv4"</c></remarks>
+        [<Literal>]
+        let family = "IPv4"
 
     [<Interface>]
     type NetworkInterfaceInfoIPv6 =
         inherit NetworkInterfaceBase
+        /// <remarks>TypeScript type: <c>"IPv6"</c></remarks>
         abstract family: string with get, set
         abstract scopeid: float with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ family: 'IPv6', ...$0 })")>]
         static member Create
-            (
-                family: string,
-                scopeid: float,
-                address: string,
-                netmask: string,
-                mac: string,
-                ``internal``: bool,
-                ?cidr: string
-            ) : NetworkInterfaceInfoIPv6 =
+            (scopeid: float, address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string)
+            : NetworkInterfaceInfoIPv6 =
             jsNative
+
+    module NetworkInterfaceInfoIPv6 =
+        /// <remarks>TypeScript type: <c>"IPv6"</c></remarks>
+        [<Literal>]
+        let family = "IPv6"
 
     [<Interface>]
     type UserInfo<'T> =
@@ -149818,10 +150516,16 @@ module Os =
     [<Interface>]
     type UserInfoOptionsWithBufferEncoding =
         inherit UserInfoOptions
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
         abstract encoding: string with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(encoding: string) : UserInfoOptionsWithBufferEncoding = jsNative
+        [<Emit("({ encoding: 'buffer' })")>]
+        static member Create() : UserInfoOptionsWithBufferEncoding = jsNative
+
+    module UserInfoOptionsWithBufferEncoding =
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+        [<Literal>]
+        let encoding = "buffer"
 
     [<Interface>]
     type UserInfoOptionsWithStringEncoding =
@@ -150570,6 +151274,12 @@ module PerfHooks =
         inherit PerformanceEntry
         abstract detail: obj
         /// <summary>
+        /// The total number of milliseconds elapsed for this entry. This value will not
+        /// be meaningful for all Performance Entry types.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        abstract duration: float
+        /// <summary>
         /// The type of the performance entry. It may be one of:
         /// <br /><br />
         /// * <c>'node'</c> (Node.js only)
@@ -150580,13 +151290,36 @@ module PerfHooks =
         /// * <c>'http2'</c> (Node.js only)
         /// * <c>'http'</c> (Node.js only)
         /// </summary>
+        /// <remarks>TypeScript type: <c>"mark"</c></remarks>
         abstract entryType: string
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (detail: obj, duration: float, entryType: string, name: string, startTime: float, toJSON: (unit -> obj))
-            : PerformanceMark =
+        [<ParamObject; Emit("({ duration: 0, entryType: 'mark', ...$0 })")>]
+        static member Create(detail: obj, name: string, startTime: float, toJSON: (unit -> obj)) : PerformanceMark =
             jsNative
+
+    module PerformanceMark =
+        /// <summary>
+        /// The total number of milliseconds elapsed for this entry. This value will not
+        /// be meaningful for all Performance Entry types.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let duration = 0.0
+
+        /// <summary>
+        /// The type of the performance entry. It may be one of:
+        /// <br /><br />
+        /// * <c>'node'</c> (Node.js only)
+        /// * <c>'mark'</c> (available on the Web)
+        /// * <c>'measure'</c> (available on the Web)
+        /// * <c>'gc'</c> (Node.js only)
+        /// * <c>'function'</c> (Node.js only)
+        /// * <c>'http2'</c> (Node.js only)
+        /// * <c>'http'</c> (Node.js only)
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"mark"</c></remarks>
+        [<Literal>]
+        let entryType = "mark"
 
     /// <summary>
     /// Exposes measures created via the <c>Performance.measure()</c> method.
@@ -150609,13 +151342,30 @@ module PerfHooks =
         /// * <c>'http2'</c> (Node.js only)
         /// * <c>'http'</c> (Node.js only)
         /// </summary>
+        /// <remarks>TypeScript type: <c>"measure"</c></remarks>
         abstract entryType: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ entryType: 'measure', ...$0 })")>]
         static member Create
-            (detail: obj, entryType: string, duration: float, name: string, startTime: float, toJSON: (unit -> obj))
+            (detail: obj, duration: float, name: string, startTime: float, toJSON: (unit -> obj))
             : PerformanceMeasure =
             jsNative
+
+    module PerformanceMeasure =
+        /// <summary>
+        /// The type of the performance entry. It may be one of:
+        /// <br /><br />
+        /// * <c>'node'</c> (Node.js only)
+        /// * <c>'mark'</c> (available on the Web)
+        /// * <c>'measure'</c> (available on the Web)
+        /// * <c>'gc'</c> (Node.js only)
+        /// * <c>'function'</c> (Node.js only)
+        /// * <c>'http2'</c> (Node.js only)
+        /// * <c>'http'</c> (Node.js only)
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"measure"</c></remarks>
+        [<Literal>]
+        let entryType = "measure"
 
     [<Interface>]
     type UVMetrics =
@@ -150656,6 +151406,7 @@ module PerfHooks =
         /// * <c>'http2'</c> (Node.js only)
         /// * <c>'http'</c> (Node.js only)
         /// </summary>
+        /// <remarks>TypeScript type: <c>"node"</c></remarks>
         abstract entryType: string
         /// <summary>
         /// The high resolution millisecond timestamp at which the Node.js process
@@ -150715,10 +151466,9 @@ module PerfHooks =
         /// <remarks>@since v8.5.0</remarks>
         abstract v8Start: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ entryType: 'node', ...$0 })")>]
         static member Create
             (
-                entryType: string,
                 bootstrapComplete: float,
                 environment: float,
                 idleTime: float,
@@ -150733,6 +151483,22 @@ module PerfHooks =
                 toJSON: (unit -> obj)
             ) : PerformanceNodeTiming =
             jsNative
+
+    module PerformanceNodeTiming =
+        /// <summary>
+        /// The type of the performance entry. It may be one of:
+        /// <br /><br />
+        /// * <c>'node'</c> (Node.js only)
+        /// * <c>'mark'</c> (available on the Web)
+        /// * <c>'measure'</c> (available on the Web)
+        /// * <c>'gc'</c> (Node.js only)
+        /// * <c>'function'</c> (Node.js only)
+        /// * <c>'http2'</c> (Node.js only)
+        /// * <c>'http'</c> (Node.js only)
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"node"</c></remarks>
+        [<Literal>]
+        let entryType = "node"
 
     [<Interface>]
     type EventLoopUtilization =
@@ -151210,6 +151976,7 @@ module PerfHooks =
         /// * <c>'http2'</c> (Node.js only)
         /// * <c>'http'</c> (Node.js only)
         /// </summary>
+        /// <remarks>TypeScript type: <c>"resource"</c></remarks>
         abstract entryType: string
         /// <summary>
         /// The high resolution millisecond timestamp at immediately before dispatching the <c>fetch</c>
@@ -151295,10 +152062,9 @@ module PerfHooks =
         /// <remarks>@since v18.2.0, v16.17.0</remarks>
         abstract decodedBodySize: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("({ entryType: 'resource', ...$0 })")>]
         static member Create
             (
-                entryType: string,
                 workerStart: float,
                 redirectStart: float,
                 redirectEnd: float,
@@ -151319,6 +152085,22 @@ module PerfHooks =
                 startTime: float
             ) : PerformanceResourceTiming =
             jsNative
+
+    module PerformanceResourceTiming =
+        /// <summary>
+        /// The type of the performance entry. It may be one of:
+        /// <br /><br />
+        /// * <c>'node'</c> (Node.js only)
+        /// * <c>'mark'</c> (available on the Web)
+        /// * <c>'measure'</c> (available on the Web)
+        /// * <c>'gc'</c> (Node.js only)
+        /// * <c>'function'</c> (Node.js only)
+        /// * <c>'http2'</c> (Node.js only)
+        /// * <c>'http'</c> (Node.js only)
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"resource"</c></remarks>
+        [<Literal>]
+        let entryType = "resource"
 
     [<Interface>]
     type EventLoopMonitorOptions =
@@ -153335,10 +154117,32 @@ module Process =
         /// </summary>
         /// <remarks>@since v0.5.8</remarks>
         abstract isTTY: bool with get, set
+        /// <remarks>TypeScript type: <c>2</c></remarks>
         abstract fd: float with get, set
 
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> AsyncIterator<obj, obj, obj>
+
+    module Stderr =
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let fd = 2.0
+
+        module Compose =
+            [<Interface>]
+            type Options =
+                abstract signal: AbortSignal with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(signal: AbortSignal) : Options = jsNative
+
+        module Pipe =
+            [<Interface>]
+            type Options =
+                abstract ``end``: bool option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?``end``: bool) : Options = jsNative
 
     type Stdin =
         /// <summary>
@@ -155347,10 +156151,32 @@ module Process =
         /// </summary>
         /// <remarks>@since v0.5.8</remarks>
         abstract isTTY: bool with get, set
+        /// <remarks>TypeScript type: <c>0</c></remarks>
         abstract fd: float with get, set
 
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> AsyncIterator<obj, obj, obj>
+
+    module Stdin =
+        /// <remarks>TypeScript type: <c>0</c></remarks>
+        [<Literal>]
+        let fd = 0.0
+
+        module Compose =
+            [<Interface>]
+            type Options =
+                abstract signal: AbortSignal with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(signal: AbortSignal) : Options = jsNative
+
+        module Pipe =
+            [<Interface>]
+            type Options =
+                abstract ``end``: bool option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?``end``: bool) : Options = jsNative
 
     type Stdout =
         /// <summary>
@@ -156951,10 +157777,32 @@ module Process =
         /// </summary>
         /// <remarks>@since v0.5.8</remarks>
         abstract isTTY: bool with get, set
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract fd: float with get, set
 
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> AsyncIterator<obj, obj, obj>
+
+    module Stdout =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let fd = 1.0
+
+        module Compose =
+            [<Interface>]
+            type Options =
+                abstract signal: AbortSignal with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(signal: AbortSignal) : Options = jsNative
+
+        module Pipe =
+            [<Interface>]
+            type Options =
+                abstract ``end``: bool option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?``end``: bool) : Options = jsNative
 
     module AddListener =
         type Listener = delegate of error: exn * origin: Process.AddListener.Listener.Origin -> unit
@@ -157002,57 +157850,6 @@ module Process =
 
     module PrependOnceListener =
         type Listener = delegate of value: obj * source: float -> unit
-
-    module Stderr =
-        module Compose =
-            [<Interface>]
-            type Options =
-                abstract signal: AbortSignal with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(signal: AbortSignal) : Options = jsNative
-
-        module Pipe =
-            [<Interface>]
-            type Options =
-                abstract ``end``: bool option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(?``end``: bool) : Options = jsNative
-
-    module Stdin =
-        module Compose =
-            [<Interface>]
-            type Options =
-                abstract signal: AbortSignal with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(signal: AbortSignal) : Options = jsNative
-
-        module Pipe =
-            [<Interface>]
-            type Options =
-                abstract ``end``: bool option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(?``end``: bool) : Options = jsNative
-
-    module Stdout =
-        module Compose =
-            [<Interface>]
-            type Options =
-                abstract signal: AbortSignal with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(signal: AbortSignal) : Options = jsNative
-
-        module Pipe =
-            [<Interface>]
-            type Options =
-                abstract ``end``: bool option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create(?``end``: bool) : Options = jsNative
 
 module ProcessConfig =
     [<Interface>]
@@ -157562,10 +158359,16 @@ module ReadableStream =
     module GetReader =
         [<Interface>]
         type Options =
+            /// <remarks>TypeScript type: <c>"byob"</c></remarks>
             abstract mode: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(mode: string) : Options = jsNative
+            [<Emit("({ mode: 'byob' })")>]
+            static member Create() : Options = jsNative
+
+        module Options =
+            /// <remarks>TypeScript type: <c>"byob"</c></remarks>
+            [<Literal>]
+            let mode = "byob"
 
     module Values =
         [<Interface>]
@@ -157608,12 +158411,18 @@ module Readdir =
 
     [<Interface>]
     type Options2 =
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
         abstract encoding: string with get, set
         abstract withFileTypes: bool option with get, set
         abstract recursive: bool option with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(encoding: string, ?withFileTypes: bool, ?recursive: bool) : Options2 = jsNative
+        [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
+        static member Create(?withFileTypes: bool, ?recursive: bool) : Options2 = jsNative
+
+    module Options2 =
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+        [<Literal>]
+        let encoding = "buffer"
 
     [<Interface>]
     type Options3 =
@@ -157635,12 +158444,18 @@ module Readdir =
 
     [<Interface>]
     type Options5 =
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
         abstract encoding: string with get, set
         abstract withFileTypes: bool with get, set
         abstract recursive: bool option with get, set
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(encoding: string, withFileTypes: bool, ?recursive: bool) : Options5 = jsNative
+        [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
+        static member Create(withFileTypes: bool, ?recursive: bool) : Options5 = jsNative
+
+    module Options5 =
+        /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+        [<Literal>]
+        let encoding = "buffer"
 
     module Promisify =
         [<Interface>]
@@ -157654,12 +158469,18 @@ module Readdir =
 
         [<Interface>]
         type Options2 =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
             abstract encoding: string with get, set
             abstract withFileTypes: bool option with get, set
             abstract recursive: bool option with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(encoding: string, ?withFileTypes: bool, ?recursive: bool) : Options2 = jsNative
+            [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
+            static member Create(?withFileTypes: bool, ?recursive: bool) : Options2 = jsNative
+
+        module Options2 =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+            [<Literal>]
+            let encoding = "buffer"
 
         [<Interface>]
         type Options3 =
@@ -157682,12 +158503,18 @@ module Readdir =
 
         [<Interface>]
         type Options5 =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
             abstract encoding: string with get, set
             abstract withFileTypes: bool with get, set
             abstract recursive: bool option with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(encoding: string, withFileTypes: bool, ?recursive: bool) : Options5 = jsNative
+            [<ParamObject; Emit("({ encoding: 'buffer', ...$0 })")>]
+            static member Create(withFileTypes: bool, ?recursive: bool) : Options5 = jsNative
+
+        module Options5 =
+            /// <remarks>TypeScript type: <c>"buffer"</c></remarks>
+            [<Literal>]
+            let encoding = "buffer"
 
 /// <summary>node:readline</summary>
 module Readline =
@@ -162795,68 +163622,6 @@ module Repl =
     module REPLServer =
         module SetupHistory =
             type Callback = delegate of err: exn option * repl: Repl.REPLServer -> unit
-
-module Request =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Cache =
-        | [<CompiledName("default")>] Default
-        | [<CompiledName("force-cache")>] ForceCache
-        | [<CompiledName("no-cache")>] NoCache
-        | [<CompiledName("no-store")>] NoStore
-        | [<CompiledName("only-if-cached")>] OnlyIfCached
-        | [<CompiledName("reload")>] Reload
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Credentials =
-        | [<CompiledName("include")>] Include
-        | [<CompiledName("omit")>] Omit
-        | [<CompiledName("same-origin")>] SameOrigin
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Destination =
-        | [<CompiledName("")>] Empty
-        | [<CompiledName("audio")>] Audio
-        | [<CompiledName("audioworklet")>] Audioworklet
-        | [<CompiledName("document")>] Document
-        | [<CompiledName("embed")>] Embed
-        | [<CompiledName("font")>] Font
-        | [<CompiledName("image")>] Image
-        | [<CompiledName("manifest")>] Manifest
-        | [<CompiledName("object")>] Object
-        | [<CompiledName("paintworklet")>] Paintworklet
-        | [<CompiledName("report")>] Report
-        | [<CompiledName("script")>] Script
-        | [<CompiledName("sharedworker")>] Sharedworker
-        | [<CompiledName("style")>] Style
-        | [<CompiledName("track")>] Track
-        | [<CompiledName("video")>] Video
-        | [<CompiledName("worker")>] Worker
-        | [<CompiledName("xslt")>] Xslt
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Mode =
-        | [<CompiledName("cors")>] Cors
-        | [<CompiledName("navigate")>] Navigate
-        | [<CompiledName("no-cors")>] NoCors
-        | [<CompiledName("same-origin")>] SameOrigin
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Redirect =
-        | [<CompiledName("error")>] Error
-        | [<CompiledName("follow")>] Follow
-        | [<CompiledName("manual")>] Manual
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ReferrerPolicy =
-        | [<CompiledName("")>] Empty
-        | [<CompiledName("no-referrer")>] NoReferrer
-        | [<CompiledName("no-referrer-when-downgrade")>] NoReferrerWhenDowngrade
-        | [<CompiledName("origin")>] Origin
-        | [<CompiledName("origin-when-cross-origin")>] OriginWhenCrossOrigin
-        | [<CompiledName("same-origin")>] SameOrigin
-        | [<CompiledName("strict-origin")>] StrictOrigin
-        | [<CompiledName("strict-origin-when-cross-origin")>] StrictOriginWhenCrossOrigin
-        | [<CompiledName("unsafe-url")>] UnsafeUrl
 
 module RequireExtensions =
     type Item = delegate of ``module``: Module * filename: string -> obj
@@ -176654,18 +177419,23 @@ module Stream =
             abstract cancel: ReadableStreamErrorCallback option with get, set
             abstract pull: ReadableByteStreamControllerCallback option with get, set
             abstract start: ReadableByteStreamControllerCallback option with get, set
+            /// <remarks>TypeScript type: <c>"bytes"</c></remarks>
             abstract ``type``: string with get, set
 
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("({ type: 'bytes', ...$0 })")>]
             static member Create
                 (
-                    ``type``: string,
                     ?autoAllocateChunkSize: float,
                     ?cancel: ReadableStreamErrorCallback,
                     ?pull: ReadableByteStreamControllerCallback,
                     ?start: ReadableByteStreamControllerCallback
                 ) : UnderlyingByteSource =
                 jsNative
+
+        module UnderlyingByteSource =
+            /// <remarks>TypeScript type: <c>"bytes"</c></remarks>
+            [<Literal>]
+            let ``type`` = "bytes"
 
         [<Interface>]
         type UnderlyingSource<'R> =
@@ -177049,10 +177819,16 @@ module Stream =
             module GetReader =
                 [<Interface>]
                 type Options =
+                    /// <remarks>TypeScript type: <c>"byob"</c></remarks>
                     abstract mode: string with get, set
 
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(mode: string) : Options = jsNative
+                    [<Emit("({ mode: 'byob' })")>]
+                    static member Create() : Options = jsNative
+
+                module Options =
+                    /// <remarks>TypeScript type: <c>"byob"</c></remarks>
+                    [<Literal>]
+                    let mode = "byob"
 
             module Values =
                 [<Interface>]
@@ -180584,107 +181360,185 @@ module Test =
 
         [<Interface>]
         type TestEvent10 =
+            /// <remarks>TypeScript type: <c>"test:start"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestStart with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestStart) : TestEvent10 = jsNative
+            [<ParamObject; Emit("({ type: 'test:start', ...$0 })")>]
+            static member Create(data: TestStart) : TestEvent10 = jsNative
+
+        module TestEvent10 =
+            /// <remarks>TypeScript type: <c>"test:start"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:start"
 
         [<Interface>]
         type TestEvent11 =
+            /// <remarks>TypeScript type: <c>"test:stderr"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestStderr with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestStderr) : TestEvent11 = jsNative
+            [<ParamObject; Emit("({ type: 'test:stderr', ...$0 })")>]
+            static member Create(data: TestStderr) : TestEvent11 = jsNative
+
+        module TestEvent11 =
+            /// <remarks>TypeScript type: <c>"test:stderr"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:stderr"
 
         [<Interface>]
         type TestEvent12 =
+            /// <remarks>TypeScript type: <c>"test:stdout"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestStdout with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestStdout) : TestEvent12 = jsNative
+            [<ParamObject; Emit("({ type: 'test:stdout', ...$0 })")>]
+            static member Create(data: TestStdout) : TestEvent12 = jsNative
+
+        module TestEvent12 =
+            /// <remarks>TypeScript type: <c>"test:stdout"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:stdout"
 
         [<Interface>]
         type TestEvent13 =
+            /// <remarks>TypeScript type: <c>"test:summary"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestSummary with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestSummary) : TestEvent13 = jsNative
+            [<ParamObject; Emit("({ type: 'test:summary', ...$0 })")>]
+            static member Create(data: TestSummary) : TestEvent13 = jsNative
+
+        module TestEvent13 =
+            /// <remarks>TypeScript type: <c>"test:summary"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:summary"
 
         [<Interface>]
         type TestEvent14 =
+            /// <remarks>TypeScript type: <c>"test:watch:drained"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: unit
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string) : TestEvent14 = jsNative
+            [<Emit("({ type: 'test:watch:drained' })")>]
+            static member Create() : TestEvent14 = jsNative
+
+        module TestEvent14 =
+            /// <remarks>TypeScript type: <c>"test:watch:drained"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:watch:drained"
 
         [<Interface>]
         type TestEvent2 =
+            /// <remarks>TypeScript type: <c>"test:coverage"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestCoverage with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestCoverage) : TestEvent2 = jsNative
+            [<ParamObject; Emit("({ type: 'test:coverage', ...$0 })")>]
+            static member Create(data: TestCoverage) : TestEvent2 = jsNative
+
+        module TestEvent2 =
+            /// <remarks>TypeScript type: <c>"test:coverage"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:coverage"
 
         [<Interface>]
         type TestEvent3 =
+            /// <remarks>TypeScript type: <c>"test:complete"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestComplete with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestComplete) : TestEvent3 = jsNative
+            [<ParamObject; Emit("({ type: 'test:complete', ...$0 })")>]
+            static member Create(data: TestComplete) : TestEvent3 = jsNative
+
+        module TestEvent3 =
+            /// <remarks>TypeScript type: <c>"test:complete"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:complete"
 
         [<Interface>]
         type TestEvent4 =
+            /// <remarks>TypeScript type: <c>"test:dequeue"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestDequeue with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestDequeue) : TestEvent4 = jsNative
+            [<ParamObject; Emit("({ type: 'test:dequeue', ...$0 })")>]
+            static member Create(data: TestDequeue) : TestEvent4 = jsNative
+
+        module TestEvent4 =
+            /// <remarks>TypeScript type: <c>"test:dequeue"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:dequeue"
 
         [<Interface>]
         type TestEvent5 =
+            /// <remarks>TypeScript type: <c>"test:diagnostic"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestDiagnostic with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestDiagnostic) : TestEvent5 = jsNative
+            [<ParamObject; Emit("({ type: 'test:diagnostic', ...$0 })")>]
+            static member Create(data: TestDiagnostic) : TestEvent5 = jsNative
+
+        module TestEvent5 =
+            /// <remarks>TypeScript type: <c>"test:diagnostic"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:diagnostic"
 
         [<Interface>]
         type TestEvent6 =
+            /// <remarks>TypeScript type: <c>"test:enqueue"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestEnqueue with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestEnqueue) : TestEvent6 = jsNative
+            [<ParamObject; Emit("({ type: 'test:enqueue', ...$0 })")>]
+            static member Create(data: TestEnqueue) : TestEvent6 = jsNative
+
+        module TestEvent6 =
+            /// <remarks>TypeScript type: <c>"test:enqueue"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:enqueue"
 
         [<Interface>]
         type TestEvent7 =
+            /// <remarks>TypeScript type: <c>"test:fail"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestFail with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestFail) : TestEvent7 = jsNative
+            [<ParamObject; Emit("({ type: 'test:fail', ...$0 })")>]
+            static member Create(data: TestFail) : TestEvent7 = jsNative
+
+        module TestEvent7 =
+            /// <remarks>TypeScript type: <c>"test:fail"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:fail"
 
         [<Interface>]
         type TestEvent8 =
+            /// <remarks>TypeScript type: <c>"test:pass"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestPass with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestPass) : TestEvent8 = jsNative
+            [<ParamObject; Emit("({ type: 'test:pass', ...$0 })")>]
+            static member Create(data: TestPass) : TestEvent8 = jsNative
+
+        module TestEvent8 =
+            /// <remarks>TypeScript type: <c>"test:pass"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:pass"
 
         [<Interface>]
         type TestEvent9 =
+            /// <remarks>TypeScript type: <c>"test:plan"</c></remarks>
             abstract ``type``: string with get, set
             abstract data: TestPlan with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(``type``: string, data: TestPlan) : TestEvent9 = jsNative
+            [<ParamObject; Emit("({ type: 'test:plan', ...$0 })")>]
+            static member Create(data: TestPlan) : TestEvent9 = jsNative
+
+        module TestEvent9 =
+            /// <remarks>TypeScript type: <c>"test:plan"</c></remarks>
+            [<Literal>]
+            let ``type`` = "test:plan"
 
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -198634,17 +199488,29 @@ module V8 =
     module QueryObjects =
         [<Interface>]
         type Options =
+            /// <remarks>TypeScript type: <c>"count"</c></remarks>
             abstract format: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(format: string) : Options = jsNative
+            [<Emit("({ format: 'count' })")>]
+            static member Create() : Options = jsNative
+
+        module Options =
+            /// <remarks>TypeScript type: <c>"count"</c></remarks>
+            [<Literal>]
+            let format = "count"
 
         [<Interface>]
         type Options2 =
+            /// <remarks>TypeScript type: <c>"summary"</c></remarks>
             abstract format: string with get, set
 
-            [<ParamObject; Emit("$0")>]
-            static member Create(format: string) : Options2 = jsNative
+            [<Emit("({ format: 'summary' })")>]
+            static member Create() : Options2 = jsNative
+
+        module Options2 =
+            /// <remarks>TypeScript type: <c>"summary"</c></remarks>
+            [<Literal>]
+            let format = "summary"
 
 /// <summary>node:vm</summary>
 module Vm =
