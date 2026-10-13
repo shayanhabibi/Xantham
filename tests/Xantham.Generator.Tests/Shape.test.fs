@@ -5855,7 +5855,7 @@ let literalKeyedMethodTests =
             match members with
             | [ FsMethod plain; FsLiteralKeyed(_, _, FsMethod keyed); FsLiteralKeyed(_, _, FsMethod fallback) ] ->
                 Expect.equal keyed.Docs "Closes.\n\n```ts\non(event: \"close\", listener: string): this\n```" "its own description, then the spelling"
-                Expect.equal fallback.Docs "Listens.\n\n```ts\non(event: \"end\", listener: string): this\n```" "the member's where it has none"
+                Expect.equal fallback.Docs "```ts\non(event: \"end\", listener: string): this\n```" "the spelling alone where it has none"
                 Expect.equal plain.Docs "Listens." "the generic overload keeps the member's"
             | other -> failtest $"unexpected {other}"
 
