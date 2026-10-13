@@ -52,9 +52,10 @@ type GroupDisposition =
     /// Resolve identity only; a name the table carries renders as its destination - a binding
     /// somebody already wrote by hand - and every other name of the group widens.
     | Map of names: Map<string, MappedName>
-    /// Resolve identity only; references widen to `obj` with a finding. For `typescript/lib`, a
-    /// name `Fable.Core.JS` binds and every other library declaration are written as their
-    /// `Xantham.Fable.Core.TS` names (`Fable.Core.TS.Es`, `Fable.Core.TS.Dom`).
+    /// Resolve identity only. For `typescript/lib`, a name in `Naming.LibBindings` is written as
+    /// its `Fable.Core.JS` binding, and any other named DOM or ECMAScript lib declaration as its
+    /// `Fable.Core.TS.Dom` or `Fable.Core.TS.Es` name. Remaining references widen to `obj` with a
+    /// finding.
     | Widen
 
 /// The optional spelling controls for the combined compiler-library binding. Names remain
@@ -950,7 +951,7 @@ module Naming =
         /// loss to record. `seq`-shaped names (`Iterable`, `Iterator`) are absent on purpose -
         /// Fable.Core binds only the async ones, and pretending `seq<'T>` interoperates with a
         /// JS iterable is exactly the kind of claim this table exists not to make.
-        /// `Shape.libBinding` writes them as Core.TS's own JS-iterable interfaces.
+        /// Under `widen`, `Shape.libBinding` writes them as Core.TS's own JS-iterable interfaces.
         let tryFind (name: string) = Map.tryFind name table
 
     /// The JavaScript key a member symbol stands for. The checker escapes a name that begins

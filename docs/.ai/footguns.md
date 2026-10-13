@@ -155,7 +155,11 @@ the corresponding lab under `tests/fixtures/` is the reducer.
   `Fable.Core.TS.Es` for ECMAScript files). Namespace members take their bare name, as Core.TS
   flattens them (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`). A name
   Core.TS renamed on collision (`Iterator2`) is reachable only under the name it kept, and the
-  compile gate will not catch a same-arity wrong target.
+  compile gate will not catch a same-arity wrong target. The two families mix within one type:
+  a table name keeps its `JS.*` spelling beside or inside a `Fable.Core.TS.Es.*` reference
+  (`U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>`, `Es.BigUint64Array<U2<JS.ArrayBuffer,
+  ...>>`), while Core.TS's own declarations use `Es.ArrayBuffer`. A value typed by a Core.TS API
+  will not unify with such a parameter; es-reuse-lab pins the mixed spelling as a known gap.
 
 ## Generator passes
 

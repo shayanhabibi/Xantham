@@ -88,7 +88,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
   - **Confirmed cause:** Node does not consult the Core.TS catalogue. It lists no `declarationReferences`, so its compiler lib takes the default `widen`, and its es2020 inference profile could never match Core.TS's `esnext`/`dom` ship profile. Under `widen`, `Shape.libBinding` names a compiler-lib type only through `Naming.LibBindings` or, for DOM files, `Fable.Core.TS.Dom`. ECMAScript names outside the table widen with TR023 (`docs/.ai/footguns.md`, "Declaration catalogs").
 - **W3.2** Fix catalog reuse so that Node references the Core.TS types.
   - **Satisfied without catalog reuse:** under `widen`, a compiler-lib ECMAScript declaration outside `Naming.LibBindings` is written as `Fable.Core.TS.Es.{name}`, as DOM declarations already are. The lab is `es-reuse-lab`, a single consumer package compiled against Core.TS by the compile gate. Measured deltas are in `generator-architecture.md`, "ECMAScript consumer bindings".
-- **Acceptance:** a two-package lab, modelled on `cross-package-lab`, references `ArrayLike` and `ArrayBufferLike` from a dependent package with no TR023. In `workers-types` and `solid-js`, TR023 and TR035 do not rise. Node holds nearly all of W3's hits, so a Node regeneration under override T4 is expected.
+- **Acceptance:** `es-reuse-lab`, a single widen-mode consumer on @types/node's es2020 program, references `ArrayLike` and `ArrayBufferLike` with no TR023 or TR035, and the compile gate builds its golden against Core.TS. This single-package lab replaces the two-package lab modelled on `cross-package-lab` (lead decision, 2026-10-13): `Shape.libBinding` keys on the compiler-lib origin and the `typescript/lib` disposition, not on the referencing group, so a dependent package adds no route. A dependency under its own `reference`, `map` or `widen` disposition that references these names is not covered by a lab. In `workers-types` and `solid-js`, TR023 and TR035 do not rise. Node holds nearly all of W3's hits, so a Node regeneration under override T4 is expected.
 
 ### W4. Symbol-keyed members
 
@@ -242,7 +242,7 @@ The probes ran on 2026-10-13. Each was a scratch project against Fable.Core 5.2.
 
 ## 7. Unaddressed items
 
-No items remain open. W3.1 is the only open investigation inside the specification. Every question raised in review is recorded below with its decision.
+No items remain open. W3.1's cause is confirmed and recorded in `docs/.ai/footguns.md`. Every question raised in review is recorded below with its decision.
 
 | Question | Decision | Recorded in |
 | --- | --- | --- |

@@ -1914,13 +1914,15 @@ let pipelineTests =
                             "(options: Fable.Core.TS.Es.NumberFormatOptions)" ] do
                           Expect.stringContains source fragment fragment
 
-                  testCase "es-reuse-lab: ArrayBufferLike keeps its SharedArrayBuffer arm" <| fun _ ->
+                  // Known gap: the table's `JS.ArrayBuffer` arm is not Core.TS's `Es.ArrayBuffer`, so
+                  // this union is a different F# type from `Fable.Core.TS.Es.ArrayBufferLike`.
+                  testCase "es-reuse-lab: ArrayBufferLike mixes the JS and Core.TS families (known gap)" <| fun _ ->
                       let source = generate().Files |> List.head |> snd
 
                       Expect.stringContains
                           source
                           "static member wrap (buffer: U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>) : unit"
-                          "both arms are named"
+                          "both arms are named, each in its own family"
 
                   testCase "es-reuse-lab: a Fable.Core binding still answers first" <| fun _ ->
                       let source = generate().Files |> List.head |> snd

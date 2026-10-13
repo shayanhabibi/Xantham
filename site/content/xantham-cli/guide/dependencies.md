@@ -19,8 +19,9 @@ standard libraries.
 </div>
 
 For `typescript/lib`, `widen` writes the names that `Fable.Core.JS` binds in that form, and every
-other standard-library declaration as its `Xantham.Fable.Core.TS` name (`Fable.Core.TS.Es.*`,
-`Fable.Core.TS.Dom.*`). Compile the binding against `Xantham.Fable.Core.TS`.
+other named standard-library interface, class or alias as its `Xantham.Fable.Core.TS` name
+(`Fable.Core.TS.Es.*`, `Fable.Core.TS.Dom.*`). Anonymous library shapes and `globalThis` still
+widen to `obj` with a finding. Compile the binding against `Xantham.Fable.Core.TS`.
 
 ```json title="xantham.json"
 {
