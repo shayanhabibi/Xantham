@@ -1251,9 +1251,11 @@ let private deriveFacts
                         | Some file when Grouping.libFamily file = "Dom" -> true
                         | Some file ->
                             Grouping.isLibFile file
-                            && GeneratorConfig.disposition ctx.Config CompilerLib = Widen
                             && shapeName
-                               |> Option.exists (fun name -> (Naming.LibBindings.tryFind name).IsNone)
+                               |> Option.exists (fun name ->
+                                   (Naming.LibBindings.tryFind name).IsNone
+                                   && (GeneratorConfig.disposition ctx.Config CompilerLib = Widen
+                                       || Naming.LibBindings.isPinnedToCoreTs name))
                         | None -> false)
 
                 let! nominal =

@@ -1345,7 +1345,7 @@ function constraints. Reproduction details are in `../probes/constrain-function/
 Under the default `widen` disposition of `typescript/lib`, a compiler-lib ECMAScript declaration
 that `Naming.LibBindings` does not bind is written as `Fable.Core.TS.Es.{name}` with all of its
 checker type arguments, as the DOM half above already is. The table still answers first
-(`Promise` stays `JS.Promise<'T>`). Checker placeholders (`__type`) and `globalThis` keep the
+for its three remaining rows (below). Checker placeholders (`__type`) and `globalThis` keep the
 existing widening. Namespace members take their bare name, which is the name Core.TS flattens
 them to (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`).
 
@@ -1366,10 +1366,7 @@ them to (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`).
   `Fable.Core.TS.Es.Iterable<string, obj, obj>`, Core.TS's JS-iterable interface and not
   `seq<'T>`, so the reason for that pin still holds.
 - **Known gaps.** The `any` defaults of `Iterable`/`IterableIterator` (`TReturn`, `TNext`) render
-  as `obj` and raise TR008, graded escape until W1. Consumers write `ArrayBuffer` as
-  `JS.ArrayBuffer` (table) while Core.TS's own `ArrayBufferLike` uses
-  `Fable.Core.TS.Es.ArrayBuffer`, so a consumer's `U2<JS.ArrayBuffer, Es.SharedArrayBuffer>` is not
-  the same F# type as Core.TS's `ArrayBufferLike`. A name Core.TS renamed on collision
+  as `obj` and raise TR008, graded escape until W1. A name Core.TS renamed on collision
   (`Iterator2`) is reachable only under the name it kept; the compile gate cannot detect a
   same-arity wrong target.
 
@@ -1394,6 +1391,52 @@ and none of `SharedArrayBuffer`, `ArrayLike`, `ArrayIterator`, `AsyncGeneratorFu
 `RegExp`; Node holds the rest. Node's "before" figures come from a regeneration at the parent
 commit, not the committed 2026-10-06 output, which differs by 60 `symbols.jsonl` lines of
 earlier generator drift.
+
+### Fable.Core `JS.*` bindings retired (2026-10-13, W3 #134)
+
+Generated bindings no longer depend on Fable.Core's `JS.*` bindings for standard-library types.
+`Naming.LibBindings` keeps three rows: `Error` → `exn` (Fable compiles `System.Exception` to a
+JavaScript `Error`), and `Promise`/`PromiseLike` → `JS.Promise<'T>` (lead decision: Fable.Promise's
+`promise { }` and `Async.AwaitPromise`/`StartAsPromise` are written against `JS.Promise`;
+`PromiseLike` keeps its TR025 loss so a `JS.Promise` passes where one is expected). Every other
+former row (`Map`, `ReadonlyMap`, `WeakMap`, `Set`, `ReadonlySet`, `WeakSet`, `Date`, `Function`,
+`Object`, `Math`, `JSON`, `Console`, `PropertyDescriptor`, `ArrayBuffer`, `ArrayBufferView`,
+`DataView`, the typed arrays, `AsyncIterable`, `AsyncIterator`, `AsyncGenerator`,
+`IteratorResult`, `AsyncIterableIterator`) is written as its `Fable.Core.TS.Es` declaration with
+all of its checker arguments (`Uint8Array<'TArrayBuffer>`), so `U2<Es.ArrayBuffer,
+Es.SharedArrayBuffer>` is Core.TS's `ArrayBufferLike`.
+
+- **Premise.** Fable 5.17.2 special-cases the `Fable.Core.JS.` namespace as a whole (global
+  resolution, no replacement, unmangled members) and `JS.Map`/`JS.Set` only for TypeScript-output
+  annotations; no `JS.*` type gets an F#-visible conversion (`docs/.ai/footguns.md`, "Fable
+  consumption of bindings").
+- **Every non-ship disposition.** The former rows were consulted under `reference`, `map` and
+  `widen` alike, so `LibBindings.isPinnedToCoreTs` keeps them bound under all three, now to
+  Core.TS, ahead of the O7 template and a `map` table, as DOM names already are. Every generated
+  consumer file opens `Fable.Core.TS.Dom`, so no non-ship disposition runs without Core.TS.
+  Other ECMAScript names still follow their disposition (`widen` → Core.TS, `reference` →
+  `TypeScript.Lib.Es.*`, `map` → table or widen).
+- **TP010.** The dropped `Function` bound is matched as `Fable.Core.TS.Es.Function`
+  (`LibBindings.FunctionBinding`); the message no longer names `JS.Function`.
+- **Known gap.** Core.TS (ship mode) still declares and references its own `Es.Promise`, so a
+  Core.TS member returning `Promise` will not unify with a consumer's `JS.Promise`.
+
+Measured on 2026-10-13 (es-reuse-lab is the lab, extended with `Promise`, `PromiseLike`, `Map`,
+`Set`, `Date`, `ArrayBuffer`, `Uint8Array<ArrayBuffer>` and `Error`):
+
+| Run | TR024 | TR025 | TR008 | Tiers (exact / ergonomic / widened / escape) |
+| --- | --- | --- | --- | --- |
+| es-reuse-lab | 0 | 0 → 2 (new `PromiseLike`, `Error` sites) | 2 | 8 / 1 / 0 / 0 → 11 / 3 / 0 / 0 |
+| lib-lab | 7 → 0 | 3 → 1 | 2 → 6 | 12 / 8 / 1 / 0 → 15 / 5 / 1 / 0 |
+| `@cloudflare/workers-types` | 120 → 0 | 10 → 8 | 218 → 222 | 412 / 1161 / 390 / 1 → 419 / 1154 / 390 / 1 |
+| `solid-js` | 0 | 2 | 78 | unchanged (69 / 180 / 92 / 1); 26 lines respelled |
+| `Xantham.Fable.Node` | 255 → 0 | 1434 → 1431 | 2877 → 2895 | 1263 / 2032 / 830 / 5 → 1270 / 2025 / 830 / 5 |
+
+TR023 and TR035 are unchanged in every row. The TR008 rise is the `any` defaults of the
+async-iteration and `IteratorResult` declarations, now applied at their real arity rather than
+truncated away. Node's residual `JS.*` spellings are `JS.Promise` (1006) and the support package's
+`JS.Record` (30); it held 1469 `JS.ArrayBuffer`, 195 `JS.Function` and 112 `JS.AsyncIterable`
+before.
 
 ## Generator identity measures (2026-09-11)
 

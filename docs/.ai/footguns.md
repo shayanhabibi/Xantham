@@ -151,15 +151,15 @@ the corresponding lab under `tests/fixtures/` is the reducer.
   @types/node's program (es2020, through its own `/// <reference lib>`) differs from Core.TS's
   `esnext`/`dom` ship profile, so listing the catalogue alone fails validation. Under `widen`,
   `Shape.libBinding` is the only route from a compiler-lib type to a name: `Naming.LibBindings`
-  first, then Core.TS by bare symbol name (`Fable.Core.TS.Dom` for DOM files and, since W3 #134,
-  `Fable.Core.TS.Es` for ECMAScript files). Namespace members take their bare name, as Core.TS
-  flattens them (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`). A name
-  Core.TS renamed on collision (`Iterator2`) is reachable only under the name it kept, and the
-  compile gate will not catch a same-arity wrong target. The two families mix within one type:
-  a table name keeps its `JS.*` spelling beside or inside a `Fable.Core.TS.Es.*` reference
-  (`U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>`, `Es.BigUint64Array<U2<JS.ArrayBuffer,
-  ...>>`), while Core.TS's own declarations use `Es.ArrayBuffer`. A value typed by a Core.TS API
-  will not unify with such a parameter; es-reuse-lab pins the mixed spelling as a known gap.
+  first (`Promise`/`PromiseLike` → `JS.Promise`, `Error` → `exn`), then Core.TS by bare symbol
+  name (`Fable.Core.TS.Dom` for DOM files and, since W3 #134, `Fable.Core.TS.Es` for ECMAScript
+  files). Namespace members take their bare name, as Core.TS flattens them
+  (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`). A name Core.TS renamed
+  on collision (`Iterator2`) is reachable only under the name it kept, and the compile gate will
+  not catch a same-arity wrong target. A `LibBindings` row splits a type across two families: a
+  consumer's `U2<JS.ArrayBuffer, Es.SharedArrayBuffer>` was a different F# type from Core.TS's
+  `ArrayBufferLike` until the row went. `Promise` keeps that split: Core.TS's own members
+  returning `Promise` use `Es.Promise`, which will not unify with a consumer's `JS.Promise`.
 
 ## Generator passes
 
@@ -270,6 +270,21 @@ in `tests/Xantham.Generator.RunGate/Program.fs` (`bindingExtensions`).
 compiled from source, and excluding it fails with `Cannot find inline member`. Its package ships
 its sources under `fable/` for the same reason; a package without them fails the same way at a
 consumer's first helper call.
+
+**Fable gives no Fable.Core `JS.*` type a mapping a binding can rely on.** Checked against
+`fable-compiler/Fable` at tag 5.17.2 (the tool pin) on 2026-10-13. The compiler matches the
+`Fable.Core.JS.` namespace as a whole: its entities resolve to the global of their display name
+(`FSharp2Fable.Util.fs` `tryGlobalOrImportedAttributes`), are not replacement candidates, and
+keep unmangled members. Core.TS declares interfaces, which Fable leaves unmangled, and reaches
+values through attribute-carrying members, so it needs none of that.
+The only per-type cases are `JS.Map`2` and `JS.Set`1` (`Fable2Babel.fs`), annotated as
+fable-library's `IMap`/`ISet` in TypeScript output only, which `Dictionary`/`HashSet` implement at
+runtime; F# type-checks no conversion from either. So a `JS.*` spelling buys a consumer nothing
+the Core.TS declaration does not, and costs unification with every Core.TS API. `LibBindings`
+keeps `Error` → `exn` (Fable compiles `System.Exception` to a JavaScript `Error`) and `Promise`
+/`PromiseLike` → `JS.Promise`, because Fable.Promise's `promise { }` and
+`Async.AwaitPromise`/`StartAsPromise` are written against `JS.Promise` (lead decision, W3 #134).
+A future row needs a reason of one of those two kinds.
 
 ## Build and test environment
 

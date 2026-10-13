@@ -18,9 +18,10 @@ standard libraries.
 <div class="card xantham-card"><span class="xantham-card__label">Accept a wider type</span><h3>widen</h3><p>Render the reference as <code>obj</code> and report a finding. This is the default for unlisted groups.</p></div>
 </div>
 
-For `typescript/lib`, `widen` writes the names that `Fable.Core.JS` binds in that form, and every
-other named standard-library interface, class or alias as its `Xantham.Fable.Core.TS` name
-(`Fable.Core.TS.Es.*`, `Fable.Core.TS.Dom.*`). Anonymous library shapes and `globalThis` still
+For `typescript/lib`, `widen` writes `Promise` and `PromiseLike` as `JS.Promise`, so they work with
+Fable.Promise and `Async.AwaitPromise`, and `Error` as `exn`. Every other named standard-library
+interface, class or alias is written as its `Xantham.Fable.Core.TS` name (`Fable.Core.TS.Es.Map`,
+`Fable.Core.TS.Es.Uint8Array<'TArrayBuffer>`, `Fable.Core.TS.Dom.*`). Anonymous library shapes and `globalThis` still
 widen to `obj` with a finding. Compile the binding against `Xantham.Fable.Core.TS`.
 
 ```json title="xantham.json"

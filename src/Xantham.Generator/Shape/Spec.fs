@@ -1969,10 +1969,10 @@ and internal objectRef
 
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
-/// A compiler-lib type a shipped package binds: `Promise` -> `JS.Promise<'T>` through the
-/// ECMAScript table, with its explicit arity and loss rules; any other DOM declaration, and under
-/// `widen` any other ECMAScript declaration, under the name and arguments of the shipped Core.TS
-/// producer (`Fable.Core.TS.Dom`, `Fable.Core.TS.Es`).
+/// A compiler-lib type a shipped package binds: `Error` -> `exn` and `Promise` -> `JS.Promise<'T>`
+/// through `Naming.LibBindings`, with their explicit arity and loss rules; any DOM declaration, a
+/// pinned ECMAScript declaration (`Map`, `Uint8Array`), and under `widen` any other ECMAScript declaration, under the name
+/// and arguments of the shipped Core.TS producer (`Fable.Core.TS.Dom`, `Fable.Core.TS.Es`).
 and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
     match facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
     | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
@@ -1995,7 +1995,8 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
                     Grouping.isLibFile file
                     && name <> "globalThis"
                     && not (isSyntheticName (name * uom<symbolName>))
-                    && GeneratorConfig.disposition ctx.Config CompilerLib = Widen
+                    && (GeneratorConfig.disposition ctx.Config CompilerLib = Widen
+                        || Naming.LibBindings.isPinnedToCoreTs name)
                     ->
                     Some($"Fable.Core.TS.Es.{name}", arguments.Length, [])
                 | _ -> None
@@ -2143,7 +2144,7 @@ and internal appliedRefTo
                 |> Option.orElseWith (fun () ->
                     match typeRef ctx model self owner boundId with
                     | FsApp _ as reference, _ -> Some reference
-                    | FsNamed name, [] when name <> "JS.Function" -> Some(FsNamed name)
+                    | FsNamed name, [] when name <> Naming.LibBindings.FunctionBinding -> Some(FsNamed name)
                     | _ -> None)
                 |> Option.map (fun reference -> boundId, reference)
             | _ -> None)
@@ -2641,7 +2642,7 @@ let typeParamsOf
                 |> Option.defaultValue true
 
             match bound with
-            | Some(FsNamed "JS.Function", _) ->
+            | Some(FsNamed Naming.LibBindings.FunctionBinding, _) ->
                 findings <-
                     findings
                     @ [ Finding.make owner (TypeParameters.FunctionConstraintDropped name) ]

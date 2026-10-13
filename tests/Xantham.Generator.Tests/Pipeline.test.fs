@@ -1817,13 +1817,13 @@ let pipelineTests =
                       // For the ECMAScript half of the lib there is one, and every generated
                       // file already opens it.
                       Expect.stringContains source "static member fetchOne (url: string) : JS.Promise<string>" "a promise is a promise"
-                      Expect.stringContains source "JS.Map<string, string[]>" "both parameters carried"
-                      Expect.stringContains source "at: JS.Date) : JS.Date" "and the non-generic names too"
+                      Expect.stringContains source "Fable.Core.TS.Es.Map<string, string[]>" "both parameters carried"
+                      Expect.stringContains source "at: Fable.Core.TS.Es.Date) : Fable.Core.TS.Es.Date" "and the non-generic names too"
 
                       // The argument is shaped at its own position, which is the half the old
                       // wholesale widening cost most: `Promise<T>` used to erase T with it.
-                      Expect.stringContains source "abstract load: key: string -> JS.Promise<JS.Uint8Array>" "nested through a member"
-                      Expect.stringContains source "abstract boxed: Box<JS.Date>" "and through a generic this run declares"
+                      Expect.stringContains source "abstract load: key: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<" "nested through a member"
+                      Expect.stringContains source "abstract boxed: Box<Fable.Core.TS.Es.Date>" "and through a generic this run declares"
 
                       // DOM names and generic arguments come from the same compiler as Core.TS.
                       Expect.stringContains
@@ -1854,14 +1854,14 @@ let pipelineTests =
                       Expect.stringContains source "static member ``select`` (over: Fable.Core.TS.Dom.Range)" "Core.TS owns the DOM Range"
                       Expect.stringContains source "static member respond () : Fable.Core.TS.Dom.Response" "fetch types are shipped by Core.TS"
 
-                      // Every loss is in the manifest: the arity the lib drifted away from, and
-                      // the restrictions the readonly views express and F# has no binding for.
+                      // Core.TS carries the typed arrays' buffer parameter and the readonly views, so
+                      // the one loss left is the thenable read as a promise.
                       let says fragment =
                           rendered.Findings |> List.exists (fun f -> f.Message.Contains(fragment: string))
 
-                      Expect.isTrue (says "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0") "the dropped buffer parameter"
+                      Expect.isFalse (says "type arguments where") "no buffer parameter is dropped"
                       Expect.isTrue (says "PromiseLike reads as JS.Promise") "a thenable is not a promise"
-                      Expect.isTrue (says "ReadonlyMap reads as JS.Map") "and readonly is not carried" ])
+                      Expect.isFalse (says "ReadonlyMap reads as") "readonly is carried" ])
 
         yield!
             fixtureTests
@@ -1914,19 +1914,44 @@ let pipelineTests =
                             "(options: Fable.Core.TS.Es.NumberFormatOptions)" ] do
                           Expect.stringContains source fragment fragment
 
-                  // Known gap: the table's `JS.ArrayBuffer` arm is not Core.TS's `Es.ArrayBuffer`, so
-                  // this union is a different F# type from `Fable.Core.TS.Es.ArrayBufferLike`.
-                  testCase "es-reuse-lab: ArrayBufferLike mixes the JS and Core.TS families (known gap)" <| fun _ ->
+                  // Core.TS declares `ArrayBufferLike` as this same abbreviation, so a value typed
+                  // by a Core.TS API passes without a cast.
+                  testCase "es-reuse-lab: ArrayBufferLike unifies with Core.TS's" <| fun _ ->
                       let source = generate().Files |> List.head |> snd
 
                       Expect.stringContains
                           source
-                          "static member wrap (buffer: U2<JS.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>) : unit"
-                          "both arms are named, each in its own family"
+                          "static member wrap (buffer: U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>) : unit"
+                          "both arms are Core.TS's"
 
-                  testCase "es-reuse-lab: a Fable.Core binding still answers first" <| fun _ ->
+                  testCase "es-reuse-lab: names Fable.Core.JS binds are written as Core.TS declarations" <| fun _ ->
                       let source = generate().Files |> List.head |> snd
-                      Expect.stringContains source "static member later () : JS.Promise<string>" "the ECMAScript table wins"
+
+                      for fragment in
+                          [ "static member index () : Fable.Core.TS.Es.Map<string, Fable.Core.TS.Es.Date>"
+                            "static member unique (values: Fable.Core.TS.Es.Set<string>)"
+                            "static member bytes (buffer: Fable.Core.TS.Es.ArrayBuffer) : Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>" ] do
+                          Expect.stringContains source fragment fragment
+
+                      for name in [ "Map"; "Date"; "Set"; "ArrayBuffer"; "Uint8Array" ] do
+                          Expect.isFalse (source.Contains $"JS.{name}") $"no Fable.Core.JS.{name} binding"
+
+                  // Fable.Promise and Async.AwaitPromise are written against JS.Promise; Fable
+                  // compiles System.Exception to a JavaScript Error.
+                  testCase "es-reuse-lab: Promise, PromiseLike and Error keep their bindings" <| fun _ ->
+                      let rendered = generate()
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "static member later () : JS.Promise<string>" "Promise"
+                      Expect.stringContains source "static member settle (value: JS.Promise<float>)" "PromiseLike"
+                      Expect.stringContains source "static member fail () : exn" "Error"
+
+                      Expect.equal
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR025") |> List.map _.Message |> List.sort)
+                          [ "Error reads as exn; the JavaScript name, stack and cause properties are not on it"
+                            "PromiseLike reads as JS.Promise; a bare thenable is not one" ]
+                          "the remaining lib-binding losses"
+
+                      Expect.isEmpty (rendered.Findings |> List.filter (fun f -> f.Key = "TR024")) "no type argument is dropped"
 
                   testCase "es-reuse-lab: no ECMAScript name widens" <| fun _ ->
                       let findings = generate().Findings
@@ -2958,7 +2983,7 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.stringContains source "abstract at: JS.Date" "Date binds, and binds whole"
+                      Expect.stringContains source "abstract at: Fable.Core.TS.Es.Date" "Date binds, and binds whole"
                       Expect.isFalse (source.Contains "abstract getTime") "with none of its members walked"
 
                   testCase "a DOM declaration previously unbound now uses Core.TS" <| fun _ ->

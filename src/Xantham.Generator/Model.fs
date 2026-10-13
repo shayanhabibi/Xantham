@@ -52,8 +52,8 @@ type GroupDisposition =
     /// Resolve identity only; a name the table carries renders as its destination - a binding
     /// somebody already wrote by hand - and every other name of the group widens.
     | Map of names: Map<string, MappedName>
-    /// Resolve identity only. For `typescript/lib`, a name in `Naming.LibBindings` is written as
-    /// its `Fable.Core.JS` binding, and any other named DOM or ECMAScript lib declaration as its
+    /// Resolve identity only. For `typescript/lib`, `Error` is written as `exn`, `Promise` and
+    /// `PromiseLike` as `JS.Promise`, and any other named DOM or ECMAScript lib declaration as its
     /// `Fable.Core.TS.Dom` or `Fable.Core.TS.Es` name. Remaining references widen to `obj` with a
     /// finding.
     | Widen
@@ -855,21 +855,6 @@ module Naming =
         | CompilerLib -> CompilerLibModule
         | Dependency name -> namespacedModule config name
 
-    /// The compiler-lib names Fable.Core already binds, and the F# spelling of each.
-    ///
-    /// O7 left the compiler-lib group widening to `obj` "until the shipped compiler-lib
-    /// package exists". For the ECMAScript half of `lib.d.ts` it already does, and every
-    /// generated file opens it: `Fable.Core.JS` is that package. So `Promise<Response>` is
-    /// `JS.Promise<obj>` rather than a bare `obj`, which is one honest loss (the DOM name
-    /// inside) instead of two.
-    ///
-    /// Each entry is the F# name and the arity that name takes. The arity is here rather than
-    /// inferred because it is the whole safety argument: TypeScript's own lib moves - it made
-    /// `Uint8Array` generic in a buffer parameter that Fable's abbreviation does not have -
-    /// and a mapping that guessed would emit code that does not compile. Arities that agree
-    /// map exactly; a lib type carrying *more* arguments than Fable's binding maps with the
-    /// extras dropped and a finding; one carrying fewer is not this type at all and widens.
-    ///
     /// The names `Xantham.Fable.Core` shadows into `Fable.Core.JS`. A generated module reaches
     /// them unqualified through the `open Fable.Core.JS` it carries. Where a package declares
     /// one of these names itself, the package's declaration takes the unqualified spelling and
@@ -891,68 +876,83 @@ module Naming =
         /// The spelling that reaches the support package's declaration past a package's own.
         let qualify (name: string) = $"JS.{name}"
 
-    /// ECMAScript bindings whose arity or loss requires an explicit mapping.
+    /// The compiler-lib names a non-ship run writes as something other than their Core.TS
+    /// declaration, and the ECMAScript names it writes as Core.TS's under every disposition.
+    ///
+    /// Generated bindings reference `Fable.Core.TS` for the standard library, so a value typed
+    /// by a Core.TS API passes to them unchanged. A name keeps another spelling only where the
+    /// Fable compiler maps an F# type to the JavaScript one, or where the ecosystem's support is
+    /// written against Fable.Core's binding (`docs/.ai/footguns.md`, "Fable consumption of
+    /// bindings").
     module LibBindings =
         /// Name, F# arity, and the loss to record - `None` when the mapping gives up nothing.
         let private table =
             [
+                // Fable.Promise's `promise { }` and `Async.AwaitPromise`/`StartAsPromise` take and
+                // return `JS.Promise`, so a binding written in Core.TS's `Promise` would need a
+                // cast at every use of either.
                 "Promise", ("JS.Promise", 1, None)
                 // A thenable is not a promise: TypeScript's `PromiseLike` is the structural
-                // supertype, and reading one as `JS.Promise` claims methods it may not have.
+                // supertype, and reading one as `JS.Promise` claims methods it may not have. It
+                // keeps the promise's spelling so a `JS.Promise` passes where it is expected.
                 "PromiseLike", ("JS.Promise", 1, Some "PromiseLike reads as JS.Promise; a bare thenable is not one")
-                "Map", ("JS.Map", 2, None)
-                "ReadonlyMap",
-                ("JS.Map", 2, Some "ReadonlyMap reads as JS.Map; the readonly restriction is not carried")
-                "WeakMap", ("JS.WeakMap", 2, None)
-                "Set", ("JS.Set", 1, None)
-                "ReadonlySet",
-                ("JS.Set", 1, Some "ReadonlySet reads as JS.Set; the readonly restriction is not carried")
-                "WeakSet", ("JS.WeakSet", 1, None)
                 // Fable compiles a JavaScript `Error` to `System.Exception`, which is what makes
                 // a class over this base raisable and catchable by type. The instance surface is
                 // where the two disagree: `name`, `stack` and `cause` are the JavaScript object's.
                 "Error",
                 ("exn", 0, Some "Error reads as exn; the JavaScript name, stack and cause properties are not on it")
-                "Date", ("JS.Date", 0, None)
-                "Function", ("JS.Function", 0, None)
-                "Object", ("JS.Object", 0, None)
-                "Math", ("JS.Math", 0, None)
-                "JSON", ("JS.JSON", 0, None)
-                "Console", ("JS.Console", 0, None)
-                "PropertyDescriptor", ("JS.PropertyDescriptor", 0, None)
-                "ArrayBuffer", ("JS.ArrayBuffer", 0, None)
-                "ArrayBufferView", ("JS.ArrayBufferView", 0, None)
-                "DataView", ("JS.DataView", 0, None)
-                "Int8Array", ("JS.Int8Array", 0, None)
-                "Uint8Array", ("JS.Uint8Array", 0, None)
-                "Uint8ClampedArray", ("JS.Uint8ClampedArray", 0, None)
-                "Int16Array", ("JS.Int16Array", 0, None)
-                "Uint16Array", ("JS.Uint16Array", 0, None)
-                "Int32Array", ("JS.Int32Array", 0, None)
-                "Uint32Array", ("JS.Uint32Array", 0, None)
-                "Float32Array", ("JS.Float32Array", 0, None)
-                "Float64Array", ("JS.Float64Array", 0, None)
-                "BigInt64Array", ("JS.BigInt64Array", 0, None)
-                "AsyncIterable", ("JS.AsyncIterable", 1, None)
-                "AsyncIterator", ("JS.AsyncIterator", 1, None)
-                "AsyncGenerator", ("JS.AsyncGenerator", 1, None)
-                "IteratorResult", ("JS.IteratorResult", 1, None)
-                // `Fable.Core` has no name for the combined shape; `JS.AsyncIterable` carries
-                // only `Symbol.asyncIterator`, not the `next`/`return`/`throw` methods an
-                // iterator adds.
-                "AsyncIterableIterator",
-                ("JS.AsyncIterable",
-                 1,
-                 Some "AsyncIterableIterator reads as JS.AsyncIterable; its next/return/throw methods are not on it")
             ]
             |> Map.ofList
 
-        /// The binding for a lib name, if Fable.Core has one: its F# name, its arity, and the
-        /// loss to record. `seq`-shaped names (`Iterable`, `Iterator`) are absent on purpose -
-        /// Fable.Core binds only the async ones, and pretending `seq<'T>` interoperates with a
-        /// JS iterable is exactly the kind of claim this table exists not to make.
-        /// Under `widen`, `Shape.libBinding` writes them as Core.TS's own JS-iterable interfaces.
+        /// The binding for a lib name, if it has one other than its Core.TS declaration: its F#
+        /// name, its arity, and the loss to record.
         let tryFind (name: string) = Map.tryFind name table
+
+        let private pinned =
+            set
+                [
+                    "Map"
+                    "ReadonlyMap"
+                    "WeakMap"
+                    "Set"
+                    "ReadonlySet"
+                    "WeakSet"
+                    "Date"
+                    "Function"
+                    "Object"
+                    "Math"
+                    "JSON"
+                    "Console"
+                    "PropertyDescriptor"
+                    "ArrayBuffer"
+                    "ArrayBufferView"
+                    "DataView"
+                    "Int8Array"
+                    "Uint8Array"
+                    "Uint8ClampedArray"
+                    "Int16Array"
+                    "Uint16Array"
+                    "Int32Array"
+                    "Uint32Array"
+                    "Float32Array"
+                    "Float64Array"
+                    "BigInt64Array"
+                    "AsyncIterable"
+                    "AsyncIterator"
+                    "AsyncGenerator"
+                    "IteratorResult"
+                    "AsyncIterableIterator"
+                ]
+
+        /// Whether a lib name is written as its `Fable.Core.TS.Es` declaration under `reference`
+        /// and `map` as well as `widen`, ahead of the O7 template and the group's table, as a DOM
+        /// name is. Under `widen` every other ECMAScript name is written the same way.
+        let isPinnedToCoreTs (name: string) = Set.contains name pinned
+
+        /// The Core.TS spelling of the lib `Function` interface. A type-parameter bound written
+        /// as it is dropped, so an F# function can be the argument.
+        [<Literal>]
+        let FunctionBinding = "Fable.Core.TS.Es.Function"
 
     /// The JavaScript key a member symbol stands for. The checker escapes a name that begins
     /// with two underscores by prepending a third, so that a real `__html` cannot collide with
