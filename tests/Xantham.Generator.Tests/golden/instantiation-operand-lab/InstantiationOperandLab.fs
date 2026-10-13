@@ -12,17 +12,29 @@ open Fable.Core.TS.Dom
 
 [<Interface>]
 type Ok<'T> =
+    /// <remarks>TypeScript type: <c>"ok"</c></remarks>
     abstract kind: string with get, set
     abstract value: 'T with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, value: 'T) : Ok<'T> = jsNative
+    [<ParamObject; Emit("({ kind: 'ok', ...$0 })")>]
+    static member Create (value: 'T) : Ok<'T> = jsNative
+
+module Ok =
+    /// <remarks>TypeScript type: <c>"ok"</c></remarks>
+    [<Literal>]
+    let kind = "ok"
 
 [<Interface>]
 type Err =
+    /// <remarks>TypeScript type: <c>"err"</c></remarks>
     abstract kind: string with get, set
     abstract message: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, message: string) : Err = jsNative
+    [<ParamObject; Emit("({ kind: 'err', ...$0 })")>]
+    static member Create (message: string) : Err = jsNative
+
+module Err =
+    /// <remarks>TypeScript type: <c>"err"</c></remarks>
+    [<Literal>]
+    let kind = "err"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Outcome =

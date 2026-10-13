@@ -3397,59 +3397,77 @@ type DrawableSVGGeometry =
     /// <summary>
     /// node is an element.
     /// </summary>
+    /// <remarks>TypeScript type: <c>1</c></remarks>
     abstract ELEMENT_NODE: float
+    /// <remarks>TypeScript type: <c>2</c></remarks>
     abstract ATTRIBUTE_NODE: float
     /// <summary>
     /// node is a Text node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>3</c></remarks>
     abstract TEXT_NODE: float
     /// <summary>
     /// node is a CDATASection node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>4</c></remarks>
     abstract CDATA_SECTION_NODE: float
+    /// <remarks>TypeScript type: <c>5</c></remarks>
     abstract ENTITY_REFERENCE_NODE: float
+    /// <remarks>TypeScript type: <c>6</c></remarks>
     abstract ENTITY_NODE: float
     /// <summary>
     /// node is a ProcessingInstruction node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>7</c></remarks>
     abstract PROCESSING_INSTRUCTION_NODE: float
     /// <summary>
     /// node is a Comment node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>8</c></remarks>
     abstract COMMENT_NODE: float
     /// <summary>
     /// node is a document.
     /// </summary>
+    /// <remarks>TypeScript type: <c>9</c></remarks>
     abstract DOCUMENT_NODE: float
     /// <summary>
     /// node is a doctype.
     /// </summary>
+    /// <remarks>TypeScript type: <c>10</c></remarks>
     abstract DOCUMENT_TYPE_NODE: float
     /// <summary>
     /// node is a DocumentFragment node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>11</c></remarks>
     abstract DOCUMENT_FRAGMENT_NODE: float
+    /// <remarks>TypeScript type: <c>12</c></remarks>
     abstract NOTATION_NODE: float
     /// <summary>
     /// Set when node and other are not in the same tree.
     /// </summary>
+    /// <remarks>TypeScript type: <c>1</c></remarks>
     abstract DOCUMENT_POSITION_DISCONNECTED: float
     /// <summary>
     /// Set when other is preceding node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>2</c></remarks>
     abstract DOCUMENT_POSITION_PRECEDING: float
     /// <summary>
     /// Set when other is following node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>4</c></remarks>
     abstract DOCUMENT_POSITION_FOLLOWING: float
     /// <summary>
     /// Set when other is an ancestor of node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>8</c></remarks>
     abstract DOCUMENT_POSITION_CONTAINS: float
     /// <summary>
     /// Set when other is a descendant of node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>16</c></remarks>
     abstract DOCUMENT_POSITION_CONTAINED_BY: float
+    /// <remarks>TypeScript type: <c>32</c></remarks>
     abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
     /// <summary>
     /// Returns the first following sibling that is an element, and null otherwise.
@@ -3592,6 +3610,109 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract assignedSlot: Fable.Core.TS.Dom.HTMLSlotElement option
     abstract draw: string with get, set
+
+module DrawableSVGGeometry =
+    /// <summary>
+    /// node is an element.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let ELEMENT_NODE = 1.0
+    /// <remarks>TypeScript type: <c>2</c></remarks>
+    [<Literal>]
+    let ATTRIBUTE_NODE = 2.0
+    /// <summary>
+    /// node is a Text node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>3</c></remarks>
+    [<Literal>]
+    let TEXT_NODE = 3.0
+    /// <summary>
+    /// node is a CDATASection node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>4</c></remarks>
+    [<Literal>]
+    let CDATA_SECTION_NODE = 4.0
+    /// <remarks>TypeScript type: <c>5</c></remarks>
+    [<Literal>]
+    let ENTITY_REFERENCE_NODE = 5.0
+    /// <remarks>TypeScript type: <c>6</c></remarks>
+    [<Literal>]
+    let ENTITY_NODE = 6.0
+    /// <summary>
+    /// node is a ProcessingInstruction node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>7</c></remarks>
+    [<Literal>]
+    let PROCESSING_INSTRUCTION_NODE = 7.0
+    /// <summary>
+    /// node is a Comment node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>8</c></remarks>
+    [<Literal>]
+    let COMMENT_NODE = 8.0
+    /// <summary>
+    /// node is a document.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>9</c></remarks>
+    [<Literal>]
+    let DOCUMENT_NODE = 9.0
+    /// <summary>
+    /// node is a doctype.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>10</c></remarks>
+    [<Literal>]
+    let DOCUMENT_TYPE_NODE = 10.0
+    /// <summary>
+    /// node is a DocumentFragment node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>11</c></remarks>
+    [<Literal>]
+    let DOCUMENT_FRAGMENT_NODE = 11.0
+    /// <remarks>TypeScript type: <c>12</c></remarks>
+    [<Literal>]
+    let NOTATION_NODE = 12.0
+    /// <summary>
+    /// Set when node and other are not in the same tree.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_DISCONNECTED = 1.0
+    /// <summary>
+    /// Set when other is preceding node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>2</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_PRECEDING = 2.0
+    /// <summary>
+    /// Set when other is following node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>4</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_FOLLOWING = 4.0
+    /// <summary>
+    /// Set when other is an ancestor of node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>8</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_CONTAINS = 8.0
+    /// <summary>
+    /// Set when other is a descendant of node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>16</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_CONTAINED_BY = 16.0
+    /// <remarks>TypeScript type: <c>32</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32.0
+
+    module InsertAdjacentElement =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Where =
+            | [<CompiledName("afterbegin")>] Afterbegin
+            | [<CompiledName("afterend")>] Afterend
+            | [<CompiledName("beforebegin")>] Beforebegin
+            | [<CompiledName("beforeend")>] Beforeend
 
 type UtilityFunction = (obj[] -> TimelinePosition)
 
@@ -4578,15 +4699,6 @@ module Draggable =
         static member Draggable (target: TargetsParam, ?parameters: DraggableParams) : Draggable = jsNative
         [<Import("createDraggable", "animejs/draggable")>]
         static member createDraggable (target: TargetsParam, ?parameters: DraggableParams) : Draggable = jsNative
-
-module DrawableSVGGeometry =
-    module InsertAdjacentElement =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Where =
-            | [<CompiledName("afterbegin")>] Afterbegin
-            | [<CompiledName("afterend")>] Afterend
-            | [<CompiledName("beforebegin")>] Beforebegin
-            | [<CompiledName("beforeend")>] Beforeend
 
 module DurationKeyframes =
     type Item =

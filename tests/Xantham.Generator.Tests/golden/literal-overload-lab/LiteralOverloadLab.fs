@@ -73,9 +73,15 @@ type Solo =
 /// </summary>
 [<Interface>]
 type Label =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
     abstract kind: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string) : Label = jsNative
+    [<Emit("({ kind: 'text' })")>]
+    static member Create () : Label = jsNative
+
+module Label =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+    [<Literal>]
+    let kind = "text"
 
 /// <summary>
 /// Negative: the parameter lists differ before the literal is read, so nothing collides.

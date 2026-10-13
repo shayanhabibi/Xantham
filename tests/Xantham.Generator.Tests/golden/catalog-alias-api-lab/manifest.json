@@ -4,8 +4,8 @@
   "module": "CatalogAliasApiLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 4,
-    "widened": 4,
+    "ergonomic": 8,
+    "widened": 0,
     "escape": 1
   },
   "passes": [
@@ -23,12 +23,12 @@
     {
       "pass": "SI - shape-interfaces",
       "total": 7,
-      "ergonomic": 3,
-      "widened": 4
+      "ergonomic": 7
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 9,
+      "total": 13,
+      "exact": 4,
       "ergonomic": 9
     },
     {

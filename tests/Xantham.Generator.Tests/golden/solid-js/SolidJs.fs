@@ -174,60 +174,90 @@ type MemoOptions<'T> =
 
 [<Interface>]
 type Errored =
+    /// <remarks>TypeScript type: <c>"errored"</c></remarks>
     abstract state: string with get, set
     abstract loading: bool with get, set
     abstract error: obj with get, set
     abstract latest: unit
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (state: string, loading: bool, error: obj) : Errored = jsNative
+    [<ParamObject; Emit("({ state: 'errored', ...$0 })")>]
+    static member Create (loading: bool, error: obj) : Errored = jsNative
+
+module Errored =
+    /// <remarks>TypeScript type: <c>"errored"</c></remarks>
+    [<Literal>]
+    let state = "errored"
 
 [<Interface>]
 type Pending =
+    /// <remarks>TypeScript type: <c>"pending"</c></remarks>
     abstract state: string with get, set
     abstract loading: bool with get, set
     abstract error: unit
     abstract latest: unit
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (state: string, loading: bool) : Pending = jsNative
+    [<ParamObject; Emit("({ state: 'pending', ...$0 })")>]
+    static member Create (loading: bool) : Pending = jsNative
+
+module Pending =
+    /// <remarks>TypeScript type: <c>"pending"</c></remarks>
+    [<Literal>]
+    let state = "pending"
 
 [<Interface>]
 type Ready<'T> =
+    /// <remarks>TypeScript type: <c>"ready"</c></remarks>
     abstract state: string with get, set
     abstract loading: bool with get, set
     abstract error: unit
     abstract latest: 'T with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> 'T
-    [<ParamObject; Emit("$0")>]
-    static member Create (state: string, loading: bool, latest: 'T) : Ready<'T> = jsNative
+    [<ParamObject; Emit("({ state: 'ready', ...$0 })")>]
+    static member Create (loading: bool, latest: 'T) : Ready<'T> = jsNative
+
+module Ready =
+    /// <remarks>TypeScript type: <c>"ready"</c></remarks>
+    [<Literal>]
+    let state = "ready"
 
 [<Interface>]
 type Refreshing<'T> =
+    /// <remarks>TypeScript type: <c>"refreshing"</c></remarks>
     abstract state: string with get, set
     abstract loading: bool with get, set
     abstract error: unit
     abstract latest: 'T with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> 'T
-    [<ParamObject; Emit("$0")>]
-    static member Create (state: string, loading: bool, latest: 'T) : Refreshing<'T> = jsNative
+    [<ParamObject; Emit("({ state: 'refreshing', ...$0 })")>]
+    static member Create (loading: bool, latest: 'T) : Refreshing<'T> = jsNative
+
+module Refreshing =
+    /// <remarks>TypeScript type: <c>"refreshing"</c></remarks>
+    [<Literal>]
+    let state = "refreshing"
 
 type Resource<'T> = U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved>
 
 [<Interface>]
 type Unresolved =
+    /// <remarks>TypeScript type: <c>"unresolved"</c></remarks>
     abstract state: string with get, set
     abstract loading: bool with get, set
     abstract error: unit
     abstract latest: unit
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (state: string, loading: bool) : Unresolved = jsNative
+    [<ParamObject; Emit("({ state: 'unresolved', ...$0 })")>]
+    static member Create (loading: bool) : Unresolved = jsNative
+
+module Unresolved =
+    /// <remarks>TypeScript type: <c>"unresolved"</c></remarks>
+    [<Literal>]
+    let state = "unresolved"
 
 type InitializedResource<'T> = U3<Errored, Ready<'T>, Refreshing<'T>>
 
@@ -1613,59 +1643,77 @@ module H =
                             /// <summary>
                             /// node is an element.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>1</c></remarks>
                             abstract ELEMENT_NODE: float
+                            /// <remarks>TypeScript type: <c>2</c></remarks>
                             abstract ATTRIBUTE_NODE: float
                             /// <summary>
                             /// node is a Text node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>3</c></remarks>
                             abstract TEXT_NODE: float
                             /// <summary>
                             /// node is a CDATASection node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>4</c></remarks>
                             abstract CDATA_SECTION_NODE: float
+                            /// <remarks>TypeScript type: <c>5</c></remarks>
                             abstract ENTITY_REFERENCE_NODE: float
+                            /// <remarks>TypeScript type: <c>6</c></remarks>
                             abstract ENTITY_NODE: float
                             /// <summary>
                             /// node is a ProcessingInstruction node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>7</c></remarks>
                             abstract PROCESSING_INSTRUCTION_NODE: float
                             /// <summary>
                             /// node is a Comment node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>8</c></remarks>
                             abstract COMMENT_NODE: float
                             /// <summary>
                             /// node is a document.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>9</c></remarks>
                             abstract DOCUMENT_NODE: float
                             /// <summary>
                             /// node is a doctype.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>10</c></remarks>
                             abstract DOCUMENT_TYPE_NODE: float
                             /// <summary>
                             /// node is a DocumentFragment node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>11</c></remarks>
                             abstract DOCUMENT_FRAGMENT_NODE: float
+                            /// <remarks>TypeScript type: <c>12</c></remarks>
                             abstract NOTATION_NODE: float
                             /// <summary>
                             /// Set when node and other are not in the same tree.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>1</c></remarks>
                             abstract DOCUMENT_POSITION_DISCONNECTED: float
                             /// <summary>
                             /// Set when other is preceding node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>2</c></remarks>
                             abstract DOCUMENT_POSITION_PRECEDING: float
                             /// <summary>
                             /// Set when other is following node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>4</c></remarks>
                             abstract DOCUMENT_POSITION_FOLLOWING: float
                             /// <summary>
                             /// Set when other is an ancestor of node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>8</c></remarks>
                             abstract DOCUMENT_POSITION_CONTAINS: float
                             /// <summary>
                             /// Set when other is a descendant of node.
                             /// </summary>
+                            /// <remarks>TypeScript type: <c>16</c></remarks>
                             abstract DOCUMENT_POSITION_CONTAINED_BY: float
+                            /// <remarks>TypeScript type: <c>32</c></remarks>
                             abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
                             /// <summary>
                             /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -1687,6 +1735,101 @@ module H =
                             abstract removeEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
                             [<EmitIndexer>]
                             abstract Item: string -> obj with get, set
+
+                        module Result =
+                            /// <summary>
+                            /// node is an element.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>1</c></remarks>
+                            [<Literal>]
+                            let ELEMENT_NODE = 1.0
+                            /// <remarks>TypeScript type: <c>2</c></remarks>
+                            [<Literal>]
+                            let ATTRIBUTE_NODE = 2.0
+                            /// <summary>
+                            /// node is a Text node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>3</c></remarks>
+                            [<Literal>]
+                            let TEXT_NODE = 3.0
+                            /// <summary>
+                            /// node is a CDATASection node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>4</c></remarks>
+                            [<Literal>]
+                            let CDATA_SECTION_NODE = 4.0
+                            /// <remarks>TypeScript type: <c>5</c></remarks>
+                            [<Literal>]
+                            let ENTITY_REFERENCE_NODE = 5.0
+                            /// <remarks>TypeScript type: <c>6</c></remarks>
+                            [<Literal>]
+                            let ENTITY_NODE = 6.0
+                            /// <summary>
+                            /// node is a ProcessingInstruction node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>7</c></remarks>
+                            [<Literal>]
+                            let PROCESSING_INSTRUCTION_NODE = 7.0
+                            /// <summary>
+                            /// node is a Comment node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>8</c></remarks>
+                            [<Literal>]
+                            let COMMENT_NODE = 8.0
+                            /// <summary>
+                            /// node is a document.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>9</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_NODE = 9.0
+                            /// <summary>
+                            /// node is a doctype.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>10</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_TYPE_NODE = 10.0
+                            /// <summary>
+                            /// node is a DocumentFragment node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>11</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_FRAGMENT_NODE = 11.0
+                            /// <remarks>TypeScript type: <c>12</c></remarks>
+                            [<Literal>]
+                            let NOTATION_NODE = 12.0
+                            /// <summary>
+                            /// Set when node and other are not in the same tree.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>1</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_POSITION_DISCONNECTED = 1.0
+                            /// <summary>
+                            /// Set when other is preceding node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>2</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_POSITION_PRECEDING = 2.0
+                            /// <summary>
+                            /// Set when other is following node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>4</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_POSITION_FOLLOWING = 4.0
+                            /// <summary>
+                            /// Set when other is an ancestor of node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>8</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_POSITION_CONTAINS = 8.0
+                            /// <summary>
+                            /// Set when other is a descendant of node.
+                            /// </summary>
+                            /// <remarks>TypeScript type: <c>16</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_POSITION_CONTAINED_BY = 16.0
+                            /// <remarks>TypeScript type: <c>32</c></remarks>
+                            [<Literal>]
+                            let DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32.0
 
     /// <summary>solid-js/h/jsx-dev-runtime</summary>
     module JsxDevRuntime =
@@ -1889,59 +2032,77 @@ module H =
                     /// <summary>
                     /// node is an element.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>1</c></remarks>
                     abstract ELEMENT_NODE: float
+                    /// <remarks>TypeScript type: <c>2</c></remarks>
                     abstract ATTRIBUTE_NODE: float
                     /// <summary>
                     /// node is a Text node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>3</c></remarks>
                     abstract TEXT_NODE: float
                     /// <summary>
                     /// node is a CDATASection node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>4</c></remarks>
                     abstract CDATA_SECTION_NODE: float
+                    /// <remarks>TypeScript type: <c>5</c></remarks>
                     abstract ENTITY_REFERENCE_NODE: float
+                    /// <remarks>TypeScript type: <c>6</c></remarks>
                     abstract ENTITY_NODE: float
                     /// <summary>
                     /// node is a ProcessingInstruction node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>7</c></remarks>
                     abstract PROCESSING_INSTRUCTION_NODE: float
                     /// <summary>
                     /// node is a Comment node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>8</c></remarks>
                     abstract COMMENT_NODE: float
                     /// <summary>
                     /// node is a document.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>9</c></remarks>
                     abstract DOCUMENT_NODE: float
                     /// <summary>
                     /// node is a doctype.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>10</c></remarks>
                     abstract DOCUMENT_TYPE_NODE: float
                     /// <summary>
                     /// node is a DocumentFragment node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>11</c></remarks>
                     abstract DOCUMENT_FRAGMENT_NODE: float
+                    /// <remarks>TypeScript type: <c>12</c></remarks>
                     abstract NOTATION_NODE: float
                     /// <summary>
                     /// Set when node and other are not in the same tree.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>1</c></remarks>
                     abstract DOCUMENT_POSITION_DISCONNECTED: float
                     /// <summary>
                     /// Set when other is preceding node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>2</c></remarks>
                     abstract DOCUMENT_POSITION_PRECEDING: float
                     /// <summary>
                     /// Set when other is following node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>4</c></remarks>
                     abstract DOCUMENT_POSITION_FOLLOWING: float
                     /// <summary>
                     /// Set when other is an ancestor of node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>8</c></remarks>
                     abstract DOCUMENT_POSITION_CONTAINS: float
                     /// <summary>
                     /// Set when other is a descendant of node.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>16</c></remarks>
                     abstract DOCUMENT_POSITION_CONTAINED_BY: float
+                    /// <remarks>TypeScript type: <c>32</c></remarks>
                     abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
                     /// <summary>
                     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -1965,6 +2126,100 @@ module H =
                     abstract Item: string -> obj with get, set
 
                 module Result =
+                    /// <summary>
+                    /// node is an element.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>1</c></remarks>
+                    [<Literal>]
+                    let ELEMENT_NODE = 1.0
+                    /// <remarks>TypeScript type: <c>2</c></remarks>
+                    [<Literal>]
+                    let ATTRIBUTE_NODE = 2.0
+                    /// <summary>
+                    /// node is a Text node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>3</c></remarks>
+                    [<Literal>]
+                    let TEXT_NODE = 3.0
+                    /// <summary>
+                    /// node is a CDATASection node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>4</c></remarks>
+                    [<Literal>]
+                    let CDATA_SECTION_NODE = 4.0
+                    /// <remarks>TypeScript type: <c>5</c></remarks>
+                    [<Literal>]
+                    let ENTITY_REFERENCE_NODE = 5.0
+                    /// <remarks>TypeScript type: <c>6</c></remarks>
+                    [<Literal>]
+                    let ENTITY_NODE = 6.0
+                    /// <summary>
+                    /// node is a ProcessingInstruction node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>7</c></remarks>
+                    [<Literal>]
+                    let PROCESSING_INSTRUCTION_NODE = 7.0
+                    /// <summary>
+                    /// node is a Comment node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>8</c></remarks>
+                    [<Literal>]
+                    let COMMENT_NODE = 8.0
+                    /// <summary>
+                    /// node is a document.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>9</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_NODE = 9.0
+                    /// <summary>
+                    /// node is a doctype.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>10</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_TYPE_NODE = 10.0
+                    /// <summary>
+                    /// node is a DocumentFragment node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>11</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_FRAGMENT_NODE = 11.0
+                    /// <remarks>TypeScript type: <c>12</c></remarks>
+                    [<Literal>]
+                    let NOTATION_NODE = 12.0
+                    /// <summary>
+                    /// Set when node and other are not in the same tree.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>1</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_POSITION_DISCONNECTED = 1.0
+                    /// <summary>
+                    /// Set when other is preceding node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>2</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_POSITION_PRECEDING = 2.0
+                    /// <summary>
+                    /// Set when other is following node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>4</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_POSITION_FOLLOWING = 4.0
+                    /// <summary>
+                    /// Set when other is an ancestor of node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>8</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_POSITION_CONTAINS = 8.0
+                    /// <summary>
+                    /// Set when other is a descendant of node.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>16</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_POSITION_CONTAINED_BY = 16.0
+                    /// <remarks>TypeScript type: <c>32</c></remarks>
+                    [<Literal>]
+                    let DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32.0
+
                     type Item =
                         /// <summary>
                         /// The read-only <b><c>baseURI</c></b> property of the Node interface returns the absolute base URL of the document containing the node.
@@ -2143,59 +2398,77 @@ module H =
                         /// <summary>
                         /// node is an element.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>1</c></remarks>
                         abstract ELEMENT_NODE: float
+                        /// <remarks>TypeScript type: <c>2</c></remarks>
                         abstract ATTRIBUTE_NODE: float
                         /// <summary>
                         /// node is a Text node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>3</c></remarks>
                         abstract TEXT_NODE: float
                         /// <summary>
                         /// node is a CDATASection node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>4</c></remarks>
                         abstract CDATA_SECTION_NODE: float
+                        /// <remarks>TypeScript type: <c>5</c></remarks>
                         abstract ENTITY_REFERENCE_NODE: float
+                        /// <remarks>TypeScript type: <c>6</c></remarks>
                         abstract ENTITY_NODE: float
                         /// <summary>
                         /// node is a ProcessingInstruction node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>7</c></remarks>
                         abstract PROCESSING_INSTRUCTION_NODE: float
                         /// <summary>
                         /// node is a Comment node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>8</c></remarks>
                         abstract COMMENT_NODE: float
                         /// <summary>
                         /// node is a document.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>9</c></remarks>
                         abstract DOCUMENT_NODE: float
                         /// <summary>
                         /// node is a doctype.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>10</c></remarks>
                         abstract DOCUMENT_TYPE_NODE: float
                         /// <summary>
                         /// node is a DocumentFragment node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>11</c></remarks>
                         abstract DOCUMENT_FRAGMENT_NODE: float
+                        /// <remarks>TypeScript type: <c>12</c></remarks>
                         abstract NOTATION_NODE: float
                         /// <summary>
                         /// Set when node and other are not in the same tree.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>1</c></remarks>
                         abstract DOCUMENT_POSITION_DISCONNECTED: float
                         /// <summary>
                         /// Set when other is preceding node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>2</c></remarks>
                         abstract DOCUMENT_POSITION_PRECEDING: float
                         /// <summary>
                         /// Set when other is following node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>4</c></remarks>
                         abstract DOCUMENT_POSITION_FOLLOWING: float
                         /// <summary>
                         /// Set when other is an ancestor of node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>8</c></remarks>
                         abstract DOCUMENT_POSITION_CONTAINS: float
                         /// <summary>
                         /// Set when other is a descendant of node.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>16</c></remarks>
                         abstract DOCUMENT_POSITION_CONTAINED_BY: float
+                        /// <remarks>TypeScript type: <c>32</c></remarks>
                         abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
                         /// <summary>
                         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -2217,6 +2490,101 @@ module H =
                         abstract removeEventListener: ``type``: string * ?callback: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
                         [<EmitIndexer>]
                         abstract Item: string -> obj with get, set
+
+                    module Item =
+                        /// <summary>
+                        /// node is an element.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>1</c></remarks>
+                        [<Literal>]
+                        let ELEMENT_NODE = 1.0
+                        /// <remarks>TypeScript type: <c>2</c></remarks>
+                        [<Literal>]
+                        let ATTRIBUTE_NODE = 2.0
+                        /// <summary>
+                        /// node is a Text node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>3</c></remarks>
+                        [<Literal>]
+                        let TEXT_NODE = 3.0
+                        /// <summary>
+                        /// node is a CDATASection node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>4</c></remarks>
+                        [<Literal>]
+                        let CDATA_SECTION_NODE = 4.0
+                        /// <remarks>TypeScript type: <c>5</c></remarks>
+                        [<Literal>]
+                        let ENTITY_REFERENCE_NODE = 5.0
+                        /// <remarks>TypeScript type: <c>6</c></remarks>
+                        [<Literal>]
+                        let ENTITY_NODE = 6.0
+                        /// <summary>
+                        /// node is a ProcessingInstruction node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>7</c></remarks>
+                        [<Literal>]
+                        let PROCESSING_INSTRUCTION_NODE = 7.0
+                        /// <summary>
+                        /// node is a Comment node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>8</c></remarks>
+                        [<Literal>]
+                        let COMMENT_NODE = 8.0
+                        /// <summary>
+                        /// node is a document.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>9</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_NODE = 9.0
+                        /// <summary>
+                        /// node is a doctype.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>10</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_TYPE_NODE = 10.0
+                        /// <summary>
+                        /// node is a DocumentFragment node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>11</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_FRAGMENT_NODE = 11.0
+                        /// <remarks>TypeScript type: <c>12</c></remarks>
+                        [<Literal>]
+                        let NOTATION_NODE = 12.0
+                        /// <summary>
+                        /// Set when node and other are not in the same tree.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>1</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_POSITION_DISCONNECTED = 1.0
+                        /// <summary>
+                        /// Set when other is preceding node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>2</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_POSITION_PRECEDING = 2.0
+                        /// <summary>
+                        /// Set when other is following node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>4</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_POSITION_FOLLOWING = 4.0
+                        /// <summary>
+                        /// Set when other is an ancestor of node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>8</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_POSITION_CONTAINS = 8.0
+                        /// <summary>
+                        /// Set when other is a descendant of node.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>16</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_POSITION_CONTAINED_BY = 16.0
+                        /// <remarks>TypeScript type: <c>32</c></remarks>
+                        [<Literal>]
+                        let DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32.0
 
     /// <summary>solid-js/h/jsx-runtime</summary>
     module JsxRuntime =

@@ -878,10 +878,16 @@ type ExportedHandlerTraceHandler<'Env, 'Props> = delegate of traces: TraceItem[]
 
 [<Interface>]
 type AlarmEventInfo =
+    /// <remarks>TypeScript type: <c>"alarm"</c></remarks>
     abstract ``type``: string
     abstract scheduledTime: Fable.Core.TS.Es.Date
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, scheduledTime: Fable.Core.TS.Es.Date) : AlarmEventInfo = jsNative
+    [<ParamObject; Emit("({ type: 'alarm', ...$0 })")>]
+    static member Create (scheduledTime: Fable.Core.TS.Es.Date) : AlarmEventInfo = jsNative
+
+module AlarmEventInfo =
+    /// <remarks>TypeScript type: <c>"alarm"</c></remarks>
+    [<Literal>]
+    let ``type`` = "alarm"
 
 [<Interface>]
 type Attribute =
@@ -892,72 +898,126 @@ type Attribute =
 
 [<Interface>]
 type Attributes =
+    /// <remarks>TypeScript type: <c>"attributes"</c></remarks>
     abstract ``type``: string
     abstract info: Attribute[]
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, info: Attribute[]) : Attributes = jsNative
+    [<ParamObject; Emit("({ type: 'attributes', ...$0 })")>]
+    static member Create (info: Attribute[]) : Attributes = jsNative
+
+module Attributes =
+    /// <remarks>TypeScript type: <c>"attributes"</c></remarks>
+    [<Literal>]
+    let ``type`` = "attributes"
 
 [<Interface>]
 type ConnectEventInfo =
+    /// <remarks>TypeScript type: <c>"connect"</c></remarks>
     abstract ``type``: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : ConnectEventInfo = jsNative
+    [<Emit("({ type: 'connect' })")>]
+    static member Create () : ConnectEventInfo = jsNative
+
+module ConnectEventInfo =
+    /// <remarks>TypeScript type: <c>"connect"</c></remarks>
+    [<Literal>]
+    let ``type`` = "connect"
 
 [<Interface>]
 type CustomEventInfo =
+    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
     abstract ``type``: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : CustomEventInfo = jsNative
+    [<Emit("({ type: 'custom' })")>]
+    static member Create () : CustomEventInfo = jsNative
+
+module CustomEventInfo =
+    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+    [<Literal>]
+    let ``type`` = "custom"
 
 [<Interface>]
 type DiagnosticChannelEvent =
+    /// <remarks>TypeScript type: <c>"diagnosticChannel"</c></remarks>
     abstract ``type``: string
     abstract channel: string
     abstract message: obj
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, channel: string, message: obj) : DiagnosticChannelEvent = jsNative
+    [<ParamObject; Emit("({ type: 'diagnosticChannel', ...$0 })")>]
+    static member Create (channel: string, message: obj) : DiagnosticChannelEvent = jsNative
+
+module DiagnosticChannelEvent =
+    /// <remarks>TypeScript type: <c>"diagnosticChannel"</c></remarks>
+    [<Literal>]
+    let ``type`` = "diagnosticChannel"
 
 [<Interface>]
 type DroppedEventsDiagnostic =
+    /// <remarks>TypeScript type: <c>"droppedEvents"</c></remarks>
     abstract diagnosticsType: string
     abstract count: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (diagnosticsType: string, count: float) : DroppedEventsDiagnostic = jsNative
+    [<ParamObject; Emit("({ diagnosticsType: 'droppedEvents', ...$0 })")>]
+    static member Create (count: float) : DroppedEventsDiagnostic = jsNative
+
+module DroppedEventsDiagnostic =
+    /// <remarks>TypeScript type: <c>"droppedEvents"</c></remarks>
+    [<Literal>]
+    let diagnosticsType = "droppedEvents"
 
 [<Interface>]
 type EmailEventInfo =
+    /// <remarks>TypeScript type: <c>"email"</c></remarks>
     abstract ``type``: string
     abstract mailFrom: string
     abstract rcptTo: string
     abstract rawSize: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, mailFrom: string, rcptTo: string, rawSize: float) : EmailEventInfo = jsNative
+    [<ParamObject; Emit("({ type: 'email', ...$0 })")>]
+    static member Create (mailFrom: string, rcptTo: string, rawSize: float) : EmailEventInfo = jsNative
+
+module EmailEventInfo =
+    /// <remarks>TypeScript type: <c>"email"</c></remarks>
+    [<Literal>]
+    let ``type`` = "email"
 
 [<Interface>]
 type Exception =
+    /// <remarks>TypeScript type: <c>"exception"</c></remarks>
     abstract ``type``: string
     abstract name: string
     abstract message: string
     abstract stack: string option
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, name: string, message: string, ?stack: string) : Exception = jsNative
+    [<ParamObject; Emit("({ type: 'exception', ...$0 })")>]
+    static member Create (name: string, message: string, ?stack: string) : Exception = jsNative
+
+module Exception =
+    /// <remarks>TypeScript type: <c>"exception"</c></remarks>
+    [<Literal>]
+    let ``type`` = "exception"
 
 [<Interface>]
 type FetchEventInfo =
+    /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
     abstract ``type``: string
     abstract ``method``: string
     abstract url: string
     abstract cfJson: obj option
     abstract headers: Header[]
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ``method``: string, url: string, headers: Header[], ?cfJson: obj) : FetchEventInfo = jsNative
+    [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
+    static member Create (``method``: string, url: string, headers: Header[], ?cfJson: obj) : FetchEventInfo = jsNative
+
+module FetchEventInfo =
+    /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
+    [<Literal>]
+    let ``type`` = "fetch"
 
 [<Interface>]
 type FetchResponseInfo =
+    /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
     abstract ``type``: string
     abstract statusCode: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, statusCode: float) : FetchResponseInfo = jsNative
+    [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
+    static member Create (statusCode: float) : FetchResponseInfo = jsNative
+
+module FetchResponseInfo =
+    /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
+    [<Literal>]
+    let ``type`` = "fetch"
 
 [<Interface>]
 type Header =
@@ -968,39 +1028,76 @@ type Header =
 
 [<Interface>]
 type HibernatableWebSocketEventInfo =
+    /// <remarks>TypeScript type: <c>"hibernatableWebSocket"</c></remarks>
     abstract ``type``: string
     abstract info: HibernatableWebSocketEventInfo.Info
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, info: HibernatableWebSocketEventInfo.Info) : HibernatableWebSocketEventInfo = jsNative
+    [<ParamObject; Emit("({ type: 'hibernatableWebSocket', ...$0 })")>]
+    static member Create (info: HibernatableWebSocketEventInfo.Info) : HibernatableWebSocketEventInfo = jsNative
+
+module HibernatableWebSocketEventInfo =
+    /// <remarks>TypeScript type: <c>"hibernatableWebSocket"</c></remarks>
+    [<Literal>]
+    let ``type`` = "hibernatableWebSocket"
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Info =
+        | [<CompiledName("close")>] Close of code: float * wasClean: bool
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("message")>] Message
 
 [<Interface>]
 type HibernatableWebSocketEventInfoClose =
+    /// <remarks>TypeScript type: <c>"close"</c></remarks>
     abstract ``type``: string
     abstract code: float
     abstract wasClean: bool
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, code: float, wasClean: bool) : HibernatableWebSocketEventInfoClose = jsNative
+    [<ParamObject; Emit("({ type: 'close', ...$0 })")>]
+    static member Create (code: float, wasClean: bool) : HibernatableWebSocketEventInfoClose = jsNative
+
+module HibernatableWebSocketEventInfoClose =
+    /// <remarks>TypeScript type: <c>"close"</c></remarks>
+    [<Literal>]
+    let ``type`` = "close"
 
 [<Interface>]
 type HibernatableWebSocketEventInfoError =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract ``type``: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : HibernatableWebSocketEventInfoError = jsNative
+    [<Emit("({ type: 'error' })")>]
+    static member Create () : HibernatableWebSocketEventInfoError = jsNative
+
+module HibernatableWebSocketEventInfoError =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error"
 
 [<Interface>]
 type HibernatableWebSocketEventInfoMessage =
+    /// <remarks>TypeScript type: <c>"message"</c></remarks>
     abstract ``type``: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : HibernatableWebSocketEventInfoMessage = jsNative
+    [<Emit("({ type: 'message' })")>]
+    static member Create () : HibernatableWebSocketEventInfoMessage = jsNative
+
+module HibernatableWebSocketEventInfoMessage =
+    /// <remarks>TypeScript type: <c>"message"</c></remarks>
+    [<Literal>]
+    let ``type`` = "message"
 
 [<Interface>]
 type JsRpcEventInfo =
+    /// <remarks>TypeScript type: <c>"jsrpc"</c></remarks>
     abstract ``type``: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : JsRpcEventInfo = jsNative
+    [<Emit("({ type: 'jsrpc' })")>]
+    static member Create () : JsRpcEventInfo = jsNative
+
+module JsRpcEventInfo =
+    /// <remarks>TypeScript type: <c>"jsrpc"</c></remarks>
+    [<Literal>]
+    let ``type`` = "jsrpc"
 
 [<Interface>]
 type Onset =
+    /// <remarks>TypeScript type: <c>"onset"</c></remarks>
     abstract ``type``: string
     abstract attributes: Attribute[]
     abstract spanId: string
@@ -1013,47 +1110,112 @@ type Onset =
     abstract scriptVersion: TailStream.ScriptVersion option
     abstract preview: TailStream.TracePreviewInfo option
     abstract info: Onset.Info
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, attributes: Attribute[], spanId: string, executionModel: string, info: Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Onset = jsNative
+    [<ParamObject; Emit("({ type: 'onset', ...$0 })")>]
+    static member Create (attributes: Attribute[], spanId: string, executionModel: string, info: Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Onset = jsNative
+
+module Onset =
+    /// <remarks>TypeScript type: <c>"onset"</c></remarks>
+    [<Literal>]
+    let ``type`` = "onset"
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Info =
+        | [<CompiledName("alarm")>] Alarm of scheduledTime: Fable.Core.TS.Es.Date
+        | [<CompiledName("connect")>] Connect
+        | [<CompiledName("custom")>] Custom
+        | [<CompiledName("email")>] Email of mailFrom: string * rcptTo: string * rawSize: float
+        | [<CompiledName("fetch")>] Fetch of ``method``: string * url: string * cfJson: obj option * headers: Header[]
+        | [<CompiledName("hibernatableWebSocket")>] HibernatableWebSocket of info: Cloudflare.WorkersTypes.HibernatableWebSocketEventInfo.Info
+        | [<CompiledName("jsrpc")>] Jsrpc
+        | [<CompiledName("queue")>] Queue of queueName: string * batchSize: float
+        | [<CompiledName("scheduled")>] Scheduled of scheduledTime: Fable.Core.TS.Es.Date * cron: string
+        | [<CompiledName("trace")>] Trace of traces: string option[]
 
 [<Interface>]
 type Outcome =
+    /// <remarks>TypeScript type: <c>"outcome"</c></remarks>
     abstract ``type``: string
     abstract outcome: Outcome.Outcome
     abstract cpuTime: float
     abstract wallTime: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, outcome: Outcome.Outcome, cpuTime: float, wallTime: float) : Outcome = jsNative
+    [<ParamObject; Emit("({ type: 'outcome', ...$0 })")>]
+    static member Create (outcome: Outcome.Outcome, cpuTime: float, wallTime: float) : Outcome = jsNative
+
+module Outcome =
+    /// <remarks>TypeScript type: <c>"outcome"</c></remarks>
+    [<Literal>]
+    let ``type`` = "outcome"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Outcome =
+        | [<CompiledName("aborted")>] Aborted
+        | [<CompiledName("canceled")>] Canceled
+        | [<CompiledName("daemonDown")>] DaemonDown
+        | [<CompiledName("exceededCpu")>] ExceededCpu
+        | [<CompiledName("exceededMemory")>] ExceededMemory
+        | [<CompiledName("exceededWallTime")>] ExceededWallTime
+        | [<CompiledName("exception")>] Exception
+        | [<CompiledName("internalError")>] InternalError
+        | [<CompiledName("killSwitch")>] KillSwitch
+        | [<CompiledName("loadShed")>] LoadShed
+        | [<CompiledName("ok")>] Ok
+        | [<CompiledName("responseStreamDisconnected")>] ResponseStreamDisconnected
+        | [<CompiledName("scriptNotFound")>] ScriptNotFound
+        | [<CompiledName("unknown")>] Unknown
 
 [<Interface>]
 type QueueEventInfo =
+    /// <remarks>TypeScript type: <c>"queue"</c></remarks>
     abstract ``type``: string
     abstract queueName: string
     abstract batchSize: float
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, queueName: string, batchSize: float) : QueueEventInfo = jsNative
+    [<ParamObject; Emit("({ type: 'queue', ...$0 })")>]
+    static member Create (queueName: string, batchSize: float) : QueueEventInfo = jsNative
+
+module QueueEventInfo =
+    /// <remarks>TypeScript type: <c>"queue"</c></remarks>
+    [<Literal>]
+    let ``type`` = "queue"
 
 [<Interface>]
 type Return =
+    /// <remarks>TypeScript type: <c>"return"</c></remarks>
     abstract ``type``: string
     abstract info: FetchResponseInfo option
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?info: FetchResponseInfo) : Return = jsNative
+    [<ParamObject; Emit("({ type: 'return', ...$0 })")>]
+    static member Create (?info: FetchResponseInfo) : Return = jsNative
+
+module Return =
+    /// <remarks>TypeScript type: <c>"return"</c></remarks>
+    [<Literal>]
+    let ``type`` = "return"
 
 [<Interface>]
 type ScheduledEventInfo =
+    /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
     abstract ``type``: string
     abstract scheduledTime: Fable.Core.TS.Es.Date
     abstract cron: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, scheduledTime: Fable.Core.TS.Es.Date, cron: string) : ScheduledEventInfo = jsNative
+    [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
+    static member Create (scheduledTime: Fable.Core.TS.Es.Date, cron: string) : ScheduledEventInfo = jsNative
+
+module ScheduledEventInfo =
+    /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
+    [<Literal>]
+    let ``type`` = "scheduled"
 
 [<Interface>]
 type SpanClose =
+    /// <remarks>TypeScript type: <c>"spanClose"</c></remarks>
     abstract ``type``: string
     abstract outcome: Outcome.Outcome
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, outcome: Outcome.Outcome) : SpanClose = jsNative
+    [<ParamObject; Emit("({ type: 'spanClose', ...$0 })")>]
+    static member Create (outcome: Outcome.Outcome) : SpanClose = jsNative
+
+module SpanClose =
+    /// <remarks>TypeScript type: <c>"spanClose"</c></remarks>
+    [<Literal>]
+    let ``type`` = "spanClose"
 
 [<Interface>]
 type SpanContext =
@@ -1065,19 +1227,31 @@ type SpanContext =
 
 [<Interface>]
 type SpanOpen =
+    /// <remarks>TypeScript type: <c>"spanOpen"</c></remarks>
     abstract ``type``: string
     abstract name: string
     abstract spanId: string
     abstract info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, name: string, spanId: string, ?info: U3<Attributes, FetchEventInfo, JsRpcEventInfo>) : SpanOpen = jsNative
+    [<ParamObject; Emit("({ type: 'spanOpen', ...$0 })")>]
+    static member Create (name: string, spanId: string, ?info: U3<Attributes, FetchEventInfo, JsRpcEventInfo>) : SpanOpen = jsNative
+
+module SpanOpen =
+    /// <remarks>TypeScript type: <c>"spanOpen"</c></remarks>
+    [<Literal>]
+    let ``type`` = "spanOpen"
 
 [<Interface>]
 type StreamDiagnostic =
+    /// <remarks>TypeScript type: <c>"streamDiagnostic"</c></remarks>
     abstract ``type``: string
     abstract diagnostic: DroppedEventsDiagnostic
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, diagnostic: DroppedEventsDiagnostic) : StreamDiagnostic = jsNative
+    [<ParamObject; Emit("({ type: 'streamDiagnostic', ...$0 })")>]
+    static member Create (diagnostic: DroppedEventsDiagnostic) : StreamDiagnostic = jsNative
+
+module StreamDiagnostic =
+    /// <remarks>TypeScript type: <c>"streamDiagnostic"</c></remarks>
+    [<Literal>]
+    let ``type`` = "streamDiagnostic"
 
 [<Interface>]
 type TailStreamErrorInfo =
@@ -1089,10 +1263,16 @@ type TailStreamErrorInfo =
 
 [<Interface>]
 type TraceEventInfo =
+    /// <remarks>TypeScript type: <c>"trace"</c></remarks>
     abstract ``type``: string
     abstract traces: string option[]
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, traces: string option[]) : TraceEventInfo = jsNative
+    [<ParamObject; Emit("({ type: 'trace', ...$0 })")>]
+    static member Create (traces: string option[]) : TraceEventInfo = jsNative
+
+module TraceEventInfo =
+    /// <remarks>TypeScript type: <c>"trace"</c></remarks>
+    [<Literal>]
+    let ``type`` = "trace"
 
 type ExportedHandlerScheduledHandler<'Env, 'Props> = delegate of controller: ScheduledController * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
@@ -1102,23 +1282,35 @@ type ExportedHandlerTestHandler<'Env, 'Props> = delegate of controller: TestCont
 
 [<Interface>]
 type EmailAttachment2 =
+    /// <remarks>TypeScript type: <c>"inline"</c></remarks>
     abstract disposition: string with get, set
     abstract contentId: string with get, set
     abstract filename: string with get, set
     abstract ``type``: string with get, set
     abstract content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (disposition: string, contentId: string, filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>) : EmailAttachment2 = jsNative
+    [<ParamObject; Emit("({ disposition: 'inline', ...$0 })")>]
+    static member Create (contentId: string, filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>) : EmailAttachment2 = jsNative
+
+module EmailAttachment2 =
+    /// <remarks>TypeScript type: <c>"inline"</c></remarks>
+    [<Literal>]
+    let disposition = "inline"
 
 [<Interface>]
 type EmailAttachment3 =
+    /// <remarks>TypeScript type: <c>"attachment"</c></remarks>
     abstract disposition: string with get, set
     abstract contentId: unit option with get, set
     abstract filename: string with get, set
     abstract ``type``: string with get, set
     abstract content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (disposition: string, filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?contentId: unit) : EmailAttachment3 = jsNative
+    [<ParamObject; Emit("({ disposition: 'attachment', ...$0 })")>]
+    static member Create (filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?contentId: unit) : EmailAttachment3 = jsNative
+
+module EmailAttachment3 =
+    /// <remarks>TypeScript type: <c>"attachment"</c></remarks>
+    [<Literal>]
+    let disposition = "attachment"
 
 [<Interface>]
 type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
@@ -3415,13 +3607,19 @@ type UnderlyingSink<'W> =
 
 [<Interface>]
 type UnderlyingByteSource =
+    /// <remarks>TypeScript type: <c>"bytes"</c></remarks>
     abstract ``type``: string with get, set
     abstract autoAllocateChunkSize: float option with get, set
     abstract start: (ReadableByteStreamController -> JS.Promise<unit> option) option with get, set
     abstract pull: (ReadableByteStreamController -> JS.Promise<unit> option) option with get, set
     abstract cancel: (obj -> JS.Promise<unit> option) option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?autoAllocateChunkSize: float, ?start: (ReadableByteStreamController -> JS.Promise<unit> option), ?pull: (ReadableByteStreamController -> JS.Promise<unit> option), ?cancel: (obj -> JS.Promise<unit> option)) : UnderlyingByteSource = jsNative
+    [<ParamObject; Emit("({ type: 'bytes', ...$0 })")>]
+    static member Create (?autoAllocateChunkSize: float, ?start: (ReadableByteStreamController -> JS.Promise<unit> option), ?pull: (ReadableByteStreamController -> JS.Promise<unit> option), ?cancel: (obj -> JS.Promise<unit> option)) : UnderlyingByteSource = jsNative
+
+module UnderlyingByteSource =
+    /// <remarks>TypeScript type: <c>"bytes"</c></remarks>
+    [<Literal>]
+    let ``type`` = "bytes"
 
 [<Interface>]
 type UnderlyingSource<'R> =
@@ -3600,9 +3798,20 @@ type ReadableStreamGetReaderOptions =
     /// <br /><br />
     /// This call behaves the same way as the no-argument variant, except that it only works on readable byte streams, i.e. streams which were constructed specifically with the ability to handle "bring your own buffer" reading. The returned BYOB reader provides the ability to directly read individual chunks from the stream via its read() method, into developer-supplied buffers, allowing more precise control over allocation.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"byob"</c></remarks>
     abstract mode: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (mode: string) : ReadableStreamGetReaderOptions = jsNative
+    [<Emit("({ mode: 'byob' })")>]
+    static member Create () : ReadableStreamGetReaderOptions = jsNative
+
+module ReadableStreamGetReaderOptions =
+    /// <summary>
+    /// Creates a ReadableStreamBYOBReader and locks the stream to the new reader.
+    /// <br /><br />
+    /// This call behaves the same way as the no-argument variant, except that it only works on readable byte streams, i.e. streams which were constructed specifically with the ability to handle "bring your own buffer" reading. The returned BYOB reader provides the ability to directly read individual chunks from the stream via its read() method, into developer-supplied buffers, allowing more precise control over allocation.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"byob"</c></remarks>
+    [<Literal>]
+    let mode = "byob"
 
 /// <summary>
 /// The <b><c>ReadableStreamBYOBRequest</c></b> interface of the Streams API represents a "pull request" for data from an underlying source that will made as a zero-copy transfer to a consumer (bypassing the stream's internal queues).
@@ -7113,10 +7322,23 @@ type AiTextGenerationToolLegacyOutput =
 [<Interface>]
 type AiTextGenerationToolOutput =
     abstract id: string with get, set
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
     abstract ``type``: string with get, set
     abstract ``function``: AiTextGenerationToolOutput.Function with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ``type``: string, ``function``: AiTextGenerationToolOutput.Function) : AiTextGenerationToolOutput = jsNative
+    [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+    static member Create (id: string, ``function``: AiTextGenerationToolOutput.Function) : AiTextGenerationToolOutput = jsNative
+
+module AiTextGenerationToolOutput =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function"
+
+    [<Interface>]
+    type Function =
+        abstract name: string with get, set
+        abstract arguments: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, arguments: string) : Function = jsNative
 
 [<Interface>]
 type UsageTags =
@@ -7214,38 +7436,112 @@ type BaseAiTranslation =
 /// </summary>
 [<Interface>]
 type ChatCompletionContentPartText =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
     abstract ``type``: string with get, set
     abstract text: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, text: string) : ChatCompletionContentPartText = jsNative
+    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+    static member Create (text: string) : ChatCompletionContentPartText = jsNative
+
+module ChatCompletionContentPartText =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "text"
 
 [<Interface>]
 type ChatCompletionContentPartImage =
+    /// <remarks>TypeScript type: <c>"image_url"</c></remarks>
     abstract ``type``: string with get, set
     abstract image_url: ChatCompletionContentPartImage.ImageUrl with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, image_url: ChatCompletionContentPartImage.ImageUrl) : ChatCompletionContentPartImage = jsNative
+    [<ParamObject; Emit("({ type: 'image_url', ...$0 })")>]
+    static member Create (image_url: ChatCompletionContentPartImage.ImageUrl) : ChatCompletionContentPartImage = jsNative
+
+module ChatCompletionContentPartImage =
+    /// <remarks>TypeScript type: <c>"image_url"</c></remarks>
+    [<Literal>]
+    let ``type`` = "image_url"
+
+    [<Interface>]
+    type ImageUrl =
+        abstract url: string with get, set
+        abstract detail: ChatCompletionContentPartImage.ImageUrl.Detail option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (url: string, ?detail: ChatCompletionContentPartImage.ImageUrl.Detail) : ImageUrl = jsNative
+
+    module ImageUrl =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Detail =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("high")>] High
+            | [<CompiledName("low")>] Low
 
 [<Interface>]
 type ChatCompletionContentPartInputAudio =
+    /// <remarks>TypeScript type: <c>"input_audio"</c></remarks>
     abstract ``type``: string with get, set
     abstract input_audio: ChatCompletionContentPartInputAudio.InputAudio with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, input_audio: ChatCompletionContentPartInputAudio.InputAudio) : ChatCompletionContentPartInputAudio = jsNative
+    [<ParamObject; Emit("({ type: 'input_audio', ...$0 })")>]
+    static member Create (input_audio: ChatCompletionContentPartInputAudio.InputAudio) : ChatCompletionContentPartInputAudio = jsNative
+
+module ChatCompletionContentPartInputAudio =
+    /// <remarks>TypeScript type: <c>"input_audio"</c></remarks>
+    [<Literal>]
+    let ``type`` = "input_audio"
+
+    [<Interface>]
+    type InputAudio =
+        /// <summary>
+        /// Base64 encoded audio data.
+        /// </summary>
+        abstract data: string with get, set
+        abstract format: ChatCompletionContentPartInputAudio.InputAudio.Format with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (data: string, format: ChatCompletionContentPartInputAudio.InputAudio.Format) : InputAudio = jsNative
+
+    module InputAudio =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Format =
+            | [<CompiledName("mp3")>] Mp3
+            | [<CompiledName("wav")>] Wav
 
 [<Interface>]
 type ChatCompletionContentPartFile =
+    /// <remarks>TypeScript type: <c>"file"</c></remarks>
     abstract ``type``: string with get, set
     abstract file: ChatCompletionContentPartFile.File with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, file: ChatCompletionContentPartFile.File) : ChatCompletionContentPartFile = jsNative
+    [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
+    static member Create (file: ChatCompletionContentPartFile.File) : ChatCompletionContentPartFile = jsNative
+
+module ChatCompletionContentPartFile =
+    /// <remarks>TypeScript type: <c>"file"</c></remarks>
+    [<Literal>]
+    let ``type`` = "file"
+
+    [<Interface>]
+    type File =
+        /// <summary>
+        /// Base64 encoded file data.
+        /// </summary>
+        abstract file_data: string option with get, set
+        /// <summary>
+        /// The ID of an uploaded file.
+        /// </summary>
+        abstract file_id: string option with get, set
+        abstract filename: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?file_data: string, ?file_id: string, ?filename: string) : File = jsNative
 
 [<Interface>]
 type ChatCompletionContentPartRefusal =
+    /// <remarks>TypeScript type: <c>"refusal"</c></remarks>
     abstract ``type``: string with get, set
     abstract refusal: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, refusal: string) : ChatCompletionContentPartRefusal = jsNative
+    [<ParamObject; Emit("({ type: 'refusal', ...$0 })")>]
+    static member Create (refusal: string) : ChatCompletionContentPartRefusal = jsNative
+
+module ChatCompletionContentPartRefusal =
+    /// <remarks>TypeScript type: <c>"refusal"</c></remarks>
+    [<Literal>]
+    let ``type`` = "refusal"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionContentPart =
@@ -7265,23 +7561,54 @@ type FunctionDefinition =
 
 [<Interface>]
 type ChatCompletionFunctionTool =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
     abstract ``type``: string with get, set
     abstract ``function``: FunctionDefinition with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ``function``: FunctionDefinition) : ChatCompletionFunctionTool = jsNative
+    [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+    static member Create (``function``: FunctionDefinition) : ChatCompletionFunctionTool = jsNative
+
+module ChatCompletionFunctionTool =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function"
 
 [<Interface>]
 type ChatCompletionCustomToolGrammarFormat =
+    /// <remarks>TypeScript type: <c>"grammar"</c></remarks>
     abstract ``type``: string with get, set
     abstract grammar: ChatCompletionCustomToolGrammarFormat.Grammar with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, grammar: ChatCompletionCustomToolGrammarFormat.Grammar) : ChatCompletionCustomToolGrammarFormat = jsNative
+    [<ParamObject; Emit("({ type: 'grammar', ...$0 })")>]
+    static member Create (grammar: ChatCompletionCustomToolGrammarFormat.Grammar) : ChatCompletionCustomToolGrammarFormat = jsNative
+
+module ChatCompletionCustomToolGrammarFormat =
+    /// <remarks>TypeScript type: <c>"grammar"</c></remarks>
+    [<Literal>]
+    let ``type`` = "grammar"
+
+    [<Interface>]
+    type Grammar =
+        abstract definition: string with get, set
+        abstract syntax: ChatCompletionCustomToolGrammarFormat.Grammar.Syntax with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (definition: string, syntax: ChatCompletionCustomToolGrammarFormat.Grammar.Syntax) : Grammar = jsNative
+
+    module Grammar =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Syntax =
+            | [<CompiledName("lark")>] Lark
+            | [<CompiledName("regex")>] Regex
 
 [<Interface>]
 type ChatCompletionCustomToolTextFormat =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : ChatCompletionCustomToolTextFormat = jsNative
+    [<Emit("({ type: 'text' })")>]
+    static member Create () : ChatCompletionCustomToolTextFormat = jsNative
+
+module ChatCompletionCustomToolTextFormat =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "text"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionCustomToolFormat =
@@ -7290,10 +7617,24 @@ type ChatCompletionCustomToolFormat =
 
 [<Interface>]
 type ChatCompletionCustomTool =
+    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
     abstract ``type``: string with get, set
     abstract custom: ChatCompletionCustomTool.Custom with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, custom: ChatCompletionCustomTool.Custom) : ChatCompletionCustomTool = jsNative
+    [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
+    static member Create (custom: ChatCompletionCustomTool.Custom) : ChatCompletionCustomTool = jsNative
+
+module ChatCompletionCustomTool =
+    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+    [<Literal>]
+    let ``type`` = "custom"
+
+    [<Interface>]
+    type Custom =
+        abstract name: string with get, set
+        abstract description: string option with get, set
+        abstract format: ChatCompletionCustomToolFormat option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, ?description: string, ?format: ChatCompletionCustomToolFormat) : Custom = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionTool =
@@ -7303,18 +7644,47 @@ type ChatCompletionTool =
 [<Interface>]
 type ChatCompletionMessageFunctionToolCall =
     abstract id: string with get, set
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
     abstract ``type``: string with get, set
     abstract ``function``: ChatCompletionMessageFunctionToolCall.Function with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ``type``: string, ``function``: ChatCompletionMessageFunctionToolCall.Function) : ChatCompletionMessageFunctionToolCall = jsNative
+    [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+    static member Create (id: string, ``function``: ChatCompletionMessageFunctionToolCall.Function) : ChatCompletionMessageFunctionToolCall = jsNative
+
+module ChatCompletionMessageFunctionToolCall =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function"
+
+    [<Interface>]
+    type Function =
+        abstract name: string with get, set
+        /// <summary>
+        /// JSON-encoded arguments string.
+        /// </summary>
+        abstract arguments: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, arguments: string) : Function = jsNative
 
 [<Interface>]
 type ChatCompletionMessageCustomToolCall =
     abstract id: string with get, set
+    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
     abstract ``type``: string with get, set
     abstract custom: ChatCompletionMessageCustomToolCall.Custom with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ``type``: string, custom: ChatCompletionMessageCustomToolCall.Custom) : ChatCompletionMessageCustomToolCall = jsNative
+    [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
+    static member Create (id: string, custom: ChatCompletionMessageCustomToolCall.Custom) : ChatCompletionMessageCustomToolCall = jsNative
+
+module ChatCompletionMessageCustomToolCall =
+    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+    [<Literal>]
+    let ``type`` = "custom"
+
+    [<Interface>]
+    type Custom =
+        abstract name: string with get, set
+        abstract input: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, input: string) : Custom = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionMessageToolCall =
@@ -7323,42 +7693,125 @@ type ChatCompletionMessageToolCall =
 
 [<Interface>]
 type ChatCompletionToolChoiceFunction =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
     abstract ``type``: string with get, set
     abstract ``function``: ChatCompletionToolChoiceFunction.Function with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ``function``: ChatCompletionToolChoiceFunction.Function) : ChatCompletionToolChoiceFunction = jsNative
+    [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+    static member Create (``function``: ChatCompletionToolChoiceFunction.Function) : ChatCompletionToolChoiceFunction = jsNative
+
+module ChatCompletionToolChoiceFunction =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function"
+
+    [<Interface>]
+    type Function =
+        abstract name: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string) : Function = jsNative
 
 [<Interface>]
 type ChatCompletionToolChoiceCustom =
+    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
     abstract ``type``: string with get, set
     abstract custom: ChatCompletionToolChoiceCustom.Custom with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, custom: ChatCompletionToolChoiceCustom.Custom) : ChatCompletionToolChoiceCustom = jsNative
+    [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
+    static member Create (custom: ChatCompletionToolChoiceCustom.Custom) : ChatCompletionToolChoiceCustom = jsNative
+
+module ChatCompletionToolChoiceCustom =
+    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+    [<Literal>]
+    let ``type`` = "custom"
+
+    [<Interface>]
+    type Custom =
+        abstract name: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string) : Custom = jsNative
 
 [<Interface>]
 type ChatCompletionToolChoiceAllowedTools =
+    /// <remarks>TypeScript type: <c>"allowed_tools"</c></remarks>
     abstract ``type``: string with get, set
     abstract allowed_tools: ChatCompletionToolChoiceAllowedTools.AllowedTools with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, allowed_tools: ChatCompletionToolChoiceAllowedTools.AllowedTools) : ChatCompletionToolChoiceAllowedTools = jsNative
+    [<ParamObject; Emit("({ type: 'allowed_tools', ...$0 })")>]
+    static member Create (allowed_tools: ChatCompletionToolChoiceAllowedTools.AllowedTools) : ChatCompletionToolChoiceAllowedTools = jsNative
+
+module ChatCompletionToolChoiceAllowedTools =
+    /// <remarks>TypeScript type: <c>"allowed_tools"</c></remarks>
+    [<Literal>]
+    let ``type`` = "allowed_tools"
+
+    [<Interface>]
+    type AllowedTools =
+        abstract mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode with get, set
+        abstract tools: JS.Record<string, obj>[] with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode, tools: JS.Record<string, obj>[]) : AllowedTools = jsNative
+
+    module AllowedTools =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Mode =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("required")>] Required
 
 type ChatCompletionToolChoiceOption = U4<string, ChatCompletionToolChoiceAllowedTools, ChatCompletionToolChoiceCustom, ChatCompletionToolChoiceFunction>
 
 [<Interface>]
 type DeveloperMessage =
+    /// <remarks>TypeScript type: <c>"developer"</c></remarks>
     abstract role: string with get, set
     abstract content: U2<string, DeveloperMessage.Content.Item[]> with get, set
     abstract name: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: string, content: U2<string, DeveloperMessage.Content.Item[]>, ?name: string) : DeveloperMessage = jsNative
+    [<ParamObject; Emit("({ role: 'developer', ...$0 })")>]
+    static member Create (content: U2<string, DeveloperMessage.Content.Item[]>, ?name: string) : DeveloperMessage = jsNative
+
+module DeveloperMessage =
+    /// <remarks>TypeScript type: <c>"developer"</c></remarks>
+    [<Literal>]
+    let role = "developer"
+
+    module Content =
+        [<Interface>]
+        type Item =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract text: string with get, set
+            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+            static member Create (text: string) : Item = jsNative
+
+        module Item =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            [<Literal>]
+            let ``type`` = "text"
 
 [<Interface>]
 type SystemMessage =
+    /// <remarks>TypeScript type: <c>"system"</c></remarks>
     abstract role: string with get, set
     abstract content: U2<string, SystemMessage.Content.Item[]> with get, set
     abstract name: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: string, content: U2<string, SystemMessage.Content.Item[]>, ?name: string) : SystemMessage = jsNative
+    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
+    static member Create (content: U2<string, SystemMessage.Content.Item[]>, ?name: string) : SystemMessage = jsNative
+
+module SystemMessage =
+    /// <remarks>TypeScript type: <c>"system"</c></remarks>
+    [<Literal>]
+    let role = "system"
+
+    module Content =
+        [<Interface>]
+        type Item =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract text: string with get, set
+            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+            static member Create (text: string) : Item = jsNative
+
+        module Item =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            [<Literal>]
+            let ``type`` = "text"
 
 /// <summary>
 /// Permissive merged content part used inside UserMessage arrays.
@@ -7379,11 +7832,17 @@ type UserMessageContentPart =
 
 [<Interface>]
 type UserMessage =
+    /// <remarks>TypeScript type: <c>"user"</c></remarks>
     abstract role: string with get, set
     abstract content: U2<string, UserMessageContentPart[]> with get, set
     abstract name: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: string, content: U2<string, UserMessageContentPart[]>, ?name: string) : UserMessage = jsNative
+    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
+    static member Create (content: U2<string, UserMessageContentPart[]>, ?name: string) : UserMessage = jsNative
+
+module UserMessage =
+    /// <remarks>TypeScript type: <c>"user"</c></remarks>
+    [<Literal>]
+    let role = "user"
 
 [<Interface>]
 type AssistantMessageContentPart =
@@ -7395,6 +7854,7 @@ type AssistantMessageContentPart =
 
 [<Interface>]
 type AssistantMessage =
+    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
     abstract role: string with get, set
     abstract content: U2<string, AssistantMessageContentPart[]> option with get, set
     abstract refusal: string option with get, set
@@ -7402,24 +7862,68 @@ type AssistantMessage =
     abstract audio: AssistantMessage.Audio option with get, set
     abstract tool_calls: ChatCompletionMessageToolCall[] option with get, set
     abstract function_call: AssistantMessage.FunctionCall option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: string, ?content: U2<string, AssistantMessageContentPart[]>, ?refusal: string, ?name: string, ?audio: AssistantMessage.Audio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: AssistantMessage.FunctionCall) : AssistantMessage = jsNative
+    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+    static member Create (?content: U2<string, AssistantMessageContentPart[]>, ?refusal: string, ?name: string, ?audio: AssistantMessage.Audio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: AssistantMessage.FunctionCall) : AssistantMessage = jsNative
+
+module AssistantMessage =
+    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+    [<Literal>]
+    let role = "assistant"
+
+    [<Interface>]
+    type Audio =
+        abstract id: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string) : Audio = jsNative
+
+    [<Interface>]
+    type FunctionCall =
+        abstract name: string with get, set
+        abstract arguments: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, arguments: string) : FunctionCall = jsNative
 
 [<Interface>]
 type ToolMessage =
+    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
     abstract role: string with get, set
     abstract content: U2<string, ToolMessage.Content.Item[]> with get, set
     abstract tool_call_id: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: string, content: U2<string, ToolMessage.Content.Item[]>, tool_call_id: string) : ToolMessage = jsNative
+    [<ParamObject; Emit("({ role: 'tool', ...$0 })")>]
+    static member Create (content: U2<string, ToolMessage.Content.Item[]>, tool_call_id: string) : ToolMessage = jsNative
+
+module ToolMessage =
+    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
+    [<Literal>]
+    let role = "tool"
+
+    module Content =
+        [<Interface>]
+        type Item =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract text: string with get, set
+            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+            static member Create (text: string) : Item = jsNative
+
+        module Item =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            [<Literal>]
+            let ``type`` = "text"
 
 [<Interface>]
 type FunctionMessage =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
     abstract role: string with get, set
     abstract content: string with get, set
     abstract name: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: string, content: string, name: string) : FunctionMessage = jsNative
+    [<ParamObject; Emit("({ role: 'function', ...$0 })")>]
+    static member Create (content: string, name: string) : FunctionMessage = jsNative
+
+module FunctionMessage =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
+    [<Literal>]
+    let role = "function"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("role", CaseRules.None)>]
 type ChatCompletionMessageParam =
@@ -7432,22 +7936,49 @@ type ChatCompletionMessageParam =
 
 [<Interface>]
 type ChatCompletionsResponseFormatText =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : ChatCompletionsResponseFormatText = jsNative
+    [<Emit("({ type: 'text' })")>]
+    static member Create () : ChatCompletionsResponseFormatText = jsNative
+
+module ChatCompletionsResponseFormatText =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "text"
 
 [<Interface>]
 type ChatCompletionsResponseFormatJSONObject =
+    /// <remarks>TypeScript type: <c>"json_object"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : ChatCompletionsResponseFormatJSONObject = jsNative
+    [<Emit("({ type: 'json_object' })")>]
+    static member Create () : ChatCompletionsResponseFormatJSONObject = jsNative
+
+module ChatCompletionsResponseFormatJSONObject =
+    /// <remarks>TypeScript type: <c>"json_object"</c></remarks>
+    [<Literal>]
+    let ``type`` = "json_object"
 
 [<Interface>]
 type ResponseFormatJSONSchema =
+    /// <remarks>TypeScript type: <c>"json_schema"</c></remarks>
     abstract ``type``: string with get, set
     abstract json_schema: ResponseFormatJSONSchema.JsonSchema with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, json_schema: ResponseFormatJSONSchema.JsonSchema) : ResponseFormatJSONSchema = jsNative
+    [<ParamObject; Emit("({ type: 'json_schema', ...$0 })")>]
+    static member Create (json_schema: ResponseFormatJSONSchema.JsonSchema) : ResponseFormatJSONSchema = jsNative
+
+module ResponseFormatJSONSchema =
+    /// <remarks>TypeScript type: <c>"json_schema"</c></remarks>
+    [<Literal>]
+    let ``type`` = "json_schema"
+
+    [<Interface>]
+    type JsonSchema =
+        abstract name: string with get, set
+        abstract description: string option with get, set
+        abstract schema: JS.Record<string, obj> option with get, set
+        abstract strict: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, ?description: string, ?schema: JS.Record<string, obj>, ?strict: bool) : JsonSchema = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFormat =
@@ -7464,10 +7995,30 @@ type ChatCompletionsStreamOptions =
 
 [<Interface>]
 type PredictionContent =
+    /// <remarks>TypeScript type: <c>"content"</c></remarks>
     abstract ``type``: string with get, set
     abstract content: U2<string, PredictionContent.Content.Item[]> with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, content: U2<string, PredictionContent.Content.Item[]>) : PredictionContent = jsNative
+    [<ParamObject; Emit("({ type: 'content', ...$0 })")>]
+    static member Create (content: U2<string, PredictionContent.Content.Item[]>) : PredictionContent = jsNative
+
+module PredictionContent =
+    /// <remarks>TypeScript type: <c>"content"</c></remarks>
+    [<Literal>]
+    let ``type`` = "content"
+
+    module Content =
+        [<Interface>]
+        type Item =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract text: string with get, set
+            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+            static member Create (text: string) : Item = jsNative
+
+        module Item =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            [<Literal>]
+            let ``type`` = "text"
 
 [<Interface>]
 type AudioParams =
@@ -7478,10 +8029,25 @@ type AudioParams =
 
 [<Interface>]
 type WebSearchUserLocation =
+    /// <remarks>TypeScript type: <c>"approximate"</c></remarks>
     abstract ``type``: string with get, set
     abstract approximate: WebSearchUserLocation.Approximate with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, approximate: WebSearchUserLocation.Approximate) : WebSearchUserLocation = jsNative
+    [<ParamObject; Emit("({ type: 'approximate', ...$0 })")>]
+    static member Create (approximate: WebSearchUserLocation.Approximate) : WebSearchUserLocation = jsNative
+
+module WebSearchUserLocation =
+    /// <remarks>TypeScript type: <c>"approximate"</c></remarks>
+    [<Literal>]
+    let ``type`` = "approximate"
+
+    [<Interface>]
+    type Approximate =
+        abstract city: string option with get, set
+        abstract country: string option with get, set
+        abstract region: string option with get, set
+        abstract timezone: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?city: string, ?country: string, ?region: string, ?timezone: string) : Approximate = jsNative
 
 [<Interface>]
 type WebSearchOptions =
@@ -7596,13 +8162,29 @@ type ChatCompletionAudio =
 
 [<Interface>]
 type ChatCompletionUrlCitation =
+    /// <remarks>TypeScript type: <c>"url_citation"</c></remarks>
     abstract ``type``: string with get, set
     abstract url_citation: ChatCompletionUrlCitation.UrlCitation with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, url_citation: ChatCompletionUrlCitation.UrlCitation) : ChatCompletionUrlCitation = jsNative
+    [<ParamObject; Emit("({ type: 'url_citation', ...$0 })")>]
+    static member Create (url_citation: ChatCompletionUrlCitation.UrlCitation) : ChatCompletionUrlCitation = jsNative
+
+module ChatCompletionUrlCitation =
+    /// <remarks>TypeScript type: <c>"url_citation"</c></remarks>
+    [<Literal>]
+    let ``type`` = "url_citation"
+
+    [<Interface>]
+    type UrlCitation =
+        abstract url: string with get, set
+        abstract title: string with get, set
+        abstract start_index: float with get, set
+        abstract end_index: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (url: string, title: string, start_index: float, end_index: float) : UrlCitation = jsNative
 
 [<Interface>]
 type ChatCompletionResponseMessage =
+    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
     abstract role: string with get, set
     abstract content: string option with get, set
     abstract refusal: string option with get, set
@@ -7610,8 +8192,20 @@ type ChatCompletionResponseMessage =
     abstract audio: ChatCompletionAudio option with get, set
     abstract tool_calls: ChatCompletionMessageToolCall[] option with get, set
     abstract function_call: ChatCompletionResponseMessage.FunctionCall option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: string, ?content: string, ?refusal: string, ?annotations: ChatCompletionUrlCitation[], ?audio: ChatCompletionAudio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: ChatCompletionResponseMessage.FunctionCall) : ChatCompletionResponseMessage = jsNative
+    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+    static member Create (?content: string, ?refusal: string, ?annotations: ChatCompletionUrlCitation[], ?audio: ChatCompletionAudio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: ChatCompletionResponseMessage.FunctionCall) : ChatCompletionResponseMessage = jsNative
+
+module ChatCompletionResponseMessage =
+    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+    [<Literal>]
+    let role = "assistant"
+
+    [<Interface>]
+    type FunctionCall =
+        abstract name: string with get, set
+        abstract arguments: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, arguments: string) : FunctionCall = jsNative
 
 [<Interface>]
 type ChatCompletionLogprobs =
@@ -7722,10 +8316,16 @@ type ResponsesFunctionTool =
     abstract name: string with get, set
     abstract parameters: JS.Record<string, obj> option with get, set
     abstract strict: bool option with get, set
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
     abstract ``type``: string with get, set
     abstract description: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ``type``: string, ?parameters: JS.Record<string, obj>, ?strict: bool, ?description: string) : ResponsesFunctionTool = jsNative
+    [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+    static member Create (name: string, ?parameters: JS.Record<string, obj>, ?strict: bool, ?description: string) : ResponsesFunctionTool = jsNative
+
+module ResponsesFunctionTool =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function"
 
 [<Interface>]
 type ResponseIncompleteDetails =
@@ -7760,9 +8360,15 @@ type ResponseContent =
 [<Interface>]
 type ResponseContentReasoningText =
     abstract text: string with get, set
+    /// <remarks>TypeScript type: <c>"reasoning_text"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ``type``: string) : ResponseContentReasoningText = jsNative
+    [<ParamObject; Emit("({ type: 'reasoning_text', ...$0 })")>]
+    static member Create (text: string) : ResponseContentReasoningText = jsNative
+
+module ResponseContentReasoningText =
+    /// <remarks>TypeScript type: <c>"reasoning_text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "reasoning_text"
 
 [<Interface>]
 type ResponseConversationParam =
@@ -7774,18 +8380,30 @@ type ResponseConversationParam =
 type ResponseCreatedEvent =
     abstract response: Response with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.created"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (response: Response, sequence_number: float, ``type``: string) : ResponseCreatedEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.created', ...$0 })")>]
+    static member Create (response: Response, sequence_number: float) : ResponseCreatedEvent = jsNative
+
+module ResponseCreatedEvent =
+    /// <remarks>TypeScript type: <c>"response.created"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.created"
 
 [<Interface>]
 type ResponseCustomToolCallOutput =
     abstract call_id: string with get, set
     abstract output: U2<string, ResponseInputContent[]> with get, set
+    /// <remarks>TypeScript type: <c>"custom_tool_call_output"</c></remarks>
     abstract ``type``: string with get, set
     abstract id: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (call_id: string, output: U2<string, ResponseInputContent[]>, ``type``: string, ?id: string) : ResponseCustomToolCallOutput = jsNative
+    [<ParamObject; Emit("({ type: 'custom_tool_call_output', ...$0 })")>]
+    static member Create (call_id: string, output: U2<string, ResponseInputContent[]>, ?id: string) : ResponseCustomToolCallOutput = jsNative
+
+module ResponseCustomToolCallOutput =
+    /// <remarks>TypeScript type: <c>"custom_tool_call_output"</c></remarks>
+    [<Literal>]
+    let ``type`` = "custom_tool_call_output"
 
 [<Interface>]
 type ResponseError =
@@ -7800,29 +8418,53 @@ type ResponseErrorEvent =
     abstract message: string with get, set
     abstract param: string option with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (message: string, sequence_number: float, ``type``: string, ?code: string, ?param: string) : ResponseErrorEvent = jsNative
+    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+    static member Create (message: string, sequence_number: float, ?code: string, ?param: string) : ResponseErrorEvent = jsNative
+
+module ResponseErrorEvent =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error"
 
 [<Interface>]
 type ResponseFailedEvent =
     abstract response: Response with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.failed"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (response: Response, sequence_number: float, ``type``: string) : ResponseFailedEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.failed', ...$0 })")>]
+    static member Create (response: Response, sequence_number: float) : ResponseFailedEvent = jsNative
+
+module ResponseFailedEvent =
+    /// <remarks>TypeScript type: <c>"response.failed"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.failed"
 
 [<Interface>]
 type ResponseFormatText =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : ResponseFormatText = jsNative
+    [<Emit("({ type: 'text' })")>]
+    static member Create () : ResponseFormatText = jsNative
+
+module ResponseFormatText =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "text"
 
 [<Interface>]
 type ResponseFormatJSONObject =
+    /// <remarks>TypeScript type: <c>"json_object"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : ResponseFormatJSONObject = jsNative
+    [<Emit("({ type: 'json_object' })")>]
+    static member Create () : ResponseFormatJSONObject = jsNative
+
+module ResponseFormatJSONObject =
+    /// <remarks>TypeScript type: <c>"json_object"</c></remarks>
+    [<Literal>]
+    let ``type`` = "json_object"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFormatTextConfig =
@@ -7834,11 +8476,17 @@ type ResponseFormatTextConfig =
 type ResponseFormatTextJSONSchemaConfig =
     abstract name: string with get, set
     abstract schema: JS.Record<string, obj> with get, set
+    /// <remarks>TypeScript type: <c>"json_schema"</c></remarks>
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     abstract strict: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, schema: JS.Record<string, obj>, ``type``: string, ?description: string, ?strict: bool) : ResponseFormatTextJSONSchemaConfig = jsNative
+    [<ParamObject; Emit("({ type: 'json_schema', ...$0 })")>]
+    static member Create (name: string, schema: JS.Record<string, obj>, ?description: string, ?strict: bool) : ResponseFormatTextJSONSchemaConfig = jsNative
+
+module ResponseFormatTextJSONSchemaConfig =
+    /// <remarks>TypeScript type: <c>"json_schema"</c></remarks>
+    [<Literal>]
+    let ``type`` = "json_schema"
 
 [<Interface>]
 type ResponseFunctionCallArgumentsDeltaEvent =
@@ -7846,9 +8494,15 @@ type ResponseFunctionCallArgumentsDeltaEvent =
     abstract item_id: string with get, set
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.function_call_arguments.delta"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (delta: string, item_id: string, output_index: float, sequence_number: float, ``type``: string) : ResponseFunctionCallArgumentsDeltaEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.function_call_arguments.delta', ...$0 })")>]
+    static member Create (delta: string, item_id: string, output_index: float, sequence_number: float) : ResponseFunctionCallArgumentsDeltaEvent = jsNative
+
+module ResponseFunctionCallArgumentsDeltaEvent =
+    /// <remarks>TypeScript type: <c>"response.function_call_arguments.delta"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.function_call_arguments.delta"
 
 [<Interface>]
 type ResponseFunctionCallArgumentsDoneEvent =
@@ -7857,9 +8511,15 @@ type ResponseFunctionCallArgumentsDoneEvent =
     abstract name: string with get, set
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.function_call_arguments.done"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (arguments: string, item_id: string, name: string, output_index: float, sequence_number: float, ``type``: string) : ResponseFunctionCallArgumentsDoneEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.function_call_arguments.done', ...$0 })")>]
+    static member Create (arguments: string, item_id: string, name: string, output_index: float, sequence_number: float) : ResponseFunctionCallArgumentsDoneEvent = jsNative
+
+module ResponseFunctionCallArgumentsDoneEvent =
+    /// <remarks>TypeScript type: <c>"response.function_call_arguments.done"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.function_call_arguments.done"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFunctionCallOutputItem =
@@ -7873,28 +8533,46 @@ type ResponseFunctionToolCall =
     abstract arguments: string with get, set
     abstract call_id: string with get, set
     abstract name: string with get, set
+    /// <remarks>TypeScript type: <c>"function_call"</c></remarks>
     abstract ``type``: string with get, set
     abstract id: string option with get, set
     abstract status: ResponseFunctionToolCall.Status option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (arguments: string, call_id: string, name: string, ``type``: string, ?id: string, ?status: ResponseFunctionToolCall.Status) : ResponseFunctionToolCall = jsNative
+    [<ParamObject; Emit("({ type: 'function_call', ...$0 })")>]
+    static member Create (arguments: string, call_id: string, name: string, ?id: string, ?status: ResponseFunctionToolCall.Status) : ResponseFunctionToolCall = jsNative
+
+module ResponseFunctionToolCall =
+    /// <remarks>TypeScript type: <c>"function_call"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function_call"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Status =
+        | [<CompiledName("completed")>] Completed
+        | [<CompiledName("in_progress")>] InProgress
+        | [<CompiledName("incomplete")>] Incomplete
 
 [<Interface>]
 type ResponseFunctionToolCallItem =
     inherit ResponseFunctionToolCall
     abstract id: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, arguments: string, call_id: string, name: string, ``type``: string, ?status: ResponseFunctionToolCall.Status) : ResponseFunctionToolCallItem = jsNative
+    [<ParamObject; Emit("({ type: 'function_call', ...$0 })")>]
+    static member Create (id: string, arguments: string, call_id: string, name: string, ?status: ResponseFunctionToolCall.Status) : ResponseFunctionToolCallItem = jsNative
 
 [<Interface>]
 type ResponseFunctionToolCallOutputItem =
     abstract id: string with get, set
     abstract call_id: string with get, set
     abstract output: U2<string, ResponseInputContent[]> with get, set
+    /// <remarks>TypeScript type: <c>"function_call_output"</c></remarks>
     abstract ``type``: string with get, set
     abstract status: ResponseFunctionToolCall.Status option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, call_id: string, output: U2<string, ResponseInputContent[]>, ``type``: string, ?status: ResponseFunctionToolCall.Status) : ResponseFunctionToolCallOutputItem = jsNative
+    [<ParamObject; Emit("({ type: 'function_call_output', ...$0 })")>]
+    static member Create (id: string, call_id: string, output: U2<string, ResponseInputContent[]>, ?status: ResponseFunctionToolCall.Status) : ResponseFunctionToolCallOutputItem = jsNative
+
+module ResponseFunctionToolCallOutputItem =
+    /// <remarks>TypeScript type: <c>"function_call_output"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function_call_output"
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ResponseIncludable =
@@ -7905,9 +8583,15 @@ type ResponseIncludable =
 type ResponseIncompleteEvent =
     abstract response: Response with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.incomplete"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (response: Response, sequence_number: float, ``type``: string) : ResponseIncompleteEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.incomplete', ...$0 })")>]
+    static member Create (response: Response, sequence_number: float) : ResponseIncompleteEvent = jsNative
+
+module ResponseIncompleteEvent =
+    /// <remarks>TypeScript type: <c>"response.incomplete"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.incomplete"
 
 type ResponseInput = ResponseInputItem[]
 
@@ -7919,24 +8603,36 @@ type ResponseInputContent =
 [<Interface>]
 type ResponseInputImage =
     abstract detail: ChatCompletionContentPartImage.ImageUrl.Detail with get, set
+    /// <remarks>TypeScript type: <c>"input_image"</c></remarks>
     abstract ``type``: string with get, set
     /// <summary>
     /// Base64 encoded image
     /// </summary>
     abstract image_url: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (detail: ChatCompletionContentPartImage.ImageUrl.Detail, ``type``: string, ?image_url: string) : ResponseInputImage = jsNative
+    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
+    static member Create (detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseInputImage = jsNative
+
+module ResponseInputImage =
+    /// <remarks>TypeScript type: <c>"input_image"</c></remarks>
+    [<Literal>]
+    let ``type`` = "input_image"
 
 [<Interface>]
 type ResponseInputImageContent =
+    /// <remarks>TypeScript type: <c>"input_image"</c></remarks>
     abstract ``type``: string with get, set
     abstract detail: ChatCompletionContentPartImage.ImageUrl.Detail option with get, set
     /// <summary>
     /// Base64 encoded image
     /// </summary>
     abstract image_url: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseInputImageContent = jsNative
+    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
+    static member Create (?detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseInputImageContent = jsNative
+
+module ResponseInputImageContent =
+    /// <remarks>TypeScript type: <c>"input_image"</c></remarks>
+    [<Literal>]
+    let ``type`` = "input_image"
 
 type ResponseInputItem = U6<EasyInputMessage, ResponseFunctionToolCall, ResponseInputItemFunctionCallOutput, ResponseInputItemMessage, ResponseOutputMessage, ResponseReasoningItem>
 
@@ -7944,11 +8640,17 @@ type ResponseInputItem = U6<EasyInputMessage, ResponseFunctionToolCall, Response
 type ResponseInputItemFunctionCallOutput =
     abstract call_id: string with get, set
     abstract output: U2<string, ResponseFunctionCallOutputItem[]> with get, set
+    /// <remarks>TypeScript type: <c>"function_call_output"</c></remarks>
     abstract ``type``: string with get, set
     abstract id: string option with get, set
     abstract status: ResponseFunctionToolCall.Status option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (call_id: string, output: U2<string, ResponseFunctionCallOutputItem[]>, ``type``: string, ?id: string, ?status: ResponseFunctionToolCall.Status) : ResponseInputItemFunctionCallOutput = jsNative
+    [<ParamObject; Emit("({ type: 'function_call_output', ...$0 })")>]
+    static member Create (call_id: string, output: U2<string, ResponseFunctionCallOutputItem[]>, ?id: string, ?status: ResponseFunctionToolCall.Status) : ResponseInputItemFunctionCallOutput = jsNative
+
+module ResponseInputItemFunctionCallOutput =
+    /// <remarks>TypeScript type: <c>"function_call_output"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function_call_output"
 
 [<Interface>]
 type ResponseInputItemMessage =
@@ -7974,16 +8676,28 @@ type ResponseInputMessageItem =
 [<Interface>]
 type ResponseInputText =
     abstract text: string with get, set
+    /// <remarks>TypeScript type: <c>"input_text"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ``type``: string) : ResponseInputText = jsNative
+    [<ParamObject; Emit("({ type: 'input_text', ...$0 })")>]
+    static member Create (text: string) : ResponseInputText = jsNative
+
+module ResponseInputText =
+    /// <remarks>TypeScript type: <c>"input_text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "input_text"
 
 [<Interface>]
 type ResponseInputTextContent =
     abstract text: string with get, set
+    /// <remarks>TypeScript type: <c>"input_text"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ``type``: string) : ResponseInputTextContent = jsNative
+    [<ParamObject; Emit("({ type: 'input_text', ...$0 })")>]
+    static member Create (text: string) : ResponseInputTextContent = jsNative
+
+module ResponseInputTextContent =
+    /// <remarks>TypeScript type: <c>"input_text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "input_text"
 
 type ResponseItem = U4<ResponseFunctionToolCallItem, ResponseFunctionToolCallOutputItem, ResponseInputMessageItem, ResponseOutputMessage>
 
@@ -7998,68 +8712,126 @@ type ResponseOutputItemAddedEvent =
     abstract item: ResponseOutputItem with get, set
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.output_item.added"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (item: ResponseOutputItem, output_index: float, sequence_number: float, ``type``: string) : ResponseOutputItemAddedEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.output_item.added', ...$0 })")>]
+    static member Create (item: ResponseOutputItem, output_index: float, sequence_number: float) : ResponseOutputItemAddedEvent = jsNative
+
+module ResponseOutputItemAddedEvent =
+    /// <remarks>TypeScript type: <c>"response.output_item.added"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.output_item.added"
 
 [<Interface>]
 type ResponseOutputItemDoneEvent =
     abstract item: ResponseOutputItem with get, set
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.output_item.done"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (item: ResponseOutputItem, output_index: float, sequence_number: float, ``type``: string) : ResponseOutputItemDoneEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.output_item.done', ...$0 })")>]
+    static member Create (item: ResponseOutputItem, output_index: float, sequence_number: float) : ResponseOutputItemDoneEvent = jsNative
+
+module ResponseOutputItemDoneEvent =
+    /// <remarks>TypeScript type: <c>"response.output_item.done"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.output_item.done"
 
 [<Interface>]
 type ResponseOutputMessage =
     abstract id: string with get, set
     abstract content: ResponseOutputMessage.Content.Item[] with get, set
+    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
     abstract role: string with get, set
     abstract status: ResponseFunctionToolCall.Status with get, set
+    /// <remarks>TypeScript type: <c>"message"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, content: ResponseOutputMessage.Content.Item[], role: string, status: ResponseFunctionToolCall.Status, ``type``: string) : ResponseOutputMessage = jsNative
+    [<ParamObject; Emit("({ role: 'assistant', type: 'message', ...$0 })")>]
+    static member Create (id: string, content: ResponseOutputMessage.Content.Item[], status: ResponseFunctionToolCall.Status) : ResponseOutputMessage = jsNative
+
+module ResponseOutputMessage =
+    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+    [<Literal>]
+    let role = "assistant"
+    /// <remarks>TypeScript type: <c>"message"</c></remarks>
+    [<Literal>]
+    let ``type`` = "message"
+
+    module Content =
+        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+        type Item =
+            | [<CompiledName("refusal")>] Refusal of refusal: string
+            | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
 
 [<Interface>]
 type ResponseOutputRefusal =
     abstract refusal: string with get, set
+    /// <remarks>TypeScript type: <c>"refusal"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (refusal: string, ``type``: string) : ResponseOutputRefusal = jsNative
+    [<ParamObject; Emit("({ type: 'refusal', ...$0 })")>]
+    static member Create (refusal: string) : ResponseOutputRefusal = jsNative
+
+module ResponseOutputRefusal =
+    /// <remarks>TypeScript type: <c>"refusal"</c></remarks>
+    [<Literal>]
+    let ``type`` = "refusal"
 
 [<Interface>]
 type ResponseOutputText =
     abstract text: string with get, set
+    /// <remarks>TypeScript type: <c>"output_text"</c></remarks>
     abstract ``type``: string with get, set
     abstract logprobs: Logprob[] option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ``type``: string, ?logprobs: Logprob[]) : ResponseOutputText = jsNative
+    [<ParamObject; Emit("({ type: 'output_text', ...$0 })")>]
+    static member Create (text: string, ?logprobs: Logprob[]) : ResponseOutputText = jsNative
+
+module ResponseOutputText =
+    /// <remarks>TypeScript type: <c>"output_text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "output_text"
 
 [<Interface>]
 type ResponseReasoningItem =
     abstract id: string with get, set
     abstract summary: ResponseReasoningSummaryItem[] with get, set
+    /// <remarks>TypeScript type: <c>"reasoning"</c></remarks>
     abstract ``type``: string with get, set
     abstract content: ResponseReasoningContentItem[] option with get, set
     abstract encrypted_content: string option with get, set
     abstract status: ResponseFunctionToolCall.Status option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, summary: ResponseReasoningSummaryItem[], ``type``: string, ?content: ResponseReasoningContentItem[], ?encrypted_content: string, ?status: ResponseFunctionToolCall.Status) : ResponseReasoningItem = jsNative
+    [<ParamObject; Emit("({ type: 'reasoning', ...$0 })")>]
+    static member Create (id: string, summary: ResponseReasoningSummaryItem[], ?content: ResponseReasoningContentItem[], ?encrypted_content: string, ?status: ResponseFunctionToolCall.Status) : ResponseReasoningItem = jsNative
+
+module ResponseReasoningItem =
+    /// <remarks>TypeScript type: <c>"reasoning"</c></remarks>
+    [<Literal>]
+    let ``type`` = "reasoning"
 
 [<Interface>]
 type ResponseReasoningSummaryItem =
     abstract text: string with get, set
+    /// <remarks>TypeScript type: <c>"summary_text"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ``type``: string) : ResponseReasoningSummaryItem = jsNative
+    [<ParamObject; Emit("({ type: 'summary_text', ...$0 })")>]
+    static member Create (text: string) : ResponseReasoningSummaryItem = jsNative
+
+module ResponseReasoningSummaryItem =
+    /// <remarks>TypeScript type: <c>"summary_text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "summary_text"
 
 [<Interface>]
 type ResponseReasoningContentItem =
     abstract text: string with get, set
+    /// <remarks>TypeScript type: <c>"reasoning_text"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ``type``: string) : ResponseReasoningContentItem = jsNative
+    [<ParamObject; Emit("({ type: 'reasoning_text', ...$0 })")>]
+    static member Create (text: string) : ResponseReasoningContentItem = jsNative
+
+module ResponseReasoningContentItem =
+    /// <remarks>TypeScript type: <c>"reasoning_text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "reasoning_text"
 
 [<Interface>]
 type ResponseReasoningTextDeltaEvent =
@@ -8068,9 +8840,15 @@ type ResponseReasoningTextDeltaEvent =
     abstract item_id: string with get, set
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.reasoning_text.delta"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (content_index: float, delta: string, item_id: string, output_index: float, sequence_number: float, ``type``: string) : ResponseReasoningTextDeltaEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.reasoning_text.delta', ...$0 })")>]
+    static member Create (content_index: float, delta: string, item_id: string, output_index: float, sequence_number: float) : ResponseReasoningTextDeltaEvent = jsNative
+
+module ResponseReasoningTextDeltaEvent =
+    /// <remarks>TypeScript type: <c>"response.reasoning_text.delta"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.reasoning_text.delta"
 
 [<Interface>]
 type ResponseReasoningTextDoneEvent =
@@ -8079,9 +8857,15 @@ type ResponseReasoningTextDoneEvent =
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
     abstract text: string with get, set
+    /// <remarks>TypeScript type: <c>"response.reasoning_text.done"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (content_index: float, item_id: string, output_index: float, sequence_number: float, text: string, ``type``: string) : ResponseReasoningTextDoneEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.reasoning_text.done', ...$0 })")>]
+    static member Create (content_index: float, item_id: string, output_index: float, sequence_number: float, text: string) : ResponseReasoningTextDoneEvent = jsNative
+
+module ResponseReasoningTextDoneEvent =
+    /// <remarks>TypeScript type: <c>"response.reasoning_text.done"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.reasoning_text.done"
 
 [<Interface>]
 type ResponseRefusalDeltaEvent =
@@ -8090,9 +8874,15 @@ type ResponseRefusalDeltaEvent =
     abstract item_id: string with get, set
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.refusal.delta"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (content_index: float, delta: string, item_id: string, output_index: float, sequence_number: float, ``type``: string) : ResponseRefusalDeltaEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.refusal.delta', ...$0 })")>]
+    static member Create (content_index: float, delta: string, item_id: string, output_index: float, sequence_number: float) : ResponseRefusalDeltaEvent = jsNative
+
+module ResponseRefusalDeltaEvent =
+    /// <remarks>TypeScript type: <c>"response.refusal.delta"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.refusal.delta"
 
 [<Interface>]
 type ResponseRefusalDoneEvent =
@@ -8101,9 +8891,15 @@ type ResponseRefusalDoneEvent =
     abstract output_index: float with get, set
     abstract refusal: string with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.refusal.done"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (content_index: float, item_id: string, output_index: float, refusal: string, sequence_number: float, ``type``: string) : ResponseRefusalDoneEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.refusal.done', ...$0 })")>]
+    static member Create (content_index: float, item_id: string, output_index: float, refusal: string, sequence_number: float) : ResponseRefusalDoneEvent = jsNative
+
+module ResponseRefusalDoneEvent =
+    /// <remarks>TypeScript type: <c>"response.refusal.done"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.refusal.done"
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ResponseStatus =
@@ -8136,9 +8932,15 @@ type ResponseStreamEvent =
 type ResponseCompletedEvent =
     abstract response: Response with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.completed"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (response: Response, sequence_number: float, ``type``: string) : ResponseCompletedEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.completed', ...$0 })")>]
+    static member Create (response: Response, sequence_number: float) : ResponseCompletedEvent = jsNative
+
+module ResponseCompletedEvent =
+    /// <remarks>TypeScript type: <c>"response.completed"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.completed"
 
 [<Interface>]
 type ResponseTextConfig =
@@ -8155,9 +8957,15 @@ type ResponseTextDeltaEvent =
     abstract logprobs: Logprob[] with get, set
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
+    /// <remarks>TypeScript type: <c>"response.output_text.delta"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (content_index: float, delta: string, item_id: string, logprobs: Logprob[], output_index: float, sequence_number: float, ``type``: string) : ResponseTextDeltaEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.output_text.delta', ...$0 })")>]
+    static member Create (content_index: float, delta: string, item_id: string, logprobs: Logprob[], output_index: float, sequence_number: float) : ResponseTextDeltaEvent = jsNative
+
+module ResponseTextDeltaEvent =
+    /// <remarks>TypeScript type: <c>"response.output_text.delta"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.output_text.delta"
 
 [<Interface>]
 type ResponseTextDoneEvent =
@@ -8167,9 +8975,15 @@ type ResponseTextDoneEvent =
     abstract output_index: float with get, set
     abstract sequence_number: float with get, set
     abstract text: string with get, set
+    /// <remarks>TypeScript type: <c>"response.output_text.done"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (content_index: float, item_id: string, logprobs: Logprob[], output_index: float, sequence_number: float, text: string, ``type``: string) : ResponseTextDoneEvent = jsNative
+    [<ParamObject; Emit("({ type: 'response.output_text.done', ...$0 })")>]
+    static member Create (content_index: float, item_id: string, logprobs: Logprob[], output_index: float, sequence_number: float, text: string) : ResponseTextDoneEvent = jsNative
+
+module ResponseTextDoneEvent =
+    /// <remarks>TypeScript type: <c>"response.output_text.done"</c></remarks>
+    [<Literal>]
+    let ``type`` = "response.output_text.done"
 
 [<Interface>]
 type Logprob =
@@ -8199,9 +9013,15 @@ type Tool = ResponsesFunctionTool
 [<Interface>]
 type ToolChoiceFunction =
     abstract name: string with get, set
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ``type``: string) : ToolChoiceFunction = jsNative
+    [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+    static member Create (name: string) : ToolChoiceFunction = jsNative
+
+module ToolChoiceFunction =
+    /// <remarks>TypeScript type: <c>"function"</c></remarks>
+    [<Literal>]
+    let ``type`` = "function"
 
 type ToolChoiceOptions = string
 
@@ -11078,6 +11898,7 @@ type Ai_Cf_Deepgram_Flux_Input =
     /// <summary>
     /// Encoding of the audio stream. Currently only supports raw signed little-endian 16-bit PCM.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"linear16"</c></remarks>
     abstract encoding: string with get, set
     /// <summary>
     /// Sample rate of the audio stream in Hz.
@@ -11107,8 +11928,21 @@ type Ai_Cf_Deepgram_Flux_Input =
     /// Label your requests for the purpose of identification during usage reporting
     /// </summary>
     abstract tag: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (encoding: string, sample_rate: string, ?eager_eot_threshold: string, ?eot_threshold: string, ?eot_timeout_ms: string, ?keyterm: string, ?mip_opt_out: Ai_Cf_Deepgram_Flux_Input.MipOptOut, ?tag: string) : Ai_Cf_Deepgram_Flux_Input = jsNative
+    [<ParamObject; Emit("({ encoding: 'linear16', ...$0 })")>]
+    static member Create (sample_rate: string, ?eager_eot_threshold: string, ?eot_threshold: string, ?eot_timeout_ms: string, ?keyterm: string, ?mip_opt_out: Ai_Cf_Deepgram_Flux_Input.MipOptOut, ?tag: string) : Ai_Cf_Deepgram_Flux_Input = jsNative
+
+module Ai_Cf_Deepgram_Flux_Input =
+    /// <summary>
+    /// Encoding of the audio stream. Currently only supports raw signed little-endian 16-bit PCM.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"linear16"</c></remarks>
+    [<Literal>]
+    let encoding = "linear16"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type MipOptOut =
+        | [<CompiledName("false")>] False
+        | [<CompiledName("true")>] True
 
 /// <summary>
 /// Output will be returned as websocket messages.
@@ -11698,10 +12532,16 @@ type ConversionResponse3 =
     abstract id: string with get, set
     abstract name: string with get, set
     abstract mimeType: string with get, set
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract format: string with get, set
     abstract error: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, name: string, mimeType: string, format: string, error: string) : ConversionResponse3 = jsNative
+    [<ParamObject; Emit("({ format: 'error', ...$0 })")>]
+    static member Create (id: string, name: string, mimeType: string, error: string) : ConversionResponse3 = jsNative
+
+module ConversionResponse3 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let format = "error"
 
 [<Interface>]
 type GatewayRetries =
@@ -12076,6 +12916,7 @@ type ArtifactsErrorCode =
 /// </summary>
 [<Interface>]
 type ArtifactsError =
+    /// <remarks>TypeScript type: <c>"ArtifactsError"</c></remarks>
     abstract name: string
     /// <summary>
     /// String error code for programmatic matching.
@@ -12088,8 +12929,13 @@ type ArtifactsError =
     abstract message: string with get, set
     abstract stack: string option with get, set
     abstract cause: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: ArtifactsErrorCode, numericCode: float, message: string, ?stack: string, ?cause: obj) : ArtifactsError = jsNative
+    [<ParamObject; Emit("({ name: 'ArtifactsError', ...$0 })")>]
+    static member Create (code: ArtifactsErrorCode, numericCode: float, message: string, ?stack: string, ?cause: obj) : ArtifactsError = jsNative
+
+module ArtifactsError =
+    /// <remarks>TypeScript type: <c>"ArtifactsError"</c></remarks>
+    [<Literal>]
+    let name = "ArtifactsError"
 
 /// <summary>
 /// Artifacts binding — namespace-level operations.
@@ -12270,13 +13116,45 @@ type AutoRagAiSearchRequestStreaming =
 /// </remarks>
 [<Interface>]
 type AutoRagSearchResponse =
+    /// <remarks>TypeScript type: <c>"vector_store.search_results.page"</c></remarks>
     abstract ``object``: string with get, set
     abstract search_query: string with get, set
     abstract data: AutoRagSearchResponse.Data.Item[] with get, set
     abstract has_more: bool with get, set
     abstract next_page: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``object``: string, search_query: string, data: AutoRagSearchResponse.Data.Item[], has_more: bool, ?next_page: string) : AutoRagSearchResponse = jsNative
+    [<ParamObject; Emit("({ object: 'vector_store.search_results.page', ...$0 })")>]
+    static member Create (search_query: string, data: AutoRagSearchResponse.Data.Item[], has_more: bool, ?next_page: string) : AutoRagSearchResponse = jsNative
+
+module AutoRagSearchResponse =
+    /// <remarks>TypeScript type: <c>"vector_store.search_results.page"</c></remarks>
+    [<Literal>]
+    let ``object`` = "vector_store.search_results.page"
+
+    module Data =
+        [<Interface>]
+        type Item =
+            abstract file_id: string with get, set
+            abstract filename: string with get, set
+            abstract score: float with get, set
+            abstract attributes: JS.Record<string, U3<string, float, bool> option> with get, set
+            abstract content: Cloudflare.WorkersTypes.AutoRagSearchResponse.Data.Item.Content.Item[] with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (file_id: string, filename: string, score: float, attributes: JS.Record<string, U3<string, float, bool> option>, content: Cloudflare.WorkersTypes.AutoRagSearchResponse.Data.Item.Content.Item[]) : Item = jsNative
+
+        module Item =
+            module Content =
+                [<Interface>]
+                type Item =
+                    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract text: string with get, set
+                    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+                    static member Create (text: string) : Item = jsNative
+
+                module Item =
+                    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "text"
 
 /// <remarks>
 /// @deprecated
@@ -12294,8 +13172,8 @@ type AutoRagListResponse = AutoRagListResponse.Item[]
 type AutoRagAiSearchResponse =
     inherit AutoRagSearchResponse
     abstract response: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``object``: string, search_query: string, data: AutoRagSearchResponse.Data.Item[], has_more: bool, response: string, ?next_page: string) : AutoRagAiSearchResponse = jsNative
+    [<ParamObject; Emit("({ object: 'vector_store.search_results.page', ...$0 })")>]
+    static member Create (search_query: string, data: AutoRagSearchResponse.Data.Item[], has_more: bool, response: string, ?next_page: string) : AutoRagAiSearchResponse = jsNative
 
 /// <remarks>
 /// @deprecated
@@ -15138,6 +16016,7 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     /// <summary>
     /// Always <c>"1"</c>, indicating that the certificate was presented
     /// </summary>
+    /// <remarks>TypeScript type: <c>"1"</c></remarks>
     abstract certPresented: string with get, set
     /// <summary>
     /// Result of certificate verification.
@@ -15245,37 +16124,137 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     /// certChainRFC9440.
     /// </summary>
     abstract certChainRFC9440TooLarge: bool with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (certPresented: string, certVerified: IncomingRequestCfPropertiesTLSClientAuth.CertVerified, certRevoked: IncomingRequestCfPropertiesTLSClientAuth.CertRevoked, certIssuerDN: string, certSubjectDN: string, certIssuerDNRFC2253: string, certSubjectDNRFC2253: string, certIssuerDNLegacy: string, certSubjectDNLegacy: string, certSerial: string, certIssuerSerial: string, certSKI: string, certIssuerSKI: string, certFingerprintSHA1: string, certFingerprintSHA256: string, certNotBefore: string, certNotAfter: string, certRFC9440: string, certRFC9440TooLarge: bool, certChainRFC9440: string, certChainRFC9440TooLarge: bool) : IncomingRequestCfPropertiesTLSClientAuth = jsNative
+    [<ParamObject; Emit("({ certPresented: '1', ...$0 })")>]
+    static member Create (certVerified: IncomingRequestCfPropertiesTLSClientAuth.CertVerified, certRevoked: IncomingRequestCfPropertiesTLSClientAuth.CertRevoked, certIssuerDN: string, certSubjectDN: string, certIssuerDNRFC2253: string, certSubjectDNRFC2253: string, certIssuerDNLegacy: string, certSubjectDNLegacy: string, certSerial: string, certIssuerSerial: string, certSKI: string, certIssuerSKI: string, certFingerprintSHA1: string, certFingerprintSHA256: string, certNotBefore: string, certNotAfter: string, certRFC9440: string, certRFC9440TooLarge: bool, certChainRFC9440: string, certChainRFC9440TooLarge: bool) : IncomingRequestCfPropertiesTLSClientAuth = jsNative
+
+module IncomingRequestCfPropertiesTLSClientAuth =
+    /// <summary>
+    /// Always <c>"1"</c>, indicating that the certificate was presented
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"1"</c></remarks>
+    [<Literal>]
+    let certPresented = "1"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type CertRevoked =
+        | [<CompiledName("0")>] N0
+        | [<CompiledName("1")>] N1
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type CertVerified =
+        | FAILED
+        | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
+        | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
+        | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
+        | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
+        | SUCCESS
 
 /// <summary>
 /// Placeholder values for TLS Client Authorization
 /// </summary>
 [<Interface>]
 type IncomingRequestCfPropertiesTLSClientAuthPlaceholder =
+    /// <remarks>TypeScript type: <c>"0"</c></remarks>
     abstract certPresented: string with get, set
+    /// <remarks>TypeScript type: <c>"NONE"</c></remarks>
     abstract certVerified: string with get, set
+    /// <remarks>TypeScript type: <c>"0"</c></remarks>
     abstract certRevoked: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certIssuerDN: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certSubjectDN: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certIssuerDNRFC2253: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certSubjectDNRFC2253: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certIssuerDNLegacy: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certSubjectDNLegacy: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certSerial: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certIssuerSerial: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certSKI: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certIssuerSKI: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certFingerprintSHA1: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certFingerprintSHA256: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certNotBefore: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certNotAfter: string with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certRFC9440: string with get, set
     abstract certRFC9440TooLarge: bool with get, set
+    /// <remarks>TypeScript type: <c>""</c></remarks>
     abstract certChainRFC9440: string with get, set
     abstract certChainRFC9440TooLarge: bool with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (certPresented: string, certVerified: string, certRevoked: string, certIssuerDN: string, certSubjectDN: string, certIssuerDNRFC2253: string, certSubjectDNRFC2253: string, certIssuerDNLegacy: string, certSubjectDNLegacy: string, certSerial: string, certIssuerSerial: string, certSKI: string, certIssuerSKI: string, certFingerprintSHA1: string, certFingerprintSHA256: string, certNotBefore: string, certNotAfter: string, certRFC9440: string, certRFC9440TooLarge: bool, certChainRFC9440: string, certChainRFC9440TooLarge: bool) : IncomingRequestCfPropertiesTLSClientAuthPlaceholder = jsNative
+    [<ParamObject; Emit("({ certPresented: '0', certVerified: 'NONE', certRevoked: '0', certIssuerDN: '', certSubjectDN: '', certIssuerDNRFC2253: '', certSubjectDNRFC2253: '', certIssuerDNLegacy: '', certSubjectDNLegacy: '', certSerial: '', certIssuerSerial: '', certSKI: '', certIssuerSKI: '', certFingerprintSHA1: '', certFingerprintSHA256: '', certNotBefore: '', certNotAfter: '', certRFC9440: '', certChainRFC9440: '', ...$0 })")>]
+    static member Create (certRFC9440TooLarge: bool, certChainRFC9440TooLarge: bool) : IncomingRequestCfPropertiesTLSClientAuthPlaceholder = jsNative
+
+module IncomingRequestCfPropertiesTLSClientAuthPlaceholder =
+    /// <remarks>TypeScript type: <c>"0"</c></remarks>
+    [<Literal>]
+    let certPresented = "0"
+    /// <remarks>TypeScript type: <c>"NONE"</c></remarks>
+    [<Literal>]
+    let certVerified = "NONE"
+    /// <remarks>TypeScript type: <c>"0"</c></remarks>
+    [<Literal>]
+    let certRevoked = "0"
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certIssuerDN = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certSubjectDN = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certIssuerDNRFC2253 = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certSubjectDNRFC2253 = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certIssuerDNLegacy = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certSubjectDNLegacy = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certSerial = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certIssuerSerial = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certSKI = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certIssuerSKI = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certFingerprintSHA1 = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certFingerprintSHA256 = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certNotBefore = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certNotAfter = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certRFC9440 = ""
+    /// <remarks>TypeScript type: <c>""</c></remarks>
+    [<Literal>]
+    let certChainRFC9440 = ""
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type CertVerificationStatus =
@@ -16095,9 +17074,15 @@ type ImageInfoResponse = U2<ImageInfoResponse2, ImageInfoResponse3>
 
 [<Interface>]
 type ImageInfoResponse2 =
+    /// <remarks>TypeScript type: <c>"image/svg+xml"</c></remarks>
     abstract format: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (format: string) : ImageInfoResponse2 = jsNative
+    [<Emit("({ format: 'image/svg+xml' })")>]
+    static member Create () : ImageInfoResponse2 = jsNative
+
+module ImageInfoResponse2 =
+    /// <remarks>TypeScript type: <c>"image/svg+xml"</c></remarks>
+    [<Literal>]
+    let format = "image/svg+xml"
 
 [<Interface>]
 type ImageInfoResponse3 =
@@ -16685,13 +17670,35 @@ type RateLimit =
 
 [<Interface>]
 type Rpc =
+    /// <remarks>TypeScript type: <c>"__RPC_STUB_BRAND"</c></remarks>
     abstract __RPC_STUB_BRAND: string
+    /// <remarks>TypeScript type: <c>"__RPC_TARGET_BRAND"</c></remarks>
     abstract __RPC_TARGET_BRAND: string
+    /// <remarks>TypeScript type: <c>"__WORKER_ENTRYPOINT_BRAND"</c></remarks>
     abstract __WORKER_ENTRYPOINT_BRAND: string
+    /// <remarks>TypeScript type: <c>"__DURABLE_OBJECT_BRAND"</c></remarks>
     abstract __DURABLE_OBJECT_BRAND: string
+    /// <remarks>TypeScript type: <c>"__WORKFLOW_ENTRYPOINT_BRAND"</c></remarks>
     abstract __WORKFLOW_ENTRYPOINT_BRAND: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (__RPC_STUB_BRAND: string, __RPC_TARGET_BRAND: string, __WORKER_ENTRYPOINT_BRAND: string, __DURABLE_OBJECT_BRAND: string, __WORKFLOW_ENTRYPOINT_BRAND: string) : Rpc = jsNative
+    [<Emit("({ __RPC_STUB_BRAND: '__RPC_STUB_BRAND', __RPC_TARGET_BRAND: '__RPC_TARGET_BRAND', __WORKER_ENTRYPOINT_BRAND: '__WORKER_ENTRYPOINT_BRAND', __DURABLE_OBJECT_BRAND: '__DURABLE_OBJECT_BRAND', __WORKFLOW_ENTRYPOINT_BRAND: '__WORKFLOW_ENTRYPOINT_BRAND' })")>]
+    static member Create () : Rpc = jsNative
+
+module Rpc =
+    /// <remarks>TypeScript type: <c>"__RPC_STUB_BRAND"</c></remarks>
+    [<Literal>]
+    let __RPC_STUB_BRAND = "__RPC_STUB_BRAND"
+    /// <remarks>TypeScript type: <c>"__RPC_TARGET_BRAND"</c></remarks>
+    [<Literal>]
+    let __RPC_TARGET_BRAND = "__RPC_TARGET_BRAND"
+    /// <remarks>TypeScript type: <c>"__WORKER_ENTRYPOINT_BRAND"</c></remarks>
+    [<Literal>]
+    let __WORKER_ENTRYPOINT_BRAND = "__WORKER_ENTRYPOINT_BRAND"
+    /// <remarks>TypeScript type: <c>"__DURABLE_OBJECT_BRAND"</c></remarks>
+    [<Literal>]
+    let __DURABLE_OBJECT_BRAND = "__DURABLE_OBJECT_BRAND"
+    /// <remarks>TypeScript type: <c>"__WORKFLOW_ENTRYPOINT_BRAND"</c></remarks>
+    [<Literal>]
+    let __WORKFLOW_ENTRYPOINT_BRAND = "__WORKFLOW_ENTRYPOINT_BRAND"
 
 type RpcStubConstructor =
     [<EmitConstructor>]
@@ -17535,62 +18542,132 @@ type StreamError =
 [<Interface>]
 type InternalError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : InternalError = jsNative
+    /// <remarks>TypeScript type: <c>"InternalError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'InternalError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : InternalError = jsNative
+
+module InternalError =
+    /// <remarks>TypeScript type: <c>"InternalError"</c></remarks>
+    [<Literal>]
+    let name = "InternalError"
 
 [<Interface>]
 type BadRequestError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : BadRequestError = jsNative
+    /// <remarks>TypeScript type: <c>"BadRequestError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'BadRequestError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : BadRequestError = jsNative
+
+module BadRequestError =
+    /// <remarks>TypeScript type: <c>"BadRequestError"</c></remarks>
+    [<Literal>]
+    let name = "BadRequestError"
 
 [<Interface>]
 type NotFoundError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : NotFoundError = jsNative
+    /// <remarks>TypeScript type: <c>"NotFoundError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'NotFoundError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : NotFoundError = jsNative
+
+module NotFoundError =
+    /// <remarks>TypeScript type: <c>"NotFoundError"</c></remarks>
+    [<Literal>]
+    let name = "NotFoundError"
 
 [<Interface>]
 type ForbiddenError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : ForbiddenError = jsNative
+    /// <remarks>TypeScript type: <c>"ForbiddenError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'ForbiddenError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : ForbiddenError = jsNative
+
+module ForbiddenError =
+    /// <remarks>TypeScript type: <c>"ForbiddenError"</c></remarks>
+    [<Literal>]
+    let name = "ForbiddenError"
 
 [<Interface>]
 type RateLimitedError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : RateLimitedError = jsNative
+    /// <remarks>TypeScript type: <c>"RateLimitedError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'RateLimitedError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : RateLimitedError = jsNative
+
+module RateLimitedError =
+    /// <remarks>TypeScript type: <c>"RateLimitedError"</c></remarks>
+    [<Literal>]
+    let name = "RateLimitedError"
 
 [<Interface>]
 type QuotaReachedError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : QuotaReachedError = jsNative
+    /// <remarks>TypeScript type: <c>"QuotaReachedError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'QuotaReachedError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : QuotaReachedError = jsNative
+
+module QuotaReachedError =
+    /// <remarks>TypeScript type: <c>"QuotaReachedError"</c></remarks>
+    [<Literal>]
+    let name = "QuotaReachedError"
 
 [<Interface>]
 type MaxFileSizeError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : MaxFileSizeError = jsNative
+    /// <remarks>TypeScript type: <c>"MaxFileSizeError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'MaxFileSizeError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : MaxFileSizeError = jsNative
+
+module MaxFileSizeError =
+    /// <remarks>TypeScript type: <c>"MaxFileSizeError"</c></remarks>
+    [<Literal>]
+    let name = "MaxFileSizeError"
 
 [<Interface>]
 type InvalidURLError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : InvalidURLError = jsNative
+    /// <remarks>TypeScript type: <c>"InvalidURLError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'InvalidURLError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : InvalidURLError = jsNative
+
+module InvalidURLError =
+    /// <remarks>TypeScript type: <c>"InvalidURLError"</c></remarks>
+    [<Literal>]
+    let name = "InvalidURLError"
 
 [<Interface>]
 type AlreadyUploadedError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : AlreadyUploadedError = jsNative
+    /// <remarks>TypeScript type: <c>"AlreadyUploadedError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'AlreadyUploadedError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : AlreadyUploadedError = jsNative
+
+module AlreadyUploadedError =
+    /// <remarks>TypeScript type: <c>"AlreadyUploadedError"</c></remarks>
+    [<Literal>]
+    let name = "AlreadyUploadedError"
 
 [<Interface>]
 type TooManyWatermarksError =
     inherit StreamError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : TooManyWatermarksError = jsNative
+    /// <remarks>TypeScript type: <c>"TooManyWatermarksError"</c></remarks>
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ name: 'TooManyWatermarksError', ...$0 })")>]
+    static member Create (code: float, statusCode: float, message: string, ?cause: obj, ?stack: string) : TooManyWatermarksError = jsNative
+
+module TooManyWatermarksError =
+    /// <remarks>TypeScript type: <c>"TooManyWatermarksError"</c></remarks>
+    [<Literal>]
+    let name = "TooManyWatermarksError"
 
 [<Interface>]
 type MarkdownDocument =
@@ -19857,8 +20934,8 @@ module AiTextGenerationOutput =
         type Item =
             inherit AiTextGenerationToolLegacyOutput
             inherit AiTextGenerationToolOutput
-            [<ParamObject; Emit("$0")>]
-            static member Create (name: string, arguments: obj, id: string, ``type``: string, ``function``: AiTextGenerationToolOutput.Function) : Item = jsNative
+            [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+            static member Create (name: string, arguments: obj, id: string, ``function``: AiTextGenerationToolOutput.Function) : Item = jsNative
 
 module AiTextGenerationToolInput =
     [<Interface>]
@@ -19904,14 +20981,6 @@ module AiTextGenerationToolLegacyInput =
                 abstract description: string option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (``type``: string, ?description: string) : Item = jsNative
-
-module AiTextGenerationToolOutput =
-    [<Interface>]
-    type Function =
-        abstract name: string with get, set
-        abstract arguments: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, arguments: string) : Function = jsNative
 
 module Ai_Cf_Ai4Bharat_Indictrans2_En_Indic_1B_Input =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -20028,12 +21097,20 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
                         /// <summary>
                         /// Type of tool call
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>"function"</c></remarks>
                         abstract ``type``: string with get, set
                         abstract ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (id: string, ``type``: string, ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function) : Item = jsNative
+                        [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+                        static member Create (id: string, ``function``: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function) : Item = jsNative
 
                     module Item =
+                        /// <summary>
+                        /// Type of tool call
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"function"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "function"
+
                         [<Interface>]
                         type Function =
                             /// <summary>
@@ -20613,12 +21690,6 @@ module Ai_Cf_Deepgram_Aura_2_Es_Input =
         | [<CompiledName("nestor")>] Nestor
         | [<CompiledName("selena")>] Selena
         | [<CompiledName("sirio")>] Sirio
-
-module Ai_Cf_Deepgram_Flux_Input =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type MipOptOut =
-        | [<CompiledName("false")>] False
-        | [<CompiledName("true")>] True
 
 module Ai_Cf_Deepgram_Flux_Output =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -22541,12 +23612,20 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
                         /// <summary>
                         /// Type of tool call
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>"function"</c></remarks>
                         abstract ``type``: string with get, set
                         abstract ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (id: string, ``type``: string, ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function) : Item = jsNative
+                        [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+                        static member Create (id: string, ``function``: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message.ToolCalls.Item.Function) : Item = jsNative
 
                     module Item =
+                        /// <summary>
+                        /// Type of tool call
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"function"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "function"
+
                         [<Interface>]
                         type Function =
                             /// <summary>
@@ -23238,20 +24317,6 @@ module ArtifactsTokenInfo =
         | [<CompiledName("expired")>] Expired
         | [<CompiledName("revoked")>] Revoked
 
-module AssistantMessage =
-    [<Interface>]
-    type Audio =
-        abstract id: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string) : Audio = jsNative
-
-    [<Interface>]
-    type FunctionCall =
-        abstract name: string with get, set
-        abstract arguments: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, arguments: string) : FunctionCall = jsNative
-
 module AssistantMessageContentPart =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Type =
@@ -23301,27 +24366,6 @@ module AutoRagSearchRequest =
         abstract model: string option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?enabled: bool, ?model: string) : Reranking = jsNative
-
-module AutoRagSearchResponse =
-    module Data =
-        [<Interface>]
-        type Item =
-            abstract file_id: string with get, set
-            abstract filename: string with get, set
-            abstract score: float with get, set
-            abstract attributes: JS.Record<string, U3<string, float, bool> option> with get, set
-            abstract content: Cloudflare.WorkersTypes.AutoRagSearchResponse.Data.Item.Content.Item[] with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (file_id: string, filename: string, score: float, attributes: JS.Record<string, U3<string, float, bool> option>, content: Cloudflare.WorkersTypes.AutoRagSearchResponse.Data.Item.Content.Item[]) : Item = jsNative
-
-        module Item =
-            module Content =
-                [<Interface>]
-                type Item =
-                    abstract ``type``: string with get, set
-                    abstract text: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, text: string) : Item = jsNative
 
 module Base_Ai_Cf_Openai_Gpt_Oss_120B =
     type Inputs =
@@ -23747,141 +24791,6 @@ module ChatCompletionChoice =
         | [<CompiledName("length")>] Length
         | [<CompiledName("stop")>] Stop
         | [<CompiledName("tool_calls")>] ToolCalls
-
-module ChatCompletionContentPartFile =
-    [<Interface>]
-    type File =
-        /// <summary>
-        /// Base64 encoded file data.
-        /// </summary>
-        abstract file_data: string option with get, set
-        /// <summary>
-        /// The ID of an uploaded file.
-        /// </summary>
-        abstract file_id: string option with get, set
-        abstract filename: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?file_data: string, ?file_id: string, ?filename: string) : File = jsNative
-
-module ChatCompletionContentPartImage =
-    [<Interface>]
-    type ImageUrl =
-        abstract url: string with get, set
-        abstract detail: ChatCompletionContentPartImage.ImageUrl.Detail option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (url: string, ?detail: ChatCompletionContentPartImage.ImageUrl.Detail) : ImageUrl = jsNative
-
-    module ImageUrl =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Detail =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("high")>] High
-            | [<CompiledName("low")>] Low
-
-module ChatCompletionContentPartInputAudio =
-    [<Interface>]
-    type InputAudio =
-        /// <summary>
-        /// Base64 encoded audio data.
-        /// </summary>
-        abstract data: string with get, set
-        abstract format: ChatCompletionContentPartInputAudio.InputAudio.Format with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (data: string, format: ChatCompletionContentPartInputAudio.InputAudio.Format) : InputAudio = jsNative
-
-    module InputAudio =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Format =
-            | [<CompiledName("mp3")>] Mp3
-            | [<CompiledName("wav")>] Wav
-
-module ChatCompletionCustomTool =
-    [<Interface>]
-    type Custom =
-        abstract name: string with get, set
-        abstract description: string option with get, set
-        abstract format: ChatCompletionCustomToolFormat option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, ?description: string, ?format: ChatCompletionCustomToolFormat) : Custom = jsNative
-
-module ChatCompletionCustomToolGrammarFormat =
-    [<Interface>]
-    type Grammar =
-        abstract definition: string with get, set
-        abstract syntax: ChatCompletionCustomToolGrammarFormat.Grammar.Syntax with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (definition: string, syntax: ChatCompletionCustomToolGrammarFormat.Grammar.Syntax) : Grammar = jsNative
-
-    module Grammar =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Syntax =
-            | [<CompiledName("lark")>] Lark
-            | [<CompiledName("regex")>] Regex
-
-module ChatCompletionMessageCustomToolCall =
-    [<Interface>]
-    type Custom =
-        abstract name: string with get, set
-        abstract input: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, input: string) : Custom = jsNative
-
-module ChatCompletionMessageFunctionToolCall =
-    [<Interface>]
-    type Function =
-        abstract name: string with get, set
-        /// <summary>
-        /// JSON-encoded arguments string.
-        /// </summary>
-        abstract arguments: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, arguments: string) : Function = jsNative
-
-module ChatCompletionResponseMessage =
-    [<Interface>]
-    type FunctionCall =
-        abstract name: string with get, set
-        abstract arguments: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, arguments: string) : FunctionCall = jsNative
-
-module ChatCompletionToolChoiceAllowedTools =
-    [<Interface>]
-    type AllowedTools =
-        abstract mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode with get, set
-        abstract tools: JS.Record<string, obj>[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (mode: ChatCompletionToolChoiceAllowedTools.AllowedTools.Mode, tools: JS.Record<string, obj>[]) : AllowedTools = jsNative
-
-    module AllowedTools =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Mode =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("required")>] Required
-
-module ChatCompletionToolChoiceCustom =
-    [<Interface>]
-    type Custom =
-        abstract name: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string) : Custom = jsNative
-
-module ChatCompletionToolChoiceFunction =
-    [<Interface>]
-    type Function =
-        abstract name: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string) : Function = jsNative
-
-module ChatCompletionUrlCitation =
-    [<Interface>]
-    type UrlCitation =
-        abstract url: string with get, set
-        abstract title: string with get, set
-        abstract start_index: float with get, set
-        abstract end_index: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (url: string, title: string, start_index: float, end_index: float) : UrlCitation = jsNative
 
 module ChatCompletionsCommonOptions =
     [<Interface>]
@@ -24752,15 +25661,6 @@ module D1Response =
         [<EmitIndexer>]
         abstract Item: string -> obj with get, set
 
-module DeveloperMessage =
-    module Content =
-        [<Interface>]
-        type Item =
-            abstract ``type``: string with get, set
-            abstract text: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string) : Item = jsNative
-
 module EasyInputMessage =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Role =
@@ -24811,25 +25711,20 @@ module ExportedHandlerTailStreamHandler =
 
                 [<Interface>]
                 type Item2 =
+                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
                     abstract ``type``: string
                     abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
                     abstract errorInfo: TailStreamErrorInfo option[] option
                     abstract message: obj
                     abstract truncated: bool option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item2 = jsNative
-
-                [<Interface>]
-                type Item3 =
-                    abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
-                    abstract errorInfo: TailStreamErrorInfo option[] option
-                    abstract message: string
-                    abstract truncated: bool
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (``type``: string, level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : Item3 = jsNative
+                    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+                    static member Create (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item2 = jsNative
 
                 module Item2 =
+                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "log"
+
                     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                     type Level =
                         | [<CompiledName("debug")>] Debug
@@ -24837,6 +25732,22 @@ module ExportedHandlerTailStreamHandler =
                         | [<CompiledName("info")>] Info
                         | [<CompiledName("log")>] Log
                         | [<CompiledName("warn")>] Warn
+
+                [<Interface>]
+                type Item3 =
+                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
+                    abstract ``type``: string
+                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
+                    abstract errorInfo: TailStreamErrorInfo option[] option
+                    abstract message: string
+                    abstract truncated: bool
+                    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+                    static member Create (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : Item3 = jsNative
+
+                module Item3 =
+                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "log"
 
 module FormData =
     module ForEach =
@@ -24874,13 +25785,6 @@ module HelloWorldBinding =
                 abstract ms: float option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (value: string, ?ms: float) : Item = jsNative
-
-module HibernatableWebSocketEventInfo =
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type Info =
-        | [<CompiledName("close")>] Close of code: float * wasClean: bool
-        | [<CompiledName("error")>] Error
-        | [<CompiledName("message")>] Message
 
 module ImageOutputOptions =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -25219,21 +26123,6 @@ module IncomingRequestCfProperties =
         | ZM
         | ZW
 
-module IncomingRequestCfPropertiesTLSClientAuth =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type CertRevoked =
-        | [<CompiledName("0")>] N0
-        | [<CompiledName("1")>] N1
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type CertVerified =
-        | FAILED
-        | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
-        | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
-        | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
-        | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
-        | SUCCESS
-
 module InstanceStatus =
     [<Interface>]
     type Error =
@@ -25315,38 +26204,6 @@ module ModuleExportDescriptor =
         | [<CompiledName("memory")>] Memory
         | [<CompiledName("table")>] Table
 
-module Onset =
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type Info =
-        | [<CompiledName("alarm")>] Alarm of scheduledTime: Fable.Core.TS.Es.Date
-        | [<CompiledName("connect")>] Connect
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("email")>] Email of mailFrom: string * rcptTo: string * rawSize: float
-        | [<CompiledName("fetch")>] Fetch of ``method``: string * url: string * cfJson: obj option * headers: Header[]
-        | [<CompiledName("hibernatableWebSocket")>] HibernatableWebSocket of info: Cloudflare.WorkersTypes.HibernatableWebSocketEventInfo.Info
-        | [<CompiledName("jsrpc")>] Jsrpc
-        | [<CompiledName("queue")>] Queue of queueName: string * batchSize: float
-        | [<CompiledName("scheduled")>] Scheduled of scheduledTime: Fable.Core.TS.Es.Date * cron: string
-        | [<CompiledName("trace")>] Trace of traces: string option[]
-
-module Outcome =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Outcome =
-        | [<CompiledName("aborted")>] Aborted
-        | [<CompiledName("canceled")>] Canceled
-        | [<CompiledName("daemonDown")>] DaemonDown
-        | [<CompiledName("exceededCpu")>] ExceededCpu
-        | [<CompiledName("exceededMemory")>] ExceededMemory
-        | [<CompiledName("exceededWallTime")>] ExceededWallTime
-        | [<CompiledName("exception")>] Exception
-        | [<CompiledName("internalError")>] InternalError
-        | [<CompiledName("killSwitch")>] KillSwitch
-        | [<CompiledName("loadShed")>] LoadShed
-        | [<CompiledName("ok")>] Ok
-        | [<CompiledName("responseStreamDisconnected")>] ResponseStreamDisconnected
-        | [<CompiledName("scriptNotFound")>] ScriptNotFound
-        | [<CompiledName("unknown")>] Unknown
-
 module PagesFunction =
     [<Interface>]
     type Context<'Env, 'Params, 'Data> =
@@ -25375,15 +26232,6 @@ module PagesPluginFunction =
         abstract pluginArgs: 'PluginArgs with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
-
-module PredictionContent =
-    module Content =
-        [<Interface>]
-        type Item =
-            abstract ``type``: string with get, set
-            abstract text: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string) : Item = jsNative
 
 module R2Bucket =
     module Get =
@@ -25632,23 +26480,6 @@ module ResponseError =
         | [<CompiledName("unsupported_image_media_type")>] UnsupportedImageMediaType
         | [<CompiledName("vector_store_timeout")>] VectorStoreTimeout
 
-module ResponseFormatJSONSchema =
-    [<Interface>]
-    type JsonSchema =
-        abstract name: string with get, set
-        abstract description: string option with get, set
-        abstract schema: JS.Record<string, obj> option with get, set
-        abstract strict: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, ?description: string, ?schema: JS.Record<string, obj>, ?strict: bool) : JsonSchema = jsNative
-
-module ResponseFunctionToolCall =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Status =
-        | [<CompiledName("completed")>] Completed
-        | [<CompiledName("in_progress")>] InProgress
-        | [<CompiledName("incomplete")>] Incomplete
-
 module ResponseIncompleteDetails =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Reason =
@@ -25661,13 +26492,6 @@ module ResponseInputItemMessage =
         | [<CompiledName("developer")>] Developer
         | [<CompiledName("system")>] System
         | [<CompiledName("user")>] User
-
-module ResponseOutputMessage =
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("refusal")>] Refusal of refusal: string
-            | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
 
 module ResponsesInput =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -25714,15 +26538,6 @@ module SqlStorageCursor =
             [<ParamObject; Emit("$0")>]
             static member Create (``done``: bool, ?value: unit) : Result2 = jsNative
 
-module SystemMessage =
-    module Content =
-        [<Interface>]
-        type Item =
-            abstract ``type``: string with get, set
-            abstract text: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string) : Item = jsNative
-
 module TableDescriptor =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Element =
@@ -25765,15 +26580,6 @@ module TextOptions =
         abstract url: string with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (url: string) : Font = jsNative
-
-module ToolMessage =
-    module Content =
-        [<Interface>]
-        type Item =
-            abstract ``type``: string with get, set
-            abstract text: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string) : Item = jsNative
 
 module Tracing =
     module EnterSpan =
@@ -25849,16 +26655,6 @@ module VectorizeVectorMetadataFilter =
         abstract ``$nin``: U3<string, float, bool>[] option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?``$in``: U3<string, float, bool>[], ?``$nin``: U3<string, float, bool>[]) : Item2 = jsNative
-
-module WebSearchUserLocation =
-    [<Interface>]
-    type Approximate =
-        abstract city: string option with get, set
-        abstract country: string option with get, set
-        abstract region: string option with get, set
-        abstract timezone: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?city: string, ?country: string, ?region: string, ?timezone: string) : Approximate = jsNative
 
 module WebSocket =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
