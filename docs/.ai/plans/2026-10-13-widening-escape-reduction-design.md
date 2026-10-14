@@ -76,7 +76,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W2.2** The Core.TS configuration selects `^on` for event-handler properties.
 - **W2.3** A selected return grades ergonomic, with a finding that records the source `any`.
 - **Acceptance:** the lab asserts a selected `on*` handler as `(ProgressEvent -> unit) option` and an unselected member as `obj`. In `animejs` and `workers-types`, output is unchanged unless their configuration sets a pattern.
-- **Status:** implemented on `agent/w2-unit-callback-returns` (2026-10-13). The key is `anyReturnAsUnit`, one .NET regular expression; a selected return reports `TR065`. `animejs` and `workers-types` are unchanged; `animejs` under `^on` moves 257 findings from `TR008` to `TR065`. Core.TS, regenerated under the T4 override, moves 15,987.
+- **Status:** merged to `develop` in #143 (2026-10-13). The key is `anyReturnAsUnit`, one .NET regular expression; a selected return reports `TR065`. `animejs` and `workers-types` are unchanged; `animejs` under `^on` moves 257 findings from `TR008` to `TR065`. Core.TS, regenerated under the T4 override, moves 15,987.
 
 ### W3. Node reuse of Core.TS ES types
 
@@ -89,6 +89,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W3.2** Fix catalog reuse so that Node references the Core.TS types.
   - **Satisfied without catalog reuse:** under `widen`, a compiler-lib ECMAScript declaration outside `Naming.LibBindings` is written as `Fable.Core.TS.Es.{name}`, as DOM declarations already are. The lab is `es-reuse-lab`, a single consumer package compiled against Core.TS by the compile gate. Measured deltas are in `generator-architecture.md`, "ECMAScript consumer bindings".
 - **Acceptance:** `es-reuse-lab`, a single widen-mode consumer on @types/node's es2020 program, references `ArrayLike` and `ArrayBufferLike` with no TR023 or TR035, and the compile gate builds its golden against Core.TS. This single-package lab replaces the two-package lab modelled on `cross-package-lab` (lead decision, 2026-10-13): `Shape.libBinding` keys on the compiler-lib origin and the `typescript/lib` disposition, not on the referencing group, so a dependent package adds no route. A dependency under its own `reference`, `map` or `widen` disposition that references these names is not covered by a lab. In `workers-types` and `solid-js`, TR023 and TR035 do not rise. Node holds nearly all of W3's hits, so a Node regeneration under override T4 is expected.
+- **Status:** merged to `develop` in #145 (2026-10-13). In `workers-types`, TR023 falls from 37 to 9 and TR035 from 11 to 6; in `solid-js`, TR023 falls from 6 to 0. Consumers write every standard-library name except `Error` and `Promise`/`PromiseLike` as `Fable.Core.TS.Es.<Name>`; Core.TS writes `Promise` as `JS.Promise`; `CatalogCompatibility.ApiVersion` is 7. Node, regenerated under the T4 override, moves TR023 from 737 to 149.
 
 ### W4. Symbol-keyed members
 
@@ -96,6 +97,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W4.2** `[Symbol.iterator]` is expressed as `inherit seq<'T>` (probe 7).
 - **W4.3** Other well-known symbols emit as named members through `[<Emit>]`, such as `[<Emit("$0[Symbol.dispose]()")>]` and the getter `[<Emit("$0[Symbol.toStringTag]")>]` (probe 7).
 - **Acceptance:** the lab asserts a non-empty `Disposable`, an iterable that iterates without a cast, and a `toStringTag` getter. A RunGate check covers one Emit-backed symbol member. In `workers-types` and `type-fest`, MB002 falls.
+- **Status:** merged to `develop` in #144 (2026-10-13). `[Symbol.iterator]` reports `MB008` and another well-known symbol member `MB009`. In `workers-types`, MB002 falls from 10 to 0; `type-fest` is unchanged. Core.TS, regenerated under the T4 override, moves MB002 from 202 to 0.
 
 ### W5. One method per literal overload
 
@@ -104,7 +106,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W5.3** Each such method carries `[<Emit("$0.on('close', $1)")>]` and an XML doc with the TypeScript signature. Curried listeners need no delegate: `string -> float -> unit` is called as `(host, port)` (probe 6).
 - **W5.4** W5.2 and W5.3 apply to every literal-keyed method, including `on`, `once`, `addListener`, `prependListener` and `prependOnceListener`.
 - **Acceptance:** the lab asserts a `Socket`-shaped emitter with listener shapes that collide today, a name collision (`on_Close`), and no DO001 or TR006 on them. The RunGate holds an Emit-on-abstract-member check. In `workers-types` and `animejs`, TR006 and DO001 fall.
-- **Status:** integrated on `integ/w5` (2026-10-14), stacked on `develop` after W2–W4. A literal overload reports `MB010`; `CatalogCompatibility.ApiVersion` is 8. TR006 falls from 228 to 221 in `workers-types` and from 21 to 20 in `animejs`, where DO001 falls from 1 to 0. Core.TS and Node are regenerated under the T4 override: Core.TS reads 784 methods (`MB010`) and TR056 falls from 786 to 0; in Node, TR006 falls from 5,063 to 673 and DO001 from 1,904 to 27.
+- **Status:** merged to `develop` in #146 (2026-10-14). A literal overload reports `MB010`; `CatalogCompatibility.ApiVersion` is 8. TR006 falls from 228 to 221 in `workers-types` and from 21 to 20 in `animejs`, where DO001 falls from 1 to 0. Core.TS and Node are regenerated under the T4 override: Core.TS reads 784 methods (`MB010`) and TR056 falls from 786 to 0; in Node, TR006 falls from 5,063 to 673 and DO001 from 1,904 to 27.
 
 ### W6. Literal members: module, docs and Create
 
@@ -118,7 +120,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
   - The lab asserts an `Event`-shaped type with methods and numeric constants, a subtype that inherits them, a string discriminant, and a value that needs escaping.
   - The RunGate checks that `match e.eventPhase with | Event.AT_TARGET` compiles to `e.eventPhase === 2`, and that a subtype's `Create` takes no constant parameters.
   - In `solid-js` and `animejs`, TR007 falls.
-- **Status:** integrated on `integ/w6` (2026-10-14), stacked on W5. A literal member reports `MB011` and a `Create` that writes literals `SP005`. Lead amendment: a required single-literal member is a literal member whether readonly or writable; optional ones stay `Create` parameters. A subtype's module holds its own literal members only; inherited constants are read through the base's module. TR007 falls from 54 to 0 in `solid-js` and from 18 to 0 in `animejs`; TR006 falls from 221 to 77 in `workers-types`. Core.TS and Node are regenerated under the T4 override: TR007 falls from 6,494 to 0 in Core.TS and from 86 to 0 in Node.
+- **Status:** merged to `develop` in #147 (2026-10-14). A literal member reports `MB011` and a `Create` that writes literals `SP005`. Lead amendment: a required single-literal member is a literal member whether readonly or writable; optional ones stay `Create` parameters. A subtype's module holds its own literal members only; inherited constants are read through the base's module. TR007 falls from 54 to 0 in `solid-js` and from 18 to 0 in `animejs`; TR006 falls from 221 to 77 in `workers-types`. Core.TS and Node are regenerated under the T4 override: TR007 falls from 6,494 to 0 in Core.TS and from 86 to 0 in Node.
 
 ### W7. Type parameters in scope
 
@@ -133,7 +135,7 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
   - a method type parameter used only in its return
 
   In `solid-js` and `animejs`, TR012, TR013, TR027 and TP006 fall.
-- **Status:** integrated on `integ/w7` (2026-10-14), stacked on W6. In `animejs`, TR012 falls from 2 to 0, TR013 from 3 to 0, TR027 from 1 to 0 and TP006 from 1 to 0; in `solid-js`, TR013 falls from 23 to 15. Core.TS and Node are regenerated under the T4 override: in Core.TS, TR012 falls from 190 to 0, TR027 from 152 to 0 and TP006 from 154 to 2; in Node, TR012 falls from 102 to 0 and TR013 from 250 to 19. `Store.DEV.isWrappable` (a readonly property typed `typeof f`, TR013) is left for a follow-up.
+- **Status:** merged to `develop` in #148 (2026-10-14). In `animejs`, TR012 falls from 2 to 0, TR013 from 3 to 0, TR027 from 1 to 0 and TP006 from 1 to 0; in `solid-js`, TR013 falls from 23 to 15. Core.TS and Node are regenerated under the T4 override: in Core.TS, TR012 falls from 190 to 0, TR027 from 152 to 0 and TP006 from 154 to 2; in Node, TR012 falls from 102 to 0 and TR013 from 250 to 19. `Store.DEV.isWrappable` (a readonly property typed `typeof f`, TR013) is left for a follow-up.
 
 ### W8. Key types for aliases and tag maps
 
@@ -153,14 +155,14 @@ Each workstream lists numbered requirements, its acceptance criteria and the pro
 - **W8.4** A tag-map method whose result type is constrained carries the constraint on its own type parameter: `getElementsByTagName<'E when 'E :> Element>` returns `HTMLCollectionOf<'E>` (probe 3).
 - **W8.5** Type-level aliases with a Core counterpart emit that counterpart (`ValueOf<T>` → `proptypelock<'T>`). Others remain phantoms.
 - **Acceptance:** the lab asserts two tag maps with a primary and a deprecated overload, a constrained result, and a `ValueOf`-style alias. The RunGate checks that the key emits the bare tag string. In `type-fest` and `solid-js`, SA002, TR020, TR044 and DO005 fall.
-- **Status:** integrated on `integ/w8` (2026-10-14), stacked on W7 (`tag-map-lab`, codes `TR066`, `TR067` and `TP011`), including the `PropertyRecord` row. A tag map's result type parameter is `'E`, the W8.1 spelling; a key over an in-scope operand keeps `'R`. The map-key form applies to every key over a declared map, Core.TS's `addEventListener` overloads included. **The selected-golden acceptance is not met** and is open for the lead: `type-fest` SA002 170 → 169 (`Stringified`, the one key-independent mapped alias) and TR020 8 → 7; `solid-js` is unchanged (its accesses are bounded by its own `KeyOf` alias and `T[number]`); TR044 and DO005 were already 0 in both. The Core.TS figures in the W8 phase record of `generator-architecture.md` (TR044 1,209 → 5, DO005 17 → 0) are offered as alternative evidence, pending the lead's decision. At integration, `animejs` moves too (TR020 17 → 0, DO005 13 → 0, TP011 0 → 20), and Core.TS, regenerated under the T4 override, measures TP011 0 → 3,170, TR044 1,209 → 5 and DO005 17 → 0; Node's findings do not move.
+- **Status:** merged to `develop` in #149 (2026-10-14; `tag-map-lab`, codes `TR066`, `TR067` and `TP011`), including the `PropertyRecord` row. A tag map's result type parameter is `'E`, the W8.1 spelling; a key over an in-scope operand keeps `'R`. The map-key form applies to every key over a declared map, Core.TS's `addEventListener` overloads included. **The selected-golden acceptance is not met** and is open for the lead: `type-fest` SA002 170 → 169 (`Stringified`, the one key-independent mapped alias) and TR020 8 → 7; `solid-js` is unchanged (its accesses are bounded by its own `KeyOf` alias and `T[number]`); TR044 and DO005 were already 0 in both. The Core.TS figures in the W8 phase record of `generator-architecture.md` (TR044 1,209 → 5, DO005 17 → 0) are offered as alternative evidence, pending the lead's decision. At integration, `animejs` moves too (TR020 17 → 0, DO005 13 → 0, TP011 0 → 20), and Core.TS, regenerated under the T4 override, measures TP011 0 → 3,170, TR044 1,209 → 5 and DO005 17 → 0; Node's findings do not move.
 
 ### W9. Early resolve pass (experiment)
 
 - **W9.1** Before Resolve, ask the checker for the resolved type of each reference whose alias is generic but whose arguments are concrete, such as `InstanceType<typeof IncomingMessage>`. Later passes then see `IncomingMessage`.
 - **W9.2** The Wire session already exposes `getTypeAtLocation`, `typeToString` and `getTypeOfSymbol`, and Resolve already calls `getTypeAtLocation` (probe 9).
 - **Outcome:** a written finding on whether the approach holds. It is measured on a lab that reproduces `http.RequestListener`'s `InstanceType` use, and on TR045 deltas in `type-fest` and `solid-js`. W9 does not commit to shipping.
-- **Status:** integrated on `integ/w9` (2026-10-14), stacked on W8, as the opt-in `resolveConditionalConstraints` flag, off by default and not set for Node. A conditional deferred over a bounded type parameter reads its value at the bound under `TR068` (Widened); W8 holds `TR066` and `TR067`. With the flag off, no golden, Core.TS or Node moves; `early-resolve-lab` sets it. Measured on a scratch Node with the flag on, all 130 `InstanceType` TR045 sites move to TR068 (`2026-10-13-w9-early-resolve-findings.md`); adopting it for Node is a follow-up.
+- **Status:** merged to `develop` in #150 (2026-10-14), as the opt-in `resolveConditionalConstraints` flag, off by default and not set for Node. A conditional deferred over a bounded type parameter reads its value at the bound under `TR068` (Widened); W8 holds `TR066` and `TR067`. With the flag off, no golden, Core.TS or Node moves; `early-resolve-lab` sets it. Measured on a scratch Node with the flag on, all 130 `InstanceType` TR045 sites move to TR068 (`2026-10-13-w9-early-resolve-findings.md`); adopting it for Node is a follow-up.
 
 ## 5. Sequencing and verification
 
