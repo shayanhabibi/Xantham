@@ -1,4 +1,5 @@
 ﻿{
   "$schema": "../../xantham.schema.json",
-  "lib": [ "node" ]
+  "lib": [ "node" ],
+  "resolveConditionalConstraints": true
 }

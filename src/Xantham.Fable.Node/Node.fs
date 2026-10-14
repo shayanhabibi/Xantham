@@ -106162,7 +106162,7 @@ module Http =
             jsNative
 
     type RequestListener<'Request, 'Response when 'Request :> IncomingMessageConstructor> =
-        delegate of req: obj * res: obj -> unit
+        delegate of req: IncomingMessage * res: obj -> unit
 
     /// <remarks>@since v0.1.17</remarks>
     [<Interface>]
@@ -106344,7 +106344,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.addListener('checkContinue', $1)")>]
-        abstract addListenerCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract addListenerCheckContinue: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106352,7 +106352,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.addListener('checkExpectation', $1)")>]
-        abstract addListenerCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract addListenerCheckExpectation: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106386,7 +106386,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.addListener('request', $1)")>]
-        abstract addListenerRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract addListenerRequest: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106443,7 +106443,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('checkContinue', $1, $2)")>]
-        abstract emitCheckContinue: req: obj * res: obj -> bool
+        abstract emitCheckContinue: req: IncomingMessage * res: obj -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -106451,7 +106451,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('checkExpectation', $1, $2)")>]
-        abstract emitCheckExpectation: req: obj * res: obj -> bool
+        abstract emitCheckExpectation: req: IncomingMessage * res: obj -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -106467,7 +106467,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('connect', $1, $2, $3)")>]
-        abstract emitConnect: req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> bool
+        abstract emitConnect: req: IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -106475,7 +106475,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('dropRequest', $1, $2)")>]
-        abstract emitDropRequest: req: obj * socket: Stream.Duplex -> bool
+        abstract emitDropRequest: req: IncomingMessage * socket: Stream.Duplex -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -106483,7 +106483,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('request', $1, $2)")>]
-        abstract emitRequest: req: obj * res: obj -> bool
+        abstract emitRequest: req: IncomingMessage * res: obj -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -106491,7 +106491,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('upgrade', $1, $2, $3)")>]
-        abstract emitUpgrade: req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> bool
+        abstract emitUpgrade: req: IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> bool
 
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
@@ -106559,7 +106559,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.on('checkContinue', $1)")>]
-        abstract onCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onCheckContinue: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106567,7 +106567,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.on('checkExpectation', $1)")>]
-        abstract onCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onCheckExpectation: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106599,7 +106599,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.on('request', $1)")>]
-        abstract onRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onRequest: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106673,7 +106673,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.once('checkContinue', $1)")>]
-        abstract onceCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onceCheckContinue: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106681,7 +106681,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.once('checkExpectation', $1)")>]
-        abstract onceCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onceCheckExpectation: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106713,7 +106713,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.once('request', $1)")>]
-        abstract onceRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onceRequest: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106776,7 +106776,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.prependListener('checkContinue', $1)")>]
-        abstract prependListenerCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependListenerCheckContinue: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106784,7 +106784,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.prependListener('checkExpectation', $1)")>]
-        abstract prependListenerCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependListenerCheckExpectation: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106819,7 +106819,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.prependListener('request', $1)")>]
-        abstract prependListenerRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependListenerRequest: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106881,7 +106881,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.prependOnceListener('checkContinue', $1)")>]
-        abstract prependOnceListenerCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependOnceListenerCheckContinue: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106889,7 +106889,8 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.prependOnceListener('checkExpectation', $1)")>]
-        abstract prependOnceListenerCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependOnceListenerCheckExpectation:
+            listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -106924,7 +106925,7 @@ module Http =
         /// </code>
         /// </summary>
         [<Emit("$0.prependOnceListener('request', $1)")>]
-        abstract prependOnceListenerRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependOnceListenerRequest: listener: Action<IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -116464,14 +116465,14 @@ module Http =
         /// <remarks>@since v0.1.17</remarks>
         [<Import("Server", "node:http"); EmitConstructor>]
         static member Server<'Request, 'Response when 'Request :> IncomingMessageConstructor>
-            (?requestListener: Action<obj, obj>)
+            (?requestListener: Action<IncomingMessage, obj>)
             : Server<'Request, 'Response> =
             jsNative
 
         /// <remarks>@since v0.1.17</remarks>
         [<Import("Server", "node:http"); EmitConstructor>]
         static member Server<'Request, 'Response when 'Request :> IncomingMessageConstructor>
-            (options: ServerOptions<'Request, 'Response>, ?requestListener: Action<obj, obj>)
+            (options: ServerOptions<'Request, 'Response>, ?requestListener: Action<IncomingMessage, obj>)
             : Server<'Request, 'Response> =
             jsNative
 
@@ -116655,7 +116656,7 @@ module Http =
         /// <remarks>@since v0.1.13</remarks>
         [<Import("createServer", "node:http")>]
         static member createServer<'Request, 'Response when 'Request :> IncomingMessageConstructor>
-            (?requestListener: Action<obj, obj>)
+            (?requestListener: Action<IncomingMessage, obj>)
             : Server<'Request, 'Response> =
             jsNative
 
@@ -116697,7 +116698,7 @@ module Http =
         /// <remarks>@since v0.1.13</remarks>
         [<Import("createServer", "node:http")>]
         static member createServer<'Request, 'Response when 'Request :> IncomingMessageConstructor>
-            (options: ServerOptions<'Request, 'Response>, ?requestListener: Action<obj, obj>)
+            (options: ServerOptions<'Request, 'Response>, ?requestListener: Action<IncomingMessage, obj>)
             : Server<'Request, 'Response> =
             jsNative
 
@@ -117476,61 +117477,61 @@ module Http =
             type Listener = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener2<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener3<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex -> unit
 
             type Listener4<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
         module On =
             type Listener = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener2<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener3<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex -> unit
 
             type Listener4<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
         module Once =
             type Listener = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener2<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener3<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex -> unit
 
             type Listener4<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
         module PrependListener =
             type Listener = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener2<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener3<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex -> unit
 
             type Listener4<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
         module PrependOnceListener =
             type Listener = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener2<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener3<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex -> unit
 
             type Listener4<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
     module ServerResponse =
         module Compose =
@@ -123284,7 +123285,8 @@ module Http2 =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('checkContinue', $1, $2)")>]
-        abstract emitCheckContinue: request: obj * response: obj -> bool
+        abstract emitCheckContinue:
+            request: Http2ServerRequest * response: Http2ServerResponse<Http2ServerRequest> -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -123292,7 +123294,7 @@ module Http2 =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('request', $1, $2)")>]
-        abstract emitRequest: request: obj * response: obj -> bool
+        abstract emitRequest: request: Http2ServerRequest * response: Http2ServerResponse<Http2ServerRequest> -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -124313,7 +124315,8 @@ module Http2 =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('checkContinue', $1, $2)")>]
-        abstract emitCheckContinue: request: obj * response: obj -> bool
+        abstract emitCheckContinue:
+            request: Http2ServerRequest * response: Http2ServerResponse<Http2ServerRequest> -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -124321,7 +124324,7 @@ module Http2 =
         /// </code>
         /// </summary>
         [<Emit("$0.emit('request', $1, $2)")>]
-        abstract emitRequest: request: obj * response: obj -> bool
+        abstract emitRequest: request: Http2ServerRequest * response: Http2ServerResponse<Http2ServerRequest> -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -129535,7 +129538,9 @@ module Http2 =
                     unit
 
         type OnRequestHandler2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-            delegate of request: obj * response: obj -> unit
+            delegate of
+                request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                    unit
 
     module CreateServer =
         type OnRequestHandler =
@@ -129544,15 +129549,21 @@ module Http2 =
                     unit
 
         type OnRequestHandler2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-            delegate of request: obj * response: obj -> unit
+            delegate of
+                request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                    unit
 
     module Http2SecureServer =
         module AddListener =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129566,10 +129577,14 @@ module Http2 =
 
         module On =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129583,10 +129598,14 @@ module Http2 =
 
         module Once =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129600,10 +129619,14 @@ module Http2 =
 
         module PrependListener =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129617,10 +129640,14 @@ module Http2 =
 
         module PrependOnceListener =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129635,10 +129662,14 @@ module Http2 =
     module Http2Server =
         module AddListener =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129657,10 +129688,14 @@ module Http2 =
 
         module On =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129679,10 +129714,14 @@ module Http2 =
 
         module Once =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129701,10 +129740,14 @@ module Http2 =
 
         module PrependListener =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -129723,10 +129766,14 @@ module Http2 =
 
         module PrependOnceListener =
             type Listener<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener2<'Http2Request, 'Http2Response when 'Http2Request :> Http2ServerRequestConstructor> =
-                delegate of request: obj * response: obj -> unit
+                delegate of
+                    request: Http2.Http2ServerRequest * response: Http2.Http2ServerResponse<Http2.Http2ServerRequest> ->
+                        unit
 
             type Listener3<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
                 when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
@@ -130922,7 +130969,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.addListener('checkContinue', $1)")>]
-        abstract addListenerCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract addListenerCheckContinue: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -130930,7 +130977,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.addListener('checkExpectation', $1)")>]
-        abstract addListenerCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract addListenerCheckExpectation: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -130955,7 +131002,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.addListener('request', $1)")>]
-        abstract addListenerRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract addListenerRequest: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -130990,6 +131037,31 @@ module Https =
         /// </summary>
         [<Emit("$0.emit('connection', $1)")>]
         abstract emitConnection: socket: Stream.Duplex -> bool
+
+        /// <summary>
+        /// <code lang="ts">
+        /// emit(event: "checkContinue", req: InstanceType&lt;Request&gt;, res: InstanceType&lt;Response&gt;): boolean
+        /// </code>
+        /// </summary>
+        [<Emit("$0.emit('checkContinue', $1, $2)")>]
+        abstract emitCheckContinue: req: Http.IncomingMessage * res: Http.ServerResponse<Http.IncomingMessage> -> bool
+
+        /// <summary>
+        /// <code lang="ts">
+        /// emit(event: "checkExpectation", req: InstanceType&lt;Request&gt;, res: InstanceType&lt;Response&gt;): boolean
+        /// </code>
+        /// </summary>
+        [<Emit("$0.emit('checkExpectation', $1, $2)")>]
+        abstract emitCheckExpectation:
+            req: Http.IncomingMessage * res: Http.ServerResponse<Http.IncomingMessage> -> bool
+
+        /// <summary>
+        /// <code lang="ts">
+        /// emit(event: "request", req: InstanceType&lt;Request&gt;, res: InstanceType&lt;Response&gt;): boolean
+        /// </code>
+        /// </summary>
+        [<Emit("$0.emit('request', $1, $2)")>]
+        abstract emitRequest: req: Http.IncomingMessage * res: Http.ServerResponse<Http.IncomingMessage> -> bool
 
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
@@ -131105,7 +131177,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.on('checkContinue', $1)")>]
-        abstract onCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onCheckContinue: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131113,7 +131185,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.on('checkExpectation', $1)")>]
-        abstract onCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onCheckExpectation: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131137,7 +131209,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.on('request', $1)")>]
-        abstract onRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onRequest: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131259,7 +131331,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.once('checkContinue', $1)")>]
-        abstract onceCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onceCheckContinue: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131267,7 +131339,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.once('checkExpectation', $1)")>]
-        abstract onceCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onceCheckExpectation: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131291,7 +131363,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.once('request', $1)")>]
-        abstract onceRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract onceRequest: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131406,7 +131478,8 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.prependListener('checkContinue', $1)")>]
-        abstract prependListenerCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependListenerCheckContinue:
+            listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131414,7 +131487,8 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.prependListener('checkExpectation', $1)")>]
-        abstract prependListenerCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependListenerCheckExpectation:
+            listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131440,7 +131514,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.prependListener('request', $1)")>]
-        abstract prependListenerRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependListenerRequest: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131555,7 +131629,8 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.prependOnceListener('checkContinue', $1)")>]
-        abstract prependOnceListenerCheckContinue: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependOnceListenerCheckContinue:
+            listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131563,7 +131638,8 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.prependOnceListener('checkExpectation', $1)")>]
-        abstract prependOnceListenerCheckExpectation: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependOnceListenerCheckExpectation:
+            listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -131589,7 +131665,7 @@ module Https =
         /// </code>
         /// </summary>
         [<Emit("$0.prependOnceListener('request', $1)")>]
-        abstract prependOnceListenerRequest: listener: Action<obj, obj> -> Server<'Request, 'Response>
+        abstract prependOnceListenerRequest: listener: Action<Http.IncomingMessage, obj> -> Server<'Request, 'Response>
 
         /// <summary>
         /// <code lang="ts">
@@ -132750,7 +132826,7 @@ module Https =
         /// <remarks>@since v0.3.4</remarks>
         [<Import("Server", "node:https"); EmitConstructor>]
         static member Server<'Request, 'Response when 'Request :> IncomingMessageConstructor>
-            (?requestListener: Action<obj, obj>)
+            (?requestListener: Action<Http.IncomingMessage, obj>)
             : Server<'Request, 'Response> =
             jsNative
 
@@ -132760,7 +132836,7 @@ module Https =
         /// <remarks>@since v0.3.4</remarks>
         [<Import("Server", "node:https"); EmitConstructor>]
         static member Server<'Request, 'Response when 'Request :> IncomingMessageConstructor>
-            (options: ServerOptions<'Request, 'Response>, ?requestListener: Action<obj, obj>)
+            (options: ServerOptions<'Request, 'Response>, ?requestListener: Action<Http.IncomingMessage, obj>)
             : Server<'Request, 'Response> =
             jsNative
 
@@ -132802,7 +132878,7 @@ module Https =
         /// <param name="requestListener">A listener to be added to the <c>'request'</c> event.</param>
         [<Import("createServer", "node:https")>]
         static member createServer<'Request, 'Response when 'Request :> IncomingMessageConstructor>
-            (?requestListener: Action<obj, obj>)
+            (?requestListener: Action<Http.IncomingMessage, obj>)
             : Server<'Request, 'Response> =
             jsNative
 
@@ -132844,7 +132920,7 @@ module Https =
         /// <param name="requestListener">A listener to be added to the <c>'request'</c> event.</param>
         [<Import("createServer", "node:https")>]
         static member createServer<'Request, 'Response when 'Request :> IncomingMessageConstructor>
-            (options: ServerOptions<'Request, 'Response>, ?requestListener: Action<obj, obj>)
+            (options: ServerOptions<'Request, 'Response>, ?requestListener: Action<Http.IncomingMessage, obj>)
             : Server<'Request, 'Response> =
             jsNative
 
@@ -133298,10 +133374,10 @@ module Https =
             type Listener6 = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener7<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener8<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
                 type Callback =
@@ -133351,10 +133427,10 @@ module Https =
             type Listener6 = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener7<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener8<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
                 type Callback =
@@ -133391,10 +133467,10 @@ module Https =
             type Listener6 = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener7<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener8<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
                 type Callback =
@@ -133432,10 +133508,10 @@ module Https =
             type Listener6 = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener7<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener8<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
                 type Callback =
@@ -133473,10 +133549,10 @@ module Https =
             type Listener6 = delegate of err: exn * socket: Stream.Duplex -> unit
 
             type Listener7<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             type Listener8<'Request when 'Request :> IncomingMessageConstructor> =
-                delegate of req: obj * socket: Stream.Duplex * head: NonSharedBuffer -> unit
+                delegate of req: Http.IncomingMessage * socket: Stream.Duplex * head: NonSharedBuffer -> unit
 
             module Listener3 =
                 type Callback =
@@ -178834,7 +178910,7 @@ module Test =
         /// mock. Each entry in the array is an object with the following properties.
         /// </summary>
         /// <remarks>@since v19.1.0, v18.13.0</remarks>
-        abstract calls: MockFunctionCall<'F, obj, obj>[]
+        abstract calls: MockFunctionCall<'F, obj, obj[]>[]
         /// <summary>
         /// This function returns the number of times that this mock has been invoked. This
         /// function is more efficient than checking <c>ctx.calls.length</c> because <c>ctx.calls</c> is a getter that creates a copy of the internal call tracking array.
@@ -178924,7 +179000,7 @@ module Test =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                calls: MockFunctionCall<'F, obj, obj>[],
+                calls: MockFunctionCall<'F, obj, obj[]>[],
                 callCount: (unit -> float),
                 mockImplementation: ('F -> unit),
                 mockImplementationOnce: Action<'F, float option>,
