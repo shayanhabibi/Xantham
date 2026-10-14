@@ -1707,6 +1707,9 @@ type FsTaggedCase =
         Name: string
         CompiledName: string option
         Fields: FsTaggedField list
+        /// The name of the case's `Create` static member, which builds the case with its optional
+        /// fields omittable and its literal fields written.
+        Create: string option
     }
 
 /// A discriminated union the checker proved is tagged (D4, §4.5(2)): every member is an object

@@ -16,8 +16,8 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 17,
-      "exact": 9,
+      "total": 21,
+      "exact": 13,
       "ergonomic": 6,
       "widened": 2
     },

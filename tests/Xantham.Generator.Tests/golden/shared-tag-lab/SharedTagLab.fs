@@ -62,6 +62,10 @@ type Signal =
     /// <param name="channel">TypeScript type: <c>"bus"</c></param>
     /// <param name="reason"></param>
     | [<CompiledName("stop")>] Stop of channel: string * reason: string
+    [<ParamObject; Emit("({ verb: 'start', channel: 'bus', ...$0 })")>]
+    static member CreateStart (at: float) : Signal = jsNative
+    [<ParamObject; Emit("({ verb: 'stop', channel: 'bus', ...$0 })")>]
+    static member CreateStop (reason: string) : Signal = jsNative
 
 [<Interface>]
 type Signal2 =
@@ -383,6 +387,8 @@ type OnEvent = (OnEvent.Event -> unit)
 type Scheduled<'T> =
     | [<CompiledName("once")>] Once of payload: 'T
     | [<CompiledName("repeat")>] Repeat of payload: 'T * previous: 'T option
+    [<ParamObject; Emit("({ kind: 'repeat', ...$0 })")>]
+    static member CreateRepeat (payload: 'T, ?previous: 'T) : Scheduled<'T> = jsNative
 
 [<Interface>]
 type Scheduled2<'T> =
@@ -445,6 +451,8 @@ module Scheduler =
         type Result<'T> =
             | [<CompiledName("ready")>] Ready of payload: 'T
             | [<CompiledName("waiting")>] Waiting of previous: 'T option
+            [<ParamObject; Emit("({ kind: 'waiting', ...$0 })")>]
+            static member CreateWaiting (?previous: 'T) : Result<'T> = jsNative
 
         [<Interface>]
         type Result2<'T> =

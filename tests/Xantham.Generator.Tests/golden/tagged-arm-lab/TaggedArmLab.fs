@@ -22,6 +22,10 @@ type Recovery =
     /// <param name="type">Which party aborted it.</param>
     | [<CompiledName("aborted")>] Aborted of reason: string option * ``type``: Recovery3.Type
     | [<CompiledName("pending")>] Pending
+    [<ParamObject; Emit("({ status: 'completed', ...$0 })")>]
+    static member CreateCompleted (?snapshot: obj, ?metadata: JS.Record<string, obj>) : Recovery = jsNative
+    [<ParamObject; Emit("({ status: 'aborted', ...$0 })")>]
+    static member CreateAborted (``type``: Recovery3.Type, ?reason: string) : Recovery = jsNative
 
 [<Interface>]
 type Recovery2 =
@@ -117,6 +121,10 @@ type Signal =
     /// <param name="channel">TypeScript type: <c>"bus"</c></param>
     /// <param name="reason"></param>
     | [<CompiledName("stop")>] Stop of channel: string * reason: string
+    [<ParamObject; Emit("({ verb: 'start', channel: 'bus', ...$0 })")>]
+    static member CreateStart (at: float) : Signal = jsNative
+    [<ParamObject; Emit("({ verb: 'stop', channel: 'bus', ...$0 })")>]
+    static member CreateStop (reason: string) : Signal = jsNative
 
 [<Interface>]
 type Signal2 =
@@ -158,6 +166,8 @@ module Signal3 =
 type Event =
     | [<CompiledName("open")>] Open of url: string
     | [<CompiledName("close")>] Close of code: float option
+    [<ParamObject; Emit("({ type: 'close', ...$0 })")>]
+    static member CreateClose (?code: float) : Event = jsNative
 
 [<Interface>]
 type Event2 =
@@ -228,6 +238,8 @@ type Message =
     /// <param name="at">Milliseconds since the epoch.</param>
     | [<CompiledName("ping")>] Ping of at: float
     | [<CompiledName("pong")>] Pong of at: float option
+    [<ParamObject; Emit("({ op: 'pong', ...$0 })")>]
+    static member CreatePong (?at: float) : Message = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Clash =

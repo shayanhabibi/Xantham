@@ -191,6 +191,8 @@ module FindingCodes =
             "DT.TaggedUnion", "DT002"
             "DT.TagValueShared", "DT003"
             "DT.ArmsMergedOnSharedTag", "DT004"
+            "DT.CaseCreateSynthesized", "DT005"
+            "DT.CaseCreateNameTaken", "DT006"
             "SY.InstantiationNamedOnce", "SY001"
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
@@ -859,6 +861,11 @@ type DetectTaggedUnions =
     | [<Ergonomic>] TagValueShared of tag: string * value: string
     /// Arms sharing a tag value folded into one case, which carries the members they agree on.
     | [<Ergonomic>] ArmsMergedOnSharedTag of tag: string * value: string
+    /// The case has a `Create` static member building it with its optional fields omittable and
+    /// its literal fields written.
+    | [<Exact>] CaseCreateSynthesized of create: string
+    /// The case's `Create` name is a case of the same union, so the case has no `Create`.
+    | [<Ergonomic>] CaseCreateNameTaken of create: string
 
     interface IFindingKind with
         member this.Message =
@@ -869,6 +876,9 @@ type DetectTaggedUnions =
                 $"discriminated by '{tag}', but two arms carry '{value}'; left as an erased union"
             | ArmsMergedOnSharedTag(tag, value) ->
                 $"arms sharing '{tag}' = '{value}' merged into one case, carrying the members they agree on"
+            | CaseCreateSynthesized create ->
+                $"case Create '{create}': optional fields omittable, literal fields written"
+            | CaseCreateNameTaken create -> $"no case Create: '{create}' is already a case of the union"
 
 /// `name-exports`.
 [<Prefix("NE", "name-exports")>]

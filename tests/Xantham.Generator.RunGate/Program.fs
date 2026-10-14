@@ -1912,6 +1912,39 @@ let private genericTaggedCases () =
         equal "a JavaScript-built object reaches its case with both payloads" "1:0" $"{payload}:{previous}"
     | _ -> check "a JavaScript-built repeat reached another case" false
 
+/// A case `Create` builds the object its case builds, absent optional fields omitted and literal
+/// fields written, and the result matches the case its tag names.
+let private taggedCaseCreates () =
+    equal
+        "a case Create with no argument writes the tag alone"
+        """{"status":"completed"}"""
+        (json (TaggedArmLab.Recovery.CreateCompleted()))
+
+    equal
+        "a case Create and its case build the same object"
+        (json (TaggedArmLab.Recovery.Completed(Some(box 1), None)))
+        (json (TaggedArmLab.Recovery.CreateCompleted(snapshot = 1)))
+
+    equal
+        "a case Create writes a literal field"
+        """{"verb":"start","channel":"bus","at":2}"""
+        (json (TaggedArmLab.Signal.CreateStart 2.0))
+
+    match TaggedArmLab.Recovery.CreateAborted(TaggedArmLab.Recovery3.Type.User, reason = "r") with
+    | TaggedArmLab.Recovery.Aborted(reason, _) ->
+        equal "a case Create with an escaped field matches its case" "r" (Option.defaultValue "" reason)
+    | _ -> check "a case Create reached another case" false
+
+    equal
+        "an escaped field is written under its JS key"
+        """{"status":"aborted","type":"user"}"""
+        (json (TaggedArmLab.Recovery.CreateAborted TaggedArmLab.Recovery3.Type.User))
+
+    equal
+        "a generic case Create writes its payload"
+        """{"kind":"repeat","payload":1}"""
+        (json (SharedTagLab.Scheduled.CreateRepeat 1.0))
+
 /// §4.10's pure index signatures, resolved to `Record`/`ReadonlyRecord`
 /// rather than a minted interface. Every property below is one of those types; reading and
 /// writing through the F# indexer (`.[key]` / `.[key] <- value`) round-trips against the
@@ -2301,6 +2334,7 @@ let main _ =
     foldedTaggedCases ()
     mintedTaggedCases ()
     genericTaggedCases ()
+    taggedCaseCreates ()
     nestedNames ()
     optionalHooks ()
     renamedStatics ()

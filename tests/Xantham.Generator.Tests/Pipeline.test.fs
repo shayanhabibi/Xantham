@@ -4595,7 +4595,47 @@ let pipelineTests =
                           "    /// <param name=\"channel\">TypeScript type: <c>"
                           "a literal field records its literal"
 
-                      Expect.stringContains source "    /// <param name=\"at\"></param>" "and its undocumented sibling is written empty" ])
+                      Expect.stringContains source "    /// <param name=\"at\"></param>" "and its undocumented sibling is written empty"
+
+                  testCase "a case with an optional or literal field has a Create" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor symbol key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && f.Key = key)
+                          |> List.map _.Message
+
+                      Expect.stringContains
+                          source
+                          "    static member CreateCompleted (?snapshot: obj, ?metadata: JS.Record<string, obj>) : Recovery = jsNative"
+                          "optional fields are omittable"
+
+                      Expect.stringContains source "    static member CreateAborted (" "a case mixing both has one"
+                      Expect.stringContains source "?reason: string) : Recovery = jsNative" "with its optional field last"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"({ verb: 'start', channel: 'bus', ...$0 })\")>]"
+                          "a literal field is written by the Emit"
+
+                      Expect.stringContains source "    static member CreateStart (at: float) : Signal = jsNative" "and binds no parameter"
+                      Expect.stringContains source "    static member CreatePong (?at: float) : Message = jsNative" "named arms' cases too"
+
+                      for absent in [ "CreatePending"; "CreateCircle"; "CreateSquare"; "CreateOpen"; "CreatePing" ] do
+                          Expect.isFalse (source.Contains absent) $"{absent}: the case constructor already builds it"
+
+                      Expect.isFalse (source.Contains "static member CreateX") "a helper name that is a case is not declared"
+
+                      Expect.equal
+                          (messagesFor "Clash.X" "DT006")
+                          [ "no case Create: 'CreateX' is already a case of the union" ]
+                          "and the collision is reported"
+
+                      Expect.equal
+                          (messagesFor "Recovery.Completed" "DT005")
+                          [ "case Create 'CreateCompleted': optional fields omittable, literal fields written" ]
+                          "a synthesized helper is reported once" ])
 
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced

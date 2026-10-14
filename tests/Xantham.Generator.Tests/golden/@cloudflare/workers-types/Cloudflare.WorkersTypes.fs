@@ -1128,6 +1128,8 @@ module Onset =
         | [<CompiledName("queue")>] Queue of queueName: string * batchSize: float
         | [<CompiledName("scheduled")>] Scheduled of scheduledTime: Fable.Core.TS.Es.Date * cron: string
         | [<CompiledName("trace")>] Trace of traces: string option[]
+        [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
+        static member CreateFetch (``method``: string, url: string, headers: Header[], ?cfJson: obj) : Info = jsNative
 
 [<Interface>]
 type Outcome =
@@ -7931,6 +7933,14 @@ type ChatCompletionMessageParam =
     | [<CompiledName("system")>] System of content: U2<string, SystemMessage.Content.Item[]> * name: string option
     | [<CompiledName("tool")>] Tool of content: U2<string, ToolMessage.Content.Item[]> * tool_call_id: string
     | [<CompiledName("user")>] User of content: U2<string, UserMessageContentPart[]> * name: string option
+    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+    static member CreateAssistant (?content: U2<string, AssistantMessageContentPart[]>, ?refusal: string, ?name: string, ?audio: AssistantMessage.Audio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: AssistantMessage.FunctionCall) : ChatCompletionMessageParam = jsNative
+    [<ParamObject; Emit("({ role: 'developer', ...$0 })")>]
+    static member CreateDeveloper (content: U2<string, DeveloperMessage.Content.Item[]>, ?name: string) : ChatCompletionMessageParam = jsNative
+    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
+    static member CreateSystem (content: U2<string, SystemMessage.Content.Item[]>, ?name: string) : ChatCompletionMessageParam = jsNative
+    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
+    static member CreateUser (content: U2<string, UserMessageContentPart[]>, ?name: string) : ChatCompletionMessageParam = jsNative
 
 [<Interface>]
 type ChatCompletionsResponseFormatText =
@@ -8356,6 +8366,10 @@ type ResponseContent =
     | [<CompiledName("input_text")>] InputText of text: string
     | [<CompiledName("refusal")>] Refusal of refusal: string
     | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
+    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
+    static member CreateInputImage (detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseContent = jsNative
+    [<ParamObject; Emit("({ type: 'output_text', ...$0 })")>]
+    static member CreateOutputText (text: string, ?logprobs: Logprob[]) : ResponseContent = jsNative
 
 [<Interface>]
 type ResponseContentReasoningText =
@@ -8471,6 +8485,8 @@ type ResponseFormatTextConfig =
     | [<CompiledName("json_object")>] JsonObject
     | [<CompiledName("text")>] Text
     | [<CompiledName("json_schema")>] JsonSchema of name: string * schema: JS.Record<string, obj> * description: string option * strict: bool option
+    [<ParamObject; Emit("({ type: 'json_schema', ...$0 })")>]
+    static member CreateJsonSchema (name: string, schema: JS.Record<string, obj>, ?description: string, ?strict: bool) : ResponseFormatTextConfig = jsNative
 
 [<Interface>]
 type ResponseFormatTextJSONSchemaConfig =
@@ -8527,6 +8543,8 @@ type ResponseFunctionCallOutputItem =
     /// <param name="image_url">Base64 encoded image</param>
     | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail option * image_url: string option
     | [<CompiledName("input_text")>] InputText of text: string
+    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
+    static member CreateInputImage (?detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseFunctionCallOutputItem = jsNative
 
 type ResponseFunctionCallOutputItemList = ResponseFunctionCallOutputItem[]
 
@@ -8603,6 +8621,8 @@ type ResponseInputContent =
     /// <param name="image_url">Base64 encoded image</param>
     | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail * image_url: string option
     | [<CompiledName("input_text")>] InputText of text: string
+    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
+    static member CreateInputImage (detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseInputContent = jsNative
 
 [<Interface>]
 type ResponseInputImage =
@@ -8714,6 +8734,12 @@ type ResponseOutputItem =
     /// <param name="status"></param>
     | [<CompiledName("message")>] Message of id: string * content: ResponseOutputMessage.Content.Item[] * role: string * status: ResponseFunctionToolCall.Status
     | [<CompiledName("reasoning")>] Reasoning of id: string * summary: ResponseReasoningSummaryItem[] * content: ResponseReasoningContentItem[] option * encrypted_content: string option * status: ResponseFunctionToolCall.Status option
+    [<ParamObject; Emit("({ type: 'function_call', ...$0 })")>]
+    static member CreateFunctionCall (arguments: string, call_id: string, name: string, ?id: string, ?status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
+    [<ParamObject; Emit("({ type: 'message', role: 'assistant', ...$0 })")>]
+    static member CreateMessage (id: string, content: ResponseOutputMessage.Content.Item[], status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
+    [<ParamObject; Emit("({ type: 'reasoning', ...$0 })")>]
+    static member CreateReasoning (id: string, summary: ResponseReasoningSummaryItem[], ?content: ResponseReasoningContentItem[], ?encrypted_content: string, ?status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
 
 [<Interface>]
 type ResponseOutputItemAddedEvent =
@@ -8770,6 +8796,8 @@ module ResponseOutputMessage =
         type Item =
             | [<CompiledName("refusal")>] Refusal of refusal: string
             | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
+            [<ParamObject; Emit("({ type: 'output_text', ...$0 })")>]
+            static member CreateOutputText (text: string, ?logprobs: Logprob[]) : Item = jsNative
 
 [<Interface>]
 type ResponseOutputRefusal =
@@ -8935,6 +8963,8 @@ type ResponseStreamEvent =
     | [<CompiledName("response.refusal.done")>] ResponseRefusalDone of content_index: float * item_id: string * output_index: float * refusal: string * sequence_number: float
     | [<CompiledName("response.output_text.delta")>] ResponseOutputTextDelta of content_index: float * delta: string * item_id: string * logprobs: Logprob[] * output_index: float * sequence_number: float
     | [<CompiledName("response.output_text.done")>] ResponseOutputTextDone of content_index: float * item_id: string * logprobs: Logprob[] * output_index: float * sequence_number: float * text: string
+    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+    static member CreateError (message: string, sequence_number: float, ?code: string, ?param: string) : ResponseStreamEvent = jsNative
 
 [<Interface>]
 type ResponseCompletedEvent =
@@ -16729,6 +16759,8 @@ type ForwardableEmailMessage =
 type EmailAttachment =
     | [<CompiledName("inline")>] Inline of contentId: string * filename: string * ``type``: string * content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     | [<CompiledName("attachment")>] Attachment of contentId: unit option * filename: string * ``type``: string * content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
+    [<ParamObject; Emit("({ disposition: 'attachment', ...$0 })")>]
+    static member CreateAttachment (filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?contentId: unit) : EmailAttachment = jsNative
 
 /// <summary>
 /// An Email Address
@@ -25719,6 +25751,16 @@ module ExportedHandlerTailStreamHandler =
                     | [<CompiledName("spanOpen")>] SpanOpen of name: string * spanId: string * info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
                     | [<CompiledName("streamDiagnostic")>] StreamDiagnostic of diagnostic: DroppedEventsDiagnostic
                     | [<CompiledName("log")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level * errorInfo: TailStreamErrorInfo option[] option
+                    [<ParamObject; Emit("({ type: 'exception', ...$0 })")>]
+                    static member CreateException (name: string, message: string, ?stack: string) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'onset', ...$0 })")>]
+                    static member CreateOnset (attributes: Attribute[], spanId: string, executionModel: string, info: Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'return', ...$0 })")>]
+                    static member CreateReturn (?info: FetchResponseInfo) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'spanOpen', ...$0 })")>]
+                    static member CreateSpanOpen (name: string, spanId: string, ?info: U3<Attributes, FetchEventInfo, JsRpcEventInfo>) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+                    static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, ?errorInfo: TailStreamErrorInfo option[]) : Item = jsNative
 
                 [<Interface>]
                 type Item2 =

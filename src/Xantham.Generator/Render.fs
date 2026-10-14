@@ -1068,6 +1068,39 @@ let private caseDocLines (case: FsTaggedCase) =
                     yield $"    /// </param>"
         ]
 
+/// The `Create` overload of a tagged case: the non-literal fields as parameters, required ones
+/// first, with the tag and the literal fields written into the object.
+let private caseCreate (decl: FsTaggedUnionDecl) (case: FsTaggedCase) : (string * FsCreateOverload) option =
+    case.Create
+    |> Option.map (fun memberName ->
+        let parameters =
+            case.Fields
+            |> List.filter (fun field -> field.Literal.IsNone)
+            |> List.map (fun field ->
+                ({
+                    Name = field.Name
+                    Optional =
+                        match field.Type with
+                        | FsOption _ -> true
+                        | _ -> false
+                    Rest = false
+                    Type = field.Type
+                }
+                : FsParam))
+
+        let required, optional = parameters |> List.partition (fun p -> not p.Optional)
+        let tag = case.CompiledName |> Option.defaultValue case.Name
+
+        let literals =
+            case.Fields
+            |> List.choose (fun field -> field.Literal |> Option.map (fun value -> field.Name, value))
+
+        memberName,
+        {
+            Parameters = required @ optional
+            Literals = (decl.Tag, LitString tag) :: literals
+        })
+
 /// A tagged union (D4, §4.5(2)). `RequireQualifiedAccess` for the same reason the StringEnum
 /// emission takes it: one generated module holds every declaration a package has, and bare
 /// case names collide across unions - and here with the member interfaces the cases carry.
@@ -1091,6 +1124,15 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
             match case.CompiledName with
             | Some tag -> yield $"    | [<CompiledName({stringLit tag})>] {ident case.Name}{carries}"
             | None -> yield $"    | {ident case.Name}{carries}"
+
+        for case in decl.Cases do
+            match caseCreate decl case with
+            | Some(memberName, overload) ->
+                yield "    " + createAttribute overload
+
+                yield
+                    $"    static member {ident memberName} {renderParamList overload.Parameters} : {declRef decl.Name decl.TypeParameters} = jsNative"
+            | None -> ()
     ]
 
 let private renderEnum (decl: FsEnumDecl) =
@@ -2092,6 +2134,12 @@ let internal renderSourcesCustomized annotations raw (modules: GroupModule list)
                                         yield! exports (interface_.Name + ".") interface_.Statics
                                     | FsExports container ->
                                         yield! exports (container.Name + ".") (container.Members |> List.map _.Member)
+                                    | FsTaggedUnion union ->
+                                        for case in union.Cases do
+                                            match caseCreate union case with
+                                            | Some(memberName, overload) ->
+                                                yield! bound $"{union.Name}.{memberName}" overload.Parameters
+                                            | None -> ()
                                     | _ -> ()
 
                             for group in written do

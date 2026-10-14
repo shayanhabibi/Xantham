@@ -155,6 +155,8 @@ let findingsTests =
                     "DT.TaggedUnion DT002 exact"
                     "DT.TagValueShared DT003 ergonomic"
                     "DT.ArmsMergedOnSharedTag DT004 ergonomic"
+                    "DT.CaseCreateSynthesized DT005 exact"
+                    "DT.CaseCreateNameTaken DT006 ergonomic"
                     "SY.InstantiationNamedOnce SY001 exact"
                     "SY.HoistArgumentsNotRecovered SY002 widened"
                     "SY.IntersectionOperandNotHoisted SY003 widened"

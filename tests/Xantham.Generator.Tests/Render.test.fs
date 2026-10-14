@@ -263,8 +263,9 @@ let renderTests =
                               Cases =
                                 [ { Name = "Circle"
                                     CompiledName = Some "circle"
-                                    Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsFloat; Literal = None } ] }
-                                  { Name = "Blank"; CompiledName = None; Fields = [] } ] } ] }
+                                    Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsFloat; Literal = None } ]
+                                    Create = None }
+                                  { Name = "Blank"; CompiledName = None; Fields = []; Create = None } ] } ] }
 
             let source = renderAll model |> Map.find "TestPkg.fs"
 
@@ -294,7 +295,8 @@ let renderTests =
                       Cases =
                         [ { Name = "Circle"
                             CompiledName = Some "circle"
-                            Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ] } ] }
+                            Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]
+                            Create = None } ] }
 
             let model =
                 { baseModel with
@@ -328,8 +330,9 @@ let renderTests =
                                     Fields =
                                       [ field "channel" "" (Some(LitString "bus"))
                                         field "at" "When it started." None
-                                        field "note" "" None ] }
-                                  { Name = "Stop"; CompiledName = Some "stop"; Fields = [ field "reason" "" None ] } ] } ] }
+                                        field "note" "" None ]
+                                    Create = None }
+                                  { Name = "Stop"; CompiledName = Some "stop"; Fields = [ field "reason" "" None ]; Create = None } ] } ] }
 
             let source = renderAll model |> Map.find "TestPkg.fs"
 
@@ -347,6 +350,45 @@ let renderTests =
                 "a literal field carries its TypeScript type"
 
             Expect.isFalse (source.Contains "<param name=\"reason\">") "a case with no field text carries no doc"
+
+        testCase "a tagged case with an optional or literal field has a Create" <| fun _ ->
+            let field name ty literal : FsTaggedField =
+                { Name = name; Docs = ""; Tags = []; Type = ty; Literal = literal }
+
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsTaggedUnion
+                            { Name = "Signal"
+                              Docs = ""
+                              Tags = []
+                              Order = None
+                              TypeParameters = []
+                              Tag = "verb"
+                              Cases =
+                                [ { Name = "Start"
+                                    CompiledName = Some "start"
+                                    Fields = [ field "channel" FsString (Some(LitString "bus")); field "at" FsFloat None ]
+                                    Create = Some "CreateStart" }
+                                  { Name = "Stop"
+                                    CompiledName = Some "stop"
+                                    Fields = [ field "reason" (FsOption FsString) None; field "code" FsFloat None ]
+                                    Create = Some "CreateStop" }
+                                  { Name = "Halt"; CompiledName = Some "halt"; Fields = []; Create = None } ] } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                "    [<ParamObject; Emit(\"({ verb: 'start', channel: 'bus', ...$0 })\")>]\n    static member CreateStart (at: float) : Signal = jsNative"
+                "the tag and literal fields are written, the rest bound"
+
+            Expect.stringContains
+                source
+                "    static member CreateStop (code: float, ?reason: string) : Signal = jsNative"
+                "required parameters first, optional ones omittable"
+
+            Expect.isFalse (source.Contains "CreateHalt") "a case without the field kinds has no Create"
 
         testCase "type variables and applications print in F# order" <| fun _ ->
             Expect.equal (Render.printType (FsTypeVar "T")) "'T" "the tick is the renderer's"

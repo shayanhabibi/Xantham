@@ -100,11 +100,50 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                     Literal = literal
                                                                 })
 
+                                                        let wantsCreate =
+                                                            fields
+                                                            |> List.exists (fun field ->
+                                                                field.Literal.IsSome
+                                                                || (match field.Type with
+                                                                    | FsOption _ -> true
+                                                                    | _ -> false))
+
+                                                        let createName = $"Create{caseName}"
+                                                        let symbol = $"{name}.{caseName}"
+
+                                                        let create =
+                                                            if not wantsCreate then
+                                                                None
+                                                            elif List.contains createName caseNames then
+                                                                findings <-
+                                                                    findings
+                                                                    @ [
+                                                                        Finding.make
+                                                                            symbol
+                                                                            (DetectTaggedUnions.CaseCreateNameTaken
+                                                                                createName)
+                                                                    ]
+
+                                                                None
+                                                            else
+                                                                findings <-
+                                                                    findings
+                                                                    @ [
+                                                                        Finding.make
+                                                                            symbol
+                                                                            (DetectTaggedUnions.CaseCreateSynthesized
+                                                                                createName)
+                                                                    ]
+
+                                                                Some createName
+
+
                                                         {
                                                             Name = caseName
                                                             CompiledName =
                                                                 (if value = caseName then None else Some value)
                                                             Fields = fields
+                                                            Create = create
                                                         })
                                                     tagged
                                                     caseNames
