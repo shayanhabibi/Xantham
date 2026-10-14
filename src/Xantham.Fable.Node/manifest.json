@@ -33,16 +33,16 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 2343,
+      "total": 2365,
       "ergonomic": 2226,
-      "widened": 117
+      "widened": 139
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 26825,
+      "total": 26833,
       "exact": 377,
       "ergonomic": 22658,
-      "widened": 3790
+      "widened": 3798
     },
     {
       "pass": "SA - shape-aliases",

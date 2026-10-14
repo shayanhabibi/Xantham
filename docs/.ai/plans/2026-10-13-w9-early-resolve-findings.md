@@ -188,6 +188,12 @@ finding and `type-fest` moves two manifest-only findings. The Node delta (130 `I
 `xantham.json` sets the flag and Node is regenerated. Adopting the flag for Node at
 integration, or accepting W9 as a findings record only, is a lead decision.
 
+**Adopted for Node (2026-10-14, #151).** `src/Xantham.Fable.Node/xantham.json` sets the flag,
+and the committed Node binding pins the delta. TR045 falls from 224 to 93: all 130 `InstanceType`
+sites, plus `MockFunctionCall`'s `Args` default (`F extends (...args: infer Y) => any ? Y`),
+which reads `obj[]` at `F extends Function`. TR068 rises from 0 to 160 over 56 symbols, and
+symbol tiers do not move. The binding compiles.
+
 Follow-ups this experiment surfaced, out of W9's scope:
 
 - `TR018` intersections with a conditional operand (`res: InstanceType<Response> & {…}`, 3 lab
