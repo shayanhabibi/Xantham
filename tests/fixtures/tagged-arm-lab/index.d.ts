@@ -90,10 +90,19 @@ export type Job =
 type Hello = { kind: "hello"; meta: { at: number } };
 export type Greeting = Hello | { kind: "bye" };
 
-// An exclusive-folded union merged with a namespace: the namespace's members are API, read or not.
+// An exclusive-folded union whose arms repeat an inline member: the fold reads the first arm's
+// declaration, and the second arm's copy is read by no declaration left.
 export type Pick =
     | { meta: { id: string }; a: number; b?: never }
     | { meta: { id: string }; b: string; a?: never };
-export namespace Pick {
-    export interface Extra { note: string }
-}
+
+// A namespace member merged under an exclusive-folded union is API, read or not. A top-level
+// interface takes the bare name, so the member nests under the folded union, and the fold drops
+// the call signature and index signature that read it.
+export interface Extra { other: number }
+export type T1 = { (e: T1.Extra): void; a: number; b?: never } | { b: string; a?: never };
+export namespace T1 { export interface Extra { note: string } }
+
+export interface Idx { other: number }
+export type T2 = { [key: string]: T2.Idx | number; a: number; b?: never } | { b: string; a?: never };
+export namespace T2 { export interface Idx { note: string } }

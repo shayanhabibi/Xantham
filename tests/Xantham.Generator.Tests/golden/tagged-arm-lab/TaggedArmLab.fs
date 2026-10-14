@@ -180,6 +180,36 @@ type Pick =
     [<ParamObject; Emit("$0")>]
     static member Create (meta: Pick.Meta, b: string) : Pick = jsNative
 
+[<Interface>]
+type Extra =
+    abstract other: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (other: float) : Extra = jsNative
+
+[<Interface>]
+type T1 =
+    abstract a: float option with get, set
+    abstract b: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (a: float) : T1 = jsNative
+    [<ParamObject; Emit("$0")>]
+    static member Create (b: string) : T1 = jsNative
+
+[<Interface>]
+type Idx =
+    abstract other: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (other: float) : Idx = jsNative
+
+[<Interface>]
+type T2 =
+    abstract a: float option with get, set
+    abstract b: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (a: float) : T2 = jsNative
+    [<ParamObject; Emit("$0")>]
+    static member Create (b: string) : T2 = jsNative
+
 module Choice =
     [<Interface>]
     type Meta =
@@ -221,6 +251,20 @@ module Shelf3 =
     type Size =
         | [<CompiledName("l")>] L
         | [<CompiledName("xl")>] Xl
+
+module T1 =
+    [<Interface>]
+    type Extra =
+        abstract note: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (note: string) : Extra = jsNative
+
+module T2 =
+    [<Interface>]
+    type Idx =
+        abstract note: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (note: string) : Idx = jsNative
 
 module Task =
     module Cases =

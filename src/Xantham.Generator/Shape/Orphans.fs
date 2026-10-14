@@ -148,6 +148,17 @@ let private armRoots (model: ShapeModel) (arms: Set<string>) : string list =
 
     unionRoots @ [ for arm in arms -> $"{arm}." ]
 
+/// The declaration names the generator minted for an inline shape. An author-written name, such as
+/// a namespace member merged under a union, is API whether or not a declaration reads it.
+let private mintedNames (model: ShapeModel) : Set<string> =
+    model.DeclNames
+    |> Map.toList
+    |> List.choose (fun (typeId, name) ->
+        match Map.tryFind typeId model.Types with
+        | Some facts when isAnonymousArm facts -> Some name
+        | _ -> None)
+    |> Set.ofList
+
 /// The name a declaration is written under; `None` for the `Exports` container.
 let private declName (decl: FsDecl) =
     match decl with
@@ -162,11 +173,12 @@ let private declName (decl: FsDecl) =
     | FsExports _ -> None
 
 /// The declaration set with every unread delegate, unread tagged-union arm interface and unread
-/// declaration under an arm root removed, and the names removed. A declaration whose removal
+/// generator-minted declaration under an arm root removed, and the names removed. A declaration whose removal
 /// would leave a harvested export unrepresented is retained. Dropping one declaration can leave
 /// another unread, so the removal repeats until the set is stable.
 let rec private prune
     (arms: Set<string>)
+    (minted: Set<string>)
     (roots: string list)
     (exports: string list)
     (dropped: string list)
@@ -182,6 +194,7 @@ let rec private prune
             | FsInterface i, _ when Set.contains i.Name arms && not (Set.contains i.Name read) -> Some i.Name
             | _, Some name when
                 not (Set.contains name read)
+                && Set.contains name minted
                 && roots |> List.exists (fun root -> name.StartsWith root)
                 ->
                 Some name
@@ -209,7 +222,7 @@ let rec private prune
     else
         decls
         |> List.filter (fun decl -> declName decl |> Option.forall (fun name -> not (Set.contains name unread)))
-        |> prune arms roots exports (dropped @ List.ofSeq unread)
+        |> prune arms minted roots exports (dropped @ List.ofSeq unread)
 
 /// The name every harvested export is looked up under: the qualified name `name-exports`
 /// assigned, falling back to the bare export name for a value export.
@@ -242,7 +255,7 @@ let dropOrphanDelegates: Pass<ShapeModel> =
                         |> Set.ofList
 
                     let decls, dropped =
-                        prune arms (armRoots model arms) (exportNames ctx model) [] model.Decls
+                        prune arms (mintedNames model) (armRoots model arms) (exportNames ctx model) [] model.Decls
 
                     let model = { model with Decls = decls }
 

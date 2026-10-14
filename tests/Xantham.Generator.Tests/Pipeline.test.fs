@@ -4715,12 +4715,10 @@ let pipelineTests =
                       Expect.stringContains source "type Hello =" "an alias-named arm stays"
                       Expect.stringContains source "Hello.Meta" "with its nested declaration under its own name"
 
-                      // `Pick.Extra` is not emitted at all today (the merged namespace member is never
-                      // harvested); the guard is that the prune never reports it as dropped.
-                      Expect.equal
-                          (messagesFor "Pick.Extra" "DD003")
-                          []
-                          "a namespace member merged under an exclusive-folded union is not pruned"
+                      for nested in [ "T1.Extra"; "T2.Idx" ] do
+                          Expect.equal (messagesFor nested "DD003") [] $"{nested}: a namespace member under an exclusive fold is not pruned"
+
+                      Expect.stringContains source "abstract note: string" "and is declared"
 
                       Expect.equal
                           (messagesFor "Pick.Meta2" "DD003")
