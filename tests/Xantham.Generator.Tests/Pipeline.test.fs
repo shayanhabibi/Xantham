@@ -2062,6 +2062,21 @@ let pipelineTests =
                           entry.Contains "inherit GlobalThis"
                           |> Flip.Expect.equal "WindowLike.self retains its program-global intersection operand" true
 
+                      testCase "compiler-lib ownership writes global functions as GlobalThis methods (W7.3)" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "compiler-lib-ownership-lab")) package)
+
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          Expect.stringContains entry "abstract pick<'T>: items: 'T[] -> 'T" "a generic global function"
+                          Expect.stringContains entry "abstract inspect: items: Item[] -> Brief" "a global function"
+                          Expect.stringContains
+                              entry
+                              "abstract parseInt: string: string * ?radix: float -> float"
+                              "a lib global function is a method too"
+                          Expect.stringContains entry "static member pick<'T>" "the global export is unchanged"
+
                       // Fable.Promise and Async.AwaitPromise are written against JS.Promise, so a
                       // shipped compiler lib writes its promises the way consumers do.
                       testCase "compiler-lib ownership writes Promise and PromiseLike as JS.Promise" <| fun _ ->
@@ -5574,6 +5589,115 @@ let pipelineTests =
 
                       for parameter in [ "?mode"; "flag: bool"; "?optional" ] do
                           Expect.stringContains create parameter $"{parameter} stays a parameter" ])
+
+        // W7 (#138): type parameters in scope. A hoisted delegate takes its owner's parameters,
+        // namespace functions are methods, and a return-only method parameter keeps its
+        // constraint where the written constraint inherits the use site's bound.
+        let typeScopeLab = handFixture "type-scope-lab"
+        let typeScopeConfig = handConfig typeScopeLab
+
+        yield!
+            fixtureTests "type-scope-lab" typeScopeLab typeScopeConfig (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate typeScopeConfig package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                let sitesOf (rendered: RenderModel) key =
+                    rendered.Findings
+                    |> List.filter (fun f -> f.Key = key)
+                    |> List.map _.Symbol
+                    |> List.distinct
+                    |> List.sort
+
+                [ testCase "type-scope-lab: a hoisted delegate takes its owner's type parameters (W7.1, W7.2)" <| fun _ ->
+                      let rendered = generate ()
+                      let source = sourceOf rendered
+
+                      Expect.stringContains source "type Visit<'T when 'T :> Shape> =" "an interface constraint is repeated"
+                      Expect.stringContains
+                          source
+                          "delegate of cell: float * index: float * grid: Grid<'T> -> unit"
+                          "the owner's declared form reads the delegate's parameter"
+                      Expect.stringContains source "abstract each: visit: Grid.Each.Visit<'T> -> unit" "the owner applies it"
+                      Expect.stringContains source "type Visit<'B> =" "an erased-union constraint stays off the delegate"
+                      Expect.stringContains source "store: Store<'B> -> bool" "the union-constrained parameter is in scope"
+                      Expect.stringContains source "abstract each: visit: Store.Each.Visit<'B> -> unit" "the owner applies it"
+
+                      Expect.equal
+                          (sitesOf rendered "TP002" |> List.filter (fun s -> s.StartsWith "Store"))
+                          [ "Store"; "Store.Each.Visit" ]
+                          "the owner and the delegate drop the union constraint alike"
+
+                  testCase "type-scope-lab: namespace functions are methods (W7.3)" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "abstract identity<'T>: value: 'T -> 'T" "a generic namespace function"
+                      Expect.stringContains
+                          source
+                          "abstract measure<'T when 'T :> Shape>: shape: 'T -> 'T"
+                          "a constrained namespace function"
+                      Expect.stringContains
+                          source
+                          "abstract relabel<'T when 'T :> Shape>: shape: 'T * label: string -> 'T"
+                          "a re-exported namespace function"
+                      Expect.stringContains source "abstract version: string" "a constant stays a property"
+
+                      let lines = source.Split '\n'
+
+                      let formatLine =
+                          lines |> Array.tryFind (fun line -> line.TrimStart().StartsWith "abstract format")
+
+                      Expect.isSome formatLine "a function-typed constant stays a property"
+                      Expect.isFalse (formatLine.Value.Contains "<'T>") "the constant's member carries no type parameter"
+
+                      for name in [ "identity"; "measure"; "relabel" ] do
+                          Expect.isFalse
+                              (lines
+                               |> Array.exists (fun line ->
+                                   line.TrimStart().StartsWith $"abstract {name}" && line.TrimEnd().EndsWith "with get, set"))
+                              $"{name} is not a settable property"
+
+                      Expect.stringContains
+                          source
+                          "static member find<'T when 'T :> Shape>"
+                          "a class's merged namespace function is a static method"
+
+                      let taggedLine =
+                          lines |> Array.tryFind (fun line -> line.TrimStart().StartsWith "abstract tagged:")
+
+                      Expect.isSome taggedLine "a function merged with a namespace is a member"
+                      Expect.stringContains taggedLine.Value "with get, set" "a function merged with a namespace stays a property"
+                      Expect.stringContains
+                          source
+                          "abstract strip: value: string -> string"
+                          "a function inside the merged namespace is a method"
+
+                  testCase "type-scope-lab: a return-only method parameter keeps its constraint (W7.4)" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "abstract queryAll<'E when 'E :> TaggedEntry>: selectors: string -> EntryList<'E>"
+                          "the written constraint inherits the bound"
+                      Expect.stringContains
+                          source
+                          "abstract queryLike: selectors: string -> EntryList<Entry>"
+                          "a structural-only bound widens to the constraint"
+
+                  testCase "type-scope-lab: NoInfer reads the owner's parameter" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "initialValue: JS.NoInfer<'T> option" "the hoisted options bind 'T"
+
+                  testCase "type-scope-lab: out-of-scope findings remain only at the negatives" <| fun _ ->
+                      let rendered = generate ()
+
+                      Expect.equal (sitesOf rendered "TR012") [] "every hoisted parameter is in scope"
+                      Expect.equal
+                          (sitesOf rendered "TR013")
+                          [ "NoInfer"; "Ns.format(value)" ]
+                          "the alias declaration and the function-typed constant"
+                      Expect.equal (sitesOf rendered "TR027") [ "Container.queryLike()" ] "the structural bound"
+                      Expect.equal (sitesOf rendered "TP006") [ "Container.queryLike" ] "the structural bound" ])
     ]
 
 [<Tests>]

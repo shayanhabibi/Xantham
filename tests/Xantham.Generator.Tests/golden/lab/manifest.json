@@ -4,15 +4,15 @@
   "module": "PhaseBLab",
   "counts": {
     "exact": 19,
-    "ergonomic": 13,
+    "ergonomic": 12,
     "widened": 1,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 2,
-      "exact": 2
+      "total": 1,
+      "exact": 1
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -26,8 +26,8 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 4,
-      "ergonomic": 4
+      "total": 3,
+      "ergonomic": 3
     },
     {
       "pass": "SI - shape-interfaces",
@@ -52,9 +52,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 16,
+      "total": 18,
       "exact": 2,
-      "ergonomic": 14
+      "ergonomic": 16
     }
   ]
 }

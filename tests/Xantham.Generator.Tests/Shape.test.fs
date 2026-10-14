@@ -6090,3 +6090,169 @@ let literalKeyedMethodTests =
             | [ FsInterface d ] -> Expect.equal d.Members.Length 1 "one survivor"
             | other -> failtest $"unexpected {other}"
     ]
+
+[<Tests>]
+let typeParametersInScopeTests =
+    let named (id: int) (name: string) =
+        { Build.facts (Build.typeResponse id TypeFlags.Object) with
+            SymbolName = Some((fun value -> value * uom<symbolName>) name) }
+
+    let parameterMember (id: int) (name: string) (typeId: int) =
+        Build.resolvedMember (Build.symbol id name SymbolFlags.FunctionScopedVariable) typeId
+
+    // `interface Grid<T> { each(visit: (cell: number, index: number, grid: Grid<T>) => void) }`:
+    // Grid 40 is the declared form over T 20, written as its own argument list, and the hoisted
+    // delegate 42 reads it.
+    let gridModel () =
+        let grid =
+            { named 40 "Grid" with
+                Response = { Build.typeResponse 40 TypeFlags.Object with Target = ValueSome 40; TypeParameters = ValueSome [| 20 |] }
+                TypeArguments = [ 20<typeId> ] }
+
+        let visit =
+            { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
+                CallSignatures =
+                    [ Build.signature [ parameterMember 401 "cell" 2; parameterMember 402 "index" 2; parameterMember 403 "grid" 40 ] 4 ] }
+
+        { Build.shapeModel (grid :: visit :: typeParam 20 "T" :: Build.primitives) with
+            DeclNames = Map.ofList [ 40<typeId>, "Grid"; 42<typeId>, "Grid.Each.Visit" ] }
+
+    testList "type parameters in scope" [
+        testCase "a hoisted delegate reading its owner's declared form binds the owner's parameter" <| fun _ ->
+            let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams (gridModel ())
+
+            Expect.equal (Map.tryFind 42<typeId> bound.DeclParams) (Some [ 20<typeId> ]) "T is free in the delegate"
+
+            let reference, findings =
+                Spec.typeRef Build.context { bound with TypeVars = Map.ofList [ 20<typeId>, "T" ] } None "x" 42<typeId>
+
+            Expect.equal reference (FsApp("Grid.Each.Visit", [ FsTypeVar "T" ])) "applied back in the owner's scope"
+            Expect.isEmpty findings "an application over an in-scope variable is exact"
+
+        testCase "a hoisted delegate from a widened group binds its owner's parameter too" <| fun _ ->
+            // Node augments lib `BigInt64Array<TArrayBuffer>`: the reduce callback sits in a
+            // `lib.*.d.ts` file, a widened group, and is still declared by the run.
+            let model = gridModel ()
+
+            let model =
+                { model with
+                    Types = model.Types |> Map.add 42<typeId> { model.Types[42<typeId>] with Origin = CompilerLib } }
+
+            let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
+
+            Expect.equal (Map.tryFind 42<typeId> bound.DeclParams) (Some [ 20<typeId> ]) "T is free in the delegate"
+
+        testCase "a delegate reading a concrete instantiation binds nothing" <| fun _ ->
+            let model = gridModel ()
+
+            let numbers =
+                { named 41 "Grid" with
+                    Response = { Build.typeResponse 41 TypeFlags.Object with Target = ValueSome 40 }
+                    TypeArguments = [ 2<typeId> ] }
+
+            let visit =
+                { Build.facts (Build.typeResponse 43 TypeFlags.Object) with
+                    CallSignatures = [ Build.signature [ parameterMember 404 "grid" 41 ] 4 ] }
+
+            let model =
+                { model with
+                    Types = model.Types |> Map.add 41<typeId> numbers |> Map.add 43<typeId> visit
+                    DeclNames = model.DeclNames |> Map.add 41<typeId> "Grid" |> Map.add 43<typeId> "Visit" }
+
+            let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
+
+            Expect.equal (Map.tryFind 43<typeId> bound.DeclParams) None "nothing free"
+
+        testCase "a NoInfer operand is read and an unshadowed alias identity is not" <| fun _ ->
+            [ "NoInfer"; "FirstOf" ]
+            |> List.map (fun alias ->
+                let access =
+                    { Build.facts (Build.typeResponse 42 TypeFlags.IndexedAccess) with
+                        AliasIdentity = Some((fun value -> value * uom<symbolName>) alias, 20<typeId>) }
+
+                let options =
+                    { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                        Members = [ Build.resolvedMember (Build.symbol 401 "initialValue" SymbolFlags.Property) 42 ] }
+
+                let model =
+                    { Build.shapeModel (options :: access :: typeParam 20 "T" :: Build.primitives) with
+                        DeclNames = Map.ofList [ 40<typeId>, "Options" ] }
+
+                let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
+                Map.tryFind 40<typeId> bound.DeclParams)
+            |> Flip.Expect.equal "NoInfer is rendered over its operand; another alias is not" [ Some [ 20<typeId> ]; None ]
+
+        testCase "a variable whose written constraint inherits the bound is applied as written" <| fun _ ->
+            // `ListOf<TNode extends Node>` applied at `E extends Element` (Element inherits Node)
+            // and at `F extends EntryLike` (structural only).
+            let withConstraint id name bound =
+                { typeParam id name with Constraint = Some(bound * uom<typeId>) }
+
+            let element = { named 51 "Element" with BaseTypes = [ 50<typeId> ] }
+
+            let model =
+                { Build.shapeModel
+                      (named 50 "Node"
+                       :: element
+                       :: named 55 "EntryLike"
+                       :: withConstraint 53 "TNode" 50
+                       :: withConstraint 54 "E" 51
+                       :: withConstraint 56 "F" 55
+                       :: Build.primitives) with
+                    DeclNames = Map.ofList [ 50<typeId>, "Node"; 51<typeId>, "Element"; 55<typeId>, "EntryLike" ]
+                    TypeVars = Map.ofList [ 54<typeId>, "E"; 56<typeId>, "F" ] }
+
+            let inherited, inheritedFindings =
+                Spec.appliedRefTo Build.context model None "x" "ListOf" [ 53<typeId> ] [ 54<typeId> ]
+
+            Expect.equal inherited (FsApp("ListOf", [ FsTypeVar "E" ])) "Element inherits Node"
+            Expect.isEmpty inheritedFindings "exact"
+
+            let structural, structuralFindings =
+                Spec.appliedRefTo Build.context model None "x" "ListOf" [ 53<typeId> ] [ 56<typeId> ]
+
+            Expect.equal structural (FsApp("ListOf", [ FsNamed "Node" ])) "EntryLike inherits nothing"
+            Expect.equal (structuralFindings |> List.map _.Key) [ "TR027" ] "written as the bound"
+
+        testCase "a function declaration is a method and a function-typed constant a property" <| fun _ ->
+            let identity =
+                { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature [ parameterMember 403 "value" 20 ] 20 with
+                              TypeParameters = [ 20<typeId> ] } ] }
+
+            let functionMember =
+                { Build.resolvedMember (Build.symbol 401 "identity" SymbolFlags.Function) 42 with
+                    ResolvesToFunction = true }
+
+            let constantMember = Build.resolvedMember (Build.symbol 402 "format" SymbolFlags.BlockScopedVariable) 42
+            let version = Build.resolvedMember (Build.symbol 404 "version" SymbolFlags.BlockScopedVariable) 1
+
+            let ns =
+                { named 40 "Ns" with
+                    Members = [ functionMember; constantMember; version ] }
+
+            let model =
+                { Build.shapeModel (ns :: identity :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 40<typeId>, "Ns" ] }
+
+            let members, findings = Spec.shapeMembers Build.context model Set.empty "Ns" ns
+
+            let shapes =
+                members
+                |> List.map (function
+                    | FsMethod m -> "method", m.Name, m.TypeParameters |> List.map _.Name
+                    | FsProperty p -> "property", p.Name, []
+                    | _ -> "other", "", [])
+
+            Expect.equal
+                shapes
+                [ "method", "identity", [ "T" ]; "property", "format", []; "property", "version", [] ]
+                "the declaration kind decides"
+
+            Expect.isTrue
+                (findings
+                 |> List.filter (fun f -> f.Key = "TR013")
+                 |> List.forall (fun f -> f.Symbol.StartsWith "Ns.format"))
+                "only the constant loses its type parameter"
+    ]

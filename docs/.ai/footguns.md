@@ -229,6 +229,18 @@ opens a block, so `{ kind: 'method', ...$0 }` fails with `SyntaxError: Unexpecte
 into an Emit template escapes `$`, `{` and `}` as `\x24`, `\x7B` and `\x7D`, because Fable's Emit
 macro reads them as argument holes; `Render.jsString` does both.
 
+**A declared form's arguments are its enclosing declaration's parameters.** Written inside
+`interface Grid<T>`, `Grid<T>` is the generic target itself (`ownArguments` non-empty), not an
+instantiation. `freeTypeParams` reads a named declaration's arguments in both cases; a walk that
+skips the declared form leaves a hoisted delegate without the owner's `'T`, and every use of it
+widens with `TR012`/`TR013` (188 typed-array delegates in Core.TS before W7).
+
+**A namespace member's symbol is an `Alias` when it is re-exported.** `export { f } from "./f"`
+inside a namespace object gives `ResolvedMember.Symbol` the `Alias` flag, not `Function`.
+Decide method form on `ResolvedMember.ResolvesToFunction` through `Spec.emitsAsMethod`, never on
+`SymbolFlags` alone. `Customization/Semantics.fs` classifies through the same predicate
+(`Spec.emitsAsMethodWith`), so a customization contract and the rendered member agree.
+
 **A finding needs a row in `FindingCodes.table`, not just a registered union.** Registering the
 kind in `FindingCatalogue` is enough to compile and enough for the pass to run; the missing code
 only throws at manifest render, from `Finding.get_Key`, which reads as a render bug rather than a

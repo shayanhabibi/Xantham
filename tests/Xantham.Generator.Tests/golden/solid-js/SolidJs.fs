@@ -756,7 +756,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'R> (fetcher: Func<bool, CreateResource.Fetcher.Info2<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item2<'R, 'T> = jsNative
+    static member createResource<'T, 'R> (fetcher: Func<bool, CreateResource.Fetcher.Info2<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2<'T>) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item2<'R, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -820,7 +820,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S, 'R> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, CreateResource.Fetcher.Info3<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options4<'S>) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item4<'R, 'T> = jsNative
+    static member createResource<'T, 'S, 'R> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, CreateResource.Fetcher.Info3<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options4<'S, 'T>) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item4<'R, 'T> = jsNative
     /// <summary>
     /// Creates a reactive computation that only runs and notifies the reactive context when the browser is idle
     /// <code lang="typescript">
@@ -1246,15 +1246,15 @@ module CreateResource =
         static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options.OnHydrated<'I, 'T>) : Options<'I, 'T> = jsNative
 
     [<Interface>]
-    type Options2 =
-        abstract initialValue: JS.NoInfer<obj> option with get, set
+    type Options2<'T> =
+        abstract initialValue: JS.NoInfer<'T> option with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
-        abstract storage: (JS.NoInfer<obj> option -> ((unit -> JS.NoInfer<obj> option) * (obj[] -> unit))) option with get, set
-        abstract onHydrated: CreateResource.Options2.OnHydrated option with get, set
+        abstract storage: (JS.NoInfer<'T> option -> ((unit -> JS.NoInfer<'T> option) * (obj[] -> unit))) option with get, set
+        abstract onHydrated: CreateResource.Options2.OnHydrated<'T> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?initialValue: JS.NoInfer<obj>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (JS.NoInfer<obj> option -> ((unit -> JS.NoInfer<obj> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options2.OnHydrated) : Options2 = jsNative
+        static member Create (?initialValue: JS.NoInfer<'T>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (JS.NoInfer<'T> option -> ((unit -> JS.NoInfer<'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options2.OnHydrated<'T>) : Options2<'T> = jsNative
 
     [<Interface>]
     type Options3<'I, 'T, 'S> =
@@ -1268,15 +1268,15 @@ module CreateResource =
         static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T>) : Options3<'I, 'T, 'S> = jsNative
 
     [<Interface>]
-    type Options4<'S> =
-        abstract initialValue: JS.NoInfer<obj> option with get, set
+    type Options4<'S, 'T> =
+        abstract initialValue: JS.NoInfer<'T> option with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
-        abstract storage: (JS.NoInfer<obj> option -> ((unit -> JS.NoInfer<obj> option) * (obj[] -> unit))) option with get, set
-        abstract onHydrated: CreateResource.Options4.OnHydrated<'S> option with get, set
+        abstract storage: (JS.NoInfer<'T> option -> ((unit -> JS.NoInfer<'T> option) * (obj[] -> unit))) option with get, set
+        abstract onHydrated: CreateResource.Options4.OnHydrated<'S, 'T> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?initialValue: JS.NoInfer<obj>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (JS.NoInfer<obj> option -> ((unit -> JS.NoInfer<obj> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options4.OnHydrated<'S>) : Options4<'S> = jsNative
+        static member Create (?initialValue: JS.NoInfer<'T>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (JS.NoInfer<'T> option -> ((unit -> JS.NoInfer<'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options4.OnHydrated<'S, 'T>) : Options4<'S, 'T> = jsNative
 
     module Fetcher =
         [<Interface>]
@@ -1319,14 +1319,14 @@ module CreateResource =
                 static member Create (?value: U2<'I, 'T>) : Info<'I, 'T> = jsNative
 
     module Options2 =
-        type OnHydrated = delegate of k: bool option * info: CreateResource.Options2.OnHydrated.Info -> unit
+        type OnHydrated<'T> = delegate of k: bool option * info: CreateResource.Options2.OnHydrated.Info<'T> -> unit
 
         module OnHydrated =
             [<Interface>]
-            type Info =
-                abstract value: JS.NoInfer<obj> option with get, set
+            type Info<'T> =
+                abstract value: JS.NoInfer<'T> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?value: JS.NoInfer<obj>) : Info = jsNative
+                static member Create (?value: JS.NoInfer<'T>) : Info<'T> = jsNative
 
     module Options3 =
         type OnHydrated<'S, 'I, 'T> = delegate of k: 'S option * info: CreateResource.Options3.OnHydrated.Info<'I, 'T> -> unit
@@ -1339,14 +1339,14 @@ module CreateResource =
                 static member Create (?value: U2<'I, 'T>) : Info<'I, 'T> = jsNative
 
     module Options4 =
-        type OnHydrated<'S> = delegate of k: 'S option * info: CreateResource.Options4.OnHydrated.Info -> unit
+        type OnHydrated<'S, 'T> = delegate of k: 'S option * info: CreateResource.Options4.OnHydrated.Info<'T> -> unit
 
         module OnHydrated =
             [<Interface>]
-            type Info =
-                abstract value: JS.NoInfer<obj> option with get, set
+            type Info<'T> =
+                abstract value: JS.NoInfer<'T> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?value: JS.NoInfer<obj>) : Info = jsNative
+                static member Create (?value: JS.NoInfer<'T>) : Info<'T> = jsNative
 
     module Result =
         type Item<'R, 'I, 'T> =

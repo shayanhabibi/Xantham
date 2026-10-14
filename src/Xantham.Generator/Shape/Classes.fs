@@ -131,7 +131,7 @@ let shapeClasses: Pass<ShapeModel> =
                         let binding = staticBinding (bindingOf export) key
 
                         let asMethod =
-                            if not (hasAny SymbolFlags.Method m.Symbol.Flags) then
+                            if not (emitsAsMethod model m) then
                                 None
                             else
                                 match Map.tryFind m.TypeId model.Types with

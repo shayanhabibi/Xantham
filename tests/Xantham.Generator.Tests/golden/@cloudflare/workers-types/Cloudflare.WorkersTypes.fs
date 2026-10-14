@@ -297,8 +297,6 @@ type InstanceConstructor =
     [<EmitConstructor>]
     abstract Create: ``module``: obj * ?imports: JS.Record<string, JS.Record<string, U5<float, Fable.Core.TS.Es.Function, Global, Memory, Table>>> -> Instance
 
-type Instantiate = delegate of ``module``: obj * imports: JS.Record<string, JS.Record<string, U5<float, Fable.Core.TS.Es.Function, Global, Memory, Table>>> option -> JS.Promise<Instance>
-
 [<Interface>]
 type Memory =
     abstract buffer: Fable.Core.TS.Es.ArrayBuffer
@@ -387,10 +385,10 @@ type WebAssembly =
     abstract Memory: MemoryConstructor with get, set
     abstract Module: ModuleConstructor with get, set
     abstract Table: TableConstructor with get, set
-    abstract instantiate: Instantiate with get, set
-    abstract validate: (BufferSource -> bool) with get, set
+    abstract instantiate: ``module``: obj * ?imports: JS.Record<string, JS.Record<string, U5<float, Fable.Core.TS.Es.Function, Global, Memory, Table>>> -> JS.Promise<Instance>
+    abstract validate: bytes: BufferSource -> bool
     [<ParamObject; Emit("$0")>]
-    static member Create (CompileError: CompileErrorConstructor, RuntimeError: RuntimeErrorConstructor, Global: GlobalConstructor, Instance: InstanceConstructor, Memory: MemoryConstructor, Module: ModuleConstructor, Table: TableConstructor, instantiate: Instantiate, validate: (BufferSource -> bool)) : WebAssembly = jsNative
+    static member Create (CompileError: CompileErrorConstructor, RuntimeError: RuntimeErrorConstructor, Global: GlobalConstructor, Instance: InstanceConstructor, Memory: MemoryConstructor, Module: ModuleConstructor, Table: TableConstructor, instantiate: Func<obj, JS.Record<string, JS.Record<string, U5<float, Fable.Core.TS.Es.Function, Global, Memory, Table>>> option, JS.Promise<Instance>>, validate: (BufferSource -> bool)) : WebAssembly = jsNative
 
 type AbortControllerConstructor =
     [<EmitConstructor>]
@@ -25097,7 +25095,7 @@ module Cloudflare =
             member _.env
                 with get (): 'Env = jsNative
                 and set (_: 'Env): unit = jsNative
-            abstract run: ``event``: Cloudflare.Workers.WorkflowEntrypoint.Run.Event * step: Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowStep -> JS.Promise<obj>
+            abstract run: ``event``: Cloudflare.Workers.WorkflowEntrypoint.Run.Event<'T> * step: Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowStep -> JS.Promise<obj>
 
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -25259,14 +25257,14 @@ module Cloudflare =
         module WorkflowEntrypoint =
             module Run =
                 [<Interface>]
-                type Event =
+                type Event<'T> =
                     abstract payload: obj
                     abstract timestamp: Fable.Core.TS.Es.Date
                     abstract instanceId: string
                     abstract workflowName: string
                     abstract schedule: Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowCronSchedule option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (payload: obj, timestamp: Fable.Core.TS.Es.Date, instanceId: string, workflowName: string, ?schedule: Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowCronSchedule) : Event = jsNative
+                    static member Create (payload: obj, timestamp: Fable.Core.TS.Es.Date, instanceId: string, workflowName: string, ?schedule: Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowCronSchedule) : Event<'T> = jsNative
 
         module WorkflowRollbackContext =
             [<Interface>]

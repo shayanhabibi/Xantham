@@ -139,9 +139,9 @@ type Strict =
     abstract Assert: AssertConstructor with get, set
     abstract AssertionError: AssertionErrorConstructor with get, set
     abstract CallTracker: CallTrackerConstructor with get, set
-    abstract deepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
-    abstract deepEqual: Action<obj, obj, U2<string, exn> option> with get, set
-    abstract doesNotMatch: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
+    abstract deepStrictEqual<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
+    abstract deepEqual<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
+    abstract doesNotMatch: value: string * regExp: Fable.Core.TS.Es.RegExp * ?message: U2<string, exn> -> unit
 
     abstract doesNotReject:
         block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> * ?message: U2<string, exn> -> JS.Promise<unit>
@@ -164,14 +164,14 @@ type Strict =
         ?stackStartFn: Fable.Core.TS.Es.Function ->
             unit
 
-    abstract ifError: (obj -> unit) with get, set
-    abstract ``match``: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
-    abstract notDeepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
-    abstract notDeepEqual: Action<obj, obj, U2<string, exn> option> with get, set
-    abstract notStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
-    abstract notEqual: Action<obj, obj, U2<string, exn> option> with get, set
-    abstract ok: Action<obj, U2<string, exn> option> with get, set
-    abstract partialDeepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
+    abstract ifError: value: obj -> unit
+    abstract ``match``: value: string * regExp: Fable.Core.TS.Es.RegExp * ?message: U2<string, exn> -> unit
+    abstract notDeepStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
+    abstract notDeepEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
+    abstract notStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
+    abstract notEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
+    abstract ok: value: obj * ?message: U2<string, exn> -> unit
+    abstract partialDeepStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
 
     abstract rejects:
         block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> * ?message: U2<string, exn> -> JS.Promise<unit>
@@ -183,8 +183,8 @@ type Strict =
             JS.Promise<unit>
 
     abstract strict: Strict with get, set
-    abstract strictEqual: Action<obj, obj, U2<string, exn> option> with get, set
-    abstract equal: Action<obj, obj, U2<string, exn> option> with get, set
+    abstract strictEqual<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
+    abstract equal<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
     abstract throws: block: (unit -> obj) * ?message: U2<string, exn> -> unit
     abstract throws: block: (unit -> obj) * error: Assert.AssertPredicate * ?message: U2<string, exn> -> unit
 
@@ -301,7 +301,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: BigInt64Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: BigInt64Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -328,7 +328,8 @@ type BigInt64Array<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract filter:
-        predicate: BigInt64Array.Filter.Predicate * ?thisArg: obj -> BigInt64Array<Fable.Core.TS.Es.ArrayBuffer>
+        predicate: BigInt64Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            BigInt64Array<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
@@ -343,7 +344,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: BigInt64Array.Find.Predicate * ?thisArg: obj -> bigint option
+    abstract find: predicate: BigInt64Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> bigint option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -357,7 +358,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: BigInt64Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: BigInt64Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -369,7 +370,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: BigInt64Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: BigInt64Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -424,7 +425,8 @@ type BigInt64Array<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract map:
-        callbackfn: BigInt64Array.Map.Callbackfn * ?thisArg: obj -> BigInt64Array<Fable.Core.TS.Es.ArrayBuffer>
+        callbackfn: BigInt64Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj ->
+            BigInt64Array<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
@@ -449,7 +451,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: BigInt64Array.Reduce.Callbackfn -> bigint
+    abstract reduce: callbackfn: BigInt64Array.Reduce.Callbackfn<'TArrayBuffer> -> bigint
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -473,7 +475,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: BigInt64Array.Reduce.Callbackfn2 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: BigInt64Array.Reduce.Callbackfn2<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -497,7 +499,8 @@ type BigInt64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: BigInt64Array.ReduceRight.Callbackfn -> bigint
+    abstract reduceRight: callbackfn: BigInt64Array.ReduceRight.Callbackfn<'TArrayBuffer> -> bigint
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -521,7 +524,9 @@ type BigInt64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: BigInt64Array.ReduceRight.Callbackfn2 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: BigInt64Array.ReduceRight.Callbackfn2<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in the array.
     /// </summary>
@@ -550,7 +555,7 @@ type BigInt64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: BigInt64Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: BigInt64Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts the array.
     /// </summary>
@@ -636,7 +641,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: BigUint64Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: BigUint64Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -663,7 +668,8 @@ type BigUint64Array<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract filter:
-        predicate: BigUint64Array.Filter.Predicate * ?thisArg: obj -> BigUint64Array<Fable.Core.TS.Es.ArrayBuffer>
+        predicate: BigUint64Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            BigUint64Array<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
@@ -678,7 +684,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: BigUint64Array.Find.Predicate * ?thisArg: obj -> bigint option
+    abstract find: predicate: BigUint64Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> bigint option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -692,7 +698,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: BigUint64Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: BigUint64Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -704,7 +710,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: BigUint64Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: BigUint64Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Determines whether an array includes a certain element, returning true or false as appropriate.
     /// </summary>
@@ -759,7 +765,8 @@ type BigUint64Array<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract map:
-        callbackfn: BigUint64Array.Map.Callbackfn * ?thisArg: obj -> BigUint64Array<Fable.Core.TS.Es.ArrayBuffer>
+        callbackfn: BigUint64Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj ->
+            BigUint64Array<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
@@ -784,7 +791,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: BigUint64Array.Reduce.Callbackfn -> bigint
+    abstract reduce: callbackfn: BigUint64Array.Reduce.Callbackfn<'TArrayBuffer> -> bigint
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -808,7 +815,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: BigUint64Array.Reduce.Callbackfn2 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: BigUint64Array.Reduce.Callbackfn2<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -832,7 +839,8 @@ type BigUint64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: BigUint64Array.ReduceRight.Callbackfn -> bigint
+    abstract reduceRight: callbackfn: BigUint64Array.ReduceRight.Callbackfn<'TArrayBuffer> -> bigint
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -856,7 +864,9 @@ type BigUint64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: BigUint64Array.ReduceRight.Callbackfn2 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: BigUint64Array.ReduceRight.Callbackfn2<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in the array.
     /// </summary>
@@ -885,7 +895,7 @@ type BigUint64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: BigUint64Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: BigUint64Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts the array.
     /// </summary>
@@ -1783,7 +1793,7 @@ type Float32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Float32Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Float32Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -1810,7 +1820,8 @@ type Float32Array<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract filter:
-        predicate: Float32Array.Filter.Predicate * ?thisArg: obj -> Float32Array<Fable.Core.TS.Es.ArrayBuffer>
+        predicate: Float32Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            Float32Array<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
@@ -1825,7 +1836,7 @@ type Float32Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Float32Array.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Float32Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -1839,7 +1850,7 @@ type Float32Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Float32Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Float32Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -1851,7 +1862,7 @@ type Float32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Float32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Float32Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -1882,6 +1893,7 @@ type Float32Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -1894,7 +1906,10 @@ type Float32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Float32Array.Map.Callbackfn * ?thisArg: obj -> Float32Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Float32Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj ->
+            Float32Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -1918,7 +1933,7 @@ type Float32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -1942,7 +1957,7 @@ type Float32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -1966,7 +1981,7 @@ type Float32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Float32Array.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Float32Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -1990,7 +2005,7 @@ type Float32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2014,7 +2029,8 @@ type Float32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2038,7 +2054,9 @@ type Float32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Float32Array.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: Float32Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -2067,7 +2085,7 @@ type Float32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Float32Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Float32Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -2174,7 +2192,7 @@ type Float64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Float64Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Float64Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -2201,7 +2219,8 @@ type Float64Array<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract filter:
-        predicate: Float64Array.Filter.Predicate * ?thisArg: obj -> Float64Array<Fable.Core.TS.Es.ArrayBuffer>
+        predicate: Float64Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            Float64Array<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
@@ -2216,7 +2235,7 @@ type Float64Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Float64Array.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Float64Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -2230,7 +2249,7 @@ type Float64Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Float64Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Float64Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -2242,7 +2261,7 @@ type Float64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Float64Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Float64Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -2273,6 +2292,7 @@ type Float64Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -2285,7 +2305,10 @@ type Float64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Float64Array.Map.Callbackfn * ?thisArg: obj -> Float64Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Float64Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj ->
+            Float64Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2309,7 +2332,7 @@ type Float64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2333,7 +2356,7 @@ type Float64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2357,7 +2380,7 @@ type Float64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Float64Array.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Float64Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2381,7 +2404,7 @@ type Float64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2405,7 +2428,8 @@ type Float64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2429,7 +2453,9 @@ type Float64Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Float64Array.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: Float64Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -2458,7 +2484,7 @@ type Float64Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Float64Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Float64Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -2565,7 +2591,7 @@ type Int16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Int16Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Int16Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -2579,6 +2605,7 @@ type Int16Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Int16Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -2590,7 +2617,10 @@ type Int16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Int16Array.Filter.Predicate * ?thisArg: obj -> Int16Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract filter:
+        predicate: Int16Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            Int16Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -2604,7 +2634,7 @@ type Int16Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Int16Array.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Int16Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -2618,7 +2648,7 @@ type Int16Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Int16Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Int16Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -2630,7 +2660,7 @@ type Int16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Int16Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Int16Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -2661,6 +2691,7 @@ type Int16Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -2673,7 +2704,9 @@ type Int16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Int16Array.Map.Callbackfn * ?thisArg: obj -> Int16Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Int16Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Int16Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2697,7 +2730,7 @@ type Int16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2721,7 +2754,7 @@ type Int16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2745,7 +2778,7 @@ type Int16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Int16Array.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Int16Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2769,7 +2802,7 @@ type Int16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2793,7 +2826,8 @@ type Int16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2817,7 +2851,9 @@ type Int16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Int16Array.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: Int16Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -2846,7 +2882,7 @@ type Int16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Int16Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Int16Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -2953,7 +2989,7 @@ type Int32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Int32Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Int32Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -2967,6 +3003,7 @@ type Int32Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Int32Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -2978,7 +3015,10 @@ type Int32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Int32Array.Filter.Predicate * ?thisArg: obj -> Int32Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract filter:
+        predicate: Int32Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            Int32Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -2992,7 +3032,7 @@ type Int32Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Int32Array.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Int32Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -3006,7 +3046,7 @@ type Int32Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Int32Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Int32Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -3018,7 +3058,7 @@ type Int32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Int32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Int32Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -3049,6 +3089,7 @@ type Int32Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -3061,7 +3102,9 @@ type Int32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Int32Array.Map.Callbackfn * ?thisArg: obj -> Int32Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Int32Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Int32Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3085,7 +3128,7 @@ type Int32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3109,7 +3152,7 @@ type Int32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3133,7 +3176,7 @@ type Int32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Int32Array.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Int32Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3157,7 +3200,7 @@ type Int32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3181,7 +3224,8 @@ type Int32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3205,7 +3249,9 @@ type Int32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Int32Array.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: Int32Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -3234,7 +3280,7 @@ type Int32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Int32Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Int32Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -3341,7 +3387,7 @@ type Int8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Int8Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Int8Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -3355,6 +3401,7 @@ type Int8Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Int8Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -3366,7 +3413,9 @@ type Int8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Int8Array.Filter.Predicate * ?thisArg: obj -> Int8Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract filter:
+        predicate: Int8Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Int8Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -3380,7 +3429,7 @@ type Int8Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Int8Array.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Int8Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -3394,7 +3443,7 @@ type Int8Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Int8Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Int8Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -3406,7 +3455,7 @@ type Int8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Int8Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Int8Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -3437,6 +3486,7 @@ type Int8Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -3449,7 +3499,9 @@ type Int8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Int8Array.Map.Callbackfn * ?thisArg: obj -> Int8Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Int8Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Int8Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3473,7 +3525,7 @@ type Int8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3497,7 +3549,7 @@ type Int8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3521,7 +3573,7 @@ type Int8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Int8Array.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Int8Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3545,7 +3597,7 @@ type Int8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3569,7 +3621,7 @@ type Int8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3593,7 +3645,7 @@ type Int8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Int8Array.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> : callbackfn: Int8Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -3622,7 +3674,7 @@ type Int8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Int8Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Int8Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -3743,7 +3795,7 @@ type Uint16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Uint16Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Uint16Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -3770,7 +3822,8 @@ type Uint16Array<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract filter:
-        predicate: Uint16Array.Filter.Predicate * ?thisArg: obj -> Uint16Array<Fable.Core.TS.Es.ArrayBuffer>
+        predicate: Uint16Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            Uint16Array<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
@@ -3785,7 +3838,7 @@ type Uint16Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Uint16Array.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Uint16Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -3799,7 +3852,7 @@ type Uint16Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Uint16Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Uint16Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -3811,7 +3864,7 @@ type Uint16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Uint16Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Uint16Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -3842,6 +3895,7 @@ type Uint16Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -3854,7 +3908,10 @@ type Uint16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Uint16Array.Map.Callbackfn * ?thisArg: obj -> Uint16Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Uint16Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj ->
+            Uint16Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3878,7 +3935,7 @@ type Uint16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3902,7 +3959,7 @@ type Uint16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3926,7 +3983,7 @@ type Uint16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Uint16Array.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Uint16Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3950,7 +4007,7 @@ type Uint16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3974,7 +4031,8 @@ type Uint16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3998,7 +4056,9 @@ type Uint16Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Uint16Array.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: Uint16Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -4027,7 +4087,7 @@ type Uint16Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Uint16Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Uint16Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -4134,7 +4194,7 @@ type Uint32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Uint32Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Uint32Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -4161,7 +4221,8 @@ type Uint32Array<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract filter:
-        predicate: Uint32Array.Filter.Predicate * ?thisArg: obj -> Uint32Array<Fable.Core.TS.Es.ArrayBuffer>
+        predicate: Uint32Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            Uint32Array<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
@@ -4176,7 +4237,7 @@ type Uint32Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Uint32Array.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Uint32Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -4190,7 +4251,7 @@ type Uint32Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Uint32Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Uint32Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -4202,7 +4263,7 @@ type Uint32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Uint32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Uint32Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -4233,6 +4294,7 @@ type Uint32Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -4245,7 +4307,10 @@ type Uint32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Uint32Array.Map.Callbackfn * ?thisArg: obj -> Uint32Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Uint32Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj ->
+            Uint32Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4269,7 +4334,7 @@ type Uint32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4293,7 +4358,7 @@ type Uint32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4317,7 +4382,7 @@ type Uint32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Uint32Array.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Uint32Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4341,7 +4406,7 @@ type Uint32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4365,7 +4430,8 @@ type Uint32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4389,7 +4455,9 @@ type Uint32Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Uint32Array.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: Uint32Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -4418,7 +4486,7 @@ type Uint32Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Uint32Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Uint32Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -4525,7 +4593,7 @@ type Uint8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Uint8Array.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Uint8Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -4539,6 +4607,7 @@ type Uint8Array<'TArrayBuffer> =
     /// length+end.
     /// </param>
     abstract fill: value: float * ?start: float * ?``end``: float -> Uint8Array<'TArrayBuffer>
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -4550,7 +4619,10 @@ type Uint8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Uint8Array.Filter.Predicate * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract filter:
+        predicate: Uint8Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -4564,7 +4636,7 @@ type Uint8Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Uint8Array.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Uint8Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -4578,7 +4650,7 @@ type Uint8Array<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Uint8Array.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Uint8Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -4590,7 +4662,7 @@ type Uint8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Uint8Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Uint8Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -4621,6 +4693,7 @@ type Uint8Array<'TArrayBuffer> =
     /// The length of the array.
     /// </summary>
     abstract length: float
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -4633,7 +4706,9 @@ type Uint8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Uint8Array.Map.Callbackfn * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Uint8Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4657,7 +4732,7 @@ type Uint8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4681,7 +4756,7 @@ type Uint8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4705,7 +4780,7 @@ type Uint8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Uint8Array.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Uint8Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4729,7 +4804,7 @@ type Uint8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4753,7 +4828,8 @@ type Uint8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4777,7 +4853,9 @@ type Uint8Array<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Uint8Array.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: Uint8Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -4806,7 +4884,7 @@ type Uint8Array<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Uint8Array.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Uint8Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -4913,7 +4991,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Uint8ClampedArray.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Uint8ClampedArray.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
     /// </summary>
@@ -4940,7 +5018,8 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract filter:
-        predicate: Uint8ClampedArray.Filter.Predicate * ?thisArg: obj -> Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
+        predicate: Uint8ClampedArray.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj ->
+            Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
@@ -4955,7 +5034,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Uint8ClampedArray.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Uint8ClampedArray.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -4969,7 +5048,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Uint8ClampedArray.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Uint8ClampedArray.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -4981,7 +5060,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Uint8ClampedArray.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Uint8ClampedArray.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
     /// <summary>
     /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
     /// </summary>
@@ -5026,7 +5105,8 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
     abstract map:
-        callbackfn: Uint8ClampedArray.Map.Callbackfn * ?thisArg: obj -> Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
+        callbackfn: Uint8ClampedArray.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj ->
+            Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
 
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
@@ -5051,7 +5131,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -5075,7 +5155,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -5099,7 +5179,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Uint8ClampedArray.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Uint8ClampedArray.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5123,7 +5203,8 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn<'TArrayBuffer> -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5147,7 +5228,9 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight:
+        callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5171,7 +5254,9 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> :
+        callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
+
     /// <summary>
     /// Reverses the elements in an Array.
     /// </summary>
@@ -5200,7 +5285,7 @@ type Uint8ClampedArray<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Uint8ClampedArray.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Uint8ClampedArray.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -7171,7 +7256,8 @@ type Buffer<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract every: predicate: Buffer.Every.Predicate * ?thisArg: obj -> bool
+    abstract every: predicate: Buffer.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
+
     /// <summary>
     /// Returns the elements of an array that meet the condition specified in a callback function.
     /// </summary>
@@ -7183,7 +7269,9 @@ type Buffer<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract filter: predicate: Buffer.Filter.Predicate * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract filter:
+        predicate: Buffer.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Returns the value of the first element in the array where predicate is true, and undefined
     /// otherwise.
@@ -7197,7 +7285,7 @@ type Buffer<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract find: predicate: Buffer.Find.Predicate * ?thisArg: obj -> float option
+    abstract find: predicate: Buffer.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
     /// <summary>
     /// Returns the index of the first element in the array where predicate is true, and -1
     /// otherwise.
@@ -7211,7 +7299,7 @@ type Buffer<'TArrayBuffer> =
     /// If provided, it will be used as the this value for each invocation of
     /// predicate. If it is not provided, undefined is used instead.
     /// </param>
-    abstract findIndex: predicate: Buffer.FindIndex.Predicate * ?thisArg: obj -> float
+    abstract findIndex: predicate: Buffer.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
     /// <summary>
     /// Performs the specified action for each element in an array.
     /// </summary>
@@ -7223,7 +7311,8 @@ type Buffer<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract forEach: callbackfn: Buffer.ForEach.Callbackfn * ?thisArg: obj -> unit
+    abstract forEach: callbackfn: Buffer.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
+
     /// <summary>
     /// Calls a defined callback function on each element of an array, and returns an array that
     /// contains the results.
@@ -7236,7 +7325,9 @@ type Buffer<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the callbackfn function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract map: callbackfn: Buffer.Map.Callbackfn * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+    abstract map:
+        callbackfn: Buffer.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -7260,7 +7351,7 @@ type Buffer<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Buffer.Reduce.Callbackfn -> float
+    abstract reduce: callbackfn: Buffer.Reduce.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -7284,7 +7375,7 @@ type Buffer<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce: callbackfn: Buffer.Reduce.Callbackfn2 * initialValue: float -> float
+    abstract reduce: callbackfn: Buffer.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array. The return value of
     /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -7308,7 +7399,7 @@ type Buffer<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduce<'U> : callbackfn: Buffer.Reduce.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduce<'U> : callbackfn: Buffer.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -7332,7 +7423,7 @@ type Buffer<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Buffer.ReduceRight.Callbackfn -> float
+    abstract reduceRight: callbackfn: Buffer.ReduceRight.Callbackfn<'TArrayBuffer> -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -7356,7 +7447,7 @@ type Buffer<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight: callbackfn: Buffer.ReduceRight.Callbackfn2 * initialValue: float -> float
+    abstract reduceRight: callbackfn: Buffer.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
     /// <summary>
     /// Calls the specified callback function for all the elements in an array, in descending order.
     /// The return value of the callback function is the accumulated result, and is provided as an
@@ -7380,7 +7471,7 @@ type Buffer<'TArrayBuffer> =
     /// the accumulation. The first call to the callbackfn function provides this value as an argument
     /// instead of an array value.
     /// </param>
-    abstract reduceRight<'U> : callbackfn: Buffer.ReduceRight.Callbackfn3 * initialValue: 'U -> 'U
+    abstract reduceRight<'U> : callbackfn: Buffer.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
     /// <summary>
     /// Determines whether the specified callback function returns true for any element of an array.
     /// </summary>
@@ -7393,7 +7484,7 @@ type Buffer<'TArrayBuffer> =
     /// An object to which the this keyword can refer in the predicate function.
     /// If thisArg is omitted, undefined is used as the this value.
     /// </param>
-    abstract some: predicate: Buffer.Some.Predicate * ?thisArg: obj -> bool
+    abstract some: predicate: Buffer.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
     /// <summary>
     /// Sorts an array.
     /// </summary>
@@ -11439,7 +11530,7 @@ type DuplexConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -11533,19 +11624,19 @@ type DuplexConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -11658,26 +11749,28 @@ type DuplexConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create: ?opts: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex
 
 [<Interface>]
 type Finished =
-    abstract __promisify__: Finished.Promisify with get, set
+    abstract __promisify__:
+        stream: U3<ReadWriteStream, ReadableStream2, WritableStream2> * ?options: Stream.FinishedOptions ->
+            JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke:
@@ -11692,7 +11785,11 @@ type Finished =
             (unit -> unit)
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Finished.Promisify) : Finished = jsNative
+    static member Create
+        (__promisify__:
+            Func<U3<ReadWriteStream, ReadableStream2, WritableStream2>, Stream.FinishedOptions option, JS.Promise<unit>>)
+        : Finished =
+        jsNative
 
 type PassThroughConstructor =
     /// <summary>
@@ -12336,7 +12433,7 @@ type PassThroughConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -12425,19 +12522,19 @@ type PassThroughConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -12550,19 +12647,19 @@ type PassThroughConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create: ?opts: Stream.TransformOptions<Stream.Transform> -> Stream.PassThrough
@@ -13260,7 +13357,7 @@ type ReadableConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -13354,19 +13451,19 @@ type ReadableConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -13479,19 +13576,19 @@ type ReadableConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create: ?opts: Stream.ReadableOptions<Stream.Readable> -> Stream.Readable
@@ -14078,7 +14175,7 @@ type StreamConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -14172,19 +14269,19 @@ type StreamConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -14297,19 +14394,19 @@ type StreamConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
     abstract EventEmitter: EventEmitterConstructor with get, set
     abstract Stream: StreamConstructor with get, set
     abstract promises: Crypto.Hash.Stream.Readable.Promises with get, set
@@ -14966,7 +15063,7 @@ type TransformConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// The <c>stream.PassThrough</c> class is a trivial implementation of a <c>Transform</c> stream that simply passes the input bytes across to the output. Its purpose is
     /// primarily for examples and testing, but there are some use cases where <c>stream.PassThrough</c> is useful as a building block for novel sorts of streams.
@@ -15048,19 +15145,19 @@ type TransformConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -15173,19 +15270,19 @@ type TransformConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create: ?opts: Stream.TransformOptions<Stream.Transform> -> Stream.Transform
@@ -15790,7 +15887,7 @@ type WritableConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -15884,19 +15981,19 @@ type WritableConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -16009,19 +16106,19 @@ type WritableConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create: ?opts: Stream.WritableOptions<Stream.Writable> -> Stream.Writable
@@ -17264,13 +17361,16 @@ type Lookup =
 
 [<Interface>]
 type LookupService =
-    abstract __promisify__: LookupService.Promisify with get, set
+    abstract __promisify__: address: string * port: float -> JS.Promise<LookupService.Promisify.Result.Item>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: address: string * port: float * callback: LookupService.Callback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: LookupService.Promisify) : LookupService = jsNative
+    static member Create
+        (__promisify__: Func<string, float, JS.Promise<LookupService.Promisify.Result.Item>>)
+        : LookupService =
+        jsNative
 
 type Resolve =
     abstract __promisify__: hostname: string * ?rrtype: Resolve.Promisify.Rrtype -> JS.Promise<string[]>
@@ -17422,7 +17522,7 @@ type Resolve6 =
 
 [<Interface>]
 type ResolveCname =
-    abstract __promisify__: (string -> JS.Promise<string[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<string[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveCname.Callback -> unit
@@ -17432,7 +17532,7 @@ type ResolveCname =
 
 [<Interface>]
 type ResolveCaa =
-    abstract __promisify__: (string -> JS.Promise<Dns.CaaRecord[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<Dns.CaaRecord[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveCaa.Callback -> unit
@@ -17442,7 +17542,7 @@ type ResolveCaa =
 
 [<Interface>]
 type ResolveMx =
-    abstract __promisify__: (string -> JS.Promise<Dns.MxRecord[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<Dns.MxRecord[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveMx.Callback -> unit
@@ -17452,7 +17552,7 @@ type ResolveMx =
 
 [<Interface>]
 type ResolveNaptr =
-    abstract __promisify__: (string -> JS.Promise<Dns.NaptrRecord[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<Dns.NaptrRecord[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveNaptr.Callback -> unit
@@ -17462,7 +17562,7 @@ type ResolveNaptr =
 
 [<Interface>]
 type ResolveNs =
-    abstract __promisify__: (string -> JS.Promise<string[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<string[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveNs.Callback -> unit
@@ -17472,7 +17572,7 @@ type ResolveNs =
 
 [<Interface>]
 type ResolvePtr =
-    abstract __promisify__: (string -> JS.Promise<string[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<string[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolvePtr.Callback -> unit
@@ -17482,7 +17582,7 @@ type ResolvePtr =
 
 [<Interface>]
 type ResolveSoa =
-    abstract __promisify__: (string -> JS.Promise<Dns.SoaRecord>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<Dns.SoaRecord>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveSoa.Callback -> unit
@@ -17492,7 +17592,7 @@ type ResolveSoa =
 
 [<Interface>]
 type ResolveSrv =
-    abstract __promisify__: (string -> JS.Promise<Dns.SrvRecord[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<Dns.SrvRecord[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveSrv.Callback -> unit
@@ -17502,7 +17602,7 @@ type ResolveSrv =
 
 [<Interface>]
 type ResolveTlsa =
-    abstract __promisify__: (string -> JS.Promise<Dns.TlsaRecord[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<Dns.TlsaRecord[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveTlsa.Callback -> unit
@@ -17512,7 +17612,7 @@ type ResolveTlsa =
 
 [<Interface>]
 type ResolveTxt =
-    abstract __promisify__: (string -> JS.Promise<string[][]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<string[][]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveTxt.Callback -> unit
@@ -17522,7 +17622,7 @@ type ResolveTxt =
 
 [<Interface>]
 type ResolveAny =
-    abstract __promisify__: (string -> JS.Promise<Dns.AnyRecord[]>) with get, set
+    abstract __promisify__: hostname: string -> JS.Promise<Dns.AnyRecord[]>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveAny.Callback -> unit
@@ -17565,13 +17665,13 @@ type Rename =
     /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
     /// URL support is _experimental_.
     /// </param>
-    abstract __promisify__: Rename.Promisify with get, set
+    abstract __promisify__: oldPath: Fs.PathLike * newPath: Fs.PathLike -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: oldPath: Fs.PathLike * newPath: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Rename.Promisify) : Rename = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.PathLike, JS.Promise<unit>>) : Rename = jsNative
 
 [<Interface>]
 type Truncate =
@@ -17580,7 +17680,7 @@ type Truncate =
     /// </summary>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="len">If not specified, defaults to <c>0</c>.</param>
-    abstract __promisify__: Truncate.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * ?len: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * len: float option * callback: Fs.NoParamCallback -> unit
@@ -17589,7 +17689,7 @@ type Truncate =
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Truncate.Promisify) : Truncate = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, float option, JS.Promise<unit>>) : Truncate = jsNative
 
 [<Interface>]
 type Ftruncate =
@@ -17598,7 +17698,7 @@ type Ftruncate =
     /// </summary>
     /// <param name="fd">A file descriptor.</param>
     /// <param name="len">If not specified, defaults to <c>0</c>.</param>
-    abstract __promisify__: Ftruncate.Promisify with get, set
+    abstract __promisify__: fd: float * ?len: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * len: float option * callback: Fs.NoParamCallback -> unit
@@ -17607,7 +17707,7 @@ type Ftruncate =
     abstract Invoke: fd: float * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Ftruncate.Promisify) : Ftruncate = jsNative
+    static member Create(__promisify__: Func<float, float option, JS.Promise<unit>>) : Ftruncate = jsNative
 
 [<Interface>]
 type Chown =
@@ -17615,13 +17715,13 @@ type Chown =
     /// Asynchronous chown(2) - Change ownership of a file.
     /// </summary>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-    abstract __promisify__: Chown.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * uid: float * gid: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * uid: float * gid: float * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Chown.Promisify) : Chown = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, float, float, JS.Promise<unit>>) : Chown = jsNative
 
 [<Interface>]
 type Fchown =
@@ -17629,13 +17729,13 @@ type Fchown =
     /// Asynchronous fchown(2) - Change ownership of a file.
     /// </summary>
     /// <param name="fd">A file descriptor.</param>
-    abstract __promisify__: Fchown.Promisify with get, set
+    abstract __promisify__: fd: float * uid: float * gid: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * uid: float * gid: float * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Fchown.Promisify) : Fchown = jsNative
+    static member Create(__promisify__: Func<float, float, float, JS.Promise<unit>>) : Fchown = jsNative
 
 [<Interface>]
 type Lchown =
@@ -17643,13 +17743,13 @@ type Lchown =
     /// Asynchronous lchown(2) - Change ownership of a file. Does not dereference symbolic links.
     /// </summary>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-    abstract __promisify__: Lchown.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * uid: float * gid: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * uid: float * gid: float * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Lchown.Promisify) : Lchown = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, float, float, JS.Promise<unit>>) : Lchown = jsNative
 
 [<Interface>]
 type Lutimes =
@@ -17661,13 +17761,14 @@ type Lutimes =
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="atime">The last access time. If a string is provided, it will be coerced to number.</param>
     /// <param name="mtime">The last modified time. If a string is provided, it will be coerced to number.</param>
-    abstract __promisify__: Lutimes.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Lutimes.Promisify) : Lutimes = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.TimeLike, Fs.TimeLike, JS.Promise<unit>>) : Lutimes =
+        jsNative
 
 [<Interface>]
 type Chmod =
@@ -17676,13 +17777,13 @@ type Chmod =
     /// </summary>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="mode">A file mode. If a string is passed, it is parsed as an octal integer.</param>
-    abstract __promisify__: Chmod.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * mode: Fs.Mode -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * mode: Fs.Mode * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Chmod.Promisify) : Chmod = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.Mode, JS.Promise<unit>>) : Chmod = jsNative
 
 [<Interface>]
 type Fchmod =
@@ -17691,13 +17792,13 @@ type Fchmod =
     /// </summary>
     /// <param name="fd">A file descriptor.</param>
     /// <param name="mode">A file mode. If a string is passed, it is parsed as an octal integer.</param>
-    abstract __promisify__: Fchmod.Promisify with get, set
+    abstract __promisify__: fd: float * mode: Fs.Mode -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * mode: Fs.Mode * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Fchmod.Promisify) : Fchmod = jsNative
+    static member Create(__promisify__: Func<float, Fs.Mode, JS.Promise<unit>>) : Fchmod = jsNative
 
 [<Interface>]
 type Lchmod =
@@ -17706,13 +17807,13 @@ type Lchmod =
     /// </summary>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="mode">A file mode. If a string is passed, it is parsed as an octal integer.</param>
-    abstract __promisify__: Lchmod.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * mode: Fs.Mode -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * mode: Fs.Mode * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Lchmod.Promisify) : Lchmod = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.Mode, JS.Promise<unit>>) : Lchmod = jsNative
 
 type Stat =
     /// <summary>
@@ -17839,13 +17940,13 @@ type Link =
     /// </summary>
     /// <param name="existingPath">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="newPath">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-    abstract __promisify__: Link.Promisify with get, set
+    abstract __promisify__: existingPath: Fs.PathLike * newPath: Fs.PathLike -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: existingPath: Fs.PathLike * newPath: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Link.Promisify) : Link = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.PathLike, JS.Promise<unit>>) : Link = jsNative
 
 [<Interface>]
 type Symlink =
@@ -17858,7 +17959,7 @@ type Symlink =
     /// May be set to <c>'dir'</c>, <c>'file'</c>, or <c>'junction'</c> (default is <c>'file'</c>) and is only available on Windows (ignored on other platforms).
     /// When using <c>'junction'</c>, the <c>target</c> argument will automatically be normalized to an absolute path.
     /// </param>
-    abstract __promisify__: Symlink.Promisify with get, set
+    abstract __promisify__: target: Fs.PathLike * path: Fs.PathLike * ?``type``: string -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke:
@@ -17868,9 +17969,9 @@ type Symlink =
     abstract Invoke: target: Fs.PathLike * path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Symlink.Promisify) : Symlink = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.PathLike, string option, JS.Promise<unit>>) : Symlink =
+        jsNative
 
-[<Interface>]
 type Readlink =
     /// <summary>
     /// Asynchronous readlink(2) - read value of a symbolic link.
@@ -17881,7 +17982,17 @@ type Readlink =
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-    abstract __promisify__: Readlink.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * ?options: Fs.EncodingOption -> JS.Promise<string>
+    /// <summary>
+    /// Asynchronous readlink(2) - read value of a symbolic link.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    abstract __promisify__: path: Fs.PathLike * options: Fs.BufferEncodingOption -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.EncodingOption * callback: Readlink.Callback -> unit
@@ -17895,9 +18006,6 @@ type Readlink =
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Readlink.Callback4 -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Readlink.Promisify) : Readlink = jsNative
-
 type Realpath =
     /// <summary>
     /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
@@ -17908,7 +18016,17 @@ type Realpath =
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-    abstract __promisify__: Realpath.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * ?options: Fs.EncodingOption -> JS.Promise<string>
+    /// <summary>
+    /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    abstract __promisify__: path: Fs.PathLike * options: Fs.BufferEncodingOption -> JS.Promise<NonSharedBuffer>
     /// <summary>
     /// Asynchronous <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>.
     /// <br /><br />
@@ -17926,7 +18044,7 @@ type Realpath =
     /// this restriction.
     /// </summary>
     /// <remarks>@since v9.2.0</remarks>
-    abstract native: path: Fs.PathLike * options: Fs.EncodingOption * callback: Native.Callback -> unit
+    abstract native: path: Fs.PathLike * options: Fs.EncodingOption * callback: Realpath.Native.Callback -> unit
     /// <summary>
     /// Asynchronous <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>.
     /// <br /><br />
@@ -17944,7 +18062,7 @@ type Realpath =
     /// this restriction.
     /// </summary>
     /// <remarks>@since v9.2.0</remarks>
-    abstract native: path: Fs.PathLike * options: Fs.BufferEncodingOption * callback: Native.Callback2 -> unit
+    abstract native: path: Fs.PathLike * options: Fs.BufferEncodingOption * callback: Realpath.Native.Callback2 -> unit
     /// <summary>
     /// Asynchronous <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>.
     /// <br /><br />
@@ -17962,7 +18080,7 @@ type Realpath =
     /// this restriction.
     /// </summary>
     /// <remarks>@since v9.2.0</remarks>
-    abstract native: path: Fs.PathLike * options: Fs.EncodingOption * callback: Native.Callback3 -> unit
+    abstract native: path: Fs.PathLike * options: Fs.EncodingOption * callback: Realpath.Native.Callback3 -> unit
     /// <summary>
     /// Asynchronous <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>.
     /// <br /><br />
@@ -17980,7 +18098,7 @@ type Realpath =
     /// this restriction.
     /// </summary>
     /// <remarks>@since v9.2.0</remarks>
-    abstract native: path: Fs.PathLike * callback: Native.Callback4 -> unit
+    abstract native: path: Fs.PathLike * callback: Realpath.Native.Callback4 -> unit
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.EncodingOption * callback: Realpath.Callback -> unit
@@ -17994,11 +18112,9 @@ type Realpath =
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Realpath.Callback4 -> unit
 
-type Native2 = delegate of path: Fs.PathLike * options: Fs.EncodingOption option -> string
-
-[<Interface>]
 type RealpathSync =
-    abstract native: Native2 with get, set
+    abstract native: path: Fs.PathLike * ?options: Fs.EncodingOption -> string
+    abstract native: path: Fs.PathLike * options: Fs.BufferEncodingOption -> NonSharedBuffer
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * ?options: Fs.EncodingOption -> string
@@ -18006,16 +18122,13 @@ type RealpathSync =
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.BufferEncodingOption -> NonSharedBuffer
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(native: Native2) : RealpathSync = jsNative
-
 [<Interface>]
 type Unlink =
     /// <summary>
     /// Asynchronous unlink(2) - delete a name and possibly the file it refers to.
     /// </summary>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-    abstract __promisify__: (Fs.PathLike -> JS.Promise<unit>) with get, set
+    abstract __promisify__: path: Fs.PathLike -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
@@ -18029,7 +18142,7 @@ type Rmdir =
     /// Asynchronous rmdir(2) - delete a directory.
     /// </summary>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-    abstract __promisify__: Rmdir.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * ?options: Fs.RmDirOptions -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
@@ -18038,14 +18151,14 @@ type Rmdir =
     abstract Invoke: path: Fs.PathLike * options: Fs.RmDirOptions * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Rmdir.Promisify) : Rmdir = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.RmDirOptions option, JS.Promise<unit>>) : Rmdir = jsNative
 
 [<Interface>]
 type Rm =
     /// <summary>
     /// Asynchronously removes files and directories (modeled on the standard POSIX <c>rm</c> utility).
     /// </summary>
-    abstract __promisify__: Rm.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * ?options: Fs.RmOptions -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
@@ -18054,7 +18167,7 @@ type Rm =
     abstract Invoke: path: Fs.PathLike * options: Fs.RmOptions * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Rm.Promisify) : Rm = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.RmOptions option, JS.Promise<unit>>) : Rm = jsNative
 
 type Mkdir =
     /// <summary>
@@ -18134,7 +18247,6 @@ type Mkdir =
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
-[<Interface>]
 type Mkdtemp =
     /// <summary>
     /// Asynchronously creates a unique temporary directory.
@@ -18143,7 +18255,15 @@ type Mkdtemp =
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-    abstract __promisify__: Mkdtemp.Promisify with get, set
+    abstract __promisify__: prefix: string * ?options: Fs.EncodingOption -> JS.Promise<string>
+    /// <summary>
+    /// Asynchronously creates a unique temporary directory.
+    /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
+    /// </summary>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    abstract __promisify__: prefix: string * options: Fs.BufferEncodingOption -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: prefix: string * options: Fs.EncodingOption * callback: Mkdtemp.Callback -> unit
@@ -18156,9 +18276,6 @@ type Mkdtemp =
 
     [<Emit("$0($1...)")>]
     abstract Invoke: prefix: string * callback: Mkdtemp.Callback4 -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Mkdtemp.Promisify) : Mkdtemp = jsNative
 
 type Readdir =
     /// <summary>
@@ -18266,7 +18383,7 @@ type Close =
     /// Asynchronous close(2) - close a file descriptor.
     /// </summary>
     /// <param name="fd">A file descriptor.</param>
-    abstract __promisify__: (float -> JS.Promise<unit>) with get, set
+    abstract __promisify__: fd: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * ?callback: Fs.NoParamCallback -> unit
@@ -18281,7 +18398,7 @@ type Open =
     /// </summary>
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="mode">A file mode. If a string is passed, it is parsed as an octal integer. If not supplied, defaults to <c>0o666</c>.</param>
-    abstract __promisify__: Open.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * flags: Fs.OpenMode * ?mode: Fs.OpenMode -> JS.Promise<float>
 
     [<Emit("$0($1...)")>]
     abstract Invoke:
@@ -18294,7 +18411,8 @@ type Open =
     abstract Invoke: path: Fs.PathLike * callback: Open.Callback3 -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Open.Promisify) : Open = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.OpenMode, Fs.OpenMode option, JS.Promise<float>>) : Open =
+        jsNative
 
 [<Interface>]
 type Utimes =
@@ -18304,13 +18422,14 @@ type Utimes =
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     /// <param name="atime">The last access time. If a string is provided, it will be coerced to number.</param>
     /// <param name="mtime">The last modified time. If a string is provided, it will be coerced to number.</param>
-    abstract __promisify__: Utimes.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Utimes.Promisify) : Utimes = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.TimeLike, Fs.TimeLike, JS.Promise<unit>>) : Utimes =
+        jsNative
 
 [<Interface>]
 type Futimes =
@@ -18320,13 +18439,13 @@ type Futimes =
     /// <param name="fd">A file descriptor.</param>
     /// <param name="atime">The last access time. If a string is provided, it will be coerced to number.</param>
     /// <param name="mtime">The last modified time. If a string is provided, it will be coerced to number.</param>
-    abstract __promisify__: Futimes.Promisify with get, set
+    abstract __promisify__: fd: float * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * atime: Fs.TimeLike * mtime: Fs.TimeLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Futimes.Promisify) : Futimes = jsNative
+    static member Create(__promisify__: Func<float, Fs.TimeLike, Fs.TimeLike, JS.Promise<unit>>) : Futimes = jsNative
 
 [<Interface>]
 type Fsync =
@@ -18334,7 +18453,7 @@ type Fsync =
     /// Asynchronous fsync(2) - synchronize a file's in-core state with the underlying storage device.
     /// </summary>
     /// <param name="fd">A file descriptor.</param>
-    abstract __promisify__: (float -> JS.Promise<unit>) with get, set
+    abstract __promisify__: fd: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * callback: Fs.NoParamCallback -> unit
@@ -18633,7 +18752,9 @@ type WriteFile =
     /// If <c>mode</c> is a string, it is parsed as an octal integer.
     /// If <c>flag</c> is not supplied, the default of <c>'w'</c> is used.
     /// </param>
-    abstract __promisify__: WriteFile.Promisify with get, set
+    abstract __promisify__:
+        path: Fs.PathOrFileDescriptor * data: Crypto.BinaryLike * ?options: U2<string, Fs.WriteFileOptions2> ->
+            JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke:
@@ -18647,7 +18768,11 @@ type WriteFile =
     abstract Invoke: path: Fs.PathOrFileDescriptor * data: Crypto.BinaryLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: WriteFile.Promisify) : WriteFile = jsNative
+    static member Create
+        (__promisify__:
+            Func<Fs.PathOrFileDescriptor, Crypto.BinaryLike, U2<string, Fs.WriteFileOptions2> option, JS.Promise<unit>>)
+        : WriteFile =
+        jsNative
 
 [<Interface>]
 type AppendFile =
@@ -18667,7 +18792,11 @@ type AppendFile =
     /// If <c>mode</c> is a string, it is parsed as an octal integer.
     /// If <c>flag</c> is not supplied, the default of <c>'a'</c> is used.
     /// </param>
-    abstract __promisify__: AppendFile.Promisify with get, set
+    abstract __promisify__:
+        file: Fs.PathOrFileDescriptor *
+        data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
+        ?options: U2<string, Fs.WriteFileOptions2> ->
+            JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke:
@@ -18685,7 +18814,16 @@ type AppendFile =
             unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: AppendFile.Promisify) : AppendFile = jsNative
+    static member Create
+        (__promisify__:
+            Func<
+                Fs.PathOrFileDescriptor,
+                U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
+                U2<string, Fs.WriteFileOptions2> option,
+                JS.Promise<unit>
+             >)
+        : AppendFile =
+        jsNative
 
 [<Interface>]
 type Exists =
@@ -18693,7 +18831,7 @@ type Exists =
     /// A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.
     /// URL support is _experimental_.
     /// </param>
-    abstract __promisify__: (Fs.PathLike -> JS.Promise<bool>) with get, set
+    abstract __promisify__: path: Fs.PathLike -> JS.Promise<bool>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: (bool -> unit) -> unit
@@ -18897,7 +19035,7 @@ type Access =
     /// A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.
     /// URL support is _experimental_.
     /// </param>
-    abstract __promisify__: Access.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * ?mode: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * mode: float option * callback: Fs.NoParamCallback -> unit
@@ -18906,7 +19044,7 @@ type Access =
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Access.Promisify) : Access = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, float option, JS.Promise<unit>>) : Access = jsNative
 
 [<Interface>]
 type CreateReadStreamFSImplementation =
@@ -19018,7 +19156,7 @@ type Fdatasync =
     /// Asynchronous fdatasync(2) - synchronize a file's in-core state with storage device.
     /// </summary>
     /// <param name="fd">A file descriptor.</param>
-    abstract __promisify__: (float -> JS.Promise<unit>) with get, set
+    abstract __promisify__: fd: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * callback: Fs.NoParamCallback -> unit
@@ -19028,7 +19166,7 @@ type Fdatasync =
 
 [<Interface>]
 type CopyFile =
-    abstract __promisify__: CopyFile.Promisify with get, set
+    abstract __promisify__: src: Fs.PathLike * dst: Fs.PathLike * ?mode: float -> JS.Promise<unit>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: src: Fs.PathLike * dest: Fs.PathLike * callback: Fs.NoParamCallback -> unit
@@ -19037,11 +19175,13 @@ type CopyFile =
     abstract Invoke: src: Fs.PathLike * dest: Fs.PathLike * mode: float * callback: Fs.NoParamCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: CopyFile.Promisify) : CopyFile = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.PathLike, float option, JS.Promise<unit>>) : CopyFile =
+        jsNative
 
 [<Interface>]
 type Writev2 =
-    abstract __promisify__: Func<float, obj, float option, JS.Promise<Fs.WriteVResult<obj>>> with get, set
+    abstract __promisify__<'TBuffers> :
+        fd: float * buffers: 'TBuffers * ?position: float -> JS.Promise<Fs.WriteVResult<'TBuffers>>
 
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffers> : fd: float * buffers: 'TBuffers * cb: Writev2.Cb<'TBuffers> -> unit
@@ -19051,12 +19191,15 @@ type Writev2 =
         fd: float * buffers: 'TBuffers * position: float option * cb: Writev2.Cb2<'TBuffers> -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<float, obj, float option, JS.Promise<Fs.WriteVResult<obj>>>) : Writev2 =
+    static member Create
+        (__promisify__: Func<float, 'TBuffers, float option, JS.Promise<Fs.WriteVResult<'TBuffers>>>)
+        : Writev2 =
         jsNative
 
 [<Interface>]
 type Readv =
-    abstract __promisify__: Func<float, obj, float option, JS.Promise<Fs.ReadVResult<obj>>> with get, set
+    abstract __promisify__<'TBuffers> :
+        fd: float * buffers: 'TBuffers * ?position: float -> JS.Promise<Fs.ReadVResult<'TBuffers>>
 
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffers> : fd: float * buffers: 'TBuffers * cb: Readv.Cb<'TBuffers> -> unit
@@ -19066,12 +19209,14 @@ type Readv =
         fd: float * buffers: 'TBuffers * position: float option * cb: Readv.Cb2<'TBuffers> -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<float, obj, float option, JS.Promise<Fs.ReadVResult<obj>>>) : Readv =
+    static member Create
+        (__promisify__: Func<float, 'TBuffers, float option, JS.Promise<Fs.ReadVResult<'TBuffers>>>)
+        : Readv =
         jsNative
 
 [<Interface>]
 type Opendir =
-    abstract __promisify__: Opendir.Promisify with get, set
+    abstract __promisify__: path: Fs.PathLike * ?options: Fs.OpenDirOptions -> JS.Promise<Fs.Dir>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * cb: Opendir.Cb -> unit
@@ -19080,7 +19225,8 @@ type Opendir =
     abstract Invoke: path: Fs.PathLike * options: Fs.OpenDirOptions * cb: Opendir.Cb2 -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Opendir.Promisify) : Opendir = jsNative
+    static member Create(__promisify__: Func<Fs.PathLike, Fs.OpenDirOptions option, JS.Promise<Fs.Dir>>) : Opendir =
+        jsNative
 
 [<Interface>]
 type CopyOptionsBase =
@@ -22466,13 +22612,13 @@ type Http2ServerRequestConstructor =
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -23091,7 +23237,7 @@ type Http2ServerRequestConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -23185,19 +23331,19 @@ type Http2ServerRequestConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -23310,7 +23456,7 @@ type Http2ServerRequestConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
 
     [<EmitConstructor>]
     abstract Create:
@@ -23919,7 +24065,7 @@ type Http2ServerResponseConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -24013,19 +24159,19 @@ type Http2ServerResponseConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -24138,19 +24284,19 @@ type Http2ServerResponseConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create<'Request when 'Request :> Http2.Http2ServerRequest> :
@@ -24774,7 +24920,7 @@ type IncomingMessageConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -24868,19 +25014,19 @@ type IncomingMessageConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -24993,19 +25139,19 @@ type IncomingMessageConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create: socket: Net.Socket -> Http.IncomingMessage
@@ -25609,7 +25755,7 @@ type ServerResponseConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -25703,19 +25849,19 @@ type ServerResponseConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -25828,19 +25974,19 @@ type ServerResponseConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create<'Request when 'Request :> Http.IncomingMessage> : req: 'Request -> Http.ServerResponse<'Request>
@@ -28514,7 +28660,7 @@ type Network =
     /// the application is about to send an HTTP request.
     /// </summary>
     /// <remarks>@since v22.6.0</remarks>
-    abstract requestWillBeSent: (RequestWillBeSentEventDataType -> unit) with get, set
+    abstract requestWillBeSent: ``params``: RequestWillBeSentEventDataType -> unit
     /// <summary>
     /// This feature is only available with the <c>--experimental-network-inspection</c> flag enabled.
     /// <br /><br />
@@ -28524,14 +28670,14 @@ type Network =
     /// Also enables <c>Network.getResponseBody</c> command to retrieve the response data.
     /// </summary>
     /// <remarks>@since v22.17.0</remarks>
-    abstract dataReceived: (DataReceivedEventDataType -> unit) with get, set
+    abstract dataReceived: ``params``: DataReceivedEventDataType -> unit
     /// <summary>
     /// This feature is only available with the <c>--experimental-network-inspection</c> flag enabled.
     /// <br /><br />
     /// Enables <c>Network.getRequestPostData</c> command to retrieve the request data.
     /// </summary>
     /// <remarks>@since v22.18.0</remarks>
-    abstract dataSent: (obj -> unit) with get, set
+    abstract dataSent: ``params``: obj -> unit
     /// <summary>
     /// This feature is only available with the <c>--experimental-network-inspection</c> flag enabled.
     /// <br /><br />
@@ -28539,7 +28685,7 @@ type Network =
     /// HTTP response is available.
     /// </summary>
     /// <remarks>@since v22.6.0</remarks>
-    abstract responseReceived: (ResponseReceivedEventDataType -> unit) with get, set
+    abstract responseReceived: ``params``: ResponseReceivedEventDataType -> unit
     /// <summary>
     /// This feature is only available with the <c>--experimental-network-inspection</c> flag enabled.
     /// <br /><br />
@@ -28547,7 +28693,7 @@ type Network =
     /// HTTP request has finished loading.
     /// </summary>
     /// <remarks>@since v22.6.0</remarks>
-    abstract loadingFinished: (LoadingFinishedEventDataType -> unit) with get, set
+    abstract loadingFinished: ``params``: LoadingFinishedEventDataType -> unit
     /// <summary>
     /// This feature is only available with the <c>--experimental-network-inspection</c> flag enabled.
     /// <br /><br />
@@ -28555,7 +28701,7 @@ type Network =
     /// HTTP request has failed to load.
     /// </summary>
     /// <remarks>@since v22.7.0</remarks>
-    abstract loadingFailed: (LoadingFailedEventDataType -> unit) with get, set
+    abstract loadingFailed: ``params``: LoadingFailedEventDataType -> unit
 
     [<ParamObject; Emit("$0")>]
     static member Create
@@ -28601,12 +28747,10 @@ type NetworkResources =
     /// </summary>
     /// <remarks>@since v22.19.0</remarks>
     /// <remarks>@experimental</remarks>
-    abstract put: Put with get, set
+    abstract put: url: string * data: string -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(put: Put) : NetworkResources = jsNative
-
-type Put = delegate of url: string * data: string -> unit
+    static member Create(put: Action<string, string>) : NetworkResources = jsNative
 
 [<Interface>]
 type CompileCacheStatus =
@@ -28669,7 +28813,7 @@ type ModuleConstructor =
     /// function. Must be a file URL object, file URL string, or absolute path
     /// string.
     /// </param>
-    abstract createRequire: (U2<string, Url.URL> -> Require) with get, set
+    abstract createRequire: path: U2<string, Url.URL> -> Require
     abstract constants: Constants4 with get, set
     /// <summary>
     /// Enable <a href="https://nodejs.org/docs/latest-v22.x/api/module.html#module-compile-cache">module compile cache</a>
@@ -28703,7 +28847,7 @@ type ModuleConstructor =
     /// Optional path to specify the directory where the compile cache
     /// will be stored/retrieved.
     /// </param>
-    abstract enableCompileCache: (string option -> Module.EnableCompileCacheResult) with get, set
+    abstract enableCompileCache: ?cacheDir: string -> Module.EnableCompileCacheResult
     /// <summary>
     /// Flush the <a href="https://nodejs.org/docs/latest-v22.x/api/module.html#module-compile-cache">module compile cache</a>
     /// accumulated from modules already loaded
@@ -28713,13 +28857,13 @@ type ModuleConstructor =
     /// interfere with the actual operation of the application.
     /// </summary>
     /// <remarks>@since v22.10.0</remarks>
-    abstract flushCompileCache: (unit -> unit) with get, set
+    abstract flushCompileCache: unit -> unit
     /// <remarks>@since v22.8.0</remarks>
     /// <returns>
     /// Path to the <a href="https://nodejs.org/docs/latest-v22.x/api/module.html#module-compile-cache">module compile cache</a>
     /// directory if it is enabled, or <c>undefined</c> otherwise.
     /// </returns>
-    abstract getCompileCacheDir: (unit -> string option) with get, set
+    abstract getCompileCacheDir: unit -> string option
     /// <summary>
     /// <code lang="text">
     /// /path/to/project
@@ -28774,9 +28918,9 @@ type ModuleConstructor =
     /// is a package, the package's root <c>package.json</c>; when a relative or unresolved, the closest
     /// <c>package.json</c> to the <c>startLocation</c>.
     /// </returns>
-    abstract findPackageJSON: Func<U2<string, Url.URL>, U2<string, Url.URL> option, string option> with get, set
+    abstract findPackageJSON: specifier: U2<string, Url.URL> * ?``base``: U2<string, Url.URL> -> string option
     /// <remarks>@since v18.6.0, v16.17.0</remarks>
-    abstract isBuiltin: (string -> bool) with get, set
+    abstract isBuiltin: moduleName: string -> bool
 
     /// <summary>
     /// Register a module that exports hooks that customize Node.js module
@@ -28825,7 +28969,7 @@ type ModuleConstructor =
     /// </summary>
     /// <remarks>@since v22.15.0</remarks>
     /// <remarks>@experimental</remarks>
-    abstract registerHooks: (Module.RegisterHooksOptions -> Module.ModuleHooks) with get, set
+    abstract registerHooks: options: Module.RegisterHooksOptions -> Module.ModuleHooks
     /// <summary>
     /// <c>module.stripTypeScriptTypes()</c> removes type annotations from TypeScript code. It
     /// can be used to strip type annotations from TypeScript code before running it
@@ -28877,7 +29021,7 @@ type ModuleConstructor =
     /// <remarks>@since v22.13.0</remarks>
     /// <param name="code">The code to strip type annotations from.</param>
     /// <returns>The code with type annotations stripped.</returns>
-    abstract stripTypeScriptTypes: Func<string, Module.StripTypeScriptTypesOptions option, string> with get, set
+    abstract stripTypeScriptTypes: code: string * ?options: Module.StripTypeScriptTypesOptions -> string
     /// <summary>
     /// The <c>module.syncBuiltinESMExports()</c> method updates all the live bindings for
     /// builtin <c>ES Modules</c> to match the properties of the <c>CommonJS</c> exports. It
@@ -28912,20 +29056,20 @@ type ModuleConstructor =
     /// </code>
     /// </summary>
     /// <remarks>@since v12.12.0</remarks>
-    abstract syncBuiltinESMExports: (unit -> unit) with get, set
+    abstract syncBuiltinESMExports: unit -> unit
     /// <summary>
     /// This method returns whether the <a href="https://tc39.es/ecma426/">Source Map v3</a> support for stack
     /// traces is enabled.
     /// </summary>
     /// <remarks>@since v22.14.0</remarks>
-    abstract getSourceMapsSupport: (unit -> Module.SourceMapsSupport) with get, set
+    abstract getSourceMapsSupport: unit -> Module.SourceMapsSupport
     /// <summary>
     /// <c>path</c> is the resolved path for the file for which a corresponding source map
     /// should be fetched.
     /// </summary>
     /// <remarks>@since v13.7.0, v12.17.0</remarks>
     /// <returns>Returns <c>module.SourceMap</c> if a source map is found, <c>undefined</c> otherwise.</returns>
-    abstract findSourceMap: (string -> Module.SourceMap option) with get, set
+    abstract findSourceMap: path: string -> Module.SourceMap option
     /// <summary>
     /// This function enables or disables the <a href="https://tc39.es/ecma426/">Source Map v3</a> support for
     /// stack traces.
@@ -28940,11 +29084,11 @@ type ModuleConstructor =
     /// before this API call.
     /// </summary>
     /// <remarks>@since v22.14.0</remarks>
-    abstract setSourceMapsSupport: Action<bool, Module.SetSourceMapsSupportOptions option> with get, set
+    abstract setSourceMapsSupport: enabled: bool * ?options: Module.SetSourceMapsSupportOptions -> unit
     /// <remarks>@since v13.7.0, v12.17.0</remarks>
     abstract SourceMap: SourceMapConstructor with get, set
-    abstract runMain: (string option -> unit) with get, set
-    abstract wrap: (string -> string) with get, set
+    abstract runMain: ?main: string -> unit
+    abstract wrap: script: string -> string
     abstract Module: ModuleConstructor with get, set
 
     [<EmitConstructor>]
@@ -30508,10 +30652,10 @@ type Assert =
     /// assertion already exists with the same name, it is overwritten.
     /// </summary>
     /// <remarks>@since v22.14.0</remarks>
-    abstract register: Register with get, set
+    abstract register: name: string * fn: (obj[] -> unit) -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(register: Register) : Assert = jsNative
+    static member Create(register: Action<string, (obj[] -> unit)>) : Assert = jsNative
 
 [<Interface>]
 type Error =
@@ -30546,8 +30690,6 @@ type MockPropertyContextConstructor =
     [<EmitConstructor>]
     abstract Create<'PropertyType> : unit -> Test.MockPropertyContext<'PropertyType>
 
-type Register = delegate of name: string * fn: (obj[] -> unit) -> unit
-
 [<Interface>]
 type Snapshot =
     /// <summary>
@@ -30562,7 +30704,7 @@ type Snapshot =
     /// </summary>
     /// <remarks>@since v22.3.0</remarks>
     /// <param name="serializers">An array of synchronous functions used as the default serializers for snapshot tests.</param>
-    abstract setDefaultSnapshotSerializers: ((obj -> obj)[] -> unit) with get, set
+    abstract setDefaultSnapshotSerializers: serializers: (obj -> obj)[] -> unit
     /// <summary>
     /// This function is used to set a custom resolver for the location of the snapshot file used for snapshot testing.
     /// By default, the snapshot filename is the same as the entry point filename with <c>.snapshot</c> appended.
@@ -30574,7 +30716,7 @@ type Snapshot =
     /// test is not associated with a file (for example in the REPL), the input is
     /// undefined. <c>fn()</c> must return a string specifying the location of the snapshot file.
     /// </param>
-    abstract setResolveSnapshotPath: ((string option -> string) -> unit) with get, set
+    abstract setResolveSnapshotPath: fn: (string option -> string) -> unit
 
     [<ParamObject; Emit("$0")>]
     static member Create
@@ -30680,7 +30822,7 @@ type Test =
     /// </summary>
     /// <remarks>@since v18.9.0, v16.19.0</remarks>
     /// <param name="options">Configuration options for running tests.</param>
-    abstract run: (Test.RunOptions option -> Test.TestsStream) with get, set
+    abstract run: ?options: Test.RunOptions -> Test.TestsStream
     /// <summary>
     /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
     /// </summary>
@@ -30767,7 +30909,7 @@ type Test =
     /// <remarks>@since v18.8.0, v16.18.0</remarks>
     /// <param name="fn">The hook function. If the hook uses callbacks, the callback function is passed as the second argument.</param>
     /// <param name="options">Configuration options for the hook.</param>
-    abstract before: Action<Test.HookFn option, Test.HookOptions option> with get, set
+    abstract before: ?fn: Test.HookFn * ?options: Test.HookOptions -> unit
     /// <summary>
     /// This function creates a hook that runs after executing a suite.
     /// <code lang="js">
@@ -30782,7 +30924,7 @@ type Test =
     /// <remarks>@since v18.8.0, v16.18.0</remarks>
     /// <param name="fn">The hook function. If the hook uses callbacks, the callback function is passed as the second argument.</param>
     /// <param name="options">Configuration options for the hook.</param>
-    abstract after: Action<Test.HookFn option, Test.HookOptions option> with get, set
+    abstract after: ?fn: Test.HookFn * ?options: Test.HookOptions -> unit
     /// <summary>
     /// This function creates a hook that runs before each test in the current suite.
     /// <code lang="js">
@@ -30797,7 +30939,7 @@ type Test =
     /// <remarks>@since v18.8.0, v16.18.0</remarks>
     /// <param name="fn">The hook function. If the hook uses callbacks, the callback function is passed as the second argument.</param>
     /// <param name="options">Configuration options for the hook.</param>
-    abstract beforeEach: Action<Test.HookFn option, Test.HookOptions option> with get, set
+    abstract beforeEach: ?fn: Test.HookFn * ?options: Test.HookOptions -> unit
     /// <summary>
     /// This function creates a hook that runs after each test in the current suite.
     /// The <c>afterEach()</c> hook is run even if the test fails.
@@ -30813,7 +30955,7 @@ type Test =
     /// <remarks>@since v18.8.0, v16.18.0</remarks>
     /// <param name="fn">The hook function. If the hook uses callbacks, the callback function is passed as the second argument.</param>
     /// <param name="options">Configuration options for the hook.</param>
-    abstract afterEach: Action<Test.HookFn option, Test.HookOptions option> with get, set
+    abstract afterEach: ?fn: Test.HookFn * ?options: Test.HookOptions -> unit
     abstract mock: Test.MockTracker
     /// <remarks>@since v22.20.0</remarks>
     abstract MockPropertyContext: MockPropertyContextConstructor with get, set
@@ -32782,7 +32924,7 @@ type SpecReporterConstructor =
     /// to set options such as buffering.
     /// </param>
     /// <remarks>@since v22.6.0</remarks>
-    abstract duplexPair: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) with get, set
+    abstract duplexPair: ?options: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex * Stream.Duplex
     /// <summary>
     /// Transform streams are <c>Duplex</c> streams where the output is in some way
     /// related to the input. Like all <c>Duplex</c> streams, <c>Transform</c> streams
@@ -32876,19 +33018,19 @@ type SpecReporterConstructor =
     /// <remarks>@since v15.4.0</remarks>
     /// <param name="signal">A signal representing possible cancellation</param>
     /// <param name="stream">A stream to attach a signal to.</param>
-    abstract addAbortSignal: Func<AbortSignal, Stream.Stream, Stream.Stream> with get, set
+    abstract addAbortSignal<'T when 'T :> Stream.Stream> : signal: AbortSignal * stream: 'T -> 'T
     /// <summary>
     /// Returns the default highWaterMark used by streams.
     /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
-    abstract getDefaultHighWaterMark: (bool -> float) with get, set
+    abstract getDefaultHighWaterMark: objectMode: bool -> float
     /// <summary>
     /// Sets the default highWaterMark used by streams.
     /// </summary>
     /// <remarks>@since v19.9.0</remarks>
     /// <param name="value">highWaterMark value</param>
-    abstract setDefaultHighWaterMark: Action<bool, float> with get, set
+    abstract setDefaultHighWaterMark: objectMode: bool * value: float -> unit
     /// <summary>
     /// A readable and/or writable stream/webstream.
     /// <br /><br />
@@ -33001,19 +33143,19 @@ type SpecReporterConstructor =
     /// Returns whether the stream has encountered an error.
     /// </summary>
     /// <remarks>@since v17.3.0, v16.14.0</remarks>
-    abstract isErrored: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) with get, set
+    abstract isErrored: stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool
     /// <summary>
     /// Returns whether the stream is readable.
     /// </summary>
     /// <remarks>@since v17.4.0, v16.14.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-    abstract isReadable: (U2<Stream.Readable, ReadableStream2> -> bool option) with get, set
+    abstract isReadable: stream: U2<Stream.Readable, ReadableStream2> -> bool option
     /// <summary>
     /// Returns whether the stream is writable.
     /// </summary>
     /// <remarks>@since v20.0.0</remarks>
     /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-    abstract isWritable: (U2<Stream.Writable, WritableStream2> -> bool option) with get, set
+    abstract isWritable: stream: U2<Stream.Writable, WritableStream2> -> bool option
 
     [<EmitConstructor>]
     abstract Create: unit -> SpecReporter
@@ -34051,7 +34193,7 @@ type Immediate =
 
 [<Interface>]
 type SetImmediate =
-    abstract __promisify__: Func<obj option, Timers.TimerOptions option, JS.Promise<obj>> with get, set
+    abstract __promisify__<'T> : ?value: 'T * ?options: Timers.TimerOptions -> JS.Promise<'T>
 
     [<Emit("$0($1...)")>]
     abstract Invoke<'TArgs> : callback: ('TArgs -> unit) * [<ParamArray>] args: 'TArgs -> Immediate
@@ -34060,7 +34202,7 @@ type SetImmediate =
     abstract Invoke: callback: (unit -> unit) -> Immediate
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<obj option, Timers.TimerOptions option, JS.Promise<obj>>) : SetImmediate =
+    static member Create(__promisify__: Func<'T option, Timers.TimerOptions option, JS.Promise<'T>>) : SetImmediate =
         jsNative
 
 type Timeout =
@@ -34109,7 +34251,7 @@ type Timeout =
 
 [<Interface>]
 type SetTimeout =
-    abstract __promisify__: Func<float option, obj option, Timers.TimerOptions option, JS.Promise<obj>> with get, set
+    abstract __promisify__<'T> : ?delay: float * ?value: 'T * ?options: Timers.TimerOptions -> JS.Promise<'T>
 
     [<Emit("$0($1...)")>]
     abstract Invoke<'TArgs> : callback: ('TArgs -> unit) * delay: float option * [<ParamArray>] args: 'TArgs -> Timeout
@@ -34119,7 +34261,7 @@ type SetTimeout =
 
     [<ParamObject; Emit("$0")>]
     static member Create
-        (__promisify__: Func<float option, obj option, Timers.TimerOptions option, JS.Promise<obj>>)
+        (__promisify__: Func<float option, 'T option, Timers.TimerOptions option, JS.Promise<'T>>)
         : SetTimeout =
         jsNative
 
@@ -34379,12 +34521,6 @@ type TextEncoderConstructor =
     [<EmitConstructor>]
     abstract Create: unit -> Util.TextEncoder
 
-type AddDeserializeCallback = delegate of callback: V8.StartupSnapshotCallbackFn * data: obj option -> unit
-
-type AddSerializeCallback = delegate of callback: V8.StartupSnapshotCallbackFn * data: obj option -> unit
-
-type SetDeserializeMainFunction = delegate of callback: V8.StartupSnapshotCallbackFn * data: obj option -> unit
-
 [<Interface>]
 type StartupSnapshot =
     /// <summary>
@@ -34392,33 +34528,33 @@ type StartupSnapshot =
     /// This can be used to release resources that should not or cannot be serialized or to convert user data into a form more suitable for serialization.
     /// </summary>
     /// <remarks>@since v18.6.0, v16.17.0</remarks>
-    abstract addSerializeCallback: AddSerializeCallback with get, set
+    abstract addSerializeCallback: callback: V8.StartupSnapshotCallbackFn * ?data: obj -> unit
     /// <summary>
     /// Add a callback that will be called when the Node.js instance is deserialized from a snapshot.
     /// The <c>callback</c> and the <c>data</c> (if provided) will be serialized into the snapshot, they can be used to re-initialize the state of the application or
     /// to re-acquire resources that the application needs when the application is restarted from the snapshot.
     /// </summary>
     /// <remarks>@since v18.6.0, v16.17.0</remarks>
-    abstract addDeserializeCallback: AddDeserializeCallback with get, set
+    abstract addDeserializeCallback: callback: V8.StartupSnapshotCallbackFn * ?data: obj -> unit
     /// <summary>
     /// This sets the entry point of the Node.js application when it is deserialized from a snapshot. This can be called only once in the snapshot building script.
     /// If called, the deserialized application no longer needs an additional entry point script to start up and will simply invoke the callback along with the deserialized
     /// data (if provided), otherwise an entry point script still needs to be provided to the deserialized application.
     /// </summary>
     /// <remarks>@since v18.6.0, v16.17.0</remarks>
-    abstract setDeserializeMainFunction: SetDeserializeMainFunction with get, set
+    abstract setDeserializeMainFunction: callback: V8.StartupSnapshotCallbackFn * ?data: obj -> unit
     /// <summary>
     /// Returns true if the Node.js instance is run to build a snapshot.
     /// </summary>
     /// <remarks>@since v18.6.0, v16.17.0</remarks>
-    abstract isBuildingSnapshot: (unit -> bool) with get, set
+    abstract isBuildingSnapshot: unit -> bool
 
     [<ParamObject; Emit("$0")>]
     static member Create
         (
-            addSerializeCallback: AddSerializeCallback,
-            addDeserializeCallback: AddDeserializeCallback,
-            setDeserializeMainFunction: SetDeserializeMainFunction,
+            addSerializeCallback: Action<V8.StartupSnapshotCallbackFn, obj option>,
+            addDeserializeCallback: Action<V8.StartupSnapshotCallbackFn, obj option>,
+            setDeserializeMainFunction: Action<V8.StartupSnapshotCallbackFn, obj option>,
             isBuildingSnapshot: (unit -> bool)
         ) : StartupSnapshot =
         jsNative
@@ -35693,7 +35829,7 @@ type MessagePortConstructor =
 
 [<Interface>]
 type BrotliCompress =
-    abstract __promisify__: BrotliCompress.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.BrotliOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.BrotliOptions * callback: Zlib.CompressCallback -> unit
@@ -35702,11 +35838,14 @@ type BrotliCompress =
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: BrotliCompress.Promisify) : BrotliCompress = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.BrotliOptions option, JS.Promise<NonSharedBuffer>>)
+        : BrotliCompress =
+        jsNative
 
 [<Interface>]
 type BrotliDecompress =
-    abstract __promisify__: BrotliDecompress.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.BrotliOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.BrotliOptions * callback: Zlib.CompressCallback -> unit
@@ -35715,11 +35854,14 @@ type BrotliDecompress =
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: BrotliDecompress.Promisify) : BrotliDecompress = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.BrotliOptions option, JS.Promise<NonSharedBuffer>>)
+        : BrotliDecompress =
+        jsNative
 
 [<Interface>]
 type Deflate =
-    abstract __promisify__: Deflate.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35728,11 +35870,14 @@ type Deflate =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Deflate.Promisify) : Deflate = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
+        : Deflate =
+        jsNative
 
 [<Interface>]
 type DeflateRaw =
-    abstract __promisify__: DeflateRaw.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35741,11 +35886,14 @@ type DeflateRaw =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: DeflateRaw.Promisify) : DeflateRaw = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
+        : DeflateRaw =
+        jsNative
 
 [<Interface>]
 type Gzip =
-    abstract __promisify__: Gzip.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35754,11 +35902,14 @@ type Gzip =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Gzip.Promisify) : Gzip = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
+        : Gzip =
+        jsNative
 
 [<Interface>]
 type Gunzip =
-    abstract __promisify__: Gunzip.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35767,11 +35918,14 @@ type Gunzip =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Gunzip.Promisify) : Gunzip = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
+        : Gunzip =
+        jsNative
 
 [<Interface>]
 type Inflate =
-    abstract __promisify__: Inflate.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35780,11 +35934,14 @@ type Inflate =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Inflate.Promisify) : Inflate = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
+        : Inflate =
+        jsNative
 
 [<Interface>]
 type InflateRaw =
-    abstract __promisify__: InflateRaw.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35793,11 +35950,14 @@ type InflateRaw =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: InflateRaw.Promisify) : InflateRaw = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
+        : InflateRaw =
+        jsNative
 
 [<Interface>]
 type Unzip =
-    abstract __promisify__: Unzip.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35806,11 +35966,14 @@ type Unzip =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Unzip.Promisify) : Unzip = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
+        : Unzip =
+        jsNative
 
 [<Interface>]
 type ZstdCompress =
-    abstract __promisify__: ZstdCompress.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZstdOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35819,11 +35982,14 @@ type ZstdCompress =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZstdOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: ZstdCompress.Promisify) : ZstdCompress = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZstdOptions option, JS.Promise<NonSharedBuffer>>)
+        : ZstdCompress =
+        jsNative
 
 [<Interface>]
 type ZstdDecompress =
-    abstract __promisify__: ZstdDecompress.Promisify with get, set
+    abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZstdOptions -> JS.Promise<NonSharedBuffer>
 
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
@@ -35832,7 +35998,10 @@ type ZstdDecompress =
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZstdOptions * callback: Zlib.CompressCallback -> unit
 
     [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: ZstdDecompress.Promisify) : ZstdDecompress = jsNative
+    static member Create
+        (__promisify__: Func<Zlib.InputType, Zlib.ZstdOptions option, JS.Promise<NonSharedBuffer>>)
+        : ZstdDecompress =
+        jsNative
 
 type Constants9 =
     abstract BROTLI_DECODE: float
@@ -36734,17 +36903,6 @@ type Exports =
     static member MessagePort
         with get (): MessagePortConstructor = jsNative
         and set (_: MessagePortConstructor): unit = jsNative
-
-module Access =
-    type Promisify = delegate of path: Fs.PathLike * mode: float option -> JS.Promise<unit>
-
-module AppendFile =
-    type Promisify =
-        delegate of
-            file: Fs.PathOrFileDescriptor *
-            data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
-            options: U2<string, Fs.WriteFileOptions2> option ->
-                JS.Promise<unit>
 
 /// <summary>node:assert</summary>
 module Assert =
@@ -41344,99 +41502,117 @@ module AsyncHooks =
 
 module BigInt64Array =
     module Every =
-        type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigInt64Array<'TArrayBuffer> -> bool
 
     module Filter =
-        type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigInt64Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigInt64Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigInt64Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: bigint * index: float * array: BigInt64Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigInt64Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: bigint * index: float * array: BigInt64Array<obj> -> bigint
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigInt64Array<'TArrayBuffer> -> bigint
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: bigint * currentValue: bigint * currentIndex: float * array: BigInt64Array<obj> -> bigint
+                previousValue: bigint * currentValue: bigint * currentIndex: float * array: BigInt64Array<'TArrayBuffer> ->
+                    bigint
 
-        type Callbackfn2 =
+        type Callbackfn2<'U, 'TArrayBuffer> =
             delegate of
-                previousValue: obj * currentValue: bigint * currentIndex: float * array: BigInt64Array<obj> -> obj
+                previousValue: 'U * currentValue: bigint * currentIndex: float * array: BigInt64Array<'TArrayBuffer> ->
+                    'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: bigint * currentValue: bigint * currentIndex: float * array: BigInt64Array<obj> -> bigint
+                previousValue: bigint * currentValue: bigint * currentIndex: float * array: BigInt64Array<'TArrayBuffer> ->
+                    bigint
 
-        type Callbackfn2 =
+        type Callbackfn2<'U, 'TArrayBuffer> =
             delegate of
-                previousValue: obj * currentValue: bigint * currentIndex: float * array: BigInt64Array<obj> -> obj
+                previousValue: 'U * currentValue: bigint * currentIndex: float * array: BigInt64Array<'TArrayBuffer> ->
+                    'U
 
     module Some =
-        type Predicate = delegate of value: bigint * index: float * array: BigInt64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigInt64Array<'TArrayBuffer> -> bool
 
     module Sort =
         type CompareFn = delegate of a: bigint * b: bigint -> Fs.ReadPosition
 
 module BigUint64Array =
     module Every =
-        type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigUint64Array<'TArrayBuffer> -> bool
 
     module Filter =
-        type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigUint64Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigUint64Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigUint64Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: bigint * index: float * array: BigUint64Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigUint64Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: bigint * index: float * array: BigUint64Array<obj> -> bigint
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigUint64Array<'TArrayBuffer> -> bigint
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: bigint * currentValue: bigint * currentIndex: float * array: BigUint64Array<obj> ->
+                previousValue: bigint *
+                currentValue: bigint *
+                currentIndex: float *
+                array: BigUint64Array<'TArrayBuffer> ->
                     bigint
 
-        type Callbackfn2 =
+        type Callbackfn2<'U, 'TArrayBuffer> =
             delegate of
-                previousValue: obj * currentValue: bigint * currentIndex: float * array: BigUint64Array<obj> -> obj
+                previousValue: 'U * currentValue: bigint * currentIndex: float * array: BigUint64Array<'TArrayBuffer> ->
+                    'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: bigint * currentValue: bigint * currentIndex: float * array: BigUint64Array<obj> ->
+                previousValue: bigint *
+                currentValue: bigint *
+                currentIndex: float *
+                array: BigUint64Array<'TArrayBuffer> ->
                     bigint
 
-        type Callbackfn2 =
+        type Callbackfn2<'U, 'TArrayBuffer> =
             delegate of
-                previousValue: obj * currentValue: bigint * currentIndex: float * array: BigUint64Array<obj> -> obj
+                previousValue: 'U * currentValue: bigint * currentIndex: float * array: BigUint64Array<'TArrayBuffer> ->
+                    'U
 
     module Some =
-        type Predicate = delegate of value: bigint * index: float * array: BigUint64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: bigint * index: float * array: BigUint64Array<'TArrayBuffer> -> bool
 
     module Sort =
         type CompareFn = delegate of a: bigint * b: bigint -> Fs.ReadPosition
-
-module BrotliCompress =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.BrotliOptions option -> JS.Promise<NonSharedBuffer>
-
-module BrotliDecompress =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.BrotliOptions option -> JS.Promise<NonSharedBuffer>
 
 /// <summary>node:buffer</summary>
 module Buffer =
@@ -41737,45 +41913,51 @@ module Buffer =
             | [<CompiledName("transparent")>] Transparent
 
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Buffer<obj> -> obj
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * array: Buffer<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Buffer<obj> -> obj
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * array: Buffer<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Buffer<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Buffer<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Buffer<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Buffer<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Buffer<obj> -> unit
+        type Callbackfn<'TArrayBuffer> = delegate of value: float * index: float * array: Buffer<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Buffer<obj> -> float
+        type Callbackfn<'TArrayBuffer> = delegate of value: float * index: float * array: Buffer<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
-            delegate of previousValue: float * currentValue: float * currentIndex: float * array: Buffer<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of
+                previousValue: float * currentValue: float * currentIndex: float * array: Buffer<'TArrayBuffer> -> float
 
-        type Callbackfn2 =
-            delegate of previousValue: float * currentValue: float * currentIndex: float * array: Buffer<obj> -> float
+        type Callbackfn2<'TArrayBuffer> =
+            delegate of
+                previousValue: float * currentValue: float * currentIndex: float * array: Buffer<'TArrayBuffer> -> float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Buffer<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Buffer<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
-            delegate of previousValue: float * currentValue: float * currentIndex: float * array: Buffer<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of
+                previousValue: float * currentValue: float * currentIndex: float * array: Buffer<'TArrayBuffer> -> float
 
-        type Callbackfn2 =
-            delegate of previousValue: float * currentValue: float * currentIndex: float * array: Buffer<obj> -> float
+        type Callbackfn2<'TArrayBuffer> =
+            delegate of
+                previousValue: float * currentValue: float * currentIndex: float * array: Buffer<'TArrayBuffer> -> float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Buffer<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Buffer<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Buffer<obj> -> obj
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * array: Buffer<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
@@ -49850,12 +50032,6 @@ module ChildProcess =
             | [<CompiledName("utf16le")>] Utf16le2
             | [<CompiledName("utf8")>] Utf82
 
-module Chmod =
-    type Promisify = delegate of path: Fs.PathLike * mode: Fs.Mode -> JS.Promise<unit>
-
-module Chown =
-    type Promisify = delegate of path: Fs.PathLike * uid: float * gid: float -> JS.Promise<unit>
-
 /// <summary>node:cluster</summary>
 module Cluster =
     [<Interface>]
@@ -52253,9 +52429,6 @@ module Console =
             | [<CompiledValue(false)>] False
             | [<CompiledValue(true)>] True
 
-module CopyFile =
-    type Promisify = delegate of src: Fs.PathLike * dst: Fs.PathLike * mode: float option -> JS.Promise<unit>
-
 /// <summary>node:crypto</summary>
 module Crypto =
     /// <summary>
@@ -54315,10 +54488,9 @@ module Crypto =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Hash.duplexPair", "node:crypto")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -54419,27 +54591,24 @@ module Crypto =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Hash.addAbortSignal", "node:crypto")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Hash.getDefaultHighWaterMark", "node:crypto")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Hash.setDefaultHighWaterMark", "node:crypto")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -54559,28 +54728,25 @@ module Crypto =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Hash.isErrored", "node:crypto")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Hash.isReadable", "node:crypto")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Hash.isWritable", "node:crypto")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <summary>
     /// The <c>Hmac</c> class is a utility for creating cryptographic HMAC digests. It can
@@ -56384,10 +56550,9 @@ module Crypto =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Hmac.duplexPair", "node:crypto")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -56488,27 +56653,24 @@ module Crypto =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Hmac.addAbortSignal", "node:crypto")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Hmac.getDefaultHighWaterMark", "node:crypto")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Hmac.setDefaultHighWaterMark", "node:crypto")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -56628,28 +56790,25 @@ module Crypto =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Hmac.isErrored", "node:crypto")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Hmac.isReadable", "node:crypto")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Hmac.isWritable", "node:crypto")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type KeyObjectType =
@@ -59054,10 +59213,9 @@ module Crypto =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Cipher.duplexPair", "node:crypto")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -59158,27 +59316,24 @@ module Crypto =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Cipher.addAbortSignal", "node:crypto")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Cipher.getDefaultHighWaterMark", "node:crypto")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Cipher.setDefaultHighWaterMark", "node:crypto")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -59298,28 +59453,25 @@ module Crypto =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Cipher.isErrored", "node:crypto")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Cipher.isReadable", "node:crypto")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Cipher.isWritable", "node:crypto")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     type CipherCCM =
         inherit Cipher
@@ -65390,10 +65542,9 @@ module Crypto =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Decipher.duplexPair", "node:crypto")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -65494,27 +65645,24 @@ module Crypto =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Decipher.addAbortSignal", "node:crypto")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Decipher.getDefaultHighWaterMark", "node:crypto")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Decipher.setDefaultHighWaterMark", "node:crypto")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -65634,28 +65782,25 @@ module Crypto =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Decipher.isErrored", "node:crypto")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Decipher.isReadable", "node:crypto")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Decipher.isWritable", "node:crypto")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     type DecipherCCM =
         inherit Decipher
@@ -71436,10 +71581,9 @@ module Crypto =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Sign.duplexPair", "node:crypto")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -71540,27 +71684,24 @@ module Crypto =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Sign.addAbortSignal", "node:crypto")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Sign.getDefaultHighWaterMark", "node:crypto")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Sign.setDefaultHighWaterMark", "node:crypto")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -71680,28 +71821,25 @@ module Crypto =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Sign.isErrored", "node:crypto")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Sign.isReadable", "node:crypto")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Sign.isWritable", "node:crypto")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <summary>
     /// The <c>Verify</c> class is a utility for verifying signatures. It can be used in one
@@ -73116,10 +73254,9 @@ module Crypto =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Verify.duplexPair", "node:crypto")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -73220,27 +73357,24 @@ module Crypto =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Verify.addAbortSignal", "node:crypto")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Verify.getDefaultHighWaterMark", "node:crypto")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Verify.setDefaultHighWaterMark", "node:crypto")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -73360,28 +73494,25 @@ module Crypto =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Verify.isErrored", "node:crypto")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Verify.isReadable", "node:crypto")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Verify.isWritable", "node:crypto")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <summary>
     /// The <c>DiffieHellman</c> class is a utility for creating Diffie-Hellman key
@@ -81015,11 +81146,9 @@ module Crypto =
             module Readable =
                 type Promises =
                     abstract finished:
-                        Func<
-                            U3<ReadWriteStream, ReadableStream2, WritableStream2>,
-                            Stream.Promises.FinishedOptions option,
+                        stream: U3<ReadWriteStream, ReadableStream2, WritableStream2> *
+                        ?options: Stream.Promises.FinishedOptions ->
                             JS.Promise<unit>
-                         > with get, set
 
                     abstract pipeline<'A, 'B> : source: 'A * destination: 'B * ?options: Stream.PipelineOptions -> obj
 
@@ -81435,14 +81564,6 @@ module DOMException =
 
         [<ParamObject; Emit("$0")>]
         static member Create(?name: string, ?cause: obj) : Options = jsNative
-
-module Deflate =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZlibOptions option -> JS.Promise<NonSharedBuffer>
-
-module DeflateRaw =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZlibOptions option -> JS.Promise<NonSharedBuffer>
 
 /// <summary>node:dgram</summary>
 module Dgram =
@@ -85001,7 +85122,7 @@ module Dns =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract getServers: (unit -> string[]) with get, set
+        abstract getServers: unit -> string[]
         /// <summary>
         /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
         /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
@@ -85239,7 +85360,7 @@ module Dns =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract lookupService: Func<string, float, JS.Promise<Dns.Promises.LookupService.Result.Item>> with get, set
+        abstract lookupService: address: string * port: float -> JS.Promise<Dns.Promises.LookupService.Result.Item>
         /// <summary>
         /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
         /// of the resource records. When successful, the <c>Promise</c> is resolved with an
@@ -85450,27 +85571,27 @@ module Dns =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolveAny: (string -> JS.Promise<AnyRecord[]>) with get, set
+        abstract resolveAny: hostname: string -> JS.Promise<AnyRecord[]>
         /// <summary>
         /// Uses the DNS protocol to resolve <c>CAA</c> records for the <c>hostname</c>. On success,
         /// the <c>Promise</c> is resolved with an array of objects containing available
         /// certification authority authorization records available for the <c>hostname</c> (e.g. <c>[{critical: 0, iodef: 'mailto:pki@example.com'},{critical: 128, issue: 'pki.example.com'}]</c>).
         /// </summary>
         /// <remarks>@since v15.0.0, v14.17.0</remarks>
-        abstract resolveCaa: (string -> JS.Promise<CaaRecord[]>) with get, set
+        abstract resolveCaa: hostname: string -> JS.Promise<CaaRecord[]>
         /// <summary>
         /// Uses the DNS protocol to resolve <c>CNAME</c> records for the <c>hostname</c>. On success,
         /// the <c>Promise</c> is resolved with an array of canonical name records available for
         /// the <c>hostname</c> (e.g. <c>['bar.example.com']</c>).
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolveCname: (string -> JS.Promise<string[]>) with get, set
+        abstract resolveCname: hostname: string -> JS.Promise<string[]>
         /// <summary>
         /// Uses the DNS protocol to resolve mail exchange records (<c>MX</c> records) for the <c>hostname</c>. On success, the <c>Promise</c> is resolved with an array of objects
         /// containing both a <c>priority</c> and <c>exchange</c> property (e.g.<c>[{priority: 10, exchange: 'mx.example.com'}, ...]</c>).
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolveMx: (string -> JS.Promise<MxRecord[]>) with get, set
+        abstract resolveMx: hostname: string -> JS.Promise<MxRecord[]>
         /// <summary>
         /// Uses the DNS protocol to resolve regular expression-based records (<c>NAPTR</c> records) for the <c>hostname</c>. On success, the <c>Promise</c> is resolved with an array
         /// of objects with the following properties:
@@ -85493,19 +85614,19 @@ module Dns =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolveNaptr: (string -> JS.Promise<NaptrRecord[]>) with get, set
+        abstract resolveNaptr: hostname: string -> JS.Promise<NaptrRecord[]>
         /// <summary>
         /// Uses the DNS protocol to resolve name server records (<c>NS</c> records) for the <c>hostname</c>. On success, the <c>Promise</c> is resolved with an array of name server
         /// records available for <c>hostname</c> (e.g.<c>['ns1.example.com', 'ns2.example.com']</c>).
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolveNs: (string -> JS.Promise<string[]>) with get, set
+        abstract resolveNs: hostname: string -> JS.Promise<string[]>
         /// <summary>
         /// Uses the DNS protocol to resolve pointer records (<c>PTR</c> records) for the <c>hostname</c>. On success, the <c>Promise</c> is resolved with an array of strings
         /// containing the reply records.
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolvePtr: (string -> JS.Promise<string[]>) with get, set
+        abstract resolvePtr: hostname: string -> JS.Promise<string[]>
         /// <summary>
         /// Uses the DNS protocol to resolve a start of authority record (<c>SOA</c> record) for
         /// the <c>hostname</c>. On success, the <c>Promise</c> is resolved with an object with the
@@ -85531,7 +85652,7 @@ module Dns =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolveSoa: (string -> JS.Promise<SoaRecord>) with get, set
+        abstract resolveSoa: hostname: string -> JS.Promise<SoaRecord>
         /// <summary>
         /// Uses the DNS protocol to resolve service records (<c>SRV</c> records) for the <c>hostname</c>. On success, the <c>Promise</c> is resolved with an array of objects with
         /// the following properties:
@@ -85550,7 +85671,7 @@ module Dns =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolveSrv: (string -> JS.Promise<SrvRecord[]>) with get, set
+        abstract resolveSrv: hostname: string -> JS.Promise<SrvRecord[]>
         /// <summary>
         /// Uses the DNS protocol to resolve certificate associations (<c>TLSA</c> records) for
         /// the <c>hostname</c>. On success, the <c>Promise</c> is resolved with an array of objectsAdd commentMore actions
@@ -85570,7 +85691,7 @@ module Dns =
         /// </code>
         /// </summary>
         /// <remarks>@since v22.15.0</remarks>
-        abstract resolveTlsa: (string -> JS.Promise<TlsaRecord[]>) with get, set
+        abstract resolveTlsa: hostname: string -> JS.Promise<TlsaRecord[]>
         /// <summary>
         /// Uses the DNS protocol to resolve text queries (<c>TXT</c> records) for the <c>hostname</c>. On success, the <c>Promise</c> is resolved with a two-dimensional array
         /// of the text records available for <c>hostname</c> (e.g.<c>[ ['v=spf1 ip4:0.0.0.0 ', '~all' ] ]</c>). Each sub-array contains TXT chunks of
@@ -85578,7 +85699,7 @@ module Dns =
         /// treated separately.
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract resolveTxt: (string -> JS.Promise<string[][]>) with get, set
+        abstract resolveTxt: hostname: string -> JS.Promise<string[][]>
         /// <summary>
         /// Performs a reverse DNS query that resolves an IPv4 or IPv6 address to an
         /// array of host names.
@@ -85587,7 +85708,7 @@ module Dns =
         /// is one of the <a href="https://nodejs.org/docs/latest-v20.x/api/dns.html#error-codes">DNS error codes</a>.
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
-        abstract reverse: (string -> JS.Promise<string[]>) with get, set
+        abstract reverse: ip: string -> JS.Promise<string[]>
         /// <summary>
         /// Get the default value for <c>verbatim</c> in lookup and <a href="https://nodejs.org/docs/latest-v20.x/api/dns.html#dnspromiseslookuphostname-options">dnsPromises.lookup()</a>.
         /// The value could be:
@@ -85596,7 +85717,7 @@ module Dns =
         /// * <c>verbatim</c>: for <c>verbatim</c> defaulting to <c>true</c>.
         /// </summary>
         /// <remarks>@since v20.1.0</remarks>
-        abstract getDefaultResultOrder: (unit -> Dns.Promises.GetDefaultResultOrder.Result) with get, set
+        abstract getDefaultResultOrder: unit -> Dns.Promises.GetDefaultResultOrder.Result
         /// <summary>
         /// Sets the IP address and port of servers to be used when performing DNS
         /// resolution. The <c>servers</c> argument is an array of <a href="https://tools.ietf.org/html/rfc5952#section-6">RFC 5952</a> formatted
@@ -85622,7 +85743,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v10.6.0</remarks>
         /// <param name="servers">array of <c>RFC 5952</c> formatted addresses</param>
-        abstract setServers: (string[] -> unit) with get, set
+        abstract setServers: servers: string[] -> unit
         /// <summary>
         /// Set the default value of <c>order</c> in <c>dns.lookup()</c> and <c>{@link lookup}</c>. The value could be:
         /// <br /><br />
@@ -85637,7 +85758,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v16.4.0, v14.18.0</remarks>
         /// <param name="order">must be <c>'ipv4first'</c>, <c>'ipv6first'</c> or <c>'verbatim'</c>.</param>
-        abstract setDefaultResultOrder: (Dns.LookupOptions.Order -> unit) with get, set
+        abstract setDefaultResultOrder: order: Dns.LookupOptions.Order -> unit
         /// <remarks>TypeScript type: <c>"ENODATA"</c></remarks>
         abstract NODATA: string
         /// <remarks>TypeScript type: <c>"EFORMERR"</c></remarks>
@@ -91643,112 +91764,126 @@ module ExecFile =
                 static member Create(stdout: U2<string, NonSharedBuffer>, stderr: U2<string, NonSharedBuffer>) : Item8 =
                     jsNative
 
-module Fchmod =
-    type Promisify = delegate of fd: float * mode: Fs.Mode -> JS.Promise<unit>
-
-module Fchown =
-    type Promisify = delegate of fd: float * uid: float * gid: float -> JS.Promise<unit>
-
-module Finished =
-    type Promisify =
-        delegate of
-            stream: U3<ReadWriteStream, ReadableStream2, WritableStream2> * options: Stream.FinishedOptions option ->
-                JS.Promise<unit>
-
 module Float32Array =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Float32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Float32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Float32Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Float32Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Float32Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Float32Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Float32Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Float32Array<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Float32Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Float32Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Float32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
 
 module Float64Array =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Float64Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Float64Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Float64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Float64Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Float64Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Float64Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Float64Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Float64Array<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Float64Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Float64Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Float64Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
@@ -94112,10 +94247,9 @@ module Fs =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("ReadStream.duplexPair", "node:fs")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -94216,27 +94350,24 @@ module Fs =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("ReadStream.addAbortSignal", "node:fs")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("ReadStream.getDefaultHighWaterMark", "node:fs")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("ReadStream.setDefaultHighWaterMark", "node:fs")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -94356,28 +94487,25 @@ module Fs =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("ReadStream.isErrored", "node:fs")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("ReadStream.isReadable", "node:fs")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("ReadStream.isWritable", "node:fs")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <summary>
     /// * Extends <c>stream.Writable</c>
@@ -95450,10 +95578,9 @@ module Fs =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("WriteStream.duplexPair", "node:fs")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -95554,27 +95681,24 @@ module Fs =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("WriteStream.addAbortSignal", "node:fs")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("WriteStream.getDefaultHighWaterMark", "node:fs")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("WriteStream.setDefaultHighWaterMark", "node:fs")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -95694,28 +95818,25 @@ module Fs =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("WriteStream.isErrored", "node:fs")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("WriteStream.isReadable", "node:fs")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("WriteStream.isWritable", "node:fs")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     type StatSyncFn =
         /// <summary>
@@ -96275,7 +96396,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract access: Func<PathLike, float option, JS.Promise<unit>> with get, set
+        abstract access: path: PathLike * ?mode: float -> JS.Promise<unit>
         /// <summary>
         /// Asynchronously copies <c>src</c> to <c>dest</c>. By default, <c>dest</c> is overwritten if it
         /// already exists.
@@ -96310,7 +96431,7 @@ module Fs =
         /// <c>fs.constants.COPYFILE_EXCL | fs.constants.COPYFILE_FICLONE</c>)
         /// </param>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract copyFile: Func<PathLike, PathLike, float option, JS.Promise<unit>> with get, set
+        abstract copyFile: src: PathLike * dest: PathLike * ?mode: float -> JS.Promise<unit>
         /// <summary>
         /// Opens a <c>FileHandle</c>.
         /// <br /><br />
@@ -96324,19 +96445,19 @@ module Fs =
         /// <param name="flags">See <c>support of file system </c>flags``.</param>
         /// <param name="mode">Sets the file mode (permission and sticky bits) if the file is created.</param>
         /// <returns>Fulfills with a {FileHandle} object.</returns>
-        abstract ``open``: Func<PathLike, OpenMode option, OpenMode option, JS.Promise<Fs.Promises.FileHandle>> with get, set
+        abstract ``open``: path: PathLike * ?flags: OpenMode * ?mode: OpenMode -> JS.Promise<Fs.Promises.FileHandle>
         /// <summary>
         /// Renames <c>oldPath</c> to <c>newPath</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract rename: Func<PathLike, PathLike, JS.Promise<unit>> with get, set
+        abstract rename: oldPath: PathLike * newPath: PathLike -> JS.Promise<unit>
         /// <summary>
         /// Truncates (shortens or extends the length) of the content at <c>path</c> to <c>len</c> bytes.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract truncate: Func<PathLike, float option, JS.Promise<unit>> with get, set
+        abstract truncate: path: PathLike * ?len: float -> JS.Promise<unit>
         /// <summary>
         /// Removes the directory identified by <c>path</c>.
         /// <br /><br />
@@ -96347,13 +96468,13 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract rmdir: Func<PathLike, RmDirOptions option, JS.Promise<unit>> with get, set
+        abstract rmdir: path: PathLike * ?options: RmDirOptions -> JS.Promise<unit>
         /// <summary>
         /// Removes files and directories (modeled on the standard POSIX <c>rm</c> utility).
         /// </summary>
         /// <remarks>@since v14.14.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract rm: Func<PathLike, RmOptions option, JS.Promise<unit>> with get, set
+        abstract rm: path: PathLike * ?options: RmOptions -> JS.Promise<unit>
         /// <summary>
         /// Asynchronously creates a directory.
         /// <br /><br />
@@ -96676,7 +96797,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract symlink: Func<PathLike, PathLike, string option, JS.Promise<unit>> with get, set
+        abstract symlink: target: PathLike * path: PathLike * ?``type``: string -> JS.Promise<unit>
         /// <summary>
         /// Equivalent to <c>fsPromises.stat()</c> unless <c>path</c> refers to a symbolic link,
         /// in which case the link itself is stat-ed, not the file that it refers to.
@@ -96724,7 +96845,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract link: Func<PathLike, PathLike, JS.Promise<unit>> with get, set
+        abstract link: existingPath: PathLike * newPath: PathLike -> JS.Promise<unit>
         /// <summary>
         /// If <c>path</c> refers to a symbolic link, then the link is removed without affecting
         /// the file or directory to which that link refers. If the <c>path</c> refers to a file
@@ -96732,13 +96853,13 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract unlink: (PathLike -> JS.Promise<unit>) with get, set
+        abstract unlink: path: PathLike -> JS.Promise<unit>
         /// <summary>
         /// Changes the permissions of a file.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract chmod: Func<PathLike, Mode, JS.Promise<unit>> with get, set
+        abstract chmod: path: PathLike * mode: Mode -> JS.Promise<unit>
         /// <summary>
         /// Changes the permissions on a symbolic link.
         /// <br /><br />
@@ -96746,13 +96867,13 @@ module Fs =
         /// </summary>
         /// <remarks>@deprecated Since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract lchmod: Func<PathLike, Mode, JS.Promise<unit>> with get, set
+        abstract lchmod: path: PathLike * mode: Mode -> JS.Promise<unit>
         /// <summary>
         /// Changes the ownership on a symbolic link.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract lchown: Func<PathLike, float, float, JS.Promise<unit>> with get, set
+        abstract lchown: path: PathLike * uid: float * gid: float -> JS.Promise<unit>
         /// <summary>
         /// Changes the access and modification times of a file in the same way as <c>fsPromises.utimes()</c>, with the difference that if the path refers to a
         /// symbolic link, then the link is not dereferenced: instead, the timestamps of
@@ -96760,13 +96881,13 @@ module Fs =
         /// </summary>
         /// <remarks>@since v14.5.0, v12.19.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract lutimes: Func<PathLike, TimeLike, TimeLike, JS.Promise<unit>> with get, set
+        abstract lutimes: path: PathLike * atime: TimeLike * mtime: TimeLike -> JS.Promise<unit>
         /// <summary>
         /// Changes the ownership of a file.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract chown: Func<PathLike, float, float, JS.Promise<unit>> with get, set
+        abstract chown: path: PathLike * uid: float * gid: float -> JS.Promise<unit>
         /// <summary>
         /// Change the file system timestamps of the object referenced by <c>path</c>.
         /// <br /><br />
@@ -96778,7 +96899,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract utimes: Func<PathLike, TimeLike, TimeLike, JS.Promise<unit>> with get, set
+        abstract utimes: path: PathLike * atime: TimeLike * mtime: TimeLike -> JS.Promise<unit>
         /// <summary>
         /// Determines the actual location of <c>path</c> using the same semantics as the <c>fs.realpath.native()</c> function.
         /// <br /><br />
@@ -96800,7 +96921,29 @@ module Fs =
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        abstract realpath: Func<PathLike, U2<string, ObjectEncodingOptions> option, JS.Promise<string>> with get, set
+        abstract realpath: path: PathLike * ?options: U2<string, ObjectEncodingOptions> -> JS.Promise<string>
+        /// <summary>
+        /// Determines the actual location of <c>path</c> using the same semantics as the <c>fs.realpath.native()</c> function.
+        /// <br /><br />
+        /// Only paths that can be converted to UTF8 strings are supported.
+        /// <br /><br />
+        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+        /// object with an <c>encoding</c> property specifying the character encoding to use for
+        /// the path. If the <c>encoding</c> is set to <c>'buffer'</c>, the path returned will be
+        /// passed as a <c>Buffer</c> object.
+        /// <br /><br />
+        /// On Linux, when Node.js is linked against musl libc, the procfs file system must
+        /// be mounted on <c>/proc</c> in order for this function to work. Glibc does not have
+        /// this restriction.
+        /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
+        /// </summary>
+        /// <remarks>@since v10.0.0</remarks>
+        /// <returns>Fulfills with the resolved path upon success.</returns>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+        abstract realpath: path: PathLike * options: BufferEncodingOption -> JS.Promise<NonSharedBuffer>
         /// <summary>
         /// Creates a unique temporary directory. A unique directory name is generated by
         /// appending six random characters to the end of the provided <c>prefix</c>. Due to
@@ -96833,7 +96976,40 @@ module Fs =
         /// <returns>Fulfills with a string containing the file system path of the newly created temporary directory.</returns>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        abstract mkdtemp: Func<string, U2<string, ObjectEncodingOptions> option, JS.Promise<string>> with get, set
+        abstract mkdtemp: prefix: string * ?options: U2<string, ObjectEncodingOptions> -> JS.Promise<string>
+        /// <summary>
+        /// Creates a unique temporary directory. A unique directory name is generated by
+        /// appending six random characters to the end of the provided <c>prefix</c>. Due to
+        /// platform inconsistencies, avoid trailing <c>X</c> characters in <c>prefix</c>. Some
+        /// platforms, notably the BSDs, can return more than six random characters, and
+        /// replace trailing <c>X</c> characters in <c>prefix</c> with random characters.
+        /// <br /><br />
+        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+        /// object with an <c>encoding</c> property specifying the character encoding to use.
+        /// <code lang="js">
+        /// import { mkdtemp } from 'node:fs/promises';
+        /// import { join } from 'node:path';
+        /// import { tmpdir } from 'node:os';
+        ///
+        /// try {
+        ///   await mkdtemp(join(tmpdir(), 'foo-'));
+        /// } catch (err) {
+        ///   console.error(err);
+        /// }
+        /// </code>
+        /// <br /><br />
+        /// The <c>fsPromises.mkdtemp()</c> method will append the six randomly selected
+        /// characters directly to the <c>prefix</c> string. For instance, given a directory <c>/tmp</c>, if the intention is to create a temporary directory _within_ <c>/tmp</c>, the <c>prefix</c> must end with a trailing
+        /// platform-specific path separator
+        /// (<c>import { sep } from 'node:path'</c>).
+        /// Asynchronously creates a unique temporary directory.
+        /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory.
+        /// </summary>
+        /// <remarks>@since v10.0.0</remarks>
+        /// <returns>Fulfills with a string containing the file system path of the newly created temporary directory.</returns>
+        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+        abstract mkdtemp: prefix: string * options: BufferEncodingOption -> JS.Promise<NonSharedBuffer>
 
         /// <summary>
         /// Asynchronously writes data to a file, replacing the file if it already exists. <c>data</c> can be a string, a buffer, an
@@ -96885,13 +97061,14 @@ module Fs =
         /// <param name="file">filename or <c>FileHandle</c></param>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
         abstract writeFile:
-            Func<
+            file:
                 U4<
                     string,
                     Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     Fs.Promises.FileHandle,
                     Url.URL
-                 >,
+                 > *
+            data:
                 U15<
                     string,
                     Fable.Core.TS.Es.AsyncIterable<Crypto.BinaryLike, obj, obj>,
@@ -96908,10 +97085,9 @@ module Fs =
                     Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
-                 >,
-                U2<string, Fs.Promises.WriteFile.Options> option,
+                 > *
+            ?options: U2<string, Fs.Promises.WriteFile.Options> ->
                 JS.Promise<unit>
-             > with get, set
 
         /// <summary>
         /// Asynchronously append data to a file, creating the file if it does not yet
@@ -96928,13 +97104,14 @@ module Fs =
         /// <param name="path">filename or {FileHandle}</param>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
         abstract appendFile:
-            Func<
+            path:
                 U4<
                     string,
                     Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     Fs.Promises.FileHandle,
                     Url.URL
-                 >,
+                 > *
+            data:
                 U15<
                     string,
                     Fable.Core.TS.Es.AsyncIterable<Crypto.BinaryLike, obj, obj>,
@@ -96951,10 +97128,9 @@ module Fs =
                     Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
                     Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
-                 >,
-                U2<string, Fs.Promises.AppendFile.Options> option,
+                 > *
+            ?options: U2<string, Fs.Promises.AppendFile.Options> ->
                 JS.Promise<unit>
-             > with get, set
 
         /// <summary>
         /// Asynchronously reads the entire contents of a file.
@@ -97229,7 +97405,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v12.12.0</remarks>
         /// <returns>Fulfills with an {fs.Dir}.</returns>
-        abstract opendir: Func<PathLike, OpenDirOptions option, JS.Promise<Dir>> with get, set
+        abstract opendir: path: PathLike * ?options: OpenDirOptions -> JS.Promise<Dir>
 
         /// <summary>
         /// Returns an async iterator that watches for changes on <c>filename</c>, where <c>filename</c>is either a file or a directory.
@@ -97342,7 +97518,7 @@ module Fs =
         /// <param name="src">source path to copy.</param>
         /// <param name="dest">destination path to copy to.</param>
         /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
-        abstract cp: Func<U2<string, URL>, U2<string, URL>, CopyOptions option, JS.Promise<unit>> with get, set
+        abstract cp: source: U2<string, URL> * destination: U2<string, URL> * ?opts: CopyOptions -> JS.Promise<unit>
         /// <summary>
         /// <code lang="js">
         /// import { glob } from 'node:fs/promises';
@@ -105564,12 +105740,6 @@ module Fstat =
             [<ParamObject; Emit("$0")>]
             static member Create(bigint: bool) : Options2 = jsNative
 
-module Ftruncate =
-    type Promisify = delegate of fd: float * len: float option -> JS.Promise<unit>
-
-module Futimes =
-    type Promisify = delegate of fd: float * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
-
 module GCOptions =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Execution =
@@ -105941,14 +106111,6 @@ module GenerateKeyPair =
 
                 [<ParamObject; Emit("$0")>]
                 static member Create(publicKey: string, privateKey: string) : Item9 = jsNative
-
-module Gunzip =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZlibOptions option -> JS.Promise<NonSharedBuffer>
-
-module Gzip =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZlibOptions option -> JS.Promise<NonSharedBuffer>
 
 module Headers =
     type Append = delegate of name: string * value: string -> unit
@@ -109648,10 +109810,9 @@ module Http =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("OutgoingMessage.duplexPair", "node:http")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -109752,27 +109913,24 @@ module Http =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("OutgoingMessage.addAbortSignal", "node:http")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("OutgoingMessage.getDefaultHighWaterMark", "node:http")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("OutgoingMessage.setDefaultHighWaterMark", "node:http")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A module method to pipe between streams and generators forwarding errors and
@@ -109845,28 +110003,25 @@ module Http =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("OutgoingMessage.isErrored", "node:http")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("OutgoingMessage.isReadable", "node:http")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("OutgoingMessage.isWritable", "node:http")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <summary>
     /// This object is created internally by an HTTP server, not by the user. It is
@@ -111437,10 +111592,9 @@ module Http =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("ServerResponse.duplexPair", "node:http")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -111541,27 +111695,24 @@ module Http =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("ServerResponse.addAbortSignal", "node:http")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("ServerResponse.getDefaultHighWaterMark", "node:http")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("ServerResponse.setDefaultHighWaterMark", "node:http")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A module method to pipe between streams and generators forwarding errors and
@@ -111634,28 +111785,25 @@ module Http =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("ServerResponse.isErrored", "node:http")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("ServerResponse.isReadable", "node:http")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("ServerResponse.isWritable", "node:http")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     [<Interface>]
     type InformationEvent =
@@ -113489,10 +113637,9 @@ module Http =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("ClientRequest.duplexPair", "node:http")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -113593,27 +113740,24 @@ module Http =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("ClientRequest.addAbortSignal", "node:http")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("ClientRequest.getDefaultHighWaterMark", "node:http")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("ClientRequest.setDefaultHighWaterMark", "node:http")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A module method to pipe between streams and generators forwarding errors and
@@ -113686,28 +113830,25 @@ module Http =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("ClientRequest.isErrored", "node:http")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("ClientRequest.isReadable", "node:http")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("ClientRequest.isWritable", "node:http")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <summary>
     /// An <c>IncomingMessage</c> object is created by Server or ClientRequest and passed as the first argument to the <c>'request'</c> and <c>'response'</c> event respectively. It may be used to
@@ -115290,10 +115431,9 @@ module Http =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("IncomingMessage.duplexPair", "node:http")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -115394,27 +115534,24 @@ module Http =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("IncomingMessage.addAbortSignal", "node:http")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("IncomingMessage.getDefaultHighWaterMark", "node:http")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("IncomingMessage.setDefaultHighWaterMark", "node:http")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -115534,28 +115671,25 @@ module Http =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("IncomingMessage.isErrored", "node:http")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("IncomingMessage.isReadable", "node:http")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("IncomingMessage.isWritable", "node:http")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     [<Interface>]
     type AgentOptions =
@@ -122864,7 +122998,13 @@ module Http2 =
         /// </summary>
         [<Emit("$0.addListener('connect', $1)")>]
         abstract addListenerConnect:
-            listener: Http2.ServerHttp2Session.AddListener.Listener ->
+            listener:
+                Http2.ServerHttp2Session.AddListener.Listener<
+                    'Http1Request,
+                    'Http1Response,
+                    'Http2Request,
+                    'Http2Response
+                 > ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -122911,7 +123051,7 @@ module Http2 =
         /// </summary>
         [<Emit("$0.on('connect', $1)")>]
         abstract onConnect:
-            listener: Http2.ServerHttp2Session.On.Listener ->
+            listener: Http2.ServerHttp2Session.On.Listener<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response> ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -122961,7 +123101,8 @@ module Http2 =
         /// </summary>
         [<Emit("$0.once('connect', $1)")>]
         abstract onceConnect:
-            listener: Http2.ServerHttp2Session.Once.Listener ->
+            listener:
+                Http2.ServerHttp2Session.Once.Listener<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response> ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -123009,7 +123150,13 @@ module Http2 =
         /// </summary>
         [<Emit("$0.prependListener('connect', $1)")>]
         abstract prependListenerConnect:
-            listener: Http2.ServerHttp2Session.PrependListener.Listener ->
+            listener:
+                Http2.ServerHttp2Session.PrependListener.Listener<
+                    'Http1Request,
+                    'Http1Response,
+                    'Http2Request,
+                    'Http2Response
+                 > ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -123046,7 +123193,13 @@ module Http2 =
         /// </summary>
         [<Emit("$0.prependOnceListener('connect', $1)")>]
         abstract prependOnceListenerConnect:
-            listener: Http2.ServerHttp2Session.PrependOnceListener.Listener ->
+            listener:
+                Http2.ServerHttp2Session.PrependOnceListener.Listener<
+                    'Http1Request,
+                    'Http1Response,
+                    'Http2Request,
+                    'Http2Response
+                 > ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -126438,18 +126591,16 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Http2ServerRequest.isReadable", "node:http2")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Http2ServerRequest.isWritable", "node:http2")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -127128,10 +127279,9 @@ module Http2 =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Http2ServerRequest.duplexPair", "node:http2")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -127232,27 +127382,24 @@ module Http2 =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Http2ServerRequest.addAbortSignal", "node:http2")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Http2ServerRequest.getDefaultHighWaterMark", "node:http2")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Http2ServerRequest.setDefaultHighWaterMark", "node:http2")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -127372,10 +127519,9 @@ module Http2 =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Http2ServerRequest.isErrored", "node:http2")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
     /// <summary>
     /// This object is created internally by an HTTP server, not by the user. It is
@@ -129046,10 +129192,9 @@ module Http2 =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Http2ServerResponse.duplexPair", "node:http2")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -129150,27 +129295,24 @@ module Http2 =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Http2ServerResponse.addAbortSignal", "node:http2")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Http2ServerResponse.getDefaultHighWaterMark", "node:http2")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Http2ServerResponse.setDefaultHighWaterMark", "node:http2")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A module method to pipe between streams and generators forwarding errors and
@@ -129243,28 +129385,25 @@ module Http2 =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Http2ServerResponse.isErrored", "node:http2")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Http2ServerResponse.isReadable", "node:http2")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Http2ServerResponse.isWritable", "node:http2")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     module Http2ServerResponse =
         /// <summary>
@@ -130088,10 +130227,10 @@ module Http2 =
 
     module ServerHttp2Session =
         module AddListener =
-            type Listener =
+            type Listener<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
+                when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
                 delegate of
-                    session:
-                        Http2.ServerHttp2Session<IncomingMessageConstructor, obj, Http2ServerRequestConstructor, obj> *
+                    session: Http2.ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response> *
                     socket: U2<Net.Socket, Tls.TLSSocket> ->
                         unit
 
@@ -130104,10 +130243,10 @@ module Http2 =
                         unit
 
         module On =
-            type Listener =
+            type Listener<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
+                when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
                 delegate of
-                    session:
-                        Http2.ServerHttp2Session<IncomingMessageConstructor, obj, Http2ServerRequestConstructor, obj> *
+                    session: Http2.ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response> *
                     socket: U2<Net.Socket, Tls.TLSSocket> ->
                         unit
 
@@ -130120,10 +130259,10 @@ module Http2 =
                         unit
 
         module Once =
-            type Listener =
+            type Listener<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
+                when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
                 delegate of
-                    session:
-                        Http2.ServerHttp2Session<IncomingMessageConstructor, obj, Http2ServerRequestConstructor, obj> *
+                    session: Http2.ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response> *
                     socket: U2<Net.Socket, Tls.TLSSocket> ->
                         unit
 
@@ -130145,10 +130284,10 @@ module Http2 =
                     static member Create(origin: string) : Item = jsNative
 
         module PrependListener =
-            type Listener =
+            type Listener<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
+                when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
                 delegate of
-                    session:
-                        Http2.ServerHttp2Session<IncomingMessageConstructor, obj, Http2ServerRequestConstructor, obj> *
+                    session: Http2.ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response> *
                     socket: U2<Net.Socket, Tls.TLSSocket> ->
                         unit
 
@@ -130161,10 +130300,10 @@ module Http2 =
                         unit
 
         module PrependOnceListener =
-            type Listener =
+            type Listener<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response
+                when 'Http1Request :> IncomingMessageConstructor and 'Http2Request :> Http2ServerRequestConstructor> =
                 delegate of
-                    session:
-                        Http2.ServerHttp2Session<IncomingMessageConstructor, obj, Http2ServerRequestConstructor, obj> *
+                    session: Http2.ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response> *
                     socket: U2<Net.Socket, Tls.TLSSocket> ->
                         unit
 
@@ -133721,14 +133860,6 @@ module Https =
                         err: exn option *
                         sessionData: Buffer<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option ->
                             unit
-
-module Inflate =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZlibOptions option -> JS.Promise<NonSharedBuffer>
-
-module InflateRaw =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZlibOptions option -> JS.Promise<NonSharedBuffer>
 
 module Inspect =
     [<Interface>]
@@ -144157,156 +144288,180 @@ module Inspector =
 
 module Int16Array =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Int16Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Int16Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Int16Array<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Int16Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Int16Array<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Int16Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Int16Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Int16Array<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Int16Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Int16Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Int16Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
 
 module Int32Array =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Int32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Int32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Int32Array<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Int32Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Int32Array<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Int32Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Int32Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Int32Array<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Int32Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Int32Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Int32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
 
 module Int8Array =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Int8Array<obj> -> obj
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Int8Array<obj> -> obj
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Int8Array<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Int8Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Int8Array<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Int8Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Int8Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Int8Array<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Int8Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Int8Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Int8Array<obj> -> obj
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
-
-module Lchmod =
-    type Promisify = delegate of path: Fs.PathLike * mode: Fs.Mode -> JS.Promise<unit>
-
-module Lchown =
-    type Promisify = delegate of path: Fs.PathLike * uid: float * gid: float -> JS.Promise<unit>
 
 module LcovReporter =
     module Compose =
@@ -144325,9 +144480,6 @@ module LcovReporter =
             [<ParamObject; Emit("$0")>]
             static member Create(?``end``: bool) : Options = jsNative
 
-module Link =
-    type Promisify = delegate of existingPath: Fs.PathLike * newPath: Fs.PathLike -> JS.Promise<unit>
-
 module Lookup =
     type Callback = delegate of err: ErrnoException option * address: string * family: float -> unit
 
@@ -144342,8 +144494,6 @@ module Lookup =
 
 module LookupService =
     type Callback = delegate of err: ErrnoException option * hostname: string * service: string -> unit
-
-    type Promisify = delegate of address: string * port: float -> JS.Promise<LookupService.Promisify.Result.Item>
 
     module Promisify =
         module Result =
@@ -144394,9 +144544,6 @@ module Lstat =
 
             [<ParamObject; Emit("$0")>]
             static member Create(bigint: bool) : Options2 = jsNative
-
-module Lutimes =
-    type Promisify = delegate of path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
 
 module Mkdir =
     type Callback = delegate of err: ErrnoException option * path: string option -> unit
@@ -144453,8 +144600,6 @@ module Mkdtemp =
 
     type Callback4 = delegate of err: ErrnoException option * folder: string -> unit
 
-    type Promisify = delegate of prefix: string * options: Fs.EncodingOption option -> JS.Promise<string>
-
 /// <summary>node:module</summary>
 module Module =
     [<Interface>]
@@ -144494,9 +144639,8 @@ module Module =
         /// function. Must be a file URL object, file URL string, or absolute path
         /// string.
         /// </param>
-        static member createRequire
-            with get (): (U2<string, Url.URL> -> Require) = jsNative
-            and set (_: (U2<string, Url.URL> -> Require)): unit = jsNative
+        [<Import("Module.createRequire", "node:module")>]
+        static member createRequire(path: U2<string, Url.URL>) : Require = jsNative
 
         static member constants
             with get (): Constants4 = jsNative
@@ -144534,9 +144678,8 @@ module Module =
         /// Optional path to specify the directory where the compile cache
         /// will be stored/retrieved.
         /// </param>
-        static member enableCompileCache
-            with get (): (string option -> EnableCompileCacheResult) = jsNative
-            and set (_: (string option -> EnableCompileCacheResult)): unit = jsNative
+        [<Import("Module.enableCompileCache", "node:module")>]
+        static member enableCompileCache(?cacheDir: string) : EnableCompileCacheResult = jsNative
 
         /// <summary>
         /// Flush the <a href="https://nodejs.org/docs/latest-v22.x/api/module.html#module-compile-cache">module compile cache</a>
@@ -144547,18 +144690,16 @@ module Module =
         /// interfere with the actual operation of the application.
         /// </summary>
         /// <remarks>@since v22.10.0</remarks>
-        static member flushCompileCache
-            with get (): (unit -> unit) = jsNative
-            and set (_: (unit -> unit)): unit = jsNative
+        [<Import("Module.flushCompileCache", "node:module")>]
+        static member flushCompileCache() : unit = jsNative
 
         /// <remarks>@since v22.8.0</remarks>
         /// <returns>
         /// Path to the <a href="https://nodejs.org/docs/latest-v22.x/api/module.html#module-compile-cache">module compile cache</a>
         /// directory if it is enabled, or <c>undefined</c> otherwise.
         /// </returns>
-        static member getCompileCacheDir
-            with get (): (unit -> string option) = jsNative
-            and set (_: (unit -> string option)): unit = jsNative
+        [<Import("Module.getCompileCacheDir", "node:module")>]
+        static member getCompileCacheDir() : string option = jsNative
 
         /// <summary>
         /// <code lang="text">
@@ -144614,14 +144755,13 @@ module Module =
         /// is a package, the package's root <c>package.json</c>; when a relative or unresolved, the closest
         /// <c>package.json</c> to the <c>startLocation</c>.
         /// </returns>
-        static member findPackageJSON
-            with get (): Func<U2<string, Url.URL>, U2<string, Url.URL> option, string option> = jsNative
-            and set (_: Func<U2<string, Url.URL>, U2<string, Url.URL> option, string option>): unit = jsNative
+        [<Import("Module.findPackageJSON", "node:module")>]
+        static member findPackageJSON(specifier: U2<string, Url.URL>, ?``base``: U2<string, Url.URL>) : string option =
+            jsNative
 
         /// <remarks>@since v18.6.0, v16.17.0</remarks>
-        static member isBuiltin
-            with get (): (string -> bool) = jsNative
-            and set (_: (string -> bool)): unit = jsNative
+        [<Import("Module.isBuiltin", "node:module")>]
+        static member isBuiltin(moduleName: string) : bool = jsNative
 
         /// <summary>
         /// Register a module that exports hooks that customize Node.js module
@@ -144641,10 +144781,33 @@ module Module =
         /// f you want to resolve <c>specifier</c> relative to a base
         /// URL, such as <c>import.meta.url</c>, you can pass that URL here.
         /// </param>
-        static member register
-            with get (): Action<U2<string, Url.URL>, U2<string, Url.URL> option, RegisterOptions<obj> option> = jsNative
-            and set (_: Action<U2<string, Url.URL>, U2<string, Url.URL> option, RegisterOptions<obj> option>): unit =
-                jsNative
+        [<Import("Module.register", "node:module")>]
+        static member register<'Data>
+            (specifier: U2<string, Url.URL>, ?parentURL: U2<string, Url.URL>, ?options: RegisterOptions<'Data>)
+            : unit =
+            jsNative
+
+        /// <summary>
+        /// Register a module that exports hooks that customize Node.js module
+        /// resolution and loading behavior. See
+        /// <a href="https://nodejs.org/docs/latest-v22.x/api/module.html#customization-hooks">Customization hooks</a>.
+        /// <br /><br />
+        /// This feature requires <c>--allow-worker</c> if used with the
+        /// <a href="https://nodejs.org/docs/latest-v22.x/api/permissions.html#permission-model">Permission Model</a>.
+        /// </summary>
+        /// <remarks>@since v20.6.0, v18.19.0</remarks>
+        /// <param name="specifier">
+        /// Customization hooks to be registered; this should be
+        /// the same string that would be passed to <c>import()</c>, except that if it is
+        /// relative, it is resolved relative to <c>parentURL</c>.
+        /// </param>
+        /// <param name="parentURL">
+        /// f you want to resolve <c>specifier</c> relative to a base
+        /// URL, such as <c>import.meta.url</c>, you can pass that URL here.
+        /// </param>
+        [<Import("Module.register", "node:module")>]
+        static member register<'Data>(specifier: U2<string, Url.URL>, ?options: RegisterOptions<'Data>) : unit =
+            jsNative
 
         /// <summary>
         /// Register <a href="https://nodejs.org/docs/latest-v22.x/api/module.html#customization-hooks">hooks</a>
@@ -144652,9 +144815,8 @@ module Module =
         /// </summary>
         /// <remarks>@since v22.15.0</remarks>
         /// <remarks>@experimental</remarks>
-        static member registerHooks
-            with get (): (RegisterHooksOptions -> ModuleHooks) = jsNative
-            and set (_: (RegisterHooksOptions -> ModuleHooks)): unit = jsNative
+        [<Import("Module.registerHooks", "node:module")>]
+        static member registerHooks(options: RegisterHooksOptions) : ModuleHooks = jsNative
 
         /// <summary>
         /// <c>module.stripTypeScriptTypes()</c> removes type annotations from TypeScript code. It
@@ -144707,9 +144869,8 @@ module Module =
         /// <remarks>@since v22.13.0</remarks>
         /// <param name="code">The code to strip type annotations from.</param>
         /// <returns>The code with type annotations stripped.</returns>
-        static member stripTypeScriptTypes
-            with get (): Func<string, StripTypeScriptTypesOptions option, string> = jsNative
-            and set (_: Func<string, StripTypeScriptTypesOptions option, string>): unit = jsNative
+        [<Import("Module.stripTypeScriptTypes", "node:module")>]
+        static member stripTypeScriptTypes(code: string, ?options: StripTypeScriptTypesOptions) : string = jsNative
 
         /// <summary>
         /// The <c>module.syncBuiltinESMExports()</c> method updates all the live bindings for
@@ -144745,18 +144906,16 @@ module Module =
         /// </code>
         /// </summary>
         /// <remarks>@since v12.12.0</remarks>
-        static member syncBuiltinESMExports
-            with get (): (unit -> unit) = jsNative
-            and set (_: (unit -> unit)): unit = jsNative
+        [<Import("Module.syncBuiltinESMExports", "node:module")>]
+        static member syncBuiltinESMExports() : unit = jsNative
 
         /// <summary>
         /// This method returns whether the <a href="https://tc39.es/ecma426/">Source Map v3</a> support for stack
         /// traces is enabled.
         /// </summary>
         /// <remarks>@since v22.14.0</remarks>
-        static member getSourceMapsSupport
-            with get (): (unit -> SourceMapsSupport) = jsNative
-            and set (_: (unit -> SourceMapsSupport)): unit = jsNative
+        [<Import("Module.getSourceMapsSupport", "node:module")>]
+        static member getSourceMapsSupport() : SourceMapsSupport = jsNative
 
         /// <summary>
         /// <c>path</c> is the resolved path for the file for which a corresponding source map
@@ -144764,9 +144923,8 @@ module Module =
         /// </summary>
         /// <remarks>@since v13.7.0, v12.17.0</remarks>
         /// <returns>Returns <c>module.SourceMap</c> if a source map is found, <c>undefined</c> otherwise.</returns>
-        static member findSourceMap
-            with get (): (string -> SourceMap option) = jsNative
-            and set (_: (string -> SourceMap option)): unit = jsNative
+        [<Import("Module.findSourceMap", "node:module")>]
+        static member findSourceMap(path: string) : SourceMap option = jsNative
 
         /// <summary>
         /// This function enables or disables the <a href="https://tc39.es/ecma426/">Source Map v3</a> support for
@@ -144782,22 +144940,19 @@ module Module =
         /// before this API call.
         /// </summary>
         /// <remarks>@since v22.14.0</remarks>
-        static member setSourceMapsSupport
-            with get (): Action<bool, SetSourceMapsSupportOptions option> = jsNative
-            and set (_: Action<bool, SetSourceMapsSupportOptions option>): unit = jsNative
+        [<Import("Module.setSourceMapsSupport", "node:module")>]
+        static member setSourceMapsSupport(enabled: bool, ?options: SetSourceMapsSupportOptions) : unit = jsNative
 
         /// <remarks>@since v13.7.0, v12.17.0</remarks>
         static member SourceMap
             with get (): SourceMapConstructor = jsNative
             and set (_: SourceMapConstructor): unit = jsNative
 
-        static member runMain
-            with get (): (string option -> unit) = jsNative
-            and set (_: (string option -> unit)): unit = jsNative
+        [<Import("Module.runMain", "node:module")>]
+        static member runMain(?main: string) : unit = jsNative
 
-        static member wrap
-            with get (): (string -> string) = jsNative
-            and set (_: (string -> string)): unit = jsNative
+        [<Import("Module.wrap", "node:module")>]
+        static member wrap(script: string) : string = jsNative
 
         static member Module
             with get (): ModuleConstructor = jsNative
@@ -145588,15 +145743,6 @@ module Module =
         type Mode =
             | [<CompiledName("strip")>] Strip
             | [<CompiledName("transform")>] Transform
-
-module Native =
-    type Callback = delegate of err: ErrnoException option * resolvedPath: string -> unit
-
-    type Callback2 = delegate of err: ErrnoException option * resolvedPath: NonSharedBuffer -> unit
-
-    type Callback3 = delegate of err: ErrnoException option * resolvedPath: U2<string, NonSharedBuffer> -> unit
-
-    type Callback4 = delegate of err: ErrnoException option * resolvedPath: string -> unit
 
 /// <summary>node:net</summary>
 module Net =
@@ -147771,10 +147917,9 @@ module Net =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Socket.duplexPair", "node:net")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -147875,27 +148020,24 @@ module Net =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Socket.addAbortSignal", "node:net")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Socket.getDefaultHighWaterMark", "node:net")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Socket.setDefaultHighWaterMark", "node:net")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -148015,28 +148157,25 @@ module Net =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Socket.isErrored", "node:net")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Socket.isReadable", "node:net")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Socket.isWritable", "node:net")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     [<Interface>]
     type ListenOptions =
@@ -150408,14 +150547,10 @@ module Open =
 
     type Callback3 = delegate of err: ErrnoException option * fd: float -> unit
 
-    type Promisify = delegate of path: Fs.PathLike * flags: Fs.OpenMode * mode: Fs.OpenMode option -> JS.Promise<float>
-
 module Opendir =
     type Cb = delegate of err: ErrnoException option * dir: Fs.Dir -> unit
 
     type Cb2 = delegate of err: ErrnoException option * dir: Fs.Dir -> unit
-
-    type Promisify = delegate of path: Fs.PathLike * options: Fs.OpenDirOptions option -> JS.Promise<Fs.Dir>
 
 /// <summary>node:os</summary>
 module Os =
@@ -161961,8 +162096,6 @@ module Readlink =
 
     type Callback4 = delegate of err: ErrnoException option * linkString: string -> unit
 
-    type Promisify = delegate of path: Fs.PathLike * options: Fs.EncodingOption option -> JS.Promise<string>
-
 module Readv =
     type Cb<'TBuffers> = delegate of err: ErrnoException option * bytesRead: float * buffers: 'TBuffers -> unit
 
@@ -161977,10 +162110,14 @@ module Realpath =
 
     type Callback4 = delegate of err: ErrnoException option * resolvedPath: string -> unit
 
-    type Promisify = delegate of path: Fs.PathLike * options: Fs.EncodingOption option -> JS.Promise<string>
+    module Native =
+        type Callback = delegate of err: ErrnoException option * resolvedPath: string -> unit
 
-module Rename =
-    type Promisify = delegate of oldPath: Fs.PathLike * newPath: Fs.PathLike -> JS.Promise<unit>
+        type Callback2 = delegate of err: ErrnoException option * resolvedPath: NonSharedBuffer -> unit
+
+        type Callback3 = delegate of err: ErrnoException option * resolvedPath: U2<string, NonSharedBuffer> -> unit
+
+        type Callback4 = delegate of err: ErrnoException option * resolvedPath: string -> unit
 
 /// <summary>node:repl</summary>
 module Repl =
@@ -163735,12 +163872,6 @@ module Response =
         | [<CompiledName("error")>] Error
         | [<CompiledName("opaque")>] Opaque
         | [<CompiledName("opaqueredirect")>] Opaqueredirect
-
-module Rm =
-    type Promisify = delegate of path: Fs.PathLike * options: Fs.RmOptions option -> JS.Promise<unit>
-
-module Rmdir =
-    type Promisify = delegate of path: Fs.PathLike * options: Fs.RmDirOptions option -> JS.Promise<unit>
 
 /// <summary>node:sea</summary>
 module Sea =
@@ -165759,9 +165890,8 @@ module Stream =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (DuplexOptions<Duplex> option -> (Duplex * Duplex)) = jsNative
-            and set (_: (DuplexOptions<Duplex> option -> (Duplex * Duplex))): unit = jsNative
+        [<Import("Stream.duplexPair", "node:stream")>]
+        static member duplexPair(?options: DuplexOptions<Duplex>) : Duplex * Duplex = jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -165862,27 +165992,24 @@ module Stream =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream, Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream, Stream>): unit = jsNative
+        [<Import("Stream.addAbortSignal", "node:stream")>]
+        static member addAbortSignal<'T when 'T :> Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Stream.getDefaultHighWaterMark", "node:stream")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Stream.setDefaultHighWaterMark", "node:stream")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -166002,27 +166129,24 @@ module Stream =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool)): unit = jsNative
+        [<Import("Stream.isErrored", "node:stream")>]
+        static member isErrored(stream: U4<Readable, ReadableStream2, Writable, WritableStream2>) : bool = jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Stream.isReadable", "node:stream")>]
+        static member isReadable(stream: U2<Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Stream.isWritable", "node:stream")>]
+        static member isWritable(stream: U2<Writable, WritableStream2>) : bool option = jsNative
 
         static member EventEmitter
             with get (): EventEmitterConstructor = jsNative
@@ -166061,7 +166185,7 @@ module Stream =
 
     [<Interface>]
     type ReadableOptions<'T when 'T :> Readable> =
-        inherit StreamOptions<Stream>
+        inherit StreamOptions<'T>
         abstract encoding: BufferEncoding option with get, set
         abstract read: (float -> unit) option with get, set
         abstract destroy: Stream.ReadableOptions.Destroy option with get, set
@@ -167956,9 +168080,8 @@ module Stream =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (DuplexOptions<Duplex> option -> (Duplex * Duplex)) = jsNative
-            and set (_: (DuplexOptions<Duplex> option -> (Duplex * Duplex))): unit = jsNative
+        [<Import("Readable.duplexPair", "node:stream")>]
+        static member duplexPair(?options: DuplexOptions<Duplex>) : Duplex * Duplex = jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -168059,27 +168182,24 @@ module Stream =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream, Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream, Stream>): unit = jsNative
+        [<Import("Readable.addAbortSignal", "node:stream")>]
+        static member addAbortSignal<'T when 'T :> Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Readable.getDefaultHighWaterMark", "node:stream")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Readable.setDefaultHighWaterMark", "node:stream")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -168199,31 +168319,28 @@ module Stream =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool)): unit = jsNative
+        [<Import("Readable.isErrored", "node:stream")>]
+        static member isErrored(stream: U4<Readable, ReadableStream2, Writable, WritableStream2>) : bool = jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Readable.isReadable", "node:stream")>]
+        static member isReadable(stream: U2<Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Readable.isWritable", "node:stream")>]
+        static member isWritable(stream: U2<Writable, WritableStream2>) : bool option = jsNative
 
     [<Interface>]
     type WritableOptions<'T when 'T :> Writable> =
-        inherit StreamOptions<Stream>
+        inherit StreamOptions<'T>
         abstract decodeStrings: bool option with get, set
         abstract defaultEncoding: BufferEncoding option with get, set
         abstract write: Stream.WritableOptions.Write option with get, set
@@ -169885,9 +170002,8 @@ module Stream =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (DuplexOptions<Duplex> option -> (Duplex * Duplex)) = jsNative
-            and set (_: (DuplexOptions<Duplex> option -> (Duplex * Duplex))): unit = jsNative
+        [<Import("Writable.duplexPair", "node:stream")>]
+        static member duplexPair(?options: DuplexOptions<Duplex>) : Duplex * Duplex = jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -169988,27 +170104,24 @@ module Stream =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream, Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream, Stream>): unit = jsNative
+        [<Import("Writable.addAbortSignal", "node:stream")>]
+        static member addAbortSignal<'T when 'T :> Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Writable.getDefaultHighWaterMark", "node:stream")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Writable.setDefaultHighWaterMark", "node:stream")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -170128,32 +170241,29 @@ module Stream =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool)): unit = jsNative
+        [<Import("Writable.isErrored", "node:stream")>]
+        static member isErrored(stream: U4<Readable, ReadableStream2, Writable, WritableStream2>) : bool = jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Writable.isReadable", "node:stream")>]
+        static member isReadable(stream: U2<Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Writable.isWritable", "node:stream")>]
+        static member isWritable(stream: U2<Writable, WritableStream2>) : bool option = jsNative
 
     [<Interface>]
     type DuplexOptions<'T when 'T :> Duplex> =
-        inherit ReadableOptions<Readable>
-        inherit WritableOptions<Writable>
+        inherit ReadableOptions<'T>
+        inherit WritableOptions<'T>
         abstract allowHalfOpen: bool option with get, set
         abstract readableObjectMode: bool option with get, set
         abstract writableObjectMode: bool option with get, set
@@ -171905,9 +172015,8 @@ module Stream =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (DuplexOptions<Duplex> option -> (Duplex * Duplex)) = jsNative
-            and set (_: (DuplexOptions<Duplex> option -> (Duplex * Duplex))): unit = jsNative
+        [<Import("Duplex.duplexPair", "node:stream")>]
+        static member duplexPair(?options: DuplexOptions<Duplex>) : Duplex * Duplex = jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -172008,27 +172117,24 @@ module Stream =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream, Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream, Stream>): unit = jsNative
+        [<Import("Duplex.addAbortSignal", "node:stream")>]
+        static member addAbortSignal<'T when 'T :> Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Duplex.getDefaultHighWaterMark", "node:stream")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Duplex.setDefaultHighWaterMark", "node:stream")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -172148,33 +172254,30 @@ module Stream =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool)): unit = jsNative
+        [<Import("Duplex.isErrored", "node:stream")>]
+        static member isErrored(stream: U4<Readable, ReadableStream2, Writable, WritableStream2>) : bool = jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Duplex.isReadable", "node:stream")>]
+        static member isReadable(stream: U2<Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Duplex.isWritable", "node:stream")>]
+        static member isWritable(stream: U2<Writable, WritableStream2>) : bool option = jsNative
 
     type TransformCallback = delegate of error: exn option * data: obj option -> unit
 
     [<Interface>]
     type TransformOptions<'T when 'T :> Transform> =
-        inherit DuplexOptions<Duplex>
+        inherit DuplexOptions<'T>
         abstract transform: TransformOptions.Transform option with get, set
         abstract flush: (TransformCallback -> unit) option with get, set
         abstract destroy: Stream.TransformOptions.Destroy option with get, set
@@ -173930,9 +174033,8 @@ module Stream =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (DuplexOptions<Duplex> option -> (Duplex * Duplex)) = jsNative
-            and set (_: (DuplexOptions<Duplex> option -> (Duplex * Duplex))): unit = jsNative
+        [<Import("Transform.duplexPair", "node:stream")>]
+        static member duplexPair(?options: DuplexOptions<Duplex>) : Duplex * Duplex = jsNative
 
         /// <summary>
         /// The <c>stream.PassThrough</c> class is a trivial implementation of a <c>Transform</c> stream that simply passes the input bytes across to the output. Its purpose is
@@ -174018,27 +174120,24 @@ module Stream =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream, Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream, Stream>): unit = jsNative
+        [<Import("Transform.addAbortSignal", "node:stream")>]
+        static member addAbortSignal<'T when 'T :> Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Transform.getDefaultHighWaterMark", "node:stream")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Transform.setDefaultHighWaterMark", "node:stream")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -174158,27 +174257,24 @@ module Stream =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool)): unit = jsNative
+        [<Import("Transform.isErrored", "node:stream")>]
+        static member isErrored(stream: U4<Readable, ReadableStream2, Writable, WritableStream2>) : bool = jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Transform.isReadable", "node:stream")>]
+        static member isReadable(stream: U2<Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Transform.isWritable", "node:stream")>]
+        static member isWritable(stream: U2<Writable, WritableStream2>) : bool option = jsNative
 
     /// <summary>
     /// The <c>stream.PassThrough</c> class is a trivial implementation of a <c>Transform</c> stream that simply passes the input bytes across to the output. Its purpose is
@@ -175885,9 +175981,8 @@ module Stream =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (DuplexOptions<Duplex> option -> (Duplex * Duplex)) = jsNative
-            and set (_: (DuplexOptions<Duplex> option -> (Duplex * Duplex))): unit = jsNative
+        [<Import("PassThrough.duplexPair", "node:stream")>]
+        static member duplexPair(?options: DuplexOptions<Duplex>) : Duplex * Duplex = jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -175980,27 +176075,24 @@ module Stream =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream, Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream, Stream>): unit = jsNative
+        [<Import("PassThrough.addAbortSignal", "node:stream")>]
+        static member addAbortSignal<'T when 'T :> Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("PassThrough.getDefaultHighWaterMark", "node:stream")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("PassThrough.setDefaultHighWaterMark", "node:stream")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -176120,27 +176212,24 @@ module Stream =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Readable, ReadableStream2, Writable, WritableStream2> -> bool)): unit = jsNative
+        [<Import("PassThrough.isErrored", "node:stream")>]
+        static member isErrored(stream: U4<Readable, ReadableStream2, Writable, WritableStream2>) : bool = jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("PassThrough.isReadable", "node:stream")>]
+        static member isReadable(stream: U2<Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("PassThrough.isWritable", "node:stream")>]
+        static member isWritable(stream: U2<Writable, WritableStream2>) : bool option = jsNative
 
     [<Interface>]
     type FinishedOptions =
@@ -177924,8 +178013,6 @@ module SubtleCrypto =
             | [<CompiledName("spki")>] Spki
 
 module Symlink =
-    type Promisify = delegate of target: Fs.PathLike * path: Fs.PathLike * ``type``: string option -> JS.Promise<unit>
-
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Type =
         | [<CompiledName("dir")>] Dir
@@ -181997,7 +182084,7 @@ module Timers =
         /// promise. <b>Default:</b> <c>1</c>.
         /// </param>
         /// <param name="value">A value with which the promise is fulfilled.</param>
-        abstract setTimeout: Func<float option, obj option, TimerOptions option, JS.Promise<obj>> with get, set
+        abstract setTimeout<'T> : ?delay: float * ?value: 'T * ?options: TimerOptions -> JS.Promise<'T>
         /// <summary>
         /// <code lang="js">
         /// import {
@@ -182011,7 +182098,7 @@ module Timers =
         /// </summary>
         /// <remarks>@since v15.0.0</remarks>
         /// <param name="value">A value with which the promise is fulfilled.</param>
-        abstract setImmediate: Func<obj option, TimerOptions option, JS.Promise<obj>> with get, set
+        abstract setImmediate<'T> : ?value: 'T * ?options: TimerOptions -> JS.Promise<'T>
         /// <summary>
         /// Returns an async iterator that generates values in an interval of <c>delay</c> ms.
         /// If <c>ref</c> is <c>true</c>, you need to call <c>next()</c> of async iterator explicitly
@@ -182037,15 +182124,15 @@ module Timers =
         /// <b>Default:</b> <c>1</c>.
         /// </param>
         /// <param name="value">A value with which the iterator returns.</param>
-        abstract setInterval: Func<float option, obj option, TimerOptions option, AsyncIterator<obj, obj, obj>> with get, set
+        abstract setInterval<'T> : ?delay: float * ?value: 'T * ?options: TimerOptions -> AsyncIterator<'T, obj, obj>
         abstract scheduler: Timers.Promises.Scheduler
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                setTimeout: Func<float option, obj option, TimerOptions option, JS.Promise<obj>>,
-                setImmediate: Func<obj option, TimerOptions option, JS.Promise<obj>>,
-                setInterval: Func<float option, obj option, TimerOptions option, AsyncIterator<obj, obj, obj>>,
+                setTimeout: Func<float option, 'T option, TimerOptions option, JS.Promise<'T>>,
+                setImmediate: Func<'T option, TimerOptions option, JS.Promise<'T>>,
+                setInterval: Func<float option, 'T option, TimerOptions option, AsyncIterator<'T, obj, obj>>,
                 scheduler: Timers.Promises.Scheduler
             ) : Promises =
             jsNative
@@ -184443,10 +184530,9 @@ module Tls =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("TLSSocket.duplexPair", "node:tls")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -184547,27 +184633,24 @@ module Tls =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("TLSSocket.addAbortSignal", "node:tls")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("TLSSocket.getDefaultHighWaterMark", "node:tls")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("TLSSocket.setDefaultHighWaterMark", "node:tls")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -184687,28 +184770,25 @@ module Tls =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("TLSSocket.isErrored", "node:tls")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("TLSSocket.isReadable", "node:tls")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("TLSSocket.isWritable", "node:tls")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     [<Interface>]
     type CommonConnectionOptions =
@@ -187586,9 +187666,6 @@ module TraceEvents =
         [<Import("getEnabledCategories", "node:trace_events")>]
         static member getEnabledCategories() : string option = jsNative
 
-module Truncate =
-    type Promisify = delegate of path: Fs.PathLike * len: float option -> JS.Promise<unit>
-
 /// <summary>node:tty</summary>
 module Tty =
     /// <summary>
@@ -189424,10 +189501,9 @@ module Tty =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("ReadStream.duplexPair", "node:tty")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -189528,27 +189604,24 @@ module Tty =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("ReadStream.addAbortSignal", "node:tty")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("ReadStream.getDefaultHighWaterMark", "node:tty")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("ReadStream.setDefaultHighWaterMark", "node:tty")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -189668,28 +189741,25 @@ module Tty =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("ReadStream.isErrored", "node:tty")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("ReadStream.isReadable", "node:tty")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("ReadStream.isWritable", "node:tty")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     type Direction =
         | NMinus1 = -1
@@ -191216,10 +191286,9 @@ module Tty =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("WriteStream.duplexPair", "node:tty")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -191320,27 +191389,24 @@ module Tty =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("WriteStream.addAbortSignal", "node:tty")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("WriteStream.getDefaultHighWaterMark", "node:tty")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("WriteStream.setDefaultHighWaterMark", "node:tty")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -191460,28 +191526,25 @@ module Tty =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("WriteStream.isErrored", "node:tty")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("WriteStream.isReadable", "node:tty")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("WriteStream.isWritable", "node:tty")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -191552,209 +191615,263 @@ module URLSearchParams =
 
 module Uint16Array =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Uint16Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Uint16Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Uint16Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Uint16Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Uint16Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Uint16Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Uint16Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Uint16Array<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Uint16Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Uint16Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Uint16Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
 
 module Uint32Array =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Uint32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Uint32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Uint32Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Uint32Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Uint32Array<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Uint32Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Uint32Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Uint32Array<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Uint32Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Uint32Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Uint32Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
 
 module Uint8Array =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Uint8Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Uint8Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Uint8Array<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Uint8Array<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Uint8Array<obj> -> bool
+        type Predicate<'TArrayBuffer> = delegate of value: float * index: float * obj: Uint8Array<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Uint8Array<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Uint8Array<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Uint8Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> -> 'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<obj> -> float
+                previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> ->
+                    float
 
-        type Callbackfn3 =
-            delegate of previousValue: obj * currentValue: float * currentIndex: float * array: Uint8Array<obj> -> obj
+        type Callbackfn3<'U, 'TArrayBuffer> =
+            delegate of
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> -> 'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Uint8Array<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
 
 module Uint8ClampedArray =
     module Every =
-        type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> obj
 
     module Filter =
-        type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> obj
 
     module Find =
-        type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Uint8ClampedArray<'TArrayBuffer> -> bool
 
     module FindIndex =
-        type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<obj> -> bool
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * obj: Uint8ClampedArray<'TArrayBuffer> -> bool
 
     module ForEach =
-        type Callbackfn = delegate of value: float * index: float * array: Uint8ClampedArray<obj> -> unit
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> unit
 
     module Map =
-        type Callbackfn = delegate of value: float * index: float * array: Uint8ClampedArray<obj> -> float
+        type Callbackfn<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> float
 
     module Reduce =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<obj> ->
+                previousValue: float *
+                currentValue: float *
+                currentIndex: float *
+                array: Uint8ClampedArray<'TArrayBuffer> ->
                     float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<obj> ->
+                previousValue: float *
+                currentValue: float *
+                currentIndex: float *
+                array: Uint8ClampedArray<'TArrayBuffer> ->
                     float
 
-        type Callbackfn3 =
+        type Callbackfn3<'U, 'TArrayBuffer> =
             delegate of
-                previousValue: obj * currentValue: float * currentIndex: float * array: Uint8ClampedArray<obj> -> obj
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<'TArrayBuffer> ->
+                    'U
 
     module ReduceRight =
-        type Callbackfn =
+        type Callbackfn<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<obj> ->
+                previousValue: float *
+                currentValue: float *
+                currentIndex: float *
+                array: Uint8ClampedArray<'TArrayBuffer> ->
                     float
 
-        type Callbackfn2 =
+        type Callbackfn2<'TArrayBuffer> =
             delegate of
-                previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<obj> ->
+                previousValue: float *
+                currentValue: float *
+                currentIndex: float *
+                array: Uint8ClampedArray<'TArrayBuffer> ->
                     float
 
-        type Callbackfn3 =
+        type Callbackfn3<'U, 'TArrayBuffer> =
             delegate of
-                previousValue: obj * currentValue: float * currentIndex: float * array: Uint8ClampedArray<obj> -> obj
+                previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<'TArrayBuffer> ->
+                    'U
 
     module Some =
-        type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<obj> -> obj
+        type Predicate<'TArrayBuffer> =
+            delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> obj
 
     module Sort =
         type CompareFn = delegate of a: float * b: float -> float
-
-module Unzip =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZlibOptions option -> JS.Promise<NonSharedBuffer>
 
 /// <summary>node:url</summary>
 module Url =
@@ -193666,7 +193783,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isAnyArrayBuffer: (obj -> bool) with get, set
+        abstract isAnyArrayBuffer: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is an <c>arguments</c> object.
         /// <code lang="js">
@@ -193676,7 +193793,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isArgumentsObject: (obj -> bool) with get, set
+        abstract isArgumentsObject: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer"><c>ArrayBuffer</c></a> instance.
         /// This does _not_ include <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer"><c>SharedArrayBuffer</c></a> instances. Usually, it is
@@ -193687,7 +193804,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isArrayBuffer: (obj -> bool) with get, set
+        abstract isArrayBuffer: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is an instance of one of the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer"><c>ArrayBuffer</c></a> views, such as typed
         /// array objects or <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView"><c>DataView</c></a>. Equivalent to
@@ -193700,7 +193817,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isArrayBufferView: (obj -> bool) with get, set
+        abstract isArrayBufferView: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function">async function</a>.
         /// This only reports back what the JavaScript engine is seeing;
@@ -193712,7 +193829,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isAsyncFunction: (obj -> bool) with get, set
+        abstract isAsyncFunction: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a <c>BigInt64Array</c> instance.
         /// <code lang="js">
@@ -193721,7 +193838,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isBigInt64Array: (obj -> bool) with get, set
+        abstract isBigInt64Array: value: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a BigInt object, e.g. created
         /// by <c>Object(BigInt(123))</c>.
@@ -193732,7 +193849,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.4.0</remarks>
-        abstract isBigIntObject: (obj -> bool) with get, set
+        abstract isBigIntObject: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a <c>BigUint64Array</c> instance.
         /// <code lang="js">
@@ -193741,7 +193858,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isBigUint64Array: (obj -> bool) with get, set
+        abstract isBigUint64Array: value: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a boolean object, e.g. created
         /// by <c>new Boolean()</c>.
@@ -193755,7 +193872,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isBooleanObject: (obj -> bool) with get, set
+        abstract isBooleanObject: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is any boxed primitive object, e.g. created
         /// by <c>new Boolean()</c>, <c>new String()</c> or <c>Object(Symbol())</c>.
@@ -193770,7 +193887,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.11.0</remarks>
-        abstract isBoxedPrimitive: (obj -> bool) with get, set
+        abstract isBoxedPrimitive: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView"><c>DataView</c></a> instance.
         /// <code lang="js">
@@ -193782,7 +193899,7 @@ module Util =
         /// See also <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer/isView"><c>ArrayBuffer.isView()</c></a>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isDataView: (obj -> bool) with get, set
+        abstract isDataView: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date"><c>Date</c></a> instance.
         /// <code lang="js">
@@ -193790,7 +193907,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isDate: (obj -> bool) with get, set
+        abstract isDate: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a native <c>External</c> value.
         /// <br /><br />
@@ -193831,7 +193948,7 @@ module Util =
         /// <a href="https://nodejs.org/docs/latest-v22.x/api/n-api.html#napi_create_external"><c>napi_create_external()</c></a>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isExternal: (obj -> bool) with get, set
+        abstract isExternal: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <c>Float16Array</c> instance.
         /// <code lang="js">
@@ -193841,7 +193958,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v22.16.0</remarks>
-        abstract isFloat16Array: (obj -> bool) with get, set
+        abstract isFloat16Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array"><c>Float32Array</c></a> instance.
         /// <code lang="js">
@@ -193851,7 +193968,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isFloat32Array: (obj -> bool) with get, set
+        abstract isFloat32Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array"><c>Float64Array</c></a> instance.
         /// <code lang="js">
@@ -193861,7 +193978,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isFloat64Array: (obj -> bool) with get, set
+        abstract isFloat64Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a generator function.
         /// This only reports back what the JavaScript engine is seeing;
@@ -193873,7 +193990,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isGeneratorFunction: (obj -> bool) with get, set
+        abstract isGeneratorFunction: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a generator object as returned from a
         /// built-in generator function.
@@ -193887,7 +194004,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isGeneratorObject: (obj -> bool) with get, set
+        abstract isGeneratorObject: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array"><c>Int8Array</c></a> instance.
         /// <code lang="js">
@@ -193897,7 +194014,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isInt8Array: (obj -> bool) with get, set
+        abstract isInt8Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array"><c>Int16Array</c></a> instance.
         /// <code lang="js">
@@ -193907,7 +194024,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isInt16Array: (obj -> bool) with get, set
+        abstract isInt16Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array"><c>Int32Array</c></a> instance.
         /// <code lang="js">
@@ -193917,7 +194034,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isInt32Array: (obj -> bool) with get, set
+        abstract isInt32Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map"><c>Map</c></a> instance.
         /// <code lang="js">
@@ -193925,7 +194042,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isMap: (obj -> bool) with get, set
+        abstract isMap: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is an iterator returned for a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map"><c>Map</c></a> instance.
         /// <code lang="js">
@@ -193937,7 +194054,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isMapIterator: (obj -> bool) with get, set
+        abstract isMapIterator: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is an instance of a <a href="https://tc39.github.io/ecma262/#sec-module-namespace-exotic-objects">Module Namespace Object</a>.
         /// <code lang="js">
@@ -193947,7 +194064,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isModuleNamespaceObject: (obj -> bool) with get, set
+        abstract isModuleNamespaceObject: value: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value was returned by the constructor of a
         /// <a href="https://tc39.es/ecma262/#sec-error-objects">built-in <c>Error</c> type</a>.
@@ -193987,7 +194104,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isNativeError: (obj -> bool) with get, set
+        abstract isNativeError: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a number object, e.g. created
         /// by <c>new Number()</c>.
@@ -193997,7 +194114,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isNumberObject: (obj -> bool) with get, set
+        abstract isNumberObject: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise"><c>Promise</c></a>.
         /// <code lang="js">
@@ -194005,7 +194122,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isPromise: (obj -> bool) with get, set
+        abstract isPromise: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy"><c>Proxy</c></a> instance.
         /// <code lang="js">
@@ -194016,7 +194133,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isProxy: (obj -> bool) with get, set
+        abstract isProxy: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a regular expression object.
         /// <code lang="js">
@@ -194025,7 +194142,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isRegExp: (obj -> bool) with get, set
+        abstract isRegExp: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set"><c>Set</c></a> instance.
         /// <code lang="js">
@@ -194033,7 +194150,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isSet: (obj -> bool) with get, set
+        abstract isSet: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is an iterator returned for a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set"><c>Set</c></a> instance.
         /// <code lang="js">
@@ -194045,7 +194162,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isSetIterator: (obj -> bool) with get, set
+        abstract isSetIterator: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer"><c>SharedArrayBuffer</c></a> instance.
         /// This does _not_ include <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer"><c>ArrayBuffer</c></a> instances. Usually, it is
@@ -194056,7 +194173,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isSharedArrayBuffer: (obj -> bool) with get, set
+        abstract isSharedArrayBuffer: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a string object, e.g. created
         /// by <c>new String()</c>.
@@ -194066,7 +194183,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isStringObject: (obj -> bool) with get, set
+        abstract isStringObject: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a symbol object, created
         /// by calling <c>Object()</c> on a <c>Symbol</c> primitive.
@@ -194077,7 +194194,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isSymbolObject: (obj -> bool) with get, set
+        abstract isSymbolObject: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray"><c>TypedArray</c></a> instance.
         /// <code lang="js">
@@ -194089,7 +194206,7 @@ module Util =
         /// See also <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer/isView"><c>ArrayBuffer.isView()</c></a>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isTypedArray: (obj -> bool) with get, set
+        abstract isTypedArray: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array"><c>Uint8Array</c></a> instance.
         /// <code lang="js">
@@ -194099,7 +194216,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isUint8Array: (obj -> bool) with get, set
+        abstract isUint8Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray"><c>Uint8ClampedArray</c></a> instance.
         /// <code lang="js">
@@ -194109,7 +194226,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isUint8ClampedArray: (obj -> bool) with get, set
+        abstract isUint8ClampedArray: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array"><c>Uint16Array</c></a> instance.
         /// <code lang="js">
@@ -194119,7 +194236,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isUint16Array: (obj -> bool) with get, set
+        abstract isUint16Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array"><c>Uint32Array</c></a> instance.
         /// <code lang="js">
@@ -194129,7 +194246,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isUint32Array: (obj -> bool) with get, set
+        abstract isUint32Array: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap"><c>WeakMap</c></a> instance.
         /// <code lang="js">
@@ -194137,7 +194254,7 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isWeakMap: (obj -> bool) with get, set
+        abstract isWeakMap: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if the value is a built-in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet"><c>WeakSet</c></a> instance.
         /// <code lang="js">
@@ -194145,17 +194262,17 @@ module Util =
         /// </code>
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract isWeakSet: (obj -> bool) with get, set
+        abstract isWeakSet: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if <c>value</c> is a <c>KeyObject</c>, <c>false</c> otherwise.
         /// </summary>
         /// <remarks>@since v16.2.0</remarks>
-        abstract isKeyObject: (obj -> bool) with get, set
+        abstract isKeyObject: ``object``: obj -> bool
         /// <summary>
         /// Returns <c>true</c> if <c>value</c> is a <c>CryptoKey</c>, <c>false</c> otherwise.
         /// </summary>
         /// <remarks>@since v16.2.0</remarks>
-        abstract isCryptoKey: (obj -> bool) with get, set
+        abstract isCryptoKey: ``object``: obj -> bool
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -198186,9 +198303,6 @@ module Util =
             /// <remarks>@since v16.2.0</remarks>
             [<Import("isCryptoKey", "node:util/types")>]
             static member isCryptoKey(``object``: obj) : bool = jsNative
-
-module Utimes =
-    type Promisify = delegate of path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
 
 /// <summary>node:v8</summary>
 module V8 =
@@ -203655,12 +203769,6 @@ module Write =
                 [<ParamObject; Emit("$0")>]
                 static member Create(bytesWritten: float, buffer: string) : Item3 = jsNative
 
-module WriteFile =
-    type Promisify =
-        delegate of
-            path: Fs.PathOrFileDescriptor * data: Crypto.BinaryLike * options: U2<string, Fs.WriteFileOptions2> option ->
-                JS.Promise<unit>
-
 module Writev =
     module Chunks =
         [<Interface>]
@@ -205585,10 +205693,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("BrotliCompress.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -205689,27 +205796,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("BrotliCompress.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("BrotliCompress.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("BrotliCompress.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -205829,28 +205933,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("BrotliCompress.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("BrotliCompress.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("BrotliCompress.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v10.16.0</remarks>
     [<Interface>]
@@ -207550,10 +207651,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("BrotliDecompress.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -207654,27 +207754,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("BrotliDecompress.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("BrotliDecompress.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("BrotliDecompress.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -207794,28 +207891,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("BrotliDecompress.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("BrotliDecompress.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("BrotliDecompress.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v0.5.8</remarks>
     [<Interface>]
@@ -209513,10 +209607,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Gzip.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -209617,27 +209710,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Gzip.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Gzip.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Gzip.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -209757,28 +209847,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Gzip.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Gzip.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Gzip.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v0.5.8</remarks>
     [<Interface>]
@@ -211476,10 +211563,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Gunzip.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -211580,27 +211666,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Gunzip.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Gunzip.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Gunzip.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -211720,28 +211803,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Gunzip.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Gunzip.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Gunzip.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v0.5.8</remarks>
     [<Interface>]
@@ -213441,10 +213521,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Deflate.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -213545,27 +213624,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Deflate.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Deflate.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Deflate.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -213685,28 +213761,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Deflate.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Deflate.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Deflate.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v0.5.8</remarks>
     [<Interface>]
@@ -215405,10 +215478,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Inflate.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -215509,27 +215581,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Inflate.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Inflate.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Inflate.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -215649,28 +215718,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Inflate.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Inflate.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Inflate.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v0.5.8</remarks>
     [<Interface>]
@@ -217370,10 +217436,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("DeflateRaw.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -217474,27 +217539,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("DeflateRaw.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("DeflateRaw.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("DeflateRaw.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -217614,28 +217676,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("DeflateRaw.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("DeflateRaw.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("DeflateRaw.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v0.5.8</remarks>
     [<Interface>]
@@ -219334,10 +219393,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("InflateRaw.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -219438,27 +219496,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("InflateRaw.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("InflateRaw.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("InflateRaw.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -219578,28 +219633,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("InflateRaw.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("InflateRaw.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("InflateRaw.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v0.5.8</remarks>
     [<Interface>]
@@ -221297,10 +221349,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("Unzip.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -221401,27 +221452,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("Unzip.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("Unzip.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("Unzip.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -221541,28 +221589,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("Unzip.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("Unzip.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("Unzip.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v22.15.0</remarks>
     /// <remarks>@experimental</remarks>
@@ -223261,10 +223306,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("ZstdCompress.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -223365,27 +223409,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("ZstdCompress.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("ZstdCompress.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("ZstdCompress.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -223505,28 +223546,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("ZstdCompress.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("ZstdCompress.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("ZstdCompress.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     /// <remarks>@since v22.15.0</remarks>
     /// <remarks>@experimental</remarks>
@@ -225227,10 +225265,9 @@ module Zlib =
         /// to set options such as buffering.
         /// </param>
         /// <remarks>@since v22.6.0</remarks>
-        static member duplexPair
-            with get (): (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex)) = jsNative
-            and set (_: (Stream.DuplexOptions<Stream.Duplex> option -> (Stream.Duplex * Stream.Duplex))): unit =
-                jsNative
+        [<Import("ZstdDecompress.duplexPair", "node:zlib")>]
+        static member duplexPair(?options: Stream.DuplexOptions<Stream.Duplex>) : Stream.Duplex * Stream.Duplex =
+            jsNative
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -225331,27 +225368,24 @@ module Zlib =
         /// <remarks>@since v15.4.0</remarks>
         /// <param name="signal">A signal representing possible cancellation</param>
         /// <param name="stream">A stream to attach a signal to.</param>
-        static member addAbortSignal
-            with get (): Func<AbortSignal, Stream.Stream, Stream.Stream> = jsNative
-            and set (_: Func<AbortSignal, Stream.Stream, Stream.Stream>): unit = jsNative
+        [<Import("ZstdDecompress.addAbortSignal", "node:zlib")>]
+        static member addAbortSignal<'T when 'T :> Stream.Stream>(signal: AbortSignal, stream: 'T) : 'T = jsNative
 
         /// <summary>
         /// Returns the default highWaterMark used by streams.
         /// Defaults to <c>65536</c> (64 KiB), or <c>16</c> for <c>objectMode</c>.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
-        static member getDefaultHighWaterMark
-            with get (): (bool -> float) = jsNative
-            and set (_: (bool -> float)): unit = jsNative
+        [<Import("ZstdDecompress.getDefaultHighWaterMark", "node:zlib")>]
+        static member getDefaultHighWaterMark(objectMode: bool) : float = jsNative
 
         /// <summary>
         /// Sets the default highWaterMark used by streams.
         /// </summary>
         /// <remarks>@since v19.9.0</remarks>
         /// <param name="value">highWaterMark value</param>
-        static member setDefaultHighWaterMark
-            with get (): Action<bool, float> = jsNative
-            and set (_: Action<bool, float>): unit = jsNative
+        [<Import("ZstdDecompress.setDefaultHighWaterMark", "node:zlib")>]
+        static member setDefaultHighWaterMark(objectMode: bool, value: float) : unit = jsNative
 
         /// <summary>
         /// A readable and/or writable stream/webstream.
@@ -225471,28 +225505,25 @@ module Zlib =
         /// Returns whether the stream has encountered an error.
         /// </summary>
         /// <remarks>@since v17.3.0, v16.14.0</remarks>
-        static member isErrored
-            with get (): (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool) = jsNative
-            and set (_: (U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2> -> bool)): unit =
-                jsNative
+        [<Import("ZstdDecompress.isErrored", "node:zlib")>]
+        static member isErrored(stream: U4<Stream.Readable, ReadableStream2, Stream.Writable, WritableStream2>) : bool =
+            jsNative
 
         /// <summary>
         /// Returns whether the stream is readable.
         /// </summary>
         /// <remarks>@since v17.4.0, v16.14.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Readable</c>, <c>Duplex</c> or <c>ReadableStream</c>.</returns>
-        static member isReadable
-            with get (): (U2<Stream.Readable, ReadableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Readable, ReadableStream2> -> bool option)): unit = jsNative
+        [<Import("ZstdDecompress.isReadable", "node:zlib")>]
+        static member isReadable(stream: U2<Stream.Readable, ReadableStream2>) : bool option = jsNative
 
         /// <summary>
         /// Returns whether the stream is writable.
         /// </summary>
         /// <remarks>@since v20.0.0</remarks>
         /// <returns>Only returns <c>null</c> if <c>stream</c> is not a valid <c>Writable</c>, <c>Duplex</c> or <c>WritableStream</c>.</returns>
-        static member isWritable
-            with get (): (U2<Stream.Writable, WritableStream2> -> bool option) = jsNative
-            and set (_: (U2<Stream.Writable, WritableStream2> -> bool option)): unit = jsNative
+        [<Import("ZstdDecompress.isWritable", "node:zlib")>]
+        static member isWritable(stream: U2<Stream.Writable, WritableStream2>) : bool option = jsNative
 
     type InputType =
         U14<
@@ -226137,14 +226168,6 @@ module Zlib =
 
                 [<ParamObject; Emit("$0")>]
                 static member Create(?``end``: bool) : Options = jsNative
-
-module ZstdCompress =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZstdOptions option -> JS.Promise<NonSharedBuffer>
-
-module ZstdDecompress =
-    type Promisify =
-        delegate of buffer: Zlib.InputType * options: Zlib.ZstdOptions option -> JS.Promise<NonSharedBuffer>
 
 module _ReadableStreamBYOBReader =
     module Read =

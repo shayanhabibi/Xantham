@@ -437,10 +437,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         let methods =
             model.Types
             |> Map.toList
-            |> List.collect (fun (_, facts) ->
-                facts.Members
-                |> List.filter (fun m -> hasAny SymbolFlags.Method m.Symbol.Flags)
-                |> List.map _.TypeId)
+            |> List.collect (fun (_, facts) -> facts.Members |> List.filter (emitsAsMethod model) |> List.map _.TypeId)
 
         // The arms of a member type that carry call signatures of their own.
         let callbackArms (typeId: int<Measure.typeId>) =

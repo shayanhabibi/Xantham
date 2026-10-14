@@ -79,6 +79,13 @@ A binding is rooted in a generated F# module.
   (`MyBinding.Event.AT_TARGET`), an expression names the interface's instance property
   instead; read the value there through a module abbreviation
   (`module EventConstants = MyBinding.Event`, then `EventConstants.AT_TARGET`).
+- **Functions of a namespace object** (`export * as utils`) and global functions are
+  methods: `MyPackage.Exports.utils.clamp(5., 0., 1.)`. TypeScript does not allow
+  assigning to them, so the binding has no setter; reassigning one needs dynamic access
+  (`?` or `!!`).
+- **A type parameter used only in a return**, such as `querySelectorAll<'E>`, is inferred
+  from how the result is used inside a function. A module-level binding states it:
+  `let items: NodeListOf<HTMLElement> = document.querySelectorAll "li"`.
 
 The same type exported through several paths has a shared canonical location.
 Use the emitted signature to find it.

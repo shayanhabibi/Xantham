@@ -96,7 +96,7 @@ let private imports () =
          |> Option.defaultValue 0.0
          |> fun d -> d / 1000.0)
 
-    equal "a namespace re-export's members are callable" 1.0 (PhaseBLab.Exports.utils.clamp.Invoke(5.0, 0.0, 1.0))
+    equal "a namespace re-export's members are callable" 1.0 (PhaseBLab.Exports.utils.clamp (5.0, 0.0, 1.0))
     equal "a StringEnum member reads as its compiled name" (Some PhaseBLab.TimeUnit.Ms) PhaseBLab.Exports.defaults.unit
 
     let mutable ticks: (float * float option) list = []

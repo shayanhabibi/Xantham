@@ -1178,6 +1178,9 @@ type ResolvedMember =
         /// The well-known symbol keying the member, as `Symbol.<name>` spells it: `Some "iterator"`
         /// for `[Symbol.iterator]`.
         WellKnownSymbol: string option
+        /// Whether the member's symbol is a `function` declaration, read through the export alias
+        /// of a re-exported namespace member.
+        ResolvesToFunction: bool
     }
 
 /// One index signature (`[key: string]: V`) as the resolve tier records it. These are

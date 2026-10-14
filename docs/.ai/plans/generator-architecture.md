@@ -2656,3 +2656,79 @@ In Core.TS, `Event.Create` writes `NONE`, `CAPTURING_PHASE`, `AT_TARGET` and `BU
 rather than taking them, and 26 interfaces refused for the parameter budget (`UIEvent`,
 `ProgressEvent` and `DOMException` among them) now carry a `Create`, raising `SP002` 884 → 988
 and `TR055` 678 → 704 with their method parameters. The catalogue's API hashes are unchanged.
+
+## Type parameters in scope (2026-10-13, W7 #138)
+
+A hoisted declaration binds the owner's type parameters it reads, a namespace function is a
+method, and a method type parameter keeps a constraint that inherits its use site's bound.
+
+- **W7.1.** `freeTypeParams` reads a named declaration's type arguments in both of its forms.
+  Written inside `interface Grid<T>`, `Grid<T>` is the declared form (`ownArguments`
+  non-empty), and its arguments are the enclosing declaration's parameters; the walk used to
+  skip them, so `BigInt64Array.Every.Predicate` reached `array: BigInt64Array<TArrayBuffer>`
+  with nothing bound and widened it (`TR012`/`TR013`). The walk also follows a shadowed
+  `AliasIdentity` operand (`NoInfer<T>`), the operand `indexedAccessRef` renders, so solid-js
+  `CreateResource.Options2<'T>`/`Options4<'S, 'T>` bind `'T`. `bind-free-type-params` admits a
+  hoisted anonymous type from a widened group, the rule `synthesize-anonymous` names it under:
+  Node's typed-array delegates sit in `lib.*.d.ts` files.
+- **W7.2.** No new code: `typeParamsOf` already writes only an interface or class constraint,
+  so a delegate binding a union-constrained parameter (`'TArrayBuffer`, `ArrayBufferLike`) drops
+  it with `TP002` as its owner does.
+- **W7.3.** `ResolvedMember.ResolvesToFunction` records a `function` declaration, read through
+  `getAliasedSymbol` for a re-exported namespace member (`export { f } from`, an `Alias`
+  symbol). `Spec.emitsAsMethod` is a method symbol, or a required function whose type is a
+  callback alone; a function+namespace merge keeps the property form. It decides in
+  `Spec.shapeMembers` (namespace objects, `globalThis`), `Classes.shapeStatic` (a class's merged
+  namespace) and `Anonymous.signatureShaped` (no delegate is minted for a method's type).
+  TypeScript rejects assignment to a function declaration (TS2630), so the setter the property
+  form carried was not part of the contract, and no finding records it. A `const` of a
+  function type stays a property. `Customization/Semantics.fs` classifies members through
+  `Spec.emitsAsMethodWith`, so a customization sees a namespace function as the method it
+  renders (a property replacement fails with `customization/property-required`).
+- **W7.4.** `appliedRefTo` accepts a type variable whose written constraint is the bound or
+  inherits it (`satisfiesNominally`): `querySelectorAll<'E when 'E :> Element>: selectors:
+  string -> NodeListOf<'E>`. A structural-only bound still widens with `TR027`.
+- Codes taken: none.
+
+Lab `type-scope-lab`: `Grid.Each.Visit<'T when 'T :> Shape>` and `Store.Each.Visit<'B>` (union
+bound dropped, `TP002` on `Store` and the delegate); `Ns.identity<'T>`, `Ns.measure<'T when 'T
+:> Shape>` and the re-exported `Ns.relabel` are methods, `Ns.version` and `Ns.format` (a generic
+function-typed `const`) stay properties, as does `Ns.tagged` (a function+namespace merge) while
+its namespace's `strip` is a method; `Registry.find<'T when 'T :> Shape>` is a static method;
+`Container.queryAll<'E when 'E :> TaggedEntry>` returns `EntryList<'E>`; `Create.Options<'T>`
+reads `JS.NoInfer<'T>`. Remaining: `TR013` on `NoInfer` (the alias declaration) and
+`Ns.format(value)`, `TR027`/`TP006` on `Container.queryLike` (structural bound). The
+`compiler-lib-ownership-lab` entry gains `declare function pick<T>`: `GlobalThis` writes every
+global function as a method (`pick<'T>: items: 'T[] -> 'T`, `parseInt: string: string * ?radix:
+float -> float`). Lab `lab` `Utils.clamp` is a method, its `Clamp` delegate is gone, and the
+RunGate calls `utils.clamp(5.0, 0.0, 1.0)`; `test --run-gate` passes its 535 Fable checks.
+
+| Golden | TR012 | TR013 | TR027 | TP006 | TP002 | exact / ergonomic / widened / escape |
+| --- | --- | --- | --- | --- | --- | --- |
+| `animejs` | 2 → 0 | 3 → 0 | 1 → 0 | 1 → 0 | 26 → 28 | 129/190/26/6 → 129/188/26/6 |
+| `solid-js` | 0 | 23 → 15 | 0 | 15 → 15 | unchanged | 69/180/92/1 → 69/182/90/1 |
+| Core.TS (scratch) | 190 → 0 | 6 → 2 | 152 → 0 | 154 → 2 | 3307 → 3499 | 2073/2203/785/5 → 2073/2346/632/5 |
+| Node (scratch) | 102 → 0 | 250 → 19 | 5 → 0 | 452 → 454 | 374 → 538 | 1263/2032/830/5 → 1263/2136/678/5 |
+
+In `animejs`, the `Utils`, `Easings`, `Svg`, `Text` and `Waapi` namespace functions become
+methods (`TR055` 70 → 62, `SY006` 25 → 23, `MB001` 328 → 361 as optional parameters become
+`?` arguments, `SP002` 34 → 48 as `Create` takes the methods as functions). `solid-js` moves only
+through `NoInfer`: the 8 `CreateResource.Options2/4` sites. Its remaining `TR013` are rank-2
+callback parameters, `Store<T> = T`, the `NoInfer` alias declarations and `Store.DEV.isWrappable`
+(a property typed `typeof isWrappable`), and its `TP006` are conditional-erased parameters; none
+is a W7 construct. The spec's acceptance line ("In solid-js and animejs, TR012, TR013, TR027 and
+TP006 fall") is met for `animejs` only: in `solid-js`, `TP006` stays 15 and `TR012`/`TR027` start at
+0; this gap is raised with the lead rather than amended. Node's remaining `TR013` are `Assert.Assert`/`AssertStrict` (members of a
+`Pick<typeof assert, …>` mapped type, not function symbols), `AsyncLocalStorage.snapshot` and
+`Stream.PipelineDestination`. In Node, functions of a function+namespace merge's namespace
+(`Mkdtemp.__promisify__`) become overloaded methods, so `DO001` +6 settles overloads equal after
+widening and `SP003` +3 refuses their `Create`; `Util.Types.isMap`/`isSet` gain `TP006`.
+
+The pull-request regeneration (`test --goldens`) also moves `@cloudflare/workers-types`
+(`WebAssembly.instantiate`/`validate` become methods, `SY006` 16 → 15, `SP002` 500 → 502;
+`WorkflowEntrypoint.Run.Event<'T>` binds its owner's `'T`, `TP002` 95 → 96) and `type-fest`
+(`ObservableLike.Subscribe.Observer<'ValueType>`, `TR013` 2 → 1).
+
+Core.TS and Node are regenerated at integration on `integ/w7` (2026-10-14), over W5 and W6,
+under the T4 override. Every W7 count equals the scratch measurement above; the tiers move from
+1302/2397/591/5 to 1302/2540/438/5 in Core.TS and from 775/2094/760/5 to 775/2198/608/5 in Node.

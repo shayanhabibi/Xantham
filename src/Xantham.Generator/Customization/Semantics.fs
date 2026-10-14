@@ -176,7 +176,7 @@ let private operationLookup
                         fail "Generic receivers are outside the operation projection contract"
                     | Some receiver ->
                         match receiver.Members |> namedMembers methodName with
-                        | [ method_ ] when method_.Symbol.Flags.HasFlag SymbolFlags.Method && not method_.Optional ->
+                        | [ method_ ] when Shape.Spec.emitsAsMethodWith facts method_ && not method_.Optional ->
                             match facts method_.TypeId with
                             | None -> incomplete "The selected method was not fully resolved"
                             | Some methodFacts ->
@@ -231,9 +231,7 @@ let private operationLookup
                                                 && (Shape.Spec.declParamIds value).IsEmpty
                                                 ->
                                                 match value.Members |> namedMembers field with
-                                                | [ property ] when
-                                                    not (property.Symbol.Flags.HasFlag SymbolFlags.Method)
-                                                    ->
+                                                | [ property ] when not (Shape.Spec.emitsAsMethodWith facts property) ->
                                                     if not property.Optional then
                                                         fail "Field projection requires an optional selected property"
                                                     elif
@@ -388,7 +386,7 @@ let private operationLookup
                                             valueMembers <- member_.Symbol :: valueMembers
 
                                             if
-                                                member_.Symbol.Flags.HasFlag SymbolFlags.Method
+                                                Shape.Spec.emitsAsMethodWith facts member_
                                                 || (handles member_.Symbol).IsEmpty
                                             then
                                                 Error
@@ -993,7 +991,7 @@ let project (ctx: Context) (shape: ShapeModel) (findings: Finding list) =
 
                 let properties, excluded =
                     facts.Members
-                    |> List.partition (fun member_ -> not (member_.Symbol.Flags.HasFlag SymbolFlags.Method))
+                    |> List.partition (fun member_ -> not (Shape.Spec.emitsAsMethod projectionShape member_))
 
                 let memberKeys =
                     facts.Members
@@ -1059,7 +1057,7 @@ let project (ctx: Context) (shape: ShapeModel) (findings: Finding list) =
                                     Receiver = key
                                     Declaring = declaring
                                     Name = name
-                                    IsProperty = not (member_.Symbol.Flags.HasFlag SymbolFlags.Method)
+                                    IsProperty = not (Shape.Spec.emitsAsMethod projectionShape member_)
                                     ReadOnly = member_.ReadOnly
                                     Optional = member_.Optional
                                     Type = mapped

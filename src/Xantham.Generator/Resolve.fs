@@ -841,6 +841,19 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
             else
                 async.Return None
 
+        let! resolvesToFunction =
+            if not isProperty then
+                async.Return false
+            elif property.Flags.HasFlag SymbolFlags.Function then
+                async.Return true
+            elif property.Flags.HasFlag SymbolFlags.Alias then
+                async {
+                    let! target = ctx.Session.getAliasedSymbol property.Id
+                    return target.Flags.HasFlag SymbolFlags.Function
+                }
+            else
+                async.Return false
+
         return
             {
                 Symbol = property
@@ -853,6 +866,7 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
                 ReadOnly = readOnly
                 TypeId = propertyType.TypeId
                 WellKnownSymbol = symbol
+                ResolvesToFunction = resolvesToFunction
             },
             propertyType
     }
