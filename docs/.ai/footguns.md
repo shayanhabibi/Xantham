@@ -281,6 +281,12 @@ missing table row.
   `Recovery.Aborted.Type.User` resolves `Recovery.Aborted` to the case: FS0039, and FS1127 in a
   pattern. Type annotations still resolve, so a compile gate over declarations alone misses it.
   Case declarations nest under `Recovery.Cases.Aborted` instead.
+- **A folded case is the intersection of its arms.** Arms sharing a tag value (`DT004`) fold
+  into a case carrying only the members they agree on, so a `Create<Case>` is valid only where
+  one arm's required members are all carried by the case (`Spec.caseConstructsArm`); otherwise it
+  builds an object matching no arm. An arm with a member the case omits keeps its interface as
+  the typed path to that member (`DT007`), and `drop-orphan-delegates` prunes only the arms the
+  case carries whole (`Spec.caseCarriesArm`).
 
 ## Fable runtime type tests
 

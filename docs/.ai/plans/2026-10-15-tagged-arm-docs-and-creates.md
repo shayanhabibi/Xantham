@@ -1462,6 +1462,7 @@ rtk git commit -m "chore(goldens): regenerate for tagged-union arm removal (#158
 - Nested declarations move under `<Union>.Cases.<Case>` (Task 3). Residue kept on purpose: a
   union with a case named `Cases` keeps the arm path (`Shelf2.Size`) after its arms are dropped.
 - Folds lost members spelled as identical inline objects (type-id comparison). Task 0 fixes both
-  folds. Declarations only a dropped or folded arm read (`Run`'s `Result`/`Failure`, the second
-  `Owner`, `Choice.Meta2`) are pruned in Task 4 under the arm roots.
+  folds. Declarations only a dropped arm read (`Choice.Meta2`) are pruned in Task 4 under the arm
+  roots; after the final fix, a folded arm with a field its case omits stays declared (`DT007`),
+  so `Run`'s `Result`/`Failure` and the second `Owner` stay with the arms that read them.
 - Accepted residue: a self-recursive declaration under an arm root reads itself and survives.

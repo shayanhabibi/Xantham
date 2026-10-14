@@ -2920,7 +2920,9 @@ member is FS0023. An anonymous arm's own declarations nest under `<Union>.Cases.
 `detect-tagged-unions` names cases from); a submodule spelled like the case itself is
 unreachable from expressions (FS0039), and a union with a case named `Cases` keeps the arm-name
 path. `drop-orphan-delegates` then prunes each unread interface named for an
-anonymous arm of a declared DU (`DD002`), then every unread generator-minted declaration under
+anonymous arm the DU carries whole (`DD002`); an arm of a folded case with a field the case
+omits stays declared (`DT007`), and such a case has `Create<Case>` only where its fields alone
+build one of its arms. It then prunes every unread generator-minted declaration under
 an arm root - a DU's `Cases` module, a dropped arm's path, an exclusive-folded interface -
 transitively (`DD003`); named arms, erased fallbacks, arms read elsewhere and author-written
 declarations under an arm root (a namespace member merged by name, `T1.Extra`) stay. The
@@ -2936,8 +2938,11 @@ catalogue.
 
 Measured over the corpus (findings against the pre-wave baseline): `DD002` 2 in
 `@cloudflare/workers-types`, 2 in `catalog-alias-api-lab`, 2 in `catalog-recursive-json-lab`,
-19 in `generic-tag-lab`, 12 in `shared-tag-lab` and 22 in `tagged-arm-lab`; `DD003` 8 and
-`DT006` 1, both in `tagged-arm-lab`; `DT005` 21, 1, 1 (`projection-lab`), 4 and 6. Ergonomic
+19 in `generic-tag-lab`, 10 in `shared-tag-lab` and 20 in `tagged-arm-lab`; `DD003` 2 and
+`DT006` 1, both in `tagged-arm-lab`; `DT005` 20 in `@cloudflare/workers-types`, 1 in
+`catalog-alias-api-lab`, 1 in `projection-lab`, 4 in `shared-tag-lab` and 7 in `tagged-arm-lab`;
+`DT007` 1 in `@cloudflare/workers-types` (`TailStream` `Event.Item.Log`, whose `CreateLog` built
+no arm), 2 in `shared-tag-lab` and 5 in `tagged-arm-lab`. Ergonomic
 tiers fall by the dropped nested arms. `catalog-recursive-json-lab`'s shipped group held only its
 two arm interfaces and is no longer written (`GE001` → `GE002`). Node drops 13 anonymous
 `TestEvent` arms (`DD002` 13) and gains 3 `Create<Case>` members; Core.TS's binding is unchanged.
