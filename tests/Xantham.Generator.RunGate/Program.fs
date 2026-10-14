@@ -1930,7 +1930,7 @@ let private taggedCaseCreates () =
         """{"verb":"start","channel":"bus","at":2}"""
         (json (TaggedArmLab.Signal.CreateStart 2.0))
 
-    match TaggedArmLab.Recovery.CreateAborted(TaggedArmLab.Recovery3.Type.User, reason = "r") with
+    match TaggedArmLab.Recovery.CreateAborted(TaggedArmLab.Recovery.Cases.Aborted.Type.User, reason = "r") with
     | TaggedArmLab.Recovery.Aborted(reason, _) ->
         equal "a case Create with an escaped field matches its case" "r" (Option.defaultValue "" reason)
     | _ -> check "a case Create reached another case" false
@@ -1938,7 +1938,7 @@ let private taggedCaseCreates () =
     equal
         "an escaped field is written under its JS key"
         """{"status":"aborted","type":"user"}"""
-        (json (TaggedArmLab.Recovery.CreateAborted TaggedArmLab.Recovery3.Type.User))
+        (json (TaggedArmLab.Recovery.CreateAborted TaggedArmLab.Recovery.Cases.Aborted.Type.User))
 
     equal
         "a generic case Create writes its payload"

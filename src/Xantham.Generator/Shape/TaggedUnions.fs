@@ -68,8 +68,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                             findings <- findings @ parameterFindings
                                             let scoped = { model with TypeVars = scope }
 
-                                            let caseNames =
-                                                tagged |> List.map (snd >> Naming.enumCaseOfString) |> uniqueCaseNames
+                                            let caseNames = taggedCaseNamesOf tagged
 
                                             let cases =
                                                 List.map2

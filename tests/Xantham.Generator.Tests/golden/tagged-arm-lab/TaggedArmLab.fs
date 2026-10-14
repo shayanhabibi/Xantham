@@ -20,12 +20,12 @@ type Recovery =
     | [<CompiledName("completed")>] Completed of snapshot: obj option * metadata: JS.Record<string, obj> option
     /// <param name="reason">Why the fiber was aborted.</param>
     /// <param name="type">Which party aborted it.</param>
-    | [<CompiledName("aborted")>] Aborted of reason: string option * ``type``: Recovery3.Type
+    | [<CompiledName("aborted")>] Aborted of reason: string option * ``type``: Recovery.Cases.Aborted.Type
     | [<CompiledName("pending")>] Pending
     [<ParamObject; Emit("({ status: 'completed', ...$0 })")>]
     static member CreateCompleted (?snapshot: obj, ?metadata: JS.Record<string, obj>) : Recovery = jsNative
     [<ParamObject; Emit("({ status: 'aborted', ...$0 })")>]
-    static member CreateAborted (``type``: Recovery3.Type, ?reason: string) : Recovery = jsNative
+    static member CreateAborted (``type``: Recovery.Cases.Aborted.Type, ?reason: string) : Recovery = jsNative
 
 [<Interface>]
 type Recovery2 =
@@ -56,19 +56,14 @@ type Recovery3 =
     /// <summary>
     /// Which party aborted it.
     /// </summary>
-    abstract ``type``: Recovery3.Type with get, set
+    abstract ``type``: Recovery.Cases.Aborted.Type with get, set
     [<ParamObject; Emit("({ status: 'aborted', ...$0 })")>]
-    static member Create (``type``: Recovery3.Type, ?reason: string) : Recovery3 = jsNative
+    static member Create (``type``: Recovery.Cases.Aborted.Type, ?reason: string) : Recovery3 = jsNative
 
 module Recovery3 =
     /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
     [<Literal>]
     let status = "aborted"
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("system")>] System
-        | [<CompiledName("user")>] User
 
 [<Interface>]
 type Recovery4 =
@@ -273,80 +268,38 @@ module Clash3 =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
 type Task =
-    | [<CompiledName("done")>] Done of owner: Task2.Owner
+    | [<CompiledName("done")>] Done of owner: Task.Cases.Done.Owner
     | [<CompiledName("queued")>] Queued
 
 [<Interface>]
 type Task2 =
     /// <remarks>TypeScript type: <c>"done"</c></remarks>
     abstract state: string with get, set
-    abstract owner: Task2.Owner with get, set
+    abstract owner: Task.Cases.Done.Owner with get, set
     abstract ok: bool with get, set
-    abstract note: Task2.Note with get, set
+    abstract note: Task.Cases.Done.Note with get, set
     [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (owner: Task2.Owner, ok: bool, note: Task2.Note) : Task2 = jsNative
+    static member Create (owner: Task.Cases.Done.Owner, ok: bool, note: Task.Cases.Done.Note) : Task2 = jsNative
 
 module Task2 =
     /// <remarks>TypeScript type: <c>"done"</c></remarks>
     [<Literal>]
     let state = "done"
 
-    [<Interface>]
-    type Note =
-        abstract text: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (text: string) : Note = jsNative
-
-    [<Interface>]
-    type Owner =
-        abstract name: string with get, set
-        abstract tags: Task2.Owner.Tags.Item[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, tags: Task2.Owner.Tags.Item[]) : Owner = jsNative
-
-    module Owner =
-        module Tags =
-            [<Interface>]
-            type Item =
-                abstract id: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: float) : Item = jsNative
-
 [<Interface>]
 type Task3 =
     /// <remarks>TypeScript type: <c>"done"</c></remarks>
     abstract state: string with get, set
-    abstract owner: Task3.Owner with get, set
+    abstract owner: Task.Cases.Done.Owner2 with get, set
     abstract ok: bool with get, set
-    abstract note: Task3.Note with get, set
+    abstract note: Task.Cases.Done.Note2 with get, set
     [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (owner: Task3.Owner, ok: bool, note: Task3.Note) : Task3 = jsNative
+    static member Create (owner: Task.Cases.Done.Owner2, ok: bool, note: Task.Cases.Done.Note2) : Task3 = jsNative
 
 module Task3 =
     /// <remarks>TypeScript type: <c>"done"</c></remarks>
     [<Literal>]
     let state = "done"
-
-    [<Interface>]
-    type Note =
-        abstract text: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (text: float) : Note = jsNative
-
-    [<Interface>]
-    type Owner =
-        abstract name: string with get, set
-        abstract tags: Task3.Owner.Tags.Item[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, tags: Task3.Owner.Tags.Item[]) : Owner = jsNative
-
-    module Owner =
-        module Tags =
-            [<Interface>]
-            type Item =
-                abstract id: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: float) : Item = jsNative
 
 [<Interface>]
 type Task4 =
@@ -369,39 +322,27 @@ type Run =
 type Run2 =
     /// <remarks>TypeScript type: <c>"done"</c></remarks>
     abstract state: string with get, set
-    abstract result: Run2.Result with get, set
+    abstract result: Run.Cases.Done.Result with get, set
     [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (result: Run2.Result) : Run2 = jsNative
+    static member Create (result: Run.Cases.Done.Result) : Run2 = jsNative
 
 module Run2 =
     /// <remarks>TypeScript type: <c>"done"</c></remarks>
     [<Literal>]
     let state = "done"
 
-    [<Interface>]
-    type Result =
-        abstract value: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (value: float) : Result = jsNative
-
 [<Interface>]
 type Run3 =
     /// <remarks>TypeScript type: <c>"done"</c></remarks>
     abstract state: string with get, set
-    abstract failure: Run3.Failure with get, set
+    abstract failure: Run.Cases.Done.Failure with get, set
     [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (failure: Run3.Failure) : Run3 = jsNative
+    static member Create (failure: Run.Cases.Done.Failure) : Run3 = jsNative
 
 module Run3 =
     /// <remarks>TypeScript type: <c>"done"</c></remarks>
     [<Literal>]
     let state = "done"
-
-    [<Interface>]
-    type Failure =
-        abstract message: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (message: string) : Failure = jsNative
 
 [<Interface>]
 type Run4 =
@@ -418,24 +359,184 @@ module Run4 =
 
 [<Interface>]
 type Choice =
-    abstract meta: Choice2.Meta with get, set
+    abstract meta: Choice.Meta with get, set
     abstract a: float option with get, set
     abstract b: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (meta: Choice2.Meta, a: float) : Choice = jsNative
+    static member Create (meta: Choice.Meta, a: float) : Choice = jsNative
     [<ParamObject; Emit("$0")>]
-    static member Create (meta: Choice2.Meta, b: string) : Choice = jsNative
+    static member Create (meta: Choice.Meta, b: string) : Choice = jsNative
 
-module Choice2 =
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+type Shelf =
+    | [<CompiledName("cases")>] Cases of size: Shelf2.Size
+    | [<CompiledName("box")>] Box of size: Shelf3.Size
+
+[<Interface>]
+type Shelf2 =
+    /// <remarks>TypeScript type: <c>"cases"</c></remarks>
+    abstract kind: string with get, set
+    abstract size: Shelf2.Size with get, set
+    [<ParamObject; Emit("({ kind: 'cases', ...$0 })")>]
+    static member Create (size: Shelf2.Size) : Shelf2 = jsNative
+
+module Shelf2 =
+    /// <remarks>TypeScript type: <c>"cases"</c></remarks>
+    [<Literal>]
+    let kind = "cases"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Size =
+        | [<CompiledName("m")>] M
+        | [<CompiledName("s")>] S
+
+[<Interface>]
+type Shelf3 =
+    /// <remarks>TypeScript type: <c>"box"</c></remarks>
+    abstract kind: string with get, set
+    abstract size: Shelf3.Size with get, set
+    [<ParamObject; Emit("({ kind: 'box', ...$0 })")>]
+    static member Create (size: Shelf3.Size) : Shelf3 = jsNative
+
+module Shelf3 =
+    /// <remarks>TypeScript type: <c>"box"</c></remarks>
+    [<Literal>]
+    let kind = "box"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Size =
+        | [<CompiledName("l")>] L
+        | [<CompiledName("xl")>] Xl
+
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
+type Job =
+    | [<CompiledName("done")>] Done of level: Job.Cases.Done.Level
+    | [<CompiledName("queued")>] Queued
+
+[<Interface>]
+type Job2 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    abstract state: string with get, set
+    abstract level: Job.Cases.Done.Level with get, set
+    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
+    static member Create (level: Job.Cases.Done.Level) : Job2 = jsNative
+
+module Job2 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    [<Literal>]
+    let state = "done"
+
+[<Interface>]
+type Job3 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    abstract state: string with get, set
+    abstract level: Job.Cases.Done.Level with get, set
+    abstract code: float with get, set
+    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
+    static member Create (level: Job.Cases.Done.Level, code: float) : Job3 = jsNative
+
+module Job3 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    [<Literal>]
+    let state = "done"
+
+[<Interface>]
+type Job4 =
+    /// <remarks>TypeScript type: <c>"queued"</c></remarks>
+    abstract state: string with get, set
+    [<Emit("({ state: 'queued' })")>]
+    static member Create () : Job4 = jsNative
+
+module Job4 =
+    /// <remarks>TypeScript type: <c>"queued"</c></remarks>
+    [<Literal>]
+    let state = "queued"
+
+module Choice =
     [<Interface>]
     type Meta =
         abstract id: string with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (id: string) : Meta = jsNative
 
-module Choice3 =
     [<Interface>]
-    type Meta =
+    type Meta2 =
         abstract id: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (id: string) : Meta = jsNative
+        static member Create (id: string) : Meta2 = jsNative
+
+module Job =
+    module Cases =
+        module Done =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Level =
+                | [<CompiledName("info")>] Info
+                | [<CompiledName("warn")>] Warn
+
+module Recovery =
+    module Cases =
+        module Aborted =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Type =
+                | [<CompiledName("system")>] System
+                | [<CompiledName("user")>] User
+
+module Run =
+    module Cases =
+        module Done =
+            [<Interface>]
+            type Failure =
+                abstract message: string with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (message: string) : Failure = jsNative
+
+            [<Interface>]
+            type Result =
+                abstract value: float with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (value: float) : Result = jsNative
+
+module Task =
+    module Cases =
+        module Done =
+            [<Interface>]
+            type Note =
+                abstract text: string with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (text: string) : Note = jsNative
+
+            [<Interface>]
+            type Note2 =
+                abstract text: float with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (text: float) : Note2 = jsNative
+
+            [<Interface>]
+            type Owner =
+                abstract name: string with get, set
+                abstract tags: Task.Cases.Done.Owner.Tags.Item[] with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, tags: Task.Cases.Done.Owner.Tags.Item[]) : Owner = jsNative
+
+            [<Interface>]
+            type Owner2 =
+                abstract name: string with get, set
+                abstract tags: Task.Cases.Done.Owner2.Tags.Item[] with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, tags: Task.Cases.Done.Owner2.Tags.Item[]) : Owner2 = jsNative
+
+            module Owner =
+                module Tags =
+                    [<Interface>]
+                    type Item =
+                        abstract id: float with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (id: float) : Item = jsNative
+
+            module Owner2 =
+                module Tags =
+                    [<Interface>]
+                    type Item =
+                        abstract id: float with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (id: float) : Item = jsNative

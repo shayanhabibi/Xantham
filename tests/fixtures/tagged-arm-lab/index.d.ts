@@ -73,3 +73,14 @@ export type Run =
 export type Choice =
     | { meta: { id: string }; a: number; b?: never }
     | { meta: { id: string }; b: string; a?: never };
+
+// A case named `Cases` would shadow the case modules, so these arms nest under their own names.
+export type Shelf =
+    | { kind: "cases"; size: "s" | "m" }
+    | { kind: "box"; size: "l" | "xl" };
+
+// Arms folding into one case nest under that case.
+export type Job =
+    | { state: "done"; level: "info" | "warn" }
+    | { state: "done"; level: "info" | "warn"; code: number }
+    | { state: "queued" };

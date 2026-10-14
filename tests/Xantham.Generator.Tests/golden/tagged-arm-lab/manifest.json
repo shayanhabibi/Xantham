@@ -3,35 +3,35 @@
   "package": "tagged-arm-lab",
   "module": "TaggedArmLab",
   "counts": {
-    "exact": 2,
-    "ergonomic": 35,
+    "exact": 6,
+    "ergonomic": 41,
     "widened": 3,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 11,
-      "exact": 11
+      "total": 14,
+      "exact": 14
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 27,
-      "exact": 14,
-      "ergonomic": 9,
+      "total": 30,
+      "exact": 16,
+      "ergonomic": 10,
       "widened": 4
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 36,
-      "ergonomic": 34,
+      "total": 41,
+      "ergonomic": 39,
       "widened": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 50,
-      "exact": 19,
-      "ergonomic": 31
+      "total": 60,
+      "exact": 24,
+      "ergonomic": 36
     }
   ]
 }

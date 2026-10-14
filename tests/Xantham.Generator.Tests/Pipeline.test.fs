@@ -4554,7 +4554,7 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "    | [<CompiledName(\"done\")>] Done of owner: Task2.Owner
+                          "    | [<CompiledName(\"done\")>] Done of owner: Task.Cases.Done.Owner
 "
                           "equal inline objects agree, nested arrays of them included; `ok` and `note` differ"
 
@@ -4565,9 +4565,9 @@ let pipelineTests =
                           "members only one arm carries still fold away"
 
                       Expect.isFalse (source.Contains "type Choice = U2<") "an exclusive fold over an inline shared object fires"
-                      Expect.stringContains source "    abstract meta: Choice2.Meta" "and reads the first arm's declaration"
-                      Expect.stringContains source "    static member Create (meta: Choice2.Meta, a: float) : Choice = jsNative" "one Create per arm"
-                      Expect.stringContains source "    static member Create (meta: Choice2.Meta, b: string) : Choice = jsNative" "for both arms"
+                      Expect.stringContains source "    abstract meta: Choice.Meta" "and reads the first arm's declaration"
+                      Expect.stringContains source "    static member Create (meta: Choice.Meta, a: float) : Choice = jsNative" "one Create per arm"
+                      Expect.stringContains source "    static member Create (meta: Choice.Meta, b: string) : Choice = jsNative" "for both arms"
 
                   testCase "a tagged union carries the documentation its arms carried" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -4635,7 +4635,33 @@ let pipelineTests =
                       Expect.equal
                           (messagesFor "Recovery.Completed" "DT005")
                           [ "case Create 'CreateCompleted': optional fields omittable, literal fields written" ]
-                          "a synthesized helper is reported once" ])
+                          "a synthesized helper is reported once"
+
+                  testCase "an anonymous arm's declarations nest under its case" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "Aborted of reason: string option * ``type``: Recovery.Cases.Aborted.Type"
+                          "the case field reads the declaration under its case"
+
+                      Expect.isFalse (source.Contains "Recovery3.Type") "and not under the arm's numbered name"
+                      Expect.stringContains source "Done of level: Job.Cases.Done.Level" "folded arms share their case's module"
+                      Expect.stringContains source "Shelf2.Size" "a union with a case named Cases keeps the arm path"
+                      Expect.stringContains source "Shelf3.Size" "for every arm"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\")>] Done of owner: Task.Cases.Done.Owner\n"
+                          "a member the fold kept reads the declaration under its case"
+
+                      Expect.stringContains
+                          source
+                          "    abstract meta: Choice.Meta"
+                          "an exclusive fold's shared member nests under the folded interface"
+
+                      Expect.isFalse (source.Contains "Choice2.Meta") "not under an arm the fold removed" ])
 
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced

@@ -3948,6 +3948,32 @@ let uniqueCaseNames (names: string list) =
         seen <- Set.add unique seen
         unique)
 
+/// The DU case names of a discriminated union's cases, in case order.
+let internal taggedCaseNamesOf (tagged: (TypeFacts * string) list) =
+    tagged |> List.map (snd >> Naming.enumCaseOfString) |> uniqueCaseNames
+
+/// The case each arm of a union reads under once `detect-tagged-unions` declares it, keyed by
+/// the arm's type id. Arms folding into one case share its name. Empty for a union that pass
+/// does not declare.
+let internal taggedCaseNames (model: ShapeModel) (facts: TypeFacts) : Map<int<Measure.typeId>, string> =
+    if not (isTaggedDeclaration model facts) then
+        Map.empty
+    else
+        match taggedUnionShape model facts with
+        | Discriminated(tag, tagged, _) ->
+            let byValue =
+                List.zip (tagged |> List.map snd) (taggedCaseNamesOf tagged) |> Map.ofList
+
+            facts.UnionMembers
+            |> List.choose (fun armId ->
+                Map.tryFind armId model.Types
+                |> Option.bind (taggedArmValue model tag)
+                |> Option.bind byValue.TryFind
+                |> Option.map (fun caseName -> armId, caseName))
+            |> Map.ofList
+        | TagCollides _
+        | Untagged -> Map.empty
+
 /// Type abbreviations declared by a model, as name -> target. Shared by the passes that must
 /// compare signatures the way the compiler does: .NET overload resolution sees through an
 /// abbreviation, so `TargetsParam` and the `U6<...>` it abbreviates are one type to it.
