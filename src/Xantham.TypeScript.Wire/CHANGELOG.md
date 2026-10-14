@@ -1,5 +1,5 @@
 ---
-last_commit_released: 0d9626867755b04d294c4313cd8a1ec299ccf543
+last_commit_released: 977355536eba47bff4672d609cccca7523bda9f7
 name: Xantham.TypeScript.Wire
 include:
   - ../../Directory.Build.props
@@ -12,6 +12,14 @@ updaters:
 ---
 
 # Changelog
+
+## 0.3.1-beta.1 - 2026-10-14
+
+### 🎨 Styling
+
+* Format the committed generated sources ([4aa0a6c7](https://github.com/shayanhabibi/Xantham/commit/4aa0a6c78e5448eab4d622f709e464219fbf269e))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/0d9626867755b04d294c4313cd8a1ec299ccf543..977355536eba47bff4672d609cccca7523bda9f7)</small></strong>
 
 ## 0.3.0 - 2026-10-10
 
