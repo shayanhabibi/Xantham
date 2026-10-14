@@ -143,7 +143,7 @@ The toolbox we map *into*. Listed once here; the catalogue below refers to these
 | `[<Erase>]` types / unions | Compile-time-only wrapper, erased to the payload in JS. The workhorse for zero-cost nominal safety. |
 | `[<StringEnum>]` (+ `CaseRules`) | F# DU whose cases compile to string literals. |
 | `U2<..>`…`U9<..>` | Erased untagged unions; `!^` upcast, pattern-match to read (unreliable at runtime — cases are untagged), implicit `op_ErasedCast`. |
-| `[<TypeScriptTaggedUnion "tag">]` | Real pattern-matchable DU over a TS discriminated union; matches on the tag property. |
+| `[<TypeScriptTaggedUnion "tag">]` | Real pattern-matchable DU over a TS discriminated union; matches on the tag property; `Create<Case>` builds a case with optional fields omittable and literal fields written. |
 | Interfaces (`abstract` members) | The default object-type representation; erased, structural at runtime. Overloaded abstract members are legal. |
 | Anonymous records `{| x: int |}` | Compile to POJOs; good for closed inline object types in *input* position. |
 | `[<AllowNullLiteral>]` | Permits `null` for a class/interface type. |
@@ -321,7 +321,7 @@ application and is written as the constraint instead (`TR044`).
 Order of preference, decided per union after §4.2's categorization:
 
 1. All-literal → StringEnum/enum (Exact).
-2. Discriminated by a common literal tag property (checker: every member has property `k` with a unique literal type) → **`[<TypeScriptTaggedUnion>]`** (Exact, pattern-matchable — by far the best consumer experience; detect aggressively). A generic union declares the parameters its arms read - the alias's own, then those of the scope it was written in - and every reference applies them: `type Scheduled<'T> = | Once of payload: 'T`, read as `Scheduled<'T>` at `schedule<T>(): Scheduled<T>`. An application of the alias is written as that application wherever it corresponds to the declared form arm for arm, including beside `null`/`undefined` (`x?: Job<string>` reads `Job<string> option`); a transformed subset (`Extract<Pair<T, U>, ...>`) is its own union.
+2. Discriminated by a common literal tag property (checker: every member has property `k` with a unique literal type) → **`[<TypeScriptTaggedUnion>]`** (Exact, pattern-matchable — by far the best consumer experience; detect aggressively). A generic union declares the parameters its arms read - the alias's own, then those of the scope it was written in - and every reference applies them: `type Scheduled<'T> = | Once of payload: 'T`, read as `Scheduled<'T>` at `schedule<T>(): Scheduled<T>`. An application of the alias is written as that application wherever it corresponds to the declared form arm for arm, including beside `null`/`undefined` (`x?: Job<string>` reads `Job<string> option`); a transformed subset (`Extract<Pair<T, U>, ...>`) is its own union. An anonymous arm interface nothing reads is not declared.
 3. Nullability hoisted + a *single* remaining member → `option`-wrapped member.
 4. Two-to-nine heterogeneous members → `U2`–`U9` (Exact for writing; reading requires
    runtime tests the consumer writes). **Decided (D4):** the `U_n` threshold is 9, one

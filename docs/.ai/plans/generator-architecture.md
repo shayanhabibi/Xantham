@@ -2900,3 +2900,44 @@ Measured in scratch with the flag on:
 Tiers, table size and wall time did not move. Core.TS and Node are not regenerated, since
 neither configuration sets the flag. Enabling it for Node is the recommendation, left to
 integration.
+
+## Tagged-union arms (2026-10-15, #158)
+
+Both folds compare members with `Spec.sameShape`: one id, or plain anonymous objects, unions and
+applications of one target that pair structurally. The checker gives every inline object literal
+its own id, so the earlier id comparison dropped `owner: { name: string }` from a tagged fold and
+refused the exclusive-arm fold over a shared inline `meta`. An exclusive-folded union's arm
+declarations nest under the folded interface (`Choice.Meta`).
+
+`detect-tagged-unions` writes the alias's JSDoc on the DU and each arm member's JSDoc, tags and
+literal value on its case field; render writes them as one `<param>` per field, empty where a
+field has no text (FS3390 rejects a case documenting some fields). A case with an optional or a
+literal field has a `Create<Case>` static member, the arm interface's `Create` moved onto the DU:
+an Emit writing the tag and literal fields, the remaining fields bound as parameters (`DT005`);
+where `Create<Case>` is a case of the same union, the case has none (`DT006`). A same-named
+member is FS0023. An anonymous arm's own declarations nest under `<Union>.Cases.<Case>`
+(`synthesize-anonymous` reads the case names from `Spec.taggedCaseNames`, the source
+`detect-tagged-unions` names cases from); a submodule spelled like the case itself is
+unreachable from expressions (FS0039), and a union with a case named `Cases` keeps the arm-name
+path. `drop-orphan-delegates` then prunes each unread interface named for an
+anonymous arm of a declared DU (`DD002`), then every unread generator-minted declaration under
+an arm root - a DU's `Cases` module, a dropped arm's path, an exclusive-folded interface -
+transitively (`DD003`); named arms, erased fallbacks, arms read elsewhere and author-written
+declarations under an arm root (a namespace member merged by name, `T1.Extra`) stay. The
+catalogue API hash is unchanged: no `CatalogCompatibility.current` bump. A tagged union's API
+hash covers exactly its tag, cases and field types; docs and `Create<Case>` members sit outside
+it. Catalogue identity keys come from roles, declaration handles and
+arguments, and a declaration's F# name enters a key only through the `generated:` fallback for a
+declaration without a type identity. The declarations nested under `<Union>.Cases.<Case>` all
+carry `type` or `literal-union` roles, so the rename leaves `identityVersion` unchanged. A newer
+producer owns fewer declarations, as orphan delegates already do, and a consumer takes every
+name from the catalogue of the producer it read. Core.TS regenerated with an unchanged semantic
+catalogue.
+
+Measured over the corpus (findings against the pre-wave baseline): `DD002` 2 in
+`@cloudflare/workers-types`, 2 in `catalog-alias-api-lab`, 2 in `catalog-recursive-json-lab`,
+19 in `generic-tag-lab`, 12 in `shared-tag-lab` and 22 in `tagged-arm-lab`; `DD003` 8 and
+`DT006` 1, both in `tagged-arm-lab`; `DT005` 21, 1, 1 (`projection-lab`), 4 and 6. Ergonomic
+tiers fall by the dropped nested arms. `catalog-recursive-json-lab`'s shipped group held only its
+two arm interfaces and is no longer written (`GE001` → `GE002`). Node drops 13 anonymous
+`TestEvent` arms (`DD002` 13) and gains 3 `Create<Case>` members; Core.TS's binding is unchanged.
