@@ -156,7 +156,7 @@ metadata for integrations.
 Source and configuration hashes normalize CRLF to LF across checkouts.
 
 This catalogue reuses qualified types such as `Fable.Core.TS.Dom.HTMLInputElement`,
-`Fable.Core.TS.Dom.FileList` and `Fable.Core.TS.Es.Promise<'T>`. Install the exact TypeScript
+`Fable.Core.TS.Dom.FileList` and `Fable.Core.TS.Es.Map<'K, 'V>`. Install the exact TypeScript
 release/source revision recorded in the catalogue and keep your library profile compatible.
 Core.TS writes `on*` event-handler returns as `unit`, so the consumer sets `anyReturnAsUnit` to
 `^on` as in the example; any other value fails the inference-profile check.

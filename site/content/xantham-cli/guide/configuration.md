@@ -129,7 +129,8 @@ Each rewritten reference is reported as `TR068`, graded Widened: a listener decl
 subclass of the bound still reads the bound. A conditional over an unbounded parameter or a
 union bound, one whose value at the bound is `any`, `unknown`, `never`, another conditional or
 one of its own branches, and an alias's own declaration all stay `obj` under `TR045`. The key
-is part of a catalogue's inference profile when set. The default is `false`.
+is part of a catalogue's inference profile when set. The default is `false`;
+`Xantham.Fable.Node` is generated with it set.
 
 ## Write handler returns as unit
 

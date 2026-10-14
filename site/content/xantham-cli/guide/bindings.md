@@ -79,6 +79,15 @@ A binding is rooted in a generated F# module.
   (`MyBinding.Event.AT_TARGET`), an expression names the interface's instance property
   instead; read the value there through a module abbreviation
   (`module EventConstants = MyBinding.Event`, then `EventConstants.AT_TARGET`).
+- **Literal overloads**: an overload selected by a literal argument is its own method, named
+  after the literal, with the literal written in: `store.read(key, "text")` binds as
+  `store.readText key` and still calls `read(key, 'text')` in JavaScript.
+- **Symbol members**: an iterable (`[Symbol.iterator]`) inherits `seq<'T>`, so
+  `for item in items do` needs no cast. Other well-known symbols are named members, such as
+  `resource.SymbolDispose()` and `value.SymbolToStringTag`.
+- **Tag maps**: a parameter typed by a key of a declared map takes a `typekeyof` key, and the
+  key fixes the result type: `document.createElement (typekeyof<HTMLElementTagNameMap, _> _.div)`
+  returns `HTMLDivElement`. The key reaches JavaScript as the bare string `"div"`.
 - **Functions of a namespace object** (`export * as utils`) and global functions are
   methods: `MyPackage.Exports.utils.clamp(5., 0., 1.)`. TypeScript does not allow
   assigning to them, so the binding has no setter; reassigning one needs dynamic access
