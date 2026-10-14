@@ -4567,7 +4567,35 @@ let pipelineTests =
                       Expect.isFalse (source.Contains "type Choice = U2<") "an exclusive fold over an inline shared object fires"
                       Expect.stringContains source "    abstract meta: Choice2.Meta" "and reads the first arm's declaration"
                       Expect.stringContains source "    static member Create (meta: Choice2.Meta, a: float) : Choice = jsNative" "one Create per arm"
-                      Expect.stringContains source "    static member Create (meta: Choice2.Meta, b: string) : Choice = jsNative" "for both arms" ])
+                      Expect.stringContains source "    static member Create (meta: Choice2.Meta, b: string) : Choice = jsNative" "for both arms"
+
+                  testCase "a tagged union carries the documentation its arms carried" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "/// The outcome of recovering a fiber." "the alias's comment reaches the DU"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"snapshot\">The state captured when the fiber finished.</param>"
+                          "a field comment reaches its case"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"metadata\">@deprecated Read <c>snapshot</c> instead.</param>"
+                          "a field tag reaches its case"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"type\">Which party aborted it.</param>"
+                          "an escaped field is documented under its JS key"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"channel\">TypeScript type: <c>"
+                          "a literal field records its literal"
+
+                      Expect.stringContains source "    /// <param name=\"at\"></param>" "and its undocumented sibling is written empty" ])
 
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced

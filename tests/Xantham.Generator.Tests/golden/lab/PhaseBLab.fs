@@ -124,6 +124,9 @@ module RoundRectShape =
     [<Literal>]
     let kind = "round-rect"
 
+/// <summary>
+/// A union the checker proves is discriminated (D4).
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Shape =
     | [<CompiledName("circle")>] Circle of radius: float

@@ -10,9 +10,16 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
+/// <summary>
+/// The outcome of recovering a fiber.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
 type Recovery =
+    /// <param name="snapshot">The state captured when the fiber finished.</param>
+    /// <param name="metadata">@deprecated Read <c>snapshot</c> instead.</param>
     | [<CompiledName("completed")>] Completed of snapshot: obj option * metadata: JS.Record<string, obj> option
+    /// <param name="reason">Why the fiber was aborted.</param>
+    /// <param name="type">Which party aborted it.</param>
     | [<CompiledName("aborted")>] Aborted of reason: string option * ``type``: Recovery3.Type
     | [<CompiledName("pending")>] Pending
 
@@ -104,7 +111,11 @@ module Shape3 =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("verb", CaseRules.None)>]
 type Signal =
+    /// <param name="channel">TypeScript type: <c>"bus"</c></param>
+    /// <param name="at"></param>
     | [<CompiledName("start")>] Start of channel: string * at: float
+    /// <param name="channel">TypeScript type: <c>"bus"</c></param>
+    /// <param name="reason"></param>
     | [<CompiledName("stop")>] Stop of channel: string * reason: string
 
 [<Interface>]
@@ -214,6 +225,7 @@ module Pong =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("op", CaseRules.None)>]
 type Message =
+    /// <param name="at">Milliseconds since the epoch.</param>
     | [<CompiledName("ping")>] Ping of at: float
     | [<CompiledName("pong")>] Pong of at: float option
 

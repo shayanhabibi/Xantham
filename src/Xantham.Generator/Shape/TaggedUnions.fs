@@ -20,6 +20,15 @@ let detectTaggedUnions: Pass<ShapeModel> =
                 async {
                     let mutable findings = []
 
+                    // The alias's own comment, which the DU is the only declaration to carry.
+                    let exportDocs =
+                        model.Harvest.Exports
+                        |> List.choose (fun export ->
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                            |> Option.bind _.Declared
+                            |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
+                        |> Map.ofList
+
                     let decls =
                         model.DeclNames
                         |> Map.toList
@@ -78,9 +87,17 @@ let detectTaggedUnions: Pass<ShapeModel> =
 
                                                                 findings <- findings @ refFindings
 
+                                                                let literal =
+                                                                    literalMemberValue model m m.TypeId
+                                                                    |> Option.filter (fun _ ->
+                                                                        reference = FsFloat || reference = FsString)
+
                                                                 {
                                                                     Name = Naming.memberName m.Symbol.Name
+                                                                    Docs = m.Docs
+                                                                    Tags = m.Tags
                                                                     Type = optionalRef m.Optional reference
+                                                                    Literal = literal
                                                                 })
 
                                                         {
@@ -102,12 +119,15 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                 ]
                                                 @ [ Finding.make name (DetectTaggedUnions.TaggedUnion tag) ]
 
+                                            let docs, tags =
+                                                Map.tryFind typeId exportDocs |> Option.defaultValue ("", [])
+
                                             Some(
                                                 FsTaggedUnion
                                                     {
                                                         Name = name
-                                                        Docs = ""
-                                                        Tags = []
+                                                        Docs = docs
+                                                        Tags = tags
                                                         Order =
                                                             Map.tryFind typeId model.DeclOrders
                                                             |> Option.defaultValue None

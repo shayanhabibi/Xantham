@@ -8350,6 +8350,8 @@ type Reasoning =
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseContent =
     | [<CompiledName("reasoning_text")>] ReasoningText of text: string
+    /// <param name="detail"></param>
+    /// <param name="image_url">Base64 encoded image</param>
     | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail * image_url: string option
     | [<CompiledName("input_text")>] InputText of text: string
     | [<CompiledName("refusal")>] Refusal of refusal: string
@@ -8521,6 +8523,8 @@ module ResponseFunctionCallArgumentsDoneEvent =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFunctionCallOutputItem =
+    /// <param name="detail"></param>
+    /// <param name="image_url">Base64 encoded image</param>
     | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail option * image_url: string option
     | [<CompiledName("input_text")>] InputText of text: string
 
@@ -8595,6 +8599,8 @@ type ResponseInput = ResponseInputItem[]
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseInputContent =
+    /// <param name="detail"></param>
+    /// <param name="image_url">Base64 encoded image</param>
     | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail * image_url: string option
     | [<CompiledName("input_text")>] InputText of text: string
 
@@ -8702,6 +8708,10 @@ type ResponseItem = U4<ResponseFunctionToolCallItem, ResponseFunctionToolCallOut
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseOutputItem =
     | [<CompiledName("function_call")>] FunctionCall of arguments: string * call_id: string * name: string * id: string option * status: ResponseFunctionToolCall.Status option
+    /// <param name="id"></param>
+    /// <param name="content"></param>
+    /// <param name="role">TypeScript type: <c>"assistant"</c></param>
+    /// <param name="status"></param>
     | [<CompiledName("message")>] Message of id: string * content: ResponseOutputMessage.Content.Item[] * role: string * status: ResponseFunctionToolCall.Status
     | [<CompiledName("reasoning")>] Reasoning of id: string * summary: ResponseReasoningSummaryItem[] * content: ResponseReasoningContentItem[] option * encrypted_content: string option * status: ResponseFunctionToolCall.Status option
 
@@ -16712,6 +16722,9 @@ type ForwardableEmailMessage =
     /// <returns>A promise that resolves when the email message is replied.</returns>
     abstract reply: builder: EmailReplyMessageBuilder -> JS.Promise<EmailSendResult>
 
+/// <summary>
+/// A file attachment for an email message
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("disposition", CaseRules.None)>]
 type EmailAttachment =
     | [<CompiledName("inline")>] Inline of contentId: string * filename: string * ``type``: string * content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>

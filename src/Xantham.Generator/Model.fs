@@ -1682,7 +1682,16 @@ type FsDelegateParam = { Name: string; Type: FsTypeRef }
 /// One field of a tagged-union case. The name is the JS property key verbatim: Fable emits the
 /// field under its F# name, and backtick escaping is transparent there (`` ``type`` `` reaches
 /// JS as `type`), so no separate compiled name is needed.
-type FsTaggedField = { Name: string; Type: FsTypeRef }
+type FsTaggedField =
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Type: FsTypeRef
+        /// The value of a literal field: a required property typed by one string or numeric
+        /// literal. `Type` is the literal's primitive.
+        Literal: FsLiteral option
+    }
 
 /// One case of a `[<TypeScriptTaggedUnion>]` DU: the case name, the tag literal when it does
 /// not spell the case name, and the arm's own properties as case fields.

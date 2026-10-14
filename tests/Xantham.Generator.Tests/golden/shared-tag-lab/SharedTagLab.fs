@@ -56,7 +56,11 @@ module Distinct4 =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("verb", CaseRules.None)>]
 type Signal =
+    /// <param name="channel">TypeScript type: <c>"bus"</c></param>
+    /// <param name="at"></param>
     | [<CompiledName("start")>] Start of channel: string * at: float
+    /// <param name="channel">TypeScript type: <c>"bus"</c></param>
+    /// <param name="reason"></param>
     | [<CompiledName("stop")>] Stop of channel: string * reason: string
 
 [<Interface>]

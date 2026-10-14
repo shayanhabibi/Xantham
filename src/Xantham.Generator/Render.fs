@@ -1028,6 +1028,46 @@ let private renderStringEnum (decl: FsStringEnumDecl) =
             | attributes -> yield $"""    | [<{String.concat "; " attributes}>] {ident case.Name}"""
     ]
 
+/// The doc text of one tagged-union field: its comment, each tag as `@name text`, and a literal
+/// field's TypeScript type.
+let private fieldDocText (field: FsTaggedField) : string list =
+    [
+        let summary = field.Docs.Trim()
+
+        if summary <> "" then
+            yield! splitLines summary
+
+        for tag in field.Tags do
+            match (tag.Text |> ValueOption.defaultValue "").Trim() with
+            | "" -> yield $"@{tag.Name}"
+            | text -> yield! splitLines $"@{tag.Name} {text}"
+
+        match field.Literal with
+        | Some value -> yield $"TypeScript type: `{Xantham.Generator.Shape.Spec.typeScriptLiteral value}`"
+        | None -> ()
+    ]
+
+/// The XML doc of a tagged-union case: a `<param>` per field once any field carries text, empty
+/// where a field carries none. FS3390 holds a documented case to documenting each field.
+let private caseDocLines (case: FsTaggedCase) =
+    let texts = case.Fields |> List.map (fun field -> field, fieldDocText field)
+
+    if texts |> List.forall (snd >> List.isEmpty) then
+        []
+    else
+        [
+            for field, lines in texts do
+                let name = xmlEscape field.Name
+
+                match lines with
+                | [] -> yield $"    /// <param name=\"{name}\"></param>"
+                | [ single ] -> yield $"    /// <param name=\"{name}\">{inlineCode single}</param>"
+                | lines ->
+                    yield $"    /// <param name=\"{name}\">"
+                    yield! docBody "    " lines
+                    yield $"    /// </param>"
+        ]
+
 /// A tagged union (D4, §4.5(2)). `RequireQualifiedAccess` for the same reason the StringEnum
 /// emission takes it: one generated module holds every declaration a package has, and bare
 /// case names collide across unions - and here with the member interfaces the cases carry.
@@ -1038,6 +1078,8 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} ="
 
         for case in decl.Cases do
+            yield! caseDocLines case
+
             // Named fields, so the JS keys survive: Fable emits each field under its own name.
             let fields =
                 case.Fields
