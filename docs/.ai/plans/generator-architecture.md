@@ -142,7 +142,7 @@ order — each row cites its mapping-doc section:
 | `flatten-intersections` | apparent-members flattening + interface inheritance where nominal | §4.6 |
 | `resolve-enums` | `getConstantValue`, const-enum inlining | §4.7 |
 | `shape-callbacks` | delegates by default | §4.8, D5 |
-| `expand-literal-overloads` | `on("click", …)` ⇒ `onClick` companions (config-gated) | §4.8 |
+| `expand-literal-overloads` | `on("click", …)` ⇒ `onClick` under `[<Emit>]`; landed inside `shape-interfaces`, unconditional (W5) | §4.8 |
 | `shape-tuples` | fixed/option-tail/rest-carrier | §4.12, D7 |
 | `split-keyof-regimes` | closed ⇒ literal union; open ⇒ support-package idioms | §4.10 |
 | `name-expanded-aliases` | `Partial<Options>` ⇒ `OptionsPartial` | §4.10, D6 |
@@ -320,7 +320,8 @@ Phases — each ends with the compile gate green on its fixtures:
     flattens into an interface carrying the whole `Array.prototype`.
   - *Symbol-keyed members* (`__@iterator@1469`) are dropped with a finding: they are
     unrepresentable, and the checker id embedded in the name breaks run-to-run
-    determinism (the first determinism failure the e2e property caught).
+    determinism (the first determinism failure the e2e property caught). *Superseded for
+    well-known symbols by "Well-known symbol members (2026-10-13, W4 #135)".*
   - *`true | false` inside bigger unions* reads back as `bool` - the checker re-expands
     `boolean` in unions, so `boolean | undefined` is a two-literal union at the wire.
   - *Member-position unions resolve to declared aliases by member set*: literal types
@@ -1339,6 +1340,112 @@ nominal `JS.Function` constraints: generic interfaces and abstract methods fail 
 an annotated inline function specializes to an F# function. The generator retains its existing
 function constraints. Reproduction details are in `../probes/constrain-function/README.md`.
 
+## ECMAScript consumer bindings (2026-10-13, W3 #134)
+
+Under the default `widen` disposition of `typescript/lib`, a compiler-lib ECMAScript declaration
+that `Naming.LibBindings` does not bind is written as `Fable.Core.TS.Es.{name}` with all of its
+checker type arguments, as the DOM half above already is. The table still answers first
+for its three remaining rows (below). Checker placeholders (`__type`) and `globalThis` keep the
+existing widening. Namespace members take their bare name, which is the name Core.TS flattens
+them to (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`).
+
+- **`widen` only.** A `map` disposition keeps its own table (group-map-lab maps `RegExp` to
+  `System.Text.RegularExpressions.Regex`), and `reference` keeps the O7 template
+  (`TypeScript.Lib.Es.RegExp`).
+- **Nominal metadata.** Resolve reads the target parameters and base types of these declarations
+  (not their members), as it does for DOM, so the constrained-argument repair applies to
+  `Fable.Core.TS.Es` references. Names the table binds are excluded from that read.
+- **No catalog contract bump.** Ship producers (Core.TS and every catalog lab) emit an unchanged
+  ABI, and a consumer under `widen` loads no catalogue. Bumping `CatalogCompatibility.current`
+  would reject Core.TS's committed catalogue for no change in its content.
+- **Why not catalog reuse.** Node lists no `declarationReferences`, and a catalogue is accepted
+  only under an equal inference profile. Making Node a catalogue consumer means switching it to
+  `lib: [esnext, dom]` with `typescript/lib: ship`, which changes its compiler program and is a
+  product decision (`docs/.ai/footguns.md`, "Declaration catalogs").
+- **lib-lab.** `each(values: Iterable<string>)` was pinned as `obj`. It is now
+  `Fable.Core.TS.Es.Iterable<string, obj, obj>`, Core.TS's JS-iterable interface and not
+  `seq<'T>`, so the reason for that pin still holds.
+- **Known gaps.** The `any` defaults of `Iterable`/`IterableIterator` (`TReturn`, `TNext`) render
+  as `obj` and raise TR008, graded escape until W1. A name Core.TS renamed on collision
+  (`Iterator2`) is reachable only under the name it kept; the compile gate cannot detect a
+  same-arity wrong target.
+
+Measured on 2026-10-13:
+
+| Run | TR023 | TR035 | TR008 | Tiers (exact / ergonomic / widened / escape) |
+| --- | --- | --- | --- | --- |
+| es-reuse-lab (new) | 0 | 0 | 2 | 8 / 0 / 0 / 1 |
+| lib-lab | 1 → 0 | 0 | 0 → 2 | widened 2 → 1, escape 0 → 1 |
+| `@cloudflare/workers-types` | 37 → 9 | 11 → 6 | 168 → 218 | 412 / 1067 → 1068 / 374 → 361 / 111 → 123 |
+| `solid-js` | 6 → 0 | 35 → 35 | 78 → 78 | 69 / 146 → 147 / 85 → 84 / 42 |
+| `Xantham.Fable.Node` | 737 → 148 | 1725 → 1270 | 2668 → 2735 | 1247 → 1263 / 1772 → 1858 / 768 → 656 / 345 → 353 |
+
+In workers-types, TP006 5 → 3 and SP004 37 → 39: `SqlStorageCursor.raw<U>` and
+`SyncKvStorage.list<T>` now return `IterableIterator<'U>`, so the type parameter is used rather
+than dropped. Its remaining TR023 are `Module` (8) and `Env` (1), outside the compiler lib. Node's
+remaining TR023 come from undici and web-global names (`Headers`, `FormData`, `MessageEvent`,
+`SpecIterableIterator`) and module specifiers.
+
+Node was regenerated under the T4 override: the selected goldens hold 43 of W3's ~780 TR023 hits
+and none of `SharedArrayBuffer`, `ArrayLike`, `ArrayIterator`, `AsyncGeneratorFunction` or
+`RegExp`; Node holds the rest. Node's "before" figures come from a regeneration at the parent
+commit, not the committed 2026-10-06 output, which differs by 60 `symbols.jsonl` lines of
+earlier generator drift.
+
+### Fable.Core `JS.*` bindings retired (2026-10-13, W3 #134)
+
+Generated bindings no longer depend on Fable.Core's `JS.*` bindings for standard-library types.
+`Naming.LibBindings` keeps three rows: `Error` → `exn` (Fable compiles `System.Exception` to a
+JavaScript `Error`), and `Promise`/`PromiseLike` → `JS.Promise<'T>` (lead decision: Fable.Promise's
+`promise { }` and `Async.AwaitPromise`/`StartAsPromise` are written against `JS.Promise`;
+`PromiseLike` keeps its TR025 loss so a `JS.Promise` passes where one is expected). Every other
+former row (`Map`, `ReadonlyMap`, `WeakMap`, `Set`, `ReadonlySet`, `WeakSet`, `Date`, `Function`,
+`Object`, `Math`, `JSON`, `Console`, `PropertyDescriptor`, `ArrayBuffer`, `ArrayBufferView`,
+`DataView`, the typed arrays, `AsyncIterable`, `AsyncIterator`, `AsyncGenerator`,
+`IteratorResult`, `AsyncIterableIterator`) is written as its `Fable.Core.TS.Es` declaration with
+all of its checker arguments (`Uint8Array<'TArrayBuffer>`), so `U2<Es.ArrayBuffer,
+Es.SharedArrayBuffer>` is Core.TS's `ArrayBufferLike`.
+
+- **Premise.** Fable 5.17.2 special-cases the `Fable.Core.JS.` namespace as a whole (global
+  resolution, no replacement, unmangled members) and `JS.Map`/`JS.Set` only for TypeScript-output
+  annotations; no `JS.*` type gets an F#-visible conversion (`docs/.ai/footguns.md`, "Fable
+  consumption of bindings").
+- **Every non-ship disposition.** The former rows were consulted under `reference`, `map` and
+  `widen` alike, so `LibBindings.isPinnedToCoreTs` keeps them bound under all three, now to
+  Core.TS, ahead of the O7 template and a `map` table, as DOM names already are. Every generated
+  consumer file opens `Fable.Core.TS.Dom`, so no non-ship disposition runs without Core.TS.
+  Other ECMAScript names still follow their disposition (`widen` → Core.TS, `reference` →
+  `TypeScript.Lib.Es.*`, `map` → table or widen).
+- **TP010.** The dropped `Function` bound is matched as `Fable.Core.TS.Es.Function`
+  (`LibBindings.FunctionBinding`); the message no longer names `JS.Function`.
+- **Ship mode.** A `ship` run binds `Promise` and `PromiseLike` too (`LibBindings.bindsWhenShipped`,
+  checked in `Spec.typeRefOnPath` ahead of the run's own declaration), so Core.TS's members return
+  `JS.Promise` and unify with consumers and Fable.Promise; `PromiseLike` records TR025 there as
+  well. Core.TS still declares `Es.Promise`, `Es.PromiseLike` and `PromiseConstructor`: the
+  declarations keep their catalogue entries (the `core-ts package` test asserts `Es.Promise` at
+  arity 1), and the `Promise` global's `resolve`/`all`/`race`/`reject` now return `JS.Promise`.
+  Only a declaration's own `Create` still returns it. The emitted ABI of a shipped compiler lib
+  changed, so `CatalogCompatibility.current` ApiVersion is 6 → 7 and Core.TS's catalogue is
+  regenerated. compiler-lib-ownership-lab (ES5, `ship`) is the lab.
+
+Measured on 2026-10-13 (es-reuse-lab is the lab, extended with `Promise`, `PromiseLike`, `Map`,
+`Set`, `Date`, `ArrayBuffer`, `Uint8Array<ArrayBuffer>` and `Error`):
+
+| Run | TR024 | TR025 | TR008 | Tiers (exact / ergonomic / widened / escape) |
+| --- | --- | --- | --- | --- |
+| es-reuse-lab | 0 | 0 → 2 (new `PromiseLike`, `Error` sites) | 2 | 8 / 1 / 0 / 0 → 11 / 3 / 0 / 0 |
+| lib-lab | 7 → 0 | 3 → 1 | 2 → 6 | 12 / 8 / 1 / 0 → 15 / 5 / 1 / 0 |
+| `@cloudflare/workers-types` | 120 → 0 | 10 → 8 | 218 → 222 | 412 / 1161 / 390 / 1 → 419 / 1154 / 390 / 1 |
+| `solid-js` | 0 | 2 | 78 | unchanged (69 / 180 / 92 / 1); 26 lines respelled |
+| `Xantham.Fable.Node` | 255 → 0 | 1434 → 1431 | 2877 → 2895 | 1263 / 2032 / 830 / 5 → 1270 / 2025 / 830 / 5 |
+| `Xantham.Fable.Core.TS` (ship) | 0 | 0 → 51 | 1681 | unchanged (2073 / 2203 / 785 / 5); 483 `JS.Promise` references |
+
+TR023 and TR035 are unchanged in every row. The TR008 rise is the `any` defaults of the
+async-iteration and `IteratorResult` declarations, now applied at their real arity rather than
+truncated away. Node's residual `JS.*` spellings are `JS.Promise` (1006) and the support package's
+`JS.Record` (30); it held 1469 `JS.ArrayBuffer`, 195 `JS.Function` and 112 `JS.AsyncIterable`
+before.
+
 ## Generator identity measures (2026-09-11)
 
 The generator keeps distinct measures for compiler symbol, type and node IDs, and for
@@ -2036,9 +2143,54 @@ Partas plugin gate. The operation regression was observed failing before the loo
 
 ## The checker's error type (2026-10-09)
 
-`TypeFlags.Any` covers four checker intrinsic names, and `any` includes the checker's own fallbacks (a circular alias, an inference placeholder) besides a written or omitted annotation, so `TR008` is not proof of authorship. `typeRef` reads `TypeResponse.IntrinsicName`: `any` keeps `TR008`; `error` and `unresolved` (a reference the program leaves unresolved or invalid) raise `TR063 ErrorTypeToObj` with the name the checker keeps; `intrinsic` (the body of `Uppercase` and its siblings) raises `TR064 IntrinsicMarkerToObj`. An Any without an intrinsic name is not claimed as a written `any`. Both are Escape, the tier `TR008` carries; the keys separate them. Resolve records the name from the error type's alias symbol, qualified through its unresolved parents (`NodeJS.Timeout`); a union, an intersection or an optional position the checker reduced over an error constituent carries none. A second export abbreviating the shared intrinsic marker (`Lowercase = Uppercase`) reports the same `TR064`.
+`TypeFlags.Any` covers four checker intrinsic names, and `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof of authorship. A circular type alias is the error type. `typeRef` reads `TypeResponse.IntrinsicName`: `any` keeps `TR008`; `error` and `unresolved` (a reference the program leaves unresolved or invalid) raise `TR063 ErrorTypeToObj` with the name the checker keeps; `intrinsic` (the body of `Uppercase` and its siblings) raises `TR064 IntrinsicMarkerToObj`. An Any without an intrinsic name is not claimed as a written `any`. `TR063` and `TR064` are Escape; `TR008` is Ergonomic (W1); the keys separate them. Resolve records the name from the error type's alias symbol, qualified through its unresolved parents (`NodeJS.Timeout`); a union, an intersection or an optional position the checker reduced over an error constituent carries none. A second export abbreviating the shared intrinsic marker (`Lowercase = Uppercase`) reports the same `TR064`.
 
 `unresolved-any-lab` pins an unresolved import, an undeclared name, a qualified name, an element position and a reduced union beside a written `any`, an omitted annotation and `unknown`. Committed corpus: `TR008` 841 to 830, `TR063` 0 to 17 (animejs 12: six members typed by the absent `three`, three sites typed by `InstanceParent`, which reduces to the nameless error type, two `NodeJS` references and one bare `TargetAdapterEntry`; the lab 5), `TR064` 0 to 5 (`compiler-lib-ownership-lab`'s `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`) and 0 to 5 in `Xantham.Fable.Core.TS`. Binding text is unchanged outside the lab.
+
+## Faithful any grades ergonomic (2026-10-13, W1 #132)
+
+`TR.AnyToObj` (`TR008`) is Ergonomic; its `FindingCodes.table` key and message are unchanged. Escape holds stated-type losses: on the `typeRef` path, `TR063 ErrorTypeToObj`, `TR064 IntrinsicMarkerToObj`, `TR003 MissingFromTypeTable` and `TR054 ReferencedArityUnconfirmed`. A symbol's tier is the worst of its findings, so a row with `TR008` beside a `TR063` stays escape.
+
+The case is regraded whole, not split. `typeRef` receives a type id and an owner, and every source of the intrinsic `any` (a written `any`, an omitted annotation, `type X = any`, a shorthand ambient module, a checker circular-annotation fallback) is the same singleton id with identical `TypeFacts`. A split keyed on reference sites would need per-file semantic diagnostics mapped to declarations and threaded into `typeRef`, and would still misgrade nested positions such as `Array<any>`. No golden carries a circularity signal.
+
+Exception: a diagnosed circular return, accessor or import-alias annotation (TS2577, TS2303) reaches `typeRef` as the intrinsic `any` and reads `TR008` at Ergonomic. These occur only in a broken declaration file, which reports the diagnostic. No lab probe pins them.
+
+`unresolved-any-lab` adds `Faithful` (a written `any` and an omitted annotation as the interface's only findings) and `listen(listener: (...args: any[]) => void)`, rendered `listener: (obj[] -> unit)`. Its test pins every `TR008` at Ergonomic (`Exports.listen(listener)(args)` among them), every `TR063` at Escape, the `Exports.listen` and `Faithful` rows at Ergonomic and the `Probe` row at Escape. `Findings.test.fs` and the `shape typeRef` unit pin the new tier.
+
+Measured on the two selected goldens (symbol tiers, exact / ergonomic / widened / escape):
+
+| Golden | Before | After | `TR008` at escape |
+| --- | --- | --- | --- |
+| `animejs` | 129 / 129 / 14 / 79 | 129 / 189 / 27 / 6 | 392 to 0 |
+| `@cloudflare/workers-types` | 412 / 1067 / 374 / 111 | 412 / 1144 / 407 / 1 | 168 to 0 |
+
+46 regraded rows land at Widened through another finding on the same symbol, which moves the widened baseline later workstreams measure against. The two `animejs` rows still escape with `TR008` (`TextSplitter`, `Adapters.Three.ThreeAdapter.RegisterPropertyResolver.Resolver`) each carry a `TR063`. Finding counts by key are unchanged.
+
+Binding text is byte-identical: outside the lab's own additions no golden `.fs` changed. Thirteen lab goldens moved tier only in `manifest.json` and `symbols.jsonl`: `compiler-lib-ownership-lab`, `uninhabited-intersection-lab`, `lib-ship-lab`, `catalog-library-entry-lab`, `catalog-subpath-lab`, `augmented-dom-lab`, `catalog-generic-defaults-lab`, `grouped-dom-aliases-lab`, `frontier-width-lab`, `inherit-lab`, `literal-overload-lab`, `member-shape-lab` and `optional-param-lab`. `solid-js`, `Xantham.Fable.Core.TS` and `Xantham.Fable.Node` were not regenerated (T4, T6); their reports still grade `TR008` Escape until integration.
+
+## Selected callback any returns as unit (2026-10-13, W2 #133)
+
+`anyReturnAsUnit` in `xantham.json` is one .NET regular expression, matched case-sensitively and culture-invariantly against a TypeScript property or value name; it is unanchored unless the pattern anchors itself. An empty string, a non-string and an invalid expression fail at load. Where it matches, the `any` return of a callback typed directly at that property or value is written `unit`, under `TR.AnyReturnAsUnit` (`TR065`, Ergonomic) in place of `TR008`. Omitted, output is unchanged.
+
+Scope is owner equality. The four member and value sites (`shapeMembers`' property branch, class statics in `Shape/Classes.fs`, the folded exclusive-arm `buildParam`/`buildMember` in `Shape/Interfaces.fs`, value exports in `Shape/Exports.fs`) shape through `Spec.selectAnyReturn`, which sets `ShapeModel.AnyReturnOwner` to the member's owner, or clears it for an unmatched name. `delegateRef` writes `unit` only when its own owner equals that field and the return is the intrinsic `any` (`Spec.isSourceAny`). A nullable or erased-union position passes the owner through unchanged, so `((ev) => any) | null` and an arm of `string | ((ev) => any)` are selected. These keep `obj`:
+
+- method returns and method parameters (`onclose(ev): any`);
+- a callback nested in a selected callback (`Upload.onregister(resolve)()`);
+- a named callback alias, a declaration shared by every reference (`Handler`);
+- an anonymous callback of two or more arguments, which `synthesize-anonymous` declares as a named delegate;
+- tagged-union case fields and hook interfaces;
+- the error type (`TR063`) and every stated return.
+
+The pattern is part of `DeclarationCatalog.profile` when set, beside `resolveNoInfer`: a catalog consumer whose pattern differs from its producer's fails the inference-profile check before any declaration is reused. A profile without the key hashes as it did before the key existed, so catalogs whose producer sets no pattern keep their profile.
+
+`handler-return-lab` (`^on`) pins `TR065` at Ergonomic on `Upload.onprogress()`, `Upload.onready()`, `Upload.onmixed()` (the callback arm of `((ev) => any) | string`) and `Exports.onload()`; `TR008` on `Handler()`, `Upload.Onpair()` (the delegate hoisted from the two-argument `onpair`), `Upload.onclose()`, `Upload.onregister(resolve)()`, `Upload.onstate` and `Upload.transform()`; and the rendered `onprogress`, `onready`, `onmixed`, `Onpair`, `onload`, `Create` and `Handler` lines. `catalog library ambient authentication` pins that a consumer with a different pattern fails the inference profile. `shape typeRef` pins the owner check and `selectAnyReturn`; `generator config` pins the loader.
+
+The selected goldens configure no pattern and are unchanged: `animejs` and `@cloudflare/workers-types` regenerated byte-identical. Generated into scratch with `{"anyReturnAsUnit":"^on"}`, `animejs` moves 257 findings from `TR008` to `TR065` (392 to 135 `TR008`), every one an `on*` property in `shape-interfaces` (`onComplete` 22, `onUpdate` 20, `onBegin`/`onLoop`/`onPause`/`onBeforeUpdate` 16 each). Symbol tiers are unchanged (129 / 189 / 27 / 6), because both codes are Ergonomic after W1.
+
+W2.2: `tools/fable-core-ts-input/xantham.json` selects `^on`, and `Xantham.Fable.Core.TS` is regenerated under the T4 override. The selected goldens configure no pattern, so they cannot show W2.2. `catalogue-inputs.json` hashes the generation configuration (`generationConfigurationSha256`), so editing it alone fails the pack-time `prepare` check until Core.TS is regenerated. The binding diff is 411 lines, every one an `abstract on*` handler moving from `-> obj)` to `-> unit)`; no other line moved. `TR008` falls from 17,659 to 1,672 and `TR065` rises to 15,987 (15,863 in `shape-interfaces`, 124 global `on*` values in `shape-exports`, which the binding writes as members of `Fable.Core.TS.Es.GlobalThis`). `declarations.json` changes 75 `api` hashes, each a declaration that carries `on*` handlers (`GlobalEventHandlers`, `Window`, `XMLHttpRequest`, `Fable.Core.TS.Es.GlobalThis`), plus the generator hash and the inference profile, which now records `^on`; identities and owners are unchanged. Symbol tiers move from 2,073 / 1,750 / 578 / 662 to 2,073 / 2,125 / 860 / 5; that movement is W1's `TR008` regrade, applied to Core.TS here for the first time, and no finding count changes outside `TR008` and `TR065`. `build.fsx -- generate --only compiler-lib` deletes the tracked `symbols.jsonl`; it is restored from a CLI run with the same compiler, whose binding, manifest and catalog are byte-identical.
+
+A catalog consumer of Core.TS must now set `anyReturnAsUnit` to `^on`, or it fails the inference-profile check. Both in-repo consumers (`catalog library identity`, `core-ts package`) load the Core.TS configuration and inherit the pattern. A consumer that assigns `fun e -> box …` to a handler no longer compiles, because the handler now returns `unit`; the packages are pre-1.0, so this ships as a minor change (`feat(core-ts)`). `Xantham.Fable.Node` is not regenerated: it declares its own `on*` handlers and inherits none of Core.TS's.
+
 ## TypeScript library catalogue identity (2026-10-09)
 
 Catalogue sources for installed TypeScript `lib/lib.*.d.ts` files use logical package
@@ -2228,3 +2380,523 @@ Targeted Fantomas checks passed. Committed golden bindings and findings are unch
 Core.TS regeneration in catalogue mode preserves all 4,062 declaration identities, APIs,
 constraints and source sets, and the binding is byte-identical; only compatibility metadata
 and producer provenance change in its committed catalogue.
+
+## Well-known symbol members (2026-10-13, W4 #135)
+
+A member keyed by a well-known symbol is emitted. Resolve records the symbol on
+`ResolvedMember.WellKnownSymbol` from the declaration's computed name `[Symbol.<name>]`, and
+only where the checker resolves `Symbol.<name>` to a `SymbolConstructor` property declared by a
+`lib.*.d.ts` file. The escaped name `__@iterator@<id>` also spells a package's own `declare
+const iterator: unique symbol`, so the name alone does not identify one; and a package's
+`declare global` augmentation (`Symbol.observable` in `solid-js` and `type-fest`) names a key
+that is `undefined` at runtime without a polyfill.
+
+- `shape-interfaces` writes `[Symbol.iterator]` as an `inherit seq<element>` beside an
+  `FsSymbolKeyed` member. The element is the `value` of the first `next` result arm whose `done`
+  is absent or admits `false`, or else the iterator's first type argument: a lib iterator reaches
+  Shape without members under O7, and every lib iterator takes its element first.
+- Every other well-known key is an `FsSymbolKeyed` member named `Symbol<Name>` and rendered
+  under `[<Emit("$0[Symbol.<name>]")>]`: a call appends `()` or `($1...)`, and a writable property
+  carries per-accessor get and set Emits.
+- `settle-symbol-members` runs after `drop-inherited`, bases first. A declaration keeps its own
+  `seq` only where no base iterates; at the base's element it inherits the base's alone. F#
+  admits one `seq` instantiation per interface (FS3360, `NodeListOf<'TNode>` over
+  `NodeList`), so a narrowed element drops its own `seq` and keeps the iterator as an Emit
+  member. `MB008` reports a kept `seq`, `MB009` each Emit member.
+- The findings raised while shaping a `[Symbol.iterator]` wait on `ShapeModel.IteratorFindings`:
+  `settle-symbol-members` reports the element's with a kept `seq` and the member's with a kept
+  member, stamped with its own pass name. A removed member leaves no finding behind.
+- Bases the settle pass reads are the run's own declarations. A lib base is never inherited,
+  catalogue run or not: its members are flattened in (`SI002`), so the declaration's own `seq`
+  is the only one. A catalogue run re-shapes every reused declaration, so a reused base is among
+  the run's declarations.
+- `MB002` remains for a key naming the package's own `unique symbol`, a key declared solely
+  by a package's augmentation, an optional member, a member whose `Symbol<Name>` is already declared
+  by another member, a class static, a member of an `[<AbstractClass>]` entrypoint (a new
+  abstract slot obliges every consumer subclass to implement it), and a narrowed iterator whose
+  member `drop-inherited` removed. Its message text is unchanged.
+- A declaration carrying a required symbol member or a `seq` inherit, its own or a base's,
+  carries no `Create` (`SP003`, "a required well-known symbol member has no key a ParamObject
+  literal can write"): the object `Create` builds would lack the key the type promises.
+  `synthesize-paramobjects` runs before the settle pass, so inherited members are still present.
+- `CatalogCompatibility.ApiVersion` is 6: the canonical API text gains a `symbol` node and lib
+  declarations' emitted ABI changes. A consumer rejects an earlier Core.TS catalogue.
+- No page under `site/content` documents member-key mapping, so the consumer docs are
+  unchanged.
+
+Lab `symbol-member-lab`: `Disposable` reads `SymbolDispose`, `Tagged` reads
+`SymbolToStringTag`, `Bag`/`Box<T>`/`Values` inherit `seq<string>`/`seq<'T>`/`seq<U2<string,
+float>>`, `LabelledBag` inherits `Bag` alone, and `Strings` (narrowed through a package
+iterator) inherits `Values` and keeps `SymbolIterator` under Emit. `Convertible` carries a
+writable `SymbolToStringTag` (get and set Emits) and `SymbolToPrimitive: ?hint: string ->
+string`; `Narrowed` extends lib `Iterable<string | number>` and inherits `seq<string>` alone.
+`MB002` remains on `Keyed.__@key`, on `Impostor.__@iterator` (a unique symbol spelled
+`iterator`) and on `Observed.__@observable` (an augmented `SymbolConstructor`). Every
+declaration with a symbol member or `seq` reports `SP003` and carries no `Create`, and no
+`[Symbol.iterator](...)` finding survives a removed member. The RunGate calls `SymbolDispose`,
+reads `SymbolToStringTag`, iterates `bag` with `Seq.toList`, writes `convertible`'s
+`SymbolToStringTag`, and calls `SymbolToPrimitive` with and without its argument.
+
+Measured on W2 (`anyReturnAsUnit`, with W1 merged):
+
+| Golden | MB002 | MB008 | MB009 | exact / ergonomic / widened / escape |
+| --- | --- | --- | --- | --- |
+| `@cloudflare/workers-types` | 10 → 0 | 0 → 5 | 0 → 2 | 412/1144/407/1 → 412/1147/404/1 |
+| `type-fest` | 2 → 2 | 0 | 0 | 26/64/205/2 → 26/64/205/2 |
+| Core.TS (T4) | 202 → 0 | 0 → 61 | 0 → 76 | 2073/2125/860/5 → 2073/2203/785/5 |
+
+In `workers-types`, `TR023` is unchanged (37): the iterator member of the five iterables that
+inherit `seq` (`EventCounts`, `FormData`, `Headers`, `SqlStorageCursor`, `URLSearchParams`) and
+of `R2Bucket.Get.Options.OnlyIf`/`OnlyIf2`, which read through `Headers`, is removed with its
+findings. `HyperdriveDynamic` reads `SymbolDispose` through `Disposable`. Those eight lose their
+`Create` (`SP001` 1305 → 1298 against the first W4 commit, `SP003` +7, with `SP002`/`SP004`/`TR055`
+falling with the dropped parameters). `ReadableStream.[Symbol.asyncIterator]` keeps its Emit
+member, so its `TR024`/`TR025`/`TR032`/`MB001` stand. `type-fest`'s
+`EmptyObject.__@emptyObjectSymbol` is a unique symbol and `ObservableLike.__@observable` an
+augmented key; both stay `MB002`.
+
+The pull-request regeneration (`test --goldens`) moves `inherit-lab` and `member-shape-lab`
+`Deferred`, which gain `SymbolToStringTag` from `Promise` (`MB002` 1 → 0 each) and so carry
+no `Create`. `solid-js` `Observable.__@observable` stays `MB002`, and `Observable` keeps its
+`Create`.
+
+Core.TS was regenerated under override T4: a consumer re-shapes every reused Core.TS
+declaration and authenticates it against the committed `declarations.json` API hash
+(`catalog library identity` failed with 117 changed entries before the regeneration), and
+W4 with the ApiVersion bump changes that hash. It was regenerated again for the `Create`
+refusal: 31 Core.TS interfaces (`Promise`, `Map`, `Set`, `Headers` and others) carried a
+`Create` building an object without the symbol key the type promises. Node was not
+regenerated: it compiles against the regenerated Core.TS. Core.TS's three new escape symbols
+(`SegmentIterator` and two `[Symbol.replace]` replacer delegates) are newly reached
+declarations whose escape is `TR008`.
+
+## Literal overloads as methods (2026-10-13, W5 #136)
+
+An overload keyed by a string literal is a method of its own. The draft pass
+`expand-literal-overloads` (§3) landed inside `shape-interfaces`, in `Spec.shapeMembers`,
+rather than as a pass of its own: `typeRef` raises `TR006` while the signature is shaped, and a
+finding cannot be withdrawn (`docs/.ai/footguns.md`). It is unconditional.
+
+- **Which members.** `Spec.isLiteralKeyed`: two or more call signatures, at least one carrying a
+  literal key, on a method or on a required property holding a pure callback whose signatures
+  `callSignaturesSeparable` tells apart. An intersection's member is such a property
+  (`Element & { setAttribute(name: "draw", ...): void }`), unless `shapeMembers` reads it at a
+  type its operands agree on, where it stays unkeyed. A symbol-keyed or backtick name is
+  excluded. A literal key (`Spec.literalKeys`) is a required, non-rest parameter typed by one
+  string literal that is not an enum member and holds no `$`, `{` or `}` (Emit macro syntax).
+  Exported functions, class statics, optional callbacks, single signatures, unions of literals
+  and literals nested in a parameter type (`Options<"text">`) keep their mapping.
+- **Names.** The keyed overload is `FsLiteralKeyed(target, literals, FsMethod inner)`: the
+  literal parameters are removed and the inner name is the JavaScript key plus each literal's
+  `Naming.literalSuffix` (`onClose`, `getElementsByTagNameNSHttpWwwW3Org1999Xhtml`). A name the
+  declaration's members already hold (inherited ones included) takes `on_Close`, then
+  `on_Close2`. Overloads sharing a key and literals share a method (`onData` twice). The
+  overloads without a literal stay under the TypeScript name, so `on(event: string, ...)` is
+  kept.
+- **Emit.** `Render.literalCallTemplate` writes each literal, single-quoted, before the F#
+  argument at its index; from the first optional or rest parameter at or after the last literal
+  the arguments spread as `$k...`: `$0.on('close', $1)`, `$0.read($1, 'text')`,
+  `$0.log('warn', $1...)`. A key that is no JavaScript identifier is indexed
+  (`$0['my-on'](...)`). On an `[<AbstractClass>]` entrypoint the method is a concrete
+  `[<Emit>] member _.onClose(...) = jsNative`, so a derived class has no slot to fill.
+- **Docs.** Resolve reads each signature declaration of a set of two or more into
+  `ResolvedSignature.Source`: the declaration on one line (comments outside string literals
+  removed) and the description of the JSDoc above it. The method's doc is that description,
+  then a ```` ```ts ```` block of the signature (`<code lang="ts">`); an overload without JSDoc
+  carries the signature block alone, because the member's doc merges every overload's JSDoc. The
+  overloads that stay keep the member's doc.
+- **Listeners.** A listener of two or more parameters keeps its D5a delegate
+  (`onConnectionAttempt: listener: Socket.On.Listener`), departing from W5.3's curried form
+  (probe 6). The keyed method's parameters are shaped by the same `shapeSignature` as every other
+  signature, and D5a measured a curried callback of arity 2 or more failing in return and
+  read-back positions (`generator-type-mapping.md`, D5).
+- **Findings.** `MB.LiteralOverloadAsMethod` (`MB010`, Ergonomic) once per method, at
+  `{owner}.{key}`, with the literal and the name; the inner signature's findings are owned by
+  `{owner}.{name}`. A literal-keyed member refuses `Create` with the overloaded-method reason
+  (`SP003`), and `dedupe-overloads` drops a repeated `FsLiteralKeyed` signature as `DO001`.
+- **Retention.** `literalOverloadSets` reads the same `isLiteralKeyed`/`literalKeys` and offers
+  only a keyed member's unkeyed signatures, so retention (`TR056`/`DO002`) serves nested
+  literals, optional callbacks and exported functions. `KVNamespace.get(key, "text")` is
+  `getText(key)` where it read `get(key, KVNamespace.Text)`.
+- `CatalogCompatibility.ApiVersion` is 7 → 8: the canonical API text gains a `literal` node, and
+  lib declarations' emitted ABI changes.
+
+Lab `literal-method-lab`: `Socket` (an `Emitter` with `on("end")`) carries `onClose`, the
+three `() => void` listeners that collided before (`onConnect`, `onReady`, `onEnd`),
+`onConnectionAttempt` through its delegate, `onceClose`, `emitClose` and `emitConnect`, and keeps
+the generic `on`, `once` and `emit`. `Dialog` has an `onClose` property, so its literal method is
+`on_Close`; `onKeyDown` reads `"key-down"`. `Store.readText(key)` writes the literal after the
+argument, `Logger.logWarn(?message)` and `logInfo(...parts)` spread their tails, and `Drawable`
+(`Element & {...}`) reads `setAttributeDraw`. `Solo.tag` keeps `TR006` and `Choice.pick` its
+literal unions. No `TR006` or `DO001` names a keyed member. The RunGate calls `onClose`,
+`emitClose`, `onConnect`/`emitConnect`, `onConnectionAttempt` with the generic `emit`, the generic
+`on`, `onEnd` (declared by `Socket` and `Emitter` both), `on_Close`, `readText`, the generic
+`read`, `logWarn` with and without its argument, and `logInfo("a", "b")`, which arrives spread.
+
+`literal-overload-lab` moves with it: `Store.read`'s `kind` overloads read `readText`,
+`readJson` and `readBytes`, `Mixed.send` reads `sendNow`/`sendLater`, and `TR056` keeps
+`Exports.emit(kind)` and `Store.read(options)`.
+
+Measured on the two selected goldens:
+
+| Golden | TR006 | DO001 | TR056 | DO002 | MB010 | exact symbols | lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `@cloudflare/workers-types` | 228 → 221 | 2 → 2 | 26 → 12 | 3 → 2 | 0 → 17 | 412 → 410 | 26,006 → 25,952 |
+| `animejs` | 21 → 20 | 1 → 0 | 3 → 0 | 1 → 0 | 0 → 4 | 129 → 126 | 5,167 → 5,177 |
+
+The other tiers are unchanged; the exact symbols that go are the retained single-case
+StringEnums. In `workers-types`, `BrowserRun.quickAction` and `KVNamespace.get`/`getWithMetadata`
+read as methods, and `DO001` stays at `Ai.run` (a `keyof` bound) and `AutoRAG.aiSearch`
+(object-typed parameters), which no literal keys. In `animejs`,
+`DrawableSVGGeometry.setAttribute(name: "draw", ...)` reads `setAttributeDraw` and the three
+namespace literals of `getElementsByTagNameNS` read as methods.
+
+Core.TS and Node were generated into scratch, not committed (T4), and both compile there:
+
+| Binding | TR006 | DO001 | TR056 | DO002 | MB010 | exact symbols |
+| --- | --- | --- | --- | --- | --- | --- |
+| Core.TS | 94 → 89 | 10 → 10 | 786 → 0 | 161 → 1 | 0 → 784 | 2,073 → 1,302 |
+| Node | 5,063 → 673 | 1,904 → 27 | 546 → 8 | 87 → 1 | 0 → 4,843 | 1,263 → 768 |
+
+Node also loses its one `LU002` (`WorkerThreads.Worker.Error`, a retained literal now
+`onError`). Both need regeneration at integration: Core.TS's member surfaces and API hashes
+change (`createEvent("AnimationEvent")` is `createEventAnimationEvent()`) and ApiVersion 8
+rejects the committed catalogue, so `catalog library identity` and `core-ts package` fail until
+it is regenerated; Node carries the `TR006`/`DO001` reduction.
+
+## Literal members (2026-10-13, W6 #137)
+
+A literal member is a property that `shapeMembers` reads as required and typed by one string
+or numeric literal, readonly or writable, where the literal is not an enum member or a union
+(`Spec.literalMemberValue`). A writable single-literal property can hold only that value, so it
+is a literal member too (lead amendment, 2026-10-14). Optional literal members, boolean literals,
+enum members, symbol-keyed members, methods and the exclusive-arm fold's members keep their earlier
+mapping. The member carries its value on `FsPropertyMember.Literal`, and its findings change
+from `TR007`/`TR006` (Widened) to `MB.LiteralMemberAsConstant` (`MB011`, Ergonomic).
+
+- **Instance (W6.2).** The interface still declares the primitive (`abstract AT_TARGET:
+  float`), with `/// <remarks>TypeScript type: <c>2</c></remarks>` after its own docs.
+- **Module (W6.1).** `renderBody` follows each interface with a block of `[<Literal>]` values
+  for the literal members it declares after `drop-inherited`: a numeric literal is a `float`
+  (`2.0`), a string literal a `string`. The block sits at `<declaration path>`, so
+  `nestedBlocks` opens `module <leaf> =` at whichever of the block and the declaration's nested
+  declarations comes first and merges the rest into it: one module per name. A subtype's module
+  holds its own literal members only; its inherited ones are read through the base's module.
+  Three names stay out of the module: `Create`, a static's name, and a name that opens a module
+  nested under the declaration (`<declaration>.<name>.*`). A declaration rendered from
+  customization source gets no module.
+- **Create (W6.3).** `synthesize-paramobjects` runs before `drop-inherited`, so a subtype's
+  members still include inherited literal members. They bind no parameter and do not count
+  against the 24-parameter budget; `FsCreateOverload.Literals` carries them in member order, and
+  `SP.LiteralMembersWrittenByCreate` (`SP005`, Exact) names them. A declaration of literal
+  members alone gets a parameterless `Create`. The Emit forms are
+  `[<ParamObject; Emit("({ kind: 'method', ...$0 })")>]` with parameters,
+  `[<Emit("({ NONE: 0, DONE: 1 })")>]` without, and `({kind: 'method', "None": $0})` where a
+  pattern-case parameter is renamed. Without literals, every form is unchanged.
+- **Escaping (W6.4).** A key is bare where it matches `[A-Za-z_][A-Za-z0-9_]*`, otherwise a
+  string. `Render.jsString` writes a single-quoted string with `\\`, `\'`, `\n`, `\r`, `\t`,
+  `\u2028`, `\u2029` and `\xHH` for other control characters, and writes `$`, `{` and `}` as
+  `\x24`, `\x7B` and `\x7D`, which Fable's Emit macro would otherwise read.
+- **Catalog.** The canonical declaration API text hashes a property as name, readonly and type,
+  and leaves out `Create`. Neither `Literal` nor `FsCreateOverload.Literals` joins it, so W6
+  needs no `CatalogCompatibility.ApiVersion` bump of its own (W5 took it to 8).
+- **Expression access.** In an expression, the fully qualified
+  `LiteralMemberLab.PhaseEvent.AT_TARGET` resolves to the interface's instance property
+  (FS0806); a pattern resolves it to the literal.
+  After `open LiteralMemberLab`, the unqualified `PhaseEvent.AT_TARGET` resolves to the literal
+  in both positions. A module abbreviation reads the value under qualified access
+  (`docs/.ai/footguns.md`).
+
+Lab `literal-member-lab`: `PhaseEvent` (methods beside `NONE`/`CAPTURING_PHASE`/`AT_TARGET`/
+`BUBBLING_PHASE`) gets `module PhaseEvent` and a `Create` writing the four constants;
+`PointerPhaseEvent` gets no module and a `Create` writing the inherited four; `MethodSignal`,
+`Tagged<T>` and `Phases` (literals alone, parameterless `Create`) carry their discriminant or
+constants; `WritableSignal`'s writable `kind: "writable"` is a literal member like a readonly
+one; `Quoted` pins the escaped marker, `-1` and `0.5`. `MB011` stands on all sixteen
+literal members (the inherited four of `PointerPhaseEvent` included), `SP005` on the seven
+`Create`s. In `NotLiterals`, the optional writable `mode` keeps `TR006`, the optional readonly
+`optional` keeps `TR007`, `level: Level.High` keeps `TR004`, `flag: true` is `bool`, and all
+four stay `Create` parameters under `Emit("$0")`. The RunGate matches `event.eventPhase` against
+`PhaseEvent.AT_TARGET` (compiled to `event.eventPhase === 2`, with no `AT_TARGET` read), runs a
+statement-position `Create`, reads the inherited constants off `PointerPhaseEvent.Create`, the
+discriminants of `MethodSignal`, `WritableSignal` and `Tagged<string>`, the JSON of `Phases.Create()`, and the
+escaped marker through a module abbreviation.
+
+Measured at integration on `integ/w6` (2026-10-14), over W5, with the lead amendment:
+
+| Golden | `TR007` | `TR006` | `MB011` | `SP005` | exact / ergonomic / widened / escape |
+| --- | --- | --- | --- | --- | --- |
+| `solid-js` | 54 → 0 | 6 → 1 | 0 → 59 | 0 → 5 | 69/180/92/1 → 69/188/84/1 |
+| `animejs` | 18 → 0 | 20 → 20 | 0 → 18 | 0 → 0 | 126/190/26/6 → 126/190/26/6 |
+| `@cloudflare/workers-types` | 0 → 0 | 221 → 77 | 0 → 144 | 0 → 121 | 417/1154/390/1 → 417/1259/285/1 |
+
+The readonly-only branch measured 54 `MB011` on `solid-js`, every one a DOM `Node` constant
+flattened into `H.JsxDevRuntime.Jsx.Result` and `Result.Item`, which gain `module Result =` and a
+merged `module Item =`; the other five are writable discriminants. Every `animejs` hit is on
+`DrawableSVGGeometry`, whose existing module now opens at its constants, so its nested string
+enums move up beside them; it carries an index signature and so no `Create`.
+
+Required string discriminants, readonly or writable, move to `MB011`, with each `Create`
+dropping the `kind` parameter and writing it in the Emit. The readonly-only branch moved
+`workers-types` `TR006` 228 → 196; the writable discriminants take it to 77. In the labs,
+`TR006` falls in `generic-tag-lab` 23 → 0, `shared-tag-lab` 31 → 2,
+`compiler-lib-ownership-lab` 6 → 0 (the `ClassDecoratorContext` family),
+`catalog-alias-api-lab` 4 → 0, `projection-lab` 4 → 2, `literal-overload-lab` 4 → 3, and 2 or
+1 → 0 in `nominal-lab`, `instantiation-operand-lab`, `catalog-recursive-json-lab`, `lab`,
+`customization-lab`, `flags-lab`, `inherit-lab` and `subpath-lab`.
+
+Core.TS and Node are regenerated under the T4 override and compile against each other:
+
+| Binding | `TR007` | `MB011` | `TR006` | `SP005` | `SP001` / `SP003` | tiers |
+| --- | --- | --- | --- | --- | --- | --- |
+| Core.TS | 6,494 → 0 | 0 → 6,515 | 89 → 68 | 0 → 138 | 1,098/519 → 1,124/493 | 1302/2203/785/5 → 1302/2397/591/5 |
+| Node | 86 → 0 | 0 → 182 | 673 → 577 | 0 → 70 | 1,120/215 → 1,122/213 | 775/2025/829/5 → 775/2094/760/5 |
+
+In Core.TS, `Event.Create` writes `NONE`, `CAPTURING_PHASE`, `AT_TARGET` and `BUBBLING_PHASE`
+rather than taking them, and 26 interfaces refused for the parameter budget (`UIEvent`,
+`ProgressEvent` and `DOMException` among them) now carry a `Create`, raising `SP002` 884 → 988
+and `TR055` 678 → 704 with their method parameters. The catalogue's API hashes are unchanged.
+
+## Type parameters in scope (2026-10-13, W7 #138)
+
+A hoisted declaration binds the owner's type parameters it reads, a namespace function is a
+method, and a method type parameter keeps a constraint that inherits its use site's bound.
+
+- **W7.1.** `freeTypeParams` reads a named declaration's type arguments in both of its forms.
+  Written inside `interface Grid<T>`, `Grid<T>` is the declared form (`ownArguments`
+  non-empty), and its arguments are the enclosing declaration's parameters; the walk used to
+  skip them, so `BigInt64Array.Every.Predicate` reached `array: BigInt64Array<TArrayBuffer>`
+  with nothing bound and widened it (`TR012`/`TR013`). The walk also follows a shadowed
+  `AliasIdentity` operand (`NoInfer<T>`), the operand `indexedAccessRef` renders, so solid-js
+  `CreateResource.Options2<'T>`/`Options4<'S, 'T>` bind `'T`. `bind-free-type-params` admits a
+  hoisted anonymous type from a widened group, the rule `synthesize-anonymous` names it under:
+  Node's typed-array delegates sit in `lib.*.d.ts` files.
+- **W7.2.** No new code: `typeParamsOf` already writes only an interface or class constraint,
+  so a delegate binding a union-constrained parameter (`'TArrayBuffer`, `ArrayBufferLike`) drops
+  it with `TP002` as its owner does.
+- **W7.3.** `ResolvedMember.ResolvesToFunction` records a `function` declaration, read through
+  `getAliasedSymbol` for a re-exported namespace member (`export { f } from`, an `Alias`
+  symbol). `Spec.emitsAsMethod` is a method symbol, or a required function whose type is a
+  callback alone; a function+namespace merge keeps the property form. It decides in
+  `Spec.shapeMembers` (namespace objects, `globalThis`), `Classes.shapeStatic` (a class's merged
+  namespace) and `Anonymous.signatureShaped` (no delegate is minted for a method's type).
+  TypeScript rejects assignment to a function declaration (TS2630), so the setter the property
+  form carried was not part of the contract, and no finding records it. A `const` of a
+  function type stays a property. `Customization/Semantics.fs` classifies members through
+  `Spec.emitsAsMethodWith`, so a customization sees a namespace function as the method it
+  renders (a property replacement fails with `customization/property-required`).
+- **W7.4.** `appliedRefTo` accepts a type variable whose written constraint is the bound or
+  inherits it (`satisfiesNominally`): `querySelectorAll<'E when 'E :> Element>: selectors:
+  string -> NodeListOf<'E>`. A structural-only bound still widens with `TR027`.
+- Codes taken: none.
+
+Lab `type-scope-lab`: `Grid.Each.Visit<'T when 'T :> Shape>` and `Store.Each.Visit<'B>` (union
+bound dropped, `TP002` on `Store` and the delegate); `Ns.identity<'T>`, `Ns.measure<'T when 'T
+:> Shape>` and the re-exported `Ns.relabel` are methods, `Ns.version` and `Ns.format` (a generic
+function-typed `const`) stay properties, as does `Ns.tagged` (a function+namespace merge) while
+its namespace's `strip` is a method; `Registry.find<'T when 'T :> Shape>` is a static method;
+`Container.queryAll<'E when 'E :> TaggedEntry>` returns `EntryList<'E>`; `Create.Options<'T>`
+reads `JS.NoInfer<'T>`. Remaining: `TR013` on `NoInfer` (the alias declaration) and
+`Ns.format(value)`, `TR027`/`TP006` on `Container.queryLike` (structural bound). The
+`compiler-lib-ownership-lab` entry gains `declare function pick<T>`: `GlobalThis` writes every
+global function as a method (`pick<'T>: items: 'T[] -> 'T`, `parseInt: string: string * ?radix:
+float -> float`). Lab `lab` `Utils.clamp` is a method, its `Clamp` delegate is gone, and the
+RunGate calls `utils.clamp(5.0, 0.0, 1.0)`; `test --run-gate` passes its 535 Fable checks.
+
+| Golden | TR012 | TR013 | TR027 | TP006 | TP002 | exact / ergonomic / widened / escape |
+| --- | --- | --- | --- | --- | --- | --- |
+| `animejs` | 2 → 0 | 3 → 0 | 1 → 0 | 1 → 0 | 26 → 28 | 129/190/26/6 → 129/188/26/6 |
+| `solid-js` | 0 | 23 → 15 | 0 | 15 → 15 | unchanged | 69/180/92/1 → 69/182/90/1 |
+| Core.TS (scratch) | 190 → 0 | 6 → 2 | 152 → 0 | 154 → 2 | 3307 → 3499 | 2073/2203/785/5 → 2073/2346/632/5 |
+| Node (scratch) | 102 → 0 | 250 → 19 | 5 → 0 | 452 → 454 | 374 → 538 | 1263/2032/830/5 → 1263/2136/678/5 |
+
+In `animejs`, the `Utils`, `Easings`, `Svg`, `Text` and `Waapi` namespace functions become
+methods (`TR055` 70 → 62, `SY006` 25 → 23, `MB001` 328 → 361 as optional parameters become
+`?` arguments, `SP002` 34 → 48 as `Create` takes the methods as functions). `solid-js` moves only
+through `NoInfer`: the 8 `CreateResource.Options2/4` sites. Its remaining `TR013` are rank-2
+callback parameters, `Store<T> = T`, the `NoInfer` alias declarations and `Store.DEV.isWrappable`
+(a property typed `typeof isWrappable`), and its `TP006` are conditional-erased parameters; none
+is a W7 construct. The spec's acceptance line ("In solid-js and animejs, TR012, TR013, TR027 and
+TP006 fall") is met for `animejs` only: in `solid-js`, `TP006` stays 15 and `TR012`/`TR027` start at
+0; this gap is raised with the lead rather than amended. Node's remaining `TR013` are `Assert.Assert`/`AssertStrict` (members of a
+`Pick<typeof assert, …>` mapped type, not function symbols), `AsyncLocalStorage.snapshot` and
+`Stream.PipelineDestination`. In Node, functions of a function+namespace merge's namespace
+(`Mkdtemp.__promisify__`) become overloaded methods, so `DO001` +6 settles overloads equal after
+widening and `SP003` +3 refuses their `Create`; `Util.Types.isMap`/`isSet` gain `TP006`.
+
+The pull-request regeneration (`test --goldens`) also moves `@cloudflare/workers-types`
+(`WebAssembly.instantiate`/`validate` become methods, `SY006` 16 → 15, `SP002` 500 → 502;
+`WorkflowEntrypoint.Run.Event<'T>` binds its owner's `'T`, `TP002` 95 → 96) and `type-fest`
+(`ObservableLike.Subscribe.Observer<'ValueType>`, `TR013` 2 → 1).
+
+Core.TS and Node are regenerated at integration on `integ/w7` (2026-10-14), over W5 and W6,
+under the T4 override. Every W7 count equals the scratch measurement above; the tiers move from
+1302/2397/591/5 to 1302/2540/438/5 in Core.TS and from 775/2094/760/5 to 775/2198/608/5 in Node.
+
+## Key types for tag maps and value-of aliases (2026-10-13, W8 #139)
+
+A key over a declared map and a value-of access are written with `Xantham.Fable.Core`'s key
+types (§4.10 of `generator-type-mapping.md`).
+
+- The checker resolves `keyof M` over a declared `M` to `M`'s key literals, so the bound of
+  `K extends keyof HTMLElementTagNameMap` reaches Shape as a literal union. For a type parameter
+  whose bound is a union or a string literal, Resolve reads the declaration's constraint node and,
+  where it is a `keyof` type operator, records `getTypeFromTypeNode` of its operand as
+  `TypeFacts.KeyOfOperand`. `keyCandidates` takes that operand ahead of an `Index` bound.
+- `KeyBinding` carries the operand as an `FsTypeRef` (the in-scope `'T`, or the map's written
+  reference) and `TypedKeyOf` the operand's id and the result's constraint. `indexedAccessRef`
+  matches the access to its binding by operand id.
+- `shapeSignature` partitions keys whose operand is out of scope: an operand that is not a type
+  parameter and whose reference is an `FsNamed` or `FsApp` with no Widened or Escape finding is a
+  map. The key reads `typekeyof<M,'E>` with `'E` at `M[K]` when a parameter or return reaches the
+  access, `keyof<M>` otherwise (`TP.KeyOverDeclaredMap`, `TP011`, Ergonomic). Any other operand
+  keeps the ordinary type parameter and its `TP002`. The result variable is `'E` (`E1`, `E2`, ... where
+  taken), the spec's W8.1 spelling; a key over an in-scope operand keeps `'R` (`Spec.resultName`).
+- `accessBound` gives `'E` the constraint of the generic parameter the access is applied at
+  (`statedConstraintOf`, lifted out of `appliedRefTo`), where every member value of `M` satisfies
+  it nominally. `appliedRefTo` passes a result variable bound with that constraint without
+  `TR027`. Otherwise `'E` stays unconstrained and the argument widens to the constraint (`TR027`).
+- `valueOfOperand` recognises `T[keyof T]`, and `T[K]` where `K`'s constraint and default are both
+  `keyof T`. Over an in-scope `T`, after `indexedAccessValues` declines, the access reads
+  `proptypelock<'T>` (`TR.ValueOfAsPropTypeLock`, `TR066`, Ergonomic). A key with no default
+  stays `TR020`. `shape-aliases` binds the operand of such an alias body, which carries no alias
+  arguments: `type ValueOf<'ObjectType> = proptypelock<'ObjectType>`.
+- `proptypelock` joins `Naming.SupportBindings`, so a package declaring the name reaches the
+  support package's as `JS.proptypelock`.
+- Each map is a distinct F# parameter type, so a key-set overload set (`createElement` over
+  `HTMLElementTagNameMap` and `HTMLElementDeprecatedTagNameMap`) survives `dedupe-overloads`
+  rather than dropping under `DO005`. A call naming one of several key overloads states the map:
+  `typekeyof<HTMLElementTagNameMap, _> _.canvas`.
+
+Lab `tag-map-lab`: `Doc.createElement` reads `typekeyof<TagMap, 'E>` and
+`typekeyof<DeprecatedTagMap, 'E>` beside the `string` overload; `getElementsByTagName<'E when 'E
+:> Elem>` returns `ElemList<'E>` over `TagMap` and `SvgTagMap`; `createSvg` has the single key
+overload; `hasTag` reads `keyof<TagMap>`; `findLoose`, over a map whose value does not inherit
+`Elem`, keeps `'E` unconstrained and writes `ElemList<Elem>` under `TR027`. `ValueOf`,
+`ValuesOf` and `valuesOf` read `proptypelock`; `Picked<T, K extends keyof T>` stays `obj`
+(`TR020`). No `DO005`, `DO001` or `TR044`; `TP011` on the five `Doc` methods. The RunGate calls
+each method and reads the key back: `createElement("canvas")`, `createElement("marquee")`,
+`createSvg("circle")`, `getElementsByTagName("div")` and `hasTag("div")`. `map key binding` and
+`shape typeRef` pin the binding, the constraint and its nominal guard, and the value-of forms.
+
+`keyof-overload-lab` keeps both `find` overloads (`DO005` 1 → 0; `DO001` stays on `pick`).
+`keyof-lab` `values` reads `proptypelock<'T>[]`. `indexed-access-lab` `addEventListener`,
+`lastEvent` and `Registrar.on` read `typekeyof<WorkerEventMap, 'E>`, and `runModel`, whose access
+is nested, reads `keyof<ModelMap>`; the fixture gains `anyWide(WideEventMap[keyof
+WideEventMap])` to keep the footer-declared `U12` coverage `onWide` carried.
+
+Measured goldens (finding counts):
+
+| Golden | TR020 | TR044 | DO005 | TP002 | TR027 | TP011 | TR066 | SA002 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `type-fest` (selected) | 8 → 7 | 0 | 0 | 144 | 0 | 0 | 0 → 1 | 170 |
+| `solid-js` (selected) | 70 | 0 | 0 | 157 | 0 | 0 | 0 | 10 |
+| `@cloudflare/workers-types` (T6) | 5 | 8 → 6 | 0 | 95 → 93 | 2 | 0 → 2 | 0 | — |
+| `animejs` (T6) | 17 → 0 | 0 | 13 → 0 | 26 → 6 | 1 → 9 | 0 → 20 | 0 | — |
+| Core.TS (scratch, T4) | 2 | 1,209 → 5 | 17 → 0 | 3,307 → 137 | 152 | 0 → 3,170 | 0 | — |
+
+`solid-js` is byte-identical: its `Store` accesses are bounded by its own conditional `KeyOf`
+alias and `T[number]`, neither a `keyof` over a declared type. type-fest's 170 `SA002` are
+type-level computations with no Core counterpart. `workers-types`' `addEventListener` reads
+`<'E when 'E :> Event>` over `WorkerGlobalScopeEventMap`. `animejs` flattens DOM element members
+in: its `getElementsByTagName` and `querySelectorAll` overloads cannot prove the lib map's values
+inherit `Element`/`Node`, so `'E` stays unconstrained and the collection argument widens
+(`TR027` +8). Symbol tiers: `type-fest` 26/65/204/2 → 26/66/203/2, `workers-types` ergonomic
+1,161 → 1,163 and widened 390 → 388.
+
+Core.TS was generated into scratch only (T4) and compiled there: 193 `typekeyof` members, among
+them two `createElement` key overloads and four each on `querySelector` and `getElementsByTagName`, and 83
+`addEventListener<'E>`. At integration on `integ/w8` (2026-10-14), over W5–W7, Core.TS and Node are
+regenerated under the T4 override: Core.TS's TP011 0 → 3,170, TP002 3,499 → 329, TR044 1,209 → 5
+and DO005 17 → 0 (tiers 1302/2540/438/5 → 1302/2688/290/5); `CatalogCompatibility.ApiVersion`
+stays 8, the wave's single bump (W5). Node's findings and tiers do not move; 1,416 doc lines go,
+as an overload, a literal-keyed method (W5) included, carries only its own JSDoc's tags.
+
+### Review follow-up (2026-10-14)
+
+- **`PropertyRecord`.** Resolve reads a member-less mapped type's `MappedType` node into
+  `TypeFacts.MappedRecord`: the operand of a `keyof` constraint and the value node, where the
+  mapping has no modifiers, no `as` clause and a value that does not mention the key. With the
+  operand in scope, `objectRef` writes `PropertyRecord<'T, V>` (`propertyRecordRef`,
+  `TR.MappedAsPropertyRecord`, `TR067`, Ergonomic). A value that reads the key (`{ [P in keyof
+  T]: T[P] }`) stays a phantom (`SA002`).
+- **Catalogued maps.** A map reached from the compiler lib or a dependency derives no members.
+  Resolve reads the property types of `KeyOfOperand` into `TypeFacts.KeyOfValues`, and
+  `accessBound` decides the bound over those where the operand has no members.
+- **Overload tags.** `getJsDocTags` merges every overload's tags under the one symbol. Resolve
+  reads each overload's own leading JSDoc into `ResolvedSignature.OwnDoc` (only where a type has
+  several signatures); `signatureTags` keeps the tags that JSDoc writes, and an undocumented
+  overload keeps the shared tags other than `@deprecated`. Applied to interface methods,
+  symbol-keyed methods, class statics and exported functions.
+
+`tag-map-lab` gains `Stringified` (`PropertyRecord<'T, string>`), its negative `Mirrored`
+(phantom), and `Doc.libElements` over `HTMLElementTagNameMap` (`<'E when 'E :>
+Fable.Core.TS.Dom.Element>`, returning `HTMLCollectionOf<'E>`); only the `DeprecatedTagMap`
+overload of `createElement` carries `@deprecated`.
+
+| Golden | SA002 | TR067 | TR027 | `@deprecated` lines |
+| --- | --- | --- | --- | --- |
+| `type-fest` (selected) | 170 → 169 | 0 → 1 | 0 | — |
+| `solid-js` (selected) | 10 | 0 | 0 | unchanged (byte-identical) |
+| `keyof-lab` (T6) | 4 → 3 (`Flags<'T>`) | 0 → 1 | — | — |
+| `animejs` (T6) | — | 0 | 9 → 1 | 22 → 10 |
+| Core.TS (scratch, T4) | — | 0 | 152 | 714 (committed) → 540 |
+
+`compiler-lib-ownership-lab` drops two `@param` lines from `Date.toLocaleString: unit -> string`,
+whose own declaration documents no parameters. The W8 acceptance line (SA002, TR020, TR044 and
+DO005 falling in `type-fest` and `solid-js`) remains unmet in `solid-js` and is with the lead.
+
+## Conditionals at a bounded check type (2026-10-13, W9 #140, experiment)
+
+`resolveConditionalConstraints` in `xantham.json` (boolean, default `false`, experimental)
+writes a conditional deferred over a bounded type parameter as its value at that bound.
+`InstanceType<Request>` with `Request extends typeof IncomingMessage` reads `IncomingMessage`,
+under `TR.ConditionalResolvedToConstraint` (`TR068`, Widened) in place of `TR045`. Unset,
+output is unchanged. `src/Xantham.Fable.Node/xantham.json` sets it (#151); Core.TS does not. The full experiment record, with every measurement, is
+[`2026-10-13-w9-early-resolve-findings.md`](2026-10-13-w9-early-resolve-findings.md).
+
+- Resolve's conditional derivation records `ConditionalFacts.Constraint` from
+  `getBaseConstraintOfType`. It does so when no branch is taken, or the taken branch is an
+  `infer` variable (a type parameter declared under an `InferType` node), and the peeled
+  check type is a type parameter that
+  `getConstraintOfTypeParameter` bounds. The constraint joins the frontier through the
+  `conditional-constraint` channel and the catalogue's dependency edges.
+- An alias's own declaration (the alias's declared type equals the conditional) stays
+  deferred. So does a constraint that is the conditional itself, either branch, `any`,
+  `unknown`, `never`, a conditional, or a union other than `boolean`. Over a union bound the
+  distributive constraint is the per-member branch union, and without a distributive
+  constraint the checker's answer is the union of both branches. §4.11 rejects both.
+- `Spec.conditionalRef` tries the taken branch, then the constraint. A constraint that maps to
+  `obj` reports `TR045`.
+- The flag is part of `DeclarationCatalog.profile` when set, and only then.
+
+W9.1's premise does not hold as written. A concrete application (`InstanceType<typeof
+IncomingMessage>`) is resolved by the checker before Resolve reads it. All 130 `InstanceType`
+`TR045` findings in Node are applications over a bounded parameter. The read therefore sits in
+Resolve, not in a separate pass before Resolve.
+
+`early-resolve-lab` (flag on) pins `TR068` at `RequestListener(req)`,
+`Server(requestListener)(req)`, `Server.on(listener)(req)`,
+`Exports.createServer(listener)(req)`, `Exports.instance(value)` (a taken `infer` branch) and
+`Exports.flag(value)` (a bound whose value is `boolean`, written `bool`), plus their rendered
+lines; the last two stay `TR045` with the flag off. It also pins `TR045` at `Divergent`,
+`Instance` (an alias's own body), `Exports.divergent(value)` (unbounded),
+`Exports.returns(value)` (bound instantiates to `any`), `Exports.either(value)` (union bound)
+and `Exports.same(value)` (a bound whose value is one of its own branches). The three `TR018` intersections over `InstanceType<Response>` are pinned unchanged,
+and `ConcreteListener` carries no finding. Its baseline testcase pins every `InstanceType` site
+at `TR045` with the flag off. `shape typeRef`, `generator config` and `catalog library ambient
+authentication` pin the rung, the loader and the profile.
+
+The selected goldens are unchanged: `type-fest` and `solid-js` regenerated byte-identical.
+Measured in scratch with the flag on:
+
+- `type-fest`: `TR045` 154 → 152 (two inline conditionals inside `Replace` and
+  `StringRepeat`), with an identical binding.
+- `solid-js`: unchanged, because every conditional is over an unbounded parameter.
+- `@types/node`: `TR045` 224 → 93 and `TR068` 160 (159 `InstanceType` over 90 symbols, the
+  surplus being nested applications). 101 binding lines changed, and the binding compiles.
+- Core.TS: unchanged.
+
+Tiers, table size and wall time did not move. Core.TS and Node are not regenerated, since
+neither configuration sets the flag. Enabling it for Node is the recommendation, left to
+integration.

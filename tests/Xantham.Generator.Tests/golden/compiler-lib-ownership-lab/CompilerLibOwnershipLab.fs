@@ -40,7 +40,7 @@ type GlobalThis =
     /// Evaluates JavaScript code and executes it.
     /// </summary>
     /// <param name="x">A String value that contains valid JavaScript code.</param>
-    abstract eval: (string -> obj) with get, set
+    abstract eval: x: string -> obj
     /// <summary>
     /// Converts a string to an integer.
     /// </summary>
@@ -50,54 +50,54 @@ type GlobalThis =
     /// If this argument is not supplied, strings with a prefix of '0x' are considered hexadecimal.
     /// All other strings are considered decimal.
     /// </param>
-    abstract parseInt: Func<string, float option, float> with get, set
+    abstract parseInt: string: string * ?radix: float -> float
     /// <summary>
     /// Converts a string to a floating-point number.
     /// </summary>
     /// <param name="string">A string that contains a floating-point number.</param>
-    abstract parseFloat: (string -> float) with get, set
+    abstract parseFloat: string: string -> float
     /// <summary>
     /// Returns a Boolean value that indicates whether a value is the reserved value NaN (not a number).
     /// </summary>
     /// <param name="number">A numeric value.</param>
-    abstract isNaN: (float -> bool) with get, set
+    abstract isNaN: number: float -> bool
     /// <summary>
     /// Determines whether a supplied number is finite.
     /// </summary>
     /// <param name="number">Any numeric value.</param>
-    abstract isFinite: (float -> bool) with get, set
+    abstract isFinite: number: float -> bool
     /// <summary>
     /// Gets the unencoded version of an encoded Uniform Resource Identifier (URI).
     /// </summary>
     /// <param name="encodedURI">A value representing an encoded URI.</param>
-    abstract decodeURI: (string -> string) with get, set
+    abstract decodeURI: encodedURI: string -> string
     /// <summary>
     /// Gets the unencoded version of an encoded component of a Uniform Resource Identifier (URI).
     /// </summary>
     /// <param name="encodedURIComponent">A value representing an encoded URI component.</param>
-    abstract decodeURIComponent: (string -> string) with get, set
+    abstract decodeURIComponent: encodedURIComponent: string -> string
     /// <summary>
     /// Encodes a text string as a valid Uniform Resource Identifier (URI)
     /// </summary>
     /// <param name="uri">A value representing an unencoded URI.</param>
-    abstract encodeURI: (string -> string) with get, set
+    abstract encodeURI: uri: string -> string
     /// <summary>
     /// Encodes a text string as a valid component of a Uniform Resource Identifier (URI).
     /// </summary>
     /// <param name="uriComponent">A value representing an unencoded URI component.</param>
-    abstract encodeURIComponent: (U3<string, float, bool> -> string) with get, set
+    abstract encodeURIComponent: uriComponent: U3<string, float, bool> -> string
     /// <summary>
     /// Computes a new string in which certain characters have been replaced by a hexadecimal escape sequence.
     /// </summary>
     /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
     /// <param name="string">A string value</param>
-    abstract escape: (string -> string) with get, set
+    abstract escape: string: string -> string
     /// <summary>
     /// Computes a new string in which hexadecimal escape sequences are replaced with the character that it represents.
     /// </summary>
     /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
     /// <param name="string">A string value</param>
-    abstract unescape: (string -> string) with get, set
+    abstract unescape: string: string -> string
     /// <summary>
     /// Provides functionality common to all JavaScript objects.
     /// </summary>
@@ -191,7 +191,9 @@ type GlobalThis =
     abstract Float64Array: TypeScript.Lib.Es.Float64ArrayConstructor with get, set
     abstract Intl: TypeScript.Lib.Es.Intl with get, set
     abstract currentItem: Item with get, set
-    abstract inspect: (Item[] -> Brief) with get, set
+    abstract inspect: items: Item[] -> Brief
+    abstract settle: value: JS.Promise<float> -> JS.Promise<string>
+    abstract pick<'T>: items: 'T[] -> 'T
     abstract windowLike: WindowLike with get, set
     abstract globalThis: GlobalThis
     abstract undefined: unit
@@ -211,6 +213,10 @@ type Exports =
         and set (_: Item): unit = jsNative
     [<Global("inspect")>]
     static member inspect (items: Item[]) : Brief = jsNative
+    [<Global("settle")>]
+    static member settle (value: JS.Promise<float>) : JS.Promise<string> = jsNative
+    [<Global("pick")>]
+    static member pick<'T> (items: 'T[]) : 'T = jsNative
     static member windowLike
         with get (): WindowLike = jsNative
         and set (_: WindowLike): unit = jsNative

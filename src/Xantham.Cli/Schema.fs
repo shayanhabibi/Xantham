@@ -108,6 +108,18 @@ let private configKeys =
             ("unionArmOverloads",
              "Synthesized overloads beside a member whose parameter is an erased union, one per arm. \
           Disabled by default: enabling it makes existing `!^` casts at those call sites ambiguous.")
+
+            "AnyReturnAsUnit",
+            ("anyReturnAsUnit",
+             "A .NET regular expression over property and value names. A callback typed directly at a matching \
+          name returns unit where its source return is any, reported as TR065. Omitted, every such return \
+          stays obj. The compiler-library binding selects ^on for event-handler properties.")
+
+            "ResolveConditionalConstraints",
+            ("resolveConditionalConstraints",
+             "Experimental. Writes a conditional type deferred over a bounded type parameter, such as \
+          InstanceType<Request> where Request extends typeof IncomingMessage, as its value at that bound \
+          (IncomingMessage), reported as TR068. Defaults to false, which keeps such a reference obj under TR045.")
         ]
 
 /// The JSON key and description of one `UnionArmOverloadsConfig` field. `policy` is spelled as

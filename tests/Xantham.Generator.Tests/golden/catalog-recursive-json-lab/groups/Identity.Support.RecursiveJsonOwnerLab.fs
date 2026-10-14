@@ -13,14 +13,26 @@ open Fable.Core.TS.Dom
 module Accept =
     [<Interface>]
     type Output2 =
+        /// <remarks>TypeScript type: <c>"text"</c></remarks>
         abstract kind: string with get, set
         abstract text: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, text: string) : Output2 = jsNative
+        [<ParamObject; Emit("({ kind: 'text', ...$0 })")>]
+        static member Create (text: string) : Output2 = jsNative
+
+    module Output2 =
+        /// <remarks>TypeScript type: <c>"text"</c></remarks>
+        [<Literal>]
+        let kind = "text"
 
     [<Interface>]
     type Output3 =
+        /// <remarks>TypeScript type: <c>"result"</c></remarks>
         abstract kind: string with get, set
         abstract result: U3<string, float, obj option[]> with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, result: U3<string, float, obj option[]>) : Output3 = jsNative
+        [<ParamObject; Emit("({ kind: 'result', ...$0 })")>]
+        static member Create (result: U3<string, float, obj option[]>) : Output3 = jsNative
+
+    module Output3 =
+        /// <remarks>TypeScript type: <c>"result"</c></remarks>
+        [<Literal>]
+        let kind = "result"

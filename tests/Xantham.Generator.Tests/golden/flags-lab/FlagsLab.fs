@@ -80,10 +80,16 @@ type Keyed =
 [<Interface>]
 type Plain =
     abstract name: string with get, set
+    /// <remarks>TypeScript type: <c>"static"</c></remarks>
     abstract kind: string with get, set
     abstract count: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, kind: string, count: float) : Plain = jsNative
+    [<ParamObject; Emit("({ kind: 'static', ...$0 })")>]
+    static member Create (name: string, count: float) : Plain = jsNative
+
+module Plain =
+    /// <remarks>TypeScript type: <c>"static"</c></remarks>
+    [<Literal>]
+    let kind = "static"
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

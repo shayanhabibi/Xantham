@@ -64,6 +64,12 @@ type Diamond =
 [<Interface>]
 type Override =
     inherit Properties<string>
+    /// <remarks>TypeScript type: <c>"chosen"</c></remarks>
     abstract value: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (value: string, stamp: string) : Override = jsNative
+    [<ParamObject; Emit("({ value: 'chosen', ...$0 })")>]
+    static member Create (stamp: string) : Override = jsNative
+
+module Override =
+    /// <remarks>TypeScript type: <c>"chosen"</c></remarks>
+    [<Literal>]
+    let value = "chosen"

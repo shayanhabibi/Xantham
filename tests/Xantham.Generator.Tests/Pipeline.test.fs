@@ -440,6 +440,7 @@ let configTests =
             Expect.equal layout.DomModule "Dom" "the artifact keeps DOM in its own child"
             Expect.isTrue layout.AutoOpenEs "the artifact opens only its ECMAScript child"
             Expect.isFalse layout.AutoOpenDom "the artifact leaves its DOM child opt-in"
+            Expect.equal config.AnyReturnAsUnit (Some "^on") "the artifact writes on* handler returns as unit"
 
         testCase "compilerLib refuses malformed layouts with a configuration error" <| fun _ ->
             let refused json =
@@ -459,6 +460,31 @@ let configTests =
             refused """{ "compilerLib": { "esModule": "not-valid" } }"""
             refused """{ "compilerLib": { "domModule": "" } }"""
             refused """{ "compilerLib": { "esModule": "Same", "domModule": "Same" } }"""
+
+        testCase "anyReturnAsUnit is one regular expression, omitted by default (W2)" <| fun _ ->
+            withConfig """{ "anyReturnAsUnit": "^on" }""" <| fun config ->
+                Expect.equal config.AnyReturnAsUnit (Some "^on") "the pattern is carried through"
+
+            withConfig """{ }""" <| fun config ->
+                Expect.equal config.AnyReturnAsUnit None "omitted, nothing is selected"
+
+            let refused json =
+                try
+                    withConfig json ignore
+                    failtest "the invalid anyReturnAsUnit was accepted"
+                with error ->
+                    Expect.stringContains error.Message "xantham.json: anyReturnAsUnit" "the error names its key"
+
+            refused """{ "anyReturnAsUnit": "" }"""
+            refused """{ "anyReturnAsUnit": 42 }"""
+            refused """{ "anyReturnAsUnit": "([" }"""
+
+        testCase "resolveConditionalConstraints is a boolean, false by default (W9)" <| fun _ ->
+            withConfig """{ "resolveConditionalConstraints": true }""" <| fun config ->
+                Expect.isTrue config.ResolveConditionalConstraints "the flag is carried through"
+
+            withConfig """{ }""" <| fun config ->
+                Expect.isFalse config.ResolveConditionalConstraints "omitted, every bounded conditional stays deferred"
 
         testCase "lib is the compiler's lib option, as tsconfig spells it" <| fun _ ->
             // A global type library that replaces the DOM (`@cloudflare/workers-types`) has to
@@ -558,6 +584,12 @@ let private groupMapLab = handFixture "group-map-lab"
 /// Wave fifteen item 4: `NoInfer<T>` under the lab's own `xantham.json`, which sets
 /// `resolveNoInfer` to exercise the toggled side; `solid-js` exercises the default.
 let private noInferLab = handFixture "noinfer-lab"
+
+/// W2: `anyReturnAsUnit` set to `^on` under the lab's own `xantham.json`.
+let private handlerReturnLab = handFixture "handler-return-lab"
+
+/// W9: `resolveConditionalConstraints` set under the lab's own `xantham.json`.
+let private earlyResolveLab = handFixture "early-resolve-lab"
 
 [<Tests>]
 let pipelineTests =
@@ -1729,22 +1761,22 @@ let pipelineTests =
 
                     Expect.stringContains source "abstract all: unit -> keyof<'T>[]" "keyof T in return position"
 
-                    // `T[keyof T]` is a different animal: no key variable selects it, so there
-                    // is nothing to name the value type. It stays widened, and says so.
+                    // `T[keyof T]` - the value-of idiom (W8, #139): one of T's property types,
+                    // which the support package's `proptypelock<'T>` states.
                     Expect.stringContains
                         source
-                        "static member values<'T> (source: 'T) : obj[] = jsNative"
-                        "the value-of idiom has no F# form"
+                        "static member values<'T> (source: 'T) : proptypelock<'T>[] = jsNative"
+                        "the value-of idiom is proptypelock"
 
                     Expect.isTrue
                         (rendered.Findings
-                         |> List.exists (fun f -> f.Symbol = "Exports.values()" && f.Tier = Widened))
-                        "and the widening is recorded against the member"
+                         |> List.exists (fun f -> f.Symbol = "Exports.values()" && f.Key = "TR066" && f.Tier = Ergonomic))
+                        "and the mapping is recorded against the member"
 
                     Expect.contains
                         (Render.symbolTiers rendered |> List.map (fun (name, tier, _) -> name, tier))
-                        ("Exports.values", Widened)
-                        "so the member's manifest row grades widened"
+                        ("Exports.values", Ergonomic)
+                        "so the member's manifest row grades ergonomic"
 
                   testCase "a type-level computation over an open operand emits an erased phantom" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -1778,7 +1810,10 @@ let pipelineTests =
                     Expect.stringContains source "type ConcreteBranch = string" "a resolved conditional"
                     Expect.isFalse (source.Contains "EventName__") "a resolved template literal is a StringEnum"
 
-                    for name in [ "DeepPartial"; "Flags"; "Unwrap"; "Prefixed" ] do
+                    // A value-only mapped type over an open operand reads as a property record.
+                    Expect.stringContains source "type Flags<'T> = PropertyRecord<'T, bool>" "a value-only mapped type"
+
+                    for name in [ "DeepPartial"; "Unwrap"; "Prefixed" ] do
                         Expect.isTrue
                             (rendered.Findings
                              |> List.exists (fun f ->
@@ -1795,13 +1830,13 @@ let pipelineTests =
                       // For the ECMAScript half of the lib there is one, and every generated
                       // file already opens it.
                       Expect.stringContains source "static member fetchOne (url: string) : JS.Promise<string>" "a promise is a promise"
-                      Expect.stringContains source "JS.Map<string, string[]>" "both parameters carried"
-                      Expect.stringContains source "at: JS.Date) : JS.Date" "and the non-generic names too"
+                      Expect.stringContains source "Fable.Core.TS.Es.Map<string, string[]>" "both parameters carried"
+                      Expect.stringContains source "at: Fable.Core.TS.Es.Date) : Fable.Core.TS.Es.Date" "and the non-generic names too"
 
                       // The argument is shaped at its own position, which is the half the old
                       // wholesale widening cost most: `Promise<T>` used to erase T with it.
-                      Expect.stringContains source "abstract load: key: string -> JS.Promise<JS.Uint8Array>" "nested through a member"
-                      Expect.stringContains source "abstract boxed: Box<JS.Date>" "and through a generic this run declares"
+                      Expect.stringContains source "abstract load: key: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<" "nested through a member"
+                      Expect.stringContains source "abstract boxed: Box<Fable.Core.TS.Es.Date>" "and through a generic this run declares"
 
                       // DOM names and generic arguments come from the same compiler as Core.TS.
                       Expect.stringContains
@@ -1824,19 +1859,22 @@ let pipelineTests =
                           "emit (detail: Fable.Core.TS.Dom.CustomEvent<string>)"
                           "and the generic arity wins where the reference has an argument"
 
-                      // Unbound ECMAScript types still widen; all three DOM names are shipped.
-                      Expect.stringContains source "static member each (values: obj)" "the sync iteration protocol is unbound"
+                      // Core.TS binds the synchronous iteration protocol as a JS interface, not seq<'T>.
+                      Expect.stringContains
+                          source
+                          "static member each (values: Fable.Core.TS.Es.Iterable<string"
+                          "the sync iteration protocol is Core.TS's"
                       Expect.stringContains source "static member ``select`` (over: Fable.Core.TS.Dom.Range)" "Core.TS owns the DOM Range"
                       Expect.stringContains source "static member respond () : Fable.Core.TS.Dom.Response" "fetch types are shipped by Core.TS"
 
-                      // Every loss is in the manifest: the arity the lib drifted away from, and
-                      // the restrictions the readonly views express and F# has no binding for.
+                      // Core.TS carries the typed arrays' buffer parameter and the readonly views, so
+                      // the one loss left is the thenable read as a promise.
                       let says fragment =
                           rendered.Findings |> List.exists (fun f -> f.Message.Contains(fragment: string))
 
-                      Expect.isTrue (says "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0") "the dropped buffer parameter"
+                      Expect.isFalse (says "type arguments where") "no buffer parameter is dropped"
                       Expect.isTrue (says "PromiseLike reads as JS.Promise") "a thenable is not a promise"
-                      Expect.isTrue (says "ReadonlyMap reads as JS.Map") "and readonly is not carried" ])
+                      Expect.isFalse (says "ReadonlyMap reads as") "readonly is carried" ])
 
         yield!
             fixtureTests
@@ -1868,6 +1906,70 @@ let pipelineTests =
                           Expect.isTrue
                               (says "in typescript/lib")
                               "the compiler's own lib is named as the group the discarded symbols came from" ])
+
+        // W3 (#134): ECMAScript compiler-lib names under widen are Core.TS's declarations; the
+        // compile gate compiles the golden against Xantham.Fable.Core.TS.
+        yield!
+            fixtureTests "es-reuse-lab" (handFixture "es-reuse-lab") (handConfig (handFixture "es-reuse-lab")) (fun package ->
+                let generate () =
+                    Async.RunSynchronously(Pipeline.generate (handConfig (Some package)) package)
+
+                [ testCase "es-reuse-lab: compiler ES names are written as Core.TS declarations" <| fun _ ->
+                      let source = generate().Files |> List.head |> snd
+
+                      for fragment in
+                          [ "static member fill (target: Fable.Core.TS.Es.ArrayLike<float>)"
+                            "static member share (buffer: Fable.Core.TS.Es.SharedArrayBuffer)"
+                            "static member words (values: Fable.Core.TS.Es.Iterable<string"
+                            ": Fable.Core.TS.Es.ArrayIterator<float>"
+                            "(pattern: Fable.Core.TS.Es.RegExp)"
+                            "Fable.Core.TS.Es.AsyncGeneratorFunction"
+                            "(options: Fable.Core.TS.Es.NumberFormatOptions)" ] do
+                          Expect.stringContains source fragment fragment
+
+                  // Core.TS declares `ArrayBufferLike` as this same abbreviation, so a value typed
+                  // by a Core.TS API passes without a cast.
+                  testCase "es-reuse-lab: ArrayBufferLike unifies with Core.TS's" <| fun _ ->
+                      let source = generate().Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "static member wrap (buffer: U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>) : unit"
+                          "both arms are Core.TS's"
+
+                  testCase "es-reuse-lab: names Fable.Core.JS binds are written as Core.TS declarations" <| fun _ ->
+                      let source = generate().Files |> List.head |> snd
+
+                      for fragment in
+                          [ "static member index () : Fable.Core.TS.Es.Map<string, Fable.Core.TS.Es.Date>"
+                            "static member unique (values: Fable.Core.TS.Es.Set<string>)"
+                            "static member bytes (buffer: Fable.Core.TS.Es.ArrayBuffer) : Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>" ] do
+                          Expect.stringContains source fragment fragment
+
+                      for name in [ "Map"; "Date"; "Set"; "ArrayBuffer"; "Uint8Array" ] do
+                          Expect.isFalse (source.Contains $"JS.{name}") $"no Fable.Core.JS.{name} binding"
+
+                  // Fable.Promise and Async.AwaitPromise are written against JS.Promise; Fable
+                  // compiles System.Exception to a JavaScript Error.
+                  testCase "es-reuse-lab: Promise, PromiseLike and Error keep their bindings" <| fun _ ->
+                      let rendered = generate()
+                      let source = rendered.Files |> List.head |> snd
+                      Expect.stringContains source "static member later () : JS.Promise<string>" "Promise"
+                      Expect.stringContains source "static member settle (value: JS.Promise<float>)" "PromiseLike"
+                      Expect.stringContains source "static member fail () : exn" "Error"
+
+                      Expect.equal
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR025") |> List.map _.Message |> List.sort)
+                          [ "Error reads as exn; the JavaScript name, stack and cause properties are not on it"
+                            "PromiseLike reads as JS.Promise; a bare thenable is not one" ]
+                          "the remaining lib-binding losses"
+
+                      Expect.isEmpty (rendered.Findings |> List.filter (fun f -> f.Key = "TR024")) "no type argument is dropped"
+
+                  testCase "es-reuse-lab: no ECMAScript name widens" <| fun _ ->
+                      let findings = generate().Findings
+                      Expect.isEmpty (findings |> List.filter (fun f -> f.Key = "TR023")) "no missing declaration"
+                      Expect.isEmpty (findings |> List.filter (fun f -> f.Key = "TR035")) "no union with an obj arm" ])
 
         yield!
             fixtureTests
@@ -1972,6 +2074,53 @@ let pipelineTests =
 
                           entry.Contains "inherit GlobalThis"
                           |> Flip.Expect.equal "WindowLike.self retains its program-global intersection operand" true
+
+                      testCase "compiler-lib ownership writes global functions as GlobalThis methods (W7.3)" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "compiler-lib-ownership-lab")) package)
+
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          Expect.stringContains entry "abstract pick<'T>: items: 'T[] -> 'T" "a generic global function"
+                          Expect.stringContains entry "abstract inspect: items: Item[] -> Brief" "a global function"
+                          Expect.stringContains
+                              entry
+                              "abstract parseInt: string: string * ?radix: float -> float"
+                              "a lib global function is a method too"
+                          Expect.stringContains entry "static member pick<'T>" "the global export is unchanged"
+
+                      // Fable.Promise and Async.AwaitPromise are written against JS.Promise, so a
+                      // shipped compiler lib writes its promises the way consumers do.
+                      testCase "compiler-lib ownership writes Promise and PromiseLike as JS.Promise" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "compiler-lib-ownership-lab")) package)
+
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let entry = rendered.Files |> List.find (fun (path, _) -> path = "CompilerLibOwnershipLab.fs") |> snd
+
+                          Expect.stringContains
+                              entry
+                              "static member settle (value: JS.Promise<float>) : JS.Promise<string>"
+                              "the entry's references"
+
+                          Expect.stringContains core "-> JS.Promise<U2<'TResult1, 'TResult2>>" "Promise.then"
+                          Expect.stringContains core "type Promise<'T> =" "the declaration stays"
+
+                          // A declaration's own `Create` still returns the declaration.
+                          let references =
+                              core.Split '\n' |> Array.filter (fun line -> not (line.Contains "static member Create"))
+
+                          for spelling in [ ": Promise<"; "-> Promise<"; "<Promise<"; ", Promise<"; ": PromiseLike<"; "-> PromiseLike<"; "<PromiseLike<"; ", PromiseLike<" ] do
+                              Expect.isFalse
+                                  (references |> Array.exists (fun line -> line.Contains spelling))
+                                  $"no reference reads {spelling}"
+
+                          Expect.contains
+                              (rendered.Findings |> List.map _.Message |> List.distinct)
+                              "PromiseLike reads as JS.Promise; a bare thenable is not one"
+                              "the thenable's loss is recorded"
 
                       testCase "compiler-lib ownership certifies the global scope of a clean producer" <| fun _ ->
                           let config =
@@ -2869,7 +3018,10 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.stringContains source "abstract catch" "the member survives"
-                      Expect.stringContains source "Func<" "carrying its call signature"
+                      Expect.stringContains
+                          source
+                          "abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>)"
+                          "carrying its call signature"
 
                       Expect.isEmpty
                           (rendered.Findings
@@ -2894,7 +3046,7 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.stringContains source "abstract at: JS.Date" "Date binds, and binds whole"
+                      Expect.stringContains source "abstract at: Fable.Core.TS.Es.Date" "Date binds, and binds whole"
                       Expect.isFalse (source.Contains "abstract getTime") "with none of its members walked"
 
                   testCase "a DOM declaration previously unbound now uses Core.TS" <| fun _ ->
@@ -3288,19 +3440,20 @@ let pipelineTests =
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
+                          // W5 (#136): a literal parameter of a method is a method of its own.
                           Expect.stringContains
                               source
-                              "abstract read: key: string * kind: Store.Text -> JS.Promise<string option>"
-                              "the literal parameter reads the type the literal is written as"
+                              "[<Emit(\"$0.read($1, 'text')\")>]\n    abstract readText: key: string -> JS.Promise<string option>"
+                              "the literal parameter is written into the call"
 
                           Expect.stringContains
                               source
-                              "abstract read: key: string * kind: Store.Json -> JS.Promise<obj>"
-                              "one overload per literal, each keeping its own return type"
+                              "[<Emit(\"$0.read($1, 'json')\")>]\n    abstract readJson: key: string -> JS.Promise<obj>"
+                              "one method per literal, each keeping its own return type"
 
                           Expect.stringContains
                               source
-                              "abstract read: key: string * kind: Store.Bytes -> JS.Promise<Chunk option>"
+                              "[<Emit(\"$0.read($1, 'bytes')\")>]\n    abstract readBytes: key: string -> JS.Promise<Chunk option>"
                               "including the one no consumer could reach before"
 
                           Expect.stringContains
@@ -3347,8 +3500,8 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "abstract send: body: string * mode: string -> unit"
-                              "overloads that differ before the literal is read keep widening it"
+                              "[<Emit(\"$0.send($1, 'now')\")>]\n    abstract sendNow: body: string -> unit"
+                              "a method's literal is a method of its own where nothing collides too"
 
                           Expect.stringContains
                               source
@@ -3413,7 +3566,7 @@ let pipelineTests =
 
                           Expect.equal
                               (symbolsOf "TR056")
-                              [ "Exports.emit(kind)"; "Store.read(kind)"; "Store.read(options)" ]
+                              [ "Exports.emit(kind)"; "Store.read(options)" ]
                               "and one per position the literal is kept at"
 
                           Expect.equal
@@ -3423,38 +3576,47 @@ let pipelineTests =
 
                           Expect.equal (symbolsOf "DO003") [] "no overload set is separated by a union of literals"
 
+                          Expect.equal
+                              (symbolsOf "MB010")
+                              [ "Mixed.send"; "Store.read" ]
+                              "a method's top-level literals are methods of their own (W5)"
+
                           Expect.contains
                               (symbolsOf "TR006")
                               "Solo.tag(name)"
                               "the literal that separates nothing is still reported as widened" ])
 
-        // Wave nine lane AP, item 2. A `keyof` bound separates an overload set in TypeScript and
-        // reaches F# erased: .NET keeps constraints out of a method signature, and a key set has
-        // no F# name to stand over. The drop is its own loss rather than a plain collision.
+        // Wave nine lane AP, item 2. A `keyof` bound separates an overload set in TypeScript. W8
+        // (#139) writes the key over the map's name, so the set survives in F#; a nominal bound,
+        // which .NET keeps out of a method signature, still collides and drops.
         yield!
             fixtureTests
                 "keyof-overload-lab"
                 (handFixture "keyof-overload-lab")
                 GeneratorConfig.Default
                 (fun package ->
-                    [ testCase "a key-set bound reaches the signature erased" <| fun _ ->
+                    [ testCase "a key-set bound is written as the map's typekeyof" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
-                          // `HtmlTags[K]` resolves to the union of the map's value types (lane
-                          // CD); the bound `K` was taken over is still nowhere in the signature,
-                          // which is what makes the two overloads collide.
+                          // W8 (#139): the key is written over the map it was taken over, so the
+                          // two overloads take different F# parameter types and both survive.
                           Expect.stringContains
                               source
-                              "abstract find<'K>: selector: 'K -> U2<Div, Span>"
-                              "the bound is nowhere in the F# signature"
+                              "abstract find<'E>: selector: typekeyof<HtmlTags, 'E> -> 'E"
+                              "the first map"
+
+                          Expect.stringContains
+                              source
+                              "abstract find<'E>: selector: typekeyof<SvgTags, 'E> -> 'E"
+                              "and the second"
 
                           Expect.stringContains
                               source
                               "abstract find: selector: string -> Div"
                               "the overload taking a plain string survives beside it"
 
-                      testCase "a key-set drop and a nominal drop report different losses" <| fun _ ->
+                      testCase "a key-set bound no longer drops, and a nominal drop still does" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                           let symbolsOf key =
@@ -3464,7 +3626,7 @@ let pipelineTests =
                               |> List.distinct
                               |> List.sort
 
-                          Expect.equal (symbolsOf "DO005") [ "Finder.find" ] "the key-set collision reports its own loss"
+                          Expect.isEmpty (symbolsOf "DO005") "no key-set overload collides"
 
                           Expect.equal
                               (symbolsOf "DO001")
@@ -4387,10 +4549,11 @@ let pipelineTests =
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced
         // over an unresolved arm read `TR063` with the name the checker keeps; a written `any`,
-        // an omitted annotation and `unknown` keep their keys.
+        // an omitted annotation and `unknown` keep their keys. A faithful `any` grades ergonomic;
+        // a row stays escape only through a stated-type loss beside it.
         yield!
             fixtureTests "unresolved-any-lab" (handFixture "unresolved-any-lab") GeneratorConfig.Default (fun package ->
-                [ testCase "the checker's error type is reported apart from a written any" <| fun _ ->
+                [ testCase "unresolved-any-lab: the checker's error type is reported apart from a written any" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                       let reported symbol =
@@ -4405,7 +4568,224 @@ let pipelineTests =
                       Expect.equal (reported "Probe.either") [ "TR063", [ "" ] ] "a union the checker reduced to its error type"
                       Expect.equal (reported "Probe.written") [ "TR008", [] ] "a written any"
                       Expect.equal (reported "Probe.omitted") [ "TR008", [] ] "an omitted annotation"
-                      Expect.equal (reported "Probe.opaque") [ "TR009", [] ] "a written unknown" ])
+                      Expect.equal (reported "Probe.opaque") [ "TR009", [] ] "a written unknown"
+
+                  testCase "unresolved-any-lab: a faithful any grades ergonomic and an unresolved name stays escape" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let graded key =
+                          rendered.Findings
+                          |> List.filter (fun finding -> finding.Key = key)
+                          |> List.map (fun finding -> finding.Symbol, finding.Tier)
+                          |> List.sort
+
+                      let tiers = Render.symbolTiers rendered |> List.map (fun (name, tier, _) -> name, tier)
+
+                      Expect.equal
+                          (graded "TR008")
+                          [ "Exports.listen(listener)(args)", Ergonomic
+                            "Faithful.omitted", Ergonomic
+                            "Faithful.written", Ergonomic
+                            "Probe.omitted", Ergonomic
+                            "Probe.written", Ergonomic ]
+                          "a written any, an omitted annotation and a rest argument grade ergonomic"
+
+                      Expect.equal (graded "TR063" |> List.map snd |> List.distinct) [ Escape ] "an unresolved name stays escape"
+
+                      Expect.stringContains
+                          source
+                          "static member listen (listener: (obj[] -> unit)) : unit"
+                          "a rest-argument listener reads obj[] -> unit"
+
+                      Expect.contains tiers ("Exports.listen", Ergonomic) "a row whose only loss is a faithful any grades ergonomic"
+                      Expect.contains tiers ("Faithful", Ergonomic) "an interface of faithful any members grades ergonomic"
+                      Expect.contains tiers ("Probe", Escape) "a faithful any beside a stated-type loss stays escape" ])
+
+        // W2: a callback typed directly at a property or value `anyReturnAsUnit` selects returns
+        // unit for a source `any`, under `TR065`, including a callback arm of an erased union. An
+        // unselected name, a non-callback `any`, a nested callback, a method, a named callback alias
+        // and a hoisted two-argument delegate keep `obj` under `TR008`.
+        yield!
+            fixtureTests "handler-return-lab" handlerReturnLab (handConfig handlerReturnLab) (fun package ->
+                [ testCase "handler-return-lab: a selected callback's any return reads unit and the rest keep obj" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig handlerReturnLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let sites key =
+                          rendered.Findings
+                          |> List.filter (fun finding -> finding.Key = key)
+                          |> List.map (fun finding -> finding.Symbol, finding.Tier)
+                          |> List.sort
+
+                      Expect.equal
+                          (sites "TR065")
+                          [ "Exports.onload()", Ergonomic
+                            "Upload.onmixed()", Ergonomic
+                            "Upload.onprogress()", Ergonomic
+                            "Upload.onready()", Ergonomic ]
+                          "the selected callbacks"
+
+                      Expect.equal
+                          (sites "TR008" |> List.map fst)
+                          [ "Handler()"
+                            "Upload.Onpair()"
+                            "Upload.onclose()"
+                            "Upload.onregister(resolve)()"
+                            "Upload.onstate"
+                            "Upload.transform()" ]
+                          "every unselected any stays obj"
+
+                      Expect.stringContains
+                          source
+                          "type Onpair = delegate of a: Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> * b: string -> obj"
+                          "a two-argument callback at a selected name hoists to a delegate and stays obj"
+
+                      Expect.stringContains
+                          source
+                          "abstract onmixed: U2<string, (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit)> with get, set"
+                          "a callback arm of an erased union at a selected name"
+
+                      Expect.stringContains
+                          source
+                          "abstract onprogress: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit) option with get, set"
+                          "a selected on* handler"
+
+                      Expect.stringContains source "abstract onready: (unit -> unit) option with get, set" "a no-argument handler"
+
+                      Expect.stringContains
+                          source
+                          "?onprogress: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit)"
+                          "Create takes the handler as its property reads"
+
+                      Expect.stringContains
+                          source
+                          "static member onload: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit) option = jsNative"
+                          "a selected value export"
+
+                      Expect.stringContains source "type Handler = (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj)" "a named callback alias stays obj"
+
+                      Expect.stringContains
+                          source
+                          "abstract transform: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj) with get, set"
+                          "an unselected member stays obj" ])
+
+        // W9: a conditional deferred over a bounded type parameter (`InstanceType<Request>`, as
+        // @types/node's `http.RequestListener` writes it) reads its value at the bound under
+        // `TR068`. A concrete argument resolves before Resolve; an unbounded parameter, a bound
+        // that instantiates to `any`, a union bound and an alias's own body stay `obj` under
+        // `TR045`.
+        yield!
+            fixtureTests "early-resolve-lab" earlyResolveLab (handConfig earlyResolveLab) (fun package ->
+                let sites (rendered: RenderModel) key =
+                    rendered.Findings
+                    |> List.filter (fun finding -> finding.Key = key)
+                    |> List.map (fun finding -> finding.Symbol, finding.Tier)
+                    |> List.sort
+
+                let instanceTypeDeferred (rendered: RenderModel) =
+                    rendered.Findings
+                    |> List.filter (fun finding -> finding.Key = "TR045" && finding.Message.Contains "InstanceType")
+                    |> List.map _.Symbol
+                    |> List.sort
+
+                [ testCase "early-resolve-lab: InstanceType over a bounded parameter reads its bound's instance type (W9)" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig earlyResolveLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.equal
+                          (instanceTypeDeferred rendered)
+                          [ "Exports.either(value)" ]
+                          "only the InstanceType over a union bound stays obj"
+
+                      Expect.equal
+                          (sites rendered "TR068")
+                          [ "Exports.createServer(listener)(req)", Widened
+                            "Exports.flag(value)", Widened
+                            "Exports.instance(value)", Widened
+                            "RequestListener(req)", Widened
+                            "Server(requestListener)(req)", Widened
+                            "Server.on(listener)(req)", Widened ]
+                          "every InstanceType over a bounded parameter, an infer branch over one, and a boolean bound"
+
+                      Expect.stringContains
+                          source
+                          "static member flag (value: bool) : unit"
+                          "a bound whose value is boolean reads bool"
+
+                      Expect.stringContains
+                          source
+                          "static member same (value: obj) : unit"
+                          "a bound whose value is one of the conditional's own branches stays obj"
+
+                      Expect.stringContains
+                          source
+                          "static member instance (value: IncomingMessage) : unit"
+                          "an application whose taken branch is an infer variable reads the bound"
+
+                      Expect.stringContains
+                          source
+                          "type RequestListener<'Request, 'Response> = delegate of req: IncomingMessage * res: obj -> unit"
+                          "http.RequestListener's req reads the bound's instance type"
+
+                      Expect.stringContains
+                          source
+                          "abstract on: ``event``: string * listener: (IncomingMessage -> unit) -> Server<'Request, 'Response>"
+                          "a generic class's member reads the bound's instance type"
+
+                      Expect.stringContains
+                          source
+                          "(?requestListener: Action<IncomingMessage, obj>)"
+                          "an applied callback alias reads the bound's instance type"
+
+                      // An intersection with a conditional operand widens before its operands map.
+                      Expect.equal
+                          (sites rendered "TR018" |> List.map fst)
+                          [ "CreateServer.Listener.Res.req"; "RequestListener(res)"; "Server(requestListener)(res)" ]
+                          "an intersection over InstanceType stays obj"
+
+                      let deferred = sites rendered "TR045" |> List.map fst
+
+                      for symbol in
+                          [ "Divergent"
+                            "Exports.divergent(value)"
+                            "Exports.either(value)"
+                            "Exports.returns(value)"
+                            "Exports.same(value)"
+                            "Instance" ] do
+                          Expect.contains deferred symbol $"{symbol} stays deferred"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun finding -> finding.Symbol.StartsWith "ConcreteListener"))
+                          "a concrete argument resolves before Resolve reads it"
+
+                  testCase "early-resolve-lab: unset, every InstanceType over a parameter stays obj (W9 baseline)" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      Expect.isEmpty (sites rendered "TR068") "nothing reads its bound unless selected"
+
+                      Expect.contains
+                          (sites rendered "TR045" |> List.map fst)
+                          "Exports.instance(value)"
+                          "an application whose taken branch is an infer variable stays obj"
+
+                      Expect.contains
+                          (sites rendered "TR045" |> List.map fst)
+                          "Exports.flag(value)"
+                          "a boolean bound stays obj"
+
+                      Expect.equal
+                          (instanceTypeDeferred rendered)
+                          [ "Exports.createServer(listener)(req)"
+                            "Exports.either(value)"
+                            "RequestListener(req)"
+                            "Server(requestListener)(req)"
+                            "Server.on(listener)(req)" ]
+                          "InstanceType<Request> stays obj"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun finding -> finding.Symbol.StartsWith "ConcreteListener"))
+                          "a concrete argument resolves before Resolve reads it" ])
 
         // Tagged unions over type parameters: the union binds the alias's own parameters, or the
         // ones it reads from the signature it is written in, and every reference applies them.
@@ -4484,7 +4864,8 @@ let pipelineTests =
         // index now resolves to the union of the value types those keys select; the shapes where
         // the index reaches past those keys stay widened. Wave fifteen item 3 lifted the
         // erased-union cap, so a value union past `Fable.Core`'s shipped arity renders against
-        // a `U<n>` this file's own footer declares, rather than widening to `obj`.
+        // a `U<n>` this file's own footer declares, rather than widening to `obj`. W8 (#139)
+        // writes a key over a declared map as `typekeyof<Map,'E>`, so `Map[K]` is `'E`.
         yield!
             fixtureTests "indexed-access-lab" (handFixture "indexed-access-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "an access confined to the operand's own keys resolves to the value union" <| fun _ ->
@@ -4493,21 +4874,27 @@ let pipelineTests =
 
                       // `Concrete[Type]` under `Type extends keyof Concrete`, in the three
                       // positions the corpus writes it: a parameter, a callback's parameter, and
-                      // a return.
+                      // a return. The key is written over the declared map (W8, #139), so the
+                      // access is the value the key selects.
                       Expect.stringContains
                           source
-                          "static member addEventListener<'Type> (``type``: 'Type, handler: (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit)) : unit"
-                          "the map's value types, as an erased union"
+                          "static member addEventListener<'E> (``type``: typekeyof<WorkerEventMap, 'E>, handler: ('E -> unit)) : unit"
+                          "the value the key selects"
 
                       Expect.stringContains
                           source
-                          "static member lastEvent<'Type> (``type``: 'Type) : U3<FetchEvent, QueueEvent, ScheduledEvent>"
-                          "and the same union returned"
+                          "static member lastEvent<'E> (``type``: typekeyof<WorkerEventMap, 'E>) : 'E"
+                          "and the same value returned"
 
                       Expect.stringContains
                           source
-                          "abstract on<'Type>: ``type``: 'Type * handler: (U3<FetchEvent, QueueEvent, ScheduledEvent> -> unit) -> unit"
+                          "abstract on<'E>: ``type``: typekeyof<WorkerEventMap, 'E> * handler: ('E -> unit) -> unit"
                           "and on a member"
+
+                      Expect.stringContains
+                          source
+                          "static member runModel (name: keyof<ModelMap>, input: obj) : obj"
+                          "a key whose access is nested reads as keyof"
 
                       // `EventMap[keyof EventMap]` over a parameter bounded by an index
                       // signature: the bound's value type is what any key selects.
@@ -4519,7 +4906,7 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "handler: (U12<E01, E02, E03, E04, E05, E06, E07, E08, E09, E10, E11, E12> -> unit)"
+                          "static member anyWide (``event``: U12<E01, E02, E03, E04, E05, E06, E07, E08, E09, E10, E11, E12>) : unit"
                           "the twelve-member value union, against a footer-declared U12"
 
                       let keysFor symbol =
@@ -4528,7 +4915,7 @@ let pipelineTests =
                           |> List.map (fun f -> f.Key, f.Message)
 
                       Expect.equal
-                          (keysFor "onWide(handler)(event)")
+                          (keysFor "Exports.anyWide(event)")
                           []
                           "the access resolves, and the union it resolved to renders exactly rather than widening"
 
@@ -4933,6 +5320,681 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.isFalse (source.Contains "[<AutoOpen>]") "the default config emits no [<AutoOpen>]" ])
+
+        // W4 (#135): members keyed by well-known symbols. `[Symbol.iterator]` inherits `seq` at
+        // its element, other well-known keys read as named members under `[<Emit>]`, and a
+        // package's own unique symbol stays dropped.
+        let symbolMemberLab = handFixture "symbol-member-lab"
+        let symbolMemberConfig = handConfig symbolMemberLab
+
+        yield!
+            fixtureTests "symbol-member-lab" symbolMemberLab symbolMemberConfig (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate symbolMemberConfig package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                [ testCase "symbol-member-lab: [Symbol.dispose] is a named method under Emit" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.dispose]()\")>]" "the call reaches the symbol key"
+                      Expect.stringContains source "abstract SymbolDispose: unit -> unit" "under a Symbol-prefixed name"
+                      Expect.isFalse (source.Contains "type Disposable =\n    interface end") "Disposable is not empty"
+
+                  testCase "symbol-member-lab: [Symbol.toStringTag] is a getter under Emit" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.toStringTag]\")>]" "the getter reads the symbol key"
+                      Expect.stringContains source "abstract SymbolToStringTag: string" "read-only, under a Symbol-prefixed name"
+
+                  testCase "symbol-member-lab: [Symbol.iterator] inherits seq at its element" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.equal (inheritsOf source "Bag") [ "seq<string>" ] "a concrete element"
+                      Expect.equal (inheritsOf source "Box") [ "seq<'T>" ] "the declaration's own parameter"
+                      Expect.equal (inheritsOf source "LabelledBag") [ "Bag" ] "an inherited sequence is written once, on the base"
+                      Expect.equal (inheritsOf source "Values") [ "seq<U2<string, float>>" ] "a union element"
+                      Expect.equal (inheritsOf source "Narrowed") [ "seq<string>" ] "a lib base is flattened, so its element is narrowed"
+
+                  testCase "symbol-member-lab: a writable key and an optional-argument method are Emit members" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.toStringTag] = $1\")>]" "the setter writes the symbol key"
+                      Expect.stringContains source "abstract SymbolToStringTag: string with set" "a writable property"
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.toPrimitive]($1...)\")>]" "the call spreads its arguments"
+                      Expect.stringContains source "abstract SymbolToPrimitive: ?hint: string -> string" "an optional argument"
+
+                  testCase "symbol-member-lab: a package-augmented SymbolConstructor key stays dropped" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.isFalse (source.Contains "Symbol.observable") "Symbol.observable is undefined without a polyfill"
+
+                  testCase "symbol-member-lab: a required symbol member refuses Create" <| fun _ ->
+                      let rendered = generate ()
+
+                      let refused =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SP003" && f.Kind.Message.Contains "well-known symbol")
+                          |> List.map _.Symbol
+                          |> List.sort
+
+                      Expect.equal
+                          refused
+                          [ "Bag"; "Box"; "Convertible"; "Disposable"; "LabelledBag"; "Narrowed"; "Strings"; "Tagged"; "Values" ]
+                          "a ParamObject literal cannot write a symbol key"
+
+                      let source = sourceOf rendered
+
+                      for name in [ "Bag"; "LabelledBag"; "Strings"; "Tagged" ] do
+                          Expect.isFalse (source.Contains $") : {name} = jsNative") $"{name} has no Create"
+
+                  testCase "symbol-member-lab: a narrowed element keeps the base's seq and an Emit iterator" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.equal (inheritsOf source "Strings") [ "Values" ] "one seq instantiation per interface"
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.iterator]()\")>]" "the narrowed iterator is reachable"
+                      Expect.stringContains source "abstract SymbolIterator: unit -> StringCursor" "under a Symbol-prefixed name"
+
+                  testCase "symbol-member-lab: findings name each mapping and each drop" <| fun _ ->
+                      let rendered = generate ()
+
+                      let symbolsOf key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      Expect.equal
+                          (symbolsOf "MB002")
+                          [ "Impostor.__@iterator"; "Keyed.__@key"; "Observed.__@observable" ]
+                          "unique symbols and a package-augmented SymbolConstructor key stay dropped"
+
+                      Expect.equal
+                          (symbolsOf "MB008")
+                          [ "Bag.[Symbol.iterator]"
+                            "Box.[Symbol.iterator]"
+                            "Narrowed.[Symbol.iterator]"
+                            "Values.[Symbol.iterator]" ]
+                          "one seq per declaring interface"
+
+                      Expect.equal
+                          (symbolsOf "MB009")
+                          [ "Convertible.[Symbol.toPrimitive]"
+                            "Convertible.[Symbol.toStringTag]"
+                            "Disposable.[Symbol.dispose]"
+                            "Strings.[Symbol.iterator]"
+                            "Tagged.[Symbol.toStringTag]" ]
+                          "one Emit member per symbol"
+
+                      Expect.isEmpty
+                          (rendered.Findings
+                           |> List.map _.Symbol
+                           |> List.filter (fun symbol -> symbol.Contains ".[Symbol.iterator]("))
+                          "an iterator member settle-symbol-members removes leaves no finding behind"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "MB008" || f.Key = "MB009")
+                           |> List.forall (fun f -> f.Tier = Ergonomic))
+                          "both mappings are ergonomic" ])
+
+        // W5 (#136): an overload keyed by a string literal reads as a method of its own under
+        // `[<Emit>]`, and the generic overload stays.
+        let literalMethodLab = handFixture "literal-method-lab"
+        let literalMethodConfig = handConfig literalMethodLab
+
+        yield!
+            fixtureTests "literal-method-lab" literalMethodLab literalMethodConfig (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate literalMethodConfig package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                /// The Emit line and the member line beneath it, as one string.
+                let pairs (source: string) =
+                    let lines = source.Replace("\r\n", "\n").Split '\n' |> Array.map _.Trim()
+                    lines |> Array.pairwise |> Array.map (fun (a, b) -> a + "\n" + b)
+
+                let expectPair (source: string) (emit: string) (head: string) =
+                    Expect.isTrue
+                        (pairs source |> Array.exists (fun pair -> pair.StartsWith(emit + "\n" + head)))
+                        $"{emit} above {head}"
+
+                [ testCase "literal-method-lab: each literal overload is a method under Emit" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      expectPair source "[<Emit(\"$0.on('close', $1)\")>]" "abstract onClose: listener: (bool -> unit) -> Socket"
+                      expectPair source "[<Emit(\"$0.on('connect', $1)\")>]" "abstract onConnect: listener: (unit -> unit) -> Socket"
+                      expectPair source "[<Emit(\"$0.on('ready', $1)\")>]" "abstract onReady: listener: (unit -> unit) -> Socket"
+                      expectPair source "[<Emit(\"$0.once('close', $1)\")>]" "abstract onceClose: listener: (bool -> unit) -> Socket"
+                      expectPair source "[<Emit(\"$0.emit('close', $1)\")>]" "abstract emitClose: hadError: bool -> bool"
+                      expectPair source "[<Emit(\"$0.emit('connect')\")>]" "abstract emitConnect: unit -> bool"
+
+                  testCase "literal-method-lab: the generic overload stays" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "abstract on: ``event``: string * listener: (obj[] -> unit) -> Socket"
+                          "the string-keyed overload is kept under the TypeScript name"
+
+                  testCase "literal-method-lab: a collision with a member separates the parts with an underscore" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      expectPair source "[<Emit(\"$0.on('close', $1)\")>]" "abstract on_Close: listener: (unit -> unit) -> Dialog"
+                      expectPair source "[<Emit(\"$0.on('key-down', $1)\")>]" "abstract onKeyDown: listener: (string -> unit) -> Dialog"
+
+                  testCase "literal-method-lab: a literal mid-list and optional and rest tails" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      expectPair source "[<Emit(\"$0.read($1, 'text')\")>]" "abstract readText: key: string -> string"
+                      expectPair source "[<Emit(\"$0.read($1, 'bytes')\")>]" "abstract readBytes: key: string -> float[]"
+                      Expect.stringContains source "abstract read: key: string -> string" "the generic overload"
+                      expectPair source "[<Emit(\"$0.log('warn', $1...)\")>]" "abstract logWarn: ?message: string -> unit"
+                      expectPair source "[<Emit(\"$0.log('info', $1...)\")>]" "abstract logInfo: [<ParamArray>] parts: string[] -> unit"
+
+                  testCase "literal-method-lab: an intersection operand's literal overload is a method of its own" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      expectPair source "[<Emit(\"$0.setAttribute('draw', $1)\")>]" "abstract setAttributeDraw: value: string -> unit"
+
+                  testCase "literal-method-lab: the doc carries the TypeScript signature" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "/// <code lang=\"ts\">" "a TypeScript code block"
+                      Expect.stringContains source "/// on(event: \"close\", listener: (hadError: boolean) =&gt; void): this" "the signature on one line"
+                      Expect.stringContains source "/// on(event: \"connectionAttempt\", listener: (ip: string, port: number, family: number) =&gt; void): this" "a multi-line signature collapsed"
+
+                      let lines = source.Replace("\r\n", "\n").Split '\n' |> Array.map _.Trim()
+
+                      let described =
+                          lines
+                          |> Array.findIndex ((=) "/// Fires once the socket is fully closed.")
+
+                      Expect.equal lines[described + 1] "/// <code lang=\"ts\">" "the JSDoc of its own declaration precedes the signature"
+
+                      for keyed in [ "connect"; "ready"; "connectionAttempt" ] do
+                          let signature =
+                              lines
+                              |> Array.findIndex (fun line -> line.StartsWith $"/// on(event: \"{keyed}\"")
+
+                          Expect.equal
+                              lines[signature - 2]
+                              "/// <summary>"
+                              $"the on(\"{keyed}\") method carries no sibling overload's JSDoc"
+
+                      Expect.stringContains
+                          source
+                          "/// <summary>\n    /// <code lang=\"ts\">\n    /// emit(event: \"connect\"): boolean"
+                          "an undocumented member's method carries the signature alone"
+
+                  testCase "literal-method-lab: a single signature and a union of literals keep their mapping" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "abstract tag: name: string -> unit" "one signature widens"
+                      Expect.stringContains source "abstract pick: kind: " "a union stays one method"
+
+                  testCase "literal-method-lab: findings" <| fun _ ->
+                      let rendered = generate ()
+
+                      let symbolsOf key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      let keyed =
+                          [ "Emitter."; "Socket."; "Dialog."; "Store."; "Logger."; "Drawable." ]
+
+                      for key in [ "TR006"; "DO001" ] do
+                          Expect.isEmpty
+                              (symbolsOf key |> List.filter (fun s -> keyed |> List.exists s.StartsWith))
+                              $"no {key} on a literal-keyed method"
+
+                      Expect.contains (symbolsOf "TR006") "Solo.tag(name)" "a single signature widens"
+
+                      Expect.equal
+                          (symbolsOf "MB010")
+                          [ "Dialog.on"
+                            "Drawable.setAttribute"
+                            "Emitter.on"
+                            "Logger.log"
+                            "Socket.emit"
+                            "Socket.on"
+                            "Socket.once"
+                            "Store.read" ]
+                          "one finding per literal-keyed member"
+
+                      let mb010 = rendered.Findings |> List.filter (fun f -> f.Key = "MB010")
+                      Expect.isTrue (mb010 |> List.forall (fun f -> f.Tier = Ergonomic)) "every MB010 is ergonomic"
+
+                      Expect.isTrue
+                          (mb010 |> List.exists (fun f -> f.Symbol = "Dialog.on" && f.Kind.Message.Contains "on_Close"))
+                          "the collision is named in the message"
+
+                      let refused =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SP003" && f.Kind.Message.Contains "overloaded method")
+                          |> List.map _.Symbol
+                          |> List.sort
+
+                      Expect.equal
+                          refused
+                          [ "Choice"; "Dialog"; "Drawable"; "Emitter"; "Logger"; "Socket"; "Store" ]
+                          "a literal-keyed member refuses Create as an overload does" ])
+
+        // W6 (#137): a required member typed by one string or numeric literal reads its
+        // primitive, is a `[<Literal>]` in the declaration's same-named module, and is written by
+        // `Create` rather than passed to it.
+        let literalMemberLab = handFixture "literal-member-lab"
+        let literalMemberConfig = handConfig literalMemberLab
+
+        yield!
+            fixtureTests "literal-member-lab" literalMemberLab literalMemberConfig (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate literalMemberConfig package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                /// The attribute line and the signature line of a declaration's `Create`.
+                let createOf (source: string) (name: string) =
+                    let lines = source.Replace("\r\n", "\n").Split '\n'
+
+                    match
+                        lines
+                        |> Array.tryFindIndex (fun line ->
+                            line.TrimStart().StartsWith "static member Create"
+                            && (line.Contains $") : {name} = jsNative" || line.Contains $") : {name}<"))
+                    with
+                    | Some at -> lines[at - 1].Trim(), lines[at].Trim()
+                    | None -> failtest $"no Create for {name} in the rendered source"
+
+                [ testCase "literal-member-lab: literal members are [<Literal>] values in a same-named module" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "module PhaseEvent =" "a type with methods gets a module"
+                      Expect.stringContains source "    [<Literal>]\n    let AT_TARGET = 2.0" "a numeric literal is a float"
+                      Expect.stringContains source "    let NONE = 0.0" "every constant is declared"
+                      Expect.stringContains source "module MethodSignal =" "a discriminant gets a module"
+                      Expect.stringContains source "    let kind = \"method\"" "a string literal is a string"
+                      Expect.stringContains source "module WritableSignal =" "a writable discriminant gets a module"
+                      Expect.stringContains source "    let kind = \"writable\"" "a writable literal is declared"
+                      Expect.stringContains source "module Tagged =" "a generic declaration gets a module"
+                      Expect.stringContains source "    let NEGATIVE = -1.0" "a negative literal"
+                      Expect.stringContains source "    let HALF = 0.5" "a fractional literal"
+                      Expect.stringContains source "    let marker = \"it's \\\"q\\\" \\\\ $0 {{x}}\"" "an F# string literal"
+                      Expect.stringContains source "abstract AT_TARGET: float" "the instance keeps the member"
+                      Expect.isFalse (source.Contains "module PointerPhaseEvent =") "inherited constants stay on the base"
+                      Expect.isFalse (source.Contains "module NotLiterals =") "no literal member, no module"
+
+                  testCase "literal-member-lab: a literal member's doc gives its TypeScript type" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "    /// <remarks>TypeScript type: <c>2</c></remarks>\n    abstract AT_TARGET: float"
+                          "the numeric literal"
+
+                      Expect.stringContains source "<remarks>TypeScript type: <c>\"method\"</c></remarks>" "the string literal"
+
+                  testCase "literal-member-lab: Create writes literal members, inherited ones included" <| fun _ ->
+                      let source = generate () |> sourceOf
+                      let constants = "({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })"
+
+                      for name in [ "PhaseEvent"; "PointerPhaseEvent" ] do
+                          let attribute, create = createOf source name
+                          Expect.equal attribute $"[<ParamObject; Emit(\"{constants}\")>]" $"{name} writes the constants"
+
+                          for constant in [ "NONE"; "CAPTURING_PHASE"; "AT_TARGET"; "BUBBLING_PHASE" ] do
+                              Expect.isFalse (create.Contains $"{constant}:") $"{name}.Create takes no {constant}"
+
+                      Expect.equal
+                          (fst (createOf source "MethodSignal"))
+                          "[<ParamObject; Emit(\"({ kind: 'method', ...$0 })\")>]"
+                          "a discriminant"
+
+                      Expect.equal
+                          (createOf source "WritableSignal")
+                          ("[<ParamObject; Emit(\"({ kind: 'writable', ...$0 })\")>]",
+                           "static member Create (name: string) : WritableSignal = jsNative")
+                          "a writable discriminant is written, not passed"
+
+                      Expect.equal
+                          (createOf source "Phases")
+                          ("[<Emit(\"({ NONE: 0, DONE: 1 })\")>]", "static member Create () : Phases = jsNative")
+                          "a constants-only Create takes no parameters"
+
+                      Expect.equal
+                          (createOf source "Tagged")
+                          ("[<ParamObject; Emit(\"({ kind: 'tagged', ...$0 })\")>]",
+                           "static member Create (value: 'T) : Tagged<'T> = jsNative")
+                          "a generic Create"
+
+                  testCase "literal-member-lab: a string literal is an escaped JavaScript string in the Emit" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.equal
+                          (fst (createOf source "Quoted"))
+                          "[<ParamObject; Emit(\"({ marker: 'it\\\\'s \\\"q\\\" \\\\\\\\ \\\\x240 \\\\x7B\\\\x7Bx\\\\x7D\\\\x7D', NEGATIVE: -1, HALF: 0.5, ...$0 })\")>]"
+                          "quotes, backslashes, $ and braces are escaped"
+
+                  testCase "literal-member-lab: findings name each literal member and each negative" <| fun _ ->
+                      let rendered = generate ()
+
+                      let symbolsOf key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      Expect.equal
+                          (symbolsOf "MB011")
+                          ([ "MethodSignal.kind"
+                             "Phases.DONE"
+                             "Phases.NONE"
+                             "PhaseEvent.AT_TARGET"
+                             "PhaseEvent.BUBBLING_PHASE"
+                             "PhaseEvent.CAPTURING_PHASE"
+                             "PhaseEvent.NONE"
+                             "PointerPhaseEvent.AT_TARGET"
+                             "PointerPhaseEvent.BUBBLING_PHASE"
+                             "PointerPhaseEvent.CAPTURING_PHASE"
+                             "PointerPhaseEvent.NONE"
+                             "Quoted.HALF"
+                             "Quoted.NEGATIVE"
+                             "Quoted.marker"
+                             "Tagged.kind"
+                             "WritableSignal.kind" ]
+                           |> List.sort)
+                          "every required single-literal member, readonly or writable"
+
+                      Expect.equal (symbolsOf "TR007") [ "NotLiterals.optional" ] "an optional readonly literal member widens"
+                      Expect.equal (symbolsOf "TR006") [ "NotLiterals.mode" ] "an optional writable literal member widens"
+                      Expect.contains (symbolsOf "TR004") "NotLiterals.level" "an enum member is not a literal member"
+
+                      Expect.equal
+                          (symbolsOf "SP005")
+                          [ "MethodSignal"; "PhaseEvent"; "Phases"; "PointerPhaseEvent"; "Quoted"; "Tagged"; "WritableSignal" ]
+                          "every Create that writes a literal"
+
+                      Expect.isTrue
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "MB011") |> List.forall (fun f -> f.Tier = Ergonomic))
+                          "MB011 is ergonomic"
+
+                      Expect.isTrue
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "SP005") |> List.forall (fun f -> f.Tier = Exact))
+                          "SP005 is exact"
+
+                  testCase "literal-member-lab: a member that is not a literal member stays a Create parameter" <| fun _ ->
+                      let source = generate () |> sourceOf
+                      let attribute, create = createOf source "NotLiterals"
+
+                      Expect.equal attribute "[<ParamObject; Emit(\"$0\")>]" "no literal is written"
+
+                      for parameter in [ "?mode"; "flag: bool"; "?optional" ] do
+                          Expect.stringContains create parameter $"{parameter} stays a parameter" ])
+
+        // W7 (#138): type parameters in scope. A hoisted delegate takes its owner's parameters,
+        // namespace functions are methods, and a return-only method parameter keeps its
+        // constraint where the written constraint inherits the use site's bound.
+        let typeScopeLab = handFixture "type-scope-lab"
+        let typeScopeConfig = handConfig typeScopeLab
+
+        yield!
+            fixtureTests "type-scope-lab" typeScopeLab typeScopeConfig (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate typeScopeConfig package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                let sitesOf (rendered: RenderModel) key =
+                    rendered.Findings
+                    |> List.filter (fun f -> f.Key = key)
+                    |> List.map _.Symbol
+                    |> List.distinct
+                    |> List.sort
+
+                [ testCase "type-scope-lab: a hoisted delegate takes its owner's type parameters (W7.1, W7.2)" <| fun _ ->
+                      let rendered = generate ()
+                      let source = sourceOf rendered
+
+                      Expect.stringContains source "type Visit<'T when 'T :> Shape> =" "an interface constraint is repeated"
+                      Expect.stringContains
+                          source
+                          "delegate of cell: float * index: float * grid: Grid<'T> -> unit"
+                          "the owner's declared form reads the delegate's parameter"
+                      Expect.stringContains source "abstract each: visit: Grid.Each.Visit<'T> -> unit" "the owner applies it"
+                      Expect.stringContains source "type Visit<'B> =" "an erased-union constraint stays off the delegate"
+                      Expect.stringContains source "store: Store<'B> -> bool" "the union-constrained parameter is in scope"
+                      Expect.stringContains source "abstract each: visit: Store.Each.Visit<'B> -> unit" "the owner applies it"
+
+                      Expect.equal
+                          (sitesOf rendered "TP002" |> List.filter (fun s -> s.StartsWith "Store"))
+                          [ "Store"; "Store.Each.Visit" ]
+                          "the owner and the delegate drop the union constraint alike"
+
+                  testCase "type-scope-lab: namespace functions are methods (W7.3)" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "abstract identity<'T>: value: 'T -> 'T" "a generic namespace function"
+                      Expect.stringContains
+                          source
+                          "abstract measure<'T when 'T :> Shape>: shape: 'T -> 'T"
+                          "a constrained namespace function"
+                      Expect.stringContains
+                          source
+                          "abstract relabel<'T when 'T :> Shape>: shape: 'T * label: string -> 'T"
+                          "a re-exported namespace function"
+                      Expect.stringContains source "abstract version: string" "a constant stays a property"
+
+                      let lines = source.Split '\n'
+
+                      let formatLine =
+                          lines |> Array.tryFind (fun line -> line.TrimStart().StartsWith "abstract format")
+
+                      Expect.isSome formatLine "a function-typed constant stays a property"
+                      Expect.isFalse (formatLine.Value.Contains "<'T>") "the constant's member carries no type parameter"
+
+                      for name in [ "identity"; "measure"; "relabel" ] do
+                          Expect.isFalse
+                              (lines
+                               |> Array.exists (fun line ->
+                                   line.TrimStart().StartsWith $"abstract {name}" && line.TrimEnd().EndsWith "with get, set"))
+                              $"{name} is not a settable property"
+
+                      Expect.stringContains
+                          source
+                          "static member find<'T when 'T :> Shape>"
+                          "a class's merged namespace function is a static method"
+
+                      let taggedLine =
+                          lines |> Array.tryFind (fun line -> line.TrimStart().StartsWith "abstract tagged:")
+
+                      Expect.isSome taggedLine "a function merged with a namespace is a member"
+                      Expect.stringContains taggedLine.Value "with get, set" "a function merged with a namespace stays a property"
+                      Expect.stringContains
+                          source
+                          "abstract strip: value: string -> string"
+                          "a function inside the merged namespace is a method"
+
+                  testCase "type-scope-lab: a return-only method parameter keeps its constraint (W7.4)" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "abstract queryAll<'E when 'E :> TaggedEntry>: selectors: string -> EntryList<'E>"
+                          "the written constraint inherits the bound"
+                      Expect.stringContains
+                          source
+                          "abstract queryLike: selectors: string -> EntryList<Entry>"
+                          "a structural-only bound widens to the constraint"
+
+                  testCase "type-scope-lab: NoInfer reads the owner's parameter" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "initialValue: JS.NoInfer<'T> option" "the hoisted options bind 'T"
+
+                  testCase "type-scope-lab: out-of-scope findings remain only at the negatives" <| fun _ ->
+                      let rendered = generate ()
+
+                      Expect.equal (sitesOf rendered "TR012") [] "every hoisted parameter is in scope"
+                      Expect.equal
+                          (sitesOf rendered "TR013")
+                          [ "NoInfer"; "Ns.format(value)" ]
+                          "the alias declaration and the function-typed constant"
+                      Expect.equal (sitesOf rendered "TR027") [ "Container.queryLike()" ] "the structural bound"
+                      Expect.equal (sitesOf rendered "TP006") [ "Container.queryLike" ] "the structural bound" ])
+
+        // W8 (#139): a key over a declared map reads as `typekeyof<Map,'E>` with `'E` at the
+        // access, so tag-map overloads stay distinct; `T[keyof T]` reads as `proptypelock<'T>`.
+        yield!
+            fixtureTests "tag-map-lab" (handFixture "tag-map-lab") GeneratorConfig.Default (fun package ->
+                let generate () = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                let symbolsOf (rendered: RenderModel) key =
+                    rendered.Findings
+                    |> List.filter (fun f -> f.Key = key)
+                    |> List.map _.Symbol
+                    |> List.distinct
+                    |> List.sort
+
+                [ testCase "tag-map-lab: a tag-map method takes a typekeyof key and returns its value" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "abstract createElement<'E>: tagName: typekeyof<TagMap, 'E> * ?options: CreateOptions -> 'E"
+                          "W8.1: the primary map"
+
+                      Expect.stringContains
+                          source
+                          "abstract createElement<'E>: tagName: typekeyof<DeprecatedTagMap, 'E> * ?options: CreateOptions -> 'E"
+                          "W8.2: the deprecated map is a second overload"
+
+                      Expect.stringContains
+                          source
+                          "abstract createElement: tagName: string * ?options: CreateOptions -> Elem"
+                          "the string overload survives beside both"
+
+                      Expect.stringContains
+                          source
+                          "abstract createSvg<'E>: tagName: typekeyof<SvgTagMap, 'E> -> 'E"
+                          "a single key overload"
+
+                  testCase "tag-map-lab: a constrained result carries the constraint on its own parameter" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains
+                          source
+                          "abstract getElementsByTagName<'E when 'E :> Elem>: qualifiedName: typekeyof<TagMap, 'E> -> ElemList<'E>"
+                          "W8.4: every TagMap value inherits Elem"
+
+                      Expect.stringContains
+                          source
+                          "abstract getElementsByTagName<'E when 'E :> Elem>: qualifiedName: typekeyof<SvgTagMap, 'E> -> ElemList<'E>"
+                          "and every SvgTagMap value"
+
+                      Expect.stringContains
+                          source
+                          "abstract findLoose<'E>: tag: typekeyof<LooseTagMap, 'E> -> ElemList<Elem>"
+                          "a map whose values do not inherit the bound keeps 'E unconstrained, and the argument widens"
+
+                      Expect.stringContains
+                          source
+                          "abstract libElements<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>"
+                          "a catalogued map's values carry the bound too"
+
+                  testCase "tag-map-lab: a key used only as a key reads as keyof" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "abstract hasTag: tag: keyof<TagMap> -> bool" "no result variable"
+
+                  testCase "tag-map-lab: T[keyof T] reads as proptypelock" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "type ValueOf<'ObjectType> = proptypelock<'ObjectType>" "W8.5: a defaulted key"
+                      Expect.stringContains source "type ValuesOf<'T> = proptypelock<'T>" "a written keyof"
+
+                      Expect.stringContains
+                          source
+                          "static member valuesOf<'T> (source: 'T) : proptypelock<'T>[] = jsNative"
+                          "a signature's own parameter"
+
+                      Expect.stringContains source "type Picked = obj" "a key with no default stays widened"
+
+                  testCase "tag-map-lab: a key-independent mapped type reads as PropertyRecord" <| fun _ ->
+                      let rendered = generate ()
+                      let source = sourceOf rendered
+
+                      Expect.stringContains
+                          source
+                          "type Stringified<'T> = PropertyRecord<'T, string>"
+                          "{ [P in keyof T]: V } is an indexer keyed by keyof<'T>"
+
+                      Expect.stringContains
+                          source
+                          "type Mirrored<'T> = private Mirrored__ of obj"
+                          "a value that reads the key stays a phantom"
+
+                      Expect.equal (symbolsOf rendered "TR067") [ "Stringified" ] "one finding per PropertyRecord"
+                      Expect.contains (symbolsOf rendered "SA002") "Mirrored" "the negative keeps its phantom finding"
+                      Expect.isFalse (List.contains "Stringified" (symbolsOf rendered "SA002")) "no phantom"
+
+                  testCase "tag-map-lab: an overload carries only its own declaration's tags" <| fun _ ->
+                      let lines = (generate () |> sourceOf).Replace("\r\n", "\n").Split '\n'
+
+                      let deprecatedBefore (signature: string) =
+                          let index = lines |> Array.findIndex (fun line -> line.Contains signature)
+                          lines[index - 1].Trim() = "/// <remarks>@deprecated</remarks>"
+
+                      Expect.isFalse
+                          (deprecatedBefore "abstract createElement<'E>: tagName: typekeyof<TagMap, 'E>")
+                          "the primary overload is not deprecated"
+
+                      Expect.isTrue
+                          (deprecatedBefore "abstract createElement<'E>: tagName: typekeyof<DeprecatedTagMap, 'E>")
+                          "the deprecated overload keeps its tag"
+
+                      Expect.isFalse
+                          (deprecatedBefore "abstract createElement: tagName: string")
+                          "the string overload is not deprecated"
+
+                  testCase "tag-map-lab: findings name each key mapping" <| fun _ ->
+                      let rendered = generate ()
+                      let symbolsOf = symbolsOf rendered
+
+                      Expect.isEmpty (symbolsOf "DO005") "no key-set overload is dropped"
+                      Expect.isEmpty (symbolsOf "DO001") "no overload collides"
+                      Expect.isEmpty (symbolsOf "TR044") "no value union fails the constraint"
+
+                      Expect.isEmpty
+                          (symbolsOf "TP002" |> List.filter (fun symbol -> symbol.StartsWith "Doc."))
+                          "no key bound is dropped"
+
+                      Expect.isTrue
+                          (symbolsOf "TR027" |> List.forall (fun symbol -> symbol.StartsWith "Doc.findLoose"))
+                          "only the loose map widens its argument"
+
+                      Expect.isNonEmpty (symbolsOf "TR027") "the loose map's argument widens"
+
+                      Expect.equal
+                          (symbolsOf "TP011")
+                          [ "Doc.createElement"
+                            "Doc.createSvg"
+                            "Doc.findLoose"
+                            "Doc.getElementsByTagName"
+                            "Doc.hasTag"
+                            "Doc.libElements" ]
+                          "one finding per key over a declared map"
+
+                      Expect.equal
+                          (symbolsOf "TR066")
+                          [ "Exports.valuesOf()"; "ValueOf"; "ValuesOf" ]
+                          "one finding per value-of access"
+
+                      Expect.equal (symbolsOf "TR020") [ "Picked" ] "the narrower key set stays widened"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "TP011" || f.Key = "TR066")
+                           |> List.forall (fun f -> f.Tier = Ergonomic))
+                          "both mappings are ergonomic" ])
     ]
 
 [<Tests>]

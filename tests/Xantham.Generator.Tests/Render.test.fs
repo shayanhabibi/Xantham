@@ -123,7 +123,7 @@ let renderTests =
                   ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "EsName"
-                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName" } ] ] }
+                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName"; Literal = None } ] ] }
 
             let dom: Render.GroupModule =
                 { Group = "typescript/lib" * uom<npmDependency>
@@ -135,7 +135,7 @@ let renderTests =
                   ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "DomName"
-                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName" } ] ] }
+                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName"; Literal = None } ] ] }
 
             let files = renderGroups ctx [ es; dom ] baseModel
             Expect.equal (files |> Map.keys |> Seq.toList) [ "groups/Fable.Core.TS.fs" ] "one combined source file"
@@ -202,7 +202,7 @@ let renderTests =
                       Statics = [] }
 
             let property name reference =
-                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference }
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None }
 
             let model =
                 { baseModel with
@@ -338,13 +338,16 @@ let renderTests =
                                         Docs = ""
                                         Tags = []
                                         ReadOnly = false
-                                        Type = FsTypeVar "T" } ]
+                                        Type = FsTypeVar "T"
+                                        Literal = None } ]
                                 Entrypoint = None
                                 CreateOverloads =
-                                  [ [ { Name = "held"
-                                        Type = FsTypeVar "T"
-                                        Optional = false
-                                        Rest = false } ] ]
+                                  [ { Parameters =
+                                        [ { Name = "held"
+                                            Type = FsTypeVar "T"
+                                            Optional = false
+                                            Rest = false } ]
+                                      Literals = [] } ]
                                 Statics = [] }
                           FsAbbrev
                               { Value = None; Name = "Mapper"
@@ -457,13 +460,15 @@ let renderTests =
                                           Docs = ""
                                           Tags = []
                                           ReadOnly = true
-                                          Type = FsBool }
+                                          Type = FsBool
+                                          Literal = None }
                                     FsProperty
                                         { Name = "count"
                                           Docs = ""
                                           Tags = []
                                           ReadOnly = false
-                                          Type = FsOption FsFloat }
+                                          Type = FsOption FsFloat
+                                          Literal = None }
                                     FsMethod
                                         { Name = "reset"
                                           Docs = ""
@@ -477,14 +482,16 @@ let renderTests =
                                           Return = FsNamed "Options" } ]
                                 Entrypoint = None
                                 CreateOverloads =
-                                  [ [ { Name = "onlyFirst"
-                                        Optional = false
-                                        Rest = false
-                                        Type = FsBool }
-                                      { Name = "count"
-                                        Optional = true
-                                        Rest = false
-                                        Type = FsOption FsFloat } ] ]
+                                  [ { Parameters =
+                                        [ { Name = "onlyFirst"
+                                            Optional = false
+                                            Rest = false
+                                            Type = FsBool }
+                                          { Name = "count"
+                                            Optional = true
+                                            Rest = false
+                                            Type = FsOption FsFloat } ]
+                                      Literals = [] } ]
                                 Statics = [] }
                           FsStringEnum
                               { Name = "TimeUnit"
@@ -914,4 +921,301 @@ let renderTests =
                               [ exportValue "choice" (ImportFrom("choice", "test-pkg/strict" * uom<importSpecifier>)) false (FsErasedUnion arms) ] ] }
             let source = renderAll model |> Map.find "TestPkg.fs"
             Expect.stringContains source "type U10<" "nested members participate in footer analysis"
+    ]
+
+/// W4 (#135): a well-known symbol member renders under its F# name, reached through `[<Emit>]`.
+[<Tests>]
+let symbolKeyedRenderTests =
+    let interface' inherits members =
+        FsInterface
+            { Name = "Holder"
+              Docs = ""
+              Tags = []
+              Order = None
+              TypeParameters = []
+              Inherits = inherits
+              Members = members
+              Entrypoint = None
+              CreateOverloads = []
+              Statics = [] }
+
+    let render decl =
+        renderAll { baseModel with Decls = [ decl ] } |> Map.find "TestPkg.fs"
+
+    let method' symbol name parameters returns =
+        FsSymbolKeyed(
+            symbol,
+            FsMethod
+                { Name = name
+                  Docs = ""
+                  Tags = []
+                  TypeParameters = []
+                  Parameters = parameters
+                  Return = returns }
+        )
+
+    let property symbol name readOnly reference =
+        FsSymbolKeyed(symbol, FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = readOnly; Type = reference; Literal = None })
+
+    testList "render symbol-keyed members" [
+        testCase "an inherited seq renders as an inherit line" <| fun _ ->
+            let source = render (interface' [ FsApp("seq", [ FsString ]) ] [])
+            Expect.stringContains source "    inherit seq<string>\n" "seq is spelled as F# names it"
+
+        testCase "a method calls the symbol key" <| fun _ ->
+            let source = render (interface' [] [ method' "dispose" "SymbolDispose" [] FsUnit ])
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.dispose]()\")>]\n    abstract SymbolDispose: unit -> unit" "a nullary call"
+
+        testCase "a method with parameters spreads them into the call" <| fun _ ->
+            let hint = { Name = "hint"; Optional = false; Rest = false; Type = FsString }
+            let source = render (interface' [] [ method' "toPrimitive" "SymbolToPrimitive" [ hint ] FsObj ])
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.toPrimitive]($1...)\")>]\n    abstract SymbolToPrimitive: hint: string -> obj" "the arguments follow the key"
+
+        testCase "a read-only property reads the symbol key" <| fun _ ->
+            let source = render (interface' [] [ property "toStringTag" "SymbolToStringTag" true FsString ])
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.toStringTag]\")>]\n    abstract SymbolToStringTag: string\n" "one member-site attribute"
+
+        testCase "a writable property emits per accessor" <| fun _ ->
+            let source = render (interface' [] [ property "species" "SymbolSpecies" false FsString ])
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.species]\")>]\n    abstract SymbolSpecies: string with get\n" "the getter reads"
+            Expect.stringContains source "    [<Emit(\"$0[Symbol.species] = $1\")>]\n    abstract SymbolSpecies: string with set\n" "the setter assigns"
+    ]
+
+/// W5 (#136): a literal-keyed overload renders as a method of its own, reached through
+/// `[<Emit>]` as a call to its JavaScript key with the literal written in.
+[<Tests>]
+let literalKeyedRenderTests =
+    let param name =
+        { Name = name; Optional = false; Rest = false; Type = FsString }
+
+    let keyed target literals name docs parameters returns =
+        FsLiteralKeyed(
+            target,
+            literals,
+            FsMethod
+                { Name = name
+                  Docs = docs
+                  Tags = []
+                  TypeParameters = []
+                  Parameters = parameters
+                  Return = returns }
+        )
+
+    let decl entrypoint members =
+        FsInterface
+            { Name = "Socket"
+              Docs = ""
+              Tags = []
+              Order = None
+              TypeParameters = []
+              Inherits = []
+              Members = members
+              Entrypoint = entrypoint
+              CreateOverloads = []
+              Statics = [] }
+
+    let render decl =
+        renderAll { baseModel with Decls = [ decl ] } |> Map.find "TestPkg.fs"
+
+    testList "render literal-keyed methods" [
+        testCase "the literal is written before the argument at its index" <| fun _ ->
+            Expect.equal (Render.literalCallTemplate "on" [ 0, "close" ] [ param "listener" ]) "$0.on('close', $1)" "a leading literal"
+            Expect.equal (Render.literalCallTemplate "emit" [ 0, "connect" ] []) "$0.emit('connect')" "no arguments"
+            Expect.equal (Render.literalCallTemplate "read" [ 1, "text" ] [ param "key" ]) "$0.read($1, 'text')" "a trailing literal"
+
+            Expect.equal
+                (Render.literalCallTemplate "pick" [ 0, "a"; 1, "b" ] [ param "x" ])
+                "$0.pick('a', $1, 'b')"
+                "two literals around an argument"
+
+        testCase "an optional or rest tail after the literal spreads" <| fun _ ->
+            let optional = { param "message" with Optional = true; Type = FsOption FsString }
+            let rest = { param "parts" with Rest = true; Type = FsArray FsString }
+            Expect.equal (Render.literalCallTemplate "log" [ 0, "warn" ] [ optional ]) "$0.log('warn', $1...)" "an optional tail"
+            Expect.equal (Render.literalCallTemplate "log" [ 0, "info" ] [ param "a"; rest ]) "$0.log('info', $1, $2...)" "a rest tail"
+
+        testCase "the literal and the key are quoted for JavaScript" <| fun _ ->
+            Expect.equal (Render.literalCallTemplate "on" [ 0, "it's" ] [ param "l" ]) "$0.on('it\\'s', $1)" "a quote is escaped"
+            Expect.equal (Render.literalCallTemplate "my-on" [ 0, "x" ] [ param "l" ]) "$0['my-on']('x', $1)" "a key that is no identifier is indexed"
+
+        testCase "the Emit line sits above the abstract member" <| fun _ ->
+            let source = render (decl None [ keyed "on" [ 0, "close" ] "onClose" "" [ param "listener" ] FsUnit ])
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"$0.on('close', $1)\")>]\n    abstract onClose: listener: string -> unit\n"
+                "the method is reached through its key"
+
+            let quoted = render (decl None [ keyed "on" [ 0, "it's" ] "onIts" "" [ param "listener" ] FsUnit ])
+            Expect.stringContains quoted "[<Emit(\"$0.on('it\\\\'s', $1)\")>]" "the F# string escapes the JavaScript escape"
+
+        testCase "the TypeScript signature renders as a code block" <| fun _ ->
+            let docs = "```ts\non(event: \"close\"): this\n```"
+            let source = render (decl None [ keyed "on" [ 0, "close" ] "onClose" docs [] FsUnit ])
+            Expect.stringContains source "    /// <code lang=\"ts\">\n    /// on(event: \"close\"): this\n    /// </code>" "a ts code block"
+
+        testCase "an entrypoint class carries the method as a concrete Emit member" <| fun _ ->
+            let entrypoint =
+                { Binding = ImportNamed "Socket"
+                  Parameters = []
+                  Inherits = None }
+
+            let source = render (decl (Some entrypoint) [ keyed "on" [ 0, "close" ] "onClose" "" [ param "listener" ] FsUnit ])
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"$0.on('close', $1)\")>]\n    member _.onClose(listener: string) : unit = jsNative"
+                "no abstract slot for a derived class to fill"
+    ]
+
+/// W6 (#137): a literal member is a `[<Literal>]` in a module of its declaration's name, carries
+/// its TypeScript type in an XML doc, and is written by `Create`.
+[<Tests>]
+let literalMemberRenderTests =
+    let interface' name members creates =
+        FsInterface
+            { Name = name
+              Docs = ""
+              Tags = []
+              Order = None
+              TypeParameters = []
+              Inherits = []
+              Members = members
+              Entrypoint = None
+              CreateOverloads = creates
+              Statics = [] }
+
+    let literal name value =
+        FsProperty
+            { Name = name
+              Docs = ""
+              Tags = []
+              ReadOnly = true
+              Type =
+                match value with
+                | LitString _ -> FsString
+                | _ -> FsFloat
+              Literal = Some value }
+
+    let property name reference =
+        FsProperty
+            { Name = name
+              Docs = ""
+              Tags = []
+              ReadOnly = true
+              Type = reference
+              Literal = None }
+
+    let parameter name reference =
+        { Name = name
+          Optional = false
+          Rest = false
+          Type = reference }
+
+    let render decls =
+        renderAll { baseModel with Decls = decls } |> Map.find "TestPkg.fs"
+
+    testList "render literal members" [
+        testCase "a literal member is a [<Literal>], documented, and written by Create" <| fun _ ->
+            let source =
+                render
+                    [ interface'
+                          "Event"
+                          [ property "eventPhase" FsFloat; literal "AT_TARGET" (LitNumber 2.0) ]
+                          [ { Parameters = [ parameter "eventPhase" FsFloat ]
+                              Literals = [ "AT_TARGET", LitNumber 2.0 ] } ] ]
+
+            Expect.stringContains
+                source
+                "    /// <remarks>TypeScript type: <c>2</c></remarks>\n    abstract AT_TARGET: float\n"
+                "the instance member keeps its primitive"
+
+            Expect.stringContains
+                source
+                "    [<ParamObject; Emit(\"({ AT_TARGET: 2, ...$0 })\")>]\n    static member Create (eventPhase: float) : Event = jsNative"
+                "Create spreads its parameters after the literals"
+
+            Expect.stringContains
+                source
+                "module Event =\n    /// <remarks>TypeScript type: <c>2</c></remarks>\n    [<Literal>]\n    let AT_TARGET = 2.0"
+                "the module declares the value"
+
+        testCase "a Create of literals alone takes no ParamObject" <| fun _ ->
+            let source =
+                render
+                    [ interface'
+                          "Phases"
+                          [ literal "NONE" (LitNumber 0.0) ]
+                          [ { Parameters = []; Literals = [ "NONE", LitNumber 0.0 ] } ] ]
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"({ NONE: 0 })\")>]\n    static member Create () : Phases = jsNative"
+                "the Emit is the whole object"
+
+        testCase "a nested declaration shares the constants module" <| fun _ ->
+            let source =
+                render
+                    [ interface' "Event" [ literal "AT_TARGET" (LitNumber 2.0) ] []
+                      interface' "Event.Options" [ property "capture" FsBool ] [] ]
+
+            let modules =
+                System.Text.RegularExpressions.Regex.Matches(source, "module Event =").Count
+
+            Expect.equal modules 1 "one module"
+            let at = source.IndexOf "module Event ="
+            Expect.isGreaterThan (source.IndexOf("let AT_TARGET = 2.0", at)) at "the constant is in it"
+            Expect.isGreaterThan (source.IndexOf("type Options =", at)) at "and so is the nested declaration"
+
+        testCase "a literal named Create, a static's name or a nested module's name is left out" <| fun _ ->
+            let gauge =
+                match interface' "Gauge" [ literal "UNIT" (LitString "mm"); literal "Create" (LitNumber 1.0) ] [] with
+                | FsInterface d ->
+                    FsInterface
+                        { d with
+                            Statics =
+                                [ exportValue "UNIT" (ImportFrom("Gauge.UNIT", "test-pkg" * uom<importSpecifier>)) false FsString ] }
+                | other -> other
+
+            let source =
+                render
+                    [ gauge
+                      interface' "Event" [ literal "kind" (LitString "e"); literal "AT_TARGET" (LitNumber 2.0) ] []
+                      interface' "Event.kind.Detail" [ property "x" FsFloat ] [] ]
+
+            Expect.isFalse (source.Contains "module Gauge =") "neither of Gauge's literals reaches a module"
+            Expect.isFalse (source.Contains "let kind") "kind would collide with module kind"
+            Expect.stringContains source "    let AT_TARGET = 2.0" "the other literal stays"
+
+        testCase "a renamed parameter keeps the literals in the object" <| fun _ ->
+            // The rename reports `EmitGroups.ParameterNameEscaped`, so this reads the files
+            // without `renderAll`'s no-findings check.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ interface'
+                              "Signal"
+                              [ literal "kind" (LitString "method"); property "None" FsString ]
+                              [ { Parameters = [ parameter "None" FsString ]
+                                  Literals = [ "kind", LitString "method" ] } ] ] }
+
+            let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
+            let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
+
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"({kind: 'method', \\\"None\\\": $0})\")>]"
+                "the literal precedes the renamed field"
+
+        testCase "a JavaScript string escapes quotes, line breaks and Emit holes" <| fun _ ->
+            Expect.equal
+                (Render.jsString "it's \"q\" \\ $0 {{x}}\n\u2028\u0001")
+                "'it\\'s \"q\" \\\\ \\x240 \\x7B\\x7Bx\\x7D\\x7D\\n\\u2028\\x01'"
+                "single-quoted"
+
+            Expect.equal (Render.jsKey "data-x") "'data-x'" "a key that is not an identifier is quoted"
+            Expect.equal (Render.jsKey "AT_TARGET") "AT_TARGET" "an identifier is bare"
+            Expect.equal (Render.fsLiteralValue (LitNumber -1.0)) "-1.0" "a float literal"
+            Expect.equal (Render.fsLiteralValue (LitNumber 0.5)) "0.5" "a fraction"
     ]

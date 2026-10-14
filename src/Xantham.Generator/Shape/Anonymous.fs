@@ -437,10 +437,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         let methods =
             model.Types
             |> Map.toList
-            |> List.collect (fun (_, facts) ->
-                facts.Members
-                |> List.filter (fun m -> hasAny SymbolFlags.Method m.Symbol.Flags)
-                |> List.map _.TypeId)
+            |> List.collect (fun (_, facts) -> facts.Members |> List.filter (emitsAsMethod model) |> List.map _.TypeId)
 
         // The arms of a member type that carry call signatures of their own.
         let callbackArms (typeId: int<Measure.typeId>) =
@@ -664,11 +661,15 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
                     // A tuple reads only its components and an array only its element, so
                     // `length`, the numeric indices and `Array<T>`'s lib members claim no
-                    // names. A symbol-keyed member is dropped at render, so nor does its type.
+                    // names. A member keyed by a unique symbol is dropped at render, so nor does its
+                    // type; a well-known symbol's member reads under its F# name.
                     if not (isTuple facts) && (arrayElement model facts).IsNone then
                         for m in facts.Members do
-                            if not (isSymbolKeyed m.Symbol.Name) then
+                            match emittedSymbol facts m with
+                            | Some symbol -> walk (into (symbolMemberName symbol)) order m.TypeId
+                            | None when not (isSymbolKeyed m.Symbol.Name) ->
                                 walk (into (Naming.pascalSegment m.Symbol.Name)) order m.TypeId
+                            | None -> ()
 
                     // An index signature's value is shape the declaration reads too:
                     // `Record<string, A & B>` reaches its intersection nowhere else.

@@ -31,19 +31,31 @@ type Weird = U2<float, string> option
 
 [<Interface>]
 type TextContent =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
     abstract ``type``: string with get, set
     abstract text: string with get, set
     abstract textSignature: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, text: string, ?textSignature: string) : TextContent = jsNative
+    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+    static member Create (text: string, ?textSignature: string) : TextContent = jsNative
+
+module TextContent =
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "text"
 
 [<Interface>]
 type ImageContent =
+    /// <remarks>TypeScript type: <c>"image"</c></remarks>
     abstract ``type``: string with get, set
     abstract data: string with get, set
     abstract mimeType: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, data: string, mimeType: string) : ImageContent = jsNative
+    [<ParamObject; Emit("({ type: 'image', ...$0 })")>]
+    static member Create (data: string, mimeType: string) : ImageContent = jsNative
+
+module ImageContent =
+    /// <remarks>TypeScript type: <c>"image"</c></remarks>
+    [<Literal>]
+    let ``type`` = "image"
 
 type Input = U2<string, Input.Item[]>
 

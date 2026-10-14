@@ -52,8 +52,10 @@ type GroupDisposition =
     /// Resolve identity only; a name the table carries renders as its destination - a binding
     /// somebody already wrote by hand - and every other name of the group widens.
     | Map of names: Map<string, MappedName>
-    /// Resolve identity only; references widen to `obj` with a finding. The default for
-    /// non-entry groups until the shipped compiler-lib package exists.
+    /// Resolve identity only. For `typescript/lib`, `Error` is written as `exn`, `Promise` and
+    /// `PromiseLike` as `JS.Promise`, and any other named DOM or ECMAScript lib declaration as its
+    /// `Fable.Core.TS.Dom` or `Fable.Core.TS.Es` name. Remaining references widen to `obj` with a
+    /// finding.
     | Widen
 
 /// The optional spelling controls for the combined compiler-library binding. Names remain
@@ -291,6 +293,14 @@ type GeneratorConfig =
         PublicInputs: Map<string, string> option
         /// Arm overloads beside an erased-union parameter (D4 §4.5's deferred half).
         UnionArmOverloads: UnionArmOverloadsConfig
+        /// A .NET regular expression over property and value names. A callback typed directly at
+        /// a matching name returns `unit` where its source return is `any` (`TR065`).
+        [<Description("A .NET regular expression over property and value names. A callback typed directly at a matching name returns unit where its source return is any, reported as TR065. Omitted, every such return stays obj.")>]
+        AnyReturnAsUnit: string option
+        /// Writes a conditional deferred over a bounded type parameter as the conditional
+        /// instantiated at that bound (`TR068`). Experimental (W9).
+        [<Description("Experimental. Writes a conditional type deferred over a bounded type parameter, such as InstanceType<Request> where Request extends typeof IncomingMessage, as its value at that bound (IncomingMessage), reported as TR068. Defaults to false, which keeps such a reference obj under TR045.")>]
+        ResolveConditionalConstraints: bool
     }
 
     static member Default =
@@ -312,6 +322,8 @@ type GeneratorConfig =
             Subpaths = None
             PublicInputs = None
             UnionArmOverloads = UnionArmOverloadsConfig.Default
+            AnyReturnAsUnit = None
+            ResolveConditionalConstraints = false
         }
 
 module GeneratorConfig =
@@ -606,6 +618,24 @@ module GeneratorConfig =
                         config
                 | true, _ -> failwith "xantham.json: compilerLib must be an object"
 
+            let anyReturnAsUnit =
+                match doc.RootElement.TryGetProperty "anyReturnAsUnit" with
+                | false, _ -> None
+                | true, value when
+                    value.ValueKind = JsonValueKind.String
+                    && not (String.IsNullOrEmpty(value.GetString()))
+                    ->
+                    let pattern = value.GetString()
+
+                    try
+                        Text.RegularExpressions.Regex(pattern, Text.RegularExpressions.RegexOptions.CultureInvariant)
+                        |> ignore
+                    with :? ArgumentException ->
+                        failwith $"xantham.json: anyReturnAsUnit is not a valid regular expression: {pattern}"
+
+                    Some pattern
+                | true, _ -> failwith "xantham.json: anyReturnAsUnit must be a nonempty regular expression string"
+
             {
                 ModuleName = field "module"
                 Namespace = field "namespace"
@@ -624,11 +654,20 @@ module GeneratorConfig =
                 Subpaths = subpaths
                 PublicInputs = publicInputs
                 UnionArmOverloads = unionArmOverloads
+                AnyReturnAsUnit = anyReturnAsUnit
+                ResolveConditionalConstraints =
+                    boolField "resolveConditionalConstraints" GeneratorConfig.Default.ResolveConditionalConstraints
             }
 
     /// Loads `<packageDir>/xantham.json`.
     let load (packageDir: string) : GeneratorConfig =
         loadFile (Path.Combine(packageDir, "xantham.json"))
+
+    /// Whether `anyReturnAsUnit` matches a property or value name.
+    let selectsAnyReturn (config: GeneratorConfig) (name: string) =
+        config.AnyReturnAsUnit
+        |> Option.exists (fun pattern ->
+            Text.RegularExpressions.Regex.IsMatch(name, pattern, Text.RegularExpressions.RegexOptions.CultureInvariant))
 
     /// The npm package a binding's imports name at runtime, derived from the package the
     /// declarations were generated from.
@@ -823,21 +862,6 @@ module Naming =
         | CompilerLib -> CompilerLibModule
         | Dependency name -> namespacedModule config name
 
-    /// The compiler-lib names Fable.Core already binds, and the F# spelling of each.
-    ///
-    /// O7 left the compiler-lib group widening to `obj` "until the shipped compiler-lib
-    /// package exists". For the ECMAScript half of `lib.d.ts` it already does, and every
-    /// generated file opens it: `Fable.Core.JS` is that package. So `Promise<Response>` is
-    /// `JS.Promise<obj>` rather than a bare `obj`, which is one honest loss (the DOM name
-    /// inside) instead of two.
-    ///
-    /// Each entry is the F# name and the arity that name takes. The arity is here rather than
-    /// inferred because it is the whole safety argument: TypeScript's own lib moves - it made
-    /// `Uint8Array` generic in a buffer parameter that Fable's abbreviation does not have -
-    /// and a mapping that guessed would emit code that does not compile. Arities that agree
-    /// map exactly; a lib type carrying *more* arguments than Fable's binding maps with the
-    /// extras dropped and a finding; one carrying fewer is not this type at all and widens.
-    ///
     /// The names `Xantham.Fable.Core` shadows into `Fable.Core.JS`. A generated module reaches
     /// them unqualified through the `open Fable.Core.JS` it carries. Where a package declares
     /// one of these names itself, the package's declaration takes the unqualified spelling and
@@ -852,6 +876,7 @@ module Naming =
                     "NoInfer"
                     "keyof"
                     "typekeyof"
+                    "proptypelock"
                 ]
 
         let shadows (name: string) = Set.contains name names
@@ -859,67 +884,89 @@ module Naming =
         /// The spelling that reaches the support package's declaration past a package's own.
         let qualify (name: string) = $"JS.{name}"
 
-    /// ECMAScript bindings whose arity or loss requires an explicit mapping.
+    /// The compiler-lib names a non-ship run writes as something other than their Core.TS
+    /// declaration, and the ECMAScript names it writes as Core.TS's under every disposition.
+    ///
+    /// Generated bindings reference `Fable.Core.TS` for the standard library, so a value typed
+    /// by a Core.TS API passes to them unchanged. A name keeps another spelling only where the
+    /// Fable compiler maps an F# type to the JavaScript one, or where the ecosystem's support is
+    /// written against Fable.Core's binding (`docs/.ai/footguns.md`, "Fable consumption of
+    /// bindings").
     module LibBindings =
         /// Name, F# arity, and the loss to record - `None` when the mapping gives up nothing.
         let private table =
             [
+                // Fable.Promise's `promise { }` and `Async.AwaitPromise`/`StartAsPromise` take and
+                // return `JS.Promise`, so a binding written in Core.TS's `Promise` would need a
+                // cast at every use of either.
                 "Promise", ("JS.Promise", 1, None)
                 // A thenable is not a promise: TypeScript's `PromiseLike` is the structural
-                // supertype, and reading one as `JS.Promise` claims methods it may not have.
+                // supertype, and reading one as `JS.Promise` claims methods it may not have. It
+                // keeps the promise's spelling so a `JS.Promise` passes where it is expected.
                 "PromiseLike", ("JS.Promise", 1, Some "PromiseLike reads as JS.Promise; a bare thenable is not one")
-                "Map", ("JS.Map", 2, None)
-                "ReadonlyMap",
-                ("JS.Map", 2, Some "ReadonlyMap reads as JS.Map; the readonly restriction is not carried")
-                "WeakMap", ("JS.WeakMap", 2, None)
-                "Set", ("JS.Set", 1, None)
-                "ReadonlySet",
-                ("JS.Set", 1, Some "ReadonlySet reads as JS.Set; the readonly restriction is not carried")
-                "WeakSet", ("JS.WeakSet", 1, None)
                 // Fable compiles a JavaScript `Error` to `System.Exception`, which is what makes
                 // a class over this base raisable and catchable by type. The instance surface is
                 // where the two disagree: `name`, `stack` and `cause` are the JavaScript object's.
                 "Error",
                 ("exn", 0, Some "Error reads as exn; the JavaScript name, stack and cause properties are not on it")
-                "Date", ("JS.Date", 0, None)
-                "Function", ("JS.Function", 0, None)
-                "Object", ("JS.Object", 0, None)
-                "Math", ("JS.Math", 0, None)
-                "JSON", ("JS.JSON", 0, None)
-                "Console", ("JS.Console", 0, None)
-                "PropertyDescriptor", ("JS.PropertyDescriptor", 0, None)
-                "ArrayBuffer", ("JS.ArrayBuffer", 0, None)
-                "ArrayBufferView", ("JS.ArrayBufferView", 0, None)
-                "DataView", ("JS.DataView", 0, None)
-                "Int8Array", ("JS.Int8Array", 0, None)
-                "Uint8Array", ("JS.Uint8Array", 0, None)
-                "Uint8ClampedArray", ("JS.Uint8ClampedArray", 0, None)
-                "Int16Array", ("JS.Int16Array", 0, None)
-                "Uint16Array", ("JS.Uint16Array", 0, None)
-                "Int32Array", ("JS.Int32Array", 0, None)
-                "Uint32Array", ("JS.Uint32Array", 0, None)
-                "Float32Array", ("JS.Float32Array", 0, None)
-                "Float64Array", ("JS.Float64Array", 0, None)
-                "BigInt64Array", ("JS.BigInt64Array", 0, None)
-                "AsyncIterable", ("JS.AsyncIterable", 1, None)
-                "AsyncIterator", ("JS.AsyncIterator", 1, None)
-                "AsyncGenerator", ("JS.AsyncGenerator", 1, None)
-                "IteratorResult", ("JS.IteratorResult", 1, None)
-                // `Fable.Core` has no name for the combined shape; `JS.AsyncIterable` carries
-                // only `Symbol.asyncIterator`, not the `next`/`return`/`throw` methods an
-                // iterator adds.
-                "AsyncIterableIterator",
-                ("JS.AsyncIterable",
-                 1,
-                 Some "AsyncIterableIterator reads as JS.AsyncIterable; its next/return/throw methods are not on it")
             ]
             |> Map.ofList
 
-        /// The binding for a lib name, if Fable.Core has one: its F# name, its arity, and the
-        /// loss to record. `seq`-shaped names (`Iterable`, `Iterator`) are absent on purpose -
-        /// Fable.Core binds only the async ones, and pretending `seq<'T>` interoperates with a
-        /// JS iterable is exactly the kind of claim this table exists not to make.
+        /// The binding for a lib name, if it has one other than its Core.TS declaration: its F#
+        /// name, its arity, and the loss to record.
         let tryFind (name: string) = Map.tryFind name table
+
+        /// Whether a `ship` run also writes the name as its binding, so the promises of a shipped
+        /// compiler lib, its consumers and Fable.Promise are one F# type. The declaration itself
+        /// is still emitted.
+        let bindsWhenShipped (name: string) =
+            name = "Promise" || name = "PromiseLike"
+
+        let private pinned =
+            set
+                [
+                    "Map"
+                    "ReadonlyMap"
+                    "WeakMap"
+                    "Set"
+                    "ReadonlySet"
+                    "WeakSet"
+                    "Date"
+                    "Function"
+                    "Object"
+                    "Math"
+                    "JSON"
+                    "Console"
+                    "PropertyDescriptor"
+                    "ArrayBuffer"
+                    "ArrayBufferView"
+                    "DataView"
+                    "Int8Array"
+                    "Uint8Array"
+                    "Uint8ClampedArray"
+                    "Int16Array"
+                    "Uint16Array"
+                    "Int32Array"
+                    "Uint32Array"
+                    "Float32Array"
+                    "Float64Array"
+                    "BigInt64Array"
+                    "AsyncIterable"
+                    "AsyncIterator"
+                    "AsyncGenerator"
+                    "IteratorResult"
+                    "AsyncIterableIterator"
+                ]
+
+        /// Whether a lib name is written as its `Fable.Core.TS.Es` declaration under `reference`
+        /// and `map` as well as `widen`, ahead of the O7 template and the group's table, as a DOM
+        /// name is. Under `widen` every other ECMAScript name is written the same way.
+        let isPinnedToCoreTs (name: string) = Set.contains name pinned
+
+        /// The Core.TS spelling of the lib `Function` interface. A type-parameter bound written
+        /// as it is dropped, so an F# function can be the argument.
+        [<Literal>]
+        let FunctionBinding = "Fable.Core.TS.Es.Function"
 
     /// The JavaScript key a member symbol stands for. The checker escapes a name that begins
     /// with two underscores by prepending a third, so that a real `__html` cannot collide with
@@ -953,6 +1000,18 @@ module Naming =
         | "" -> "Empty"
         | name when Char.IsLetter name[0] -> name
         | name -> "N" + name
+
+    /// The PascalCase form a string literal takes as a method-name suffix: `"close"` ->
+    /// `Close`, `"utf-8"` -> `Utf8`, `"2d"` -> `2d`.
+    let literalSuffix (text: string) =
+        let cleaned =
+            text
+            |> Seq.map (fun c -> if Char.IsLetterOrDigit c then c else '-')
+            |> String.Concat
+
+        match pascalSegment cleaned with
+        | "" -> "Empty"
+        | name -> name
 
     /// The DU case name for a numeric-literal union member (D12): `1` -> `N1`,
     /// `1.5` -> `N1_5`, `-1` -> `NMinus1`.
@@ -1124,6 +1183,12 @@ type ResolvedMember =
         Optional: bool
         ReadOnly: bool
         TypeId: int<typeId>
+        /// The well-known symbol keying the member, as `Symbol.<name>` spells it: `Some "iterator"`
+        /// for `[Symbol.iterator]`.
+        WellKnownSymbol: string option
+        /// Whether the member's symbol is a `function` declaration, read through the export alias
+        /// of a re-exported namespace member.
+        ResolvesToFunction: bool
     }
 
 /// One index signature (`[key: string]: V`) as the resolve tier records it. These are
@@ -1137,6 +1202,21 @@ type ResolvedIndex =
         IsReadonly: bool
     }
 
+/// A signature declaration as written: `on(event: "close", listener: () => void): this`.
+type SignatureSource =
+    {
+        Spelling: string
+        /// The description of the JSDoc written above the declaration, before its first tag.
+        Comment: string
+    }
+
+/// The JSDoc an overload's own declaration writes.
+type OverloadDoc =
+    /// The tag names written on the declaration's JSDoc.
+    | Documented of tagNames: Set<string>
+    /// The declaration carries no JSDoc of its own; it shares its siblings' documentation.
+    | Undocumented
+
 type ResolvedSignature =
     {
         Parameters: ResolvedMember list
@@ -1149,6 +1229,12 @@ type ResolvedSignature =
         /// marks the class as one written to be derived from (§4.4).
         IsAbstract: bool
         ReturnTypeId: int<typeId>
+        /// The declaration's source text on one line, and the description of its own JSDoc.
+        /// Carried by each signature of a set of two or more.
+        Source: SignatureSource option
+        /// The JSDoc of the signature's own declaration, where the signature is one of several
+        /// overloads and the declaration is available.
+        OwnDoc: OverloadDoc option
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -1159,6 +1245,11 @@ type ConditionalFacts =
         /// The branch the mapping takes, named for the manifest and carried by id. Absent where
         /// both branches are reachable and inhabited.
         Branch: (string * int<typeId>) option
+        /// The conditional instantiated at its check type's bound, carried by id. Set under
+        /// `resolveConditionalConstraints` for a conditional applied over a bounded type parameter,
+        /// where the branch is absent or an `infer` variable and the bound's value is a usable
+        /// type (§4.11).
+        Constraint: int<typeId> option
     }
 
 /// A `TypeResponse` plus the derived facts of the kinds the skeleton resolves: object members,
@@ -1215,6 +1306,15 @@ type TypeFacts =
         Constraint: int<typeId> option
         /// A type parameter's default type argument, by id (§4.9).
         Default: int<typeId> option
+        /// The declared operand `M` of a type parameter written `K extends keyof M`, where the
+        /// checker resolved the bound to `M`'s key literals (W8, #139).
+        KeyOfOperand: int<typeId> option
+        /// The property types `KeyOfOperand` declares, by id: the values of a catalogued map,
+        /// whose own facts carry no members.
+        KeyOfValues: int<typeId> list
+        /// The operand `T` and value `V` of a mapped type written `{ [P in keyof T]: V }`, where
+        /// `V` is independent of `P` and the mapping carries no modifiers or `as` clause.
+        MappedRecord: (int<typeId> * int<typeId>) option
         /// `T extends U ? X : Y` (§4.11), where the type is one.
         Conditional: ConditionalFacts option
         UnionMembers: int<typeId> list
@@ -1258,6 +1358,9 @@ module TypeFacts =
             IntersectionMembers = []
             Constraint = None
             Default = None
+            KeyOfOperand = None
+            KeyOfValues = []
+            MappedRecord = None
             Conditional = None
             UnionMembers = []
             NonNullableAlias = None
@@ -1339,8 +1442,8 @@ type FsTypeRef =
     | FsBranded of primitive: FsTypeRef * measure: string
     | FsNamed of string
 
-/// A literal payload carried by a StringEnum case (D12: mixed literal unions keep their
-/// non-string members as `[<CompiledValue>]` cases).
+/// A literal value: the payload of a StringEnum case (D12: mixed literal unions keep their
+/// non-string members as `[<CompiledValue>]` cases), or the value of a literal member.
 type FsLiteral =
     | LitString of string
     | LitNumber of float
@@ -1353,6 +1456,9 @@ type FsPropertyMember =
         Tags: JSDocTagInfo list
         ReadOnly: bool
         Type: FsTypeRef
+        /// The value of a literal member: a required property typed by one string or
+        /// numeric literal. `Type` is the literal's primitive.
+        Literal: FsLiteral option
     }
 
 /// A type parameter (§4.9), bound by a declaration or by a generic signature of its own. The
@@ -1399,7 +1505,8 @@ type FsIndexerMember =
     }
 
 /// An interface member. Overloads are consecutive `FsMethod` entries sharing a name -
-/// overloaded abstract members are legal F#.
+/// overloaded abstract members are legal F#. A literal-keyed overload is an `FsLiteralKeyed`
+/// entry under a name of its own.
 /// A construct signature of a *constructor object* - the thing `typeof Request` names, and the
 /// type of a `declare var Request: { new (...): Request }` (§4.4). F# has no first-class
 /// constructor-object type, so the object is declared as an interface of its own and each of
@@ -1428,6 +1535,15 @@ type FsMember =
     /// the receiver to the arguments, so it reaches JavaScript as `x(a)` (§4.4's counterpart for
     /// the call side). Shares `FsConstructorMember`'s shape - the name is fixed the same way.
     | FsInvoke of FsConstructorMember
+    /// A member keyed by a well-known symbol, declared under its inner member's F# name and
+    /// reached as `$0[Symbol.<symbol>]` through `[<Emit>]`. The inner member is an
+    /// `FsProperty` or an `FsMethod`.
+    | FsSymbolKeyed of symbol: string * FsMember
+    /// An overload keyed by string literals, declared as a method of its own and reached
+    /// through `[<Emit>]` as a call to `target` with each literal written before the F#
+    /// argument at its index: `onClose` is `$0.on('close', $1)`. The inner member is an
+    /// `FsMethod`.
+    | FsLiteralKeyed of target: string * literals: (int * string) list * FsMember
 
 /// How a value export is bound to its JavaScript module.
 type ImportBinding =
@@ -1506,6 +1622,15 @@ type FsEntrypoint =
         Inherits: FsTypeRef option
     }
 
+/// One `Create` overload of a plain-data interface (D3).
+type FsCreateOverload =
+    {
+        Parameters: FsParam list
+        /// Literal members the Emit writes into the object, as JavaScript key and value, in
+        /// member order, inherited ones included.
+        Literals: (string * FsLiteral) list
+    }
+
 type FsInterfaceDecl =
     {
         Name: string
@@ -1519,9 +1644,11 @@ type FsInterfaceDecl =
         /// Present where the declaration renders as an `[<AbstractClass>]` a consumer inherits;
         /// `None` where it renders as an `[<Interface>]`.
         Entrypoint: FsEntrypoint option
-        /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
-        /// parameter lists mirroring the members, so consumers never hand-build objects.
-        CreateOverloads: FsParam list list
+        /// Create overloads for plain-data interfaces (D3), each an `Emit` building the object,
+        /// `[<ParamObject>]` where it takes parameters - parameter lists mirroring the members, so
+        /// consumers never hand-build objects. Literal members are written by the Emit rather
+        /// than taken as parameters.
+        CreateOverloads: FsCreateOverload list
         /// A class's static members (§4.4): the properties of the constructor object. A get-only
         /// static is bound through a dotted selector of its own (`[<Import("Counter.MAX",
         /// "pkg")>]`); a settable one is bound through the type-level attribute this list puts on
@@ -1685,12 +1812,16 @@ type FsDecl =
 /// unconstrained variable saying nothing about T's keys, and every use of it - including the
 /// `T[K]` it selects - would have to widen to obj. The support package carries the idiom
 /// instead, so `'K` is not bound at all; its uses are written as one of these.
+/// The operand is the in-scope `'T`, or the written reference to a declared map such as
+/// `HTMLElementTagNameMap`.
 type KeyBinding =
-    /// `keyof<'T>`: the key is only ever a key, so nothing needs the type it selects.
-    | KeyOf of operand: string
-    /// `typekeyof<'T,'R>` at the key's uses and `'R` at `T[K]`: the signature reads the value
-    /// the key selects, so `'K` is replaced by the result variable that names it.
-    | TypedKeyOf of operand: string * result: string
+    /// `keyof<Operand>`: the key is only ever a key, so nothing needs the type it selects.
+    | KeyOf of operand: FsTypeRef
+    /// `typekeyof<Operand,'R>` at the key's uses and `'R` at `Operand[K]`: the signature reads
+    /// the value the key selects, so `'K` is replaced by the result variable that names it.
+    /// `bound` is the constraint `'R` carries, where every value of the operand satisfies the
+    /// constraint of the generic parameter the access is applied at.
+    | TypedKeyOf of operand: FsTypeRef * operandId: int<typeId> * result: string * bound: FsTypeRef option
 
 type ShapeModel =
     {
@@ -1724,7 +1855,14 @@ type ShapeModel =
         /// signature currently being shaped (§4.10). Scoped like `TypeVars`, and for the same
         /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
         KeyVars: Map<int<typeId>, KeyBinding>
+        /// The owner whose directly typed callback returns `unit` for a source `any`, for the
+        /// property or value currently being shaped (`anyReturnAsUnit`). Scoped like `TypeVars`.
+        AnyReturnOwner: string option
         Decls: FsDecl list
+        /// Interface name -> the findings raised while shaping its `[Symbol.iterator]`: those of
+        /// the `seq` element, then those of the iterator member. `settle-symbol-members` reports
+        /// each list only where the `seq` or the member is kept.
+        IteratorFindings: Map<string, Finding list * Finding list>
         /// The specifier value exports import from; ambient modules under it are entry owners.
         RuntimePackage: string<importSpecifier>
     }
@@ -1823,6 +1961,11 @@ module Grouping =
         else
             "Es"
 
+    /// True for a compiler library file such as `lib.es2020.d.ts`, under any directory.
+    let isLibFile (file: string) =
+        let name = file.Substring(file.LastIndexOf '/' + 1)
+        name.StartsWith "lib." && name.EndsWith ".d.ts"
+
     /// Classifies a declaration's origin group (O7) from its file path: under the
     /// package directory and outside any `node_modules` below it is the entry package; the
     /// compiler's default libs are the compiler-lib group; under a `node_modules` entry is that
@@ -1839,8 +1982,7 @@ module Grouping =
     let classifyFile (packageDir: string<dirPath>) (filePath: string<filePath>) : PackageId =
         let path = (filePath / uom<filePath>).Replace('\\', '/')
         let root = (packageDir / uom<dirPath>).Replace('\\', '/').TrimEnd '/' + "/"
-        let file = path.Substring(path.LastIndexOf '/' + 1)
-        let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
+        let isLibFile = isLibFile path
         let installedAt = path.LastIndexOf "/node_modules/"
 
         // npm installs a package's dependencies under the package's own `node_modules`, so

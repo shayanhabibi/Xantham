@@ -477,12 +477,12 @@ type Eases =
 [<Interface>]
 type Easings =
     abstract Spring: SpringConstructor with get, set
-    abstract spring: (SpringParams option -> Spring) with get, set
-    abstract createSpring: (SpringParams option -> Spring) with get, set
-    abstract cubicBezier: Func<float option, float option, float option, float option, EasingFunction> with get, set
-    abstract steps: Func<float option, bool option, EasingFunction> with get, set
-    abstract linear: (TimelinePosition[] -> EasingFunction) with get, set
-    abstract irregular: Func<float option, float option, EasingFunction> with get, set
+    abstract spring: ?parameters: SpringParams -> Spring
+    abstract createSpring: ?parameters: SpringParams -> Spring
+    abstract cubicBezier: ?mX1: float * ?mY1: float * ?mX2: float * ?mY2: float -> EasingFunction
+    abstract steps: ?steps: float * ?fromStart: bool -> EasingFunction
+    abstract linear: [<ParamArray>] args: TimelinePosition[] -> EasingFunction
+    abstract irregular: ?length: float * ?randomness: float -> EasingFunction
     abstract eases: Eases with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (Spring: SpringConstructor, spring: (SpringParams option -> Spring), createSpring: (SpringParams option -> Spring), cubicBezier: Func<float option, float option, float option, float option, EasingFunction>, steps: Func<float option, bool option, EasingFunction>, linear: (TimelinePosition[] -> EasingFunction), irregular: Func<float option, float option, EasingFunction>, eases: Eases) : Easings = jsNative
@@ -670,13 +670,13 @@ type AutoLayout =
     /// <remarks>@type {LayoutStateParams}</remarks>
     abstract leaveToParams: LayoutStateParams with get, set
     /// <remarks>@type {Set&lt;String&gt;}</remarks>
-    abstract properties: JS.Set<string> with get, set
+    abstract properties: Fable.Core.TS.Es.Set<string> with get, set
     /// <remarks>@type {Set&lt;String&gt;}</remarks>
-    abstract recordedProperties: JS.Set<string> with get, set
+    abstract recordedProperties: Fable.Core.TS.Es.Set<string> with get, set
     /// <remarks>@type {WeakSet&lt;DOMTarget&gt;}</remarks>
-    abstract pendingRemoval: JS.WeakSet<DOMTarget> with get, set
+    abstract pendingRemoval: Fable.Core.TS.Es.WeakSet<DOMTarget> with get, set
     /// <remarks>@type {Map&lt;DOMTarget, String|null&gt;}</remarks>
-    abstract transitionMuteStore: JS.Map<DOMTarget, string option> with get, set
+    abstract transitionMuteStore: Fable.Core.TS.Es.Map<DOMTarget, string option> with get, set
     /// <remarks>@type {LayoutSnapshot}</remarks>
     abstract oldState: LayoutSnapshot with get, set
     /// <remarks>@type {LayoutSnapshot}</remarks>
@@ -698,7 +698,7 @@ type AutoLayout =
     abstract animate: ?``params``: LayoutAnimationParams -> Timeline
     abstract update: callback: (AutoLayout -> unit) * ?``params``: LayoutAnimationParams -> Timeline
     [<ParamObject; Emit("$0")>]
-    static member Create (``params``: AutoLayoutParams, root: DOMTarget, id: TimelinePosition, children: LayoutChildrenParam, absoluteCoords: bool, swapAtParams: LayoutStateParams, enterFromParams: LayoutStateParams, leaveToParams: LayoutStateParams, properties: JS.Set<string>, recordedProperties: JS.Set<string>, pendingRemoval: JS.WeakSet<DOMTarget>, transitionMuteStore: JS.Map<DOMTarget, string option>, oldState: LayoutSnapshot, newState: LayoutSnapshot, timeline: Timeline, transformAnimation: WAAPIAnimation, animating: DOMTarget[], swapping: DOMTarget[], leaving: DOMTarget[], entering: DOMTarget[], revert: (unit -> AutoLayout), record: (unit -> AutoLayout), animate: (LayoutAnimationParams option -> Timeline), update: Func<(AutoLayout -> unit), LayoutAnimationParams option, Timeline>) : AutoLayout = jsNative
+    static member Create (``params``: AutoLayoutParams, root: DOMTarget, id: TimelinePosition, children: LayoutChildrenParam, absoluteCoords: bool, swapAtParams: LayoutStateParams, enterFromParams: LayoutStateParams, leaveToParams: LayoutStateParams, properties: Fable.Core.TS.Es.Set<string>, recordedProperties: Fable.Core.TS.Es.Set<string>, pendingRemoval: Fable.Core.TS.Es.WeakSet<DOMTarget>, transitionMuteStore: Fable.Core.TS.Es.Map<DOMTarget, string option>, oldState: LayoutSnapshot, newState: LayoutSnapshot, timeline: Timeline, transformAnimation: WAAPIAnimation, animating: DOMTarget[], swapping: DOMTarget[], leaving: DOMTarget[], entering: DOMTarget[], revert: (unit -> AutoLayout), record: (unit -> AutoLayout), animate: (LayoutAnimationParams option -> Timeline), update: Func<(AutoLayout -> unit), LayoutAnimationParams option, Timeline>) : AutoLayout = jsNative
 
 [<Interface>]
 type LayoutSnapshot =
@@ -707,9 +707,9 @@ type LayoutSnapshot =
     /// <remarks>@type {LayoutNode|null}</remarks>
     abstract rootNode: LayoutNode option with get, set
     /// <remarks>@type {Set&lt;LayoutNode&gt;}</remarks>
-    abstract rootNodes: JS.Set<LayoutNode> with get, set
+    abstract rootNodes: Fable.Core.TS.Es.Set<LayoutNode> with get, set
     /// <remarks>@type {Map&lt;String, LayoutNode&gt;}</remarks>
-    abstract nodes: JS.Map<string, LayoutNode> with get, set
+    abstract nodes: Fable.Core.TS.Es.Map<string, LayoutNode> with get, set
     /// <remarks>@type {Number}</remarks>
     abstract scrollX: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -721,10 +721,10 @@ type LayoutSnapshot =
     abstract forEachRootNode: cb: LayoutNodeIterator -> unit
     abstract forEachNode: cb: LayoutNodeIterator -> unit
     abstract registerElement: ``$el``: DOMTarget * ?parentNode: LayoutNode -> LayoutNode option
-    abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: JS.Set<DOMTarget> -> LayoutNode option
+    abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: Fable.Core.TS.Es.Set<DOMTarget> -> LayoutNode option
     abstract record: unit -> LayoutSnapshot
     [<ParamObject; Emit("$0")>]
-    static member Create (layout: AutoLayout, rootNodes: JS.Set<LayoutNode>, nodes: JS.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: (unit -> LayoutSnapshot), getNode: (DOMTarget -> LayoutNode), getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: (LayoutNodeIterator -> unit), forEachNode: (LayoutNodeIterator -> unit), registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, JS.Set<DOMTarget>, LayoutNode option>, record: (unit -> LayoutSnapshot), ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
+    static member Create (layout: AutoLayout, rootNodes: Fable.Core.TS.Es.Set<LayoutNode>, nodes: Fable.Core.TS.Es.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: (unit -> LayoutSnapshot), getNode: (DOMTarget -> LayoutNode), getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: (LayoutNodeIterator -> unit), forEachNode: (LayoutNodeIterator -> unit), registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, Fable.Core.TS.Es.Set<DOMTarget>, LayoutNode option>, record: (unit -> LayoutSnapshot), ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
 
 type LayoutChildrenParam = U5<string, DOMTargetSelector[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>
 
@@ -902,9 +902,9 @@ type Scope =
 
 [<Interface>]
 type Svg =
-    abstract createMotionPath: Func<TargetsParam, float option, Svg.CreateMotionPath.Result> with get, set
-    abstract createDrawable: Func<TargetsParam, float option, float option, DrawableSVGGeometry[]> with get, set
-    abstract morphTo: Func<TargetsParam, float option, AutoLayoutParams.Ease> with get, set
+    abstract createMotionPath: path: TargetsParam * ?offset: float -> Svg.CreateMotionPath.Result
+    abstract createDrawable: selector: TargetsParam * ?start: float * ?``end``: float -> DrawableSVGGeometry[]
+    abstract morphTo: path2: TargetsParam * ?precision: float -> AutoLayoutParams.Ease
     [<ParamObject; Emit("$0")>]
     static member Create (createMotionPath: Func<TargetsParam, float option, Svg.CreateMotionPath.Result>, createDrawable: Func<TargetsParam, float option, float option, DrawableSVGGeometry[]>, morphTo: Func<TargetsParam, float option, AutoLayoutParams.Ease>) : Svg = jsNative
 
@@ -915,9 +915,9 @@ type Text =
     /// </summary>
     /// <remarks>@class</remarks>
     abstract TextSplitter: TextSplitterConstructor with get, set
-    abstract splitText: Func<U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter> with get, set
-    abstract split: Func<U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter> with get, set
-    abstract scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result) with get, set
+    abstract splitText: target: U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList> * ?parameters: TextSplitterParams -> TextSplitter
+    abstract split: target: U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList> * ?parameters: TextSplitterParams -> TextSplitter
+    abstract scrambleText: ?``params``: ScrambleTextParams -> Text.ScrambleText.Result
     [<ParamObject; Emit("$0")>]
     static member Create (TextSplitter: TextSplitterConstructor, splitText: Func<U4<string, Fable.Core.TS.Dom.Element[], Fable.Core.TS.Dom.Element, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Fable.Core.TS.Dom.HTMLElement[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: (ScrambleTextParams option -> Text.ScrambleText.Result)) : Text = jsNative
 
@@ -985,9 +985,9 @@ type Segment =
 
 [<Interface>]
 type Segmenter =
-    abstract segment: (string -> obj) with get, set
+    abstract segment: (string -> Fable.Core.TS.Es.Iterable<Segment, obj, obj>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (segment: (string -> obj)) : Segmenter = jsNative
+    static member Create (segment: (string -> Fable.Core.TS.Es.Iterable<Segment, obj, obj>)) : Segmenter = jsNative
 
 type Timeline =
     inherit Timer
@@ -1124,7 +1124,7 @@ type Timer =
     /// <remarks>@type {Number}</remarks>
     abstract _currentIteration: float with get, set
     /// <remarks>@type {Function}</remarks>
-    abstract _resolve: JS.Function with get, set
+    abstract _resolve: Fable.Core.TS.Es.Function with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract _running: bool with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1528,8 +1528,8 @@ type Tween =
     abstract property: string with get, set
     abstract target: Target with get, set
     abstract _value: obj with get, set
-    abstract _toFunc: JS.Function option with get, set
-    abstract _fromFunc: JS.Function option with get, set
+    abstract _toFunc: Fable.Core.TS.Es.Function option with get, set
+    abstract _fromFunc: Fable.Core.TS.Es.Function option with get, set
     abstract _ease: EasingFunction with get, set
     abstract _fromNumbers: float[] with get, set
     abstract _toNumbers: float[] with get, set
@@ -1602,9 +1602,9 @@ type TweenPropertySiblings =
 
 type TweenLookups = JS.Record<string, TweenPropertySiblings>
 
-type TweenReplaceLookups = JS.WeakMap<Target, TweenLookups>
+type TweenReplaceLookups = Fable.Core.TS.Es.WeakMap<Target, TweenLookups>
 
-type TweenAdditiveLookups = JS.Map<Target, TweenLookups>
+type TweenAdditiveLookups = Fable.Core.TS.Es.Map<Target, TweenLookups>
 
 type TweenParamValue = U6<string, float, EasingFunction, DurationKeyframes.Item.Duration, Spring, TweakRegister>
 
@@ -2049,7 +2049,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
-    abstract addEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
+    abstract addEventListener<'E>: ``type``: typekeyof<Fable.Core.TS.Dom.SVGElementEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     /// <br /><br />
@@ -2061,7 +2061,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
-    abstract removeEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
+    abstract removeEventListener<'E>: ``type``: typekeyof<Fable.Core.TS.Dom.SVGElementEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     /// <br /><br />
@@ -2472,7 +2472,19 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
     /// </summary>
-    abstract closest<'K>: selector: 'K -> obj option
+    abstract closest<'E>: selector: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
+    /// </summary>
+    abstract closest<'E>: selector: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
+    /// </summary>
+    abstract closest<'E>: selector: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> 'E option
     /// <summary>
     /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
     /// <br /><br />
@@ -2538,33 +2550,56 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract getElementsByTagName<'K>: qualifiedName: 'K -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.Element>
+    abstract getElementsByTagName<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
+    /// <summary>
+    /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+    /// </summary>
+    abstract getElementsByTagName<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
+    /// <summary>
+    /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+    /// </summary>
+    abstract getElementsByTagName<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
     /// <summary>
     /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
+    abstract getElementsByTagName<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
+    /// <summary>
+    /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+    /// </summary>
     abstract getElementsByTagName: qualifiedName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.Element>
     /// <summary>
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+    /// <code lang="ts">
+    /// getElementsByTagNameNS(namespaceURI: "http://www.w3.org/1999/xhtml", localName: string): HTMLCollectionOf&lt;HTMLElement&gt;
+    /// </code>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1999Xhtml * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.HTMLElement>
+    [<Emit("$0.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', $1)")>]
+    abstract getElementsByTagNameNSHttpWwwW3Org1999Xhtml: localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.HTMLElement>
     /// <summary>
-    /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+    /// <code lang="ts">
+    /// getElementsByTagNameNS(namespaceURI: "http://www.w3.org/2000/svg", localName: string): HTMLCollectionOf&lt;SVGElement&gt;
+    /// </code>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org2000Svg * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.SVGElement>
+    [<Emit("$0.getElementsByTagNameNS('http://www.w3.org/2000/svg', $1)")>]
+    abstract getElementsByTagNameNSHttpWwwW3Org2000Svg: localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.SVGElement>
     /// <summary>
-    /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS">MDN Reference</a>
+    /// <code lang="ts">
+    /// getElementsByTagNameNS(namespaceURI: "http://www.w3.org/1998/Math/MathML", localName: string): HTMLCollectionOf&lt;MathMLElement&gt;
+    /// </code>
     /// </summary>
-    abstract getElementsByTagNameNS: namespaceURI: DrawableSVGGeometry.HttpWwwW3Org1998MathMathML * localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.MathMLElement>
+    [<Emit("$0.getElementsByTagNameNS('http://www.w3.org/1998/Math/MathML', $1)")>]
+    abstract getElementsByTagNameNSHttpWwwW3Org1998MathMathML: localName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.MathMLElement>
     /// <summary>
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     /// <br /><br />
@@ -2624,7 +2659,19 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
     /// </summary>
-    abstract matches<'K>: selectors: 'K -> bool
+    abstract matches: selectors: keyof<Fable.Core.TS.Dom.HTMLElementTagNameMap> -> bool
+    /// <summary>
+    /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
+    /// </summary>
+    abstract matches: selectors: keyof<Fable.Core.TS.Dom.SVGElementTagNameMap> -> bool
+    /// <summary>
+    /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
+    /// </summary>
+    abstract matches: selectors: keyof<Fable.Core.TS.Dom.MathMLElementTagNameMap> -> bool
     /// <summary>
     /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
     /// <br /><br />
@@ -2715,6 +2762,13 @@ type DrawableSVGGeometry =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setAttribute">MDN Reference</a>
     /// </summary>
     abstract setAttribute: qualifiedName: string * value: string -> unit
+    /// <summary>
+    /// <code lang="ts">
+    /// setAttribute(name: "draw", value: `${number} ${number}`): void
+    /// </code>
+    /// </summary>
+    [<Emit("$0.setAttribute('draw', $1)")>]
+    abstract setAttributeDraw: value: string -> unit
     /// <summary>
     /// The <b><c>setAttributeNS()</c></b> method of the Element interface adds a new attribute or changes the value of an attribute with the given namespace and name.
     /// <br /><br />
@@ -3384,59 +3438,77 @@ type DrawableSVGGeometry =
     /// <summary>
     /// node is an element.
     /// </summary>
+    /// <remarks>TypeScript type: <c>1</c></remarks>
     abstract ELEMENT_NODE: float
+    /// <remarks>TypeScript type: <c>2</c></remarks>
     abstract ATTRIBUTE_NODE: float
     /// <summary>
     /// node is a Text node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>3</c></remarks>
     abstract TEXT_NODE: float
     /// <summary>
     /// node is a CDATASection node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>4</c></remarks>
     abstract CDATA_SECTION_NODE: float
+    /// <remarks>TypeScript type: <c>5</c></remarks>
     abstract ENTITY_REFERENCE_NODE: float
+    /// <remarks>TypeScript type: <c>6</c></remarks>
     abstract ENTITY_NODE: float
     /// <summary>
     /// node is a ProcessingInstruction node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>7</c></remarks>
     abstract PROCESSING_INSTRUCTION_NODE: float
     /// <summary>
     /// node is a Comment node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>8</c></remarks>
     abstract COMMENT_NODE: float
     /// <summary>
     /// node is a document.
     /// </summary>
+    /// <remarks>TypeScript type: <c>9</c></remarks>
     abstract DOCUMENT_NODE: float
     /// <summary>
     /// node is a doctype.
     /// </summary>
+    /// <remarks>TypeScript type: <c>10</c></remarks>
     abstract DOCUMENT_TYPE_NODE: float
     /// <summary>
     /// node is a DocumentFragment node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>11</c></remarks>
     abstract DOCUMENT_FRAGMENT_NODE: float
+    /// <remarks>TypeScript type: <c>12</c></remarks>
     abstract NOTATION_NODE: float
     /// <summary>
     /// Set when node and other are not in the same tree.
     /// </summary>
+    /// <remarks>TypeScript type: <c>1</c></remarks>
     abstract DOCUMENT_POSITION_DISCONNECTED: float
     /// <summary>
     /// Set when other is preceding node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>2</c></remarks>
     abstract DOCUMENT_POSITION_PRECEDING: float
     /// <summary>
     /// Set when other is following node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>4</c></remarks>
     abstract DOCUMENT_POSITION_FOLLOWING: float
     /// <summary>
     /// Set when other is an ancestor of node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>8</c></remarks>
     abstract DOCUMENT_POSITION_CONTAINS: float
     /// <summary>
     /// Set when other is a descendant of node.
     /// </summary>
+    /// <remarks>TypeScript type: <c>16</c></remarks>
     abstract DOCUMENT_POSITION_CONTAINED_BY: float
+    /// <remarks>TypeScript type: <c>32</c></remarks>
     abstract DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: float
     /// <summary>
     /// Returns the first following sibling that is an element, and null otherwise.
@@ -3497,29 +3569,63 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract querySelector<'K>: selectors: 'K -> obj option
+    abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// Returns the first element that is a descendant of node that matches selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+    /// </summary>
+    abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// Returns the first element that is a descendant of node that matches selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+    /// </summary>
+    abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> 'E option
     /// <summary>
     /// Returns the first element that is a descendant of node that matches selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
+    abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// Returns the first element that is a descendant of node that matches selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+    /// </summary>
     abstract querySelector<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> 'E option
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract querySelectorAll<'K>: selectors: 'K -> Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.Node>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
+    /// <summary>
+    /// Returns all element descendants of node that match selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+    /// </summary>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
+    /// <summary>
+    /// Returns all element descendants of node that match selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+    /// </summary>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract querySelectorAll: selectors: string -> Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.Node>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
+    /// <summary>
+    /// Returns all element descendants of node that match selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+    /// </summary>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
     /// Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes.
     /// <br /><br />
@@ -3579,6 +3685,109 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract assignedSlot: Fable.Core.TS.Dom.HTMLSlotElement option
     abstract draw: string with get, set
+
+module DrawableSVGGeometry =
+    /// <summary>
+    /// node is an element.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let ELEMENT_NODE = 1.0
+    /// <remarks>TypeScript type: <c>2</c></remarks>
+    [<Literal>]
+    let ATTRIBUTE_NODE = 2.0
+    /// <summary>
+    /// node is a Text node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>3</c></remarks>
+    [<Literal>]
+    let TEXT_NODE = 3.0
+    /// <summary>
+    /// node is a CDATASection node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>4</c></remarks>
+    [<Literal>]
+    let CDATA_SECTION_NODE = 4.0
+    /// <remarks>TypeScript type: <c>5</c></remarks>
+    [<Literal>]
+    let ENTITY_REFERENCE_NODE = 5.0
+    /// <remarks>TypeScript type: <c>6</c></remarks>
+    [<Literal>]
+    let ENTITY_NODE = 6.0
+    /// <summary>
+    /// node is a ProcessingInstruction node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>7</c></remarks>
+    [<Literal>]
+    let PROCESSING_INSTRUCTION_NODE = 7.0
+    /// <summary>
+    /// node is a Comment node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>8</c></remarks>
+    [<Literal>]
+    let COMMENT_NODE = 8.0
+    /// <summary>
+    /// node is a document.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>9</c></remarks>
+    [<Literal>]
+    let DOCUMENT_NODE = 9.0
+    /// <summary>
+    /// node is a doctype.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>10</c></remarks>
+    [<Literal>]
+    let DOCUMENT_TYPE_NODE = 10.0
+    /// <summary>
+    /// node is a DocumentFragment node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>11</c></remarks>
+    [<Literal>]
+    let DOCUMENT_FRAGMENT_NODE = 11.0
+    /// <remarks>TypeScript type: <c>12</c></remarks>
+    [<Literal>]
+    let NOTATION_NODE = 12.0
+    /// <summary>
+    /// Set when node and other are not in the same tree.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_DISCONNECTED = 1.0
+    /// <summary>
+    /// Set when other is preceding node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>2</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_PRECEDING = 2.0
+    /// <summary>
+    /// Set when other is following node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>4</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_FOLLOWING = 4.0
+    /// <summary>
+    /// Set when other is an ancestor of node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>8</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_CONTAINS = 8.0
+    /// <summary>
+    /// Set when other is a descendant of node.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>16</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_CONTAINED_BY = 16.0
+    /// <remarks>TypeScript type: <c>32</c></remarks>
+    [<Literal>]
+    let DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32.0
+
+    module InsertAdjacentElement =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Where =
+            | [<CompiledName("afterbegin")>] Afterbegin
+            | [<CompiledName("afterend")>] Afterend
+            | [<CompiledName("beforebegin")>] Beforebegin
+            | [<CompiledName("beforeend")>] Beforeend
 
 type UtilityFunction = (obj[] -> TimelinePosition)
 
@@ -3663,11 +3872,11 @@ type Utils =
     /// </summary>
     /// <remarks>@type {RandomNumberGenerator}</remarks>
     abstract random: RandomNumberGenerator
-    abstract createSeededRandom: Func<float option, float option, float option, float option, RandomNumberGenerator> with get, set
-    abstract randomPick: (U2<string, obj[]> -> obj) with get, set
-    abstract shuffle: Func<obj[], RandomNumberGenerator option, obj[]> with get, set
-    abstract sync: ((Timer -> obj) option -> Timer) with get, set
-    abstract keepTime: Func<(obj[] -> obj), (obj[] -> obj)> with get, set
+    abstract createSeededRandom: ?seed: float * ?seededMin: float * ?seededMax: float * ?seededDecimalLength: float -> RandomNumberGenerator
+    abstract randomPick<'T>: items: U2<string, 'T[]> -> U2<string, 'T>
+    abstract shuffle: items: obj[] * ?rnd: RandomNumberGenerator -> obj[]
+    abstract sync: ?callback: (Timer -> obj) -> Timer
+    abstract keepTime<'T>: ``constructor``: (obj[] -> 'T) -> (obj[] -> obj)
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -3739,9 +3948,9 @@ type Utils =
     abstract ``$``: targets: DOMTargetsParam -> DOMTarget[]
     abstract ``$``: targets: JSTargetsParam -> JSTarget[]
     abstract ``$``: targets: TargetsParam -> Target[]
-    abstract set: Func<TargetsParam, AnimationParams, JSAnimation> with get, set
-    abstract remove: Func<TargetsParam, U3<JSAnimation, Timeline, WAAPIAnimation> option, string option, Target[]> with get, set
-    abstract cleanInlineStyles: (Renderable -> Renderable) with get, set
+    abstract set: targets: TargetsParam * parameters: AnimationParams -> JSAnimation
+    abstract remove: targets: TargetsParam * ?renderable: U3<JSAnimation, Timeline, WAAPIAnimation> * ?propertyName: string -> Target[]
+    abstract cleanInlineStyles<'T>: renderable: 'T -> 'T
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -3762,9 +3971,9 @@ type Utils =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     abstract stagger: ``val``: string * string * ?``params``: StaggerParams -> Utils.Stagger.Result2
-    abstract forEachChildren: Action<obj, JS.Function, bool option, string option, string option> with get, set
-    abstract addChild: Action<obj, obj, JS.Function option, string option, string option> with get, set
-    abstract removeChild: Action<obj, obj, string option, string option> with get, set
+    abstract forEachChildren: parent: obj * callback: Fable.Core.TS.Es.Function * ?reverse: bool * ?prevProp: string * ?nextProp: string -> unit
+    abstract addChild: parent: obj * child: obj * ?sortMethod: Fable.Core.TS.Es.Function * ?prevProp: string * ?nextProp: string -> unit
+    abstract removeChild: parent: obj * child: obj * ?prevProp: string * ?nextProp: string -> unit
 
 type RandomNumberGenerator = delegate of min: float option * max: float option * decimalLength: float option -> float
 
@@ -3794,7 +4003,7 @@ type WAAPIAnimation =
     /// <remarks>@type {Number}</remarks>
     abstract _speed: float with get, set
     /// <remarks>@type {Function}</remarks>
-    abstract _resolve: JS.Function with get, set
+    abstract _resolve: Fable.Core.TS.Es.Function with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _completed: float with get, set
     /// <remarks>@type {Array.&lt;Object&gt;}</remarks>
@@ -3817,16 +4026,12 @@ type WAAPIAnimation =
     /// <returns>Promise&lt;this&gt;</returns>
     abstract ``then``: ?callback: (WAAPIAnimation -> obj) -> JS.Promise<obj>
 
-type Animate = delegate of targets: DOMTargetsParam * ``params``: WAAPIAnimationParams -> WAAPIAnimation
-
-type EasingToLinear = delegate of fn: EasingFunction * samples: float option -> string
-
 [<Interface>]
 type Waapi =
-    abstract animate: Animate with get, set
-    abstract convertEase: EasingToLinear with get, set
+    abstract animate: targets: DOMTargetsParam * ``params``: WAAPIAnimationParams -> WAAPIAnimation
+    abstract convertEase: fn: EasingFunction * ?samples: float -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (animate: Animate, convertEase: EasingToLinear) : Waapi = jsNative
+    static member Create (animate: Func<DOMTargetsParam, WAAPIAnimationParams, WAAPIAnimation>, convertEase: Func<EasingFunction, float option, string>) : Waapi = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -3843,11 +4048,11 @@ type Exports =
     [<Import("globals", "animejs")>]
     static member globals: Globals = jsNative
     [<Import("forEachChildren", "animejs")>]
-    static member forEachChildren (parent: obj, callback: JS.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
+    static member forEachChildren (parent: obj, callback: Fable.Core.TS.Es.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("removeChild", "animejs")>]
     static member removeChild (parent: obj, child: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("addChild", "animejs")>]
-    static member addChild (parent: obj, child: obj, ?sortMethod: JS.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
+    static member addChild (parent: obj, child: obj, ?sortMethod: Fable.Core.TS.Es.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("cleanInlineStyles", "animejs")>]
     static member cleanInlineStyles<'T> (renderable: 'T) : 'T = jsNative
     /// <remarks>@overload</remarks>
@@ -3908,7 +4113,7 @@ type Exports =
     [<Import("engine", "animejs")>]
     static member engine: Engine = jsNative
     [<Import("scrollContainers", "animejs")>]
-    static member scrollContainers: JS.Map<obj, obj> = jsNative
+    static member scrollContainers: Fable.Core.TS.Es.Map<obj, obj> = jsNative
     [<Import("ScrollObserver", "animejs"); EmitConstructor>]
     static member ScrollObserver (?parameters: ScrollObserverParams) : ScrollObserver = jsNative
     [<Import("onScroll", "animejs")>]
@@ -4566,27 +4771,6 @@ module Draggable =
         [<Import("createDraggable", "animejs/draggable")>]
         static member createDraggable (target: TargetsParam, ?parameters: DraggableParams) : Draggable = jsNative
 
-module DrawableSVGGeometry =
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org1998MathMathML =
-        | [<CompiledName("http://www.w3.org/1998/Math/MathML")>] HttpWwwW3Org1998MathMathML
-
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org1999Xhtml =
-        | [<CompiledName("http://www.w3.org/1999/xhtml")>] HttpWwwW3Org1999Xhtml
-
-    [<StringEnum(CaseRules.None)>]
-    type HttpWwwW3Org2000Svg =
-        | [<CompiledName("http://www.w3.org/2000/svg")>] HttpWwwW3Org2000Svg
-
-    module InsertAdjacentElement =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Where =
-            | [<CompiledName("afterbegin")>] Afterbegin
-            | [<CompiledName("afterend")>] Afterend
-            | [<CompiledName("beforebegin")>] Beforebegin
-            | [<CompiledName("beforeend")>] Beforeend
-
 module DurationKeyframes =
     type Item =
         inherit TweenParamsOptions
@@ -4689,7 +4873,7 @@ module Events =
     [<Erase>]
     type Exports =
         [<Import("scrollContainers", "animejs/events")>]
-        static member scrollContainers: JS.Map<obj, obj> = jsNative
+        static member scrollContainers: Fable.Core.TS.Es.Map<obj, obj> = jsNative
         [<Import("ScrollObserver", "animejs/events"); EmitConstructor>]
         static member ScrollObserver (?parameters: ScrollObserverParams) : ScrollObserver = jsNative
         [<Import("onScroll", "animejs/events")>]
@@ -4699,18 +4883,18 @@ module Globals =
     [<Interface>]
     type Editor =
         abstract showPanel: bool with get, set
-        abstract addAnimation: JS.Function with get, set
-        abstract addSet: JS.Function with get, set
-        abstract addTimeline: JS.Function with get, set
-        abstract addTimelineChild: JS.Function with get, set
-        abstract addTimelineLabel: JS.Function with get, set
-        abstract addTimelineCall: JS.Function with get, set
-        abstract addTimelineSync: JS.Function with get, set
-        abstract resolveStagger: JS.Function with get, set
+        abstract addAnimation: Fable.Core.TS.Es.Function with get, set
+        abstract addSet: Fable.Core.TS.Es.Function with get, set
+        abstract addTimeline: Fable.Core.TS.Es.Function with get, set
+        abstract addTimelineChild: Fable.Core.TS.Es.Function with get, set
+        abstract addTimelineLabel: Fable.Core.TS.Es.Function with get, set
+        abstract addTimelineCall: Fable.Core.TS.Es.Function with get, set
+        abstract addTimelineSync: Fable.Core.TS.Es.Function with get, set
+        abstract resolveStagger: Fable.Core.TS.Es.Function with get, set
         abstract _head: obj with get, set
         abstract _tail: obj with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (showPanel: bool, addAnimation: JS.Function, addSet: JS.Function, addTimeline: JS.Function, addTimelineChild: JS.Function, addTimelineLabel: JS.Function, addTimelineCall: JS.Function, addTimelineSync: JS.Function, resolveStagger: JS.Function, _head: obj, _tail: obj) : Editor = jsNative
+        static member Create (showPanel: bool, addAnimation: Fable.Core.TS.Es.Function, addSet: Fable.Core.TS.Es.Function, addTimeline: Fable.Core.TS.Es.Function, addTimelineChild: Fable.Core.TS.Es.Function, addTimelineLabel: Fable.Core.TS.Es.Function, addTimelineCall: Fable.Core.TS.Es.Function, addTimelineSync: Fable.Core.TS.Es.Function, resolveStagger: Fable.Core.TS.Es.Function, _head: obj, _tail: obj) : Editor = jsNative
 
 /// <summary>animejs/layout</summary>
 module Layout =
@@ -4883,11 +5067,11 @@ module Utils =
     [<Erase>]
     type Exports =
         [<Import("forEachChildren", "animejs/utils")>]
-        static member forEachChildren (parent: obj, callback: JS.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
+        static member forEachChildren (parent: obj, callback: Fable.Core.TS.Es.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
         [<Import("removeChild", "animejs/utils")>]
         static member removeChild (parent: obj, child: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
         [<Import("addChild", "animejs/utils")>]
-        static member addChild (parent: obj, child: obj, ?sortMethod: JS.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
+        static member addChild (parent: obj, child: obj, ?sortMethod: Fable.Core.TS.Es.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
         [<Import("cleanInlineStyles", "animejs/utils")>]
         static member cleanInlineStyles<'T> (renderable: 'T) : 'T = jsNative
         /// <remarks>@overload</remarks>

@@ -269,7 +269,7 @@ type Exports =
     [<Import("addListener", "callback-function-lab")>]
     static member addListener (register: AddListener.Register) : unit = jsNative
     /// <summary>
-    /// Generic callable identity: F# functions do not inherit JS.Function.
+    /// Generic callable identity: F# functions do not inherit the lib Function.
     /// </summary>
     [<Import("keepFunction", "callback-function-lab")>]
     static member keepFunction<'T> (callback: 'T) : 'T = jsNative

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "package": "type-scope-lab",
+  "module": "TypeScopeLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 16,
+    "widened": 3,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 5,
+      "exact": 5
+    },
+    {
+      "pass": "shape-callbacks",
+      "total": 3,
+      "ergonomic": 3
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 14,
+      "exact": 1,
+      "ergonomic": 10,
+      "widened": 3
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 30,
+      "ergonomic": 26,
+      "widened": 4
+    }
+  ]
+}

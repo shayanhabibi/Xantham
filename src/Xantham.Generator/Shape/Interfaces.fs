@@ -54,6 +54,7 @@ let shapeInterfaces: Pass<ShapeModel> =
             fun ctx model ->
                 async {
                     let mutable findings = []
+                    let mutable iteratorFindings = model.IteratorFindings
 
                     let fallbackDocs =
                         model.Harvest.Exports
@@ -190,6 +191,12 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 let members, memberFindings =
                                     shapeMembers ctx { model with TypeVars = scope } hooks name facts
 
+                                // `settle-symbol-members` reports the iterator member's findings
+                                // where it keeps the member.
+                                let iteratorMemberFindings, memberFindings =
+                                    memberFindings
+                                    |> List.partition (fun f -> f.Symbol.StartsWith $"{name}.[Symbol.iterator]")
+
                                 findings <- findings @ memberFindings
 
                                 let hookDecls =
@@ -244,6 +251,35 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                 inheritGraph <- Map.add name (inherits |> List.map fst) inheritGraph
 
+                                // `[Symbol.iterator]` reads as `inherit seq<element>` (W4); whether
+                                // the declaration keeps it, and so its findings, is settled once
+                                // every base is shaped.
+                                let sequence, elementFindings =
+                                    facts.Members
+                                    |> List.tryFind (fun m -> emittedSymbol facts m = Some "iterator")
+                                    |> Option.bind (fun m -> iteratedElement model m.TypeId)
+                                    |> Option.map (fun elementId ->
+                                        let element, elementFindings =
+                                            typeRef
+                                                ctx
+                                                { model with TypeVars = scope }
+                                                (Some name)
+                                                $"{name}.[Symbol.iterator]"
+                                                elementId
+
+                                        Some(FsApp("seq", [ element ])), elementFindings)
+                                    |> Option.defaultValue (None, [])
+
+                                if not (elementFindings.IsEmpty && iteratorMemberFindings.IsEmpty) then
+                                    let elements, members =
+                                        Map.tryFind name iteratorFindings |> Option.defaultValue ([], [])
+
+                                    iteratorFindings <-
+                                        Map.add
+                                            name
+                                            (elements @ elementFindings, members @ iteratorMemberFindings)
+                                            iteratorFindings
+
                                 if isConstructorObject facts then
                                     findings <-
                                         findings
@@ -264,9 +300,12 @@ let shapeInterfaces: Pass<ShapeModel> =
                                     |> List.exists (function
                                         | FsProperty p -> p.Name = "Invoke"
                                         | FsMethod m -> m.Name = "Invoke"
+                                        | FsLiteralKeyed(_, _, FsMethod m) -> m.Name = "Invoke"
                                         | FsIndexer _
                                         | FsConstructor _
-                                        | FsInvoke _ -> false)
+                                        | FsInvoke _
+                                        | FsSymbolKeyed _
+                                        | FsLiteralKeyed _ -> false)
 
                                 let invokes =
                                     if invokeCollides then
@@ -325,7 +364,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         Tags = tags
                                         Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
                                         TypeParameters = typeParameters
-                                        Inherits = inherits |> List.map snd
+                                        Inherits = (inherits |> List.map snd) @ Option.toList sequence
                                         Members = members @ invokes
                                         Entrypoint = None
                                         CreateOverloads = []
@@ -338,7 +377,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // shared ones - never a `never`-typed placeholder for the other arm's
                     // exclusive member - so a folded pair's overloads carry no `unit` parameter.
                     let buildParam (owner: string) (m: ResolvedMember) =
-                        let reference, refFindings = typeRef ctx model None owner m.TypeId
+                        let reference, refFindings =
+                            typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
 
                         {
                             Name = Naming.memberName m.Symbol.Name
@@ -349,7 +389,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                         refFindings
 
                     let buildMember (owner: string) (optional: bool) (m: ResolvedMember) =
-                        let reference, refFindings = typeRef ctx model None owner m.TypeId
+                        let reference, refFindings =
+                            typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
 
                         FsProperty
                             {
@@ -358,6 +399,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 Tags = m.Tags
                                 ReadOnly = m.ReadOnly
                                 Type = optionalRef optional reference
+                                Literal = None
                             },
                         refFindings
 
@@ -389,7 +431,10 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         let required, optional =
                                             (sharedParams @ ownParams) |> List.partition (fun p -> not p.Optional)
 
-                                        required @ optional,
+                                        {
+                                            Parameters = required @ optional
+                                            Literals = []
+                                        },
                                         List.concat sharedParamFindings @ List.concat ownParamFindings)
                                     |> List.unzip
 
@@ -424,6 +469,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                         { model with
                             Decls = model.Decls @ decls @ foldedDecls
                             DeclNames = declNames
+                            IteratorFindings = iteratorFindings
                         }
 
                     return

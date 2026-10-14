@@ -4,23 +4,25 @@
   "module": "MemberShapeLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 3,
+    "ergonomic": 4,
     "widened": 0,
-    "escape": 1
+    "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 24,
-      "ergonomic": 21,
-      "widened": 1,
-      "escape": 2
+      "total": 23,
+      "ergonomic": 23
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 15,
-      "ergonomic": 13,
-      "widened": 2
+      "total": 9,
+      "ergonomic": 9
+    },
+    {
+      "pass": "settle-symbol-members",
+      "total": 1,
+      "ergonomic": 1
     }
   ]
 }

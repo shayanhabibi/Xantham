@@ -1,0 +1,8 @@
+{
+    "name": "tag-map-lab",
+    "version": "1.0.0",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for key types over tag maps and value-of aliases (W8, #139). A key over a declared map reads as typekeyof<Map,'R>, with 'R at the access; T[keyof T] reads as proptypelock<'T>. Tracked in git, no npm install."
+}

@@ -70,6 +70,31 @@ A binding is rooted in a generated F# module.
 - **Ambient modules** follow their import paths: `inspector/promises` becomes
   `Inspector.Promises`.
 - **Anonymous option objects and callbacks** are named under the member that uses them.
+- **Constants**: a required member typed by one string or numeric literal, readonly or writable
+  (`readonly AT_TARGET: 2`) is also a `[<Literal>]` in a module of the type's name, so the
+  pattern in
+  `match e.eventPhase with | Event.AT_TARGET -> ...` compiles to `e.eventPhase === 2`.
+  `Create` sets these members itself and takes no argument for them. After you open the
+  binding module, `Event.AT_TARGET` reads the value in an expression too. Fully qualified
+  (`MyBinding.Event.AT_TARGET`), an expression names the interface's instance property
+  instead; read the value there through a module abbreviation
+  (`module EventConstants = MyBinding.Event`, then `EventConstants.AT_TARGET`).
+- **Literal overloads**: an overload selected by a literal argument is its own method, named
+  after the literal, with the literal written in: `store.read(key, "text")` binds as
+  `store.readText key` and still calls `read(key, 'text')` in JavaScript.
+- **Symbol members**: an iterable (`[Symbol.iterator]`) inherits `seq<'T>`, so
+  `for item in items do` needs no cast. Other well-known symbols are named members, such as
+  `resource.SymbolDispose()` and `value.SymbolToStringTag`.
+- **Tag maps**: a parameter typed by a key of a declared map takes a `typekeyof` key, and the
+  key fixes the result type: `document.createElement (typekeyof<HTMLElementTagNameMap, _> _.div)`
+  returns `HTMLDivElement`. The key reaches JavaScript as the bare string `"div"`.
+- **Functions of a namespace object** (`export * as utils`) and global functions are
+  methods: `MyPackage.Exports.utils.clamp(5., 0., 1.)`. TypeScript does not allow
+  assigning to them, so the binding has no setter; reassigning one needs dynamic access
+  (`?` or `!!`).
+- **A type parameter used only in a return**, such as `querySelectorAll<'E>`, is inferred
+  from how the result is used inside a function. A module-level binding states it:
+  `let items: NodeListOf<HTMLElement> = document.querySelectorAll "li"`.
 
 The same type exported through several paths has a shared canonical location.
 Use the emitted signature to find it.

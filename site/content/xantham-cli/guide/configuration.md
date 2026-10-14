@@ -112,6 +112,47 @@ Record updates from `GeneratorConfig.Default` keep their previous behavior.
 `resolveNoInfer: true` maps TypeScript's `NoInfer<T>` directly to `T`.
 The default preserves `NoInfer<T>` through the support library.
 
+## Resolve conditionals at a bound (experimental)
+
+`resolveConditionalConstraints: true` writes a conditional type that stays open over a bounded
+type parameter as its value at that bound. `@types/node` writes a request listener's argument as
+`InstanceType<Request>`, where `Request extends typeof IncomingMessage`; with the key set, the
+argument binds as `IncomingMessage` instead of `obj`.
+
+```json title="Resolve conditionals at a bound"
+{
+  "resolveConditionalConstraints": true
+}
+```
+
+Each rewritten reference is reported as `TR068`, graded Widened: a listener declared for a
+subclass of the bound still reads the bound. A conditional over an unbounded parameter or a
+union bound, one whose value at the bound is `any`, `unknown`, `never`, another conditional or
+one of its own branches, and an alias's own declaration all stay `obj` under `TR045`. The key
+is part of a catalogue's inference profile when set. The default is `false`;
+`Xantham.Fable.Node` is generated with it set.
+
+## Write handler returns as unit
+
+A DOM-style handler declared `onclick: ((ev: MouseEvent) => any) | null` binds as
+`(MouseEvent -> obj) option`, so every handler body has to end in a value. `anyReturnAsUnit` is
+a .NET regular expression over property and value names; a callback typed directly at a matching
+name returns `unit` where its source return is `any`.
+
+```json title="Write on* handler returns as unit"
+{
+  "anyReturnAsUnit": "^on"
+}
+```
+
+The match is case-sensitive and unanchored unless the pattern anchors itself. Each rewritten
+return is reported as `TR065`. These keep `obj`: method returns, a callback nested inside a
+selected one, a named callback alias, an anonymous callback of two or more arguments (declared as
+a delegate) and a stated return type. The compiler-library binding `Xantham.Fable.Core.TS`
+selects `^on`, so a configuration that reuses its declaration catalogue sets
+`"anyReturnAsUnit": "^on"` too. The pattern is part of a catalogue's inference profile, so any
+other value fails the inference-profile check.
+
 ## Add overloads per union arm
 
 `unionArmOverloads` synthesizes one overload per arm beside a member whose parameter is an

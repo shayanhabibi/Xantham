@@ -17,6 +17,20 @@ let private declaredAt (path: string) =
 [<Tests>]
 let classifyTests =
     testList "resolve classify" [
+        testCase "a signature declaration reads as its JSDoc description and one line" <| fun _ ->
+            let text =
+                "\n  /**\n   * Fires on close.\n   * @param listener called once\n   */\n  on(\n    event: \"close\", // the event\n    listener: () => void,\n  ): this;"
+
+            Expect.equal
+                (Resolve.signatureText text)
+                ("Fires on close.", "on(event: \"close\", listener: () => void): this")
+                "comments and line breaks collapse"
+
+            Expect.equal
+                (Resolve.signatureText "getElementsByTagNameNS(namespaceURI: \"http://www.w3.org/1999/xhtml\", localName: string): HTMLCollectionOf<HTMLElement>;")
+                ("", "getElementsByTagNameNS(namespaceURI: \"http://www.w3.org/1999/xhtml\", localName: string): HTMLCollectionOf<HTMLElement>")
+                "a comment marker inside a string literal is text"
+
         testCase "a declaration under the package directory is the entry package" <| fun _ ->
             Expect.equal
                 (Grouping.classify packageDir (declaredAt $"{packageDir}/index.d.ts"))

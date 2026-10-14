@@ -28,7 +28,7 @@ Source and configuration hashes normalize CRLF to LF so they agree across checko
 Xantham reads the `.br` file directly; the descriptor is package metadata for integrations.
 The catalogue retains qualified names and arities, including
 `Fable.Core.TS.Dom.HTMLInputElement`, `Fable.Core.TS.Dom.FileList` and
-`Fable.Core.TS.Es.Promise<'T>`. Reuse requires the exact TypeScript release/source revision
+`Fable.Core.TS.Es.Map<'K, 'V>`. Reuse requires the exact TypeScript release/source revision
 and compatible generation settings recorded in the catalogue.
 
 ## Regenerate

@@ -173,8 +173,7 @@ type DeepPartial<'T> = private DeepPartial__ of obj
 /// <summary>
 /// A mapped type that changes the value type rather than the modifiers.
 /// </summary>
-[<Erase>]
-type Flags<'T> = private Flags__ of obj
+type Flags<'T> = PropertyRecord<'T, bool>
 
 /// <summary>
 /// A conditional over a concrete operand - already resolved by the checker.
@@ -225,4 +224,4 @@ type Exports =
     /// <c>T[keyof T]</c> - the value-of idiom.
     /// </summary>
     [<Import("values", "keyof-lab")>]
-    static member values<'T> (source: 'T) : obj[] = jsNative
+    static member values<'T> (source: 'T) : proptypelock<'T>[] = jsNative

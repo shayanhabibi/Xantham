@@ -21,7 +21,7 @@ export interface Handle {
 }
 
 // ---------------------------------------------------------------------------
-// Mapped. Neither `Fable.Core.JS` nor the `Fable.Browser.*` family binds either name; the BCL
+// Mapped. Neither `Fable.Core.TS` nor the `Fable.Browser.*` family binds either name; the BCL
 // does, and Fable compiles both to the JavaScript object the declaration means.
 // ---------------------------------------------------------------------------
 

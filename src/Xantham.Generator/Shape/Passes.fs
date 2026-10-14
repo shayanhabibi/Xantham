@@ -22,6 +22,7 @@ let passes: Pass<ShapeModel> list =
         Exports.shapeExports
         ParamObjects.synthesizeParamObjects
         Inherited.dropInherited
+        SymbolMembers.settleSymbolMembers
         Overloads.dedupeOverloads
         Ordering.orderDeclarations
         UnionArms.expandUnionArms

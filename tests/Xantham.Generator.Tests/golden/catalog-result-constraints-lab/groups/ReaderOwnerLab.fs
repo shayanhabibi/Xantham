@@ -12,9 +12,9 @@ open Fable.Core.TS.Dom
 
 [<Interface>]
 type Reader =
-    abstract read<'T when 'T :> JS.ArrayBufferView>: view: 'T -> JS.Promise<U2<Reader.Read.Result.Item<'T>, Reader.Read.Result.Item2>>
-    abstract readAtLeast<'T when 'T :> JS.ArrayBufferView>: minimum: float * view: 'T -> JS.Promise<U2<Reader.ReadAtLeast.Result.Item<'T>, Reader.Read.Result.Item2>>
-    abstract readBound<'T when 'T :> JS.ArrayBufferView>: view: 'T -> JS.Promise<U2<Reader.ReadBound.Result.Item<'T>, Reader.ReadBound.Result.Item2>>
+    abstract read<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> : view: 'T -> JS.Promise<U2<Reader.Read.Result.Item<'T>, Reader.Read.Result.Item2>>
+    abstract readAtLeast<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> : minimum: float * view: 'T -> JS.Promise<U2<Reader.ReadAtLeast.Result.Item<'T>, Reader.Read.Result.Item2>>
+    abstract readBound<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> : view: 'T -> JS.Promise<U2<Reader.ReadBound.Result.Item<'T>, Reader.ReadBound.Result.Item2>>
     [<ParamObject; Emit("$0")>]
     static member Create (read: ('T -> JS.Promise<U2<Reader.Read.Result.Item<'T>, Reader.Read.Result.Item2>>), readAtLeast: Func<float, 'T, JS.Promise<U2<Reader.ReadAtLeast.Result.Item<'T>, Reader.Read.Result.Item2>>>, readBound: ('T -> JS.Promise<U2<Reader.ReadBound.Result.Item<'T>, Reader.ReadBound.Result.Item2>>)) : Reader = jsNative
 
@@ -22,7 +22,7 @@ module Reader =
     module Read =
         module Result =
             [<Interface>]
-            type Item<'T when 'T :> JS.ArrayBufferView> =
+            type Item<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> =
                 abstract ``done``: bool with get, set
                 abstract value: 'T with get, set
                 [<ParamObject; Emit("$0")>]
@@ -38,7 +38,7 @@ module Reader =
     module ReadAtLeast =
         module Result =
             [<Interface>]
-            type Item<'T when 'T :> JS.ArrayBufferView> =
+            type Item<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> =
                 abstract ``done``: bool with get, set
                 abstract value: 'T with get, set
                 [<ParamObject; Emit("$0")>]
@@ -47,7 +47,7 @@ module Reader =
     module ReadBound =
         module Result =
             [<Interface>]
-            type Item<'T when 'T :> JS.ArrayBufferView> =
+            type Item<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> =
                 abstract ``done``: bool with get, set
                 abstract value: 'T with get, set
                 [<ParamObject; Emit("$0")>]

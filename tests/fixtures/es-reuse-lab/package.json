@@ -1,0 +1,1 @@
+{"name":"es-reuse-lab","type":"module","types":"index.d.ts","description":"W3 (#134): a widen-mode consumer on @types/node's es2020 program references Core.TS's ECMAScript declarations. The compile gate builds the golden against Xantham.Fable.Core.TS, the producer half of the pair."}

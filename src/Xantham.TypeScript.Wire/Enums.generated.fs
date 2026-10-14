@@ -74,15 +74,30 @@ module SymbolFlags =
 
     /// <summary><code>FunctionScopedVariable | BlockScopedVariable</code></summary><returns><c>3u</c></returns>
     [<Literal>]
-    let Variable = (SymbolFlags.FunctionScopedVariable ||| SymbolFlags.BlockScopedVariable)
+    let Variable =
+        (SymbolFlags.FunctionScopedVariable ||| SymbolFlags.BlockScopedVariable)
 
     /// <summary><code>Variable | Property | EnumMember | ObjectLiteral | Function | Class | Enum | ValueModule | Method | GetAccessor | SetAccessor</code></summary><returns><c>111551u</c></returns>
     [<Literal>]
-    let Value = ((((((((((Variable ||| SymbolFlags.Property) ||| SymbolFlags.EnumMember) ||| SymbolFlags.ObjectLiteral) ||| SymbolFlags.Function) ||| SymbolFlags.Class) ||| Enum) ||| SymbolFlags.ValueModule) ||| SymbolFlags.Method) ||| SymbolFlags.GetAccessor) ||| SymbolFlags.SetAccessor)
+    let Value =
+        ((((((((((Variable ||| SymbolFlags.Property) ||| SymbolFlags.EnumMember)
+                ||| SymbolFlags.ObjectLiteral)
+               ||| SymbolFlags.Function)
+              ||| SymbolFlags.Class)
+             ||| Enum)
+            ||| SymbolFlags.ValueModule)
+           ||| SymbolFlags.Method)
+          ||| SymbolFlags.GetAccessor)
+         ||| SymbolFlags.SetAccessor)
 
     /// <summary><code>Class | Interface | Enum | EnumMember | TypeLiteral | TypeParameter | TypeAlias</code></summary><returns><c>788968u</c></returns>
     [<Literal>]
-    let Type = ((((((SymbolFlags.Class ||| SymbolFlags.Interface) ||| Enum) ||| SymbolFlags.EnumMember) ||| SymbolFlags.TypeLiteral) ||| SymbolFlags.TypeParameter) ||| SymbolFlags.TypeAlias)
+    let Type =
+        ((((((SymbolFlags.Class ||| SymbolFlags.Interface) ||| Enum)
+            ||| SymbolFlags.EnumMember)
+           ||| SymbolFlags.TypeLiteral)
+          ||| SymbolFlags.TypeParameter)
+         ||| SymbolFlags.TypeAlias)
 
     /// <summary><code>ValueModule | NamespaceModule | Enum</code></summary><returns><c>1920u</c></returns>
     [<Literal>]
@@ -98,7 +113,8 @@ module SymbolFlags =
 
     /// <summary><code>Value &amp; ~FunctionScopedVariable</code></summary><returns><c>111550u</c></returns>
     [<Literal>]
-    let FunctionScopedVariableExcludes = (Value &&& (~~~SymbolFlags.FunctionScopedVariable))
+    let FunctionScopedVariableExcludes =
+        (Value &&& (~~~SymbolFlags.FunctionScopedVariable))
 
     /// <summary><code>Value</code></summary><returns><c>111551u</c></returns>
     [<Literal>]
@@ -118,19 +134,25 @@ module SymbolFlags =
 
     /// <summary><code>Value &amp; ~(Function | ValueModule | Class)</code></summary><returns><c>110991u</c></returns>
     [<Literal>]
-    let FunctionExcludes = (Value &&& (~~~((SymbolFlags.Function ||| SymbolFlags.ValueModule) ||| SymbolFlags.Class)))
+    let FunctionExcludes =
+        (Value
+         &&& (~~~((SymbolFlags.Function ||| SymbolFlags.ValueModule) ||| SymbolFlags.Class)))
 
     /// <summary><code>(Value | Type) &amp; ~(ValueModule | Interface | Function)</code></summary><returns><c>899503u</c></returns>
     [<Literal>]
-    let ClassExcludes = ((Value ||| Type) &&& (~~~((SymbolFlags.ValueModule ||| SymbolFlags.Interface) ||| SymbolFlags.Function)))
+    let ClassExcludes =
+        ((Value ||| Type)
+         &&& (~~~((SymbolFlags.ValueModule ||| SymbolFlags.Interface) ||| SymbolFlags.Function)))
 
     /// <summary><code>Type &amp; ~(Interface | Class)</code></summary><returns><c>788872u</c></returns>
     [<Literal>]
-    let InterfaceExcludes = (Type &&& (~~~(SymbolFlags.Interface ||| SymbolFlags.Class)))
+    let InterfaceExcludes =
+        (Type &&& (~~~(SymbolFlags.Interface ||| SymbolFlags.Class)))
 
     /// <summary><code>(Value | Type) &amp; ~(RegularEnum | ValueModule)</code></summary><returns><c>899327u</c></returns>
     [<Literal>]
-    let RegularEnumExcludes = ((Value ||| Type) &&& (~~~(SymbolFlags.RegularEnum ||| SymbolFlags.ValueModule)))
+    let RegularEnumExcludes =
+        ((Value ||| Type) &&& (~~~(SymbolFlags.RegularEnum ||| SymbolFlags.ValueModule)))
 
     /// <summary><code>(Value | Type) &amp; ~ConstEnum</code></summary><returns><c>899967u</c></returns>
     [<Literal>]
@@ -138,7 +160,10 @@ module SymbolFlags =
 
     /// <summary><code>Value &amp; ~(Function | Class | RegularEnum | ValueModule)</code></summary><returns><c>110735u</c></returns>
     [<Literal>]
-    let ValueModuleExcludes = (Value &&& (~~~(((SymbolFlags.Function ||| SymbolFlags.Class) ||| SymbolFlags.RegularEnum) ||| SymbolFlags.ValueModule)))
+    let ValueModuleExcludes =
+        (Value
+         &&& (~~~(((SymbolFlags.Function ||| SymbolFlags.Class) ||| SymbolFlags.RegularEnum)
+                  ||| SymbolFlags.ValueModule)))
 
     /// <summary><code>None</code></summary><returns><c>0u</c></returns>
     [<Literal>]
@@ -150,11 +175,13 @@ module SymbolFlags =
 
     /// <summary><code>Value &amp; ~(SetAccessor | Property)</code></summary><returns><c>46011u</c></returns>
     [<Literal>]
-    let GetAccessorExcludes = (Value &&& (~~~(SymbolFlags.SetAccessor ||| SymbolFlags.Property)))
+    let GetAccessorExcludes =
+        (Value &&& (~~~(SymbolFlags.SetAccessor ||| SymbolFlags.Property)))
 
     /// <summary><code>Value &amp; ~(GetAccessor | Property)</code></summary><returns><c>78779u</c></returns>
     [<Literal>]
-    let SetAccessorExcludes = (Value &&& (~~~(SymbolFlags.GetAccessor ||| SymbolFlags.Property)))
+    let SetAccessorExcludes =
+        (Value &&& (~~~(SymbolFlags.GetAccessor ||| SymbolFlags.Property)))
 
     /// <summary><code>Value &amp; ~Property</code></summary><returns><c>111547u</c></returns>
     [<Literal>]
@@ -174,11 +201,19 @@ module SymbolFlags =
 
     /// <summary><code>Variable | Function | Class | Interface | Enum | Module | TypeAlias | Alias</code></summary><returns><c>2623475u</c></returns>
     [<Literal>]
-    let ModuleMember = (((((((Variable ||| SymbolFlags.Function) ||| SymbolFlags.Class) ||| SymbolFlags.Interface) ||| Enum) ||| Module) ||| SymbolFlags.TypeAlias) ||| SymbolFlags.Alias)
+    let ModuleMember =
+        (((((((Variable ||| SymbolFlags.Function) ||| SymbolFlags.Class)
+             ||| SymbolFlags.Interface)
+            ||| Enum)
+           ||| Module)
+          ||| SymbolFlags.TypeAlias)
+         ||| SymbolFlags.Alias)
 
     /// <summary><code>Function | Class | Enum | ValueModule</code></summary><returns><c>944u</c></returns>
     [<Literal>]
-    let ExportHasLocal = (((SymbolFlags.Function ||| SymbolFlags.Class) ||| Enum) ||| SymbolFlags.ValueModule)
+    let ExportHasLocal =
+        (((SymbolFlags.Function ||| SymbolFlags.Class) ||| Enum)
+         ||| SymbolFlags.ValueModule)
 
     /// <summary><code>BlockScopedVariable | Class | Enum</code></summary><returns><c>418u</c></returns>
     [<Literal>]
@@ -194,7 +229,8 @@ module SymbolFlags =
 
     /// <summary><code>Class | Function | Interface</code></summary><returns><c>112u</c></returns>
     [<Literal>]
-    let ExportSupportsDefaultModifier = ((SymbolFlags.Class ||| SymbolFlags.Function) ||| SymbolFlags.Interface)
+    let ExportSupportsDefaultModifier =
+        ((SymbolFlags.Class ||| SymbolFlags.Function) ||| SymbolFlags.Interface)
 
     /// <summary><code>~ExportSupportsDefaultModifier</code></summary><returns><c>4294967183u</c></returns>
     [<Literal>]
@@ -202,7 +238,10 @@ module SymbolFlags =
 
     /// <summary><code>Class | Interface | TypeLiteral | ObjectLiteral | Function</code></summary><returns><c>6256u</c></returns>
     [<Literal>]
-    let LateBindingContainer = ((((SymbolFlags.Class ||| SymbolFlags.Interface) ||| SymbolFlags.TypeLiteral) ||| SymbolFlags.ObjectLiteral) ||| SymbolFlags.Function)
+    let LateBindingContainer =
+        ((((SymbolFlags.Class ||| SymbolFlags.Interface) ||| SymbolFlags.TypeLiteral)
+          ||| SymbolFlags.ObjectLiteral)
+         ||| SymbolFlags.Function)
 
 /// `CheckFlags`, from `tsc/internal/ast/checkflags.go` upstream.
 [<System.Flags>]
@@ -246,7 +285,8 @@ module CheckFlags =
 
     /// <summary><code>HasNonUniformType | HasLiteralType</code></summary><returns><c>192u</c></returns>
     [<Literal>]
-    let NonUniformAndLiteral = (CheckFlags.HasNonUniformType ||| CheckFlags.HasLiteralType)
+    let NonUniformAndLiteral =
+        (CheckFlags.HasNonUniformType ||| CheckFlags.HasLiteralType)
 
     /// <summary><code>ReadPartial | WritePartial</code></summary><returns><c>48u</c></returns>
     [<Literal>]
@@ -303,11 +343,15 @@ module TypeFlags =
 
     /// <summary><code>StringLiteral | NumberLiteral | BigIntLiteral | BooleanLiteral</code></summary><returns><c>15360u</c></returns>
     [<Literal>]
-    let Literal = (((TypeFlags.StringLiteral ||| TypeFlags.NumberLiteral) ||| TypeFlags.BigIntLiteral) ||| TypeFlags.BooleanLiteral)
+    let Literal =
+        (((TypeFlags.StringLiteral ||| TypeFlags.NumberLiteral)
+          ||| TypeFlags.BigIntLiteral)
+         ||| TypeFlags.BooleanLiteral)
 
     /// <summary><code>Enum | Literal | UniqueESSymbol | Nullable</code></summary><returns><c>97292u</c></returns>
     [<Literal>]
-    let Unit = (((TypeFlags.Enum ||| Literal) ||| TypeFlags.UniqueESSymbol) ||| Nullable)
+    let Unit =
+        (((TypeFlags.Enum ||| Literal) ||| TypeFlags.UniqueESSymbol) ||| Nullable)
 
     /// <summary><code>Enum | Literal</code></summary><returns><c>80896u</c></returns>
     [<Literal>]
@@ -319,23 +363,45 @@ module TypeFlags =
 
     /// <summary><code>StringLiteral | NumberLiteral | UniqueESSymbol</code></summary><returns><c>19456u</c></returns>
     [<Literal>]
-    let StringOrNumberLiteralOrUnique = ((TypeFlags.StringLiteral ||| TypeFlags.NumberLiteral) ||| TypeFlags.UniqueESSymbol)
+    let StringOrNumberLiteralOrUnique =
+        ((TypeFlags.StringLiteral ||| TypeFlags.NumberLiteral)
+         ||| TypeFlags.UniqueESSymbol)
 
     /// <summary><code>StringLiteral | NumberLiteral | BigIntLiteral | BooleanLiteral | Void | Undefined | Null</code></summary><returns><c>15388u</c></returns>
     [<Literal>]
-    let DefinitelyFalsy = ((((((TypeFlags.StringLiteral ||| TypeFlags.NumberLiteral) ||| TypeFlags.BigIntLiteral) ||| TypeFlags.BooleanLiteral) ||| TypeFlags.Void) ||| TypeFlags.Undefined) ||| TypeFlags.Null)
+    let DefinitelyFalsy =
+        ((((((TypeFlags.StringLiteral ||| TypeFlags.NumberLiteral)
+             ||| TypeFlags.BigIntLiteral)
+            ||| TypeFlags.BooleanLiteral)
+           ||| TypeFlags.Void)
+          ||| TypeFlags.Undefined)
+         ||| TypeFlags.Null)
 
     /// <summary><code>DefinitelyFalsy | String | Number | BigInt | Boolean</code></summary><returns><c>15868u</c></returns>
     [<Literal>]
-    let PossiblyFalsy = ((((DefinitelyFalsy ||| TypeFlags.String) ||| TypeFlags.Number) ||| TypeFlags.BigInt) ||| TypeFlags.Boolean)
+    let PossiblyFalsy =
+        ((((DefinitelyFalsy ||| TypeFlags.String) ||| TypeFlags.Number)
+          ||| TypeFlags.BigInt)
+         ||| TypeFlags.Boolean)
 
     /// <summary><code>Any | Unknown | String | Number | BigInt | ESSymbol | Void | Undefined | Null | Never | NonPrimitive</code></summary><returns><c>393983u</c></returns>
     [<Literal>]
-    let Intrinsic = ((((((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| TypeFlags.String) ||| TypeFlags.Number) ||| TypeFlags.BigInt) ||| TypeFlags.ESSymbol) ||| TypeFlags.Void) ||| TypeFlags.Undefined) ||| TypeFlags.Null) ||| TypeFlags.Never) ||| TypeFlags.NonPrimitive)
+    let Intrinsic =
+        ((((((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| TypeFlags.String)
+                ||| TypeFlags.Number)
+               ||| TypeFlags.BigInt)
+              ||| TypeFlags.ESSymbol)
+             ||| TypeFlags.Void)
+            ||| TypeFlags.Undefined)
+           ||| TypeFlags.Null)
+          ||| TypeFlags.Never)
+         ||| TypeFlags.NonPrimitive)
 
     /// <summary><code>String | StringLiteral | TemplateLiteral | StringMapping</code></summary><returns><c>12583968u</c></returns>
     [<Literal>]
-    let StringLike = (((TypeFlags.String ||| TypeFlags.StringLiteral) ||| TypeFlags.TemplateLiteral) ||| TypeFlags.StringMapping)
+    let StringLike =
+        (((TypeFlags.String ||| TypeFlags.StringLiteral) ||| TypeFlags.TemplateLiteral)
+         ||| TypeFlags.StringMapping)
 
     /// <summary><code>Number | NumberLiteral | Enum</code></summary><returns><c>67648u</c></returns>
     [<Literal>]
@@ -363,15 +429,28 @@ module TypeFlags =
 
     /// <summary><code>StringLike | NumberLike | BigIntLike | BooleanLike | EnumLike | ESSymbolLike | VoidLike | Null</code></summary><returns><c>12713980u</c></returns>
     [<Literal>]
-    let Primitive = (((((((StringLike ||| NumberLike) ||| BigIntLike) ||| BooleanLike) ||| EnumLike) ||| ESSymbolLike) ||| VoidLike) ||| TypeFlags.Null)
+    let Primitive =
+        (((((((StringLike ||| NumberLike) ||| BigIntLike) ||| BooleanLike) ||| EnumLike)
+           ||| ESSymbolLike)
+          ||| VoidLike)
+         ||| TypeFlags.Null)
 
     /// <summary><code>StringLike | NumberLike | BigIntLike | BooleanLike | EnumLike | ESSymbolLike | Object | NonPrimitive</code></summary><returns><c>13893600u</c></returns>
     [<Literal>]
-    let DefinitelyNonNullable = (((((((StringLike ||| NumberLike) ||| BigIntLike) ||| BooleanLike) ||| EnumLike) ||| ESSymbolLike) ||| TypeFlags.Object) ||| TypeFlags.NonPrimitive)
+    let DefinitelyNonNullable =
+        (((((((StringLike ||| NumberLike) ||| BigIntLike) ||| BooleanLike) ||| EnumLike)
+           ||| ESSymbolLike)
+          ||| TypeFlags.Object)
+         ||| TypeFlags.NonPrimitive)
 
     /// <summary><code>NonPrimitive | StringLike | NumberLike | BigIntLike | BooleanLike | ESSymbolLike | VoidLike | Null</code></summary><returns><c>12812284u</c></returns>
     [<Literal>]
-    let DisjointDomains = (((((((TypeFlags.NonPrimitive ||| StringLike) ||| NumberLike) ||| BigIntLike) ||| BooleanLike) ||| ESSymbolLike) ||| VoidLike) ||| TypeFlags.Null)
+    let DisjointDomains =
+        (((((((TypeFlags.NonPrimitive ||| StringLike) ||| NumberLike) ||| BigIntLike)
+            ||| BooleanLike)
+           ||| ESSymbolLike)
+          ||| VoidLike)
+         ||| TypeFlags.Null)
 
     /// <summary><code>Union | Intersection</code></summary><returns><c>402653184u</c></returns>
     [<Literal>]
@@ -379,7 +458,8 @@ module TypeFlags =
 
     /// <summary><code>Object | Union | Intersection</code></summary><returns><c>403701760u</c></returns>
     [<Literal>]
-    let StructuredType = ((TypeFlags.Object ||| TypeFlags.Union) ||| TypeFlags.Intersection)
+    let StructuredType =
+        ((TypeFlags.Object ||| TypeFlags.Union) ||| TypeFlags.Intersection)
 
     /// <summary><code>TypeParameter | IndexedAccess</code></summary><returns><c>34078720u</c></returns>
     [<Literal>]
@@ -387,11 +467,13 @@ module TypeFlags =
 
     /// <summary><code>TypeVariable | Conditional | Substitution</code></summary><returns><c>117964800u</c></returns>
     [<Literal>]
-    let InstantiableNonPrimitive = ((TypeVariable ||| TypeFlags.Conditional) ||| TypeFlags.Substitution)
+    let InstantiableNonPrimitive =
+        ((TypeVariable ||| TypeFlags.Conditional) ||| TypeFlags.Substitution)
 
     /// <summary><code>Index | TemplateLiteral | StringMapping</code></summary><returns><c>14680064u</c></returns>
     [<Literal>]
-    let InstantiablePrimitive = ((TypeFlags.Index ||| TypeFlags.TemplateLiteral) ||| TypeFlags.StringMapping)
+    let InstantiablePrimitive =
+        ((TypeFlags.Index ||| TypeFlags.TemplateLiteral) ||| TypeFlags.StringMapping)
 
     /// <summary><code>InstantiableNonPrimitive | InstantiablePrimitive</code></summary><returns><c>132644864u</c></returns>
     [<Literal>]
@@ -403,23 +485,52 @@ module TypeFlags =
 
     /// <summary><code>Any | Nullable | Never | Object | Union | Intersection</code></summary><returns><c>403963917u</c></returns>
     [<Literal>]
-    let ObjectFlagsType = (((((TypeFlags.Any ||| Nullable) ||| TypeFlags.Never) ||| TypeFlags.Object) ||| TypeFlags.Union) ||| TypeFlags.Intersection)
+    let ObjectFlagsType =
+        (((((TypeFlags.Any ||| Nullable) ||| TypeFlags.Never) ||| TypeFlags.Object)
+          ||| TypeFlags.Union)
+         ||| TypeFlags.Intersection)
 
     /// <summary><code>IndexedAccess | Conditional | Index</code></summary><returns><c>102760448u</c></returns>
     [<Literal>]
-    let Simplifiable = ((TypeFlags.IndexedAccess ||| TypeFlags.Conditional) ||| TypeFlags.Index)
+    let Simplifiable =
+        ((TypeFlags.IndexedAccess ||| TypeFlags.Conditional) ||| TypeFlags.Index)
 
     /// <summary><code>Any | Unknown | String | Number | Boolean | BigInt | ESSymbol | Void | Undefined | Null | Never | NonPrimitive</code></summary><returns><c>394239u</c></returns>
     [<Literal>]
-    let Singleton = (((((((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| TypeFlags.String) ||| TypeFlags.Number) ||| TypeFlags.Boolean) ||| TypeFlags.BigInt) ||| TypeFlags.ESSymbol) ||| TypeFlags.Void) ||| TypeFlags.Undefined) ||| TypeFlags.Null) ||| TypeFlags.Never) ||| TypeFlags.NonPrimitive)
+    let Singleton =
+        (((((((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| TypeFlags.String)
+                 ||| TypeFlags.Number)
+                ||| TypeFlags.Boolean)
+               ||| TypeFlags.BigInt)
+              ||| TypeFlags.ESSymbol)
+             ||| TypeFlags.Void)
+            ||| TypeFlags.Undefined)
+           ||| TypeFlags.Null)
+          ||| TypeFlags.Never)
+         ||| TypeFlags.NonPrimitive)
 
     /// <summary><code>Any | Unknown | StructuredOrInstantiable | StringLike | NumberLike | BigIntLike | BooleanLike | ESSymbol | UniqueESSymbol | NonPrimitive</code></summary><returns><c>536575971u</c></returns>
     [<Literal>]
-    let Narrowable = (((((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| StructuredOrInstantiable) ||| StringLike) ||| NumberLike) ||| BigIntLike) ||| BooleanLike) ||| TypeFlags.ESSymbol) ||| TypeFlags.UniqueESSymbol) ||| TypeFlags.NonPrimitive)
+    let Narrowable =
+        (((((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| StructuredOrInstantiable)
+               ||| StringLike)
+              ||| NumberLike)
+             ||| BigIntLike)
+            ||| BooleanLike)
+           ||| TypeFlags.ESSymbol)
+          ||| TypeFlags.UniqueESSymbol)
+         ||| TypeFlags.NonPrimitive)
 
     /// <summary><code>Any | Unknown | Primitive | Never | Object | Union | Intersection | NonPrimitive | TemplateLiteral | StringMapping</code></summary><returns><c>416808959u</c></returns>
     [<Literal>]
-    let IncludesMask = (((((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| Primitive) ||| TypeFlags.Never) ||| TypeFlags.Object) ||| TypeFlags.Union) ||| TypeFlags.Intersection) ||| TypeFlags.NonPrimitive) ||| TypeFlags.TemplateLiteral) ||| TypeFlags.StringMapping)
+    let IncludesMask =
+        (((((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| Primitive) ||| TypeFlags.Never)
+              ||| TypeFlags.Object)
+             ||| TypeFlags.Union)
+            ||| TypeFlags.Intersection)
+           ||| TypeFlags.NonPrimitive)
+          ||| TypeFlags.TemplateLiteral)
+         ||| TypeFlags.StringMapping)
 
     /// <summary><code>TypeParameter</code></summary><returns><c>524288u</c></returns>
     [<Literal>]
@@ -451,7 +562,11 @@ module TypeFlags =
 
     /// <summary><code>Any | Unknown | Void | Never | Object | Intersection | IncludesInstantiable</code></summary><returns><c>286523411u</c></returns>
     [<Literal>]
-    let NotPrimitiveUnion = ((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| TypeFlags.Void) ||| TypeFlags.Never) ||| TypeFlags.Object) ||| TypeFlags.Intersection) ||| IncludesInstantiable)
+    let NotPrimitiveUnion =
+        ((((((TypeFlags.Any ||| TypeFlags.Unknown) ||| TypeFlags.Void) ||| TypeFlags.Never)
+           ||| TypeFlags.Object)
+          ||| TypeFlags.Intersection)
+         ||| IncludesInstantiable)
 
 /// `ObjectFlags`, from `tsc/internal/checker/types.go` upstream.
 [<System.Flags>]
@@ -510,11 +625,14 @@ module ObjectFlags =
 
     /// <summary><code>ContainsWideningType | ContainsObjectOrArrayLiteral</code></summary><returns><c>196608u</c></returns>
     [<Literal>]
-    let RequiresWidening = (ObjectFlags.ContainsWideningType ||| ObjectFlags.ContainsObjectOrArrayLiteral)
+    let RequiresWidening =
+        (ObjectFlags.ContainsWideningType ||| ObjectFlags.ContainsObjectOrArrayLiteral)
 
     /// <summary><code>ContainsWideningType | ContainsObjectOrArrayLiteral | NonInferrableType</code></summary><returns><c>458752u</c></returns>
     [<Literal>]
-    let PropagatingFlags = ((ObjectFlags.ContainsWideningType ||| ObjectFlags.ContainsObjectOrArrayLiteral) ||| ObjectFlags.NonInferrableType)
+    let PropagatingFlags =
+        ((ObjectFlags.ContainsWideningType ||| ObjectFlags.ContainsObjectOrArrayLiteral)
+         ||| ObjectFlags.NonInferrableType)
 
     /// <summary><code>Mapped | Instantiated</code></summary><returns><c>96u</c></returns>
     [<Literal>]
@@ -522,11 +640,19 @@ module ObjectFlags =
 
     /// <summary><code>ClassOrInterface | Reference | Tuple | Anonymous | Mapped | ReverseMapped | EvolvingArray | InstantiationExpressionType | SingleSignatureType</code></summary><returns><c>50332991u</c></returns>
     [<Literal>]
-    let ObjectTypeKindMask = ((((((((ClassOrInterface ||| ObjectFlags.Reference) ||| ObjectFlags.Tuple) ||| ObjectFlags.Anonymous) ||| ObjectFlags.Mapped) ||| ObjectFlags.ReverseMapped) ||| ObjectFlags.EvolvingArray) ||| ObjectFlags.InstantiationExpressionType) ||| ObjectFlags.SingleSignatureType)
+    let ObjectTypeKindMask =
+        ((((((((ClassOrInterface ||| ObjectFlags.Reference) ||| ObjectFlags.Tuple)
+              ||| ObjectFlags.Anonymous)
+             ||| ObjectFlags.Mapped)
+            ||| ObjectFlags.ReverseMapped)
+           ||| ObjectFlags.EvolvingArray)
+          ||| ObjectFlags.InstantiationExpressionType)
+         ||| ObjectFlags.SingleSignatureType)
 
     /// <summary><code>IsGenericObjectType | IsGenericIndexType</code></summary><returns><c>25165824u</c></returns>
     [<Literal>]
-    let IsGenericType = (ObjectFlags.IsGenericObjectType ||| ObjectFlags.IsGenericIndexType)
+    let IsGenericType =
+        (ObjectFlags.IsGenericObjectType ||| ObjectFlags.IsGenericIndexType)
 
 /// `SignatureFlags`, from `tsc/internal/checker/types.go` upstream.
 [<System.Flags>]
@@ -548,11 +674,17 @@ module SignatureFlags =
 
     /// <summary><code>HasRestParameter | HasLiteralTypes | Construct | Abstract | IsUntypedSignatureInJSFile | IsSignatureCandidateForOverloadFailure</code></summary><returns><c>335u</c></returns>
     [<Literal>]
-    let PropagatingFlags = (((((SignatureFlags.HasRestParameter ||| SignatureFlags.HasLiteralTypes) ||| SignatureFlags.Construct) ||| SignatureFlags.Abstract) ||| SignatureFlags.IsUntypedSignatureInJSFile) ||| SignatureFlags.IsSignatureCandidateForOverloadFailure)
+    let PropagatingFlags =
+        (((((SignatureFlags.HasRestParameter ||| SignatureFlags.HasLiteralTypes)
+            ||| SignatureFlags.Construct)
+           ||| SignatureFlags.Abstract)
+          ||| SignatureFlags.IsUntypedSignatureInJSFile)
+         ||| SignatureFlags.IsSignatureCandidateForOverloadFailure)
 
     /// <summary><code>IsInnerCallChain | IsOuterCallChain</code></summary><returns><c>48u</c></returns>
     [<Literal>]
-    let CallChainFlags = (SignatureFlags.IsInnerCallChain ||| SignatureFlags.IsOuterCallChain)
+    let CallChainFlags =
+        (SignatureFlags.IsInnerCallChain ||| SignatureFlags.IsOuterCallChain)
 
 /// `ElementFlags`, from `tsc/internal/checker/types.go` upstream.
 [<System.Flags>]
@@ -577,11 +709,13 @@ module ElementFlags =
 
     /// <summary><code>Optional | Rest | Variadic</code></summary><returns><c>14u</c></returns>
     [<Literal>]
-    let NonRequired = ((ElementFlags.Optional ||| ElementFlags.Rest) ||| ElementFlags.Variadic)
+    let NonRequired =
+        ((ElementFlags.Optional ||| ElementFlags.Rest) ||| ElementFlags.Variadic)
 
     /// <summary><code>Required | Optional | Variadic</code></summary><returns><c>11u</c></returns>
     [<Literal>]
-    let NonRest = ((ElementFlags.Required ||| ElementFlags.Optional) ||| ElementFlags.Variadic)
+    let NonRest =
+        ((ElementFlags.Required ||| ElementFlags.Optional) ||| ElementFlags.Variadic)
 
 /// `SignatureKind`, from `tsc/internal/checker/types.go` upstream.
 type SignatureKind =
@@ -637,7 +771,14 @@ module NodeBuilderFlags =
 
     /// <summary><code>AllowThisInObjectLiteral | AllowQualifiedNameInPlaceOfIdentifier | AllowAnonymousIdentifier | AllowEmptyUnionOrIntersection | AllowEmptyTuple | AllowEmptyIndexInfoType | AllowNodeModulesRelativePaths</code></summary><returns><c>70221824u</c></returns>
     [<Literal>]
-    let IgnoreErrors = ((((((NodeBuilderFlags.AllowThisInObjectLiteral ||| NodeBuilderFlags.AllowQualifiedNameInPlaceOfIdentifier) ||| NodeBuilderFlags.AllowAnonymousIdentifier) ||| NodeBuilderFlags.AllowEmptyUnionOrIntersection) ||| NodeBuilderFlags.AllowEmptyTuple) ||| NodeBuilderFlags.AllowEmptyIndexInfoType) ||| NodeBuilderFlags.AllowNodeModulesRelativePaths)
+    let IgnoreErrors =
+        ((((((NodeBuilderFlags.AllowThisInObjectLiteral
+              ||| NodeBuilderFlags.AllowQualifiedNameInPlaceOfIdentifier)
+             ||| NodeBuilderFlags.AllowAnonymousIdentifier)
+            ||| NodeBuilderFlags.AllowEmptyUnionOrIntersection)
+           ||| NodeBuilderFlags.AllowEmptyTuple)
+          ||| NodeBuilderFlags.AllowEmptyIndexInfoType)
+         ||| NodeBuilderFlags.AllowNodeModulesRelativePaths)
 
 /// `InternalSymbolName`, from `tsc/internal/ast/symbol.go` upstream.
 [<RequireQualifiedAccess>]
@@ -755,15 +896,24 @@ module NodeFlags =
 
     /// <summary><code>HasImplicitReturn | HasExplicitReturn</code></summary><returns><c>768u</c></returns>
     [<Literal>]
-    let ReachabilityCheckFlags = (NodeFlags.HasImplicitReturn ||| NodeFlags.HasExplicitReturn)
+    let ReachabilityCheckFlags =
+        (NodeFlags.HasImplicitReturn ||| NodeFlags.HasExplicitReturn)
 
     /// <summary><code>ReachabilityCheckFlags | HasAsyncFunctions</code></summary><returns><c>262912u</c></returns>
     [<Literal>]
-    let ReachabilityAndEmitFlags = (ReachabilityCheckFlags ||| NodeFlags.HasAsyncFunctions)
+    let ReachabilityAndEmitFlags =
+        (ReachabilityCheckFlags ||| NodeFlags.HasAsyncFunctions)
 
     /// <summary><code>DisallowInContext | DisallowConditionalTypesContext | YieldContext | DecoratorContext | AwaitContext | JavaScriptFile | InWithStatement | Ambient</code></summary><returns><c>25263104u</c></returns>
     [<Literal>]
-    let ContextFlags = (((((((NodeFlags.DisallowInContext ||| NodeFlags.DisallowConditionalTypesContext) ||| NodeFlags.YieldContext) ||| NodeFlags.DecoratorContext) ||| NodeFlags.AwaitContext) ||| NodeFlags.JavaScriptFile) ||| NodeFlags.InWithStatement) ||| NodeFlags.Ambient)
+    let ContextFlags =
+        (((((((NodeFlags.DisallowInContext ||| NodeFlags.DisallowConditionalTypesContext)
+              ||| NodeFlags.YieldContext)
+             ||| NodeFlags.DecoratorContext)
+            ||| NodeFlags.AwaitContext)
+           ||| NodeFlags.JavaScriptFile)
+          ||| NodeFlags.InWithStatement)
+         ||| NodeFlags.Ambient)
 
     /// <summary><code>YieldContext | AwaitContext</code></summary><returns><c>10240u</c></returns>
     [<Literal>]
@@ -771,7 +921,8 @@ module NodeFlags =
 
     /// <summary><code>PossiblyContainsDynamicImport | PossiblyContainsImportMeta</code></summary><returns><c>1572864u</c></returns>
     [<Literal>]
-    let PermanentlySetIncrementalFlags = (NodeFlags.PossiblyContainsDynamicImport ||| NodeFlags.PossiblyContainsImportMeta)
+    let PermanentlySetIncrementalFlags =
+        (NodeFlags.PossiblyContainsDynamicImport ||| NodeFlags.PossiblyContainsImportMeta)
 
     /// <summary><code>ContainsThis</code></summary><returns><c>128u</c></returns>
     [<Literal>]
@@ -815,7 +966,8 @@ module TokenFlags =
 
     /// <summary><code>BinarySpecifier | OctalSpecifier</code></summary><returns><c>384u</c></returns>
     [<Literal>]
-    let BinaryOrOctalSpecifier = (TokenFlags.BinarySpecifier ||| TokenFlags.OctalSpecifier)
+    let BinaryOrOctalSpecifier =
+        (TokenFlags.BinarySpecifier ||| TokenFlags.OctalSpecifier)
 
     /// <summary><code>HexSpecifier | BinaryOrOctalSpecifier</code></summary><returns><c>448u</c></returns>
     [<Literal>]
@@ -823,15 +975,26 @@ module TokenFlags =
 
     /// <summary><code>Unterminated | HexEscape | UnicodeEscape | ExtendedUnicodeEscape | ContainsInvalidEscape | SingleQuote</code></summary><returns><c>72716u</c></returns>
     [<Literal>]
-    let StringLiteralFlags = (((((TokenFlags.Unterminated ||| TokenFlags.HexEscape) ||| TokenFlags.UnicodeEscape) ||| TokenFlags.ExtendedUnicodeEscape) ||| TokenFlags.ContainsInvalidEscape) ||| TokenFlags.SingleQuote)
+    let StringLiteralFlags =
+        (((((TokenFlags.Unterminated ||| TokenFlags.HexEscape) ||| TokenFlags.UnicodeEscape)
+           ||| TokenFlags.ExtendedUnicodeEscape)
+          ||| TokenFlags.ContainsInvalidEscape)
+         ||| TokenFlags.SingleQuote)
 
     /// <summary><code>Scientific | Octal | ContainsLeadingZero | WithSpecifier | ContainsSeparator | ContainsInvalidSeparator</code></summary><returns><c>25584u</c></returns>
     [<Literal>]
-    let NumericLiteralFlags = (((((TokenFlags.Scientific ||| TokenFlags.Octal) ||| TokenFlags.ContainsLeadingZero) ||| WithSpecifier) ||| TokenFlags.ContainsSeparator) ||| TokenFlags.ContainsInvalidSeparator)
+    let NumericLiteralFlags =
+        (((((TokenFlags.Scientific ||| TokenFlags.Octal) ||| TokenFlags.ContainsLeadingZero)
+           ||| WithSpecifier)
+          ||| TokenFlags.ContainsSeparator)
+         ||| TokenFlags.ContainsInvalidSeparator)
 
     /// <summary><code>Unterminated | HexEscape | UnicodeEscape | ExtendedUnicodeEscape | ContainsInvalidEscape</code></summary><returns><c>7180u</c></returns>
     [<Literal>]
-    let TemplateLiteralLikeFlags = ((((TokenFlags.Unterminated ||| TokenFlags.HexEscape) ||| TokenFlags.UnicodeEscape) ||| TokenFlags.ExtendedUnicodeEscape) ||| TokenFlags.ContainsInvalidEscape)
+    let TemplateLiteralLikeFlags =
+        ((((TokenFlags.Unterminated ||| TokenFlags.HexEscape) ||| TokenFlags.UnicodeEscape)
+          ||| TokenFlags.ExtendedUnicodeEscape)
+         ||| TokenFlags.ContainsInvalidEscape)
 
     /// <summary><code>Unterminated</code></summary><returns><c>4u</c></returns>
     [<Literal>]
@@ -839,7 +1002,10 @@ module TokenFlags =
 
     /// <summary><code>Octal | ContainsLeadingZero | ContainsInvalidSeparator | ContainsInvalidEscape</code></summary><returns><c>26656u</c></returns>
     [<Literal>]
-    let IsInvalid = (((TokenFlags.Octal ||| TokenFlags.ContainsLeadingZero) ||| TokenFlags.ContainsInvalidSeparator) ||| TokenFlags.ContainsInvalidEscape)
+    let IsInvalid =
+        (((TokenFlags.Octal ||| TokenFlags.ContainsLeadingZero)
+          ||| TokenFlags.ContainsInvalidSeparator)
+         ||| TokenFlags.ContainsInvalidEscape)
 
 /// `ModifierFlags`, from `tsc/internal/ast/modifierflags.go` upstream.
 [<System.Flags>]
@@ -876,11 +1042,23 @@ module ModifierFlags =
 
     /// <summary><code>Public | Private | Protected | Readonly | Override</code></summary><returns><c>31u</c></returns>
     [<Literal>]
-    let SyntacticOrJSDocModifiers = ((((ModifierFlags.Public ||| ModifierFlags.Private) ||| ModifierFlags.Protected) ||| ModifierFlags.Readonly) ||| ModifierFlags.Override)
+    let SyntacticOrJSDocModifiers =
+        ((((ModifierFlags.Public ||| ModifierFlags.Private) ||| ModifierFlags.Protected)
+          ||| ModifierFlags.Readonly)
+         ||| ModifierFlags.Override)
 
     /// <summary><code>Export | Ambient | Abstract | Static | Accessor | Async | Default | Const | In | Out | Decorator</code></summary><returns><c>65504u</c></returns>
     [<Literal>]
-    let SyntacticOnlyModifiers = ((((((((((ModifierFlags.Export ||| ModifierFlags.Ambient) ||| ModifierFlags.Abstract) ||| ModifierFlags.Static) ||| ModifierFlags.Accessor) ||| ModifierFlags.Async) ||| ModifierFlags.Default) ||| ModifierFlags.Const) ||| ModifierFlags.In) ||| ModifierFlags.Out) ||| ModifierFlags.Decorator)
+    let SyntacticOnlyModifiers =
+        ((((((((((ModifierFlags.Export ||| ModifierFlags.Ambient) ||| ModifierFlags.Abstract)
+                ||| ModifierFlags.Static)
+               ||| ModifierFlags.Accessor)
+              ||| ModifierFlags.Async)
+             ||| ModifierFlags.Default)
+            ||| ModifierFlags.Const)
+           ||| ModifierFlags.In)
+          ||| ModifierFlags.Out)
+         ||| ModifierFlags.Decorator)
 
     /// <summary><code>SyntacticOrJSDocModifiers | SyntacticOnlyModifiers</code></summary><returns><c>65535u</c></returns>
     [<Literal>]
@@ -888,7 +1066,11 @@ module ModifierFlags =
 
     /// <summary><code>JSDocPublic | JSDocPrivate | JSDocProtected | JSDocReadonly | JSDocOverride</code></summary><returns><c>260046848u</c></returns>
     [<Literal>]
-    let JSDocCacheOnlyModifiers = ((((ModifierFlags.JSDocPublic ||| ModifierFlags.JSDocPrivate) ||| ModifierFlags.JSDocProtected) ||| ModifierFlags.JSDocReadonly) ||| ModifierFlags.JSDocOverride)
+    let JSDocCacheOnlyModifiers =
+        ((((ModifierFlags.JSDocPublic ||| ModifierFlags.JSDocPrivate)
+           ||| ModifierFlags.JSDocProtected)
+          ||| ModifierFlags.JSDocReadonly)
+         ||| ModifierFlags.JSDocOverride)
 
     /// <summary><code>Deprecated</code></summary><returns><c>65536u</c></returns>
     [<Literal>]
@@ -896,23 +1078,35 @@ module ModifierFlags =
 
     /// <summary><code>SyntacticOrJSDocModifiers | SyntacticOnlyModifiers | JSDocOnlyModifiers</code></summary><returns><c>131071u</c></returns>
     [<Literal>]
-    let NonCacheOnlyModifiers = ((SyntacticOrJSDocModifiers ||| SyntacticOnlyModifiers) ||| JSDocOnlyModifiers)
+    let NonCacheOnlyModifiers =
+        ((SyntacticOrJSDocModifiers ||| SyntacticOnlyModifiers) ||| JSDocOnlyModifiers)
 
     /// <summary><code>Public | Private | Protected</code></summary><returns><c>7u</c></returns>
     [<Literal>]
-    let AccessibilityModifier = ((ModifierFlags.Public ||| ModifierFlags.Private) ||| ModifierFlags.Protected)
+    let AccessibilityModifier =
+        ((ModifierFlags.Public ||| ModifierFlags.Private) ||| ModifierFlags.Protected)
 
     /// <summary><code>AccessibilityModifier | Readonly | Override</code></summary><returns><c>31u</c></returns>
     [<Literal>]
-    let ParameterPropertyModifier = ((AccessibilityModifier ||| ModifierFlags.Readonly) ||| ModifierFlags.Override)
+    let ParameterPropertyModifier =
+        ((AccessibilityModifier ||| ModifierFlags.Readonly) ||| ModifierFlags.Override)
 
     /// <summary><code>Private | Protected</code></summary><returns><c>6u</c></returns>
     [<Literal>]
-    let NonPublicAccessibilityModifier = (ModifierFlags.Private ||| ModifierFlags.Protected)
+    let NonPublicAccessibilityModifier =
+        (ModifierFlags.Private ||| ModifierFlags.Protected)
 
     /// <summary><code>Ambient | Public | Private | Protected | Readonly | Abstract | Const | Override | In | Out</code></summary><returns><c>28895u</c></returns>
     [<Literal>]
-    let TypeScriptModifier = (((((((((ModifierFlags.Ambient ||| ModifierFlags.Public) ||| ModifierFlags.Private) ||| ModifierFlags.Protected) ||| ModifierFlags.Readonly) ||| ModifierFlags.Abstract) ||| ModifierFlags.Const) ||| ModifierFlags.Override) ||| ModifierFlags.In) ||| ModifierFlags.Out)
+    let TypeScriptModifier =
+        (((((((((ModifierFlags.Ambient ||| ModifierFlags.Public) ||| ModifierFlags.Private)
+               ||| ModifierFlags.Protected)
+              ||| ModifierFlags.Readonly)
+             ||| ModifierFlags.Abstract)
+            ||| ModifierFlags.Const)
+           ||| ModifierFlags.Override)
+          ||| ModifierFlags.In)
+         ||| ModifierFlags.Out)
 
     /// <summary><code>Export | Default</code></summary><returns><c>2080u</c></returns>
     [<Literal>]
@@ -920,7 +1114,22 @@ module ModifierFlags =
 
     /// <summary><code>Export | Ambient | Public | Private | Protected | Static | Readonly | Abstract | Accessor | Async | Default | Const | Deprecated | Override | In | Out | Decorator</code></summary><returns><c>131071u</c></returns>
     [<Literal>]
-    let All = ((((((((((((((((ModifierFlags.Export ||| ModifierFlags.Ambient) ||| ModifierFlags.Public) ||| ModifierFlags.Private) ||| ModifierFlags.Protected) ||| ModifierFlags.Static) ||| ModifierFlags.Readonly) ||| ModifierFlags.Abstract) ||| ModifierFlags.Accessor) ||| ModifierFlags.Async) ||| ModifierFlags.Default) ||| ModifierFlags.Const) ||| ModifierFlags.Deprecated) ||| ModifierFlags.Override) ||| ModifierFlags.In) ||| ModifierFlags.Out) ||| ModifierFlags.Decorator)
+    let All =
+        ((((((((((((((((ModifierFlags.Export ||| ModifierFlags.Ambient) ||| ModifierFlags.Public)
+                      ||| ModifierFlags.Private)
+                     ||| ModifierFlags.Protected)
+                    ||| ModifierFlags.Static)
+                   ||| ModifierFlags.Readonly)
+                  ||| ModifierFlags.Abstract)
+                 ||| ModifierFlags.Accessor)
+                ||| ModifierFlags.Async)
+               ||| ModifierFlags.Default)
+              ||| ModifierFlags.Const)
+             ||| ModifierFlags.Deprecated)
+            ||| ModifierFlags.Override)
+           ||| ModifierFlags.In)
+          ||| ModifierFlags.Out)
+         ||| ModifierFlags.Decorator)
 
     /// <summary><code>All &amp; ~Decorator</code></summary><returns><c>98303u</c></returns>
     [<Literal>]
@@ -928,7 +1137,10 @@ module ModifierFlags =
 
     /// <summary><code>Export | Static | Accessor | Async | Default</code></summary><returns><c>3872u</c></returns>
     [<Literal>]
-    let JavaScript = ((((ModifierFlags.Export ||| ModifierFlags.Static) ||| ModifierFlags.Accessor) ||| ModifierFlags.Async) ||| ModifierFlags.Default)
+    let JavaScript =
+        ((((ModifierFlags.Export ||| ModifierFlags.Static) ||| ModifierFlags.Accessor)
+          ||| ModifierFlags.Async)
+         ||| ModifierFlags.Default)
 
 /// `ScriptKind`, from `tsc/internal/core/scriptkind.go` upstream.
 type ScriptKind =
@@ -993,4 +1205,3 @@ type DiagnosticDirectivePolicy =
 type CommentDirectiveType =
     | ExpectError = 0u
     | Ignore = 1u
-

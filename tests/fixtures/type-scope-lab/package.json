@@ -1,0 +1,7 @@
+{
+    "name": "type-scope-lab",
+    "version": "1.0.0",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for type parameters in scope (W7, #138). A hoisted delegate takes its owner's type parameters, repeating only an interface constraint; namespace functions are methods; a return-only method parameter keeps its constraint; NoInfer reads the owner's parameter. Tracked in git, no npm install."
+}

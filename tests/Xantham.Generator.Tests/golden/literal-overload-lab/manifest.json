@@ -3,10 +3,10 @@
   "package": "literal-overload-lab",
   "module": "LiteralOverloadLab",
   "counts": {
-    "exact": 8,
-    "ergonomic": 3,
-    "widened": 5,
-    "escape": 1
+    "exact": 7,
+    "ergonomic": 5,
+    "widened": 4,
+    "escape": 0
   },
   "passes": [
     {
@@ -17,10 +17,9 @@
     {
       "pass": "SI - shape-interfaces",
       "total": 29,
-      "exact": 7,
-      "ergonomic": 13,
-      "widened": 8,
-      "escape": 1
+      "exact": 4,
+      "ergonomic": 20,
+      "widened": 5
     },
     {
       "pass": "SE - shape-exports",
@@ -29,7 +28,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 10,
+      "total": 11,
+      "exact": 1,
       "ergonomic": 10
     },
     {

@@ -92,8 +92,11 @@ let private reusableDeclarations declarations =
 let private sourceKey (source: Source) =
     $"{source.Package}@{source.Version}/{source.File}"
 
+/// The settings a catalog consumer shares with its producer. `anyReturnAsUnit` and
+/// `resolveConditionalConstraints` are present only when set, so a profile without them hashes
+/// as it did before the keys existed.
 let private profile (config: GeneratorConfig) =
-    json
+    let settings =
         {|
             inferenceVersion = 1
             lib = config.Lib |> Option.map List.sort
@@ -104,6 +107,25 @@ let private profile (config: GeneratorConfig) =
                 |> Array.map (fun (key, disposition) -> key, sprintf "%A" disposition)
             resolveNoInfer = config.ResolveNoInfer
         |}
+
+    match config.AnyReturnAsUnit, config.ResolveConditionalConstraints with
+    | None, false -> json settings
+    | Some pattern, false ->
+        json
+            {| settings with
+                anyReturnAsUnit = pattern
+            |}
+    | None, true ->
+        json
+            {| settings with
+                resolveConditionalConstraints = true
+            |}
+    | Some pattern, true ->
+        json
+            {| settings with
+                anyReturnAsUnit = pattern
+                resolveConditionalConstraints = true
+            |}
     |> hashText
 
 let private compiler (ctx: Context) =
@@ -752,6 +774,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             yield! Option.toList facts.Default
             yield! facts.Response.TargetTypeId |> ValueOption.toList
             yield! facts.Conditional |> Option.bind _.Branch |> Option.map snd |> Option.toList
+            yield! facts.Conditional |> Option.bind _.Constraint |> Option.toList
         ]
 
     // Export-only handles anchor public aliases. Transitive source closures use intrinsic
@@ -1130,6 +1153,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
                                             Tags = member_.Tags
                                             ReadOnly = not member_.Settable
                                             Type = reference
+                                            Literal = None
                                         }
                                 | ExportConstructor(parameters, returns) ->
                                     FsConstructor
@@ -1490,8 +1514,19 @@ let internal applyWithProducer
                             typeText vars returns
                         ]
 
-                let member_ =
+                let rec member_ =
                     function
+                    | FsSymbolKeyed(symbol, inner) -> Canonical.node "symbol" [ Canonical.text symbol; member_ inner ]
+                    | FsLiteralKeyed(target, literals, inner) ->
+                        Canonical.node
+                            "literal"
+                            [
+                                Canonical.text target
+                                literals
+                                |> Canonical.list (fun (index, text) ->
+                                    Canonical.node "argument" [ string index; Canonical.text text ])
+                                member_ inner
+                            ]
                     | FsProperty property ->
                         Canonical.node
                             "property"

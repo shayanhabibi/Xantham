@@ -1,0 +1,5 @@
+{
+    // W2: a callback typed directly at a property or value whose name matches returns unit
+    // where its source return is `any`.
+    "anyReturnAsUnit": "^on"
+}

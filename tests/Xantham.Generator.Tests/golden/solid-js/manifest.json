@@ -4,9 +4,9 @@
   "module": "SolidJs",
   "counts": {
     "exact": 69,
-    "ergonomic": 146,
-    "widened": 85,
-    "escape": 42
+    "ergonomic": 190,
+    "widened": 82,
+    "escape": 1
   },
   "passes": [
     {
@@ -27,37 +27,34 @@
     {
       "pass": "shape-callbacks",
       "total": 150,
-      "ergonomic": 99,
-      "widened": 47,
-      "escape": 4
+      "ergonomic": 103,
+      "widened": 47
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 986,
+      "total": 978,
       "exact": 15,
-      "ergonomic": 718,
-      "widened": 206,
-      "escape": 47
+      "ergonomic": 824,
+      "widened": 139
     },
     {
       "pass": "SA - shape-aliases",
       "total": 107,
       "exact": 4,
-      "ergonomic": 37,
-      "widened": 65,
-      "escape": 1
+      "ergonomic": 38,
+      "widened": 65
     },
     {
       "pass": "SE - shape-exports",
-      "total": 259,
+      "total": 253,
       "exact": 2,
-      "ergonomic": 189,
-      "widened": 42,
-      "escape": 26
+      "ergonomic": 215,
+      "widened": 36
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 166,
+      "total": 171,
+      "exact": 5,
       "ergonomic": 158,
       "widened": 8
     },

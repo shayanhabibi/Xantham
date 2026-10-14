@@ -1,0 +1,4 @@
+{
+    // Only the entry's own lib reference loads, as it does for @types/node.
+    "lib": []
+}

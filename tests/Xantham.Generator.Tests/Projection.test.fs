@@ -189,7 +189,7 @@ let tests = testList "projection companions" [
             node["projections"].["companions"].[0].["sourceFingerprint"].GetValue<string>()
         Expect.notEqual (fingerprint original) (fingerprint mutated) "source changes invalidate provenance"
         rejects "projection/unsupported" (fun () -> generate "export type Choice = 'auto' | boolean | null | undefined;" |> ignore)
-    testCase "operations carry strict input contracts into actual typed method calls" <| fun _ ->
+    testCase "operations carry strict input contracts into typed method calls and their committed goldens" <| fun _ ->
         use scratch = Scratch.directory "projection-operations"
         let compile = compiler scratch.Path
         let extension = Operations.create {identity with Id = "lab.operations"} scratch.Path operationSelections

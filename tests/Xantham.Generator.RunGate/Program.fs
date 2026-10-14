@@ -96,7 +96,7 @@ let private imports () =
          |> Option.defaultValue 0.0
          |> fun d -> d / 1000.0)
 
-    equal "a namespace re-export's members are callable" 1.0 (PhaseBLab.Exports.utils.clamp.Invoke(5.0, 0.0, 1.0))
+    equal "a namespace re-export's members are callable" 1.0 (PhaseBLab.Exports.utils.clamp (5.0, 0.0, 1.0))
     equal "a StringEnum member reads as its compiled name" (Some PhaseBLab.TimeUnit.Ms) PhaseBLab.Exports.defaults.unit
 
     let mutable ticks: (float * float option) list = []
@@ -2120,6 +2120,168 @@ let private bindingExtensions () =
 
     check "toJSFunc yields the callable JavaScript function" (emitJsExpr increment "$0(1) === 2")
 
+/// W4 (#135): well-known symbol members reach JavaScript under their `Symbol.<name>` key.
+let private symbolMembers () =
+    let resource = SymbolMemberLab.Exports.resource
+    resource.SymbolDispose()
+    check "an Emit-backed symbol method calls the [Symbol.dispose] key" (emitJsExpr resource "$0.disposed === true")
+
+    equal
+        "an Emit-backed getter reads the [Symbol.toStringTag] key"
+        "Lab"
+        SymbolMemberLab.Exports.tagged.SymbolToStringTag
+
+    equal "an iterable iterates as seq without a cast" [ "a"; "b" ] (SymbolMemberLab.Exports.bag |> Seq.toList)
+
+    let convertible = SymbolMemberLab.Exports.convertible
+    equal "a writable symbol property reads the [Symbol.toStringTag] key" "Lab" convertible.SymbolToStringTag
+    convertible.SymbolToStringTag <- "Changed"
+
+    check
+        "an Emit-backed setter writes the [Symbol.toStringTag] key"
+        (emitJsExpr convertible "$0[Symbol.toStringTag] === 'Changed'")
+
+    equal
+        "an optional symbol argument passed as None reaches the call as absent"
+        "none"
+        (convertible.SymbolToPrimitive())
+
+    equal
+        "an optional symbol argument passed as Some reaches the call"
+        "number"
+        (convertible.SymbolToPrimitive "number")
+
+/// W5 (#136): a literal overload reaches JavaScript as a call to its method with the literal
+/// written in.
+let private literalMethods () =
+    let socket = LiteralMethodLab.Exports.socket
+    let mutable closed = None
+    socket.onClose (fun hadError -> closed <- Some hadError) |> ignore
+
+    check
+        "an Emit-backed literal method calls on with the literal and the listener"
+        (emitJsExpr socket "$0.calls.some(c => c[0] === 'close' && c[1] === 2)")
+
+    socket.emitClose true |> ignore
+    equal "the listener receives the emitted argument" (Some true) closed
+
+    let mutable connected = false
+    socket.onConnect (fun () -> connected <- true) |> ignore
+    socket.emitConnect () |> ignore
+    check "a nullary listener runs on a nullary emit" connected
+
+    let mutable attempt = ""
+
+    socket.onConnectionAttempt (
+        LiteralMethodLab.Socket.On.Listener(fun ip port family -> attempt <- $"{ip}:{port}:{family}")
+    )
+    |> ignore
+
+    socket.emit ("connectionAttempt", box "host", box 80., box 4.) |> ignore
+    equal "a delegate listener receives every argument" "host:80:4" attempt
+
+    let mutable custom = 0
+    socket.on ("custom", fun _ -> custom <- custom + 1) |> ignore
+    socket.emit ("custom", box 1) |> ignore
+    equal "the generic overload stays reachable" 1 custom
+
+    socket.onEnd (fun () -> ()) |> ignore
+    check "a literal method a base also declares is callable" (emitJsExpr socket "$0.listeners.end.length === 1")
+
+    let dialog = LiteralMethodLab.Exports.dialog
+    dialog.on_Close (fun () -> ()) |> ignore
+    check "a colliding name still calls on with its literal" (emitJsExpr dialog "$0.listeners.close.length === 1")
+
+    let store = LiteralMethodLab.Exports.store
+    equal "a literal after an argument is written in its position" "text:k" (store.readText "k")
+    equal "the generic overload passes its arguments alone" "plain:k" (store.read "k")
+
+    let logger = LiteralMethodLab.Exports.logger
+    logger.logWarn ()
+
+    check
+        "an omitted optional argument is absent"
+        (emitJsExpr logger "$0.lastArgs.length === 1 && $0.lastArgs[0] === 'warn'")
+
+    logger.logWarn "m"
+    check "a supplied optional argument follows the literal" (emitJsExpr logger "$0.lastArgs.join() === 'warn,m'")
+    logger.logInfo ("a", "b")
+    check "a rest argument spreads after the literal" (emitJsExpr logger "$0.lastArgs.join() === 'info,a,b'")
+
+module QuotedConstants = LiteralMemberLab.Quoted
+
+/// W6 (#137): a literal member is a `[<Literal>]` a pattern matches against, and `Create`
+/// writes it into the object it builds.
+let private literalMembers () =
+    let phaseOf =
+        fun (event: LiteralMemberLab.PhaseEvent) ->
+            match event.eventPhase with
+            | LiteralMemberLab.PhaseEvent.AT_TARGET -> "target"
+            | _ -> "other"
+
+    equal "a [<Literal>] matches the runtime value" "target" (phaseOf LiteralMemberLab.Exports.event)
+
+    let compiled: string = emitJsExpr phaseOf "String($0)"
+    check $"the literal pattern compiles to a comparison with 2: {compiled}" (compiled.Contains "=== 2")
+    check $"the literal is inlined, not read off a module: {compiled}" (not (compiled.Contains "AT_TARGET"))
+
+    // Statement position: the Emit's object literal is parenthesised, or `{` opens a block.
+    LiteralMemberLab.PhaseEvent.Create(eventPhase = 1.0, ``type`` = "x", stopPropagation = ignore)
+    |> ignore
+
+    let pointer =
+        LiteralMemberLab.PointerPhaseEvent.Create(
+            pointerId = 7.0,
+            eventPhase = 2.0,
+            ``type`` = "down",
+            stopPropagation = ignore
+        )
+
+    check
+        "a subtype's Create writes the constants it inherits"
+        (emitJsExpr pointer "$0.AT_TARGET === 2 && $0.NONE === 0 && $0.BUBBLING_PHASE === 3 && $0.pointerId === 7")
+
+    equal "a discriminant is written by Create" "method" (LiteralMemberLab.MethodSignal.Create(name = "n")).kind
+
+    equal
+        "a writable discriminant is written by Create"
+        "writable"
+        (LiteralMemberLab.WritableSignal.Create(name = "n")).kind
+
+    equal "a constants-only Create" """{"NONE":0,"DONE":1}""" (json (LiteralMemberLab.Phases.Create()))
+
+    // In an expression, `LiteralMemberLab.Quoted.marker` names the interface's instance
+    // property (FS0806); `QuotedConstants` abbreviates the module alone.
+    equal
+        "an escaped string literal round-trips through the Emit"
+        QuotedConstants.marker
+        (LiteralMemberLab.Quoted.Create()).marker
+
+    equal "an escaped string literal is the TypeScript value" "it's \"q\" \\ $0 {{x}}" QuotedConstants.marker
+
+
+    equal "a generic Create writes its discriminant" "tagged" (LiteralMemberLab.Tagged<string>.Create(value = "v")).kind
+
+/// W8 (#139): a `typekeyof` key over a tag map reaches JavaScript as the bare tag string.
+let private tagMapKeys () =
+    let doc = TagMapLab.Exports.doc
+    let canvas = doc.createElement (typekeyof<TagMapLab.TagMap, _> _.canvas)
+    equal "a typekeyof key creates the element its tag names" "canvas" canvas.tagName
+    check "a typekeyof key emits the bare tag string" (emitJsExpr doc "$0.last === 'canvas'")
+
+    let marquee = doc.createElement (typekeyof<TagMapLab.DeprecatedTagMap, _> _.marquee)
+    equal "the deprecated-map overload is called with its tag" "marquee" marquee.tagName
+
+    let circle = doc.createSvg (typekeyof _.circle)
+    equal "a single key overload infers its map" "circle" circle.tagName
+
+    let divs = doc.getElementsByTagName (typekeyof<TagMapLab.TagMap, _> _.div)
+    equal "a constrained result types through the key" 1.0 divs.length
+    check "the constrained overload emits the bare tag string" (emitJsExpr doc "$0.last === 'div'")
+
+    let present = doc.hasTag (keyof<TagMapLab.TagMap, _> _.div)
+    check "a keyof key emits the bare tag string" present
+
 [<EntryPoint>]
 let main _ =
     dependencyEntrypoint ()
@@ -2157,6 +2319,10 @@ let main _ =
     recordIndex ()
     callableHybrids ()
     callableOverloads ()
+    symbolMembers ()
+    literalMethods ()
+    literalMembers ()
+    tagMapKeys ()
     patternParameters ()
     exportLayout ()
     subpathLab ()

@@ -22,6 +22,12 @@ notes for the agents and people who come after them. It is not rendered to the s
   `plans/2026-10-06-generator-customization-execution.md` — customization design, implementation
   plan, and verified results/rulings for `agent/generator-customization`. Consumer instructions
   live in `site/content/xantham-cli/guide/customization.md`.
+- `plans/2026-10-13-widening-escape-reduction-design.md` — approved spec for reducing widened and
+  escaped findings (workstreams W1–W9, probe evidence, deferred items); read before changing a
+  finding grade, literal-member emission, symbol-keyed members or tag-map generics.
+- `plans/2026-10-13-w9-early-resolve-findings.md` — W9's experiment record: resolving a
+  conditional at its check type's bound (`resolveConditionalConstraints`, `TR068`), measured on
+  `@types/node`, `type-fest` and `solid-js`, with a recommendation.
 - `fable5-workarounds.md`, `fable-binding-gaps.md`, `fable-utility-types.md` — what Fable 5 and
   `Fable.Core` cost a generated binding. `fable5-workarounds-user-response.md` holds the user's
   answers to `fable5-workarounds.md`, section by section.

@@ -48,7 +48,7 @@ Fidelity tiers used throughout:
 | **Exact** | Same set of values, same operations, statically enforced. |
 | **Ergonomic** | Different shape, equivalent safety (e.g. options object → `[<ParamObject>]` overload). |
 | **Widened** | Strictly more values accepted/produced than TS allows (e.g. template literal → `string`). Safe to *read*, lossy to *write*. |
-| **Escape** | `obj` / dynamic. Present deliberately, marked, never silent. |
+| **Escape** | A stated type or declaration lost: at a reference position, `obj` in place of a type the source declares (`TR063`, `TR064`, `TR003`, `TR054`); elsewhere, a declaration not represented. Present deliberately, marked, never silent. |
 
 A hard lesson carried from the archive: the pre-Wire
 pipeline's worst failures were *silent* — a construct it did not understand was dropped and
@@ -183,7 +183,8 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 | `symbol` / `unique symbol` | `JS.Symbol` | Exact / Widened | unique symbols lose uniqueness; consider erased brand per unique symbol (open). |
 | `object` | `obj` | Widened | |
 | `unknown` | `obj` | Escape-ish | **Decided (D8):** `obj` for now. An erased `Unknown` wrapper forcing explicit narrowing may become a config toggle if it stays cheap to implement. |
-| `any` | `obj` | Escape | `TR008`. Intrinsic name `any`: a written or omitted annotation, or a checker fallback (a circular alias, an inference placeholder). |
+| `any` | `obj` | Ergonomic | `TR008`. Intrinsic name `any`: a written or omitted annotation, a shorthand ambient module, or a diagnosed circular return, accessor or import-alias annotation. A circular type alias is the error type (`TR063`). |
+| `any` as the return of a callback typed directly at a property or value `anyReturnAsUnit` selects | `unit` | Ergonomic | `TR065`, in place of `TR008`. Configured per package (W2); a nested callback, a method, a named callback alias and a delegate keep `obj`. |
 | the checker's error type | `obj` | Escape | `TR063`, with the name the checker keeps (qualified through unresolved parents; empty once a union or optional position reduces it). Intrinsic name `error` or `unresolved`: a reference the program leaves unresolved or invalid, not a source `any`. |
 | `intrinsic` alias body | `obj` | Escape | `TR064`. The marker behind `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`. |
 | `void` (return) | `unit` | Exact | |
@@ -206,7 +207,11 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 - Single literal type (e.g. `kind: "click"`) → the StringEnum/enum case type where one
   exists; else the literal's base primitive, Widened, with the literal recorded in the doc
   comment. In tagged-union positions the tag is consumed by `[<TypeScriptTaggedUnion>]`
-  instead.
+  instead. A required literal parameter of a method overload set is a method of its own
+  (§4.8). A required member, readonly or writable, typed by one string or numeric literal
+  (`readonly AT_TARGET: 2`) reads its primitive with the literal in an XML doc remark, is a
+  `[<Literal>]` in a module of the declaration's name (`Event.AT_TARGET = 2.0`), and is
+  written by `Create` rather than passed to it: Ergonomic, `MB011`/`SP005` (W6).
 - `boolean` literals `true`/`false` → `bool`, Widened, doc-noted.
 
 Wire: `TypeFlags` distinguishes every literal kind; `Value` carries the payload (bigint as
@@ -284,6 +289,18 @@ Policy question with a recommended default:
     concrete on the instance interface.
 - **Callable + properties hybrids** (function with attached props) → interface with an
   `[<Emit "$0($1...)">]` `Invoke` member plus the properties. Ergonomic.
+- **Well-known symbol members** (W4, 2026-10-13) → `[Symbol.iterator]` is `inherit seq<'T>` at
+  the element its iterator yields (`MB008`, Ergonomic); the iterator object is not exposed. Every
+  other well-known key is a named member `Symbol<Name>` under `[<Emit("$0[Symbol.<name>]")>]`
+  (a call adds `()` or `($1...)`, a writable property adds a setter Emit; `MB009`, Ergonomic).
+  An interface whose base already iterates keeps the base's `seq` alone, because F# admits one
+  `seq` instantiation per interface (FS3360); a narrowed iterator stays an Emit member. A key
+  naming the package's own `unique symbol`, a key declared solely by a package's
+  `SymbolConstructor` augmentation (`Symbol.observable`), an optional member, a member whose
+  `Symbol<Name>` is already declared by another member, a class static, a member of an
+  `[<AbstractClass>]` entrypoint and a narrowed iterator `drop-inherited` removed stay dropped
+  (`MB002`, Widened). A declaration with a required symbol member or a `seq` inherit, its own
+  or a base's, carries no `Create` (`SP003`): a ParamObject literal cannot write a symbol key.
 
 *Landed (2026-09-02, phase E).* Bases and intersection operands go through one gate: a base is
 inherited exactly when its reference resolves to a name this run declares as an interface, and
@@ -446,23 +463,33 @@ always was.
   does not, and `TR055` naming the position at every retained site. The rule is a callback of one
   argument or none whose return is not itself a callback; wave seven's lane AK measured every
   other shape breaking, and `tests/fixtures/callback-function-lab` pins each measurement.
+  `anyReturnAsUnit`, a .NET regular expression over property and value names, writes the `any`
+  return of a callback typed directly at a matching name as `unit` (`TR065`, W2); the
+  compiler-library binding selects `^on` for DOM event-handler properties.
 - **Rest parameters and optionals** - `[<ParamArray>]` is required and last, so a signature
   with a rest parameter has no optional tail: `setTimeout(cb, delay?, ...args)` keeps `delay`
   required, of `option` type, where `?delay` ahead of the rest would be FS1212 (landed
   2026-09-02).
-- **Overloads** → overloaded abstract members / static members (legal in F#). Where
-  overloads differ only in literal-typed params (the `addEventListener` pattern:
-  `on(event: "click", cb: MouseCb)`), emit one member per literal with a synthesized name
-  (`onClick`) *in addition to* the general form — Ergonomic tier, config-gated.
+- **Overloads** → overloaded abstract members / static members (legal in F#). An overload
+  keyed by a string literal (a required, non-rest parameter typed by one string literal, in a
+  method of two or more signatures) is a method of its own, named as the method plus the
+  literal in PascalCase (`on(event: "close", cb)` → `onClose(cb)`), `on_Close` where the
+  declaration already has a member of that name. It is reached through
+  `[<Emit("$0.on('close', $1)")>]` and documented with its TypeScript signature; the
+  overloads without a literal keep the TypeScript name, so `on(event: string, ...)` stays
+  (`MB010`, Ergonomic; unconditional, landed 2026-10-13, W5). A required property holding a
+  separable overloaded callback, such as an intersection's member, reads the same way.
+  Exported functions, class statics, optional callbacks and literals nested in a parameter
+  type keep the retained-literal mapping of §4.2.
 - Optional params → F# optional params (`?x: T`) on members; trailing-only, as in TS.
 - Rest params → `[<ParamArray>]`.
 - `this` parameter → `getThisParameterOfSignature`; usually drop (Fable binds `this` via the
   interface receiver); emit doc note when the declared `this` differs from the receiver.
 - Type predicates (`x is Foo`) → return `bool`, Widened, doc-noted. (An erased
   `TypeGuard<'T>` that unlocks a typed read is possible future work.)
-- Generators/iterables → `JS.Iterable` / `seq<'T>` (Fable understands both); async
-  iterables → `JS.AsyncIterable`. Promises → `JS.Promise<'T>` (leave `Async` adaptation to
-  the consumer or an opt-in wrapper layer; don't bake it into bindings).
+- Generators/iterables → Core.TS's `Fable.Core.TS.Es.Iterable` / `AsyncIterable` (not
+  `seq<'T>`). Promises → `JS.Promise<'T>` (leave `Async` adaptation to the consumer or an
+  opt-in wrapper layer; don't bake it into bindings).
 
 *Landed (2026-09-02, phase D) - the compiler-lib group's disposition.* O7 widened everything
 the compiler's own `lib.d.ts` declares to `obj`, "until the shipped compiler-lib package
@@ -479,8 +506,25 @@ Ergonomic finding; one carrying fewer is some other type wearing a familiar name
 as before. `PromiseLike`, `ReadonlyMap` and `ReadonlySet` map with a finding for the
 restriction F# has no binding for.
 
-One absence is deliberate: the *synchronous* iteration protocol (`Iterable`, `Iterator`) has
-no Fable.Core binding, and `seq<'T>` is not one however alike the two look.
+The *synchronous* iteration protocol (`Iterable`, `Iterator`) has no Fable.Core binding, and
+`seq<'T>` is not one however alike the two look. Under the default `widen` disposition it is
+written as Core.TS's own JS-iterable interface, `Fable.Core.TS.Es.Iterable<'T, 'TReturn,
+'TNext>`, as is every other ECMAScript declaration the table does not bind (2026-10-13, W3
+#134; `generator-architecture.md`, "ECMAScript consumer bindings"). `seq<'T>` is still not
+used; W4 owns `[Symbol.iterator]` → `inherit seq<'T>`.
+
+*Superseded (2026-10-13, W3 #134).* Generated bindings are free of Fable.Core's `JS.*`
+bindings except where the Fable compiler or the ecosystem's support pins one. `LibBindings`
+keeps three entries: `Promise` and `PromiseLike` → `JS.Promise<'T>` (Fable.Promise's
+`promise { }` and `Async.AwaitPromise`/`StartAsPromise` are written against it; `PromiseLike`
+keeps its loss finding) and `Error` → `exn` (Fable compiles `System.Exception` to a JavaScript
+`Error`). Every other former entry (`Map`, `Set`, `Date`, `Function`, `ArrayBuffer`, the typed
+arrays, the async-iteration names, ...) is written as its `Fable.Core.TS.Es` declaration at
+its real arity, under every non-ship disposition. Their arity truncations (TR024) and readonly
+or shape losses (TR025) are gone because Core.TS carries the real declarations, and a
+consumer's `U2<Es.ArrayBuffer, Es.SharedArrayBuffer>` is now Core.TS's `ArrayBufferLike`.
+The promise rows bind under `ship` too, so Core.TS returns `JS.Promise` as well.
+`generator-architecture.md`, "ECMAScript consumer bindings", has the measurements.
 
 What it was worth on the workers-types rung: widened findings 528 -> 451, and 39 "type
 parameter is erased: every use of it widened away" findings gone, because a generic whose only
@@ -538,9 +582,12 @@ absence under the live compiler.
   (§4.10). `T extends string` → measure-tagged `string<'T>`? — open; probably drop.
   The head writes the parameters first and one `when` clause after the last, constraints
   joined by `and`. A constraint binds the application too: an argument that widened to `obj`,
-  or is a variable not bound with the same named constraint (a `typekeyof` result), is
-  written as the constraint itself, with a finding - F# rejects `Listener<obj>` against
-  `'E :> Event` outright (landed 2026-09-02).
+  or a variable whose written constraint neither is nor inherits the bound (a `typekeyof`
+  result, a structural-only bound), is written as the constraint itself, with a finding - F#
+  rejects `Listener<obj>` against `'E :> Event` outright (landed 2026-09-02). A variable
+  whose written constraint inherits the bound is applied as written:
+  `querySelectorAll<'E when 'E :> Element>: selectors: string -> NodeListOf<'E>` under
+  `NodeListOf<'TNode when 'TNode :> Node>` (W7.4, 2026-10-13).
   A constraint the run can see is unsatisfiable is not written at all. TypeScript's `extends`
   is structural and `:>` is nominal, so `class Geometry<Attributes extends Wide = Narrow>` -
   where `Narrow` and `Wide` are two `Record<string, …>` aliases with no `inherit` between them -
@@ -552,6 +599,11 @@ absence under the live compiler.
   (`extends keyof T`, `extends string`); this one has a form and is still not provable.
   `tests/fixtures/nominal-lab` pins it, with the two negatives - a bound the argument *is*, and
   a bound the argument `inherit`s - that must keep their `:>` (landed 2026-09-02, wave two).
+- A hoisted declaration (a delegate, an options object) binds the owner's parameters it reads,
+  including through the owner's own declared form (`grid: Grid<T>` inside `Grid<T>`) and
+  through `NoInfer<T>`: `BigInt64Array.Every.Predicate<'TArrayBuffer>`. It repeats a constraint
+  only where the owner's head writes one; an erased-union bound (`ArrayBufferLike`) stays off
+  both with `TP002` (W7.1, W7.2, 2026-10-13). `type-scope-lab` pins the forms.
 - A tagged union (§4.5(2)) binds type parameters like any other declaration, and an inline one hoisted out of a generic signature binds the signature's parameters it reads: `current<T>(): { kind: "ready"; payload: T } | ...` reads `Current.Result<'T>`, so `'T` stays live on the method. `generic-tag-lab` pins the forms (landed 2026-10-09).
 - **Default type arguments** (`interface Foo<T = string>`) — F# permits same-name types with
   different generic arity: emit `type Foo<'T> = ...` *and* `type Foo = Foo<string>` (an
@@ -586,7 +638,11 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   | `keyof T`, `T` in scope | `keyof<'T>` |
   | `K extends keyof T` used only as a key | `keyof<'T>`, `K` unbound |
   | `K extends keyof T` plus `T[K]` | `typekeyof<'T,'R>` at the key, `'R` at the access, `K` replaced by `'R` |
-  | `T[keyof T]` | `obj`, Widened — nothing names the value type |
+  | `T[keyof T]`, `T` in scope | `proptypelock<'T>`, Ergonomic (`TR066`) |
+  | `T[K]`, `K extends keyof T = keyof T` (type-fest `ValueOf`) | `proptypelock<'T>`, Ergonomic (`TR066`) |
+  | `K extends keyof M`, `M` a declared type, used only as a key | `keyof<M>`, `K` unbound (`TP011`) |
+  | `K extends keyof M` plus `M[K]` | `typekeyof<M,'E>` at the key, `'E` at the access (`TP011`) |
+  | `{ [P in keyof T]: V }`, `T` in scope, `V` independent of `P` | `PropertyRecord<'T, V>`, Ergonomic (`TR067`) |
 
   So `get<T, K extends keyof T>(source: T, key: K): T[K]` emits
   `get<'T, 'R> (source: 'T, key: typekeyof<'T, 'R>) : 'R`, and Cloudflare's
@@ -597,8 +653,23 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   a name. The resolve tier now follows index operands and both halves of an indexed access;
   without that the table was not closed over them.
 
-  `proptypekey`/`proptypelock` and `PropertyRecord` are not emitted yet: no fixture has
-  needed them, and `T[keyof T]` widens loudly rather than guessing.
+  *Extended (2026-10-13, W8 #139).* `T[keyof T]` reads as `proptypelock<'T>`, one of `T`'s
+  property types that a `proptypekey` unlocks. A key parameter with no default (`T[K]`,
+  `K extends keyof T`) selects a narrower set than `proptypelock` states, and stays `obj`
+  (`TR020`). A key over a declared map (`HTMLElementTagNameMap`) is written over the map's own
+  name, so `createElement<K extends keyof HTMLElementTagNameMap>(tagName: K):
+  HTMLElementTagNameMap[K]` reads `createElement<'E>: tagName: typekeyof<HTMLElementTagNameMap,
+  'E> -> 'E`. The checker resolves `keyof M` to `M`'s key literals, so Resolve reads `M` off the
+  constraint node (`TypeFacts.KeyOfOperand`). `'E` carries the constraint of the generic
+  parameter the access is applied at (`getElementsByTagName<'E when 'E :> Element>`) where every
+  value `M` declares inherits it nominally; otherwise the argument widens to the constraint
+  (`TR027`). Each map is a distinct F# parameter type, so key-set overloads survive `DO005`.
+  A catalogued map (`HTMLElementTagNameMap` reached from a package) derives no members, so
+  Resolve reads its property types into the key's `TypeFacts.KeyOfValues` and the bound is
+  decided over those. A generic mapped type reaches Shape with no members; Resolve reads its
+  `MappedType` node, and `{ [P in keyof T]: V }` with no modifiers, no `as` clause and a `V`
+  that does not mention `P` reads as `PropertyRecord<'T, V>` (`type-fest` `Stringified`). A
+  value that reads the key (`{ [P in keyof T]: T[P] }`) stays a phantom (`SA002`).
 
 Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
 `Record<string, T>`):
@@ -704,6 +775,16 @@ this section is one of them, and it now has a measurement: a conditional the che
 resolves (`type Decided = string extends string ? number : boolean`) never reaches the shaper
 as a conditional at all — it arrives as `float`, with no finding of any kind.
 
+*Experiment (2026-10-13, W9) — the bound rung.* Under `resolveConditionalConstraints` (off by
+default), a conditional with no usable branch, written over a bounded type parameter, reads the
+checker's distributive constraint (`getBaseConstraintOfType`): the conditional instantiated at
+the bound. `InstanceType<Request>` with `Request extends typeof IncomingMessage` maps to
+`IncomingMessage` and reports `TR068` (Widened), because the link to the parameter is lost. A
+union constraint is refused, since it is the branch union rejected above, and an alias's own
+body stays deferred. A concrete application such as `InstanceType<typeof IncomingMessage>`
+needs none of this: the checker has already resolved it. Measurements are in
+`2026-10-13-w9-early-resolve-findings.md`.
+
 ### 4.12 Tuples
 
 Fable F# tuples *are* JS arrays — a happy exact match:
@@ -731,6 +812,11 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   nothing. (This bit ts2fable hard; it falls out for free here.)
 - Re-exports / barrel files → follow `getAliasedSymbol` to the origin, emit once at the
   origin, alias elsewhere (F# module abbreviations / type abbreviations).
+- A required `function` declaration of a namespace object (`export * as ns`), of `globalThis`
+  or of a class's merged namespace is a method, one per signature, with its own type
+  parameters: `abstract measure<'T when 'T :> Shape>: shape: 'T -> 'T`. TypeScript rejects
+  assignment to a function declaration (TS2630), so no setter is lost. A `const` of a function
+  type stays a property (W7.3, 2026-10-13).
 
 ### 4.14 Names and docs
 

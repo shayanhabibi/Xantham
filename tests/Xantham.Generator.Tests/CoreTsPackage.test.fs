@@ -133,7 +133,7 @@ let tests = testSequenced <| testList "core-ts package" [
         File.WriteAllText(Path.Combine(consumer, "Consumer.fs"), """module Package.Consumer
 let element (value: Package.Binding.Selection) : Fable.Core.TS.Dom.HTMLInputElement = value.element
 let files (value: Package.Binding.Selection) : Fable.Core.TS.Dom.FileList = value.files
-let ready (value: Package.Binding.Selection) : Fable.Core.TS.Es.Promise<Fable.Core.TS.Dom.HTMLInputElement> = value.ready
+let ready (value: Package.Binding.Selection) : Fable.Core.JS.Promise<Fable.Core.TS.Dom.HTMLInputElement> = value.ready
         """)
         dotnet consumer ["build"; "Consumer.fsproj"; "--no-restore"; "--disable-build-servers"; "-m:1"; "-v"; "q"]
 ]

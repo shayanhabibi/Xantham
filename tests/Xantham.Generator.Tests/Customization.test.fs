@@ -80,6 +80,26 @@ let tests =
             let code, errors = compileConsumer generated "module Consumer\nlet value (x: CustomizationEntrypoint.Entrypoint.Widget.Widget) = x.value\n"
             Expect.equal code 0 errors
 
+        testCase "a namespace function is a method of the customization contract (W7.3)" <| fun _ ->
+            use scratch = Scratch.directory "customization-namespace-function"
+            File.WriteAllText(Path.Combine(scratch.Path, "package.json"), "{\"name\":\"customization-namespace\",\"types\":\"index.d.ts\"}")
+            File.WriteAllText(Path.Combine(scratch.Path, "utils.d.ts"), "export declare function clamp(value: number, min: number, max: number): number;\nexport declare const scale: number;\n")
+            File.WriteAllText(Path.Combine(scratch.Path, "index.d.ts"), "export * as utils from './utils';\n")
+            let extension name =
+                { Identity = { Id = "namespace-function"; Version = "1"; Configuration = Map.empty }
+                  Transform = fun model ->
+                    let source = Semantic.members model |> List.find (fun p -> Semantic.jsName p model = name)
+                    let target = Semantic.outputTargets source model |> List.head
+                    Ok (Edits.empty |> Edits.replaceInterop target (Interop.property "renamed")) }
+            let failure = try Pipeline.generateWith [extension "clamp"] GeneratorConfig.Default scratch.Path |> Async.RunSynchronously |> ignore; None with error -> Some (error.ToString())
+            match failure with
+            | Some text -> Expect.stringContains text "customization/property-required" "a method rejects a property replacement"
+            | None -> failtest "expected customization/property-required"
+            let generated = Pipeline.generateWith [extension "scale"] GeneratorConfig.Default scratch.Path |> Async.RunSynchronously
+            let source = generated.Files |> List.filter (fst >> fun n -> n.EndsWith ".fs") |> List.map snd |> String.concat "\n"
+            Expect.stringContains source "abstract clamp: value: float * min: float * max: float -> float" "the function renders as a method"
+            Expect.stringContains source "renamed" "a namespace constant accepts the property replacement"
+
         testCase "type-valued attributes qualify a shipped dependency" <| fun _ ->
             use scratch = Scratch.directory "customization-type-attribute"
             let dependency = Path.Combine(scratch.Path, "node_modules", "customization-dependency")

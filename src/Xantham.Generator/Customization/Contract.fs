@@ -557,6 +557,7 @@ module Replacement =
                         Tags = []
                         ReadOnly = p.ReadOnly
                         Type = p.Type
+                        Literal = None
                     })
 
         ReplacementSpec(values, [], None)

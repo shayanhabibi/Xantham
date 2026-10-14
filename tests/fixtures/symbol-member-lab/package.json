@@ -1,0 +1,8 @@
+{
+    "name": "symbol-member-lab",
+    "version": "1.0.0",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for members keyed by well-known symbols (W4, #135). [Symbol.iterator] inherits seq at its element; other well-known keys read as named members under [<Emit>]; a package's own unique symbol stays dropped (MB002). Tracked in git, no npm install."
+}

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Version>0.2.1</Version>
+    <Version>0.3.0-beta.1</Version>
     <FSharpCoreImplicitPackageVersion>9.0.100</FSharpCoreImplicitPackageVersion>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
     <IsPackable>true</IsPackable>
@@ -46,6 +46,7 @@
     <Compile Include="Shape\Exports.fs" />
     <Compile Include="Shape\ParamObjects.fs" />
     <Compile Include="Shape\Inherited.fs" />
+    <Compile Include="Shape\SymbolMembers.fs" />
     <Compile Include="Shape\Overloads.fs" />
     <Compile Include="Shape\UnionArms.fs" />
     <Compile Include="Shape\Arity.fs" />

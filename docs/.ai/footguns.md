@@ -16,7 +16,30 @@ argument, so `Model<string>` reads as two type arguments. Read heritage nodes an
 
 **Checker alias-symbol identity alone does not name a type.** A transformed type retains the symbol of the alias it came from, so the checker-declared type must equal the type being named before a source name is recovered. `NonNullable<Value>` matched the members of the nullable `Value` and reintroduced `null` on the strength of the shared symbol. A union application of a generic tagged alias is recognised only where its arms correspond to the declared form's arm for arm. An arm that is an instantiation open over a signature parameter reaches the shape tier identity-only, with no members, so it corresponds by its target rather than by its tag.
 
-**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation and the checker's own fallbacks (a circular alias, an inference placeholder), so `TR008` is not proof an author wrote `any`. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
+**`Session.getConstraintOfType` is not the checker's `getConstraintOfType`.** It reads a
+substitution type's preloaded constraint handle. Ask `getBaseConstraintOfType` for a type's
+constraint. For a conditional over a bounded, naked type parameter it is the conditional
+instantiated at the bound. Otherwise it is the union of both branches, which §4.11 rejects as a
+mapping, and over a union bound it is the union of each member's branch.
+
+**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof an author wrote `any`; a circular type alias is the error type. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
+
+**`keyof` over a declared type reaches Shape as that type's key literals.** `K extends keyof
+TagMap` arrives with its constraint resolved to `"div" | "canvas"`; only a `keyof` over a type
+parameter stays an `Index` type with a target. Resolve reads the operand of a literal-bounded
+type parameter off its constraint node into `TypeFacts.KeyOfOperand`; a pass that inspects the
+constraint alone cannot tell `keyof TagMap` from a written literal union.
+
+**An indexed-access type carries no alias arguments.** `type ValueOf<T, K extends keyof T =
+keyof T> = T[K]` reaches Shape with no `AliasTypeArguments`, so `declTypeParams` sees no
+parameters and the alias was emitted `type ValueOf = obj`. `shape-aliases` binds the operand a
+`T[keyof T]` body reads from `ObjectTypeId`; any other indexed-access alias keeps no parameters.
+
+**`getJsDocTags` merges every overload's tags.** Overloads share one symbol, so a
+`@deprecated` written on one `createElement` declaration reaches all of them. Resolve reads each
+overload's own leading JSDoc into `ResolvedSignature.OwnDoc`; `signatureTags` keeps the tags
+that JSDoc writes, and an undocumented overload keeps the shared tags other than `@deprecated`
+(solid-js documents only the first overload of `createSignal`).
 
 **A nullable union hides the application it was written over.** `x?: Job<string>` reaches the shape tier as `Job<string>`'s arms beside `undefined`, and arms no argument re-instantiates are the declared form's own, so a member-set match lands on `Job<T>` outside its scope. Read `TypeFacts.NonNullableApplication` (the union origin's application, from `getNonNullableType`) and apply its arguments; a declared form's own parameters apply only where they are in scope. An alias that already includes `null` (`Maybe<T> | undefined`) leaves no single application in the origin, and its reference depends on the member-set match.
 
@@ -144,6 +167,23 @@ the corresponding lab under `tests/fixtures/` is the reducer.
   bound and apply the ordinary argument check at concrete uses. Dropping the bound on a callback's
   type parameter can give its result a different F# constraint from the exported generic alias
   with the same catalog identity. The generic-defaults lab covers this without nullable types.
+- **A widen-mode consumer does not read the Core.TS catalogue.** `Xantham.Fable.Node` lists no
+  `declarationReferences`, so its compiler library takes the default `widen` and
+  `DeclarationCatalog.applyWithProducer` returns before loading any catalogue. A catalogue is
+  accepted only under an equal inference profile (`lib`, `types`, `groups`, `resolveNoInfer`), and
+  @types/node's program (es2020, through its own `/// <reference lib>`) differs from Core.TS's
+  `esnext`/`dom` ship profile, so listing the catalogue alone fails validation. Under `widen`,
+  `Shape.libBinding` is the only route from a compiler-lib type to a name: `Naming.LibBindings`
+  first (`Promise`/`PromiseLike` → `JS.Promise`, `Error` → `exn`), then Core.TS by bare symbol
+  name (`Fable.Core.TS.Dom` for DOM files and, since W3 #134, `Fable.Core.TS.Es` for ECMAScript
+  files). Namespace members take their bare name, as Core.TS flattens them
+  (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`). A name Core.TS renamed
+  on collision (`Iterator2`) is reachable only under the name it kept, and the compile gate will
+  not catch a same-arity wrong target. A `LibBindings` row splits a type across two families: a
+  consumer's `U2<JS.ArrayBuffer, Es.SharedArrayBuffer>` was a different F# type from Core.TS's
+  `ArrayBufferLike` until the row went. `Promise` and `PromiseLike` are bound under `ship` as
+  well (`LibBindings.bindsWhenShipped`), so Core.TS's own members return `JS.Promise` and unify
+  with a consumer's; Core.TS still declares `Es.Promise`, which nothing it emits references.
 
 ## Generator passes
 
@@ -151,6 +191,25 @@ the corresponding lab under `tests/fixtures/` is the reducer.
 ambient modules are harvested alphabetically. "The declaring module wins" is unimplementable;
 `Shape/Classes.fs` uses the class's own binding specifier instead, falling back to the first
 harvested occurrence, and reports `SC010` per dropped member.
+
+**`__@<name>@<id>` does not identify a well-known symbol.** A package's own `declare const
+iterator: unique symbol` escapes to the same `__@iterator@<id>` as `[Symbol.iterator]`. Resolve
+reads the declaration's computed name `Symbol.<name>` into `ResolvedMember.WellKnownSymbol`; a
+pass that decides on the escaped name alone emits the impostor as `[Symbol.iterator]`. The
+spelling `Symbol.<name>` is not proof either: a package's `declare global` augmentation of
+`SymbolConstructor` (`Symbol.observable`) names a key that is `undefined` at runtime, so Resolve
+also requires a `lib.*.d.ts` declaration of the property.
+
+**F# admits one `seq` instantiation per interface.** `NodeListOf<'TNode>` inheriting
+`NodeList`'s `seq<Node>` beside its own `seq<'TNode>` is FS3360 ("may unify"). Only
+`settle-symbol-members` settles which `seq` a declaration keeps, bases first: the base's
+wins, and a narrowed iterator becomes an Emit member. A pass that adds a `seq` inherit after it
+reopens the error.
+
+**A finding cannot be withdrawn.** The tier fold appends each pass's findings, so a member a
+later pass removes keeps the findings raised while shaping it, and the manifest reports a
+widening that is not emitted. Findings that depend on a later decision wait on the model, as
+`ShapeModel.IteratorFindings` does for `[Symbol.iterator]` until `settle-symbol-members`.
 
 **`drop-orphan-delegates` has a failure mode on each side.** The first version retained nothing
 and pushed `AC001` from 8 to 22; the second retained anything whose name fuzzily matched an export
@@ -171,6 +230,39 @@ declaration's own free parameter keeps the name; `Coalesce<string>` renders `obj
 earlier and mapping over `model.Decls` looking for `FsExports` matches nothing, silently produces
 no output, and has no container name to key its findings on. `expand-union-arms` cost an
 afternoon to this.
+
+**`literalOverloadSets` and `shapeMembers` must read the same literal keys.** Both decide
+through `Spec.isLiteralKeyed` and `Spec.literalKeys` whether a literal is a method name (W5) or
+a retained single-case StringEnum. If they diverge, a StringEnum is declared that nothing reads,
+or a literal parameter is both written into an Emit and kept. A callback-valued property is
+tested on its declared type in `literalOverloadSets` and on the type its intersection operands
+agree on in `shapeMembers`; where those differ, the literal widens rather than retains.
+
+**`anyReturnAsUnit` reaches only sites that scope with `selectAnyReturn`.** `delegateRef` writes
+`unit` for a callback's `any` return when its owner equals `ShapeModel.AnyReturnOwner`, which only
+`Spec.selectAnyReturn` sets. A new property or value site that calls `typeRef` without it keeps
+`obj` for a selected name. A stale owner affects only a callback whose owner string is identical.
+The pattern is part of `DeclarationCatalog.profile` when set, so a catalog consumer whose pattern
+differs from its producer's fails the inference-profile check. Every Core.TS catalog consumer sets
+`^on`.
+
+**A `[<ParamObject>]` Emit that spreads `$0` is parenthesised.** In statement position `{`
+opens a block, so `{ kind: 'method', ...$0 }` fails with `SyntaxError: Unexpected token '...'`;
+`({ kind: 'method', ...$0 })` works in every position (spec probe 10). A literal value written
+into an Emit template escapes `$`, `{` and `}` as `\x24`, `\x7B` and `\x7D`, because Fable's Emit
+macro reads them as argument holes; `Render.jsString` does both.
+
+**A declared form's arguments are its enclosing declaration's parameters.** Written inside
+`interface Grid<T>`, `Grid<T>` is the generic target itself (`ownArguments` non-empty), not an
+instantiation. `freeTypeParams` reads a named declaration's arguments in both cases; a walk that
+skips the declared form leaves a hoisted delegate without the owner's `'T`, and every use of it
+widens with `TR012`/`TR013` (188 typed-array delegates in Core.TS before W7).
+
+**A namespace member's symbol is an `Alias` when it is re-exported.** `export { f } from "./f"`
+inside a namespace object gives `ResolvedMember.Symbol` the `Alias` flag, not `Function`.
+Decide method form on `ResolvedMember.ResolvesToFunction` through `Spec.emitsAsMethod`, never on
+`SymbolFlags` alone. `Customization/Semantics.fs` classifies through the same predicate
+(`Spec.emitsAsMethodWith`), so a customization contract and the rendered member agree.
 
 **A finding needs a row in `FindingCodes.table`, not just a registered union.** Registering the
 kind in `FindingCatalogue` is enough to compile and enough for the pass to run; the missing code
@@ -228,12 +320,44 @@ compiled from source, and excluding it fails with `Cannot find inline member`. I
 its sources under `fable/` for the same reason; a package without them fails the same way at a
 consumer's first helper call.
 
+**Fable gives no Fable.Core `JS.*` type a mapping a binding can rely on.** Checked against
+`fable-compiler/Fable` at tag 5.17.2 (the tool pin) on 2026-10-13. The compiler matches the
+`Fable.Core.JS.` namespace as a whole: its entities resolve to the global of their display name
+(`FSharp2Fable.Util.fs` `tryGlobalOrImportedAttributes`), are not replacement candidates, and
+keep unmangled members. Core.TS declares interfaces, which Fable leaves unmangled, and reaches
+values through attribute-carrying members, so it needs none of that.
+The only per-type cases are `JS.Map`2` and `JS.Set`1` (`Fable2Babel.fs`), annotated as
+fable-library's `IMap`/`ISet` in TypeScript output only, which `Dictionary`/`HashSet` implement at
+runtime; F# type-checks no conversion from either. So a `JS.*` spelling buys a consumer nothing
+the Core.TS declaration does not, and costs unification with every Core.TS API. `LibBindings`
+keeps `Error` → `exn` (Fable compiles `System.Exception` to a JavaScript `Error`) and `Promise`
+/`PromiseLike` → `JS.Promise`, because Fable.Promise's `promise { }` and
+`Async.AwaitPromise`/`StartAsPromise` are written against `JS.Promise` (lead decision, W3 #134).
+A future row needs a reason of one of those two kinds. The promise rows also bind under `ship`;
+a row that binds only for consumers splits a type between Core.TS and its consumers.
+
+**A same-named module loses qualified expression lookup to an interface member.** `module
+Event` of `[<Literal>]` values beside `[<Interface>] type Event` in `module rec M` resolves the
+fully qualified `M.Event.AT_TARGET` in an expression to the interface's instance property
+(FS0806, "Property 'AT_TARGET' is not static"); a pattern resolves it to the literal. After
+`open M`, the unqualified `Event.AT_TARGET` resolves to the literal in both positions. A module
+abbreviation (`module EventConstants = M.Event`) names the module alone for qualified access.
+`Event.Create` resolves to the type's static, since the module declares no `Create`; W6 keeps a
+literal named `Create` out of the module.
+
 ## Build and test environment
 
 **Nested `dotnet build` inside a test stalls under `dotnet test`.** Idle MSBuild nodes hold the
 test host's stdout, reproduced three times in one lane. `build.fsx` runs the Expecto executables
 directly, and nested builds carry a copy of the root `global.json` beside their scratch project
 inside the repository (`.claude/rules/tests.md`).
+
+**The CLI prefers its `xantham tsc init` cache to the parent walk.** Its compiler precedence is
+`XANTHAM_TSGO_EXE`, then the cache, then the walk up from the package. A stale cached compiler
+crashed on `type-fest` (`json: cannot marshal … +Inf` from `getDeclaredTypeOfSymbol`) while the
+test suite passed. When measuring with `dotnet run --project src/Xantham.Cli -- generate`, set
+`XANTHAM_TSGO_EXE` to the root install's `tsc.exe`, and check each off-mode `manifest.json`
+against the committed one.
 
 **`tools/workspace.fsx` exports `XANTHAM_TSGO_EXE` from any checkout**, not only a worktree, so
 the catalog suites run in the main checkout. Only a worktree skips `npm install`: the main

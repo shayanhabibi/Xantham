@@ -348,6 +348,124 @@ let private sourceFile (ctx: Context) (path: string) : Async<Ast.SourceFile vopt
         .Value
     |> Async.AwaitTask
 
+/// The description of a `/** */` block, up to its first tag line, with the comment markers and
+/// each line's leading `*` removed.
+let private jsDocDescription (block: string) =
+    block.Substring(3, max 0 (block.Length - 5)).Replace("\r\n", "\n").Split '\n'
+    |> Array.map (fun line ->
+        let line = line.Trim()
+
+        if line.StartsWith "*" then
+            line.Substring(1).Trim()
+        else
+            line)
+    |> Array.takeWhile (fun line -> not (line.StartsWith "@"))
+    |> String.concat "\n"
+    |> _.Trim()
+
+/// A signature declaration's text as the description of the JSDoc written above it and the
+/// declaration on one line, comments outside string literals removed:
+/// `/** Closed. */ on(\n  event: "close",\n): this;` reads `"Closed."` and
+/// `on(event: "close"): this`.
+let internal signatureText (text: string) : string * string =
+    let at (index: int) (token: string) =
+        System.String.CompareOrdinal(text, index, token, 0, token.Length) = 0
+
+    let skipComment (index: int) =
+        if at index "//" then
+            match text.IndexOf('\n', index) with
+            | -1 -> text.Length
+            | newline -> newline + 1
+        else
+            match text.IndexOf("*/", index + 2, System.StringComparison.Ordinal) with
+            | -1 -> text.Length
+            | close -> close + 2
+
+    let mutable index = 0
+    let mutable comment = ""
+    let mutable leading = true
+
+    while leading && index < text.Length do
+        if System.Char.IsWhiteSpace text[index] then
+            index <- index + 1
+        elif at index "//" || at index "/*" then
+            let next = skipComment index
+
+            if at index "/**" && next - index >= 5 then
+                comment <- jsDocDescription (text.Substring(index, next - index))
+
+            index <- next
+        else
+            leading <- false
+
+    let body = System.Text.StringBuilder()
+
+    let space () =
+        if body.Length > 0 && body[body.Length - 1] <> ' ' then
+            body.Append ' ' |> ignore
+
+    let mutable quote = None
+
+    while index < text.Length do
+        let c = text[index]
+
+        match quote with
+        | Some q ->
+            body.Append c |> ignore
+
+            if c = '\\' && index + 1 < text.Length then
+                body.Append text[index + 1] |> ignore
+                index <- index + 2
+            else
+                if c = q then
+                    quote <- None
+
+                index <- index + 1
+        | None when c = '"' || c = '\'' || c = '`' ->
+            quote <- Some c
+            body.Append c |> ignore
+            index <- index + 1
+        | None when at index "//" || at index "/*" ->
+            space ()
+            index <- skipComment index
+        | None when System.Char.IsWhiteSpace c ->
+            space ()
+            index <- index + 1
+        | None ->
+            body.Append c |> ignore
+            index <- index + 1
+
+    let spelling =
+        body.ToString().Trim().Replace("( ", "(").Replace(" )", ")").Replace(",)", ")").TrimEnd(';').Trim()
+
+    comment, spelling
+
+/// The source of a signature declaration, where its node handle resolves to source text.
+let private signatureSource (ctx: Context) (declaration: string voption) : Async<SignatureSource option> =
+    async {
+        match declaration |> ValueOption.bind NodeHandle.parse with
+        | ValueNone -> return None
+        | ValueSome handle ->
+            match! attempt (sourceFile ctx handle.Path) with
+            | Ok(ValueSome source) ->
+                let node = Node.ofIndex<AnyNode> source handle.Index
+                let text = Ast.sourceText source
+
+                if node.Pos < 0 || node.End > text.Length || node.End <= node.Pos then
+                    return None
+                else
+                    let comment, spelling =
+                        signatureText (text.Substring(node.Pos, node.End - node.Pos))
+
+                    return
+                        Some
+                            {
+                                Spelling = spelling
+                                Comment = comment
+                            }
+            | _ -> return None
+    }
+
 /// A type alias can bind unused parameters that disappear from its resolved type. Read the
 /// declaring alias rather than attaching that fact to a type shared with nongeneric aliases.
 let internal declarationHasTypeParameters (ctx: Context) (symbol: SymbolResponse) =
@@ -575,6 +693,178 @@ let private implementedTypes (ctx: Context) (symbol: SymbolResponse voption) : A
         return contracts |> Array.concat |> Array.distinctBy _.TypeId |> Array.toList
     }
 
+/// The operand `M` of a type parameter declared `K extends keyof M`, read from the constraint
+/// node.
+let private keyOfOperandOf (ctx: Context) (parameter: SymbolResponse) : Async<TypeResponse voption> =
+    async {
+        match
+            parameter.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | None -> return ValueNone
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            let operand =
+                match file with
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    if node.Kind = SyntaxKind.TypeParameter then
+                        Node.retag<AnyNode, TypeParameterDeclaration> node
+                        |> TypeParameterDeclaration.``constraint``
+                        |> ValueOption.filter (fun bound -> bound.Kind = SyntaxKind.TypeOperator)
+                        |> ValueOption.map Node.retag<TypeNode, TypeOperatorNode>
+                        |> ValueOption.filter (fun bound ->
+                            TypeOperatorNode.operator bound = ValueSome SyntaxKind.KeyOfKeyword)
+                        |> ValueOption.bind TypeOperatorNode.``type``
+                    else
+                        ValueNone
+                | ValueNone -> ValueNone
+
+            match operand with
+            | ValueSome operand ->
+                let location =
+                    NodeHandle.format
+                        {
+                            Index = Node.index operand
+                            Kind = operand.Kind
+                            Path = handle.Path
+                        }
+
+                let! resolved = ctx.Session.getTypeFromTypeNode location
+                return ValueSome resolved
+            | ValueNone -> return ValueNone
+    }
+
+/// Each source file's text, decoded once per blob.
+let private sourceTexts =
+    System.Runtime.CompilerServices.ConditionalWeakTable<byte[], string>()
+
+let private textOf (file: Ast.SourceFile) : string =
+    sourceTexts.GetValue(file.Data, fun _ -> Ast.sourceText file)
+
+/// The node's leading trivia: the whitespace and comments between its full start and its first
+/// token.
+let private leadingTrivia (file: Ast.SourceFile) (index: int) =
+    let text = textOf file
+    let start = Ast.pos file index
+    let finish = Ast.endPos file index
+
+    if start < 0 || finish > text.Length || finish < start then
+        ""
+    else
+        let span = text.Substring(start, finish - start)
+
+        System.Text.RegularExpressions.Regex.Match(span, @"\A(?:\s+|/\*[\s\S]*?\*/|//[^\n]*)*").Value
+
+/// The JSDoc a signature's own declaration writes, or `None` where the declaration is
+/// unavailable.
+let private ownDocOf (ctx: Context) (signature: SignatureResponse) : Async<OverloadDoc option> =
+    async {
+        match signature.Declaration |> ValueOption.bind NodeHandle.parse with
+        | ValueNone -> return None
+        | ValueSome handle ->
+            let! file = sourceFile ctx handle.Path
+
+            match file with
+            | ValueNone -> return None
+            | ValueSome file ->
+                let blocks =
+                    System.Text.RegularExpressions.Regex.Matches(leadingTrivia file handle.Index, @"/\*\*[\s\S]*?\*/")
+
+                if blocks.Count = 0 then
+                    return Some Undocumented
+                else
+                    return
+                        blocks
+                        |> Seq.collect (fun block ->
+                            System.Text.RegularExpressions.Regex.Matches(block.Value, @"(?:^|[\s*])@(\w+)")
+                            |> Seq.map _.Groups[1].Value)
+                        |> Set.ofSeq
+                        |> Documented
+                        |> Some
+    }
+
+/// The operand `T` and value node of a mapped type declared `{ [P in keyof T]: V }`, where `V`
+/// is independent of `P` and the mapping carries no modifiers or `as` clause.
+let private mappedRecordOf (ctx: Context) (symbol: SymbolResponse) : Async<(TypeResponse * TypeResponse) voption> =
+    async {
+        match
+            symbol.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | None -> return ValueNone
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            let nodes =
+                match file with
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    if node.Kind <> SyntaxKind.MappedType then
+                        ValueNone
+                    else
+                        let mapped = Node.retag<AnyNode, MappedTypeNode> node
+
+                        let unmodified =
+                            (MappedTypeNode.readonlyToken mapped).IsNone
+                            && (MappedTypeNode.questionToken mapped).IsNone
+                            && (MappedTypeNode.nameType mapped).IsNone
+
+                        match MappedTypeNode.typeParameter mapped, MappedTypeNode.``type`` mapped with
+                        | ValueSome parameter, ValueSome value when unmodified ->
+                            let key =
+                                TypeParameterDeclaration.name parameter |> ValueOption.bind Identifier.text
+
+                            let operand =
+                                TypeParameterDeclaration.``constraint`` parameter
+                                |> ValueOption.filter (fun bound -> bound.Kind = SyntaxKind.TypeOperator)
+                                |> ValueOption.map Node.retag<TypeNode, TypeOperatorNode>
+                                |> ValueOption.filter (fun bound ->
+                                    TypeOperatorNode.operator bound = ValueSome SyntaxKind.KeyOfKeyword)
+                                |> ValueOption.bind TypeOperatorNode.``type``
+
+                            let valueText =
+                                let text = textOf file
+                                let start = Ast.pos file (Node.index value)
+                                text.Substring(start, Ast.endPos file (Node.index value) - start)
+
+                            match key, operand with
+                            | ValueSome key, ValueSome operand when
+                                not (
+                                    System.Text.RegularExpressions.Regex.IsMatch(
+                                        valueText,
+                                        $@"(?<![\w$]){System.Text.RegularExpressions.Regex.Escape key}(?![\w$])"
+                                    )
+                                )
+                                ->
+                                ValueSome(Node.index operand, operand.Kind, Node.index value, value.Kind)
+                            | _ -> ValueNone
+                        | _ -> ValueNone
+                | ValueNone -> ValueNone
+
+            match nodes with
+            | ValueSome(operandIndex, operandKind, valueIndex, valueKind) ->
+                let location index kind =
+                    NodeHandle.format
+                        {
+                            Index = index
+                            Kind = kind
+                            Path = handle.Path
+                        }
+
+                let! operand = ctx.Session.getTypeFromTypeNode (location operandIndex operandKind)
+                let! value = ctx.Session.getTypeFromTypeNode (location valueIndex valueKind)
+                return ValueSome(operand, value)
+            | ValueNone -> return ValueNone
+    }
+
 /// Whether a parameter declares the `?` that makes it omittable.
 ///
 /// For a parameter the marker lives on the declaration node alone, reached through the symbol's
@@ -604,6 +894,127 @@ let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : A
                        |> ValueOption.isSome
     }
 
+/// Whether a type parameter is declared by an `infer` clause: its declaration is a type parameter
+/// node under an `InferType` node.
+let private declaredByInfer (ctx: Context) (parameter: TypeResponse) : Async<bool> =
+    async {
+        let! symbol = ctx.Session.getSymbolOfType parameter.Id
+
+        match
+            symbol
+            |> ValueOption.bind _.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | None -> return false
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            return
+                match file with
+                | ValueNone -> false
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    node.Kind = SyntaxKind.TypeParameter
+                    && Node.parent node
+                       |> ValueOption.exists (fun parent -> parent.Kind = SyntaxKind.InferType)
+    }
+
+/// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
+/// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
+/// `lib.*.d.ts` file. A key referencing a package's own `unique symbol` reads `None`, including
+/// one escaped as `__@iterator@<id>`, as does a `SymbolConstructor` property declared solely by a
+/// package's augmentation (`Symbol.observable`).
+let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<string option> =
+    async {
+        match
+            property.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | _ when not (property.Name.StartsWith "__@") -> return None
+        | None -> return None
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            let candidate =
+                match file with
+                | ValueNone -> None
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    let name =
+                        match node.Kind with
+                        | SyntaxKind.PropertySignature ->
+                            Node.retag<AnyNode, PropertySignatureDeclaration> node
+                            |> PropertySignatureDeclaration.name
+                        | SyntaxKind.PropertyDeclaration ->
+                            Node.retag<AnyNode, PropertyDeclaration> node |> PropertyDeclaration.name
+                        | SyntaxKind.MethodSignature ->
+                            Node.retag<AnyNode, MethodSignatureDeclaration> node
+                            |> MethodSignatureDeclaration.name
+                        | SyntaxKind.MethodDeclaration ->
+                            Node.retag<AnyNode, MethodDeclaration> node |> MethodDeclaration.name
+                        | SyntaxKind.GetAccessor ->
+                            Node.retag<AnyNode, GetAccessorDeclaration> node |> GetAccessorDeclaration.name
+                        | SyntaxKind.SetAccessor ->
+                            Node.retag<AnyNode, SetAccessorDeclaration> node |> SetAccessorDeclaration.name
+                        | _ -> ValueNone
+
+                    match name with
+                    | ValueSome name when name.Kind = SyntaxKind.ComputedPropertyName ->
+                        match
+                            Node.retag<PropertyName, ComputedPropertyName> name
+                            |> ComputedPropertyName.expression
+                        with
+                        | ValueSome access when access.Kind = SyntaxKind.PropertyAccessExpression ->
+                            let access = Node.retag<Expression, PropertyAccessExpression> access
+
+                            match PropertyAccessExpression.expression access, PropertyAccessExpression.name access with
+                            | ValueSome receiver, ValueSome key when
+                                receiver.Kind = SyntaxKind.Identifier
+                                && receiver.Text = ValueSome "Symbol"
+                                && key.Kind = SyntaxKind.Identifier
+                                ->
+                                key.Text
+                                |> ValueOption.toOption
+                                |> Option.map (fun text -> text, Node.index key, key.Kind)
+                            | _ -> None
+                        | _ -> None
+                    | _ -> None
+
+            match candidate with
+            | None -> return None
+            | Some(text, index, kind) ->
+                let! symbol =
+                    ctx.Session.getSymbolAtLocation (
+                        NodeHandle.format
+                            {
+                                Index = index
+                                Kind = kind
+                                Path = handle.Path
+                            }
+                    )
+
+                let declaredByLib =
+                    symbol
+                    |> ValueOption.bind _.Declarations
+                    |> ValueOption.defaultValue [||]
+                    |> Array.exists (fun declaration ->
+                        match NodeHandle.parse declaration with
+                        | ValueSome declaration ->
+                            let file = System.IO.Path.GetFileName declaration.Path
+
+                            file.StartsWith("lib.", System.StringComparison.Ordinal)
+                            && file.EndsWith(".d.ts", System.StringComparison.Ordinal)
+                        | ValueNone -> false)
+
+                return if declaredByLib then Some text else None
+    }
+
 let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
     async {
         let! propertyType = ctx.Session.getTypeOfSymbol property.Id
@@ -624,6 +1035,25 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
             else
                 declaresQuestionToken ctx property
 
+        let! symbol =
+            if isProperty then
+                wellKnownSymbol ctx property
+            else
+                async.Return None
+
+        let! resolvesToFunction =
+            if not isProperty then
+                async.Return false
+            elif property.Flags.HasFlag SymbolFlags.Function then
+                async.Return true
+            elif property.Flags.HasFlag SymbolFlags.Alias then
+                async {
+                    let! target = ctx.Session.getAliasedSymbol property.Id
+                    return target.Flags.HasFlag SymbolFlags.Function
+                }
+            else
+                async.Return false
+
         return
             {
                 Symbol = property
@@ -635,6 +1065,8 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
                     || questionToken
                 ReadOnly = readOnly
                 TypeId = propertyType.TypeId
+                WellKnownSymbol = symbol
+                ResolvesToFunction = resolvesToFunction
             },
             propertyType
     }
@@ -670,6 +1102,20 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                     for parameter in typeParameters do
                         registers.SignatureParameters.TryAdd(parameter.TypeId, true) |> ignore
 
+                    // The spelling documents a literal overload's method of its own (W5).
+                    let! source =
+                        if signatures.Length >= 2 then
+                            signatureSource ctx signature.Declaration
+                        else
+                            async.Return None
+
+                    // Per overload: the symbol's tags merge every declaration's.
+                    let! ownDoc =
+                        if signatures.Length > 1 then
+                            ownDocOf ctx signature
+                        else
+                            async.Return None
+
                     return
                         {
                             Parameters = parameterFacts |> Array.map fst |> Array.toList
@@ -677,6 +1123,8 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                             TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
                             IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
                             ReturnTypeId = returnType.TypeId
+                            Source = source
+                            OwnDoc = ownDoc
                         },
                         [
                             yield! channel trace $"{label}-parameter" (parameterFacts |> Array.map snd |> Array.toList)
@@ -1142,14 +1590,24 @@ let private deriveFacts
             if shapeName.IsSome then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
-                // Core.TS preserves DOM generic bounds and heritage. Read that declaration
-                // metadata without walking members, so references can satisfy the same bounds.
+                // Core.TS preserves compiler-library generic bounds and heritage. Read that
+                // declaration metadata without walking members, so a reference written as a
+                // Core.TS name satisfies the same bounds.
+                let readsNominal =
+                    origin = CompilerLib
+                    && (match Grouping.declFile symbol with
+                        | Some file when Grouping.libFamily file = "Dom" -> true
+                        | Some file ->
+                            Grouping.isLibFile file
+                            && shapeName
+                               |> Option.exists (fun name ->
+                                   (Naming.LibBindings.tryFind name).IsNone
+                                   && (GeneratorConfig.disposition ctx.Config CompilerLib = Widen
+                                       || Naming.LibBindings.isPinnedToCoreTs name))
+                        | None -> false)
+
                 let! nominal =
-                    if
-                        origin = CompilerLib
-                        && (Grouping.declFile symbol
-                            |> Option.exists (fun file -> Grouping.libFamily file = "Dom"))
-                    then
+                    if readsNominal then
                         async {
                             let! target =
                                 match ty.Target with
@@ -1291,9 +1749,26 @@ let private deriveFacts
                     let baseTypes =
                         baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
+                    let! mappedRecord =
+                        match symbol with
+                        | ValueSome symbol when
+                            objectFlags.HasFlag ObjectFlags.Mapped
+                            && structure.Members.IsEmpty
+                            && structure.IndexInfos.IsEmpty
+                            ->
+                            mappedRecordOf ctx symbol
+                        | _ -> async.Return ValueNone
+
                     let discovered =
                         [
                             yield! structure.Discovered
+                            yield!
+                                channel
+                                    trace
+                                    "mapped-record"
+                                    (match mappedRecord with
+                                     | ValueSome(operand, value) -> [ operand; value ]
+                                     | ValueNone -> [])
                             yield! constructorDependencies
                             yield! channel trace "base-types" baseTypes
                             yield! channel trace "implemented-types" implemented
@@ -1327,6 +1802,12 @@ let private deriveFacts
                             IntersectionMembers = []
                             Constraint = None
                             Default = None
+                            KeyOfOperand = None
+                            KeyOfValues = []
+                            MappedRecord =
+                                mappedRecord
+                                |> ValueOption.map (fun (operand, value) -> operand.TypeId, value.TypeId)
+                                |> ValueOption.toOption
                             Conditional = None
                             UnionMembers = []
                             NonNullableAlias = None
@@ -1345,6 +1826,31 @@ let private deriveFacts
             let! bound = ctx.Session.getConstraintOfTypeParameter ty.Id
             let! fallback = ctx.Session.getDefaultFromTypeParameter ty.Id
 
+            let! keyOfOperand =
+                match bound, symbol with
+                | ValueSome bound, ValueSome symbol when
+                    bound.Flags.HasFlag TypeFlags.Union
+                    || bound.Flags.HasFlag TypeFlags.StringLiteral
+                    ->
+                    keyOfOperandOf ctx symbol
+                | _ -> async { return ValueNone }
+
+            let! keyOfValues =
+                match keyOfOperand with
+                | ValueSome operand when operand.Flags.HasFlag TypeFlags.Object ->
+                    async {
+                        let! properties = ctx.Session.getPropertiesOfType operand.Id
+
+                        return!
+                            properties
+                            |> ValueOption.defaultValue [||]
+                            |> Array.map (fun property -> ctx.Session.getTypeOfSymbol property.Id)
+                            |> Async.Parallel
+                    }
+                | _ -> async.Return [||]
+
+            let keyOfValues = Array.toList keyOfValues
+
             return
                 { TypeFacts.shallow ty with
                     SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
@@ -1353,10 +1859,14 @@ let private deriveFacts
                         |> Option.map (fun value -> value * uom<Measure.declFile>)
                     Constraint = bound |> ValueOption.map _.TypeId |> ValueOption.toOption
                     Default = fallback |> ValueOption.map _.TypeId |> ValueOption.toOption
+                    KeyOfOperand = keyOfOperand |> ValueOption.map _.TypeId |> ValueOption.toOption
+                    KeyOfValues = keyOfValues |> List.map _.TypeId
                 },
                 [
                     yield! channel trace "constraint" (ValueOption.toList bound)
                     yield! channel trace "default" (ValueOption.toList fallback)
+                    yield! channel trace "keyof-operand" (ValueOption.toList keyOfOperand)
+                    yield! channel trace "keyof-values" keyOfValues
                 ]
         elif has TypeFlags.Index then
             // `keyof T` at an operand the checker could not finish (§4.10). The operand is the
@@ -1491,13 +2001,79 @@ let private deriveFacts
                                 }
                             | None -> async.Return None
 
+                        // The conditional instantiated at its check type's bound (W9): read where no
+                        // branch is taken, or where the taken branch is an `infer` variable, over a
+                        // check type that is a bounded type parameter. An alias's own declaration
+                        // keeps its deferred body.
+                        let! wanted =
+                            if not ctx.Config.ResolveConditionalConstraints then
+                                async.Return false
+                            else
+                                match taken with
+                                | None -> async.Return true
+                                | Some(_, bare) when bare.Flags.HasFlag TypeFlags.TypeParameter ->
+                                    declaredByInfer ctx bare
+                                | Some _ -> async.Return false
+
+                        let! constrained =
+                            if not wanted then
+                                async.Return None
+                            else
+                                async {
+                                    let! checkBare = peeled check
+
+                                    let! bound =
+                                        if checkBare.Flags.HasFlag TypeFlags.TypeParameter then
+                                            ctx.Session.getConstraintOfTypeParameter checkBare.Id
+                                        else
+                                            async.Return ValueNone
+
+                                    // Unbounded, or the alias's own declaration.
+                                    let! refused =
+                                        match bound, alias with
+                                        | ValueNone, _ -> async.Return true
+                                        | ValueSome _, ValueNone -> async.Return false
+                                        | ValueSome _, ValueSome alias ->
+                                            async {
+                                                let! declared = ctx.Session.getDeclaredTypeOfSymbol alias.Id
+                                                return declared.Id = ty.Id
+                                            }
+
+                                    if refused then
+                                        return None
+                                    else
+                                        let! resolved = ctx.Session.getBaseConstraintOfType ty.Id
+
+                                        // The checker's distributive constraint (footguns: not
+                                        // `getConstraintOfType`). A union constraint is the
+                                        // branch union §4.11 rejects, and is refused whole.
+                                        match resolved with
+                                        | ValueSome c when
+                                            c.Id <> ty.Id
+                                            && c.Id <> whenTrue.Id
+                                            && c.Id <> whenFalse.Id
+                                            && not (
+                                                c.Flags.HasFlag TypeFlags.Any
+                                                || c.Flags.HasFlag TypeFlags.Unknown
+                                                || c.Flags.HasFlag TypeFlags.Never
+                                                || c.Flags.HasFlag TypeFlags.Conditional
+                                                || (c.Flags.HasFlag TypeFlags.Union
+                                                    && not (c.Flags.HasFlag TypeFlags.Boolean))
+                                            )
+                                            ->
+                                            return Some c
+                                        | _ -> return None
+                                }
+
                         return
                             Some
                                 {
                                     Name = alias |> ValueOption.map _.Name |> ValueOption.toOption
                                     Branch = taken |> Option.map (fun (side, bare) -> side, bare.TypeId)
+                                    Constraint = constrained |> Option.map _.TypeId
                                 },
                             channel trace "conditional-branch" (taken |> Option.map snd |> Option.toList)
+                            @ channel trace "conditional-constraint" (Option.toList constrained)
                     }
                 else
                     async.Return(None, [])

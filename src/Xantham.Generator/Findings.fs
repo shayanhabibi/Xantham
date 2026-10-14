@@ -145,6 +145,10 @@ module FindingCodes =
             "TR.CallbackOverloadsNotSeparable", "TR062"
             "TR.ErrorTypeToObj", "TR063"
             "TR.IntrinsicMarkerToObj", "TR064"
+            "TR.AnyReturnAsUnit", "TR065"
+            "TR.ValueOfAsPropTypeLock", "TR066"
+            "TR.MappedAsPropertyRecord", "TR067"
+            "TR.ConditionalResolvedToConstraint", "TR068"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -155,6 +159,7 @@ module FindingCodes =
             "TP.ConstraintNotProvenNominal", "TP008"
             "TP.DuplicateTypeParameterCollapsed", "TP009"
             "TP.FunctionConstraintDropped", "TP010"
+            "TP.KeyOverDeclaredMap", "TP011"
             "MB.OptionalParameterAsOption", "MB001"
             "MB.SymbolKeyedMemberDropped", "MB002"
             "MB.OptionalMemberAsOption", "MB003"
@@ -162,6 +167,10 @@ module FindingCodes =
             "MB.OptionalHookAsInterface", "MB005"
             "MB.OptionalParameterFromUnion", "MB006"
             "MB.UnspellableMemberDropped", "MB007"
+            "MB.SymbolIteratorAsSeq", "MB008"
+            "MB.SymbolKeyedMemberAsEmit", "MB009"
+            "MB.LiteralOverloadAsMethod", "MB010"
+            "MB.LiteralMemberAsConstant", "MB011"
             "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
@@ -217,6 +226,7 @@ module FindingCodes =
             "SP.MethodMemberAsCreateParameter", "SP002"
             "SP.CreateNotSynthesized", "SP003"
             "SP.MethodTypeParametersBoundAtCreate", "SP004"
+            "SP.LiteralMembersWrittenByCreate", "SP005"
             "DO.OverloadDropped", "DO001"
             "DO.OverloadsDistinguishedByLiteral", "DO002"
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
@@ -411,7 +421,7 @@ type TypeReference =
     | [<Widened>] LoneEnumMemberToString
     | [<Widened>] StringLiteralToString
     | [<Widened>] NumericLiteralToFloat
-    | [<Escape>] AnyToObj
+    | [<Ergonomic>] AnyToObj
     | [<Widened>] UnknownToObj
     | [<Ergonomic>] PolymorphicThisAsDeclaringType
     | [<Widened>] ThisOutsideDeclaration
@@ -516,6 +526,19 @@ type TypeReference =
     | [<Escape>] ErrorTypeToObj of written: string
     /// The `intrinsic` body of a compiler-implemented alias (`Uppercase`, `NoInfer`).
     | [<Escape>] IntrinsicMarkerToObj
+    /// The source `any` return of a callback typed directly at a property or value that
+    /// `anyReturnAsUnit` selects, written as `unit`.
+    | [<Ergonomic>] AnyReturnAsUnit
+    /// W8 (#139). `T[keyof T]`, with `T` in scope, written as the support package's
+    /// `proptypelock<'T>`: one of the operand's property types, unlocked by a `proptypekey`.
+    | [<Ergonomic>] ValueOfAsPropTypeLock of operand: string
+    /// W8 (#139). `{ [P in keyof T]: V }`, with `T` in scope and `V` independent of `P`, written
+    /// as the support package's `PropertyRecord<'T, V>`: an indexer keyed by `keyof<'T>`.
+    | [<Ergonomic>] MappedAsPropertyRecord of operand: string
+    /// A conditional deferred over a bounded type parameter, written as the conditional
+    /// instantiated at that bound (`InstanceType<Request>` as `IncomingMessage`).
+    /// `resolveConditionalConstraints` selects it.
+    | [<Widened>] ConditionalResolvedToConstraint of conditional: string
 
     interface IFindingKind with
         member this.Message =
@@ -637,6 +660,12 @@ type TypeReference =
             | ErrorTypeToObj "" -> "the checker resolved this reference to its error type; widened to obj"
             | ErrorTypeToObj written -> $"the checker could not resolve {written}; widened to obj"
             | IntrinsicMarkerToObj -> "intrinsic alias body is a compiler marker; widened to obj"
+            | AnyReturnAsUnit -> "any return of a selected callback written as unit"
+            | ValueOfAsPropTypeLock operand -> $"T[keyof T] reads as proptypelock<'{operand}> (§4.10)"
+            | MappedAsPropertyRecord operand ->
+                $"{{ [P in keyof T]: V }} reads as PropertyRecord<'{operand}, V> (§4.10)"
+            | ConditionalResolvedToConstraint conditional ->
+                $"{conditional} written as its value at the check type's bound; the parameter it is applied to is not carried (§4.11)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -659,6 +688,10 @@ type TypeParameters =
     /// The head writes it once, and every signature's uses bind to that single variable.
     | [<Ergonomic>] DuplicateTypeParameterCollapsed of name: string * declared: int
     | [<Widened>] FunctionConstraintDropped of name: string
+    /// W8 (#139). A key over a declared map (`K extends keyof HTMLElementTagNameMap`) written as
+    /// `keyof<Map>`, or as `typekeyof<Map,'E>` with `'E` at `Map[K]` when the signature reads
+    /// the value the key selects.
+    | [<Ergonomic>] KeyOverDeclaredMap of map: string * result: string option
 
     interface IFindingKind with
         member this.Message =
@@ -678,7 +711,10 @@ type TypeParameters =
             | DuplicateTypeParameterCollapsed(name, declared) ->
                 $"'{name}' is declared by {declared} signatures of the same alias; the head writes one variable"
             | FunctionConstraintDropped name ->
-                $"JS.Function constraint on '{name}' is dropped so F# functions can be type arguments; callability is no longer checked"
+                $"Function constraint on '{name}' is dropped so F# functions can be type arguments; callability is no longer checked"
+            | KeyOverDeclaredMap(map, Some result) ->
+                $"key over {map} with its indexed access reads as typekeyof<{map},'{result}> (§4.10)"
+            | KeyOverDeclaredMap(map, None) -> $"key over {map} reads as keyof<{map}> (§4.10)"
 
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]
@@ -694,6 +730,16 @@ type Members =
     /// Wave sixteen. The member's key holds a backtick, which no F# identifier can carry even
     /// backticked: `RegExpConstructor`'s legacy `` $` ``.
     | [<Widened>] UnspellableMemberDropped
+    /// W4. The iterator object returned by `[Symbol.iterator]` is hidden behind `seq`.
+    | [<Ergonomic>] SymbolIteratorAsSeq of element: string
+    /// W4. The member reads as `$0[Symbol.<symbol>]` through `[<Emit>]`.
+    | [<Ergonomic>] SymbolKeyedMemberAsEmit of symbol: string * name: string
+    /// W5. An overload keyed by a string literal reads as a method of its own through `[<Emit>]`.
+    | [<Ergonomic>] LiteralOverloadAsMethod of literal: string * name: string
+    /// W6. A required member typed by one string or numeric literal: the instance reads its
+    /// primitive, the literal is a `[<Literal>]` in the declaration's same-named module, and
+    /// `Create` writes it.
+    | [<Ergonomic>] LiteralMemberAsConstant of literal: string
 
     interface IFindingKind with
         member this.Message =
@@ -706,6 +752,13 @@ type Members =
             | OptionalHookAsInterface asInterface ->
                 $"optional method emitted as the opt-in interface {asInterface} a subclass implements"
             | OptionalParameterFromUnion -> "parameter admits undefined through its type; reads as option"
+            | SymbolIteratorAsSeq element ->
+                $"[Symbol.iterator] reads as inherit seq<{element}>; the iterator object is not exposed"
+            | SymbolKeyedMemberAsEmit(symbol, name) -> $"[Symbol.{symbol}] reads as {name} through [<Emit>]"
+            | LiteralOverloadAsMethod(literal, name) ->
+                $"overload on literal \"{literal}\" reads as {name} through [<Emit>]"
+            | LiteralMemberAsConstant literal ->
+                $"literal member {literal}: read as its primitive, declared as a [<Literal>], written by Create"
 
 // -------------------------------------------------------------------------------------------------
 // Per-pass unions, in pipeline order. Append-only.
@@ -1032,6 +1085,8 @@ type SynthesizeParamObjects =
     /// A generic method carried into `Create`: its type parameters are bound once per `Create`
     /// call, so the object holds one instantiation of a method its interface declares generic.
     | [<Widened>] MethodTypeParametersBoundAtCreate of parameters: string
+    /// W6. Literal members the `Create` Emit writes into the object in place of parameters.
+    | [<Exact>] LiteralMembersWrittenByCreate of members: string
 
     interface IFindingKind with
         member this.Message =
@@ -1042,6 +1097,8 @@ type SynthesizeParamObjects =
             | CreateNotSynthesized reason -> $"no ParamObject Create synthesized: {reason}"
             | MethodTypeParametersBoundAtCreate parameters ->
                 $"generic method's {parameters} bound once per Create call; the object holds one instantiation"
+            | LiteralMembersWrittenByCreate members ->
+                $"Create writes the literal members {members} in its Emit; they are not parameters"
 
 /// `dedupe-overloads`.
 [<Prefix("DO", "dedupe-overloads")>]

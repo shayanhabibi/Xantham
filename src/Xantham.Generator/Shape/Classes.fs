@@ -9,24 +9,28 @@ open Xantham.Generator.Shape.ExportLayout
 
 /// The F# name an already-shaped member answers to, for the collision test below. An indexer is
 /// spelled `Item` (§4.10), which is a name a static could carry too.
-let private shapedMemberName (m: FsMember) =
+let rec private shapedMemberName (m: FsMember) =
     match m with
     | FsProperty p -> p.Name
     | FsMethod m -> m.Name
     | FsIndexer _ -> "Item"
     | FsConstructor _ -> "Create"
     | FsInvoke _ -> "Invoke"
+    | FsSymbolKeyed(_, inner) -> shapedMemberName inner
+    | FsLiteralKeyed(_, _, inner) -> shapedMemberName inner
 
 /// Whether F# admits a static beside an instance member of the same name. Only between two
 /// methods (`Response.json` is both): property over property is FS0441, method over property
 /// FS0434, and a static property under an abstract method is FS3214 at every use.
 let private staticFitsBeside (instance: FsMember) (isMethod: bool) =
     match instance with
-    | FsMethod _ -> isMethod
+    | FsMethod _
+    | FsLiteralKeyed _ -> isMethod
     | FsProperty _
     | FsIndexer _
     | FsConstructor _
-    | FsInvoke _ -> false
+    | FsInvoke _
+    | FsSymbolKeyed _ -> false
 
 /// A class's static, bound through a dotted selector off whatever the class itself binds to:
 /// `[<Import("Counter.MAX", "pkg")>]` is `import { Counter }` then `Counter.MAX`, and
@@ -127,7 +131,7 @@ let shapeClasses: Pass<ShapeModel> =
                         let binding = staticBinding (bindingOf export) key
 
                         let asMethod =
-                            if not (hasAny SymbolFlags.Method m.Symbol.Flags) then
+                            if not (emitsAsMethod model m) then
                                 None
                             else
                                 match Map.tryFind m.TypeId model.Types with
@@ -170,14 +174,21 @@ let shapeClasses: Pass<ShapeModel> =
                                     {
                                         Name = key
                                         Docs = m.Docs
-                                        Tags = m.Tags
+                                        Tags = signatureTags m.Tags signature
                                         TypeParameters = typeParameters
                                         Binding = binding
                                         Body = ExportFunction(parameters, returns)
                                         Settable = false
                                     })
                             | None ->
-                                let reference, refFindings = typeRef ctx model (Some name) owner m.TypeId
+                                let reference, refFindings =
+                                    typeRef
+                                        ctx
+                                        (selectAnyReturn ctx model m.Symbol.Name owner)
+                                        (Some name)
+                                        owner
+                                        m.TypeId
+
                                 findings <- findings @ refFindings
 
                                 if m.Optional then

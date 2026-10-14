@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "package": "tag-map-lab",
+  "module": "TagMapLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 17,
+    "widened": 3,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 23,
+      "exact": 5,
+      "ergonomic": 17,
+      "widened": 1
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 5,
+      "ergonomic": 3,
+      "widened": 2
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 15,
+      "ergonomic": 15
+    }
+  ]
+}

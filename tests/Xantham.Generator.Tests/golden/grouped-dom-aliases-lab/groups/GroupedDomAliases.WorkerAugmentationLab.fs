@@ -100,7 +100,7 @@ type Request =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/body">MDN Reference</a>
     /// </summary>
-    abstract body: Fable.Core.TS.Dom.ReadableStream<JS.Uint8Array> option
+    abstract body: Fable.Core.TS.Dom.ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>> option
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bodyUsed">MDN Reference</a>
     /// </summary>
@@ -108,7 +108,7 @@ type Request =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/arrayBuffer">MDN Reference</a>
     /// </summary>
-    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    abstract arrayBuffer: unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/blob">MDN Reference</a>
     /// </summary>
@@ -116,7 +116,7 @@ type Request =
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bytes">MDN Reference</a>
     /// </summary>
-    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
+    abstract bytes: unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
     /// <summary>
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/formData">MDN Reference</a>
     /// </summary>
@@ -130,7 +130,7 @@ type Request =
     /// </summary>
     abstract text: unit -> JS.Promise<string>
     [<ParamObject; Emit("$0")>]
-    static member Create (cache: Request.Cache, credentials: Request.Credentials, destination: Request.Destination, headers: Fable.Core.TS.Dom.Headers, integrity: string, keepalive: bool, ``method``: string, mode: Request.Mode, redirect: Request.Redirect, referrer: string, referrerPolicy: Request.ReferrerPolicy, signal: Fable.Core.TS.Dom.AbortSignal, url: string, clone: (unit -> Request), cf: string, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<JS.ArrayBuffer>), blob: (unit -> JS.Promise<Fable.Core.TS.Dom.Blob>), bytes: (unit -> JS.Promise<JS.Uint8Array>), formData: (unit -> JS.Promise<Fable.Core.TS.Dom.FormData>), json: (unit -> JS.Promise<obj>), text: (unit -> JS.Promise<string>), ?body: Fable.Core.TS.Dom.ReadableStream<JS.Uint8Array>) : Request = jsNative
+    static member Create (cache: Request.Cache, credentials: Request.Credentials, destination: Request.Destination, headers: Fable.Core.TS.Dom.Headers, integrity: string, keepalive: bool, ``method``: string, mode: Request.Mode, redirect: Request.Redirect, referrer: string, referrerPolicy: Request.ReferrerPolicy, signal: Fable.Core.TS.Dom.AbortSignal, url: string, clone: (unit -> Request), cf: string, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>), blob: (unit -> JS.Promise<Fable.Core.TS.Dom.Blob>), bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>), formData: (unit -> JS.Promise<Fable.Core.TS.Dom.FormData>), json: (unit -> JS.Promise<obj>), text: (unit -> JS.Promise<string>), ?body: Fable.Core.TS.Dom.ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>) : Request = jsNative
 
 module Request =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

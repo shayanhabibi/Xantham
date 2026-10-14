@@ -99,7 +99,8 @@ module Options =
 
     let noFormat =
         Input.option<bool> "--no-format"
-        |> Input.description "Skip source formatting locally; CI still checks formatting"
+        |> Input.description
+            "Skip source formatting locally, and the formatting of generated sources under generate; CI still checks formatting"
         |> Input.def false
 
     let config =
@@ -180,6 +181,15 @@ module Options =
             "Regenerate the golden corpus before asserting against it. Runs the suite twice: once writing, once checking."
         |> Input.def false
 
+    /// Pull-request regeneration: every golden is rewritten and no test is checked. The write
+    /// pass runs only the test cases whose names contain "golden", which are the cases that write
+    /// a golden, so the rest of the suite does not run.
+    let goldensOnly =
+        Input.option<bool> "--goldens"
+        |> Input.description
+            "Regenerate every golden and run nothing else: the write pass only, limited to test cases named \"golden\"."
+        |> Input.def false
+
     let testFilter =
         Input.option<string> "--filter"
         |> Input.description
@@ -215,6 +225,65 @@ module Options =
         |> Input.description
             "Re-vendor the upstream compiler sources before generating. Hits the network, so it is off by default; bump the pin in tools/tsc-ast/upstream.json first."
         |> Input.def false
+
+/// Formats generated F# sources in place with the repository's Fantomas settings, including
+/// files listed in `.fantomasignore`. Each file is formatted as a copy under `tests/.scratch/`
+/// beside an empty `.fantomasignore`, which takes precedence over the repository's.
+module Generated =
+    open System.IO
+
+    let private scratch =
+        Path.Combine(__SOURCE_DIRECTORY__, "tests", ".scratch", "format-generated")
+
+    let format (files: string list) =
+        let files = files |> List.filter File.Exists
+        let names = files |> List.map Path.GetFileName
+
+        if List.length (List.distinct names) <> List.length names then
+            failwith $"Generated files to format share a file name: %A{names}"
+
+        if Directory.Exists scratch then
+            Directory.Delete(scratch, true)
+
+        Directory.CreateDirectory scratch |> ignore
+        File.WriteAllText(Path.Combine(scratch, ".fantomasignore"), "")
+
+        for file in files do
+            File.Copy(file, Path.Combine(scratch, Path.GetFileName file), true)
+
+        let fantomas =
+            System.Diagnostics.Process.Start(
+                System.Diagnostics.ProcessStartInfo(
+                    "dotnet",
+                    $"fantomas \"{scratch}\"",
+                    WorkingDirectory = __SOURCE_DIRECTORY__,
+                    UseShellExecute = false
+                )
+            )
+
+        fantomas.WaitForExit()
+
+        if fantomas.ExitCode <> 0 then
+            failwith $"fantomas exited with {fantomas.ExitCode} formatting generated sources"
+
+        for file in files do
+            File.Copy(Path.Combine(scratch, Path.GetFileName file), file, true)
+
+        Directory.Delete(scratch, true)
+
+    let private wire =
+        Path.Combine(__SOURCE_DIRECTORY__, "src", "Xantham.TypeScript.Wire")
+
+    /// The wire layers `generate ast|proto|session` write, and the test table beside them.
+    let wireLayers () =
+        [
+            yield! Directory.GetFiles(wire, "*.generated.fs")
+            yield!
+                Directory.GetFiles(
+                    Path.Combine(__SOURCE_DIRECTORY__, "tests", "Xantham.TypeScript.Wire.Tests"),
+                    "*.generated.fs"
+                )
+        ]
 
 module Stages =
     let restore =
@@ -398,6 +467,11 @@ module Stages =
         input {
             let! only = Options.generateOnly
             and! sync = Options.syncUpstream
+            and! noFormat = Options.noFormat
+
+            // A worktree reads the main checkout's `@types/node`, as it borrows the compiler.
+            let nodeTypes =
+                System.IO.Path.Combine(Workspace.nodeModulesRoot __SOURCE_DIRECTORY__, "node_modules", "@types", "node")
 
             return
                 stage "generate" {
@@ -455,7 +529,10 @@ module Stages =
                             )
 
                             System.IO.File.Delete(System.IO.Path.Combine(output, "FableCoreTsInput.fs"))
-                            System.IO.File.Delete(System.IO.Path.Combine(output, "symbols.jsonl")))
+
+                            // Before the stamp, which hashes the binding's text.
+                            if not noFormat then
+                                Generated.format [ System.IO.Path.Combine(output, "Fable.Core.TS.fs") ])
 
                         run "dotnet fsi tools/package-core-ts-catalog.fsx -- stamp"
                     }
@@ -464,8 +541,31 @@ module Stages =
                     stage "generate node-lib" {
                         when' (only |> Option.contains Options.NodeLib)
 
-                        run
-                            "dotnet run --project src/Xantham.Cli -- generate node_modules/@types/node -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
+                        run (
+                            cmd
+                                $"dotnet run --project src/Xantham.Cli -- generate \"{nodeTypes}\" -o src/Xantham.Fable.Node --config src/Xantham.Fable.Node/xantham.json"
+                        )
+
+                        run (fun _ ->
+                            if not noFormat then
+                                Generated.format
+                                    [
+                                        System.IO.Path.Combine(
+                                            __SOURCE_DIRECTORY__,
+                                            "src",
+                                            "Xantham.Fable.Node",
+                                            "Node.fs"
+                                        )
+                                    ])
+                    }
+
+                    stage "format wire layers" {
+                        when' (
+                            not noFormat
+                            && [ Options.Ast; Options.Proto; Options.Session ] |> List.exists wanted
+                        )
+
+                        run (fun _ -> Generated.format (Generated.wireLayers ()))
                     }
                 }
         }
@@ -488,14 +588,15 @@ module Stages =
             and! runGate = Options.runGate
             and! isCI = Baked.Common.isCI
             and! shard = Options.testShard
+            and! goldens = Options.goldensOnly
 
             // Each test project is an Expecto console app and runs as its built executable, with
-            // output streamed as written. `--filter` is Expecto's own hint: a substring of the full test name.
+            // output streamed as written. `--filter` is Expecto's own hint: a prefix of the `.`-joined full test name.
             // `cmd` quotes each interpolation hole as one argument, so the flag and its value
             // have to be part of the format string rather than a pre-baked `" --filter ..."` hole.
             let suites = Spec.testProjects |> List.filter _.Name.EndsWith(".Tests")
 
-            let suite (name: string) =
+            let suite (name: string) (goldenWriters: bool) =
                 stage name {
                     if not (System.String.IsNullOrWhiteSpace shard) then
                         stage "sharded suites" {
@@ -520,7 +621,11 @@ module Stages =
                         let assembly = System.IO.Path.Combine(output, project.Name + ".dll")
 
                         let command =
-                            if isCI && System.String.IsNullOrWhiteSpace filter then
+                            if goldenWriters && isCI then
+                                cmd $"dotnet {assembly} --filter-test-case golden --debug --no-spinner"
+                            elif goldenWriters then
+                                cmd $"dotnet {assembly} --filter-test-case golden"
+                            elif isCI && System.String.IsNullOrWhiteSpace filter then
                                 cmd $"dotnet {assembly} --debug --no-spinner"
                             elif isCI then
                                 cmd $"dotnet {assembly} --filter {filter} --debug --no-spinner"
@@ -539,6 +644,18 @@ module Stages =
             return
                 stage "test" {
                     when' (not skipTests)
+
+                    run (fun _ ->
+                        if
+                            goldens
+                            && (update
+                                || not (System.String.IsNullOrWhiteSpace filter)
+                                || not (System.String.IsNullOrWhiteSpace shard))
+                        then
+                            Error "--goldens cannot be combined with --update, --filter or --shard"
+                        else
+                            Ok())
+
                     run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} --no-restore -v q")
 
                     // Regeneration is a *separate* run of the same suite, not a mode of the
@@ -546,12 +663,15 @@ module Stages =
                     // goldens, so asserting in that same pass would only assert that a file
                     // equals what was just written to it. Child processes inherit the variable.
                     stage "regenerate goldens" {
-                        when' update
+                        when' (update || goldens)
                         envVars [ ("XANTHAM_UPDATE_GOLDEN", "1") ]
-                        suite "write"
+                        suite "write" goldens
                     }
 
-                    suite "check"
+                    stage "checked suites" {
+                        when' (not goldens)
+                        suite "check" false
+                    }
                     // The Fable *run* gate (§5 of the architecture plan): the linked goldens compiled
                     // by Fable and executed under node against the fixtures' JavaScript runtimes.
                     // `--noCache` because Fable's up-to-date check missed a changed linked golden once,

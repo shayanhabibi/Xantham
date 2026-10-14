@@ -1,0 +1,1 @@
+{"name":"handler-return-lab","version":"1.0.0","type":"module","types":"index.d.ts","description":"Lab: anyReturnAsUnit ^on writes the any return of a callback typed directly at a selected property or value as unit; an unselected name, a non-callback any, a nested callback, a method and a named callback alias keep obj."}

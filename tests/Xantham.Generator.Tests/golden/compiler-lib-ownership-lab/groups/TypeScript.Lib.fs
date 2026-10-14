@@ -175,6 +175,7 @@ module Es =
         /// <summary>
         /// The kind of element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"class"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class.
@@ -202,8 +203,16 @@ module Es =
         /// </example>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, addInitializer: ((unit -> unit) -> unit), ?name: string, ?metadata: obj) : ClassDecoratorContext<'Class> = jsNative
+        [<ParamObject; Emit("({ kind: 'class', ...$0 })")>]
+        static member Create (addInitializer: ((unit -> unit) -> unit), ?name: string, ?metadata: obj) : ClassDecoratorContext<'Class> = jsNative
+
+    module ClassDecoratorContext =
+        /// <summary>
+        /// The kind of element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"class"</c></remarks>
+        [<Literal>]
+        let kind = "class"
 
     /// <summary>
     /// Context provided to a class method decorator.
@@ -219,6 +228,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"method"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -265,8 +275,30 @@ module Es =
         /// </example>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassMethodDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassMethodDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'method', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassMethodDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassMethodDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassMethodDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"method"</c></remarks>
+        [<Literal>]
+        let kind = "method"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the current value of the method from the provided object.
+            /// </summary>
+            /// <example><c>let fn = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class getter decorator.
@@ -282,6 +314,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"getter"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -306,8 +339,30 @@ module Es =
         /// </summary>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassGetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassGetterDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'getter', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassGetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassGetterDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassGetterDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"getter"</c></remarks>
+        [<Literal>]
+        let kind = "getter"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class setter decorator.
@@ -323,6 +378,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"setter"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -347,8 +403,30 @@ module Es =
         /// </summary>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassSetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassSetterDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'setter', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassSetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassSetterDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassSetterDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"setter"</c></remarks>
+        [<Literal>]
+        let kind = "setter"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Context provided to a class <c>accessor</c> field decorator.
@@ -364,6 +442,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"accessor"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -387,8 +466,35 @@ module Es =
         /// </summary>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassAccessorDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassAccessorDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'accessor', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassAccessorDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassAccessorDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassAccessorDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"accessor"</c></remarks>
+        [<Literal>]
+        let kind = "accessor"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Invokes the getter on the provided object.
+            /// </summary>
+            /// <example><c>let value = context.access.get(instance);</c></example>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Invokes the setter on the provided object.
+            /// </summary>
+            /// <example><c>context.access.set(instance, value);</c></example>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     /// <summary>
     /// Describes the target provided to class <c>accessor</c> field decorators.
@@ -448,6 +554,7 @@ module Es =
         /// <summary>
         /// The kind of class element that was decorated.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"field"</c></remarks>
         abstract kind: string
         /// <summary>
         /// The name of the decorated class element.
@@ -471,8 +578,33 @@ module Es =
         /// </summary>
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, name: obj, ``static``: bool, ``private``: bool, access: ClassFieldDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassFieldDecoratorContext<'This, 'Value> = jsNative
+        [<ParamObject; Emit("({ kind: 'field', ...$0 })")>]
+        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassFieldDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassFieldDecoratorContext<'This, 'Value> = jsNative
+
+    module ClassFieldDecoratorContext =
+        /// <summary>
+        /// The kind of class element that was decorated.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"field"</c></remarks>
+        [<Literal>]
+        let kind = "field"
+
+        [<Interface>]
+        type Access<'This, 'Value> =
+            /// <summary>
+            /// Determines whether an object has a property with the same name as the decorated element.
+            /// </summary>
+            abstract has: ``object``: 'This -> bool
+            /// <summary>
+            /// Gets the value of the field on the provided object.
+            /// </summary>
+            abstract get: ``object``: 'This -> 'Value
+            /// <summary>
+            /// Sets the value of the field on the provided object.
+            /// </summary>
+            abstract set: ``object``: 'This * value: 'Value -> unit
+            [<ParamObject; Emit("$0")>]
+            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     type ClassDecorator<'TFunction when 'TFunction :> Function> = ('TFunction -> 'TFunction option)
 
@@ -1202,8 +1334,6 @@ module Es =
         /// Returns a value as a string value appropriate to the host environment's current locale.
         /// Converts a date and time to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleString: unit -> string
         /// <summary>
         /// Returns a value as a string value appropriate to the host environment's current locale.
@@ -1216,8 +1346,6 @@ module Es =
         /// Returns a date as a string value appropriate to the host environment's current locale.
         /// Converts a date to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleDateString: unit -> string
         /// <summary>
         /// Returns a date as a string value appropriate to the host environment's current locale.
@@ -1230,8 +1358,6 @@ module Es =
         /// Returns a time as a string value appropriate to the host environment's current locale.
         /// Converts a time to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleTimeString: unit -> string
         /// <summary>
         /// Returns a time as a string value appropriate to the host environment's current locale.
@@ -1706,7 +1832,7 @@ module Es =
 
     type PromiseConstructorLike =
         [<EmitConstructor>]
-        abstract Create<'T>: executor: PromiseConstructorLike.Executor<'T> -> PromiseLike<'T>
+        abstract Create<'T>: executor: PromiseConstructorLike.Executor<'T> -> JS.Promise<'T>
 
     [<Interface>]
     type PromiseLike<'T> =
@@ -1716,9 +1842,9 @@ module Es =
         /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, PromiseLike<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, PromiseLike<'TResult2>>) -> PromiseLike<U2<'TResult1, 'TResult2>>
+        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
         [<ParamObject; Emit("$0")>]
-        static member Create (``then``: Func<('T -> U2<'TResult1, PromiseLike<'TResult1>>) option, (obj -> U2<'TResult2, PromiseLike<'TResult2>>) option, PromiseLike<U2<'TResult1, 'TResult2>>>) : PromiseLike<'T> = jsNative
+        static member Create (``then``: Func<('T -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>) : PromiseLike<'T> = jsNative
 
     /// <summary>
     /// Represents the completion of an asynchronous operation
@@ -1731,15 +1857,15 @@ module Es =
         /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, PromiseLike<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, PromiseLike<'TResult2>>) -> Promise<U2<'TResult1, 'TResult2>>
+        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: ('T -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
         /// <summary>
         /// Attaches a callback for only the rejection of the Promise.
         /// </summary>
         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
         /// <returns>A Promise for the completion of the callback.</returns>
-        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, PromiseLike<'TResult>>) -> Promise<U2<'T, 'TResult>>
+        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'T, 'TResult>>
         [<ParamObject; Emit("$0")>]
-        static member Create (``then``: Func<('T -> U2<'TResult1, PromiseLike<'TResult1>>) option, (obj -> U2<'TResult2, PromiseLike<'TResult2>>) option, Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, PromiseLike<'TResult>>) option -> Promise<U2<'T, 'TResult>>)) : Promise<'T> = jsNative
+        static member Create (``then``: Func<('T -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<'T, 'TResult>>)) : Promise<'T> = jsNative
 
     /// <summary>
     /// Recursively unwraps the "awaited type" of a type. Non-promise "thenables" should resolve to <c>never</c>. This emulates the behavior of <c>await</c>.
@@ -2085,7 +2211,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Int8Array.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Int8Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -2110,7 +2236,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Int8Array.Filter.Predicate * ?thisArg: obj -> Int8Array<ArrayBuffer>
+        abstract filter: predicate: Int8Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Int8Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -2124,7 +2250,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Int8Array.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Int8Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -2138,7 +2264,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Int8Array.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Int8Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -2150,7 +2276,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Int8Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Int8Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -2193,7 +2319,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Int8Array.Map.Callbackfn * ?thisArg: obj -> Int8Array<ArrayBuffer>
+        abstract map: callbackfn: Int8Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Int8Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2217,7 +2343,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2241,7 +2367,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Int8Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2265,7 +2391,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Int8Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Int8Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2289,7 +2415,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2313,7 +2439,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Int8Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2337,7 +2463,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Int8Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Int8Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -2366,7 +2492,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Int8Array.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Int8Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -2485,7 +2611,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Uint8Array.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Uint8Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -2510,7 +2636,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Uint8Array.Filter.Predicate * ?thisArg: obj -> Uint8Array<ArrayBuffer>
+        abstract filter: predicate: Uint8Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Uint8Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -2524,7 +2650,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Uint8Array.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Uint8Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -2538,7 +2664,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Uint8Array.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Uint8Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -2550,7 +2676,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Uint8Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Uint8Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -2593,7 +2719,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Uint8Array.Map.Callbackfn * ?thisArg: obj -> Uint8Array<ArrayBuffer>
+        abstract map: callbackfn: Uint8Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Uint8Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2617,7 +2743,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2641,7 +2767,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Uint8Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -2665,7 +2791,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Uint8Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Uint8Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2689,7 +2815,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2713,7 +2839,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Uint8Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -2737,7 +2863,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Uint8Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Uint8Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -2766,7 +2892,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Uint8Array.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Uint8Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -2885,7 +3011,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Uint8ClampedArray.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Uint8ClampedArray.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -2910,7 +3036,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Uint8ClampedArray.Filter.Predicate * ?thisArg: obj -> Uint8ClampedArray<ArrayBuffer>
+        abstract filter: predicate: Uint8ClampedArray.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Uint8ClampedArray<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -2924,7 +3050,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Uint8ClampedArray.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Uint8ClampedArray.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -2938,7 +3064,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Uint8ClampedArray.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Uint8ClampedArray.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -2950,7 +3076,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Uint8ClampedArray.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Uint8ClampedArray.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -2993,7 +3119,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Uint8ClampedArray.Map.Callbackfn * ?thisArg: obj -> Uint8ClampedArray<ArrayBuffer>
+        abstract map: callbackfn: Uint8ClampedArray.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Uint8ClampedArray<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3017,7 +3143,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3041,7 +3167,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Uint8ClampedArray.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3065,7 +3191,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Uint8ClampedArray.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Uint8ClampedArray.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3089,7 +3215,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3113,7 +3239,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3137,7 +3263,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Uint8ClampedArray.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -3166,7 +3292,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Uint8ClampedArray.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Uint8ClampedArray.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -3285,7 +3411,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Int16Array.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Int16Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -3310,7 +3436,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Int16Array.Filter.Predicate * ?thisArg: obj -> Int16Array<ArrayBuffer>
+        abstract filter: predicate: Int16Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Int16Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -3324,7 +3450,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Int16Array.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Int16Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -3338,7 +3464,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Int16Array.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Int16Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -3350,7 +3476,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Int16Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Int16Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -3393,7 +3519,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Int16Array.Map.Callbackfn * ?thisArg: obj -> Int16Array<ArrayBuffer>
+        abstract map: callbackfn: Int16Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Int16Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3417,7 +3543,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3441,7 +3567,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Int16Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3465,7 +3591,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Int16Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Int16Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3489,7 +3615,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3513,7 +3639,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Int16Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3537,7 +3663,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Int16Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Int16Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -3566,7 +3692,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Int16Array.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Int16Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -3685,7 +3811,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Uint16Array.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Uint16Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -3710,7 +3836,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Uint16Array.Filter.Predicate * ?thisArg: obj -> Uint16Array<ArrayBuffer>
+        abstract filter: predicate: Uint16Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Uint16Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -3724,7 +3850,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Uint16Array.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Uint16Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -3738,7 +3864,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Uint16Array.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Uint16Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -3750,7 +3876,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Uint16Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Uint16Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -3793,7 +3919,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Uint16Array.Map.Callbackfn * ?thisArg: obj -> Uint16Array<ArrayBuffer>
+        abstract map: callbackfn: Uint16Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Uint16Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3817,7 +3943,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3841,7 +3967,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Uint16Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -3865,7 +3991,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Uint16Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Uint16Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3889,7 +4015,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3913,7 +4039,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Uint16Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -3937,7 +4063,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Uint16Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Uint16Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -3966,7 +4092,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Uint16Array.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Uint16Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -4085,7 +4211,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Int32Array.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Int32Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -4110,7 +4236,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Int32Array.Filter.Predicate * ?thisArg: obj -> Int32Array<ArrayBuffer>
+        abstract filter: predicate: Int32Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Int32Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -4124,7 +4250,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Int32Array.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Int32Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -4138,7 +4264,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Int32Array.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Int32Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -4150,7 +4276,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Int32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Int32Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -4193,7 +4319,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Int32Array.Map.Callbackfn * ?thisArg: obj -> Int32Array<ArrayBuffer>
+        abstract map: callbackfn: Int32Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Int32Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4217,7 +4343,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4241,7 +4367,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Int32Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4265,7 +4391,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Int32Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Int32Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4289,7 +4415,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4313,7 +4439,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Int32Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4337,7 +4463,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Int32Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Int32Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -4366,7 +4492,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Int32Array.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Int32Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -4485,7 +4611,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Uint32Array.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Uint32Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -4510,7 +4636,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Uint32Array.Filter.Predicate * ?thisArg: obj -> Uint32Array<ArrayBuffer>
+        abstract filter: predicate: Uint32Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Uint32Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -4524,7 +4650,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Uint32Array.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Uint32Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -4538,7 +4664,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Uint32Array.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Uint32Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -4550,7 +4676,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Uint32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Uint32Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -4593,7 +4719,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Uint32Array.Map.Callbackfn * ?thisArg: obj -> Uint32Array<ArrayBuffer>
+        abstract map: callbackfn: Uint32Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Uint32Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4617,7 +4743,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4641,7 +4767,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Uint32Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -4665,7 +4791,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Uint32Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Uint32Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4689,7 +4815,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4713,7 +4839,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Uint32Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -4737,7 +4863,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Uint32Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Uint32Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -4766,7 +4892,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Uint32Array.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Uint32Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -4885,7 +5011,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Float32Array.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Float32Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -4910,7 +5036,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Float32Array.Filter.Predicate * ?thisArg: obj -> Float32Array<ArrayBuffer>
+        abstract filter: predicate: Float32Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Float32Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -4924,7 +5050,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Float32Array.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Float32Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -4938,7 +5064,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Float32Array.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Float32Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -4950,7 +5076,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Float32Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Float32Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -4993,7 +5119,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Float32Array.Map.Callbackfn * ?thisArg: obj -> Float32Array<ArrayBuffer>
+        abstract map: callbackfn: Float32Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Float32Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -5017,7 +5143,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -5041,7 +5167,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Float32Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -5065,7 +5191,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Float32Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Float32Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5089,7 +5215,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5113,7 +5239,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Float32Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5137,7 +5263,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Float32Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Float32Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -5166,7 +5292,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Float32Array.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Float32Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -5285,7 +5411,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract every: predicate: Float64Array.Every.Predicate * ?thisArg: obj -> bool
+        abstract every: predicate: Float64Array.Every.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
         /// </summary>
@@ -5310,7 +5436,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract filter: predicate: Float64Array.Filter.Predicate * ?thisArg: obj -> Float64Array<ArrayBuffer>
+        abstract filter: predicate: Float64Array.Filter.Predicate<'TArrayBuffer> * ?thisArg: obj -> Float64Array<ArrayBuffer>
         /// <summary>
         /// Returns the value of the first element in the array where predicate is true, and undefined
         /// otherwise.
@@ -5324,7 +5450,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract find: predicate: Float64Array.Find.Predicate * ?thisArg: obj -> float option
+        abstract find: predicate: Float64Array.Find.Predicate<'TArrayBuffer> * ?thisArg: obj -> float option
         /// <summary>
         /// Returns the index of the first element in the array where predicate is true, and -1
         /// otherwise.
@@ -5338,7 +5464,7 @@ module Es =
         /// If provided, it will be used as the this value for each invocation of
         /// predicate. If it is not provided, undefined is used instead.
         /// </param>
-        abstract findIndex: predicate: Float64Array.FindIndex.Predicate * ?thisArg: obj -> float
+        abstract findIndex: predicate: Float64Array.FindIndex.Predicate<'TArrayBuffer> * ?thisArg: obj -> float
         /// <summary>
         /// Performs the specified action for each element in an array.
         /// </summary>
@@ -5350,7 +5476,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract forEach: callbackfn: Float64Array.ForEach.Callbackfn * ?thisArg: obj -> unit
+        abstract forEach: callbackfn: Float64Array.ForEach.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> unit
         /// <summary>
         /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
         /// </summary>
@@ -5393,7 +5519,7 @@ module Es =
         /// An object to which the this keyword can refer in the callbackfn function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract map: callbackfn: Float64Array.Map.Callbackfn * ?thisArg: obj -> Float64Array<ArrayBuffer>
+        abstract map: callbackfn: Float64Array.Map.Callbackfn<'TArrayBuffer> * ?thisArg: obj -> Float64Array<ArrayBuffer>
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -5417,7 +5543,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn -> float
+        abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -5441,7 +5567,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn2 * initialValue: float -> float
+        abstract reduce: callbackfn: Float64Array.Reduce.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array. The return value of
         /// the callback function is the accumulated result, and is provided as an argument in the next
@@ -5465,7 +5591,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduce<'U>: callbackfn: Float64Array.Reduce.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduce<'U>: callbackfn: Float64Array.Reduce.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5489,7 +5615,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn -> float
+        abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn<'TArrayBuffer> -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5513,7 +5639,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn2 * initialValue: float -> float
+        abstract reduceRight: callbackfn: Float64Array.ReduceRight.Callbackfn2<'TArrayBuffer> * initialValue: float -> float
         /// <summary>
         /// Calls the specified callback function for all the elements in an array, in descending order.
         /// The return value of the callback function is the accumulated result, and is provided as an
@@ -5537,7 +5663,7 @@ module Es =
         /// the accumulation. The first call to the callbackfn function provides this value as an argument
         /// instead of an array value.
         /// </param>
-        abstract reduceRight<'U>: callbackfn: Float64Array.ReduceRight.Callbackfn3<'U> * initialValue: 'U -> 'U
+        abstract reduceRight<'U>: callbackfn: Float64Array.ReduceRight.Callbackfn3<'U, 'TArrayBuffer> * initialValue: 'U -> 'U
         /// <summary>
         /// Reverses the elements in an Array.
         /// </summary>
@@ -5566,7 +5692,7 @@ module Es =
         /// An object to which the this keyword can refer in the predicate function.
         /// If thisArg is omitted, undefined is used as the this value.
         /// </param>
-        abstract some: predicate: Float64Array.Some.Predicate * ?thisArg: obj -> bool
+        abstract some: predicate: Float64Array.Some.Predicate<'TArrayBuffer> * ?thisArg: obj -> bool
         /// <summary>
         /// Sorts an array.
         /// </summary>
@@ -5637,89 +5763,6 @@ module Es =
         abstract Create: buffer: ArrayBuffer * ?byteOffset: float * ?length: float -> Float64Array<ArrayBuffer>
         [<EmitConstructor>]
         abstract Create: array: U2<ArrayBuffer, ArrayLike<float>> -> Float64Array<ArrayBuffer>
-
-    module ClassAccessorDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
-
-    module ClassFieldDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the value of the field on the provided object.
-            /// </summary>
-            abstract get: ``object``: 'This -> 'Value
-            /// <summary>
-            /// Sets the value of the field on the provided object.
-            /// </summary>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
-
-    module ClassGetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the getter on the provided object.
-            /// </summary>
-            /// <example><c>let value = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
-    module ClassMethodDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Gets the current value of the method from the provided object.
-            /// </summary>
-            /// <example><c>let fn = context.access.get(instance);</c></example>
-            abstract get: ``object``: 'This -> 'Value
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), get: ('This -> 'Value)) : Access<'This, 'Value> = jsNative
-
-    module ClassSetterDecoratorContext =
-        [<Interface>]
-        type Access<'This, 'Value> =
-            /// <summary>
-            /// Determines whether an object has a property with the same name as the decorated element.
-            /// </summary>
-            abstract has: ``object``: 'This -> bool
-            /// <summary>
-            /// Invokes the setter on the provided object.
-            /// </summary>
-            /// <example><c>context.access.set(instance, value);</c></example>
-            abstract set: ``object``: 'This * value: 'Value -> unit
-            [<ParamObject; Emit("$0")>]
-            static member Create (has: ('This -> bool), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
     module CollatorOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -5807,39 +5850,39 @@ module Es =
 
     module Float32Array =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Float32Array<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Float32Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Float32Array<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float32Array<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Float32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float32Array<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float
@@ -5850,39 +5893,39 @@ module Es =
 
     module Float64Array =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Float64Array<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Float64Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Float64Array<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Float64Array<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Float64Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Float64Array<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float
@@ -5893,39 +5936,39 @@ module Es =
 
     module Int16Array =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Int16Array<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int16Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Int16Array<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int16Array<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Int16Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float
@@ -5936,39 +5979,39 @@ module Es =
 
     module Int32Array =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Int32Array<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int32Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Int32Array<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int32Array<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Int32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int32Array<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float
@@ -5979,39 +6022,39 @@ module Es =
 
     module Int8Array =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Int8Array<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Int8Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Int8Array<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Int8Array<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Int8Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int8Array<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float
@@ -6064,7 +6107,7 @@ module Es =
                 abstract Item: string -> obj
 
     module PromiseConstructorLike =
-        type Executor<'T> = delegate of resolve: (U2<'T, PromiseLike<'T>> -> unit) * reject: (obj option -> unit) -> unit
+        type Executor<'T> = delegate of resolve: (U2<'T, JS.Promise<'T>> -> unit) * reject: (obj option -> unit) -> unit
 
     module String =
         module Replace =
@@ -6072,39 +6115,39 @@ module Es =
 
     module Uint16Array =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Uint16Array<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint16Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Uint16Array<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint16Array<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint16Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint16Array<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float
@@ -6115,39 +6158,39 @@ module Es =
 
     module Uint32Array =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Uint32Array<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint32Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Uint32Array<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint32Array<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint32Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint32Array<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float
@@ -6158,39 +6201,39 @@ module Es =
 
     module Uint8Array =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Uint8Array<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint8Array<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Uint8Array<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8Array<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint8Array<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8Array<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float
@@ -6201,39 +6244,39 @@ module Es =
 
     module Uint8ClampedArray =
         module Every =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> obj
 
         module Filter =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> obj
 
         module Find =
-            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Uint8ClampedArray<'TArrayBuffer> -> bool
 
         module FindIndex =
-            type Predicate = delegate of value: float * index: float * obj: Uint8ClampedArray<ArrayBuffer> -> bool
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * obj: Uint8ClampedArray<'TArrayBuffer> -> bool
 
         module ForEach =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> unit
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> unit
 
         module Map =
-            type Callbackfn = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> float
 
         module Reduce =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<'TArrayBuffer> -> 'U
 
         module ReduceRight =
-            type Callbackfn = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+            type Callbackfn<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<'TArrayBuffer> -> float
 
-            type Callbackfn2 = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> float
+            type Callbackfn2<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: float * currentValue: float * currentIndex: float * array: Uint8ClampedArray<'TArrayBuffer> -> float
 
-            type Callbackfn3<'U> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<ArrayBuffer> -> 'U
+            type Callbackfn3<'U, 'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of previousValue: 'U * currentValue: float * currentIndex: float * array: Uint8ClampedArray<'TArrayBuffer> -> 'U
 
         module Some =
-            type Predicate = delegate of value: float * index: float * array: Uint8ClampedArray<ArrayBuffer> -> obj
+            type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Uint8ClampedArray<'TArrayBuffer> -> obj
 
         module Sort =
             type CompareFn = delegate of a: float * b: float -> float

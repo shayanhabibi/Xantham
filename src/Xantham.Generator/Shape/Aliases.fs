@@ -215,8 +215,14 @@ let shapeAliases: Pass<ShapeModel> =
                                         )
                                     else
 
+                                        // Binds the operand a `T[keyof T]` body reads (W8, #139).
                                         let typeParameters, scope, parameterFindings =
-                                            declTypeParams ctx model name facts
+                                            match valueOfOperand model facts with
+                                            | Some objectId when
+                                                (declParamIds facts @ freeParamsOf model facts.Response.TypeId).IsEmpty
+                                                ->
+                                                typeParamsOf ctx model name [ objectId ]
+                                            | _ -> declTypeParams ctx model name facts
 
                                         let scoped = { model with TypeVars = scope }
 

@@ -13,6 +13,8 @@ interface Store {
 
 declare var currentItem: Item;
 declare function inspect(items: Items): Brief;
+declare function settle(value: PromiseLike<number>): Promise<string>;
+declare function pick<T>(items: T[]): T;
 
 interface WindowLike {
     readonly self: WindowLike & typeof globalThis;

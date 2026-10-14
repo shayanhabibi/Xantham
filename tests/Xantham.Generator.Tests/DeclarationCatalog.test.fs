@@ -277,17 +277,18 @@ let shippedOverloadTests =
             let reference = Path.Combine(producer, "declarations.json")
             Pipeline.run (configure "Adapter" [| reference |]) package (Path.Combine(directory, "adapter"))
             |> Async.RunSynchronously |> ignore
+            // W5 (#136): each literal overload is a method of its own, reached through Emit.
             let consumer = """module Identity.Consumer
-let read (store: Identity.Root.Store) (text: Identity.Root.Store.Text) (bytes: Identity.Root.Store.Bytes) : string * float =
+let read (store: Identity.Root.Store) : string * float =
     let shared = Identity.Adapter.Exports.``use`` store
-    shared.get text, shared.get bytes
+    shared.getText (), shared.getBytes ()
 """
             let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
             Expect.equal code 0 output
             let invalid = consumer + "\nlet invalid (store: Identity.Root.Store) = store.get \"anything\"\n"
             let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] invalid
             Expect.notEqual code 0 "arbitrary strings must not enter a literal-discriminated overload"
-            Expect.stringContains output "FS0041" "overload resolution rejects the wrong discriminator"
+            Expect.stringContains output "FS0039" "no member takes the discriminator as a string"
         finally
             if Directory.Exists directory then Directory.Delete(directory, true)
 
@@ -844,11 +845,11 @@ let private authenticationTests compression =
 open Fable.Core
 let accept (reader: Identity.Root.Reader) : Identity.Root.Reader = Identity.Adapter.Exports.accept reader
 let unconstrained (value: Identity.Root.ReadResult2<string>) : string = value.value
-let read<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+let read<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>> (reader: Identity.Root.Reader) (view: 'T)
     : JS.Promise<U2<Identity.Root.ReadResult2<'T>, Identity.Root.ReadResult3>> = reader.read view
-let readAtLeast<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+let readAtLeast<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>> (reader: Identity.Root.Reader) (view: 'T)
     : JS.Promise<U2<Identity.Root.ReadResult2<'T>, Identity.Root.ReadResult3>> = reader.readAtLeast(1.0, view)
-let bound<'T when 'T :> JS.ArrayBufferView> (reader: Identity.Root.Reader) (view: 'T)
+let bound<'T when 'T :> Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>> (reader: Identity.Root.Reader) (view: 'T)
     : JS.Promise<U2<Identity.Root.BoundResult2<'T>, Identity.Root.BoundResult3>> = reader.readBound view
 """
                     let code, output = compileConsumer directory sources consumer
@@ -1852,7 +1853,7 @@ let callableTests =
                     writePackageFile directory "package.json" """{"name":"catalog-callable-lab","version":"1.0.0","types":"index.d.ts"}"""
                     writePackageFile directory "index.d.ts" $"""export namespace Factory {{
     interface Result {{ count: number; }}
-    function create(value: {argument}, options?: object): Promise<Result>;
+    const create: (value: {argument}, options?: object) => Promise<Result>;
 }}
 """
                     writePackageFile directory "adapter.d.ts" """export { Factory as AdapterFactory } from "./index.js";"""
@@ -1862,13 +1863,13 @@ let callableTests =
                     let reference = Path.Combine(producer, "declarations.json")
                     use catalog = JsonDocument.Parse(File.ReadAllText reference)
                     catalog.RootElement.GetProperty("declarations").EnumerateArray()
-                    |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Create")
+                    |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Factory.Create")
                     |> fun entry -> entry.GetProperty("handles").GetArrayLength() > 0
                     |> Flip.Expect.equal "callable identity retains its declaration anchor" true
                     let adapter = configured directory "Adapter" "adapter.d.ts" [| reference |]
                     Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
-let share () : Identity.Root.Create = Identity.Adapter.Exports.AdapterFactory.create
+let share () : Identity.Root.Factory.Create = Identity.Adapter.Exports.AdapterFactory.create
 """
                     let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
                     code |> Flip.Expect.equal output 0

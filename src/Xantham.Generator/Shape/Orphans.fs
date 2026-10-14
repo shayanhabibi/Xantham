@@ -37,13 +37,15 @@ let private typeParamNames (parameters: FsTypeParam list) =
     parameters
     |> List.collect (_.Constraint >> Option.map namesOf >> Option.defaultValue [])
 
-let private memberNames (m: FsMember) =
+let rec private memberNames (m: FsMember) =
     match m with
     | FsProperty p -> namesOf p.Type
     | FsMethod m -> typeParamNames m.TypeParameters @ paramNames m.Parameters @ namesOf m.Return
     | FsIndexer i -> namesOf i.Key @ namesOf i.Value
     | FsConstructor c
     | FsInvoke c -> typeParamNames c.TypeParameters @ paramNames c.Parameters @ namesOf c.Return
+    | FsSymbolKeyed(_, inner) -> memberNames inner
+    | FsLiteralKeyed(_, _, inner) -> memberNames inner
 
 let private exportMemberNames (m: FsExportMember) =
     typeParamNames m.TypeParameters
@@ -64,7 +66,7 @@ let internal readNames (decl: FsDecl) : string list =
                paramNames e.Parameters
                @ (e.Inherits |> Option.map namesOf |> Option.defaultValue []))
            |> Option.defaultValue [])
-        @ List.collect paramNames i.CreateOverloads
+        @ List.collect (fun (overload: FsCreateOverload) -> paramNames overload.Parameters) i.CreateOverloads
         @ List.collect exportMemberNames i.Statics
     | FsAbbrev a ->
         typeParamNames a.TypeParameters

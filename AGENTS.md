@@ -61,11 +61,13 @@ live `tsc --api` server.
 ## Key commands
 
 - `dotnet build Xantham.slnx` — build.
-- `dotnet fsi build.fsx -- test [--quick] [--update] [--filter <name>] [--run-gate]` — run the
-  Expecto suites. Use this, not `dotnet test`, which stalls on the suites' nested builds
+- `dotnet fsi build.fsx -- test [--quick] [--update] [--filter <name>] [--run-gate] [--goldens]` —
+  run the Expecto suites. Use this, not `dotnet test`, which stalls on the suites' nested builds
   (`docs/.ai/footguns.md`). `--quick` skips setup, `--update` rewrites the goldens, `--filter`
-  narrows by test name, `--run-gate` adds the Fable run gate; the inner loop is in
-  `.claude/rules/generator-fixtures.md`.
+  narrows by a prefix of the dotted test name, `--run-gate` adds the Fable run gate; the inner
+  loop is in `.claude/rules/generator-fixtures.md`. `--goldens` rewrites every golden and runs
+  nothing else (the write pass, limited to test cases named "golden"); it is the pull-request
+  regeneration step.
 - `dotnet fsi build.fsx -- <build|test|generate|docs|pack|publish|bump>` — full pipeline.
   `--no-format` skips local source formatting while retaining restore, clean and installs;
   CI still checks formatting. Other stages may write tracked files.
@@ -74,7 +76,8 @@ live `tsc --api` server.
   secret command arguments are masked.
 - `dotnet fsi build.fsx -- generate [--only ast|proto|session|compiler-lib|node-lib|schema]
   [--sync]` — routes to `tools/generate-wire.fsx`; `--sync` re-vendors upstream sources first
-  (network). `node-lib` regenerates `src/Xantham.Fable.Node` and runs only when named.
+  (network). `node-lib` regenerates `src/Xantham.Fable.Node` and runs only when named. Every
+  layer it writes is formatted with Fantomas unless `--no-format` is given.
 - `dotnet run --project src/Xantham.Cli -- generate <package-dir> [-o <dir>] [--config <path>]` —
   generate a binding outside the test harness.
 - `dotnet fsi tools/xantham-fixtures.fsx -- init` — install `tests/fixtures/` from `pins.json`;

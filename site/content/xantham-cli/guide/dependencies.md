@@ -18,6 +18,12 @@ standard libraries.
 <div class="card xantham-card"><span class="xantham-card__label">Accept a wider type</span><h3>widen</h3><p>Render the reference as <code>obj</code> and report a finding. This is the default for unlisted groups.</p></div>
 </div>
 
+For `typescript/lib`, `widen` writes `Promise` and `PromiseLike` as `JS.Promise`, so they work with
+Fable.Promise and `Async.AwaitPromise`, and `Error` as `exn`. Every other named standard-library
+interface, class or alias is written as its `Xantham.Fable.Core.TS` name (`Fable.Core.TS.Es.Map`,
+`Fable.Core.TS.Es.Uint8Array<'TArrayBuffer>`, `Fable.Core.TS.Dom.*`). Anonymous library shapes and `globalThis` still
+widen to `obj` with a finding. Compile the binding against `Xantham.Fable.Core.TS`.
+
 ```json title="xantham.json"
 {
   "namespace": "MyBindings",
@@ -131,6 +137,7 @@ consumer project and reference the file from that restored version:
 {
   "module": "MyBindings",
   "lib": ["esnext", "dom"],
+  "anyReturnAsUnit": "^on",
   "declarationReferences": ["/path/to/packages/xantham.fable.core.ts/<version>/xantham/declarations.json.br"]
 }
 ```
@@ -149,8 +156,10 @@ metadata for integrations.
 Source and configuration hashes normalize CRLF to LF across checkouts.
 
 This catalogue reuses qualified types such as `Fable.Core.TS.Dom.HTMLInputElement`,
-`Fable.Core.TS.Dom.FileList` and `Fable.Core.TS.Es.Promise<'T>`. Install the exact TypeScript
+`Fable.Core.TS.Dom.FileList` and `Fable.Core.TS.Es.Map<'K, 'V>`. Install the exact TypeScript
 release/source revision recorded in the catalogue and keep your library profile compatible.
+Core.TS writes `on*` event-handler returns as `unit`, so the consumer sets `anyReturnAsUnit` to
+`^on` as in the example; any other value fails the inference-profile check.
 
 ## Choose a shared owner before generating related libraries
 
@@ -186,7 +195,9 @@ Older catalogues are rejected before reuse.
 Custom compiler executables without verifiable package metadata require identical compiler
 binary hashes. Matching TypeScript major/minor versions alone is insufficient.
 
-Keep `lib`, `types`, group dispositions, and inference options compatible.
+Keep `lib`, `types`, group dispositions, and inference options compatible, including
+`resolveNoInfer` and `anyReturnAsUnit`: the inference profile records them, and a consumer whose
+profile differs from the producer's is rejected.
 Use separate catalogs for environments that need different globals.
 
 Upgrade consumers before regenerating producers: older Xantham builds reject schema 2.

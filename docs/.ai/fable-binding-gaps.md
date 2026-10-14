@@ -117,6 +117,10 @@ The two halves are different problems and only the first is a binding gap. A `Sy
 let `unique symbol` and `symbol` bind; the *keyed member* still needs `EmitIndexer` or a similar
 route, which wave three verified exists but did not take.
 
+*2026-10-13 (W4).* Members keyed by well-known symbols are now emitted: `[Symbol.iterator]` as
+`inherit seq<'T>`, every other key as a `Symbol<Name>` member under `[<Emit>]`. A key naming a
+package's own `unique symbol` remains `MB002`.
+
 [//]: # (ANSWER)
 Same as before; we'll generate or hand roll our own bindings for this.
 [//]: # (ANSWER END)
@@ -145,6 +149,10 @@ through Xantham.Fable.Core such that they are reachable through the Fable.Core.J
 ---
 
 ## 4. A bound name that carries no arity
+
+**Closed (2026-10-13, W3 #134).** The names this entry counted are written as their
+`Fable.Core.TS.Es` declarations at their real arity, so `TR024` is no longer raised. `LibBindings`
+keeps `Promise`/`PromiseLike` (`JS.Promise`) and `Error` (`exn`), none of which drops an argument.
 
 **Incidence: 132 sites** — `TR024 LibExtraTypeArgumentsDropped` 118 on
 `@cloudflare/workers-types`, 14 corpus-wide as `TR025 LibBindingLoss`.

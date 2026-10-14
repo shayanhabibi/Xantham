@@ -3,10 +3,10 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 52,
-    "ergonomic": 82,
-    "widened": 152,
-    "escape": 62
+    "exact": 53,
+    "ergonomic": 224,
+    "widened": 68,
+    "escape": 5
   },
   "passes": [
     {
@@ -21,35 +21,33 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 304,
-      "ergonomic": 148,
-      "widened": 141,
-      "escape": 15
+      "total": 188,
+      "ergonomic": 164,
+      "widened": 24
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1076,
+      "total": 1085,
       "exact": 14,
-      "ergonomic": 896,
-      "widened": 37,
-      "escape": 129
+      "ergonomic": 1040,
+      "widened": 31
     },
     {
       "pass": "SA - shape-aliases",
       "total": 50,
-      "ergonomic": 10,
+      "ergonomic": 14,
       "widened": 31,
-      "escape": 9
+      "escape": 5
     },
     {
       "pass": "SE - shape-exports",
-      "total": 43,
-      "ergonomic": 36,
-      "escape": 7
+      "total": 44,
+      "ergonomic": 44
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 175,
+      "total": 181,
+      "exact": 6,
       "ergonomic": 172,
       "widened": 3
     },

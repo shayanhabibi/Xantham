@@ -80,6 +80,8 @@ let resolvedMember (sym: SymbolResponse) (typeId: int) : ResolvedMember =
         Optional = false
         ReadOnly = false
         TypeId = typeId * Measure.uom<Measure.typeId>
+        WellKnownSymbol = None
+        ResolvesToFunction = false
     }
 
 let export (name: string) (sym: SymbolResponse) : HarvestedExport =
@@ -110,7 +112,9 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         ExportMembers = []
         TypeVars = Map.empty
         KeyVars = Map.empty
+        AnyReturnOwner = None
         Decls = []
+        IteratorFindings = Map.empty
         RuntimePackage = "lab" * Measure.uom<Measure.importSpecifier>
     }
 
@@ -122,6 +126,8 @@ let signature (parameters: ResolvedMember list) (returnTypeId: int) : ResolvedSi
         TypeParameters = []
         IsAbstract = false
         ReturnTypeId = returnTypeId * Measure.uom<Measure.typeId>
+        Source = None
+        OwnDoc = None
     }
 
 /// Runs one pass to completion under the wire-less context and splits the outcome.
