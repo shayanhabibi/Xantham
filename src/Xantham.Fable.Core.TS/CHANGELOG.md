@@ -1,5 +1,5 @@
 ---
-last_commit_released: 336800e22243e089e80b6ce406c6f257424569c3
+last_commit_released: 977355536eba47bff4672d609cccca7523bda9f7
 name: Xantham.Fable.Core.TS
 include:
   - ../../tools/fable-core-ts-input/**
@@ -15,6 +15,20 @@ updaters:
 ---
 
 # Changelog
+
+## 0.4.0-beta.1 - 2026-10-14
+
+### 🚀 Features
+
+* *(core-ts)* Select on* handler returns as unit (W2.2, #133) ([282c4092](https://github.com/shayanhabibi/Xantham/commit/282c40928a111fe564eb43dfde417938196a492a))
+* *(core-ts)* Emit well-known symbol members (W4, #135) ([437c8659](https://github.com/shayanhabibi/Xantham/commit/437c8659a0adb33512d82012a9e4b7051d5690d1))
+* *(core-ts)* Write Promise as JS.Promise (W3, #134) ([98e3456f](https://github.com/shayanhabibi/Xantham/commit/98e3456f04f7cb35cf602f79655ae719133181d4))
+* *(core-ts)* Write literal overloads as Emit-backed methods (W5, #136) ([a6d10814](https://github.com/shayanhabibi/Xantham/commit/a6d108144ce78d8916ab6e3de8208b45a7ab86f0))
+* *(core-ts)* Declare literal members as [<Literal>] modules (W6, #137) ([6d8da2fa](https://github.com/shayanhabibi/Xantham/commit/6d8da2fa9fa8fcc55f4646ed1c93a8266453777c))
+* *(core-ts)* Keep type parameters in scope (W7, #138) ([13e59910](https://github.com/shayanhabibi/Xantham/commit/13e599101850811604f60c58bc6a2216801bc6bd))
+* *(core-ts)* Emit key types for tag maps (W8, #139) ([90c35bc1](https://github.com/shayanhabibi/Xantham/commit/90c35bc1d1ad4482e3024a47434dc008def807ba))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/336800e22243e089e80b6ce406c6f257424569c3..977355536eba47bff4672d609cccca7523bda9f7)</small></strong>
 
 ## 0.3.0 - 2026-10-12
 

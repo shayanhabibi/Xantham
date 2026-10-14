@@ -1,5 +1,5 @@
 ---
-last_commit_released: 2f70620ce9950438f4043662a5f964151d9614fb
+last_commit_released: 977355536eba47bff4672d609cccca7523bda9f7
 name: Xantham.Generator.Myriad
 include:
   - ../Xantham.TypeScript.Wire/**
@@ -14,6 +14,36 @@ updaters:
 ---
 
 # Changelog
+
+## 0.3.0-beta.1 - 2026-10-14
+
+### 🚀 Features
+
+* *(core-ts)* Write Promise as JS.Promise (W3, #134) ([98e3456f](https://github.com/shayanhabibi/Xantham/commit/98e3456f04f7cb35cf602f79655ae719133181d4))
+* *(findings)* Grade a faithful any as ergonomic (W1, #132) ([7d99283d](https://github.com/shayanhabibi/Xantham/commit/7d99283ddbd94abd2031cfe29da037df0de05178))
+* *(generator)* Write selected callback any returns as unit (W2, #133) ([d3a2a122](https://github.com/shayanhabibi/Xantham/commit/d3a2a122c4782904107e270572f8498b008351b7))
+* *(generator)* Record anyReturnAsUnit in the catalog inference profile (W2, #133) ([6350fe4e](https://github.com/shayanhabibi/Xantham/commit/6350fe4e59e760b1d57f1b72c14695f01e7e3f0b))
+* *(generator)* Emit well-known symbol members (W4) ([1c8c9daa](https://github.com/shayanhabibi/Xantham/commit/1c8c9daa340a7ee4aec44f2b75b1ae3090bf0c1e))
+* *(generator)* Reference Core.TS ECMAScript declarations under widen ([063a023d](https://github.com/shayanhabibi/Xantham/commit/063a023d64f012be9e0c9e0e1d0511c4827169f6))
+* *(generator)* Reference Core.TS for standard-library names (W3, #134) ([565e689c](https://github.com/shayanhabibi/Xantham/commit/565e689cb6283d0cc420839f75f89063fea6399e))
+* *(generator)* Write literal overloads as Emit-backed methods (W5, #136) ([7b3b20a9](https://github.com/shayanhabibi/Xantham/commit/7b3b20a9e167e8edd6ad95492ccb37878a4c6bf2))
+* *(generator)* Literal members as [<Literal>] modules and Create Emits (W6, #137) ([6a4a9cf9](https://github.com/shayanhabibi/Xantham/commit/6a4a9cf9ab679ed375a10278d078d0290f247e28))
+* *(generator)* Make writable required single-literal members literal members (W6, #137) ([65ba7da1](https://github.com/shayanhabibi/Xantham/commit/65ba7da19f2996943a712f454175144fc2432848))
+* *(generator)* Keep type parameters in scope (W7, #138) ([f15fb73c](https://github.com/shayanhabibi/Xantham/commit/f15fb73c7b6c9181bb373a10f6aafaf6f3f809a5))
+* *(generator)* Emit key types for tag maps and value-of aliases (W8, #139) ([dab32780](https://github.com/shayanhabibi/Xantham/commit/dab327807cff7627583f3718410fbba50e7fb1fd))
+* *(generator)* Name a tag map's result type parameter 'E (W8, #139) ([38f0eb2a](https://github.com/shayanhabibi/Xantham/commit/38f0eb2adcfbdade0350af0cf60f0aedbf9c4751))
+* *(generator)* Resolve conditionals at a bounded check type behind resolveConditionalConstraints (W9, #140) ([d75a0807](https://github.com/shayanhabibi/Xantham/commit/d75a080782de8f2880767adb8bfc235d1194ac2f))
+* *(generator)* Refuse a union constraint under resolveConditionalConstraints (W9, #140) ([90761796](https://github.com/shayanhabibi/Xantham/commit/90761796ddbe55bd9ee63b08fcc4c5ac57f0fdef))
+
+### 🐞 Bug Fixes
+
+* *(generator)* Settle W4 symbol members review findings ([dd128439](https://github.com/shayanhabibi/Xantham/commit/dd1284392519687b14a63f811bf8849f2762d790))
+* *(generator)* Keep a literal-keyed method's doc to its own overload (W5, #136) ([f503e748](https://github.com/shayanhabibi/Xantham/commit/f503e7484b92cdb381ef86a55786698ea4f6f749))
+* *(generator)* Classify namespace functions as methods for customization (W7, #138) ([6e218656](https://github.com/shayanhabibi/Xantham/commit/6e2186566e76ab94acac2ca80a57ff585cb50efa))
+* *(generator)* Emit PropertyRecord, bound catalogued maps, scope overload tags (W8, #139) ([9e1882c6](https://github.com/shayanhabibi/Xantham/commit/9e1882c69f1f2b9932081cc09f930f2877f8117d))
+* *(generator)* Record a conditional's bound only for an infer branch (W9, #140) ([62164ad4](https://github.com/shayanhabibi/Xantham/commit/62164ad41fcf973dcee1a0069a343a2685e53693))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/2f70620ce9950438f4043662a5f964151d9614fb..977355536eba47bff4672d609cccca7523bda9f7)</small></strong>
 
 ## 0.2.1 - 2026-10-12
 
