@@ -170,6 +170,16 @@ type Greeting =
     | [<CompiledName("hello")>] Hello of meta: Hello.Meta
     | [<CompiledName("bye")>] Bye
 
+[<Interface>]
+type Pick =
+    abstract meta: Pick.Meta with get, set
+    abstract a: float option with get, set
+    abstract b: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (meta: Pick.Meta, a: float) : Pick = jsNative
+    [<ParamObject; Emit("$0")>]
+    static member Create (meta: Pick.Meta, b: string) : Pick = jsNative
+
 module Choice =
     [<Interface>]
     type Meta =
@@ -184,6 +194,13 @@ module Job =
             type Level =
                 | [<CompiledName("info")>] Info
                 | [<CompiledName("warn")>] Warn
+
+module Pick =
+    [<Interface>]
+    type Meta =
+        abstract id: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string) : Meta = jsNative
 
 module Recovery =
     module Cases =

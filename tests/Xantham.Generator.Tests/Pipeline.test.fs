@@ -4713,7 +4713,19 @@ let pipelineTests =
 
                       Expect.equal (messagesFor "Event2" "DD002") [] "a read arm is not"
                       Expect.stringContains source "type Hello =" "an alias-named arm stays"
-                      Expect.stringContains source "Hello.Meta" "with its nested declaration under its own name" ])
+                      Expect.stringContains source "Hello.Meta" "with its nested declaration under its own name"
+
+                      // `Pick.Extra` is not emitted at all today (the merged namespace member is never
+                      // harvested); the guard is that the prune never reports it as dropped.
+                      Expect.equal
+                          (messagesFor "Pick.Extra" "DD003")
+                          []
+                          "a namespace member merged under an exclusive-folded union is not pruned"
+
+                      Expect.equal
+                          (messagesFor "Pick.Meta2" "DD003")
+                          [ "declaration dropped: only an arm the union replaced read it" ]
+                          "while the fold's minted orphan is" ])
 
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced

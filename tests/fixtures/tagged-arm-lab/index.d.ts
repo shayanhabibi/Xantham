@@ -89,3 +89,11 @@ export type Job =
 // its nested declarations stay, under its own name.
 type Hello = { kind: "hello"; meta: { at: number } };
 export type Greeting = Hello | { kind: "bye" };
+
+// An exclusive-folded union merged with a namespace: the namespace's members are API, read or not.
+export type Pick =
+    | { meta: { id: string }; a: number; b?: never }
+    | { meta: { id: string }; b: string; a?: never };
+export namespace Pick {
+    export interface Extra { note: string }
+}
