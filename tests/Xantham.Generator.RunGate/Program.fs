@@ -2262,6 +2262,26 @@ let private literalMembers () =
 
     equal "a generic Create writes its discriminant" "tagged" (LiteralMemberLab.Tagged<string>.Create(value = "v")).kind
 
+/// W8 (#139): a `typekeyof` key over a tag map reaches JavaScript as the bare tag string.
+let private tagMapKeys () =
+    let doc = TagMapLab.Exports.doc
+    let canvas = doc.createElement (typekeyof<TagMapLab.TagMap, _> _.canvas)
+    equal "a typekeyof key creates the element its tag names" "canvas" canvas.tagName
+    check "a typekeyof key emits the bare tag string" (emitJsExpr doc "$0.last === 'canvas'")
+
+    let marquee = doc.createElement (typekeyof<TagMapLab.DeprecatedTagMap, _> _.marquee)
+    equal "the deprecated-map overload is called with its tag" "marquee" marquee.tagName
+
+    let circle = doc.createSvg (typekeyof _.circle)
+    equal "a single key overload infers its map" "circle" circle.tagName
+
+    let divs = doc.getElementsByTagName (typekeyof<TagMapLab.TagMap, _> _.div)
+    equal "a constrained result types through the key" 1.0 divs.length
+    check "the constrained overload emits the bare tag string" (emitJsExpr doc "$0.last === 'div'")
+
+    let present = doc.hasTag (keyof<TagMapLab.TagMap, _> _.div)
+    check "a keyof key emits the bare tag string" present
+
 [<EntryPoint>]
 let main _ =
     dependencyEntrypoint ()
@@ -2302,6 +2322,7 @@ let main _ =
     symbolMembers ()
     literalMethods ()
     literalMembers ()
+    tagMapKeys ()
     patternParameters ()
     exportLayout ()
     subpathLab ()

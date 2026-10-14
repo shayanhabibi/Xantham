@@ -1601,6 +1601,33 @@ let internal indexedAccessValues (model: ShapeModel) (facts: TypeFacts) : int<Me
                 None
         | _ -> None
 
+/// The type parameter `T` of a `T[keyof T]` access: the index is `keyof T`, or a type parameter
+/// whose constraint and default are both `keyof T` (type-fest `ValueOf`).
+let internal valueOfOperand (model: ShapeModel) (facts: TypeFacts) : int<Measure.typeId> option =
+    let keyOfTarget (id: int<Measure.typeId>) =
+        Map.tryFind id model.Types
+        |> Option.filter (flag TypeFlags.Index)
+        |> Option.bind (fun index -> index.Response.TargetTypeId |> ValueOption.toOption)
+
+    match facts.Response.ObjectTypeId |> ValueOption.toOption, facts.Response.IndexTypeId |> ValueOption.toOption with
+    | Some objectId, Some indexId when flag TypeFlags.IndexedAccess facts ->
+        let operandIsParameter =
+            Map.tryFind objectId model.Types |> Option.exists (flag TypeFlags.TypeParameter)
+
+        let selectsEveryKey =
+            match Map.tryFind indexId model.Types with
+            | Some index when flag TypeFlags.Index index -> keyOfTarget indexId = Some objectId
+            | Some index when flag TypeFlags.TypeParameter index ->
+                (index.Constraint |> Option.bind keyOfTarget) = Some objectId
+                && (index.Default |> Option.bind keyOfTarget) = Some objectId
+            | _ -> false
+
+        if operandIsParameter && selectsEveryKey then
+            Some objectId
+        else
+            None
+    | _ -> None
+
 // ---------------------------------------------------------------------------------------------
 // Type references.
 // ---------------------------------------------------------------------------------------------
@@ -1731,8 +1758,8 @@ and internal typeRefOnPath
                 // A key variable is not bound as a variable at all: `K extends keyof T` is
                 // written as the support package's idiom over the operand (§4.10).
                 match Map.tryFind typeId model.KeyVars with
-                | Some(KeyOf operand) -> FsApp("keyof", [ FsTypeVar operand ]), []
-                | Some(TypedKeyOf(operand, result)) -> FsApp("typekeyof", [ FsTypeVar operand; FsTypeVar result ]), []
+                | Some(KeyOf operand) -> FsApp("keyof", [ operand ]), []
+                | Some(TypedKeyOf(operand, _, result, _)) -> FsApp("typekeyof", [ operand; FsTypeVar result ]), []
                 | None ->
 
                     // In scope only where the declaration being shaped bound it (§4.9); a
@@ -1898,11 +1925,11 @@ and internal intersectionRef
 
                             FsObj, [ Finding.make owner reason ]
 
-/// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
-/// exactly the `'R` that idiom introduced. Where the operand's own keys confine `K`, the access
-/// is the union of the value types those keys select - a widening, and a far tighter one than
-/// `obj`. An index reaching past what the operand declares is a type-level computation with no
-/// F# form, and widens loudly.
+/// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<Operand,'R>`, the
+/// access is exactly the `'R` that idiom introduced. Where the operand's own keys confine `K`,
+/// the access is the union of the value types those keys select - a widening, and a far tighter
+/// one than `obj`. `T[keyof T]` over an in-scope `T` is `proptypelock<'T>`. Any other index is a
+/// type-level computation with no F# form, and widens loudly.
 and internal indexedAccessRef
     (ctx: Context)
     (model: ShapeModel)
@@ -1915,13 +1942,9 @@ and internal indexedAccessRef
         |> ValueOption.toOption
         |> Option.bind (fun id -> Map.tryFind id model.KeyVars)
 
-    let objectName =
-        facts.Response.ObjectTypeId
-        |> ValueOption.toOption
-        |> Option.bind (fun id -> Map.tryFind id model.TypeVars)
-
-    match binding, objectName with
-    | Some(TypedKeyOf(operand, result)), Some name when operand = name -> FsTypeVar result, []
+    match binding with
+    | Some(TypedKeyOf(_, operandId, result, _)) when facts.Response.ObjectTypeId = ValueSome operandId ->
+        FsTypeVar result, []
     | _ ->
         match (facts.AliasIdentity |> Option.map (fun (name, id) -> name / uom<symbolName>, id)) with
         | Some(name, operand) when Naming.SupportBindings.shadows name ->
@@ -1938,7 +1961,15 @@ and internal indexedAccessRef
         | _ ->
             match indexedAccessValues model facts with
             | Some values -> erasedUnionRef ctx model self owner values
-            | None -> FsObj, [ Finding.make owner TypeReference.IndexedAccessNoForm ]
+            | None ->
+                match
+                    valueOfOperand model facts
+                    |> Option.bind (fun id -> Map.tryFind id model.TypeVars)
+                with
+                | Some name ->
+                    FsApp("proptypelock", [ FsTypeVar name ]),
+                    [ Finding.make owner (TypeReference.ValueOfAsPropTypeLock name) ]
+                | None -> FsObj, [ Finding.make owner TypeReference.IndexedAccessNoForm ]
 
 /// An array-shaped type as an F# array over its element. The members an intersection's other
 /// operands contribute are reported as dropped.
@@ -2007,6 +2038,7 @@ and internal objectRef
                     match
                         libBinding ctx model self owner facts
                         |> Option.orElseWith (fun () -> mappedBinding ctx model self owner facts)
+                        |> Option.orElseWith (fun () -> propertyRecordRef ctx model self owner facts)
                     with
                     | Some result -> result
                     | None ->
@@ -2055,6 +2087,25 @@ and internal objectRef
                                 |> Option.defaultValue "an anonymous object type"
 
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
+
+/// `{ [P in keyof T]: V }`, with `T` in scope and `V` independent of `P`, as the support
+/// package's `PropertyRecord<'T, V>`.
+and internal propertyRecordRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    : (FsTypeRef * Finding list) option =
+    facts.MappedRecord
+    |> Option.filter (fun _ -> facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+    |> Option.bind (fun (operand, value) -> Map.tryFind operand model.TypeVars |> Option.map (fun name -> name, value))
+    |> Option.map (fun (name, value) ->
+        let valueRef, valueFindings = typeRef ctx model self owner value
+
+        FsApp("PropertyRecord", [ FsTypeVar name; valueRef ]),
+        valueFindings
+        @ [ Finding.make owner (TypeReference.MappedAsPropertyRecord name) ])
 
 /// A compiler-lib type a shipped package binds: `Error` -> `exn` and `Promise` -> `JS.Promise<'T>`
 /// through `Naming.LibBindings`, with their explicit arity and loss rules; any DOM declaration, a
@@ -2199,6 +2250,39 @@ and internal appliedRef
     : FsTypeRef * Finding list =
     appliedRefTo ctx model self owner name [] arguments
 
+/// The nominal constraint a type parameter's declaration head writes, with the bound's id, or
+/// `None` where the head writes none (`constraintProvenNominal`).
+and internal statedConstraintOf
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (typeId: int<Measure.typeId>)
+    : (int<Measure.typeId> * FsTypeRef) option =
+    Map.tryFind typeId model.Types
+    |> Option.bind _.Constraint
+    |> Option.filter (fun boundId -> boundId <> typeId)
+    |> Option.filter (constraintProvenNominal model typeId)
+    |> Option.bind (fun boundId ->
+        match Map.tryFind boundId model.Types with
+        | Some bound when
+            flag TypeFlags.Object bound
+            && (ownArguments bound).IsEmpty
+            && (arrayElement model bound).IsNone
+            && not (isTuple bound)
+            && not (isPureCallback bound)
+            && not (isPureIndexSignature bound)
+            ->
+            Map.tryFind boundId model.DeclNames
+            |> Option.map FsNamed
+            |> Option.orElseWith (fun () ->
+                match typeRef ctx model self owner boundId with
+                | FsApp _ as reference, _ -> Some reference
+                | FsNamed name, [] when name <> Naming.LibBindings.FunctionBinding -> Some(FsNamed name)
+                | _ -> None)
+            |> Option.map (fun reference -> boundId, reference)
+        | _ -> None)
+
 /// An application of a generic declaration whose own parameters are known, so each argument is
 /// checked against the constraint the declaration states (§4.9). An argument that widened to
 /// `obj`, or whose declared bases exclude the constraint, is written as the constraint itself.
@@ -2212,33 +2296,17 @@ and internal appliedRefTo
     (arguments: int<Measure.typeId> list)
     : FsTypeRef * Finding list =
     let mutable findings = []
+    let statedConstraint = statedConstraintOf ctx model self owner
 
-    // A constraint the head does not write is a constraint nothing has to satisfy, so this
-    // reads the same `constraintProvenNominal` the head does: dropped there, silent here.
-    let statedConstraint (typeId: int<Measure.typeId>) =
-        Map.tryFind typeId model.Types
-        |> Option.bind _.Constraint
-        |> Option.filter (fun boundId -> boundId <> typeId)
-        |> Option.filter (constraintProvenNominal model typeId)
-        |> Option.bind (fun boundId ->
-            match Map.tryFind boundId model.Types with
-            | Some bound when
-                flag TypeFlags.Object bound
-                && (ownArguments bound).IsEmpty
-                && (arrayElement model bound).IsNone
-                && not (isTuple bound)
-                && not (isPureCallback bound)
-                && not (isPureIndexSignature bound)
-                ->
-                Map.tryFind boundId model.DeclNames
-                |> Option.map FsNamed
-                |> Option.orElseWith (fun () ->
-                    match typeRef ctx model self owner boundId with
-                    | FsApp _ as reference, _ -> Some reference
-                    | FsNamed name, [] when name <> Naming.LibBindings.FunctionBinding -> Some(FsNamed name)
-                    | _ -> None)
-                |> Option.map (fun reference -> boundId, reference)
-            | _ -> None)
+    // The constraint a key's result variable carries, where the argument is that key's access.
+    let keyResultBound (argument: int<Measure.typeId>) =
+        Map.tryFind argument model.Types
+        |> Option.filter (flag TypeFlags.IndexedAccess)
+        |> Option.bind (fun access -> access.Response.IndexTypeId |> ValueOption.toOption)
+        |> Option.bind (fun key -> Map.tryFind key model.KeyVars)
+        |> Option.bind (function
+            | TypedKeyOf(_, _, _, bound) -> bound
+            | KeyOf _ -> None)
 
     let satisfies = satisfiesNominally model
 
@@ -2278,7 +2346,10 @@ and internal appliedRefTo
                     ]
 
                 bound
-            | Some(boundId, bound), FsTypeVar variable when not (variableSatisfies boundId bound argument) ->
+            | Some(boundId, bound), FsTypeVar variable when
+                not (variableSatisfies boundId bound argument)
+                && keyResultBound argument <> Some bound
+                ->
                 findings <-
                     findings
                     @ [
@@ -2845,9 +2916,12 @@ let internal keyCandidates
     : (int<Measure.typeId> * int<Measure.typeId>) list =
     ids
     |> List.choose (fun id ->
-        match Map.tryFind id model.Types |> Option.bind _.Constraint with
-        | None -> None
-        | Some boundId ->
+        let parameter = Map.tryFind id model.Types
+
+        match parameter |> Option.bind _.KeyOfOperand, parameter |> Option.bind _.Constraint with
+        | Some operand, _ -> Some(id, operand)
+        | None, None -> None
+        | None, Some boundId ->
             match Map.tryFind boundId model.Types with
             | Some bound when flag TypeFlags.Index bound ->
                 bound.Response.TargetTypeId
@@ -2894,12 +2968,89 @@ let internal mentionsAccess
 
     go Set.empty roots
 
-/// The name to write the value a key selects under: `R`, unless something in scope already
-/// answers to it - a generated variable that shadows one the signature also mentions would
-/// silently retype it.
-let internal resultName (taken: Set<string>) =
+/// The constraint the result variable of `object[key]` carries: the bound of the generic
+/// parameter the access is applied at, where every value `object` declares nominally satisfies
+/// that bound. Carriers are followed as `mentionsAccess` follows them; the first application of
+/// the access decides.
+let internal accessBound
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (objectId: int<Measure.typeId>)
+    (keyId: int<Measure.typeId>)
+    (roots: int<Measure.typeId> list)
+    : FsTypeRef option =
+    let values =
+        match Map.tryFind objectId model.Types with
+        | Some operand when not operand.Members.IsEmpty -> operand.Members |> List.map _.TypeId
+        | _ ->
+            Map.tryFind keyId model.Types
+            |> Option.filter (fun key -> key.KeyOfOperand = Some objectId)
+            |> Option.map _.KeyOfValues
+            |> Option.defaultValue []
+
+    let isAccess (id: int<Measure.typeId>) =
+        Map.tryFind id model.Types
+        |> Option.exists (fun facts ->
+            flag TypeFlags.IndexedAccess facts
+            && facts.Response.ObjectTypeId = ValueSome objectId
+            && facts.Response.IndexTypeId = ValueSome keyId)
+
+    let boundAt (facts: TypeFacts) =
+        match facts.Response.TargetTypeId |> ValueOption.toOption with
+        | Some target when not facts.TypeArguments.IsEmpty ->
+            let parameters =
+                Map.tryFind target model.Types
+                |> Option.map ownArguments
+                |> Option.defaultValue []
+
+            if parameters.Length = facts.TypeArguments.Length then
+                List.zip parameters facts.TypeArguments
+                |> List.tryPick (fun (parameter, argument) ->
+                    if isAccess argument then
+                        statedConstraintOf ctx model self owner parameter
+                    else
+                        None)
+            else
+                None
+        | _ -> None
+
+    let rec go visited pending =
+        match pending with
+        | [] -> None
+        | id :: rest when Set.contains id visited -> go visited rest
+        | id :: rest ->
+            match Map.tryFind id model.Types with
+            | None -> go (Set.add id visited) rest
+            | Some facts ->
+                match boundAt facts with
+                | Some found -> Some found
+                | None ->
+                    let carried =
+                        [
+                            yield! facts.TypeArguments
+                            yield! facts.UnionMembers
+                            yield! facts.AliasTypeArguments
+                            for info in facts.IndexInfos -> info.ValueTypeId
+                            for signature in facts.CallSignatures do
+                                yield! signature.Parameters |> List.map _.TypeId
+                                yield signature.ReturnTypeId
+                        ]
+
+                    go (Set.add id visited) (rest @ carried)
+
+    match go Set.empty roots with
+    | Some(boundId, reference) when not values.IsEmpty && values |> List.forall (satisfiesNominally model boundId) ->
+        Some reference
+    | _ -> None
+
+/// The name to write the value a key selects under: `stem`, then `stem1`, `stem2`, ... while the
+/// name is taken in scope. `R` for a key over an in-scope operand, `E` for a key over a declared
+/// map (`typekeyof<HTMLElementTagNameMap, 'E>`).
+let internal resultName (stem: string) (taken: Set<string>) =
     let rec pick n =
-        let candidate = if n = 0 then "R" else $"R{n}"
+        let candidate = if n = 0 then stem else $"{stem}{n}"
 
         if Set.contains candidate taken then
             pick (n + 1)
@@ -2911,6 +3062,14 @@ let internal resultName (taken: Set<string>) =
 // ---------------------------------------------------------------------------------------------
 // Shared shaping of members and signatures.
 // ---------------------------------------------------------------------------------------------
+
+/// The member's tags an overload carries: those its own JSDoc writes, or, for an undocumented
+/// overload, the shared tags other than `@deprecated`.
+let internal signatureTags (tags: JSDocTagInfo list) (signature: ResolvedSignature) =
+    match signature.OwnDoc with
+    | Some(Documented names) -> tags |> List.filter (fun tag -> Set.contains tag.Name names)
+    | Some Undocumented -> tags |> List.filter (fun tag -> tag.Name <> "deprecated")
+    | None -> tags
 
 /// A resolved signature as an F# type-parameter list, parameter list and return reference.
 /// Rest parameters are marked from the signature flag; their array types read as-is, and a
@@ -2939,10 +3098,29 @@ let internal shapeSignature
         | [] -> [], model.TypeVars, []
         | ids -> typeParamsOf ctx model owner ids
 
-    // A key over an operand that is nowhere in scope has no `'T` to be taken over, so it falls
-    // back to an ordinary type parameter and widens like one.
-    let bindable, loose =
+    // A key over an operand that is nowhere in scope has no `'T` to be taken over. Where the
+    // operand is a declared map with a written name (`HTMLElementTagNameMap`), the key is taken
+    // over that name; otherwise it falls back to an ordinary type parameter and widens like one.
+    let bindable, outOfScope =
         candidates |> List.partition (fun (_, operand) -> Map.containsKey operand scope)
+
+    let mapReference (operand: int<Measure.typeId>) =
+        if Map.tryFind operand model.Types |> Option.exists (flag TypeFlags.TypeParameter) then
+            None
+        else
+            match typeRef ctx { model with TypeVars = scope } self owner operand with
+            | (FsNamed _ | FsApp _) as reference, findings when
+                findings |> List.forall (fun f -> f.Tier = Exact || f.Tier = Ergonomic)
+                ->
+                Some(reference, findings)
+            | _ -> None
+
+    let mapped, loose =
+        outOfScope
+        |> List.map (fun (key, operand) -> key, operand, mapReference operand)
+        |> List.partition (fun (_, _, reference) -> reference.IsSome)
+
+    let loose = loose |> List.map (fun (key, operand, _) -> key, operand)
 
     let looseParameters, scope, looseFindings =
         match loose |> List.map fst with
@@ -2960,10 +3138,10 @@ let internal shapeSignature
         let operandName = Map.find operand scope
 
         if mentionsAccess model operand key roots then
-            let result = resultName taken
+            let result = resultName "R" taken
             taken <- Set.add result taken
             resultParameters <- resultParameters @ [ { Name = result; Constraint = None } ]
-            keyVars <- Map.add key (TypedKeyOf(operandName, result)) keyVars
+            keyVars <- Map.add key (TypedKeyOf(FsTypeVar operandName, operand, result, None)) keyVars
 
             keyFindings <-
                 keyFindings
@@ -2971,9 +3149,37 @@ let internal shapeSignature
                     Finding.make owner (TypeParameters.KeyWithIndexedAccess(operandName, result))
                 ]
         else
-            keyVars <- Map.add key (KeyOf operandName) keyVars
+            keyVars <- Map.add key (KeyOf(FsTypeVar operandName)) keyVars
 
             keyFindings <- keyFindings @ [ Finding.make owner (TypeParameters.KeyOverOperand operandName) ]
+
+    for key, operand, reference in mapped do
+        let map, mapFindings = reference.Value
+        let spelling = typeSpelling map
+
+        if mentionsAccess model operand key roots then
+            let result = resultName "E" taken
+            taken <- Set.add result taken
+
+            let bound =
+                accessBound ctx { model with TypeVars = scope } self owner operand key roots
+
+            resultParameters <- resultParameters @ [ { Name = result; Constraint = bound } ]
+            keyVars <- Map.add key (TypedKeyOf(map, operand, result, bound)) keyVars
+
+            keyFindings <-
+                keyFindings
+                @ mapFindings
+                @ [
+                    Finding.make owner (TypeParameters.KeyOverDeclaredMap(spelling, Some result))
+                ]
+        else
+            keyVars <- Map.add key (KeyOf map) keyVars
+
+            keyFindings <-
+                keyFindings
+                @ mapFindings
+                @ [ Finding.make owner (TypeParameters.KeyOverDeclaredMap(spelling, None)) ]
 
     let typeParameters = typeParameters @ looseParameters @ resultParameters
 
@@ -3426,7 +3632,7 @@ let internal shapeMembers
                     Name = name
                     Docs = docs
                     Tags =
-                        m.Tags
+                        signatureTags m.Tags signature
                         |> List.filter (fun tag ->
                             match tag.Name, tag.Text with
                             | "param", ValueSome text -> not (Set.contains (text.Trim().Split(' ')[0]) removed)
@@ -3512,7 +3718,7 @@ let internal shapeMembers
                             {
                                 Name = Naming.memberName m.Symbol.Name
                                 Docs = m.Docs
-                                Tags = m.Tags
+                                Tags = signatureTags m.Tags signature
                                 TypeParameters = typeParameters
                                 Parameters = parameters
                                 Return = returns
@@ -3616,7 +3822,7 @@ let internal shapeMembers
                                 {
                                     Name = name
                                     Docs = m.Docs
-                                    Tags = m.Tags
+                                    Tags = signatureTags m.Tags signature
                                     TypeParameters = typeParameters
                                     Parameters = parameters
                                     Return = returns

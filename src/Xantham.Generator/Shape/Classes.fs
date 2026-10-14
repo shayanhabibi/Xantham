@@ -174,7 +174,7 @@ let shapeClasses: Pass<ShapeModel> =
                                     {
                                         Name = key
                                         Docs = m.Docs
-                                        Tags = m.Tags
+                                        Tags = signatureTags m.Tags signature
                                         TypeParameters = typeParameters
                                         Binding = binding
                                         Body = ExportFunction(parameters, returns)

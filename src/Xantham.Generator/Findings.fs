@@ -146,6 +146,8 @@ module FindingCodes =
             "TR.ErrorTypeToObj", "TR063"
             "TR.IntrinsicMarkerToObj", "TR064"
             "TR.AnyReturnAsUnit", "TR065"
+            "TR.ValueOfAsPropTypeLock", "TR066"
+            "TR.MappedAsPropertyRecord", "TR067"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -156,6 +158,7 @@ module FindingCodes =
             "TP.ConstraintNotProvenNominal", "TP008"
             "TP.DuplicateTypeParameterCollapsed", "TP009"
             "TP.FunctionConstraintDropped", "TP010"
+            "TP.KeyOverDeclaredMap", "TP011"
             "MB.OptionalParameterAsOption", "MB001"
             "MB.SymbolKeyedMemberDropped", "MB002"
             "MB.OptionalMemberAsOption", "MB003"
@@ -525,6 +528,12 @@ type TypeReference =
     /// The source `any` return of a callback typed directly at a property or value that
     /// `anyReturnAsUnit` selects, written as `unit`.
     | [<Ergonomic>] AnyReturnAsUnit
+    /// W8 (#139). `T[keyof T]`, with `T` in scope, written as the support package's
+    /// `proptypelock<'T>`: one of the operand's property types, unlocked by a `proptypekey`.
+    | [<Ergonomic>] ValueOfAsPropTypeLock of operand: string
+    /// W8 (#139). `{ [P in keyof T]: V }`, with `T` in scope and `V` independent of `P`, written
+    /// as the support package's `PropertyRecord<'T, V>`: an indexer keyed by `keyof<'T>`.
+    | [<Ergonomic>] MappedAsPropertyRecord of operand: string
 
     interface IFindingKind with
         member this.Message =
@@ -647,6 +656,9 @@ type TypeReference =
             | ErrorTypeToObj written -> $"the checker could not resolve {written}; widened to obj"
             | IntrinsicMarkerToObj -> "intrinsic alias body is a compiler marker; widened to obj"
             | AnyReturnAsUnit -> "any return of a selected callback written as unit"
+            | ValueOfAsPropTypeLock operand -> $"T[keyof T] reads as proptypelock<'{operand}> (§4.10)"
+            | MappedAsPropertyRecord operand ->
+                $"{{ [P in keyof T]: V }} reads as PropertyRecord<'{operand}, V> (§4.10)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -669,6 +681,10 @@ type TypeParameters =
     /// The head writes it once, and every signature's uses bind to that single variable.
     | [<Ergonomic>] DuplicateTypeParameterCollapsed of name: string * declared: int
     | [<Widened>] FunctionConstraintDropped of name: string
+    /// W8 (#139). A key over a declared map (`K extends keyof HTMLElementTagNameMap`) written as
+    /// `keyof<Map>`, or as `typekeyof<Map,'E>` with `'E` at `Map[K]` when the signature reads
+    /// the value the key selects.
+    | [<Ergonomic>] KeyOverDeclaredMap of map: string * result: string option
 
     interface IFindingKind with
         member this.Message =
@@ -689,6 +705,9 @@ type TypeParameters =
                 $"'{name}' is declared by {declared} signatures of the same alias; the head writes one variable"
             | FunctionConstraintDropped name ->
                 $"Function constraint on '{name}' is dropped so F# functions can be type arguments; callability is no longer checked"
+            | KeyOverDeclaredMap(map, Some result) ->
+                $"key over {map} with its indexed access reads as typekeyof<{map},'{result}> (§4.10)"
+            | KeyOverDeclaredMap(map, None) -> $"key over {map} reads as keyof<{map}> (§4.10)"
 
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]

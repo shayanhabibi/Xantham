@@ -869,6 +869,7 @@ module Naming =
                     "NoInfer"
                     "keyof"
                     "typekeyof"
+                    "proptypelock"
                 ]
 
         let shadows (name: string) = Set.contains name names
@@ -1202,6 +1203,13 @@ type SignatureSource =
         Comment: string
     }
 
+/// The JSDoc an overload's own declaration writes.
+type OverloadDoc =
+    /// The tag names written on the declaration's JSDoc.
+    | Documented of tagNames: Set<string>
+    /// The declaration carries no JSDoc of its own; it shares its siblings' documentation.
+    | Undocumented
+
 type ResolvedSignature =
     {
         Parameters: ResolvedMember list
@@ -1217,6 +1225,9 @@ type ResolvedSignature =
         /// The declaration's source text on one line, and the description of its own JSDoc.
         /// Carried by each signature of a set of two or more.
         Source: SignatureSource option
+        /// The JSDoc of the signature's own declaration, where the signature is one of several
+        /// overloads and the declaration is available.
+        OwnDoc: OverloadDoc option
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -1283,6 +1294,15 @@ type TypeFacts =
         Constraint: int<typeId> option
         /// A type parameter's default type argument, by id (§4.9).
         Default: int<typeId> option
+        /// The declared operand `M` of a type parameter written `K extends keyof M`, where the
+        /// checker resolved the bound to `M`'s key literals (W8, #139).
+        KeyOfOperand: int<typeId> option
+        /// The property types `KeyOfOperand` declares, by id: the values of a catalogued map,
+        /// whose own facts carry no members.
+        KeyOfValues: int<typeId> list
+        /// The operand `T` and value `V` of a mapped type written `{ [P in keyof T]: V }`, where
+        /// `V` is independent of `P` and the mapping carries no modifiers or `as` clause.
+        MappedRecord: (int<typeId> * int<typeId>) option
         /// `T extends U ? X : Y` (§4.11), where the type is one.
         Conditional: ConditionalFacts option
         UnionMembers: int<typeId> list
@@ -1326,6 +1346,9 @@ module TypeFacts =
             IntersectionMembers = []
             Constraint = None
             Default = None
+            KeyOfOperand = None
+            KeyOfValues = []
+            MappedRecord = None
             Conditional = None
             UnionMembers = []
             NonNullableAlias = None
@@ -1777,12 +1800,16 @@ type FsDecl =
 /// unconstrained variable saying nothing about T's keys, and every use of it - including the
 /// `T[K]` it selects - would have to widen to obj. The support package carries the idiom
 /// instead, so `'K` is not bound at all; its uses are written as one of these.
+/// The operand is the in-scope `'T`, or the written reference to a declared map such as
+/// `HTMLElementTagNameMap`.
 type KeyBinding =
-    /// `keyof<'T>`: the key is only ever a key, so nothing needs the type it selects.
-    | KeyOf of operand: string
-    /// `typekeyof<'T,'R>` at the key's uses and `'R` at `T[K]`: the signature reads the value
-    /// the key selects, so `'K` is replaced by the result variable that names it.
-    | TypedKeyOf of operand: string * result: string
+    /// `keyof<Operand>`: the key is only ever a key, so nothing needs the type it selects.
+    | KeyOf of operand: FsTypeRef
+    /// `typekeyof<Operand,'R>` at the key's uses and `'R` at `Operand[K]`: the signature reads
+    /// the value the key selects, so `'K` is replaced by the result variable that names it.
+    /// `bound` is the constraint `'R` carries, where every value of the operand satisfies the
+    /// constraint of the generic parameter the access is applied at.
+    | TypedKeyOf of operand: FsTypeRef * operandId: int<typeId> * result: string * bound: FsTypeRef option
 
 type ShapeModel =
     {

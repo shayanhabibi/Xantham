@@ -2049,7 +2049,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
     /// </summary>
-    abstract addEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
+    abstract addEventListener<'E>: ``type``: typekeyof<Fable.Core.TS.Dom.SVGElementEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     /// <br /><br />
@@ -2061,7 +2061,7 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
     /// </summary>
-    abstract removeEventListener<'K>: ``type``: 'K * listener: (obj -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
+    abstract removeEventListener<'E>: ``type``: typekeyof<Fable.Core.TS.Dom.SVGElementEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
     /// <summary>
     /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     /// <br /><br />
@@ -2472,7 +2472,19 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
     /// </summary>
-    abstract closest<'K>: selector: 'K -> obj option
+    abstract closest<'E>: selector: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
+    /// </summary>
+    abstract closest<'E>: selector: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/closest">MDN Reference</a>
+    /// </summary>
+    abstract closest<'E>: selector: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> 'E option
     /// <summary>
     /// The <b><c>closest()</c></b> method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
     /// <br /><br />
@@ -2538,14 +2550,31 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract getElementsByTagName<'K>: qualifiedName: 'K -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.Element>
+    abstract getElementsByTagName<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
+    /// <summary>
+    /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+    /// </summary>
+    abstract getElementsByTagName<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
+    /// <summary>
+    /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+    /// </summary>
+    abstract getElementsByTagName<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
     /// <summary>
     /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
+    abstract getElementsByTagName<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
+    /// <summary>
+    /// The <b><c>Element.getElementsByTagName()</c></b> method returns a live HTMLCollection of elements with the given tag name.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName">MDN Reference</a>
+    /// </summary>
     abstract getElementsByTagName: qualifiedName: string -> Fable.Core.TS.Dom.HTMLCollectionOf<Fable.Core.TS.Dom.Element>
     /// <summary>
     /// The <b><c>Element.getElementsByTagNameNS()</c></b> method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
@@ -2630,7 +2659,19 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
     /// </summary>
-    abstract matches<'K>: selectors: 'K -> bool
+    abstract matches: selectors: keyof<Fable.Core.TS.Dom.HTMLElementTagNameMap> -> bool
+    /// <summary>
+    /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
+    /// </summary>
+    abstract matches: selectors: keyof<Fable.Core.TS.Dom.SVGElementTagNameMap> -> bool
+    /// <summary>
+    /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/matches">MDN Reference</a>
+    /// </summary>
+    abstract matches: selectors: keyof<Fable.Core.TS.Dom.MathMLElementTagNameMap> -> bool
     /// <summary>
     /// The <b><c>matches()</c></b> method of the Element interface tests whether the element would be selected by the specified CSS selector.
     /// <br /><br />
@@ -3528,28 +3569,62 @@ type DrawableSVGGeometry =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract querySelector<'K>: selectors: 'K -> obj option
+    abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// Returns the first element that is a descendant of node that matches selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+    /// </summary>
+    abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// Returns the first element that is a descendant of node that matches selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+    /// </summary>
+    abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> 'E option
     /// <summary>
     /// Returns the first element that is a descendant of node that matches selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
+    abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap, 'E> -> 'E option
+    /// <summary>
+    /// Returns the first element that is a descendant of node that matches selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
+    /// </summary>
     abstract querySelector<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> 'E option
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract querySelectorAll<'K>: selectors: 'K -> Fable.Core.TS.Dom.NodeListOf<Fable.Core.TS.Dom.Node>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
+    /// <summary>
+    /// Returns all element descendants of node that match selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+    /// </summary>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
+    /// <summary>
+    /// Returns all element descendants of node that match selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+    /// </summary>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
+    abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
+    /// <summary>
+    /// Returns all element descendants of node that match selectors.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
+    /// </summary>
     abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
     /// Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes.

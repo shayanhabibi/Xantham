@@ -4,8 +4,8 @@
   "module": "TypeFest",
   "counts": {
     "exact": 27,
-    "ergonomic": 64,
-    "widened": 204,
+    "ergonomic": 66,
+    "widened": 202,
     "escape": 2
   },
   "passes": [
@@ -30,8 +30,8 @@
       "pass": "SA - shape-aliases",
       "total": 573,
       "exact": 1,
-      "ergonomic": 211,
-      "widened": 361
+      "ergonomic": 213,
+      "widened": 359
     },
     {
       "pass": "SP - synthesize-paramobjects",

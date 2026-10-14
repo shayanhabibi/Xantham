@@ -9184,8 +9184,7 @@ type StringToNumber<'S> = private StringToNumber__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-[<Erase>]
-type Stringified<'ObjectType> = private Stringified__ of obj
+type Stringified<'ObjectType> = PropertyRecord<'ObjectType, string>
 
 /// <summary>
 /// Matches a value that can be losslessly cloned using <c>structuredClone</c>.
@@ -10234,7 +10233,7 @@ type UnwrapRequired<'RequiredObjectType> = private UnwrapRequired__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type ValueOf = obj
+type ValueOf<'ObjectType> = proptypelock<'ObjectType>
 
 /// <summary>
 /// Words options.

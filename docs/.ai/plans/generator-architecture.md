@@ -2732,3 +2732,116 @@ The pull-request regeneration (`test --goldens`) also moves `@cloudflare/workers
 Core.TS and Node are regenerated at integration on `integ/w7` (2026-10-14), over W5 and W6,
 under the T4 override. Every W7 count equals the scratch measurement above; the tiers move from
 1302/2397/591/5 to 1302/2540/438/5 in Core.TS and from 775/2094/760/5 to 775/2198/608/5 in Node.
+
+## Key types for tag maps and value-of aliases (2026-10-13, W8 #139)
+
+A key over a declared map and a value-of access are written with `Xantham.Fable.Core`'s key
+types (§4.10 of `generator-type-mapping.md`).
+
+- The checker resolves `keyof M` over a declared `M` to `M`'s key literals, so the bound of
+  `K extends keyof HTMLElementTagNameMap` reaches Shape as a literal union. For a type parameter
+  whose bound is a union or a string literal, Resolve reads the declaration's constraint node and,
+  where it is a `keyof` type operator, records `getTypeFromTypeNode` of its operand as
+  `TypeFacts.KeyOfOperand`. `keyCandidates` takes that operand ahead of an `Index` bound.
+- `KeyBinding` carries the operand as an `FsTypeRef` (the in-scope `'T`, or the map's written
+  reference) and `TypedKeyOf` the operand's id and the result's constraint. `indexedAccessRef`
+  matches the access to its binding by operand id.
+- `shapeSignature` partitions keys whose operand is out of scope: an operand that is not a type
+  parameter and whose reference is an `FsNamed` or `FsApp` with no Widened or Escape finding is a
+  map. The key reads `typekeyof<M,'E>` with `'E` at `M[K]` when a parameter or return reaches the
+  access, `keyof<M>` otherwise (`TP.KeyOverDeclaredMap`, `TP011`, Ergonomic). Any other operand
+  keeps the ordinary type parameter and its `TP002`. The result variable is `'E` (`E1`, `E2`, ... where
+  taken), the spec's W8.1 spelling; a key over an in-scope operand keeps `'R` (`Spec.resultName`).
+- `accessBound` gives `'E` the constraint of the generic parameter the access is applied at
+  (`statedConstraintOf`, lifted out of `appliedRefTo`), where every member value of `M` satisfies
+  it nominally. `appliedRefTo` passes a result variable bound with that constraint without
+  `TR027`. Otherwise `'E` stays unconstrained and the argument widens to the constraint (`TR027`).
+- `valueOfOperand` recognises `T[keyof T]`, and `T[K]` where `K`'s constraint and default are both
+  `keyof T`. Over an in-scope `T`, after `indexedAccessValues` declines, the access reads
+  `proptypelock<'T>` (`TR.ValueOfAsPropTypeLock`, `TR066`, Ergonomic). A key with no default
+  stays `TR020`. `shape-aliases` binds the operand of such an alias body, which carries no alias
+  arguments: `type ValueOf<'ObjectType> = proptypelock<'ObjectType>`.
+- `proptypelock` joins `Naming.SupportBindings`, so a package declaring the name reaches the
+  support package's as `JS.proptypelock`.
+- Each map is a distinct F# parameter type, so a key-set overload set (`createElement` over
+  `HTMLElementTagNameMap` and `HTMLElementDeprecatedTagNameMap`) survives `dedupe-overloads`
+  rather than dropping under `DO005`. A call naming one of several key overloads states the map:
+  `typekeyof<HTMLElementTagNameMap, _> _.canvas`.
+
+Lab `tag-map-lab`: `Doc.createElement` reads `typekeyof<TagMap, 'E>` and
+`typekeyof<DeprecatedTagMap, 'E>` beside the `string` overload; `getElementsByTagName<'E when 'E
+:> Elem>` returns `ElemList<'E>` over `TagMap` and `SvgTagMap`; `createSvg` has the single key
+overload; `hasTag` reads `keyof<TagMap>`; `findLoose`, over a map whose value does not inherit
+`Elem`, keeps `'E` unconstrained and writes `ElemList<Elem>` under `TR027`. `ValueOf`,
+`ValuesOf` and `valuesOf` read `proptypelock`; `Picked<T, K extends keyof T>` stays `obj`
+(`TR020`). No `DO005`, `DO001` or `TR044`; `TP011` on the five `Doc` methods. The RunGate calls
+each method and reads the key back: `createElement("canvas")`, `createElement("marquee")`,
+`createSvg("circle")`, `getElementsByTagName("div")` and `hasTag("div")`. `map key binding` and
+`shape typeRef` pin the binding, the constraint and its nominal guard, and the value-of forms.
+
+`keyof-overload-lab` keeps both `find` overloads (`DO005` 1 → 0; `DO001` stays on `pick`).
+`keyof-lab` `values` reads `proptypelock<'T>[]`. `indexed-access-lab` `addEventListener`,
+`lastEvent` and `Registrar.on` read `typekeyof<WorkerEventMap, 'E>`, and `runModel`, whose access
+is nested, reads `keyof<ModelMap>`; the fixture gains `anyWide(WideEventMap[keyof
+WideEventMap])` to keep the footer-declared `U12` coverage `onWide` carried.
+
+Measured goldens (finding counts):
+
+| Golden | TR020 | TR044 | DO005 | TP002 | TR027 | TP011 | TR066 | SA002 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `type-fest` (selected) | 8 → 7 | 0 | 0 | 144 | 0 | 0 | 0 → 1 | 170 |
+| `solid-js` (selected) | 70 | 0 | 0 | 157 | 0 | 0 | 0 | 10 |
+| `@cloudflare/workers-types` (T6) | 5 | 8 → 6 | 0 | 95 → 93 | 2 | 0 → 2 | 0 | — |
+| `animejs` (T6) | 17 → 0 | 0 | 13 → 0 | 26 → 6 | 1 → 9 | 0 → 20 | 0 | — |
+| Core.TS (scratch, T4) | 2 | 1,209 → 5 | 17 → 0 | 3,307 → 137 | 152 | 0 → 3,170 | 0 | — |
+
+`solid-js` is byte-identical: its `Store` accesses are bounded by its own conditional `KeyOf`
+alias and `T[number]`, neither a `keyof` over a declared type. type-fest's 170 `SA002` are
+type-level computations with no Core counterpart. `workers-types`' `addEventListener` reads
+`<'E when 'E :> Event>` over `WorkerGlobalScopeEventMap`. `animejs` flattens DOM element members
+in: its `getElementsByTagName` and `querySelectorAll` overloads cannot prove the lib map's values
+inherit `Element`/`Node`, so `'E` stays unconstrained and the collection argument widens
+(`TR027` +8). Symbol tiers: `type-fest` 26/65/204/2 → 26/66/203/2, `workers-types` ergonomic
+1,161 → 1,163 and widened 390 → 388.
+
+Core.TS was generated into scratch only (T4) and compiled there: 193 `typekeyof` members, among
+them two `createElement` key overloads and four each on `querySelector` and `getElementsByTagName`, and 83
+`addEventListener<'E>`. At integration on `integ/w8` (2026-10-14), over W5–W7, Core.TS and Node are
+regenerated under the T4 override: Core.TS's TP011 0 → 3,170, TP002 3,499 → 329, TR044 1,209 → 5
+and DO005 17 → 0 (tiers 1302/2540/438/5 → 1302/2688/290/5); `CatalogCompatibility.ApiVersion`
+stays 8, the wave's single bump (W5). Node's findings and tiers do not move; 1,416 doc lines go,
+as an overload, a literal-keyed method (W5) included, carries only its own JSDoc's tags.
+
+### Review follow-up (2026-10-14)
+
+- **`PropertyRecord`.** Resolve reads a member-less mapped type's `MappedType` node into
+  `TypeFacts.MappedRecord`: the operand of a `keyof` constraint and the value node, where the
+  mapping has no modifiers, no `as` clause and a value that does not mention the key. With the
+  operand in scope, `objectRef` writes `PropertyRecord<'T, V>` (`propertyRecordRef`,
+  `TR.MappedAsPropertyRecord`, `TR067`, Ergonomic). A value that reads the key (`{ [P in keyof
+  T]: T[P] }`) stays a phantom (`SA002`).
+- **Catalogued maps.** A map reached from the compiler lib or a dependency derives no members.
+  Resolve reads the property types of `KeyOfOperand` into `TypeFacts.KeyOfValues`, and
+  `accessBound` decides the bound over those where the operand has no members.
+- **Overload tags.** `getJsDocTags` merges every overload's tags under the one symbol. Resolve
+  reads each overload's own leading JSDoc into `ResolvedSignature.OwnDoc` (only where a type has
+  several signatures); `signatureTags` keeps the tags that JSDoc writes, and an undocumented
+  overload keeps the shared tags other than `@deprecated`. Applied to interface methods,
+  symbol-keyed methods, class statics and exported functions.
+
+`tag-map-lab` gains `Stringified` (`PropertyRecord<'T, string>`), its negative `Mirrored`
+(phantom), and `Doc.libElements` over `HTMLElementTagNameMap` (`<'E when 'E :>
+Fable.Core.TS.Dom.Element>`, returning `HTMLCollectionOf<'E>`); only the `DeprecatedTagMap`
+overload of `createElement` carries `@deprecated`.
+
+| Golden | SA002 | TR067 | TR027 | `@deprecated` lines |
+| --- | --- | --- | --- | --- |
+| `type-fest` (selected) | 170 → 169 | 0 → 1 | 0 | — |
+| `solid-js` (selected) | 10 | 0 | 0 | unchanged (byte-identical) |
+| `keyof-lab` (T6) | 4 → 3 (`Flags<'T>`) | 0 → 1 | — | — |
+| `animejs` (T6) | — | 0 | 9 → 1 | 22 → 10 |
+| Core.TS (scratch, T4) | — | 0 | 152 | 714 (committed) → 540 |
+
+`compiler-lib-ownership-lab` drops two `@param` lines from `Date.toLocaleString: unit -> string`,
+whose own declaration documents no parameters. The W8 acceptance line (SA002, TR020, TR044 and
+DO005 falling in `type-fest` and `solid-js`) remains unmet in `solid-js` and is with the lead.

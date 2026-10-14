@@ -89,7 +89,7 @@ let shapeExports: Pass<ShapeModel> =
                                                 {
                                                     Name = name
                                                     Docs = export.Docs
-                                                    Tags = export.Tags
+                                                    Tags = signatureTags export.Tags signature
                                                     TypeParameters = typeParameters
                                                     Binding = binding
                                                     Body = ExportFunction(parameters, returns)

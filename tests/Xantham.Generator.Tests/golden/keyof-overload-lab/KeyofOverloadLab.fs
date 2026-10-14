@@ -40,7 +40,11 @@ type Finder =
     /// <summary>
     /// Separated by which key set the parameter is bounded to, and by nothing else.
     /// </summary>
-    abstract find<'K>: selector: 'K -> U2<Div, Span>
+    abstract find<'E>: selector: typekeyof<HtmlTags, 'E> -> 'E
+    /// <summary>
+    /// Separated by which key set the parameter is bounded to, and by nothing else.
+    /// </summary>
+    abstract find<'E>: selector: typekeyof<SvgTags, 'E> -> 'E
     /// <summary>
     /// Separated by which key set the parameter is bounded to, and by nothing else.
     /// </summary>

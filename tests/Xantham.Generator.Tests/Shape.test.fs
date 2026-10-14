@@ -704,9 +704,8 @@ let typeRefTests =
             Expect.equal reference (FsApp("keyof", [ FsTypeVar "T" ])) "keyof<'T>"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the support idiom is ergonomic, not a widening"
 
-        testCase "an indexed access no key variable selects has no F# form" <| fun _ ->
-            // `T[keyof T]` - the value-of idiom. Nothing names the value type, so there is no
-            // `'R` to write and no honest alternative to obj.
+        testCase "T[keyof T] over an in-scope operand reads as proptypelock" <| fun _ ->
+            // `T[keyof T]` - the value-of idiom (W8, #139): one of T's property types.
             let model =
                 { Build.shapeModel (
                       indexedAccess 41 20 40 :: keyOf 40 20 :: typeParam 20 "T" :: Build.primitives
@@ -715,8 +714,65 @@ let typeRefTests =
 
             let reference, findings = Spec.typeRef Build.context model None "x" 41<typeId>
 
+            Expect.equal reference (FsApp("proptypelock", [ FsTypeVar "T" ])) "proptypelock<'T>"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "ergonomic"
+            Expect.equal (findings |> List.map _.Key) [ "TR066" ] "and said so"
+
+        testCase "T[keyof T] over an operand not in scope has no F# form" <| fun _ ->
+            let model =
+                Build.shapeModel (indexedAccess 41 20 40 :: keyOf 40 20 :: typeParam 20 "T" :: Build.primitives)
+
+            let reference, findings = Spec.typeRef Build.context model None "x" 41<typeId>
+
+            Expect.equal reference FsObj "no 'T to lock"
+            Expect.equal (findings |> List.map _.Key) [ "TR020" ] "widened"
+
+        testCase "a key parameter defaulted to keyof T reads as proptypelock" <| fun _ ->
+            // type-fest `ValueOf<ObjectType, ValueType extends keyof ObjectType = keyof ObjectType>`.
+            let key = { typeParam 42 "K" with Constraint = Some 40<typeId>; Default = Some 40<typeId> }
+
+            let model =
+                { Build.shapeModel (
+                      indexedAccess 41 20 42 :: key :: keyOf 40 20 :: typeParam 20 "T" :: Build.primitives
+                  ) with
+                    TypeVars = Map.ofList [ 20<typeId>, "T" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "x" 41<typeId>
+
+            Expect.equal reference (FsApp("proptypelock", [ FsTypeVar "T" ])) "proptypelock<'T>"
+            Expect.equal (findings |> List.map _.Key) [ "TR066" ] "ergonomic"
+
+        testCase "a key parameter with no default has no F# form" <| fun _ ->
+            // `Picked<T, K extends keyof T> = T[K]`: K selects a narrower set than every key.
+            let key = { typeParam 42 "K" with Constraint = Some 40<typeId> }
+
+            let model =
+                { Build.shapeModel (
+                      indexedAccess 41 20 42 :: key :: keyOf 40 20 :: typeParam 20 "T" :: Build.primitives
+                  ) with
+                    TypeVars = Map.ofList [ 20<typeId>, "T" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "x" 41<typeId>
+
             Expect.equal reference FsObj "widened"
-            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and said so"
+            Expect.equal (findings |> List.map _.Key) [ "TR020" ] "and said so"
+
+        testCase "a key bound over a declared map reads as typekeyof of the map" <| fun _ ->
+            let model =
+                { Build.shapeModel (
+                      indexedAccess 51 30 50
+                      :: typeParam 50 "K"
+                      :: Build.facts (Build.typeResponse 30 TypeFlags.Object)
+                      :: Build.primitives
+                  ) with
+                    KeyVars = Map.ofList [ 50<typeId>, TypedKeyOf(FsNamed "TagMap", 30<typeId>, "E", None) ] }
+
+            let key, keyFindings = Spec.typeRef Build.context model None "x" 50<typeId>
+            let access, accessFindings = Spec.typeRef Build.context model None "x" 51<typeId>
+
+            Expect.equal key (FsApp("typekeyof", [ FsNamed "TagMap"; FsTypeVar "E" ])) "typekeyof<TagMap,'E>"
+            Expect.equal access (FsTypeVar "E") "the access is the result variable"
+            Expect.isEmpty (keyFindings @ accessFindings) "the binding reported its finding where it was made"
 
         testCase "an instantiation of a declared generic is written as an application" <| fun _ ->
             // A reference, as the wire reports an instantiation of an interface or class; an
@@ -5352,6 +5408,91 @@ let private constraintParameters expected used =
 
     (parameters |> List.map _.Name,
      findings |> List.filter (fun finding -> finding.Key = "TP006") |> List.map _.Message), expected
+
+/// `Doc.find<K extends keyof TagMap>(tag: K)`, over `TagMap` (30) whose members `div` (31) and
+/// `span` (32) are declared with the given bases. `Elem` is 70 and the generic
+/// `ElemList<T extends Elem>` is 60 over 21; 61 is `ElemList<TagMap[K]>` and 51 is `TagMap[K]`.
+let private mapKeyModel (divBases: int list) (spanBases: int list) =
+    let declared id bases =
+        { Build.facts (Build.typeResponse id TypeFlags.Object) with
+            BaseTypes = bases |> List.map (fun value -> value * uom<typeId>) }
+
+    let tagMap =
+        { Build.facts (Build.typeResponse 30 TypeFlags.Object) with
+            Members =
+                [ Build.resolvedMember (Build.symbol 300 "div" SymbolFlags.Property) 31
+                  Build.resolvedMember (Build.symbol 301 "span" SymbolFlags.Property) 32 ] }
+
+    let elemList =
+        { Build.facts
+              { Build.typeResponse 61 TypeFlags.Object with
+                  Target = ValueSome 60
+                  ObjectFlags = ValueSome ObjectFlags.Reference } with
+            TypeArguments = [ 51<typeId> ] }
+
+    { Build.shapeModel (
+          tagMap
+          :: declared 31 divBases
+          :: declared 32 spanBases
+          :: declared 70 []
+          :: genericDecl 60 [ 21 ] []
+          :: { typeParam 21 "T" with Constraint = Some 70<typeId> }
+          :: elemList
+          :: indexedAccess 51 30 42
+          :: { typeParam 42 "K" with KeyOfOperand = Some 30<typeId>; Constraint = Some 43<typeId> }
+          :: Build.facts (Build.typeResponse 43 TypeFlags.Union)
+          :: Build.primitives
+      ) with
+        DeclNames =
+            Map.ofList
+                [ 30<typeId>, "TagMap"
+                  31<typeId>, "DivElem"
+                  32<typeId>, "SpanElem"
+                  70<typeId>, "Elem"
+                  60<typeId>, "ElemList" ] }
+
+let private shapeFind model returns =
+    let parameter = Build.resolvedMember (Build.symbol 500 "tag" SymbolFlags.FunctionScopedVariable) 42
+    let signature = { Build.signature [ parameter ] returns with TypeParameters = [ 42<typeId> ] }
+    Spec.shapeSignature Build.context model None "Doc.find" signature
+
+[<Tests>]
+let mapKeyBindingTests =
+    testList "map key binding" [
+        testCase "a key over a declared map and its access read as typekeyof and 'E" <| fun _ ->
+            let typeParameters, parameters, returns, findings = shapeFind (mapKeyModel [] []) 51
+
+            Expect.equal typeParameters [ { Name = "E"; Constraint = None } ] "the result variable replaces 'K"
+
+            Expect.equal
+                (parameters |> List.map _.Type)
+                [ FsApp("typekeyof", [ FsNamed "TagMap"; FsTypeVar "E" ]) ]
+                "the key"
+
+            Expect.equal returns (FsTypeVar "E") "the access"
+            Expect.equal (findings |> List.map _.Key) [ "TP011" ] "one ergonomic finding"
+
+        testCase "a result applied at a constrained parameter carries the constraint" <| fun _ ->
+            let typeParameters, _, returns, findings = shapeFind (mapKeyModel [ 70 ] [ 70 ]) 61
+
+            Expect.equal typeParameters [ { Name = "E"; Constraint = Some(FsNamed "Elem") } ] "every value inherits Elem"
+            Expect.equal returns (FsApp("ElemList", [ FsTypeVar "E" ])) "the access passes through the application"
+            Expect.equal (findings |> List.map _.Key) [ "TP011" ] "and nothing widens"
+
+        testCase "a value that does not inherit the bound leaves the result unconstrained" <| fun _ ->
+            let typeParameters, _, returns, findings = shapeFind (mapKeyModel [ 70 ] []) 61
+
+            Expect.equal typeParameters [ { Name = "E"; Constraint = None } ] "SpanElem is not an Elem"
+            Expect.equal returns (FsApp("ElemList", [ FsNamed "Elem" ])) "the argument is written as its constraint"
+            Expect.equal (findings |> List.map _.Key) [ "TP011"; "TR027" ] "and widens"
+
+        testCase "a key with no access reads as keyof of the map" <| fun _ ->
+            let typeParameters, parameters, _, findings = shapeFind (mapKeyModel [] []) 3
+
+            Expect.isEmpty typeParameters "no result variable"
+            Expect.equal (parameters |> List.map _.Type) [ FsApp("keyof", [ FsNamed "TagMap" ]) ] "keyof<TagMap>"
+            Expect.equal (findings |> List.map _.Key) [ "TP011" ] "one ergonomic finding"
+    ]
 
 [<Tests>]
 let signatureConstraints =

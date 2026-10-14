@@ -1039,18 +1039,7 @@ type BufferConstructor =
     /// </summary>
     /// <remarks>@since v5.10.0</remarks>
     /// <remarks>@since v5.10.0</remarks>
-    /// <param name="arrayBuffer">
-    /// An <c>ArrayBuffer</c>, <c>SharedArrayBuffer</c>, for example the
-    /// <c>.buffer</c> property of a <c>TypedArray</c>.
-    /// </param>
-    /// <param name="byteOffset">Index of first byte to expose. <b>Default:</b> <c>0</c>.</param>
-    /// <param name="length">
-    /// Number of bytes to expose. <b>Default:</b>
-    /// <c>arrayBuffer.byteLength - byteOffset</c>.
-    /// </param>
     /// <remarks>@since v5.10.0</remarks>
-    /// <param name="string">A string to encode.</param>
-    /// <param name="encoding">The encoding of <c>string</c>. <b>Default:</b> <c>'utf8'</c>.</param>
     abstract from:
         array: U2<Fable.Core.TS.Es.ArrayLike<float>, BufferConstructor.From.Array> ->
             Buffer<Fable.Core.TS.Es.ArrayBuffer>
@@ -20949,12 +20938,6 @@ type Process =
     /// processes inherit the mask from the parent process.
     /// Can only be set if not in worker thread.
     /// </summary>
-    /// <remarks>@since v0.1.19</remarks>
-    /// <remarks>
-    /// @deprecated
-    /// Calling <c>process.umask()</c> with no argument causes the process-wide umask to be written twice. This introduces a race condition between threads, and is a potential
-    /// security vulnerability. There is no safe, cross-platform alternative API.
-    /// </remarks>
     abstract umask: mask: Fs.OpenMode -> float
     /// <summary>
     /// The <c>process.uptime()</c> method returns the number of seconds the current Node.js
@@ -31481,14 +31464,12 @@ type SpecReporter =
     /// </summary>
     /// <remarks>@since v0.9.4</remarks>
     /// <param name="cb">Callback for when the stream is finished.</param>
-    /// <remarks>@see {@link Writable.end} for full details.</remarks>
     /// <remarks>@since v0.9.4</remarks>
     /// <param name="chunk">
     /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
     /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
     /// </param>
     /// <param name="cb">Callback for when the stream is finished.</param>
-    /// <remarks>@see {@link Writable.end} for full details.</remarks>
     /// <remarks>@since v0.9.4</remarks>
     /// <param name="chunk">
     /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -33347,14 +33328,12 @@ type LcovReporter =
     /// </summary>
     /// <remarks>@since v0.9.4</remarks>
     /// <param name="cb">Callback for when the stream is finished.</param>
-    /// <remarks>@see {@link Writable.end} for full details.</remarks>
     /// <remarks>@since v0.9.4</remarks>
     /// <param name="chunk">
     /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
     /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
     /// </param>
     /// <param name="cb">Callback for when the stream is finished.</param>
-    /// <remarks>@see {@link Writable.end} for full details.</remarks>
     /// <remarks>@since v0.9.4</remarks>
     /// <param name="chunk">
     /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -37351,7 +37330,6 @@ module Assert =
         /// See below for further details.
         /// </summary>
         /// <remarks>@since v0.1.21</remarks>
-        /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
         [<Import("fail", "node:assert")>]
         static member fail(?message: U2<string, exn>) : unit = jsNative
 
@@ -37375,7 +37353,6 @@ module Assert =
         /// Using <c>assert.fail()</c> with more than two arguments is possible but deprecated.
         /// See below for further details.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
         /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
         [<Import("fail", "node:assert")>]
         static member fail
@@ -38514,7 +38491,6 @@ module Assert =
             /// See below for further details.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
             abstract fail: ?message: U2<string, exn> -> unit
 
             /// <summary>
@@ -38537,7 +38513,6 @@ module Assert =
             /// Using <c>assert.fail()</c> with more than two arguments is possible but deprecated.
             /// See below for further details.
             /// </summary>
-            /// <remarks>@since v0.1.21</remarks>
             /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
             abstract fail:
                 actual: obj *
@@ -39723,7 +39698,6 @@ module Assert =
             /// See below for further details.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
             [<Import("fail", "node:assert/strict")>]
             static member fail(?message: U2<string, exn>) : unit = jsNative
 
@@ -39747,7 +39721,6 @@ module Assert =
             /// Using <c>assert.fail()</c> with more than two arguments is possible but deprecated.
             /// See below for further details.
             /// </summary>
-            /// <remarks>@since v0.1.21</remarks>
             /// <remarks>@deprecated since v10.0.0 - use fail([message]) or other assert functions instead.</remarks>
             [<Import("fail", "node:assert/strict")>]
             static member fail
@@ -52988,14 +52961,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -55050,14 +55021,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -57713,14 +57682,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -59701,14 +59668,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -60736,14 +60701,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -61771,14 +61734,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -62808,14 +62769,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -63877,14 +63836,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -66044,14 +66001,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -67093,14 +67048,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -68142,14 +68095,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -69193,14 +69144,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -70352,14 +70301,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -72025,14 +71972,12 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -94691,14 +94636,12 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -96498,16 +96441,6 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Upon success, fulfills with <c>undefined</c> if <c>recursive</c> is <c>false</c>, or the first directory path created if <c>recursive</c> is <c>true</c>.</returns>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
         abstract mkdir: path: PathLike * options: Fs.Promises.Mkdir.Options -> JS.Promise<string option>
         /// <summary>
         /// Asynchronously creates a directory.
@@ -96530,8 +96463,6 @@ module Fs =
         /// </code>
         /// Asynchronous mkdir(2) - create a directory.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Upon success, fulfills with <c>undefined</c> if <c>recursive</c> is <c>false</c>, or the first directory path created if <c>recursive</c> is <c>true</c>.</returns>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">
         /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -96564,8 +96495,6 @@ module Fs =
         /// </code>
         /// Asynchronous mkdir(2) - create a directory.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Upon success, fulfills with <c>undefined</c> if <c>recursive</c> is <c>false</c>, or the first directory path created if <c>recursive</c> is <c>true</c>.</returns>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">
         /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -96601,14 +96530,6 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
-        /// <param name="path">A path to a directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
         abstract readdir: path: PathLike * ?options: U2<string, Fs.Promises.Readdir.Options> -> JS.Promise<string[]>
 
         /// <summary>
@@ -96633,8 +96554,6 @@ module Fs =
         /// </code>
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -96668,8 +96587,6 @@ module Fs =
         /// </code>
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -96704,8 +96621,6 @@ module Fs =
         /// </code>
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -96738,8 +96653,6 @@ module Fs =
         /// </code>
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -96763,10 +96676,6 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with the <c>linkString</c> upon success.</returns>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         abstract readlink: path: PathLike * ?options: U2<string, ObjectEncodingOptions> -> JS.Promise<string>
         /// <summary>
         /// Reads the contents of the symbolic link referred to by <c>path</c>. See the POSIX <a href="http://man7.org/linux/man-pages/man2/readlink.2.html"><c>readlink(2)</c></a> documentation for more detail. The promise is
@@ -96778,8 +96687,6 @@ module Fs =
         /// returned will be passed as a <c>Buffer</c> object.
         /// Asynchronous readlink(2) - read value of a symbolic link.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Fulfills with the <c>linkString</c> upon success.</returns>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -96917,10 +96824,6 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with the resolved path upon success.</returns>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         abstract realpath: path: PathLike * ?options: U2<string, ObjectEncodingOptions> -> JS.Promise<string>
         /// <summary>
         /// Determines the actual location of <c>path</c> using the same semantics as the <c>fs.realpath.native()</c> function.
@@ -96937,8 +96840,6 @@ module Fs =
         /// this restriction.
         /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Fulfills with the resolved path upon success.</returns>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -96974,8 +96875,6 @@ module Fs =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         /// <returns>Fulfills with a string containing the file system path of the newly created temporary directory.</returns>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         abstract mkdtemp: prefix: string * ?options: U2<string, ObjectEncodingOptions> -> JS.Promise<string>
         /// <summary>
         /// Creates a unique temporary directory. A unique directory name is generated by
@@ -97005,8 +96904,6 @@ module Fs =
         /// Asynchronously creates a unique temporary directory.
         /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <returns>Fulfills with a string containing the file system path of the newly created temporary directory.</returns>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         abstract mkdtemp: prefix: string * options: BufferEncodingOption -> JS.Promise<NonSharedBuffer>
@@ -97266,9 +97163,7 @@ module Fs =
         /// Any specified <c>FileHandle</c> has to support reading.
         /// Asynchronously reads the entire contents of a file.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
         /// <param name="path">filename or <c>FileHandle</c></param>
-        /// <returns>Fulfills with the contents of the file.</returns>
         /// <param name="path">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
         /// If a <c>FileHandle</c> is provided, the underlying file will _not_ be closed automatically.
@@ -97348,9 +97243,7 @@ module Fs =
         /// Any specified <c>FileHandle</c> has to support reading.
         /// Asynchronously reads the entire contents of a file.
         /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
         /// <param name="path">filename or <c>FileHandle</c></param>
-        /// <returns>Fulfills with the contents of the file.</returns>
         /// <param name="path">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
         /// If a <c>FileHandle</c> is provided, the underlying file will _not_ be closed automatically.
@@ -97805,7 +97698,6 @@ module Fs =
         /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/truncate.2.html"><c>truncate(2)</c></a> documentation for more details.
         /// Asynchronous truncate(2) - Truncate a file to a specified length.
         /// </summary>
-        /// <remarks>@since v0.8.6</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("truncate", "node:fs")>]
         static member truncate(path: PathLike, callback: NoParamCallback) : unit = jsNative
@@ -97908,7 +97800,6 @@ module Fs =
         /// If <c>len</c> is negative then <c>0</c> will be used.
         /// Asynchronous ftruncate(2) - Truncate a file to a specified length.
         /// </summary>
-        /// <remarks>@since v0.8.6</remarks>
         /// <param name="fd">A file descriptor.</param>
         [<Import("ftruncate", "node:fs")>]
         static member ftruncate(fd: float, callback: NoParamCallback) : unit = jsNative
@@ -98785,7 +98676,6 @@ module Fs =
         /// </code>
         /// Asynchronous symlink(2) - Create a new symbolic link to an existing file.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="target">A path to an existing file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="path">A path to the new symlink. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("symlink", "node:fs")>]
@@ -98814,11 +98704,6 @@ module Fs =
         /// Asynchronous readlink(2) - read value of a symbolic link.
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("readlink", "node:fs")>]
         static member readlink(path: PathLike, options: EncodingOption, callback: Readlink.Callback) : unit = jsNative
 
@@ -98834,7 +98719,6 @@ module Fs =
         /// the link path returned will be passed as a <c>Buffer</c> object.
         /// Asynchronous readlink(2) - read value of a symbolic link.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -98856,7 +98740,6 @@ module Fs =
         /// the link path returned will be passed as a <c>Buffer</c> object.
         /// Asynchronous readlink(2) - read value of a symbolic link.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -98877,7 +98760,6 @@ module Fs =
         /// the link path returned will be passed as a <c>Buffer</c> object.
         /// Asynchronous readlink(2) - read value of a symbolic link.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -98898,10 +98780,6 @@ module Fs =
         /// Synchronous readlink(2) - read value of a symbolic link.
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("readlinkSync", "node:fs")>]
         static member readlinkSync(path: PathLike, ?options: EncodingOption) : U2<string, NonSharedBuffer> = jsNative
 
@@ -98916,7 +98794,6 @@ module Fs =
         /// the link path returned will be passed as a <c>Buffer</c> object.
         /// Synchronous readlink(2) - read value of a symbolic link.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -98951,11 +98828,6 @@ module Fs =
         /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("realpath", "node:fs")>]
         static member realpath(path: PathLike, options: EncodingOption, callback: Realpath.Callback) : unit = jsNative
 
@@ -98985,7 +98857,6 @@ module Fs =
         /// dependent name for that object.
         /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99021,7 +98892,6 @@ module Fs =
         /// dependent name for that object.
         /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99056,7 +98926,6 @@ module Fs =
         /// dependent name for that object.
         /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99073,10 +98942,6 @@ module Fs =
         /// Synchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("realpathSync", "node:fs")>]
         static member realpathSync(path: PathLike, ?options: EncodingOption) : U2<string, NonSharedBuffer> = jsNative
 
@@ -99087,7 +98952,6 @@ module Fs =
         /// this API: realpath.
         /// Synchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99220,17 +99084,6 @@ module Fs =
         /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
         /// </summary>
         /// <remarks>@since v0.1.8</remarks>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("mkdir", "node:fs")>]
         static member mkdir(path: PathLike, options: Mkdir.Options, callback: Mkdir.Callback) : unit = jsNative
 
@@ -99269,7 +99122,6 @@ module Fs =
         /// Asynchronous mkdir(2) - create a directory.
         /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">
         /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -99322,7 +99174,6 @@ module Fs =
         /// Asynchronous mkdir(2) - create a directory.
         /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">
         /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -99375,7 +99226,6 @@ module Fs =
         /// Asynchronous mkdir(2) - create a directory.
         /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">
         /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -99398,16 +99248,6 @@ module Fs =
         /// Synchronous mkdir(2) - create a directory.
         /// </summary>
         /// <remarks>@since v0.1.21</remarks>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
         [<Import("mkdirSync", "node:fs")>]
         static member mkdirSync(path: PathLike, options: Fs.MkdirSync.Options) : string option = jsNative
 
@@ -99418,7 +99258,6 @@ module Fs =
         /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
         /// Synchronous mkdir(2) - create a directory.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">
         /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -99439,7 +99278,6 @@ module Fs =
         /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
         /// Synchronous mkdir(2) - create a directory.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">
         /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -99513,8 +99351,6 @@ module Fs =
         /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
         /// </summary>
         /// <remarks>@since v5.10.0</remarks>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("mkdtemp", "node:fs")>]
         static member mkdtemp(prefix: string, options: EncodingOption, callback: Mkdtemp.Callback) : unit = jsNative
 
@@ -99576,7 +99412,6 @@ module Fs =
         /// Asynchronously creates a unique temporary directory.
         /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
         /// </summary>
-        /// <remarks>@since v5.10.0</remarks>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("mkdtemp", "node:fs")>]
@@ -99641,7 +99476,6 @@ module Fs =
         /// Asynchronously creates a unique temporary directory.
         /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
         /// </summary>
-        /// <remarks>@since v5.10.0</remarks>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("mkdtemp", "node:fs")>]
@@ -99705,9 +99539,6 @@ module Fs =
         /// Asynchronously creates a unique temporary directory.
         /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
         /// </summary>
-        /// <remarks>@since v5.10.0</remarks>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("mkdtemp", "node:fs")>]
         static member mkdtemp(prefix: string, callback: Mkdtemp.Callback4) : unit = jsNative
 
@@ -99723,8 +99554,6 @@ module Fs =
         /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
         /// </summary>
         /// <remarks>@since v5.10.0</remarks>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("mkdtempSync", "node:fs")>]
         static member mkdtempSync(prefix: string, ?options: EncodingOption) : U2<string, NonSharedBuffer> = jsNative
 
@@ -99739,7 +99568,6 @@ module Fs =
         /// Synchronously creates a unique temporary directory.
         /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
         /// </summary>
-        /// <remarks>@since v5.10.0</remarks>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("mkdtempSync", "node:fs")>]
@@ -99759,15 +99587,6 @@ module Fs =
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
         /// <remarks>@since v0.1.8</remarks>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
         [<Import("readdir", "node:fs")>]
         static member readdir
             (path: PathLike, options: U2<string, Readdir.Options> option, callback: Readdir.Callback)
@@ -99787,7 +99606,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99816,7 +99634,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99845,7 +99662,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99871,7 +99687,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99897,7 +99712,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99924,14 +99738,6 @@ module Fs =
         /// Synchronous readdir(3) - read a directory.
         /// </summary>
         /// <remarks>@since v0.1.21</remarks>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
         [<Import("readdirSync", "node:fs")>]
         static member readdirSync(path: PathLike, ?options: U2<string, Fs.ReaddirSync.Options>) : string[] = jsNative
 
@@ -99948,7 +99754,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the result will contain <c>fs.Dirent</c> objects.
         /// Synchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99974,7 +99779,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the result will contain <c>fs.Dirent</c> objects.
         /// Synchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -100002,7 +99806,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the result will contain <c>fs.Dirent</c> objects.
         /// Synchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -100027,7 +99830,6 @@ module Fs =
         /// If <c>options.withFileTypes</c> is set to <c>true</c>, the result will contain <c>fs.Dirent</c> objects.
         /// Synchronous readdir(3) - read a directory.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -100106,7 +99908,6 @@ module Fs =
         /// Functions based on <c>fs.open()</c> exhibit this behavior as well:<c>fs.writeFile()</c>, <c>fs.readFile()</c>, etc.
         /// Asynchronous open(2) - open and possibly create a file. If the file is created, its mode will be <c>0o666</c>.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="flags">See <c>support of file system </c>flags``.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="flags">See <c>support of file system </c>flags``.</param>
@@ -100129,7 +99930,6 @@ module Fs =
         /// Functions based on <c>fs.open()</c> exhibit this behavior as well:<c>fs.writeFile()</c>, <c>fs.readFile()</c>, etc.
         /// Asynchronous open(2) - open and possibly create a file. If the file is created, its mode will be <c>0o666</c>.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="flags">See <c>support of file system </c>flags``.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="flags">See <c>support of file system </c>flags``.</param>
@@ -100289,7 +100089,6 @@ module Fs =
         /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
         /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="fd">A file descriptor.</param>
         /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
         /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
@@ -100348,7 +100147,6 @@ module Fs =
         /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
         /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="fd">A file descriptor.</param>
         /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
         /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
@@ -100402,7 +100200,6 @@ module Fs =
         /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
         /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="fd">A file descriptor.</param>
         /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
         /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
@@ -100454,7 +100251,6 @@ module Fs =
         /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
         /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="fd">A file descriptor.</param>
         /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
         /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
@@ -100508,7 +100304,6 @@ module Fs =
         /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
         /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="fd">A file descriptor.</param>
         /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
         /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
@@ -100567,7 +100362,6 @@ module Fs =
         /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
         /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="fd">A file descriptor.</param>
         /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
         /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
@@ -100619,7 +100413,6 @@ module Fs =
         /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
         /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
         /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
         /// <param name="fd">A file descriptor.</param>
         /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
         /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
@@ -100686,8 +100479,6 @@ module Fs =
         /// this API: write.
         /// Synchronously writes <c>string</c> to the file referenced by the supplied file descriptor, returning the number of bytes written.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
-        /// <returns>The number of bytes written.</returns>
         /// <param name="fd">A file descriptor.</param>
         /// <param name="string">A string to write.</param>
         /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
@@ -100752,13 +100543,6 @@ module Fs =
         /// <c>position</c> defaults to <c>null</c>
         /// </summary>
         /// <remarks>@since v0.0.2</remarks>
-        /// <param name="buffer">The buffer that the data will be written to.</param>
-        /// <param name="offset">The position in <c>buffer</c> to write the data to.</param>
-        /// <param name="length">The number of bytes to read.</param>
-        /// <param name="position">
-        /// Specifies where to begin reading from in the file. If <c>position</c> is <c>null</c> or <c>-1 </c>, data will be read from the current file position, and the file position will be updated. If
-        /// <c>position</c> is an integer, the file position will be unchanged.
-        /// </param>
         /// <remarks>@since v12.17.0, 13.11.0</remarks>
         [<Import("read", "node:fs")>]
         static member read<'TBuffer>
@@ -100898,7 +100682,6 @@ module Fs =
         /// Similar to the above <c>fs.readSync</c> function, this version takes an optional <c>options</c> object.
         /// If no <c>options</c> object is specified, it will default with the above values.
         /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
         [<Import("readSync", "node:fs")>]
         static member readSync
             (
@@ -101072,7 +100855,6 @@ module Fs =
         /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
         /// Asynchronously reads the entire contents of a file.
         /// </summary>
-        /// <remarks>@since v0.1.29</remarks>
         /// <param name="path">filename or file descriptor</param>
         /// <param name="path">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
@@ -101161,7 +100943,6 @@ module Fs =
         /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
         /// Asynchronously reads the entire contents of a file.
         /// </summary>
-        /// <remarks>@since v0.1.29</remarks>
         /// <param name="path">filename or file descriptor</param>
         /// <param name="path">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
@@ -101250,7 +101031,6 @@ module Fs =
         /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
         /// Asynchronously reads the entire contents of a file.
         /// </summary>
-        /// <remarks>@since v0.1.29</remarks>
         /// <param name="path">filename or file descriptor</param>
         /// <param name="path">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
@@ -101341,7 +101121,6 @@ module Fs =
         /// </code>
         /// Synchronously reads the entire contents of a file.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">filename or file descriptor</param>
         /// <param name="path">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
@@ -101385,7 +101164,6 @@ module Fs =
         /// </code>
         /// Synchronously reads the entire contents of a file.
         /// </summary>
-        /// <remarks>@since v0.1.8</remarks>
         /// <param name="path">filename or file descriptor</param>
         /// <param name="path">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
@@ -101536,7 +101314,6 @@ module Fs =
         /// system requests but rather the internal buffering <c>fs.writeFile</c> performs.
         /// Asynchronously writes data to a file, replacing the file if it already exists.
         /// </summary>
-        /// <remarks>@since v0.1.29</remarks>
         /// <param name="file">filename or file descriptor</param>
         /// <param name="path">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
@@ -101678,7 +101455,6 @@ module Fs =
         /// </code>
         /// Asynchronously append data to a file, creating the file if it does not exist.
         /// </summary>
-        /// <remarks>@since v0.6.7</remarks>
         /// <param name="path">filename or file descriptor</param>
         /// <param name="file">
         /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
@@ -101793,7 +101569,6 @@ module Fs =
         /// Watch for changes on <c>filename</c>. The callback <c>listener</c> will be called each time the file is accessed.
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
-        /// <param name="filename">A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("watchFile", "node:fs")>]
         static member watchFile
             (filename: PathLike, options: Fs.WatchFile.Options option, listener: StatsListener)
@@ -101898,7 +101673,6 @@ module Fs =
         /// * the file is renamed and then renamed a second time back to its original name
         /// Watch for changes on <c>filename</c>. The callback <c>listener</c> will be called each time the file is accessed.
         /// </summary>
-        /// <remarks>@since v0.1.31</remarks>
         /// <param name="filename">A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("watchFile", "node:fs")>]
         static member watchFile(filename: PathLike, listener: StatsListener) : StatWatcher = jsNative
@@ -102493,7 +102267,6 @@ module Fs =
         /// the user from reading or writing to it.
         /// Asynchronously tests a user's permissions for the file specified by path.
         /// </summary>
-        /// <remarks>@since v0.11.15</remarks>
         /// <param name="path">A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("access", "node:fs")>]
         static member access(path: PathLike, callback: NoParamCallback) : unit = jsNative
@@ -103541,11 +103314,6 @@ module Fs =
             /// Asynchronously reads the entire contents of a file. The underlying file will _not_ be closed automatically.
             /// The <c>FileHandle</c> must have been opened for reading.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>
-            /// Fulfills upon a successful read with the contents of the file. If no encoding is specified (using <c>options.encoding</c>), the data is returned as a {Buffer} object. Otherwise, the
-            /// data will be a string.
-            /// </returns>
             abstract readFile: options: U2<string, Fs.Promises.FileHandle.ReadFile.Options2> -> JS.Promise<string>
 
             /// <summary>
@@ -103561,11 +103329,6 @@ module Fs =
             /// Asynchronously reads the entire contents of a file. The underlying file will _not_ be closed automatically.
             /// The <c>FileHandle</c> must have been opened for reading.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>
-            /// Fulfills upon a successful read with the contents of the file. If no encoding is specified (using <c>options.encoding</c>), the data is returned as a {Buffer} object. Otherwise, the
-            /// data will be a string.
-            /// </returns>
             abstract readFile:
                 ?options: U2<string, Fs.Promises.FileHandle.AppendFile.Options> ->
                     JS.Promise<U2<string, NonSharedBuffer>>
@@ -103995,16 +103758,6 @@ module Fs =
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
             /// <returns>Upon success, fulfills with <c>undefined</c> if <c>recursive</c> is <c>false</c>, or the first directory path created if <c>recursive</c> is <c>true</c>.</returns>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">
-            /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-            /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-            /// </param>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">
-            /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-            /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-            /// </param>
             [<Import("mkdir", "node:fs/promises")>]
             static member mkdir(path: Fs.PathLike, options: Fs.Promises.Mkdir.Options) : JS.Promise<string option> =
                 jsNative
@@ -104030,8 +103783,6 @@ module Fs =
             /// </code>
             /// Asynchronous mkdir(2) - create a directory.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Upon success, fulfills with <c>undefined</c> if <c>recursive</c> is <c>false</c>, or the first directory path created if <c>recursive</c> is <c>true</c>.</returns>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
             /// <param name="options">
             /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -104069,8 +103820,6 @@ module Fs =
             /// </code>
             /// Asynchronous mkdir(2) - create a directory.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Upon success, fulfills with <c>undefined</c> if <c>recursive</c> is <c>false</c>, or the first directory path created if <c>recursive</c> is <c>true</c>.</returns>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
             /// <param name="options">
             /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -104111,14 +103860,6 @@ module Fs =
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
             /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
-            /// <param name="path">A path to a directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
             [<Import("readdir", "node:fs/promises")>]
             static member readdir
                 (path: Fs.PathLike, ?options: U2<string, Fs.Promises.Readdir.Options>)
@@ -104147,8 +103888,6 @@ module Fs =
             /// </code>
             /// Asynchronous readdir(3) - read a directory.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
             /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -104185,8 +103924,6 @@ module Fs =
             /// </code>
             /// Asynchronous readdir(3) - read a directory.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
             /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -104223,8 +103960,6 @@ module Fs =
             /// </code>
             /// Asynchronous readdir(3) - read a directory.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
             /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -104261,8 +103996,6 @@ module Fs =
             /// </code>
             /// Asynchronous readdir(3) - read a directory.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Fulfills with an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.</returns>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
             /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -104289,10 +104022,6 @@ module Fs =
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
             /// <returns>Fulfills with the <c>linkString</c> upon success.</returns>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             [<Import("readlink", "node:fs/promises")>]
             static member readlink
                 (path: Fs.PathLike, ?options: U2<string, Fs.ObjectEncodingOptions>)
@@ -104309,8 +104038,6 @@ module Fs =
             /// returned will be passed as a <c>Buffer</c> object.
             /// Asynchronous readlink(2) - read value of a symbolic link.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Fulfills with the <c>linkString</c> upon success.</returns>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
             /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -104497,10 +104224,6 @@ module Fs =
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
             /// <returns>Fulfills with the resolved path upon success.</returns>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-            /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-            /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             [<Import("realpath", "node:fs/promises")>]
             static member realpath
                 (path: Fs.PathLike, ?options: U2<string, Fs.ObjectEncodingOptions>)
@@ -104522,8 +104245,6 @@ module Fs =
             /// this restriction.
             /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Fulfills with the resolved path upon success.</returns>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
             /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -104562,8 +104283,6 @@ module Fs =
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
             /// <returns>Fulfills with a string containing the file system path of the newly created temporary directory.</returns>
-            /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-            /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             [<Import("mkdtemp", "node:fs/promises")>]
             static member mkdtemp
                 (prefix: string, ?options: U2<string, Fs.ObjectEncodingOptions>)
@@ -104598,8 +104317,6 @@ module Fs =
             /// Asynchronously creates a unique temporary directory.
             /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
-            /// <returns>Fulfills with a string containing the file system path of the newly created temporary directory.</returns>
             /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
             [<Import("mkdtemp", "node:fs/promises")>]
@@ -104874,9 +104591,7 @@ module Fs =
             /// Any specified <c>FileHandle</c> has to support reading.
             /// Asynchronously reads the entire contents of a file.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
             /// <param name="path">filename or <c>FileHandle</c></param>
-            /// <returns>Fulfills with the contents of the file.</returns>
             /// <param name="path">
             /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
             /// If a <c>FileHandle</c> is provided, the underlying file will _not_ be closed automatically.
@@ -104959,9 +104674,7 @@ module Fs =
             /// Any specified <c>FileHandle</c> has to support reading.
             /// Asynchronously reads the entire contents of a file.
             /// </summary>
-            /// <remarks>@since v10.0.0</remarks>
             /// <param name="path">filename or <c>FileHandle</c></param>
-            /// <returns>Fulfills with the contents of the file.</returns>
             /// <param name="path">
             /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
             /// If a <c>FileHandle</c> is provided, the underlying file will _not_ be closed automatically.
@@ -108581,14 +108294,12 @@ module Http =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -110363,14 +110074,12 @@ module Http =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -111996,7 +111705,6 @@ module Http =
         /// addListener(event: "connect", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('connect', $1)")>]
         abstract addListenerConnect: listener: Http.ClientRequest.AddListener.Listener -> ClientRequest
 
@@ -112005,7 +111713,6 @@ module Http =
         /// addListener(event: "continue", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('continue', $1)")>]
         abstract addListenerContinue: listener: (unit -> unit) -> ClientRequest
 
@@ -112014,7 +111721,6 @@ module Http =
         /// addListener(event: "information", listener: (info: InformationEvent) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('information', $1)")>]
         abstract addListenerInformation: listener: (InformationEvent -> unit) -> ClientRequest
 
@@ -112023,7 +111729,6 @@ module Http =
         /// addListener(event: "response", listener: (response: IncomingMessage) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('response', $1)")>]
         abstract addListenerResponse: listener: (IncomingMessage -> unit) -> ClientRequest
 
@@ -112032,7 +111737,6 @@ module Http =
         /// addListener(event: "socket", listener: (socket: Socket) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('socket', $1)")>]
         abstract addListenerSocket: listener: (Net.Socket -> unit) -> ClientRequest
 
@@ -112041,7 +111745,6 @@ module Http =
         /// addListener(event: "timeout", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('timeout', $1)")>]
         abstract addListenerTimeout: listener: (unit -> unit) -> ClientRequest
 
@@ -112050,7 +111753,6 @@ module Http =
         /// addListener(event: "upgrade", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('upgrade', $1)")>]
         abstract addListenerUpgrade: listener: Http.ClientRequest.AddListener.Listener2 -> ClientRequest
 
@@ -112059,7 +111761,6 @@ module Http =
         /// addListener(event: "close", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('close', $1)")>]
         abstract addListenerClose: listener: (unit -> unit) -> ClientRequest
 
@@ -112068,7 +111769,6 @@ module Http =
         /// addListener(event: "drain", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('drain', $1)")>]
         abstract addListenerDrain: listener: (unit -> unit) -> ClientRequest
 
@@ -112077,7 +111777,6 @@ module Http =
         /// addListener(event: "error", listener: (err: Error) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('error', $1)")>]
         abstract addListenerError: listener: (exn -> unit) -> ClientRequest
 
@@ -112086,7 +111785,6 @@ module Http =
         /// addListener(event: "finish", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('finish', $1)")>]
         abstract addListenerFinish: listener: (unit -> unit) -> ClientRequest
 
@@ -112095,7 +111793,6 @@ module Http =
         /// addListener(event: "pipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('pipe', $1)")>]
         abstract addListenerPipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
@@ -112104,11 +111801,9 @@ module Http =
         /// addListener(event: "unpipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.addListener('unpipe', $1)")>]
         abstract addListenerUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        /// <remarks>@deprecated</remarks>
         abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
 
         /// <summary>
@@ -112125,7 +111820,6 @@ module Http =
         /// on(event: "connect", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('connect', $1)")>]
         abstract onConnect: listener: Http.ClientRequest.On.Listener -> ClientRequest
 
@@ -112134,7 +111828,6 @@ module Http =
         /// on(event: "continue", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('continue', $1)")>]
         abstract onContinue: listener: (unit -> unit) -> ClientRequest
 
@@ -112143,7 +111836,6 @@ module Http =
         /// on(event: "information", listener: (info: InformationEvent) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('information', $1)")>]
         abstract onInformation: listener: (InformationEvent -> unit) -> ClientRequest
 
@@ -112152,7 +111844,6 @@ module Http =
         /// on(event: "response", listener: (response: IncomingMessage) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('response', $1)")>]
         abstract onResponse: listener: (IncomingMessage -> unit) -> ClientRequest
 
@@ -112161,7 +111852,6 @@ module Http =
         /// on(event: "socket", listener: (socket: Socket) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('socket', $1)")>]
         abstract on_Socket: listener: (Net.Socket -> unit) -> ClientRequest
 
@@ -112170,7 +111860,6 @@ module Http =
         /// on(event: "timeout", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('timeout', $1)")>]
         abstract onTimeout: listener: (unit -> unit) -> ClientRequest
 
@@ -112179,7 +111868,6 @@ module Http =
         /// on(event: "upgrade", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('upgrade', $1)")>]
         abstract onUpgrade: listener: Http.ClientRequest.On.Listener2 -> ClientRequest
 
@@ -112188,7 +111876,6 @@ module Http =
         /// on(event: "close", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('close', $1)")>]
         abstract onClose: listener: (unit -> unit) -> ClientRequest
 
@@ -112197,7 +111884,6 @@ module Http =
         /// on(event: "drain", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('drain', $1)")>]
         abstract onDrain: listener: (unit -> unit) -> ClientRequest
 
@@ -112206,7 +111892,6 @@ module Http =
         /// on(event: "error", listener: (err: Error) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('error', $1)")>]
         abstract onError: listener: (exn -> unit) -> ClientRequest
 
@@ -112215,7 +111900,6 @@ module Http =
         /// on(event: "finish", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('finish', $1)")>]
         abstract onFinish: listener: (unit -> unit) -> ClientRequest
 
@@ -112224,7 +111908,6 @@ module Http =
         /// on(event: "pipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('pipe', $1)")>]
         abstract onPipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
@@ -112233,11 +111916,9 @@ module Http =
         /// on(event: "unpipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.on('unpipe', $1)")>]
         abstract onUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        /// <remarks>@deprecated</remarks>
         abstract on: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
 
         /// <summary>
@@ -112254,7 +111935,6 @@ module Http =
         /// once(event: "connect", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('connect', $1)")>]
         abstract onceConnect: listener: Http.ClientRequest.Once.Listener -> ClientRequest
 
@@ -112263,7 +111943,6 @@ module Http =
         /// once(event: "continue", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('continue', $1)")>]
         abstract onceContinue: listener: (unit -> unit) -> ClientRequest
 
@@ -112272,7 +111951,6 @@ module Http =
         /// once(event: "information", listener: (info: InformationEvent) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('information', $1)")>]
         abstract onceInformation: listener: (InformationEvent -> unit) -> ClientRequest
 
@@ -112281,7 +111959,6 @@ module Http =
         /// once(event: "response", listener: (response: IncomingMessage) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('response', $1)")>]
         abstract onceResponse: listener: (IncomingMessage -> unit) -> ClientRequest
 
@@ -112290,7 +111967,6 @@ module Http =
         /// once(event: "socket", listener: (socket: Socket) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('socket', $1)")>]
         abstract onceSocket: listener: (Net.Socket -> unit) -> ClientRequest
 
@@ -112299,7 +111975,6 @@ module Http =
         /// once(event: "timeout", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('timeout', $1)")>]
         abstract onceTimeout: listener: (unit -> unit) -> ClientRequest
 
@@ -112308,7 +111983,6 @@ module Http =
         /// once(event: "upgrade", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('upgrade', $1)")>]
         abstract onceUpgrade: listener: Http.ClientRequest.Once.Listener2 -> ClientRequest
 
@@ -112317,7 +111991,6 @@ module Http =
         /// once(event: "close", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('close', $1)")>]
         abstract onceClose: listener: (unit -> unit) -> ClientRequest
 
@@ -112326,7 +111999,6 @@ module Http =
         /// once(event: "drain", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('drain', $1)")>]
         abstract onceDrain: listener: (unit -> unit) -> ClientRequest
 
@@ -112335,7 +112007,6 @@ module Http =
         /// once(event: "error", listener: (err: Error) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('error', $1)")>]
         abstract onceError: listener: (exn -> unit) -> ClientRequest
 
@@ -112344,7 +112015,6 @@ module Http =
         /// once(event: "finish", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('finish', $1)")>]
         abstract onceFinish: listener: (unit -> unit) -> ClientRequest
 
@@ -112353,7 +112023,6 @@ module Http =
         /// once(event: "pipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('pipe', $1)")>]
         abstract oncePipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
@@ -112362,11 +112031,9 @@ module Http =
         /// once(event: "unpipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.once('unpipe', $1)")>]
         abstract onceUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        /// <remarks>@deprecated</remarks>
         abstract once: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
 
         /// <summary>
@@ -112383,7 +112050,6 @@ module Http =
         /// prependListener(event: "connect", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('connect', $1)")>]
         abstract prependListenerConnect: listener: Http.ClientRequest.PrependListener.Listener -> ClientRequest
 
@@ -112392,7 +112058,6 @@ module Http =
         /// prependListener(event: "continue", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('continue', $1)")>]
         abstract prependListenerContinue: listener: (unit -> unit) -> ClientRequest
 
@@ -112401,7 +112066,6 @@ module Http =
         /// prependListener(event: "information", listener: (info: InformationEvent) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('information', $1)")>]
         abstract prependListenerInformation: listener: (InformationEvent -> unit) -> ClientRequest
 
@@ -112410,7 +112074,6 @@ module Http =
         /// prependListener(event: "response", listener: (response: IncomingMessage) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('response', $1)")>]
         abstract prependListenerResponse: listener: (IncomingMessage -> unit) -> ClientRequest
 
@@ -112419,7 +112082,6 @@ module Http =
         /// prependListener(event: "socket", listener: (socket: Socket) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('socket', $1)")>]
         abstract prependListenerSocket: listener: (Net.Socket -> unit) -> ClientRequest
 
@@ -112428,7 +112090,6 @@ module Http =
         /// prependListener(event: "timeout", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('timeout', $1)")>]
         abstract prependListenerTimeout: listener: (unit -> unit) -> ClientRequest
 
@@ -112437,7 +112098,6 @@ module Http =
         /// prependListener(event: "upgrade", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('upgrade', $1)")>]
         abstract prependListenerUpgrade: listener: Http.ClientRequest.PrependListener.Listener2 -> ClientRequest
 
@@ -112446,7 +112106,6 @@ module Http =
         /// prependListener(event: "close", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('close', $1)")>]
         abstract prependListenerClose: listener: (unit -> unit) -> ClientRequest
 
@@ -112455,7 +112114,6 @@ module Http =
         /// prependListener(event: "drain", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('drain', $1)")>]
         abstract prependListenerDrain: listener: (unit -> unit) -> ClientRequest
 
@@ -112464,7 +112122,6 @@ module Http =
         /// prependListener(event: "error", listener: (err: Error) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('error', $1)")>]
         abstract prependListenerError: listener: (exn -> unit) -> ClientRequest
 
@@ -112473,7 +112130,6 @@ module Http =
         /// prependListener(event: "finish", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('finish', $1)")>]
         abstract prependListenerFinish: listener: (unit -> unit) -> ClientRequest
 
@@ -112482,7 +112138,6 @@ module Http =
         /// prependListener(event: "pipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('pipe', $1)")>]
         abstract prependListenerPipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
@@ -112491,11 +112146,9 @@ module Http =
         /// prependListener(event: "unpipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependListener('unpipe', $1)")>]
         abstract prependListenerUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        /// <remarks>@deprecated</remarks>
         abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
 
         /// <summary>
@@ -112512,7 +112165,6 @@ module Http =
         /// prependOnceListener(event: "connect", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('connect', $1)")>]
         abstract prependOnceListenerConnect: listener: Http.ClientRequest.PrependOnceListener.Listener -> ClientRequest
 
@@ -112521,7 +112173,6 @@ module Http =
         /// prependOnceListener(event: "continue", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('continue', $1)")>]
         abstract prependOnceListenerContinue: listener: (unit -> unit) -> ClientRequest
 
@@ -112530,7 +112181,6 @@ module Http =
         /// prependOnceListener(event: "information", listener: (info: InformationEvent) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('information', $1)")>]
         abstract prependOnceListenerInformation: listener: (InformationEvent -> unit) -> ClientRequest
 
@@ -112539,7 +112189,6 @@ module Http =
         /// prependOnceListener(event: "response", listener: (response: IncomingMessage) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('response', $1)")>]
         abstract prependOnceListenerResponse: listener: (IncomingMessage -> unit) -> ClientRequest
 
@@ -112548,7 +112197,6 @@ module Http =
         /// prependOnceListener(event: "socket", listener: (socket: Socket) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('socket', $1)")>]
         abstract prependOnceListenerSocket: listener: (Net.Socket -> unit) -> ClientRequest
 
@@ -112557,7 +112205,6 @@ module Http =
         /// prependOnceListener(event: "timeout", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('timeout', $1)")>]
         abstract prependOnceListenerTimeout: listener: (unit -> unit) -> ClientRequest
 
@@ -112566,7 +112213,6 @@ module Http =
         /// prependOnceListener(event: "upgrade", listener: (response: IncomingMessage, socket: Socket, head: NonSharedBuffer) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('upgrade', $1)")>]
         abstract prependOnceListenerUpgrade: listener: Http.ClientRequest.PrependOnceListener.Listener2 -> ClientRequest
 
@@ -112575,7 +112221,6 @@ module Http =
         /// prependOnceListener(event: "close", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('close', $1)")>]
         abstract prependOnceListenerClose: listener: (unit -> unit) -> ClientRequest
 
@@ -112584,7 +112229,6 @@ module Http =
         /// prependOnceListener(event: "drain", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('drain', $1)")>]
         abstract prependOnceListenerDrain: listener: (unit -> unit) -> ClientRequest
 
@@ -112593,7 +112237,6 @@ module Http =
         /// prependOnceListener(event: "error", listener: (err: Error) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('error', $1)")>]
         abstract prependOnceListenerError: listener: (exn -> unit) -> ClientRequest
 
@@ -112602,7 +112245,6 @@ module Http =
         /// prependOnceListener(event: "finish", listener: () =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('finish', $1)")>]
         abstract prependOnceListenerFinish: listener: (unit -> unit) -> ClientRequest
 
@@ -112611,7 +112253,6 @@ module Http =
         /// prependOnceListener(event: "pipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('pipe', $1)")>]
         abstract prependOnceListenerPipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
@@ -112620,11 +112261,9 @@ module Http =
         /// prependOnceListener(event: "unpipe", listener: (src: stream.Readable) =&gt; void): this
         /// </code>
         /// </summary>
-        /// <remarks>@deprecated</remarks>
         [<Emit("$0.prependOnceListener('unpipe', $1)")>]
         abstract prependOnceListenerUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        /// <remarks>@deprecated</remarks>
         abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
         /// <summary>
         /// The <c>writable.setDefaultEncoding()</c> method sets the default <c>encoding</c> for a <c>Writable</c> stream.
@@ -112651,14 +112290,12 @@ module Http =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -119039,14 +118676,12 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -119785,14 +119420,12 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -121182,14 +120815,12 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -134007,14 +133638,6 @@ module Inspector =
         /// Enable the <c>NodeRuntime.waitingForDisconnect</c>.
         /// Read a chunk of the stream
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         abstract post: ``method``: string * ?callback: Inspector.Session.Post.Callback -> unit
         /// <summary>
         /// Posts a message to the inspector back-end. <c>callback</c> will be notified when
@@ -134120,14 +133743,6 @@ module Inspector =
         /// post(method: "Schema.getDomains", callback?: (err: Error | null, params: Schema.GetDomainsReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Schema.getDomains', $1...)")>]
         abstract postSchemaGetDomains: ?callback: Inspector.Session.Post.Callback3 -> unit
 
@@ -134137,14 +133752,6 @@ module Inspector =
         /// post(method: "Runtime.evaluate", params?: Runtime.EvaluateParameterType, callback?: (err: Error | null, params: Runtime.EvaluateReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.evaluate', $1...)")>]
         abstract postRuntimeEvaluate:
             ?``params``: EvaluateParameterType * ?callback: Inspector.Session.Post.Callback4 -> unit
@@ -134171,14 +133778,6 @@ module Inspector =
         /// post(method: "Runtime.awaitPromise", params?: Runtime.AwaitPromiseParameterType, callback?: (err: Error | null, params: Runtime.AwaitPromiseReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.awaitPromise', $1...)")>]
         abstract postRuntimeAwaitPromise:
             ?``params``: AwaitPromiseParameterType * ?callback: Inspector.Session.Post.Callback6 -> unit
@@ -134205,14 +133804,6 @@ module Inspector =
         /// post(method: "Runtime.callFunctionOn", params?: Runtime.CallFunctionOnParameterType, callback?: (err: Error | null, params: Runtime.CallFunctionOnReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.callFunctionOn', $1...)")>]
         abstract postRuntimeCallFunctionOn:
             ?``params``: CallFunctionOnParameterType * ?callback: Inspector.Session.Post.Callback8 -> unit
@@ -134239,14 +133830,6 @@ module Inspector =
         /// post(method: "Runtime.getProperties", params?: Runtime.GetPropertiesParameterType, callback?: (err: Error | null, params: Runtime.GetPropertiesReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.getProperties', $1...)")>]
         abstract postRuntimeGetProperties:
             ?``params``: GetPropertiesParameterType * ?callback: Inspector.Session.Post.Callback10 -> unit
@@ -134273,14 +133856,6 @@ module Inspector =
         /// post(method: "Runtime.releaseObject", params?: Runtime.ReleaseObjectParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.releaseObject', $1...)")>]
         abstract postRuntimeReleaseObject:
             ?``params``: ReleaseObjectParameterType * ?callback: (exn option -> unit) -> unit
@@ -134307,14 +133882,6 @@ module Inspector =
         /// post(method: "Runtime.releaseObjectGroup", params?: Runtime.ReleaseObjectGroupParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.releaseObjectGroup', $1...)")>]
         abstract postRuntimeReleaseObjectGroup:
             ?``params``: ReleaseObjectGroupParameterType * ?callback: (exn option -> unit) -> unit
@@ -134341,14 +133908,6 @@ module Inspector =
         /// post(method: "Runtime.runIfWaitingForDebugger", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.runIfWaitingForDebugger', $1...)")>]
         abstract postRuntimeRunIfWaitingForDebugger: ?callback: (exn option -> unit) -> unit
 
@@ -134358,14 +133917,6 @@ module Inspector =
         /// post(method: "Runtime.enable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.enable', $1...)")>]
         abstract postRuntimeEnable: ?callback: (exn option -> unit) -> unit
 
@@ -134375,14 +133926,6 @@ module Inspector =
         /// post(method: "Runtime.disable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.disable', $1...)")>]
         abstract postRuntimeDisable: ?callback: (exn option -> unit) -> unit
 
@@ -134392,14 +133935,6 @@ module Inspector =
         /// post(method: "Runtime.discardConsoleEntries", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.discardConsoleEntries', $1...)")>]
         abstract postRuntimeDiscardConsoleEntries: ?callback: (exn option -> unit) -> unit
 
@@ -134442,14 +133977,6 @@ module Inspector =
         /// post(method: "Runtime.compileScript", params?: Runtime.CompileScriptParameterType, callback?: (err: Error | null, params: Runtime.CompileScriptReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.compileScript', $1...)")>]
         abstract postRuntimeCompileScript:
             ?``params``: CompileScriptParameterType * ?callback: Inspector.Session.Post.Callback12 -> unit
@@ -134476,14 +134003,6 @@ module Inspector =
         /// post(method: "Runtime.runScript", params?: Runtime.RunScriptParameterType, callback?: (err: Error | null, params: Runtime.RunScriptReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.runScript', $1...)")>]
         abstract postRuntimeRunScript:
             ?``params``: RunScriptParameterType * ?callback: Inspector.Session.Post.Callback14 -> unit
@@ -134543,14 +134062,6 @@ module Inspector =
         /// post(method: "Runtime.globalLexicalScopeNames", params?: Runtime.GlobalLexicalScopeNamesParameterType, callback?: (err: Error | null, params: Runtime.GlobalLexicalScopeNamesReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Runtime.globalLexicalScopeNames', $1...)")>]
         abstract postRuntimeGlobalLexicalScopeNames:
             ?``params``: GlobalLexicalScopeNamesParameterType * ?callback: Inspector.Session.Post.Callback18 -> unit
@@ -134577,14 +134088,6 @@ module Inspector =
         /// post(method: "Debugger.enable", callback?: (err: Error | null, params: Debugger.EnableReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.enable', $1...)")>]
         abstract postDebuggerEnable: ?callback: Inspector.Session.Post.Callback20 -> unit
 
@@ -134594,14 +134097,6 @@ module Inspector =
         /// post(method: "Debugger.disable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.disable', $1...)")>]
         abstract postDebuggerDisable: ?callback: (exn option -> unit) -> unit
 
@@ -134611,14 +134106,6 @@ module Inspector =
         /// post(method: "Debugger.setBreakpointsActive", params?: Debugger.SetBreakpointsActiveParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.setBreakpointsActive', $1...)")>]
         abstract postDebuggerSetBreakpointsActive:
             ?``params``: SetBreakpointsActiveParameterType * ?callback: (exn option -> unit) -> unit
@@ -134645,14 +134132,6 @@ module Inspector =
         /// post(method: "Debugger.setSkipAllPauses", params?: Debugger.SetSkipAllPausesParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.setSkipAllPauses', $1...)")>]
         abstract postDebuggerSetSkipAllPauses:
             ?``params``: SetSkipAllPausesParameterType * ?callback: (exn option -> unit) -> unit
@@ -134679,14 +134158,6 @@ module Inspector =
         /// post(method: "Debugger.setBreakpointByUrl", params?: Debugger.SetBreakpointByUrlParameterType, callback?: (err: Error | null, params: Debugger.SetBreakpointByUrlReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.setBreakpointByUrl', $1...)")>]
         abstract postDebuggerSetBreakpointByUrl:
             ?``params``: SetBreakpointByUrlParameterType * ?callback: Inspector.Session.Post.Callback21 -> unit
@@ -134713,14 +134184,6 @@ module Inspector =
         /// post(method: "Debugger.setBreakpoint", params?: Debugger.SetBreakpointParameterType, callback?: (err: Error | null, params: Debugger.SetBreakpointReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.setBreakpoint', $1...)")>]
         abstract postDebuggerSetBreakpoint:
             ?``params``: SetBreakpointParameterType * ?callback: Inspector.Session.Post.Callback23 -> unit
@@ -134747,14 +134210,6 @@ module Inspector =
         /// post(method: "Debugger.removeBreakpoint", params?: Debugger.RemoveBreakpointParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.removeBreakpoint', $1...)")>]
         abstract postDebuggerRemoveBreakpoint:
             ?``params``: RemoveBreakpointParameterType * ?callback: (exn option -> unit) -> unit
@@ -134781,14 +134236,6 @@ module Inspector =
         /// post(method: "Debugger.getPossibleBreakpoints", params?: Debugger.GetPossibleBreakpointsParameterType, callback?: (err: Error | null, params: Debugger.GetPossibleBreakpointsReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.getPossibleBreakpoints', $1...)")>]
         abstract postDebuggerGetPossibleBreakpoints:
             ?``params``: GetPossibleBreakpointsParameterType * ?callback: Inspector.Session.Post.Callback25 -> unit
@@ -134815,14 +134262,6 @@ module Inspector =
         /// post(method: "Debugger.continueToLocation", params?: Debugger.ContinueToLocationParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.continueToLocation', $1...)")>]
         abstract postDebuggerContinueToLocation:
             ?``params``: ContinueToLocationParameterType * ?callback: (exn option -> unit) -> unit
@@ -134882,14 +134321,6 @@ module Inspector =
         /// post(method: "Debugger.stepOver", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.stepOver', $1...)")>]
         abstract postDebuggerStepOver: ?callback: (exn option -> unit) -> unit
 
@@ -134899,14 +134330,6 @@ module Inspector =
         /// post(method: "Debugger.stepInto", params?: Debugger.StepIntoParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.stepInto', $1...)")>]
         abstract postDebuggerStepInto: ?``params``: StepIntoParameterType * ?callback: (exn option -> unit) -> unit
 
@@ -134932,14 +134355,6 @@ module Inspector =
         /// post(method: "Debugger.stepOut", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.stepOut', $1...)")>]
         abstract postDebuggerStepOut: ?callback: (exn option -> unit) -> unit
 
@@ -134949,14 +134364,6 @@ module Inspector =
         /// post(method: "Debugger.pause", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.pause', $1...)")>]
         abstract postDebuggerPause: ?callback: (exn option -> unit) -> unit
 
@@ -134983,14 +134390,6 @@ module Inspector =
         /// post(method: "Debugger.resume", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.resume', $1...)")>]
         abstract postDebuggerResume: ?callback: (exn option -> unit) -> unit
 
@@ -135034,14 +134433,6 @@ module Inspector =
         /// post(method: "Debugger.searchInContent", params?: Debugger.SearchInContentParameterType, callback?: (err: Error | null, params: Debugger.SearchInContentReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.searchInContent', $1...)")>]
         abstract postDebuggerSearchInContent:
             ?``params``: SearchInContentParameterType * ?callback: Inspector.Session.Post.Callback29 -> unit
@@ -135068,14 +134459,6 @@ module Inspector =
         /// post(method: "Debugger.setScriptSource", params?: Debugger.SetScriptSourceParameterType, callback?: (err: Error | null, params: Debugger.SetScriptSourceReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.setScriptSource', $1...)")>]
         abstract postDebuggerSetScriptSource:
             ?``params``: SetScriptSourceParameterType * ?callback: Inspector.Session.Post.Callback31 -> unit
@@ -135102,14 +134485,6 @@ module Inspector =
         /// post(method: "Debugger.restartFrame", params?: Debugger.RestartFrameParameterType, callback?: (err: Error | null, params: Debugger.RestartFrameReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.restartFrame', $1...)")>]
         abstract postDebuggerRestartFrame:
             ?``params``: RestartFrameParameterType * ?callback: Inspector.Session.Post.Callback33 -> unit
@@ -135136,14 +134511,6 @@ module Inspector =
         /// post(method: "Debugger.getScriptSource", params?: Debugger.GetScriptSourceParameterType, callback?: (err: Error | null, params: Debugger.GetScriptSourceReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.getScriptSource', $1...)")>]
         abstract postDebuggerGetScriptSource:
             ?``params``: GetScriptSourceParameterType * ?callback: Inspector.Session.Post.Callback35 -> unit
@@ -135170,14 +134537,6 @@ module Inspector =
         /// post(method: "Debugger.setPauseOnExceptions", params?: Debugger.SetPauseOnExceptionsParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.setPauseOnExceptions', $1...)")>]
         abstract postDebuggerSetPauseOnExceptions:
             ?``params``: SetPauseOnExceptionsParameterType * ?callback: (exn option -> unit) -> unit
@@ -135204,14 +134563,6 @@ module Inspector =
         /// post(method: "Debugger.evaluateOnCallFrame", params?: Debugger.EvaluateOnCallFrameParameterType, callback?: (err: Error | null, params: Debugger.EvaluateOnCallFrameReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.evaluateOnCallFrame', $1...)")>]
         abstract postDebuggerEvaluateOnCallFrame:
             ?``params``: EvaluateOnCallFrameParameterType * ?callback: Inspector.Session.Post.Callback37 -> unit
@@ -135238,14 +134589,6 @@ module Inspector =
         /// post(method: "Debugger.setVariableValue", params?: Debugger.SetVariableValueParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.setVariableValue', $1...)")>]
         abstract postDebuggerSetVariableValue:
             ?``params``: SetVariableValueParameterType * ?callback: (exn option -> unit) -> unit
@@ -135306,14 +134649,6 @@ module Inspector =
         /// post(method: "Debugger.setAsyncCallStackDepth", params?: Debugger.SetAsyncCallStackDepthParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Debugger.setAsyncCallStackDepth', $1...)")>]
         abstract postDebuggerSetAsyncCallStackDepth:
             ?``params``: SetAsyncCallStackDepthParameterType * ?callback: (exn option -> unit) -> unit
@@ -135408,14 +134743,6 @@ module Inspector =
         /// post(method: "Console.enable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Console.enable', $1...)")>]
         abstract postConsoleEnable: ?callback: (exn option -> unit) -> unit
 
@@ -135425,14 +134752,6 @@ module Inspector =
         /// post(method: "Console.disable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Console.disable', $1...)")>]
         abstract postConsoleDisable: ?callback: (exn option -> unit) -> unit
 
@@ -135442,14 +134761,6 @@ module Inspector =
         /// post(method: "Console.clearMessages", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Console.clearMessages', $1...)")>]
         abstract postConsoleClearMessages: ?callback: (exn option -> unit) -> unit
 
@@ -135491,14 +134802,6 @@ module Inspector =
         /// post(method: "Profiler.setSamplingInterval", params?: Profiler.SetSamplingIntervalParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Profiler.setSamplingInterval', $1...)")>]
         abstract postProfilerSetSamplingInterval:
             ?``params``: SetSamplingIntervalParameterType * ?callback: (exn option -> unit) -> unit
@@ -135557,14 +134860,6 @@ module Inspector =
         /// post(method: "Profiler.startPreciseCoverage", params?: Profiler.StartPreciseCoverageParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Profiler.startPreciseCoverage', $1...)")>]
         abstract postProfilerStartPreciseCoverage:
             ?``params``: StartPreciseCoverageParameterType * ?callback: (exn option -> unit) -> unit
@@ -135591,14 +134886,6 @@ module Inspector =
         /// post(method: "Profiler.stopPreciseCoverage", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Profiler.stopPreciseCoverage', $1...)")>]
         abstract postProfilerStopPreciseCoverage: ?callback: (exn option -> unit) -> unit
 
@@ -135608,14 +134895,6 @@ module Inspector =
         /// post(method: "Profiler.takePreciseCoverage", callback?: (err: Error | null, params: Profiler.TakePreciseCoverageReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Profiler.takePreciseCoverage', $1...)")>]
         abstract postProfilerTakePreciseCoverage: ?callback: Inspector.Session.Post.Callback40 -> unit
 
@@ -135625,14 +134904,6 @@ module Inspector =
         /// post(method: "Profiler.getBestEffortCoverage", callback?: (err: Error | null, params: Profiler.GetBestEffortCoverageReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Profiler.getBestEffortCoverage', $1...)")>]
         abstract postProfilerGetBestEffortCoverage: ?callback: Inspector.Session.Post.Callback41 -> unit
 
@@ -135822,14 +135093,6 @@ module Inspector =
         /// post(method: "HeapProfiler.addInspectedHeapObject", params?: HeapProfiler.AddInspectedHeapObjectParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('HeapProfiler.addInspectedHeapObject', $1...)")>]
         abstract postHeapProfilerAddInspectedHeapObject:
             ?``params``: AddInspectedHeapObjectParameterType * ?callback: (exn option -> unit) -> unit
@@ -135954,14 +135217,6 @@ module Inspector =
         /// post(method: "NodeTracing.getCategories", callback?: (err: Error | null, params: NodeTracing.GetCategoriesReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeTracing.getCategories', $1...)")>]
         abstract postNodeTracingGetCategories: ?callback: Inspector.Session.Post.Callback48 -> unit
 
@@ -135971,14 +135226,6 @@ module Inspector =
         /// post(method: "NodeTracing.start", params?: NodeTracing.StartParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeTracing.start', $1...)")>]
         abstract postNodeTracingStart: ?``params``: StartParameterType * ?callback: (exn option -> unit) -> unit
 
@@ -136005,14 +135252,6 @@ module Inspector =
         /// post(method: "NodeTracing.stop", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeTracing.stop', $1...)")>]
         abstract postNodeTracingStop: ?callback: (exn option -> unit) -> unit
 
@@ -136022,14 +135261,6 @@ module Inspector =
         /// post(method: "NodeWorker.sendMessageToWorker", params?: NodeWorker.SendMessageToWorkerParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeWorker.sendMessageToWorker', $1...)")>]
         abstract postNodeWorkerSendMessageToWorker:
             ?``params``: SendMessageToWorkerParameterType * ?callback: (exn option -> unit) -> unit
@@ -136057,14 +135288,6 @@ module Inspector =
         /// post(method: "NodeWorker.enable", params?: NodeWorker.EnableParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeWorker.enable', $1...)")>]
         abstract postNodeWorkerEnable: ?``params``: EnableParameterType * ?callback: (exn option -> unit) -> unit
 
@@ -136090,14 +135313,6 @@ module Inspector =
         /// post(method: "NodeWorker.disable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeWorker.disable', $1...)")>]
         abstract postNodeWorkerDisable: ?callback: (exn option -> unit) -> unit
 
@@ -136107,14 +135322,6 @@ module Inspector =
         /// post(method: "NodeWorker.detach", params?: NodeWorker.DetachParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeWorker.detach', $1...)")>]
         abstract postNodeWorkerDetach: ?``params``: DetachParameterType * ?callback: (exn option -> unit) -> unit
 
@@ -136140,14 +135347,6 @@ module Inspector =
         /// post(method: "Network.disable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Network.disable', $1...)")>]
         abstract postNetworkDisable: ?callback: (exn option -> unit) -> unit
 
@@ -136157,14 +135356,6 @@ module Inspector =
         /// post(method: "Network.enable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Network.enable', $1...)")>]
         abstract postNetworkEnable: ?callback: (exn option -> unit) -> unit
 
@@ -136174,14 +135365,6 @@ module Inspector =
         /// post(method: "Network.getRequestPostData", params?: Network.GetRequestPostDataParameterType, callback?: (err: Error | null, params: Network.GetRequestPostDataReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Network.getRequestPostData', $1...)")>]
         abstract postNetworkGetRequestPostData:
             ?``params``: GetRequestPostDataParameterType * ?callback: Inspector.Session.Post.Callback49 -> unit
@@ -136208,14 +135391,6 @@ module Inspector =
         /// post(method: "Network.getResponseBody", params?: Network.GetResponseBodyParameterType, callback?: (err: Error | null, params: Network.GetResponseBodyReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Network.getResponseBody', $1...)")>]
         abstract postNetworkGetResponseBody:
             ?``params``: GetResponseBodyParameterType * ?callback: Inspector.Session.Post.Callback51 -> unit
@@ -136277,14 +135452,6 @@ module Inspector =
         /// post(method: "Network.loadNetworkResource", params?: Network.LoadNetworkResourceParameterType, callback?: (err: Error | null, params: Network.LoadNetworkResourceReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('Network.loadNetworkResource', $1...)")>]
         abstract postNetworkLoadNetworkResource:
             ?``params``: LoadNetworkResourceParameterType * ?callback: Inspector.Session.Post.Callback55 -> unit
@@ -136311,14 +135478,6 @@ module Inspector =
         /// post(method: "NodeRuntime.enable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeRuntime.enable', $1...)")>]
         abstract postNodeRuntimeEnable: ?callback: (exn option -> unit) -> unit
 
@@ -136328,14 +135487,6 @@ module Inspector =
         /// post(method: "NodeRuntime.disable", callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeRuntime.disable', $1...)")>]
         abstract postNodeRuntimeDisable: ?callback: (exn option -> unit) -> unit
 
@@ -136345,14 +135496,6 @@ module Inspector =
         /// post(method: "NodeRuntime.notifyWhenWaitingForDisconnect", params?: NodeRuntime.NotifyWhenWaitingForDisconnectParameterType, callback?: (err: Error | null) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('NodeRuntime.notifyWhenWaitingForDisconnect', $1...)")>]
         abstract postNodeRuntimeNotifyWhenWaitingForDisconnect:
             ?``params``: NotifyWhenWaitingForDisconnectParameterType * ?callback: (exn option -> unit) -> unit
@@ -136412,14 +135555,6 @@ module Inspector =
         /// post(method: "IO.read", params?: IO.ReadParameterType, callback?: (err: Error | null, params: IO.ReadReturnType) =&gt; void): void
         /// </code>
         /// </summary>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
-        /// <remarks>@experimental</remarks>
         [<Emit("$0.post('IO.read', $1...)")>]
         abstract postIORead: ?``params``: ReadParameterType * ?callback: Inspector.Session.Post.Callback57 -> unit
 
@@ -139643,14 +138778,6 @@ module Inspector =
             /// Enable the <c>NodeRuntime.waitingForDisconnect</c>.
             /// Read a chunk of the stream
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             abstract post: ``method``: string * ?``params``: obj -> JS.Promise<unit>
 
             /// <summary>
@@ -139659,14 +138786,6 @@ module Inspector =
             /// post(method: "Schema.getDomains"): Promise&lt;Schema.GetDomainsReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Schema.getDomains')")>]
             abstract postSchemaGetDomains: unit -> JS.Promise<GetDomainsReturnType>
 
@@ -139676,14 +138795,6 @@ module Inspector =
             /// post(method: "Runtime.evaluate", params?: Runtime.EvaluateParameterType): Promise&lt;Runtime.EvaluateReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.evaluate', $1...)")>]
             abstract postRuntimeEvaluate: ?``params``: EvaluateParameterType -> JS.Promise<EvaluateReturnType>
 
@@ -139693,14 +138804,6 @@ module Inspector =
             /// post(method: "Runtime.awaitPromise", params?: Runtime.AwaitPromiseParameterType): Promise&lt;Runtime.AwaitPromiseReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.awaitPromise', $1...)")>]
             abstract postRuntimeAwaitPromise:
                 ?``params``: AwaitPromiseParameterType -> JS.Promise<AwaitPromiseReturnType>
@@ -139711,14 +138814,6 @@ module Inspector =
             /// post(method: "Runtime.callFunctionOn", params?: Runtime.CallFunctionOnParameterType): Promise&lt;Runtime.CallFunctionOnReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.callFunctionOn', $1...)")>]
             abstract postRuntimeCallFunctionOn:
                 ?``params``: CallFunctionOnParameterType -> JS.Promise<CallFunctionOnReturnType>
@@ -139729,14 +138824,6 @@ module Inspector =
             /// post(method: "Runtime.getProperties", params?: Runtime.GetPropertiesParameterType): Promise&lt;Runtime.GetPropertiesReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.getProperties', $1...)")>]
             abstract postRuntimeGetProperties:
                 ?``params``: GetPropertiesParameterType -> JS.Promise<GetPropertiesReturnType>
@@ -139747,14 +138834,6 @@ module Inspector =
             /// post(method: "Runtime.releaseObject", params?: Runtime.ReleaseObjectParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.releaseObject', $1...)")>]
             abstract postRuntimeReleaseObject: ?``params``: ReleaseObjectParameterType -> JS.Promise<unit>
 
@@ -139764,14 +138843,6 @@ module Inspector =
             /// post(method: "Runtime.releaseObjectGroup", params?: Runtime.ReleaseObjectGroupParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.releaseObjectGroup', $1...)")>]
             abstract postRuntimeReleaseObjectGroup: ?``params``: ReleaseObjectGroupParameterType -> JS.Promise<unit>
 
@@ -139781,14 +138852,6 @@ module Inspector =
             /// post(method: "Runtime.runIfWaitingForDebugger"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.runIfWaitingForDebugger')")>]
             abstract postRuntimeRunIfWaitingForDebugger: unit -> JS.Promise<unit>
 
@@ -139798,14 +138861,6 @@ module Inspector =
             /// post(method: "Runtime.enable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.enable')")>]
             abstract postRuntimeEnable: unit -> JS.Promise<unit>
 
@@ -139815,14 +138870,6 @@ module Inspector =
             /// post(method: "Runtime.disable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.disable')")>]
             abstract postRuntimeDisable: unit -> JS.Promise<unit>
 
@@ -139832,14 +138879,6 @@ module Inspector =
             /// post(method: "Runtime.discardConsoleEntries"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.discardConsoleEntries')")>]
             abstract postRuntimeDiscardConsoleEntries: unit -> JS.Promise<unit>
 
@@ -139866,14 +138905,6 @@ module Inspector =
             /// post(method: "Runtime.compileScript", params?: Runtime.CompileScriptParameterType): Promise&lt;Runtime.CompileScriptReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.compileScript', $1...)")>]
             abstract postRuntimeCompileScript:
                 ?``params``: CompileScriptParameterType -> JS.Promise<CompileScriptReturnType>
@@ -139884,14 +138915,6 @@ module Inspector =
             /// post(method: "Runtime.runScript", params?: Runtime.RunScriptParameterType): Promise&lt;Runtime.RunScriptReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.runScript', $1...)")>]
             abstract postRuntimeRunScript: ?``params``: RunScriptParameterType -> JS.Promise<RunScriptReturnType>
 
@@ -139918,14 +138941,6 @@ module Inspector =
             /// post(method: "Runtime.globalLexicalScopeNames", params?: Runtime.GlobalLexicalScopeNamesParameterType): Promise&lt;Runtime.GlobalLexicalScopeNamesReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Runtime.globalLexicalScopeNames', $1...)")>]
             abstract postRuntimeGlobalLexicalScopeNames:
                 ?``params``: GlobalLexicalScopeNamesParameterType -> JS.Promise<GlobalLexicalScopeNamesReturnType>
@@ -139936,14 +138951,6 @@ module Inspector =
             /// post(method: "Debugger.enable"): Promise&lt;Debugger.EnableReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.enable')")>]
             abstract postDebuggerEnable: unit -> JS.Promise<EnableReturnType>
 
@@ -139953,14 +138960,6 @@ module Inspector =
             /// post(method: "Debugger.disable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.disable')")>]
             abstract postDebuggerDisable: unit -> JS.Promise<unit>
 
@@ -139970,14 +138969,6 @@ module Inspector =
             /// post(method: "Debugger.setBreakpointsActive", params?: Debugger.SetBreakpointsActiveParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.setBreakpointsActive', $1...)")>]
             abstract postDebuggerSetBreakpointsActive:
                 ?``params``: SetBreakpointsActiveParameterType -> JS.Promise<unit>
@@ -139988,14 +138979,6 @@ module Inspector =
             /// post(method: "Debugger.setSkipAllPauses", params?: Debugger.SetSkipAllPausesParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.setSkipAllPauses', $1...)")>]
             abstract postDebuggerSetSkipAllPauses: ?``params``: SetSkipAllPausesParameterType -> JS.Promise<unit>
 
@@ -140005,14 +138988,6 @@ module Inspector =
             /// post(method: "Debugger.setBreakpointByUrl", params?: Debugger.SetBreakpointByUrlParameterType): Promise&lt;Debugger.SetBreakpointByUrlReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.setBreakpointByUrl', $1...)")>]
             abstract postDebuggerSetBreakpointByUrl:
                 ?``params``: SetBreakpointByUrlParameterType -> JS.Promise<SetBreakpointByUrlReturnType>
@@ -140023,14 +138998,6 @@ module Inspector =
             /// post(method: "Debugger.setBreakpoint", params?: Debugger.SetBreakpointParameterType): Promise&lt;Debugger.SetBreakpointReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.setBreakpoint', $1...)")>]
             abstract postDebuggerSetBreakpoint:
                 ?``params``: SetBreakpointParameterType -> JS.Promise<SetBreakpointReturnType>
@@ -140041,14 +139008,6 @@ module Inspector =
             /// post(method: "Debugger.removeBreakpoint", params?: Debugger.RemoveBreakpointParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.removeBreakpoint', $1...)")>]
             abstract postDebuggerRemoveBreakpoint: ?``params``: RemoveBreakpointParameterType -> JS.Promise<unit>
 
@@ -140058,14 +139017,6 @@ module Inspector =
             /// post(method: "Debugger.getPossibleBreakpoints", params?: Debugger.GetPossibleBreakpointsParameterType): Promise&lt;Debugger.GetPossibleBreakpointsReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.getPossibleBreakpoints', $1...)")>]
             abstract postDebuggerGetPossibleBreakpoints:
                 ?``params``: GetPossibleBreakpointsParameterType -> JS.Promise<GetPossibleBreakpointsReturnType>
@@ -140076,14 +139027,6 @@ module Inspector =
             /// post(method: "Debugger.continueToLocation", params?: Debugger.ContinueToLocationParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.continueToLocation', $1...)")>]
             abstract postDebuggerContinueToLocation: ?``params``: ContinueToLocationParameterType -> JS.Promise<unit>
 
@@ -140109,14 +139052,6 @@ module Inspector =
             /// post(method: "Debugger.stepOver"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.stepOver')")>]
             abstract postDebuggerStepOver: unit -> JS.Promise<unit>
 
@@ -140126,14 +139061,6 @@ module Inspector =
             /// post(method: "Debugger.stepInto", params?: Debugger.StepIntoParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.stepInto', $1...)")>]
             abstract postDebuggerStepInto: ?``params``: StepIntoParameterType -> JS.Promise<unit>
 
@@ -140143,14 +139070,6 @@ module Inspector =
             /// post(method: "Debugger.stepOut"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.stepOut')")>]
             abstract postDebuggerStepOut: unit -> JS.Promise<unit>
 
@@ -140160,14 +139079,6 @@ module Inspector =
             /// post(method: "Debugger.pause"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.pause')")>]
             abstract postDebuggerPause: unit -> JS.Promise<unit>
 
@@ -140194,14 +139105,6 @@ module Inspector =
             /// post(method: "Debugger.resume"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.resume')")>]
             abstract postDebuggerResume: unit -> JS.Promise<unit>
 
@@ -140229,14 +139132,6 @@ module Inspector =
             /// post(method: "Debugger.searchInContent", params?: Debugger.SearchInContentParameterType): Promise&lt;Debugger.SearchInContentReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.searchInContent', $1...)")>]
             abstract postDebuggerSearchInContent:
                 ?``params``: SearchInContentParameterType -> JS.Promise<SearchInContentReturnType>
@@ -140247,14 +139142,6 @@ module Inspector =
             /// post(method: "Debugger.setScriptSource", params?: Debugger.SetScriptSourceParameterType): Promise&lt;Debugger.SetScriptSourceReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.setScriptSource', $1...)")>]
             abstract postDebuggerSetScriptSource:
                 ?``params``: SetScriptSourceParameterType -> JS.Promise<SetScriptSourceReturnType>
@@ -140265,14 +139152,6 @@ module Inspector =
             /// post(method: "Debugger.restartFrame", params?: Debugger.RestartFrameParameterType): Promise&lt;Debugger.RestartFrameReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.restartFrame', $1...)")>]
             abstract postDebuggerRestartFrame:
                 ?``params``: RestartFrameParameterType -> JS.Promise<RestartFrameReturnType>
@@ -140283,14 +139162,6 @@ module Inspector =
             /// post(method: "Debugger.getScriptSource", params?: Debugger.GetScriptSourceParameterType): Promise&lt;Debugger.GetScriptSourceReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.getScriptSource', $1...)")>]
             abstract postDebuggerGetScriptSource:
                 ?``params``: GetScriptSourceParameterType -> JS.Promise<GetScriptSourceReturnType>
@@ -140301,14 +139172,6 @@ module Inspector =
             /// post(method: "Debugger.setPauseOnExceptions", params?: Debugger.SetPauseOnExceptionsParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.setPauseOnExceptions', $1...)")>]
             abstract postDebuggerSetPauseOnExceptions:
                 ?``params``: SetPauseOnExceptionsParameterType -> JS.Promise<unit>
@@ -140319,14 +139182,6 @@ module Inspector =
             /// post(method: "Debugger.evaluateOnCallFrame", params?: Debugger.EvaluateOnCallFrameParameterType): Promise&lt;Debugger.EvaluateOnCallFrameReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.evaluateOnCallFrame', $1...)")>]
             abstract postDebuggerEvaluateOnCallFrame:
                 ?``params``: EvaluateOnCallFrameParameterType -> JS.Promise<EvaluateOnCallFrameReturnType>
@@ -140337,14 +139192,6 @@ module Inspector =
             /// post(method: "Debugger.setVariableValue", params?: Debugger.SetVariableValueParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.setVariableValue', $1...)")>]
             abstract postDebuggerSetVariableValue: ?``params``: SetVariableValueParameterType -> JS.Promise<unit>
 
@@ -140371,14 +139218,6 @@ module Inspector =
             /// post(method: "Debugger.setAsyncCallStackDepth", params?: Debugger.SetAsyncCallStackDepthParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Debugger.setAsyncCallStackDepth', $1...)")>]
             abstract postDebuggerSetAsyncCallStackDepth:
                 ?``params``: SetAsyncCallStackDepthParameterType -> JS.Promise<unit>
@@ -140423,14 +139262,6 @@ module Inspector =
             /// post(method: "Console.enable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Console.enable')")>]
             abstract postConsoleEnable: unit -> JS.Promise<unit>
 
@@ -140440,14 +139271,6 @@ module Inspector =
             /// post(method: "Console.disable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Console.disable')")>]
             abstract postConsoleDisable: unit -> JS.Promise<unit>
 
@@ -140457,14 +139280,6 @@ module Inspector =
             /// post(method: "Console.clearMessages"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Console.clearMessages')")>]
             abstract postConsoleClearMessages: unit -> JS.Promise<unit>
 
@@ -140506,14 +139321,6 @@ module Inspector =
             /// post(method: "Profiler.setSamplingInterval", params?: Profiler.SetSamplingIntervalParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Profiler.setSamplingInterval', $1...)")>]
             abstract postProfilerSetSamplingInterval: ?``params``: SetSamplingIntervalParameterType -> JS.Promise<unit>
 
@@ -140555,14 +139362,6 @@ module Inspector =
             /// post(method: "Profiler.startPreciseCoverage", params?: Profiler.StartPreciseCoverageParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Profiler.startPreciseCoverage', $1...)")>]
             abstract postProfilerStartPreciseCoverage:
                 ?``params``: StartPreciseCoverageParameterType -> JS.Promise<unit>
@@ -140573,14 +139372,6 @@ module Inspector =
             /// post(method: "Profiler.stopPreciseCoverage"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Profiler.stopPreciseCoverage')")>]
             abstract postProfilerStopPreciseCoverage: unit -> JS.Promise<unit>
 
@@ -140590,14 +139381,6 @@ module Inspector =
             /// post(method: "Profiler.takePreciseCoverage"): Promise&lt;Profiler.TakePreciseCoverageReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Profiler.takePreciseCoverage')")>]
             abstract postProfilerTakePreciseCoverage: unit -> JS.Promise<TakePreciseCoverageReturnType>
 
@@ -140607,14 +139390,6 @@ module Inspector =
             /// post(method: "Profiler.getBestEffortCoverage"): Promise&lt;Profiler.GetBestEffortCoverageReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Profiler.getBestEffortCoverage')")>]
             abstract postProfilerGetBestEffortCoverage: unit -> JS.Promise<GetBestEffortCoverageReturnType>
 
@@ -140739,14 +139514,6 @@ module Inspector =
             /// post(method: "HeapProfiler.addInspectedHeapObject", params?: HeapProfiler.AddInspectedHeapObjectParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('HeapProfiler.addInspectedHeapObject', $1...)")>]
             abstract postHeapProfilerAddInspectedHeapObject:
                 ?``params``: AddInspectedHeapObjectParameterType -> JS.Promise<unit>
@@ -140822,14 +139589,6 @@ module Inspector =
             /// post(method: "NodeTracing.getCategories"): Promise&lt;NodeTracing.GetCategoriesReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeTracing.getCategories')")>]
             abstract postNodeTracingGetCategories: unit -> JS.Promise<GetCategoriesReturnType>
 
@@ -140839,14 +139598,6 @@ module Inspector =
             /// post(method: "NodeTracing.start", params?: NodeTracing.StartParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeTracing.start', $1...)")>]
             abstract postNodeTracingStart: ?``params``: StartParameterType -> JS.Promise<unit>
 
@@ -140857,14 +139608,6 @@ module Inspector =
             /// post(method: "NodeTracing.stop"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeTracing.stop')")>]
             abstract postNodeTracingStop: unit -> JS.Promise<unit>
 
@@ -140874,14 +139617,6 @@ module Inspector =
             /// post(method: "NodeWorker.sendMessageToWorker", params?: NodeWorker.SendMessageToWorkerParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeWorker.sendMessageToWorker', $1...)")>]
             abstract postNodeWorkerSendMessageToWorker:
                 ?``params``: SendMessageToWorkerParameterType -> JS.Promise<unit>
@@ -140893,14 +139628,6 @@ module Inspector =
             /// post(method: "NodeWorker.enable", params?: NodeWorker.EnableParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeWorker.enable', $1...)")>]
             abstract postNodeWorkerEnable: ?``params``: EnableParameterType -> JS.Promise<unit>
 
@@ -140910,14 +139637,6 @@ module Inspector =
             /// post(method: "NodeWorker.disable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeWorker.disable')")>]
             abstract postNodeWorkerDisable: unit -> JS.Promise<unit>
 
@@ -140927,14 +139646,6 @@ module Inspector =
             /// post(method: "NodeWorker.detach", params?: NodeWorker.DetachParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeWorker.detach', $1...)")>]
             abstract postNodeWorkerDetach: ?``params``: DetachParameterType -> JS.Promise<unit>
 
@@ -140944,14 +139655,6 @@ module Inspector =
             /// post(method: "Network.disable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Network.disable')")>]
             abstract postNetworkDisable: unit -> JS.Promise<unit>
 
@@ -140961,14 +139664,6 @@ module Inspector =
             /// post(method: "Network.enable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Network.enable')")>]
             abstract postNetworkEnable: unit -> JS.Promise<unit>
 
@@ -140978,14 +139673,6 @@ module Inspector =
             /// post(method: "Network.getRequestPostData", params?: Network.GetRequestPostDataParameterType): Promise&lt;Network.GetRequestPostDataReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Network.getRequestPostData', $1...)")>]
             abstract postNetworkGetRequestPostData:
                 ?``params``: GetRequestPostDataParameterType -> JS.Promise<GetRequestPostDataReturnType>
@@ -140996,14 +139683,6 @@ module Inspector =
             /// post(method: "Network.getResponseBody", params?: Network.GetResponseBodyParameterType): Promise&lt;Network.GetResponseBodyReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Network.getResponseBody', $1...)")>]
             abstract postNetworkGetResponseBody:
                 ?``params``: GetResponseBodyParameterType -> JS.Promise<GetResponseBodyReturnType>
@@ -141033,14 +139712,6 @@ module Inspector =
             /// post(method: "Network.loadNetworkResource", params?: Network.LoadNetworkResourceParameterType): Promise&lt;Network.LoadNetworkResourceReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('Network.loadNetworkResource', $1...)")>]
             abstract postNetworkLoadNetworkResource:
                 ?``params``: LoadNetworkResourceParameterType -> JS.Promise<LoadNetworkResourceReturnType>
@@ -141051,14 +139722,6 @@ module Inspector =
             /// post(method: "NodeRuntime.enable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeRuntime.enable')")>]
             abstract postNodeRuntimeEnable: unit -> JS.Promise<unit>
 
@@ -141068,14 +139731,6 @@ module Inspector =
             /// post(method: "NodeRuntime.disable"): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeRuntime.disable')")>]
             abstract postNodeRuntimeDisable: unit -> JS.Promise<unit>
 
@@ -141085,14 +139740,6 @@ module Inspector =
             /// post(method: "NodeRuntime.notifyWhenWaitingForDisconnect", params?: NodeRuntime.NotifyWhenWaitingForDisconnectParameterType): Promise&lt;void&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('NodeRuntime.notifyWhenWaitingForDisconnect', $1...)")>]
             abstract postNodeRuntimeNotifyWhenWaitingForDisconnect:
                 ?``params``: NotifyWhenWaitingForDisconnectParameterType -> JS.Promise<unit>
@@ -141119,14 +139766,6 @@ module Inspector =
             /// post(method: "IO.read", params?: IO.ReadParameterType): Promise&lt;IO.ReadReturnType&gt;
             /// </code>
             /// </summary>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
-            /// <remarks>@experimental</remarks>
             [<Emit("$0.post('IO.read', $1...)")>]
             abstract postIORead: ?``params``: ReadParameterType -> JS.Promise<ReadReturnType>
 
@@ -145907,9 +144546,7 @@ module Net =
         /// Sends data on the socket, with an explicit encoding for string data.
         /// </summary>
         /// <remarks>@since v0.1.90</remarks>
-        /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
         abstract write:
             buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
             ?cb: (exn option -> unit) ->
@@ -146234,11 +144871,9 @@ module Net =
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
@@ -152778,9 +151413,7 @@ module Process =
         /// Sends data on the socket, with an explicit encoding for string data.
         /// </summary>
         /// <remarks>@since v0.1.90</remarks>
-        /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
         abstract write:
             buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
             ?cb: (exn option -> unit) ->
@@ -153105,11 +151738,9 @@ module Process =
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
@@ -154404,9 +153035,7 @@ module Process =
         /// Sends data on the socket, with an explicit encoding for string data.
         /// </summary>
         /// <remarks>@since v0.1.90</remarks>
-        /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
         abstract write:
             buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
             ?cb: (exn option -> unit) ->
@@ -154731,11 +153360,9 @@ module Process =
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
@@ -156438,9 +155065,7 @@ module Process =
         /// Sends data on the socket, with an explicit encoding for string data.
         /// </summary>
         /// <remarks>@since v0.1.90</remarks>
-        /// <remarks>@see {@link Socket.write} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
-        /// <param name="encoding">Only used when data is <c>string</c>.</param>
         abstract write:
             buffer: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> *
             ?cb: (exn option -> unit) ->
@@ -156765,11 +155390,9 @@ module Process =
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
@@ -168498,7 +167121,6 @@ module Stream =
         /// </param>
         /// <param name="callback">Callback for when this chunk of data is flushed.</param>
         /// <returns><c>false</c> if the stream wishes for the calling code to wait for the <c>'drain'</c> event to be emitted before continuing to write additional data; otherwise <c>true</c>.</returns>
-        /// <remarks>@see {@link Writable.write} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -168600,14 +167222,12 @@ module Stream =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -171236,14 +169856,12 @@ module Stream =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -172519,14 +171137,12 @@ module Stream =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -174474,14 +173090,12 @@ module Stream =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -182851,11 +181465,9 @@ module Tls =
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
@@ -187928,11 +186540,9 @@ module Tty =
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
@@ -190282,11 +188892,9 @@ module Tty =
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
         /// <returns>The socket itself.</returns>
-        /// <remarks>@see {@link Socket.end} for full details.</remarks>
         /// <remarks>@since v0.1.90</remarks>
         /// <param name="encoding">Only used when data is <c>string</c>.</param>
         /// <param name="callback">Optional callback for when the socket is finished.</param>
@@ -192644,7 +191252,6 @@ module Url =
         /// input. CVEs are not issued for <c>url.parse()</c> vulnerabilities. Use the <c>WHATWG URL</c> API instead.
         /// </summary>
         /// <remarks>@since v0.1.25</remarks>
-        /// <remarks>@deprecated Use the WHATWG URL API instead.</remarks>
         /// <param name="urlString">The URL string to parse.</param>
         /// <param name="parseQueryString">
         /// If <c>true</c>, the <c>query</c> property will always be set to an object returned by the {@link querystring} module's <c>parse()</c> method. If <c>false</c>, the <c>query</c> property
@@ -192671,7 +191278,6 @@ module Url =
         /// input. CVEs are not issued for <c>url.parse()</c> vulnerabilities. Use the <c>WHATWG URL</c> API instead.
         /// </summary>
         /// <remarks>@since v0.1.25</remarks>
-        /// <remarks>@deprecated Use the WHATWG URL API instead.</remarks>
         /// <param name="urlString">The URL string to parse.</param>
         /// <param name="parseQueryString">
         /// If <c>true</c>, the <c>query</c> property will always be set to an object returned by the {@link querystring} module's <c>parse()</c> method. If <c>false</c>, the <c>query</c> property
@@ -204193,14 +202799,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -206151,14 +204755,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -208107,14 +206709,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -210063,14 +208663,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -212021,14 +210619,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -213978,14 +212574,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -215936,14 +214530,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -217893,14 +216485,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -219849,14 +218439,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -221806,14 +220394,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
@@ -223765,14 +222351,12 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},
         /// {TypedArray} or {DataView}. For object mode streams, <c>chunk</c> may be any JavaScript value other than <c>null</c>.
         /// </param>
         /// <param name="cb">Callback for when the stream is finished.</param>
-        /// <remarks>@see {@link Writable.end} for full details.</remarks>
         /// <remarks>@since v0.9.4</remarks>
         /// <param name="chunk">
         /// Optional data to write. For streams not operating in object mode, <c>chunk</c> must be a {string}, {Buffer},

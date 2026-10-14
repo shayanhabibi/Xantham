@@ -1334,8 +1334,6 @@ module Es =
         /// Returns a value as a string value appropriate to the host environment's current locale.
         /// Converts a date and time to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleString: unit -> string
         /// <summary>
         /// Returns a value as a string value appropriate to the host environment's current locale.
@@ -1348,8 +1346,6 @@ module Es =
         /// Returns a date as a string value appropriate to the host environment's current locale.
         /// Converts a date to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleDateString: unit -> string
         /// <summary>
         /// Returns a date as a string value appropriate to the host environment's current locale.
@@ -1362,8 +1358,6 @@ module Es =
         /// Returns a time as a string value appropriate to the host environment's current locale.
         /// Converts a time to a string by using the current or specified locale.
         /// </summary>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         abstract toLocaleTimeString: unit -> string
         /// <summary>
         /// Returns a time as a string value appropriate to the host environment's current locale.
