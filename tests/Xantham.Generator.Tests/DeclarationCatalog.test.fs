@@ -1853,7 +1853,7 @@ let callableTests =
                     writePackageFile directory "package.json" """{"name":"catalog-callable-lab","version":"1.0.0","types":"index.d.ts"}"""
                     writePackageFile directory "index.d.ts" $"""export namespace Factory {{
     interface Result {{ count: number; }}
-    function create(value: {argument}, options?: object): Promise<Result>;
+    const create: (value: {argument}, options?: object) => Promise<Result>;
 }}
 """
                     writePackageFile directory "adapter.d.ts" """export { Factory as AdapterFactory } from "./index.js";"""
@@ -1863,13 +1863,13 @@ let callableTests =
                     let reference = Path.Combine(producer, "declarations.json")
                     use catalog = JsonDocument.Parse(File.ReadAllText reference)
                     catalog.RootElement.GetProperty("declarations").EnumerateArray()
-                    |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Create")
+                    |> Seq.find (fun entry -> entry.GetProperty("fSharpName").GetString() = "Identity.Root.Factory.Create")
                     |> fun entry -> entry.GetProperty("handles").GetArrayLength() > 0
                     |> Flip.Expect.equal "callable identity retains its declaration anchor" true
                     let adapter = configured directory "Adapter" "adapter.d.ts" [| reference |]
                     Pipeline.run adapter directory (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
                     let consumer = """module Identity.Consumer
-let share () : Identity.Root.Create = Identity.Adapter.Exports.AdapterFactory.create
+let share () : Identity.Root.Factory.Create = Identity.Adapter.Exports.AdapterFactory.create
 """
                     let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
                     code |> Flip.Expect.equal output 0
