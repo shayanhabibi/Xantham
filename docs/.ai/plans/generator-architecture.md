@@ -2852,7 +2852,7 @@ DO005 falling in `type-fest` and `solid-js`) remains unmet in `solid-js` and is 
 writes a conditional deferred over a bounded type parameter as its value at that bound.
 `InstanceType<Request>` with `Request extends typeof IncomingMessage` reads `IncomingMessage`,
 under `TR.ConditionalResolvedToConstraint` (`TR068`, Widened) in place of `TR045`. Unset,
-output is unchanged. The full experiment record, with every measurement, is
+output is unchanged. `src/Xantham.Fable.Node/xantham.json` sets it (#151); Core.TS does not. The full experiment record, with every measurement, is
 [`2026-10-13-w9-early-resolve-findings.md`](2026-10-13-w9-early-resolve-findings.md).
 
 - Resolve's conditional derivation records `ConditionalFacts.Constraint` from
