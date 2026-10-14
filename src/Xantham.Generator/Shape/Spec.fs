@@ -458,9 +458,54 @@ type internal TaggedShape =
     /// Every candidate property is absent or non-literal on some arm.
     | Untagged
 
+/// An object type with members only: no symbol of its own, type arguments, signatures or index
+/// signatures.
+let private plainAnonymousObject (facts: TypeFacts) =
+    flag TypeFlags.Object facts
+    && (facts.SymbolName |> Option.forall isSyntheticName)
+    && facts.TypeArguments.IsEmpty
+    && facts.IndexInfos.IsEmpty
+    && facts.CallSignatures.IsEmpty
+    && facts.ConstructSignatures.IsEmpty
+
+/// Whether two types read as one F# type: one id; two plain anonymous objects whose members pair
+/// by name, optionality and readonly with types that read as one; two unions whose members pair
+/// the same way; or two applications of one generic target whose arguments do.
+let internal sameShape (model: ShapeModel) (left: int<Measure.typeId>) (right: int<Measure.typeId>) =
+    let rec go (assumed: Set<int<Measure.typeId> * int<Measure.typeId>>) left right =
+        left = right
+        || Set.contains (left, right) assumed
+        || (match Map.tryFind left model.Types, Map.tryFind right model.Types with
+            | Some l, Some r ->
+                let assumed = Set.add (left, right) assumed
+
+                if plainAnonymousObject l && plainAnonymousObject r then
+                    l.Members.Length = r.Members.Length
+                    && l.Members
+                       |> List.forall (fun m ->
+                           r.Members
+                           |> List.exists (fun o ->
+                               o.Symbol.Name = m.Symbol.Name
+                               && o.Optional = m.Optional
+                               && o.ReadOnly = m.ReadOnly
+                               && go assumed m.TypeId o.TypeId))
+                elif flag TypeFlags.Union l && flag TypeFlags.Union r then
+                    l.UnionMembers.Length = r.UnionMembers.Length
+                    && l.UnionMembers
+                       |> List.forall (fun m -> r.UnionMembers |> List.exists (go assumed m))
+                else
+                    match l.Response.TargetTypeId, r.Response.TargetTypeId with
+                    | ValueSome lt, ValueSome rt when lt = rt && lt <> left && rt <> right ->
+                        l.TypeArguments.Length = r.TypeArguments.Length
+                        && List.forall2 (go assumed) l.TypeArguments r.TypeArguments
+                    | _ -> false
+            | _ -> false)
+
+    go Set.empty left right
+
 /// One case's facts, folded from the arms sharing its tag value: the members every arm declares
 /// under the same name, type and optionality, and every signature the arms carry.
-let private foldedArm (arms: TypeFacts list) =
+let private foldedArm (model: ShapeModel) (arms: TypeFacts list) =
     match arms with
     | [ single ] -> single
     | _ ->
@@ -471,7 +516,7 @@ let private foldedArm (arms: TypeFacts list) =
             arm.Members
             |> List.exists (fun other ->
                 other.Symbol.Name = m.Symbol.Name
-                && other.TypeId = m.TypeId
+                && sameShape model other.TypeId m.TypeId
                 && other.Optional = m.Optional)
 
         { head with
@@ -540,7 +585,7 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : TaggedSha
                 let groups =
                     tagged
                     |> List.groupBy snd
-                    |> List.map (fun (value, group) -> foldedArm (group |> List.map fst), value)
+                    |> List.map (fun (value, group) -> foldedArm model (group |> List.map fst), value)
 
                 let folded =
                     tagged |> List.countBy snd |> List.filter (snd >> (<) 1) |> List.map fst
@@ -623,7 +668,7 @@ let internal exclusiveArmShape (model: ShapeModel) (facts: TypeFacts) : Exclusiv
                 else
                     let first = snd (List.head real)
 
-                    if not (real |> List.forall (fun (_, m) -> m.TypeId = first.TypeId)) then
+                    if not (real |> List.forall (fun (_, m) -> sameShape model m.TypeId first.TypeId)) then
                         None
                     elif never.IsEmpty then
                         if real |> List.forall (fun (_, m) -> m.Optional = first.Optional) then

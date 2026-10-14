@@ -4546,6 +4546,29 @@ let pipelineTests =
                           (rendered.Findings |> List.filter (fun f -> List.contains f.Key [ "TP006"; "RA003"; "RA004"; "SY002" ]))
                           "no parameter is erased and no reference widens for want of arguments" ])
 
+        yield!
+            fixtureTests "tagged-arm-lab" (handFixture "tagged-arm-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a fold keeps a member the arms spell as one shape" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\")>] Done of owner: Task2.Owner
+"
+                          "equal inline objects agree, nested arrays of them included; `ok` and `note` differ"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\")>] Done
+    | [<CompiledName(\"queued\")>] Queued of position: float"
+                          "members only one arm carries still fold away"
+
+                      Expect.isFalse (source.Contains "type Choice = U2<") "an exclusive fold over an inline shared object fires"
+                      Expect.stringContains source "    abstract meta: Choice2.Meta" "and reads the first arm's declaration"
+                      Expect.stringContains source "    static member Create (meta: Choice2.Meta, a: float) : Choice = jsNative" "one Create per arm"
+                      Expect.stringContains source "    static member Create (meta: Choice2.Meta, b: string) : Choice = jsNative" "for both arms" ])
+
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced
         // over an unresolved arm read `TR063` with the name the checker keeps; a written `any`,

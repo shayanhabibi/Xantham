@@ -1,0 +1,1 @@
+{"name":"tagged-arm-lab","type":"module","types":"index.d.ts","description":"Issue #158 lab: the arm interfaces a tagged union already carries, and what removing them must keep - the documentation and the construction a Create overload gives."}
