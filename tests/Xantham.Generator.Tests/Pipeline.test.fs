@@ -1800,7 +1800,10 @@ let pipelineTests =
                     Expect.stringContains source "type ConcreteBranch = string" "a resolved conditional"
                     Expect.isFalse (source.Contains "EventName__") "a resolved template literal is a StringEnum"
 
-                    for name in [ "DeepPartial"; "Flags"; "Unwrap"; "Prefixed" ] do
+                    // A value-only mapped type over an open operand reads as a property record.
+                    Expect.stringContains source "type Flags<'T> = PropertyRecord<'T, bool>" "a value-only mapped type"
+
+                    for name in [ "DeepPartial"; "Unwrap"; "Prefixed" ] do
                         Expect.isTrue
                             (rendered.Findings
                              |> List.exists (fun f ->
