@@ -723,9 +723,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             | None -> Map.empty
 
                         for memberId in facts.UnionMembers do
-                            let anonymous =
-                                Map.tryFind memberId model.Types
-                                |> Option.exists (fun arm -> arm.SymbolName |> Option.forall isSyntheticName)
+                            let anonymous = Map.tryFind memberId model.Types |> Option.exists isAnonymousArm
 
                             match Map.tryFind memberId caseModules with
                             | Some caseModule when anonymous -> nestBases <- Map.add memberId caseModule nestBases

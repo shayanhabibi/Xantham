@@ -4,7 +4,7 @@
   "module": "CatalogAliasApiLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 8,
+    "ergonomic": 6,
     "widened": 0,
     "escape": 1
   },
@@ -30,6 +30,11 @@
       "total": 13,
       "exact": 4,
       "ergonomic": 9
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 2,
+      "exact": 2
     },
     {
       "pass": "",

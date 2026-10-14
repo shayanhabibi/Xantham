@@ -4,7 +4,7 @@
   "module": "SharedTagLab",
   "counts": {
     "exact": 7,
-    "ergonomic": 35,
+    "ergonomic": 33,
     "widened": 4,
     "escape": 0
   },
@@ -33,6 +33,11 @@
       "exact": 27,
       "ergonomic": 34,
       "widened": 2
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 12,
+      "exact": 12
     }
   ]
 }

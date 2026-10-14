@@ -108,16 +108,83 @@ let private represented (names: Set<string>) (exported: string) =
     || names
        |> Set.exists (fun declared -> declared.StartsWith(exported + ".") || declared.EndsWith("." + exported))
 
-/// The declaration set with every unread delegate removed, and the names removed. A delegate
-/// whose removal would leave a harvested export unrepresented is retained. Dropping one delegate
-/// can leave another unread, so the removal repeats until the set is stable.
-let rec private prune (exports: string list) (dropped: string list) (decls: FsDecl list) : FsDecl list * string list =
+/// The interface names of the anonymous arms of every union declared as a tagged DU. The DU
+/// carries each arm's fields, documentation and construction.
+let private taggedArmNames (model: ShapeModel) : Set<string> =
+    let unions =
+        model.Decls
+        |> List.choose (function
+            | FsTaggedUnion u -> Some u.Name
+            | _ -> None)
+        |> Set.ofList
+
+    model.DeclNames
+    |> Map.toList
+    |> List.filter (snd >> unions.Contains)
+    |> List.collect (fun (typeId, _) ->
+        Map.tryFind typeId model.Types
+        |> Option.map _.UnionMembers
+        |> Option.defaultValue [])
+    |> List.filter (fun armId -> Map.tryFind armId model.Types |> Option.exists isAnonymousArm)
+    |> List.choose (fun armId -> Map.tryFind armId model.DeclNames)
+    |> Set.ofList
+
+/// The name prefixes under which declarations exist for arms alone: each tagged union's `Cases`
+/// module, each anonymous tagged arm's own path, and each union the exclusive-arm fold declares as
+/// one interface.
+let private armRoots (model: ShapeModel) (arms: Set<string>) : string list =
+    let unionRoots =
+        model.DeclNames
+        |> Map.toList
+        |> List.choose (fun (typeId, name) ->
+            match Map.tryFind typeId model.Types with
+            | Some facts when not (Map.isEmpty (taggedCaseNames model facts)) -> Some $"{name}.Cases."
+            | Some facts ->
+                match exclusiveArmShape model facts with
+                | ExclusiveArmsFold _ -> Some $"{name}."
+                | NotExclusiveArms
+                | ExclusiveArmsDecline _ -> None
+            | None -> None)
+
+    unionRoots @ [ for arm in arms -> $"{arm}." ]
+
+/// The name a declaration is written under; `None` for the `Exports` container.
+let private declName (decl: FsDecl) =
+    match decl with
+    | FsInterface d -> Some d.Name
+    | FsStringEnum d -> Some d.Name
+    | FsTaggedUnion d -> Some d.Name
+    | FsEnum d -> Some d.Name
+    | FsAbbrev d -> Some d.Name
+    | FsDelegateType d -> Some d.Name
+    | FsPhantom d -> Some d.Name
+    | FsMeasure d -> Some d.Name
+    | FsExports _ -> None
+
+/// The declaration set with every unread delegate, unread tagged-union arm interface and unread
+/// declaration under an arm root removed, and the names removed. A declaration whose removal
+/// would leave a harvested export unrepresented is retained. Dropping one declaration can leave
+/// another unread, so the removal repeats until the set is stable.
+let rec private prune
+    (arms: Set<string>)
+    (roots: string list)
+    (exports: string list)
+    (dropped: string list)
+    (decls: FsDecl list)
+    : FsDecl list * string list =
     let read = decls |> List.collect readNames |> Set.ofList
 
     let candidates =
         decls
-        |> List.choose (function
-            | FsDelegateType d when not (Set.contains d.Name read) -> Some d.Name
+        |> List.choose (fun decl ->
+            match decl, declName decl with
+            | FsDelegateType d, _ when not (Set.contains d.Name read) -> Some d.Name
+            | FsInterface i, _ when Set.contains i.Name arms && not (Set.contains i.Name read) -> Some i.Name
+            | _, Some name when
+                not (Set.contains name read)
+                && roots |> List.exists (fun root -> name.StartsWith root)
+                ->
+                Some name
             | _ -> None)
         |> Set.ofList
 
@@ -141,10 +208,8 @@ let rec private prune (exports: string list) (dropped: string list) (decls: FsDe
         decls, dropped
     else
         decls
-        |> List.filter (function
-            | FsDelegateType d -> not (Set.contains d.Name unread)
-            | _ -> true)
-        |> prune exports (dropped @ List.ofSeq unread)
+        |> List.filter (fun decl -> declName decl |> Option.forall (fun name -> not (Set.contains name unread)))
+        |> prune arms roots exports (dropped @ List.ofSeq unread)
 
 /// The name every harvested export is looked up under: the qualified name `name-exports`
 /// assigned, falling back to the bare export name for a value export.
@@ -159,20 +224,38 @@ let private exportNames (ctx: Context) (model: ShapeModel) : string list =
         |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
         |> Option.defaultValue (bare export))
 
+//FOR-REVIEW The pass also drops arm interfaces and their nested declarations now; renaming it to
+//FOR-REVIEW `drop-orphan-declarations` is deferred, since the name appears in every manifest.
 let dropOrphanDelegates: Pass<ShapeModel> =
     {
         Name = "drop-orphan-delegates"
         Run =
             fun ctx model ->
                 async {
-                    let decls, dropped = prune (exportNames ctx model) [] model.Decls
+                    let arms = taggedArmNames model
+
+                    let delegates =
+                        model.Decls
+                        |> List.choose (function
+                            | FsDelegateType d -> Some d.Name
+                            | _ -> None)
+                        |> Set.ofList
+
+                    let decls, dropped =
+                        prune arms (armRoots model arms) (exportNames ctx model) [] model.Decls
 
                     let model = { model with Decls = decls }
 
                     let findings =
                         dropped
                         |> List.sort
-                        |> List.map (fun name -> Finding.make name DropOrphanDelegates.DelegateReachedNoReference)
+                        |> List.map (fun name ->
+                            if Set.contains name delegates then
+                                Finding.make name DropOrphanDelegates.DelegateReachedNoReference
+                            elif Set.contains name arms then
+                                Finding.make name DropOrphanDelegates.TaggedArmReachedNoReference
+                            else
+                                Finding.make name DropOrphanDelegates.ArmDeclarationReachedNoReference)
 
                     return
                         if List.isEmpty findings then

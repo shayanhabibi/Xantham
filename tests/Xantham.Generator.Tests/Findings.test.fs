@@ -214,6 +214,8 @@ let findingsTests =
                     "RA.AliasKeptAsPhantom RA006 widened"
                     "RA.DuplicateTypeParameterUnwritable RA007 widened"
                     "DD.DelegateReachedNoReference DD001 exact"
+                    "DD.TaggedArmReachedNoReference DD002 exact"
+                    "DD.ArmDeclarationReachedNoReference DD003 exact"
                     "AC.ExportNotRepresented AC001 escape"
                     "GE.GroupShipped GE001 exact"
                     "GE.ShippedGroupWithoutDeclarations GE002 widened"

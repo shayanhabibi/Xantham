@@ -326,6 +326,11 @@ let internal isSyntheticName (name: string<symbolName>) =
     let name = string name
     name.StartsWith "__" || name.StartsWith "\""
 
+/// Whether the union arm is an inline shape, named only by the checker.
+let internal isAnonymousArm (arm: TypeFacts) =
+    (arm.SymbolName |> Option.forall isSyntheticName)
+    && ValueOption.isNone arm.Response.AliasSymbolId
+
 /// A pure index signature the checker gave no symbol of its own: reached through a type
 /// alias or written inline, rather than declared as an interface. `Bag`'s and
 /// `FrozenBag`'s own names are what their own consumers call them, and stay; this shape has

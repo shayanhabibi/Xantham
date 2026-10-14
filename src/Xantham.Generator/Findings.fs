@@ -250,6 +250,8 @@ module FindingCodes =
             "RA.AliasKeptAsPhantom", "RA006"
             "RA.DuplicateTypeParameterUnwritable", "RA007"
             "DD.DelegateReachedNoReference", "DD001"
+            "DD.TaggedArmReachedNoReference", "DD002"
+            "DD.ArmDeclarationReachedNoReference", "DD003"
             "AC.ExportNotRepresented", "AC001"
             "GE.GroupShipped", "GE001"
             "GE.ShippedGroupWithoutDeclarations", "GE002"
@@ -1228,12 +1230,21 @@ type DropOrphanDelegates =
     /// The delegate was declared for a callback every reading position writes out in full, so the
     /// declaration is dropped.
     | [<Exact>] DelegateReachedNoReference
+    /// The interface was named for an anonymous arm of a union declared as a tagged DU, which
+    /// carries the arm's fields, documentation and construction; nothing else reads it.
+    | [<Exact>] TaggedArmReachedNoReference
+    /// The declaration was named under an arm the union no longer declares, for a member the
+    /// union's own declaration does not carry; nothing else reads it.
+    | [<Exact>] ArmDeclarationReachedNoReference
 
     interface IFindingKind with
         member this.Message =
             match this with
             | DelegateReachedNoReference ->
                 "delegate dropped: every position reading this callback writes its parameters directly"
+            | TaggedArmReachedNoReference ->
+                "arm interface dropped: the tagged union carries its fields and nothing else reads it"
+            | ArmDeclarationReachedNoReference -> "declaration dropped: only an arm the union replaced read it"
 
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]

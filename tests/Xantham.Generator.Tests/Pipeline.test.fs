@@ -4473,6 +4473,12 @@ let pipelineTests =
 
                       Expect.stringContains source "type Log = U2<Log2, Log3>" "and Log stays an erased union"
 
+                      for gone in [ "Distinct2"; "Distinct3"; "Distinct4"; "Signal2"; "Signal3"; "Terminal2"; "Terminal3"; "Terminal4"; "Scheduled2"; "Scheduled3"; "Result2"; "Result3" ] do
+                          Expect.isFalse (source.Contains $"type {gone}") $"{gone}: an unread tagged arm is dropped"
+
+                      for kept in [ "Onset2"; "Onset3"; "Log2"; "Log3"; "Loose2"; "Loose3"; "FetchInfo" ] do
+                          Expect.stringContains source $"type {kept} =" $"{kept}: an arm an erased union or name holds stays"
+
                   testCase "a union written inline is named under its owner and claimed from there"
                   <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -4661,7 +4667,53 @@ let pipelineTests =
                           "    abstract meta: Choice.Meta"
                           "an exclusive fold's shared member nests under the folded interface"
 
-                      Expect.isFalse (source.Contains "Choice2.Meta") "not under an arm the fold removed" ])
+                      Expect.isFalse (source.Contains "Choice2.Meta") "not under an arm the fold removed"
+
+                  testCase "an arm interface nothing reads is dropped" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor symbol key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && f.Key = key)
+                          |> List.map _.Message
+
+                      for gone in [ "Recovery2"; "Recovery3"; "Recovery4"; "Shape2"; "Shape3"; "Signal2"; "Signal3"; "Event3"; "Clash2"; "Clash3"; "Task2"; "Task3"; "Task4"; "Run2"; "Run3"; "Run4" ] do
+                          Expect.isFalse (source.Contains $"type {gone} =") $"{gone} is dropped"
+
+                      // What only a dropped or folded arm read goes with it, transitively.
+                      for gone in [ "Owner2"; "Result"; "Failure"; "Meta2" ] do
+                          Expect.isFalse (source.Contains $"type {gone} =") $"{gone}: read by no declaration left"
+
+                      Expect.stringContains source "type Owner =" "the declaration a kept case field reads stays"
+                      Expect.stringContains source "type Meta =" "and the one the exclusive-folded interface reads"
+
+                      Expect.equal
+                          (messagesFor "Task.Cases.Done.Owner2" "DD003")
+                          [ "declaration dropped: only an arm the union replaced read it" ]
+                          "a dropped nested declaration is reported"
+
+                      Expect.stringContains source "type Event2 =" "an arm read through Extract stays"
+                      Expect.stringContains source "type Ping =" "a named arm stays"
+                      Expect.stringContains source "type Pong =" "a named arm stays when nothing reads it"
+                      Expect.isFalse (source.Contains "Recovery3") "a dropped arm leaves no module behind"
+                      Expect.stringContains source "module Recovery =" "its nested declarations live under the union"
+                      Expect.isFalse (source.Contains "type Job2 =") "folded arms are dropped too"
+                      Expect.isFalse (source.Contains "type Shelf2 =") "a Cases-collision union's arms are dropped as well"
+
+                      Expect.stringContains
+                          source
+                          "Cases of size: Shelf2.Size"
+                          "and their nested declarations keep the arm path, the one remaining residue"
+
+                      Expect.equal
+                          (messagesFor "Recovery2" "DD002")
+                          [ "arm interface dropped: the tagged union carries its fields and nothing else reads it" ]
+                          "each dropped arm is reported"
+
+                      Expect.equal (messagesFor "Event2" "DD002") [] "a read arm is not"
+                      Expect.stringContains source "type Hello =" "an alias-named arm stays"
+                      Expect.stringContains source "Hello.Meta" "with its nested declaration under its own name" ])
 
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced

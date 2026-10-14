@@ -84,3 +84,8 @@ export type Job =
     | { state: "done"; level: "info" | "warn" }
     | { state: "done"; level: "info" | "warn"; code: number }
     | { state: "queued" };
+
+// An arm named by a type alias the module does not export is a declaration of its own: it and
+// its nested declarations stay, under its own name.
+type Hello = { kind: "hello"; meta: { at: number } };
+export type Greeting = Hello | { kind: "bye" };

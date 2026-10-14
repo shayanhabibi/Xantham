@@ -4,7 +4,7 @@
   "module": "CatalogRecursiveJsonLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 1,
+    "ergonomic": 0,
     "widened": 2,
     "escape": 1
   },
@@ -34,6 +34,11 @@
       "ergonomic": 2
     },
     {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 2,
+      "exact": 2
+    },
+    {
       "pass": "",
       "total": 1,
       "escape": 1
@@ -41,7 +46,7 @@
     {
       "pass": "render-source",
       "total": 1,
-      "exact": 1
+      "widened": 1
     }
   ]
 }

@@ -94,8 +94,8 @@
     },
     {
       "pass": "DD - drop-orphan-delegates",
-      "total": 1,
-      "exact": 1
+      "total": 3,
+      "exact": 3
     }
   ]
 }

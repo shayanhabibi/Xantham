@@ -1281,38 +1281,6 @@ type ExportedHandlerQueueHandler<'Env, 'Message, 'Props> = delegate of batch: Me
 type ExportedHandlerTestHandler<'Env, 'Props> = delegate of controller: TestController * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
 [<Interface>]
-type EmailAttachment2 =
-    /// <remarks>TypeScript type: <c>"inline"</c></remarks>
-    abstract disposition: string with get, set
-    abstract contentId: string with get, set
-    abstract filename: string with get, set
-    abstract ``type``: string with get, set
-    abstract content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    [<ParamObject; Emit("({ disposition: 'inline', ...$0 })")>]
-    static member Create (contentId: string, filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>) : EmailAttachment2 = jsNative
-
-module EmailAttachment2 =
-    /// <remarks>TypeScript type: <c>"inline"</c></remarks>
-    [<Literal>]
-    let disposition = "inline"
-
-[<Interface>]
-type EmailAttachment3 =
-    /// <remarks>TypeScript type: <c>"attachment"</c></remarks>
-    abstract disposition: string with get, set
-    abstract contentId: unit option with get, set
-    abstract filename: string with get, set
-    abstract ``type``: string with get, set
-    abstract content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    [<ParamObject; Emit("({ disposition: 'attachment', ...$0 })")>]
-    static member Create (filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?contentId: unit) : EmailAttachment3 = jsNative
-
-module EmailAttachment3 =
-    /// <remarks>TypeScript type: <c>"attachment"</c></remarks>
-    [<Literal>]
-    let disposition = "attachment"
-
-[<Interface>]
 type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
     abstract fetch: Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>> option with get, set
     abstract connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set

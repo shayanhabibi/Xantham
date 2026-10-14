@@ -16,44 +16,6 @@ type Distinct =
     | [<CompiledName("square")>] Square of side: float
     | [<CompiledName("point")>] Point
 
-[<Interface>]
-type Distinct2 =
-    /// <remarks>TypeScript type: <c>"circle"</c></remarks>
-    abstract kind: string
-    abstract radius: float
-    [<ParamObject; Emit("({ kind: 'circle', ...$0 })")>]
-    static member Create (radius: float) : Distinct2 = jsNative
-
-module Distinct2 =
-    /// <remarks>TypeScript type: <c>"circle"</c></remarks>
-    [<Literal>]
-    let kind = "circle"
-
-[<Interface>]
-type Distinct3 =
-    /// <remarks>TypeScript type: <c>"square"</c></remarks>
-    abstract kind: string
-    abstract side: float
-    [<ParamObject; Emit("({ kind: 'square', ...$0 })")>]
-    static member Create (side: float) : Distinct3 = jsNative
-
-module Distinct3 =
-    /// <remarks>TypeScript type: <c>"square"</c></remarks>
-    [<Literal>]
-    let kind = "square"
-
-[<Interface>]
-type Distinct4 =
-    /// <remarks>TypeScript type: <c>"point"</c></remarks>
-    abstract kind: string
-    [<Emit("({ kind: 'point' })")>]
-    static member Create () : Distinct4 = jsNative
-
-module Distinct4 =
-    /// <remarks>TypeScript type: <c>"point"</c></remarks>
-    [<Literal>]
-    let kind = "point"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("verb", CaseRules.None)>]
 type Signal =
     /// <param name="channel">TypeScript type: <c>"bus"</c></param>
@@ -67,84 +29,10 @@ type Signal =
     [<ParamObject; Emit("({ verb: 'stop', channel: 'bus', ...$0 })")>]
     static member CreateStop (reason: string) : Signal = jsNative
 
-[<Interface>]
-type Signal2 =
-    /// <remarks>TypeScript type: <c>"bus"</c></remarks>
-    abstract channel: string
-    /// <remarks>TypeScript type: <c>"start"</c></remarks>
-    abstract verb: string
-    abstract at: float
-    [<ParamObject; Emit("({ channel: 'bus', verb: 'start', ...$0 })")>]
-    static member Create (at: float) : Signal2 = jsNative
-
-module Signal2 =
-    /// <remarks>TypeScript type: <c>"bus"</c></remarks>
-    [<Literal>]
-    let channel = "bus"
-    /// <remarks>TypeScript type: <c>"start"</c></remarks>
-    [<Literal>]
-    let verb = "start"
-
-[<Interface>]
-type Signal3 =
-    /// <remarks>TypeScript type: <c>"bus"</c></remarks>
-    abstract channel: string
-    /// <remarks>TypeScript type: <c>"stop"</c></remarks>
-    abstract verb: string
-    abstract reason: string
-    [<ParamObject; Emit("({ channel: 'bus', verb: 'stop', ...$0 })")>]
-    static member Create (reason: string) : Signal3 = jsNative
-
-module Signal3 =
-    /// <remarks>TypeScript type: <c>"bus"</c></remarks>
-    [<Literal>]
-    let channel = "bus"
-    /// <remarks>TypeScript type: <c>"stop"</c></remarks>
-    [<Literal>]
-    let verb = "stop"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
 type Terminal =
     | [<CompiledName("done")>] Done
     | [<CompiledName("pending")>] Pending
-
-[<Interface>]
-type Terminal2 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    abstract state: string
-    abstract value: float
-    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (value: float) : Terminal2 = jsNative
-
-module Terminal2 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    [<Literal>]
-    let state = "done"
-
-[<Interface>]
-type Terminal3 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    abstract state: string
-    abstract error: string
-    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (error: string) : Terminal3 = jsNative
-
-module Terminal3 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    [<Literal>]
-    let state = "done"
-
-[<Interface>]
-type Terminal4 =
-    /// <remarks>TypeScript type: <c>"pending"</c></remarks>
-    abstract state: string
-    [<Emit("({ state: 'pending' })")>]
-    static member Create () : Terminal4 = jsNative
-
-module Terminal4 =
-    /// <remarks>TypeScript type: <c>"pending"</c></remarks>
-    [<Literal>]
-    let state = "pending"
 
 type Onset = U2<Onset2, Onset3>
 
@@ -391,33 +279,6 @@ type Scheduled<'T> =
     static member CreateRepeat (payload: 'T, ?previous: 'T) : Scheduled<'T> = jsNative
 
 [<Interface>]
-type Scheduled2<'T> =
-    /// <remarks>TypeScript type: <c>"once"</c></remarks>
-    abstract kind: string
-    abstract payload: 'T
-    [<ParamObject; Emit("({ kind: 'once', ...$0 })")>]
-    static member Create (payload: 'T) : Scheduled2<'T> = jsNative
-
-module Scheduled2 =
-    /// <remarks>TypeScript type: <c>"once"</c></remarks>
-    [<Literal>]
-    let kind = "once"
-
-[<Interface>]
-type Scheduled3<'T> =
-    /// <remarks>TypeScript type: <c>"repeat"</c></remarks>
-    abstract kind: string
-    abstract payload: 'T
-    abstract previous: 'T option
-    [<ParamObject; Emit("({ kind: 'repeat', ...$0 })")>]
-    static member Create (payload: 'T, ?previous: 'T) : Scheduled3<'T> = jsNative
-
-module Scheduled3 =
-    /// <remarks>TypeScript type: <c>"repeat"</c></remarks>
-    [<Literal>]
-    let kind = "repeat"
-
-[<Interface>]
 type Scheduler =
     abstract schedule<'T>: payload: 'T -> Scheduled<'T>
     abstract current<'T>: unit -> Scheduler.Current.Result<'T>
@@ -453,32 +314,6 @@ module Scheduler =
             | [<CompiledName("waiting")>] Waiting of previous: 'T option
             [<ParamObject; Emit("({ kind: 'waiting', ...$0 })")>]
             static member CreateWaiting (?previous: 'T) : Result<'T> = jsNative
-
-        [<Interface>]
-        type Result2<'T> =
-            /// <remarks>TypeScript type: <c>"ready"</c></remarks>
-            abstract kind: string
-            abstract payload: 'T
-            [<ParamObject; Emit("({ kind: 'ready', ...$0 })")>]
-            static member Create (payload: 'T) : Result2<'T> = jsNative
-
-        module Result2 =
-            /// <remarks>TypeScript type: <c>"ready"</c></remarks>
-            [<Literal>]
-            let kind = "ready"
-
-        [<Interface>]
-        type Result3<'T> =
-            /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
-            abstract kind: string
-            abstract previous: 'T option
-            [<ParamObject; Emit("({ kind: 'waiting', ...$0 })")>]
-            static member Create (?previous: 'T) : Result3<'T> = jsNative
-
-        module Result3 =
-            /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
-            [<Literal>]
-            let kind = "waiting"
 
 module Wide =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
