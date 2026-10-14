@@ -894,6 +894,34 @@ let private declaresQuestionToken (ctx: Context) (parameter: SymbolResponse) : A
                        |> ValueOption.isSome
     }
 
+/// Whether a type parameter is declared by an `infer` clause: its declaration is a type parameter
+/// node under an `InferType` node.
+let private declaredByInfer (ctx: Context) (parameter: TypeResponse) : Async<bool> =
+    async {
+        let! symbol = ctx.Session.getSymbolOfType parameter.Id
+
+        match
+            symbol
+            |> ValueOption.bind _.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.tryHead
+            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+        with
+        | None -> return false
+        | Some handle ->
+            let! file = sourceFile ctx handle.Path
+
+            return
+                match file with
+                | ValueNone -> false
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    node.Kind = SyntaxKind.TypeParameter
+                    && Node.parent node
+                       |> ValueOption.exists (fun parent -> parent.Kind = SyntaxKind.InferType)
+    }
+
 /// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
 /// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
 /// `lib.*.d.ts` file. A key referencing a package's own `unique symbol` reads `None`, including
@@ -1973,13 +2001,79 @@ let private deriveFacts
                                 }
                             | None -> async.Return None
 
+                        // The conditional instantiated at its check type's bound (W9): read where no
+                        // branch is taken, or where the taken branch is an `infer` variable, over a
+                        // check type that is a bounded type parameter. An alias's own declaration
+                        // keeps its deferred body.
+                        let! wanted =
+                            if not ctx.Config.ResolveConditionalConstraints then
+                                async.Return false
+                            else
+                                match taken with
+                                | None -> async.Return true
+                                | Some(_, bare) when bare.Flags.HasFlag TypeFlags.TypeParameter ->
+                                    declaredByInfer ctx bare
+                                | Some _ -> async.Return false
+
+                        let! constrained =
+                            if not wanted then
+                                async.Return None
+                            else
+                                async {
+                                    let! checkBare = peeled check
+
+                                    let! bound =
+                                        if checkBare.Flags.HasFlag TypeFlags.TypeParameter then
+                                            ctx.Session.getConstraintOfTypeParameter checkBare.Id
+                                        else
+                                            async.Return ValueNone
+
+                                    // Unbounded, or the alias's own declaration.
+                                    let! refused =
+                                        match bound, alias with
+                                        | ValueNone, _ -> async.Return true
+                                        | ValueSome _, ValueNone -> async.Return false
+                                        | ValueSome _, ValueSome alias ->
+                                            async {
+                                                let! declared = ctx.Session.getDeclaredTypeOfSymbol alias.Id
+                                                return declared.Id = ty.Id
+                                            }
+
+                                    if refused then
+                                        return None
+                                    else
+                                        let! resolved = ctx.Session.getBaseConstraintOfType ty.Id
+
+                                        // The checker's distributive constraint (footguns: not
+                                        // `getConstraintOfType`). A union constraint is the
+                                        // branch union §4.11 rejects, and is refused whole.
+                                        match resolved with
+                                        | ValueSome c when
+                                            c.Id <> ty.Id
+                                            && c.Id <> whenTrue.Id
+                                            && c.Id <> whenFalse.Id
+                                            && not (
+                                                c.Flags.HasFlag TypeFlags.Any
+                                                || c.Flags.HasFlag TypeFlags.Unknown
+                                                || c.Flags.HasFlag TypeFlags.Never
+                                                || c.Flags.HasFlag TypeFlags.Conditional
+                                                || (c.Flags.HasFlag TypeFlags.Union
+                                                    && not (c.Flags.HasFlag TypeFlags.Boolean))
+                                            )
+                                            ->
+                                            return Some c
+                                        | _ -> return None
+                                }
+
                         return
                             Some
                                 {
                                     Name = alias |> ValueOption.map _.Name |> ValueOption.toOption
                                     Branch = taken |> Option.map (fun (side, bare) -> side, bare.TypeId)
+                                    Constraint = constrained |> Option.map _.TypeId
                                 },
                             channel trace "conditional-branch" (taken |> Option.map snd |> Option.toList)
+                            @ channel trace "conditional-constraint" (Option.toList constrained)
                     }
                 else
                     async.Return(None, [])

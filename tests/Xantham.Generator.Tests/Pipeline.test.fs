@@ -479,6 +479,13 @@ let configTests =
             refused """{ "anyReturnAsUnit": 42 }"""
             refused """{ "anyReturnAsUnit": "([" }"""
 
+        testCase "resolveConditionalConstraints is a boolean, false by default (W9)" <| fun _ ->
+            withConfig """{ "resolveConditionalConstraints": true }""" <| fun config ->
+                Expect.isTrue config.ResolveConditionalConstraints "the flag is carried through"
+
+            withConfig """{ }""" <| fun config ->
+                Expect.isFalse config.ResolveConditionalConstraints "omitted, every bounded conditional stays deferred"
+
         testCase "lib is the compiler's lib option, as tsconfig spells it" <| fun _ ->
             // A global type library that replaces the DOM (`@cloudflare/workers-types`) has to
             // be generated without it, or every name it shares with `lib.dom.d.ts` merges into
@@ -580,6 +587,9 @@ let private noInferLab = handFixture "noinfer-lab"
 
 /// W2: `anyReturnAsUnit` set to `^on` under the lab's own `xantham.json`.
 let private handlerReturnLab = handFixture "handler-return-lab"
+
+/// W9: `resolveConditionalConstraints` set under the lab's own `xantham.json`.
+let private earlyResolveLab = handFixture "early-resolve-lab"
 
 [<Tests>]
 let pipelineTests =
@@ -4659,6 +4669,123 @@ let pipelineTests =
                           source
                           "abstract transform: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj) with get, set"
                           "an unselected member stays obj" ])
+
+        // W9: a conditional deferred over a bounded type parameter (`InstanceType<Request>`, as
+        // @types/node's `http.RequestListener` writes it) reads its value at the bound under
+        // `TR068`. A concrete argument resolves before Resolve; an unbounded parameter, a bound
+        // that instantiates to `any`, a union bound and an alias's own body stay `obj` under
+        // `TR045`.
+        yield!
+            fixtureTests "early-resolve-lab" earlyResolveLab (handConfig earlyResolveLab) (fun package ->
+                let sites (rendered: RenderModel) key =
+                    rendered.Findings
+                    |> List.filter (fun finding -> finding.Key = key)
+                    |> List.map (fun finding -> finding.Symbol, finding.Tier)
+                    |> List.sort
+
+                let instanceTypeDeferred (rendered: RenderModel) =
+                    rendered.Findings
+                    |> List.filter (fun finding -> finding.Key = "TR045" && finding.Message.Contains "InstanceType")
+                    |> List.map _.Symbol
+                    |> List.sort
+
+                [ testCase "early-resolve-lab: InstanceType over a bounded parameter reads its bound's instance type (W9)" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig earlyResolveLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.equal
+                          (instanceTypeDeferred rendered)
+                          [ "Exports.either(value)" ]
+                          "only the InstanceType over a union bound stays obj"
+
+                      Expect.equal
+                          (sites rendered "TR068")
+                          [ "Exports.createServer(listener)(req)", Widened
+                            "Exports.flag(value)", Widened
+                            "Exports.instance(value)", Widened
+                            "RequestListener(req)", Widened
+                            "Server(requestListener)(req)", Widened
+                            "Server.on(listener)(req)", Widened ]
+                          "every InstanceType over a bounded parameter, an infer branch over one, and a boolean bound"
+
+                      Expect.stringContains
+                          source
+                          "static member flag (value: bool) : unit"
+                          "a bound whose value is boolean reads bool"
+
+                      Expect.stringContains
+                          source
+                          "static member same (value: obj) : unit"
+                          "a bound whose value is one of the conditional's own branches stays obj"
+
+                      Expect.stringContains
+                          source
+                          "static member instance (value: IncomingMessage) : unit"
+                          "an application whose taken branch is an infer variable reads the bound"
+
+                      Expect.stringContains
+                          source
+                          "type RequestListener<'Request, 'Response> = delegate of req: IncomingMessage * res: obj -> unit"
+                          "http.RequestListener's req reads the bound's instance type"
+
+                      Expect.stringContains
+                          source
+                          "abstract on: ``event``: string * listener: (IncomingMessage -> unit) -> Server<'Request, 'Response>"
+                          "a generic class's member reads the bound's instance type"
+
+                      Expect.stringContains
+                          source
+                          "(?requestListener: Action<IncomingMessage, obj>)"
+                          "an applied callback alias reads the bound's instance type"
+
+                      // An intersection with a conditional operand widens before its operands map.
+                      Expect.equal
+                          (sites rendered "TR018" |> List.map fst)
+                          [ "CreateServer.Listener.Res.req"; "RequestListener(res)"; "Server(requestListener)(res)" ]
+                          "an intersection over InstanceType stays obj"
+
+                      let deferred = sites rendered "TR045" |> List.map fst
+
+                      for symbol in
+                          [ "Divergent"
+                            "Exports.divergent(value)"
+                            "Exports.either(value)"
+                            "Exports.returns(value)"
+                            "Exports.same(value)"
+                            "Instance" ] do
+                          Expect.contains deferred symbol $"{symbol} stays deferred"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun finding -> finding.Symbol.StartsWith "ConcreteListener"))
+                          "a concrete argument resolves before Resolve reads it"
+
+                  testCase "early-resolve-lab: unset, every InstanceType over a parameter stays obj (W9 baseline)" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      Expect.isEmpty (sites rendered "TR068") "nothing reads its bound unless selected"
+
+                      Expect.contains
+                          (sites rendered "TR045" |> List.map fst)
+                          "Exports.instance(value)"
+                          "an application whose taken branch is an infer variable stays obj"
+
+                      Expect.contains
+                          (sites rendered "TR045" |> List.map fst)
+                          "Exports.flag(value)"
+                          "a boolean bound stays obj"
+
+                      Expect.equal
+                          (instanceTypeDeferred rendered)
+                          [ "Exports.createServer(listener)(req)"
+                            "Exports.either(value)"
+                            "RequestListener(req)"
+                            "Server(requestListener)(req)"
+                            "Server.on(listener)(req)" ]
+                          "InstanceType<Request> stays obj"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun finding -> finding.Symbol.StartsWith "ConcreteListener"))
+                          "a concrete argument resolves before Resolve reads it" ])
 
         // Tagged unions over type parameters: the union binds the alias's own parameters, or the
         // ones it reads from the signature it is written in, and every reference applies them.

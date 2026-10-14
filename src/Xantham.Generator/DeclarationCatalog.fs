@@ -92,8 +92,9 @@ let private reusableDeclarations declarations =
 let private sourceKey (source: Source) =
     $"{source.Package}@{source.Version}/{source.File}"
 
-/// The settings a catalog consumer shares with its producer. `anyReturnAsUnit` is present only
-/// when set, so a profile without it hashes as it did before the key existed.
+/// The settings a catalog consumer shares with its producer. `anyReturnAsUnit` and
+/// `resolveConditionalConstraints` are present only when set, so a profile without them hashes
+/// as it did before the keys existed.
 let private profile (config: GeneratorConfig) =
     let settings =
         {|
@@ -107,12 +108,23 @@ let private profile (config: GeneratorConfig) =
             resolveNoInfer = config.ResolveNoInfer
         |}
 
-    match config.AnyReturnAsUnit with
-    | None -> json settings
-    | Some pattern ->
+    match config.AnyReturnAsUnit, config.ResolveConditionalConstraints with
+    | None, false -> json settings
+    | Some pattern, false ->
         json
             {| settings with
                 anyReturnAsUnit = pattern
+            |}
+    | None, true ->
+        json
+            {| settings with
+                resolveConditionalConstraints = true
+            |}
+    | Some pattern, true ->
+        json
+            {| settings with
+                anyReturnAsUnit = pattern
+                resolveConditionalConstraints = true
             |}
     |> hashText
 
@@ -762,6 +774,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             yield! Option.toList facts.Default
             yield! facts.Response.TargetTypeId |> ValueOption.toList
             yield! facts.Conditional |> Option.bind _.Branch |> Option.map snd |> Option.toList
+            yield! facts.Conditional |> Option.bind _.Constraint |> Option.toList
         ]
 
     // Export-only handles anchor public aliases. Transitive source closures use intrinsic
