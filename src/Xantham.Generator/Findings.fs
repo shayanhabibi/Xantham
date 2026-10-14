@@ -193,6 +193,7 @@ module FindingCodes =
             "DT.ArmsMergedOnSharedTag", "DT004"
             "DT.CaseCreateSynthesized", "DT005"
             "DT.CaseCreateNameTaken", "DT006"
+            "DT.FoldedCaseOmitsArmMembers", "DT007"
             "SY.InstantiationNamedOnce", "SY001"
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
@@ -868,6 +869,10 @@ type DetectTaggedUnions =
     | [<Exact>] CaseCreateSynthesized of create: string
     /// The case's `Create` name is a case of the same union, so the case has no `Create`.
     | [<Ergonomic>] CaseCreateNameTaken of create: string
+    /// The folded case omits `members`, which the arms sharing its tag value disagree on; the
+    /// arm interfaces declaring them stay declared. With `createDeclined`, the case has no
+    /// `Create`: its fields alone build none of its arms.
+    | [<Widened>] FoldedCaseOmitsArmMembers of case: string * members: string list * createDeclined: bool
 
     interface IFindingKind with
         member this.Message =
@@ -881,6 +886,16 @@ type DetectTaggedUnions =
             | CaseCreateSynthesized create ->
                 $"case Create '{create}': optional fields omittable, literal fields written"
             | CaseCreateNameTaken create -> $"no case Create: '{create}' is already a case of the union"
+            | FoldedCaseOmitsArmMembers(case, members, createDeclined) ->
+                let omitted = String.concat ", " members
+
+                let declined =
+                    if createDeclined then
+                        $"; no Create{case}: the case's fields alone build none of its arms"
+                    else
+                        ""
+
+                $"case '{case}' omits {omitted}: the arms sharing its tag value disagree on them, and their arm interfaces stay declared{declined}"
 
 /// `name-exports`.
 [<Prefix("NE", "name-exports")>]
@@ -1230,8 +1245,8 @@ type DropOrphanDelegates =
     /// The delegate was declared for a callback every reading position writes out in full, so the
     /// declaration is dropped.
     | [<Exact>] DelegateReachedNoReference
-    /// The interface was named for an anonymous arm of a union declared as a tagged DU, which
-    /// carries the arm's fields, documentation and construction; nothing else reads it.
+    /// A dropped interface named for an anonymous arm: the tagged DU carries the arm whole, with
+    /// its fields, documentation and construction, and no declaration reads the interface.
     | [<Exact>] TaggedArmReachedNoReference
     /// The declaration was named under an arm the union no longer declares, for a member the
     /// union's own declaration does not carry; nothing else reads it.

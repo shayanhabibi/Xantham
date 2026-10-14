@@ -699,22 +699,22 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                         |> Option.exists (fun application -> Map.containsKey application names)
 
                     if not readsApplication then
-                        // A case named `Cases` would take the module path the case modules
-                        // open under, so that union keeps the arm-name path.
-                        // The exclusive-arm fold declares the union as one interface under its own
-                        // name, so its arms' declarations nest there.
                         let caseModules =
                             match named with
                             | Some unionName ->
                                 let caseNames = taggedCaseNames model facts
 
                                 if not caseNames.IsEmpty then
+                                    // A case named `Cases` would take the module path the case
+                                    // modules open under, so that union keeps the arm-name path.
                                     if caseNames |> Map.exists (fun _ caseName -> caseName = "Cases") then
                                         Map.empty
                                     else
                                         caseNames
                                         |> Map.map (fun _ caseName -> nestUnder (nestUnder unionName "Cases") caseName)
                                 else
+                                    // The exclusive-arm fold declares the union as one interface
+                                    // under its own name, and its arms' declarations nest there.
                                     match exclusiveArmShape model facts with
                                     | ExclusiveArmsFold _ ->
                                         facts.UnionMembers |> List.map (fun armId -> armId, unionName) |> Map.ofList

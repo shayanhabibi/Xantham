@@ -4,8 +4,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 417,
-    "ergonomic": 1260,
-    "widened": 283,
+    "ergonomic": 1259,
+    "widened": 284,
     "escape": 1
   },
   "passes": [
@@ -28,9 +28,9 @@
     {
       "pass": "DT - detect-tagged-unions",
       "total": 82,
-      "exact": 38,
+      "exact": 37,
       "ergonomic": 41,
-      "widened": 3
+      "widened": 4
     },
     {
       "pass": "shape-callbacks",

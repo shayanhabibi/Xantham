@@ -106,3 +106,17 @@ export namespace T1 { export interface Extra { note: string } }
 export interface Idx { other: number }
 export type T2 = { [key: string]: T2.Idx | number; a: number; b?: never } | { b: string; a?: never };
 export namespace T2 { export interface Idx { note: string } }
+
+// A folded case whose fields alone build neither arm: `value` and `error` fold away, so the
+// arm interfaces stay declared and the case has no Create.
+export type Report =
+    | { state: "done"; note?: string; value: number }
+    | { state: "done"; note?: string; error: string }
+    | { state: "queued" };
+
+// A folded case carrying one arm whole: that arm builds the case's Create and is dropped, while
+// the arm with `error` stays declared.
+export type Outcome =
+    | { state: "done"; value: number; note?: string }
+    | { state: "done"; value: number; note?: string; error: string }
+    | { state: "queued" };

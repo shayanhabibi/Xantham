@@ -25727,8 +25727,6 @@ module ExportedHandlerTailStreamHandler =
                     static member CreateReturn (?info: FetchResponseInfo) : Item = jsNative
                     [<ParamObject; Emit("({ type: 'spanOpen', ...$0 })")>]
                     static member CreateSpanOpen (name: string, spanId: string, ?info: U3<Attributes, FetchEventInfo, JsRpcEventInfo>) : Item = jsNative
-                    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-                    static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, ?errorInfo: TailStreamErrorInfo option[]) : Item = jsNative
 
                 [<Interface>]
                 type Item2 =

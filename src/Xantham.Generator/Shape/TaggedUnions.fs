@@ -70,6 +70,10 @@ let detectTaggedUnions: Pass<ShapeModel> =
 
                                             let caseNames = taggedCaseNamesOf tagged
 
+                                            let arms =
+                                                facts.UnionMembers
+                                                |> List.choose (fun id -> Map.tryFind id model.Types)
+
                                             let cases =
                                                 List.map2
                                                     (fun (arm, value) caseName ->
@@ -99,7 +103,20 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                     Literal = literal
                                                                 })
 
-                                                        let wantsCreate =
+                                                        let groupArms =
+                                                            if List.contains value folded then
+                                                                arms
+                                                                |> List.filter (fun a ->
+                                                                    taggedArmValue model tag a = Some value)
+                                                            else
+                                                                []
+
+                                                        let constructible =
+                                                            groupArms.IsEmpty
+                                                            || groupArms
+                                                               |> List.exists (caseConstructsArm model tag arm)
+
+                                                        let optionalOrLiteral =
                                                             fields
                                                             |> List.exists (fun field ->
                                                                 field.Literal.IsSome
@@ -107,8 +124,34 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                     | FsOption _ -> true
                                                                     | _ -> false))
 
+                                                        let wantsCreate = constructible && optionalOrLiteral
+
                                                         let createName = $"Create{caseName}"
                                                         let symbol = $"{name}.{caseName}"
+
+                                                        let omitted =
+                                                            groupArms
+                                                            |> List.filter (fun a ->
+                                                                not (caseCarriesArm model tag arm a))
+                                                            |> List.collect (fun a ->
+                                                                taggedCaseFields tag a
+                                                                |> List.filter (fun m ->
+                                                                    not (memberDeclaredBy model m arm))
+                                                                |> List.map _.Symbol.Name)
+                                                            |> List.distinct
+
+                                                        if not omitted.IsEmpty then
+                                                            findings <-
+                                                                findings
+                                                                @ [
+                                                                    Finding.make
+                                                                        symbol
+                                                                        (DetectTaggedUnions.FoldedCaseOmitsArmMembers(
+                                                                            caseName,
+                                                                            omitted,
+                                                                            not constructible && optionalOrLiteral
+                                                                        ))
+                                                                ]
 
                                                         let create =
                                                             if not wantsCreate then

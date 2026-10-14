@@ -108,8 +108,8 @@ let private represented (names: Set<string>) (exported: string) =
     || names
        |> Set.exists (fun declared -> declared.StartsWith(exported + ".") || declared.EndsWith("." + exported))
 
-/// The interface names of the anonymous arms of every union declared as a tagged DU. The DU
-/// carries each arm's fields, documentation and construction.
+/// The interface names of the anonymous arms a declared DU carries whole: every arm of an
+/// unfolded case, and an arm of a folded case whose every field the case carries.
 let private taggedArmNames (model: ShapeModel) : Set<string> =
     let unions =
         model.Decls
@@ -121,11 +121,26 @@ let private taggedArmNames (model: ShapeModel) : Set<string> =
     model.DeclNames
     |> Map.toList
     |> List.filter (snd >> unions.Contains)
-    |> List.collect (fun (typeId, _) ->
-        Map.tryFind typeId model.Types
-        |> Option.map _.UnionMembers
-        |> Option.defaultValue [])
-    |> List.filter (fun armId -> Map.tryFind armId model.Types |> Option.exists isAnonymousArm)
+    |> List.choose (fun (typeId, _) -> Map.tryFind typeId model.Types)
+    |> List.collect (fun facts ->
+        let carriedWhole =
+            match taggedUnionShape model facts with
+            | Discriminated(tag, cases, folded) ->
+                fun (arm: TypeFacts) ->
+                    match taggedArmValue model tag arm with
+                    | Some value when List.contains value folded ->
+                        cases
+                        |> List.exists (fun (case, caseValue) ->
+                            caseValue = value && caseCarriesArm model tag case arm)
+                    | Some _ -> true
+                    | None -> false
+            | TagCollides _
+            | Untagged -> fun _ -> false
+
+        facts.UnionMembers
+        |> List.filter (fun armId ->
+            Map.tryFind armId model.Types
+            |> Option.exists (fun arm -> isAnonymousArm arm && carriedWhole arm)))
     |> List.choose (fun armId -> Map.tryFind armId model.DeclNames)
     |> Set.ofList
 
@@ -148,8 +163,7 @@ let private armRoots (model: ShapeModel) (arms: Set<string>) : string list =
 
     unionRoots @ [ for arm in arms -> $"{arm}." ]
 
-/// The declaration names the generator minted for an inline shape. An author-written name, such as
-/// a namespace member merged under a union, is API whether or not a declaration reads it.
+/// The declaration names the generator minted for an inline shape.
 let private mintedNames (model: ShapeModel) : Set<string> =
     model.DeclNames
     |> Map.toList
@@ -173,9 +187,9 @@ let private declName (decl: FsDecl) =
     | FsExports _ -> None
 
 /// The declaration set with every unread delegate, unread tagged-union arm interface and unread
-/// generator-minted declaration under an arm root removed, and the names removed. A declaration whose removal
-/// would leave a harvested export unrepresented is retained. Dropping one declaration can leave
-/// another unread, so the removal repeats until the set is stable.
+/// generator-minted declaration under an arm root removed, and the names removed. A declaration
+/// whose removal would leave a harvested export unrepresented is retained. Dropping one
+/// declaration can leave another unread, so the removal repeats until the set is stable.
 let rec private prune
     (arms: Set<string>)
     (minted: Set<string>)

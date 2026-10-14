@@ -508,6 +508,14 @@ let internal sameShape (model: ShapeModel) (left: int<Measure.typeId>) (right: i
 
     go Set.empty left right
 
+/// Whether `arm` declares a member under the name, type and optionality of `m`.
+let internal memberDeclaredBy (model: ShapeModel) (m: ResolvedMember) (arm: TypeFacts) : bool =
+    arm.Members
+    |> List.exists (fun other ->
+        other.Symbol.Name = m.Symbol.Name
+        && sameShape model other.TypeId m.TypeId
+        && other.Optional = m.Optional)
+
 /// One case's facts, folded from the arms sharing its tag value: the members every arm declares
 /// under the same name, type and optionality, and every signature the arms carry.
 let private foldedArm (model: ShapeModel) (arms: TypeFacts list) =
@@ -517,15 +525,10 @@ let private foldedArm (model: ShapeModel) (arms: TypeFacts list) =
         let head = List.head arms
         let rest = List.tail arms
 
-        let declaredBy (m: ResolvedMember) (arm: TypeFacts) =
-            arm.Members
-            |> List.exists (fun other ->
-                other.Symbol.Name = m.Symbol.Name
-                && sameShape model other.TypeId m.TypeId
-                && other.Optional = m.Optional)
-
         { head with
-            Members = head.Members |> List.filter (fun m -> rest |> List.forall (declaredBy m))
+            Members =
+                head.Members
+                |> List.filter (fun m -> rest |> List.forall (memberDeclaredBy model m))
             CallSignatures = arms |> List.collect _.CallSignatures
             ConstructSignatures = arms |> List.collect _.ConstructSignatures
         }
@@ -818,6 +821,17 @@ let internal TaggedCaseFieldBudget = 12
 let internal taggedCaseFields (tag: string) (arm: TypeFacts) =
     arm.Members
     |> List.filter (fun m -> m.Symbol.Name <> tag && not (isSymbolKeyed m.Symbol.Name))
+
+/// Whether a folded case declares every field of `arm`.
+let internal caseCarriesArm (model: ShapeModel) (tag: string) (case: TypeFacts) (arm: TypeFacts) =
+    taggedCaseFields tag arm |> List.forall (fun m -> memberDeclaredBy model m case)
+
+/// Whether a folded case's fields alone build an object of `arm`: the case declares every
+/// required field of the arm.
+let internal caseConstructsArm (model: ShapeModel) (tag: string) (case: TypeFacts) (arm: TypeFacts) =
+    taggedCaseFields tag arm
+    |> List.filter (fun m -> not m.Optional)
+    |> List.forall (fun m -> memberDeclaredBy model m case)
 
 /// Whether an arm carries data a DU case can bind: properties within the budget, and neither a
 /// method nor a signature.
@@ -3958,8 +3972,8 @@ let internal taggedCaseNamesOf (tagged: (TypeFacts * string) list) =
     tagged |> List.map (snd >> Naming.enumCaseOfString) |> uniqueCaseNames
 
 /// The case each arm of a union reads under once `detect-tagged-unions` declares it, keyed by
-/// the arm's type id. Arms folding into one case share its name. Empty for a union that pass
-/// does not declare.
+/// the arm's type id. Arms folding into one case share its name. Empty for a union
+/// `detect-tagged-unions` does not declare.
 let internal taggedCaseNames (model: ShapeModel) (facts: TypeFacts) : Map<int<Measure.typeId>, string> =
     if not (isTaggedDeclaration model facts) then
         Map.empty

@@ -34,6 +34,32 @@ type Terminal =
     | [<CompiledName("done")>] Done
     | [<CompiledName("pending")>] Pending
 
+[<Interface>]
+type Terminal2 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    abstract state: string
+    abstract value: float
+    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
+    static member Create (value: float) : Terminal2 = jsNative
+
+module Terminal2 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    [<Literal>]
+    let state = "done"
+
+[<Interface>]
+type Terminal3 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    abstract state: string
+    abstract error: string
+    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
+    static member Create (error: string) : Terminal3 = jsNative
+
+module Terminal3 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    [<Literal>]
+    let state = "done"
+
 type Onset = U2<Onset2, Onset3>
 
 [<Interface>]
