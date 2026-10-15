@@ -4445,6 +4445,18 @@ let pipelineTests =
                           [ "arms sharing 'state' = 'done' merged into one case, carrying the members they agree on" ]
                           "the fold names the tag and the value it folded on"
 
+                      // The case omits `value` and `error`, so both arm interfaces stay declared as
+                      // the typed path to them; the unfolded `pending` arm is dropped.
+                      Expect.stringContains source "type Terminal2 =" "an arm with a field the case omits stays"
+                      Expect.stringContains source "static member Create (value: float) : Terminal2" "and builds that arm"
+                      Expect.equal (messagesFor "Terminal2" "DD002") [] "a kept arm is not reported dropped"
+                      Expect.isFalse (source.Contains "type Terminal4 =") "an unfolded arm the DU carries is dropped"
+
+                      Expect.equal
+                          (messagesFor "Terminal.Done" "DT007")
+                          [ "case 'Done' omits value, error: the arms sharing its tag value disagree on them, and their arm interfaces stay declared" ]
+                          "the omitted members are reported on the case"
+
                       // The refusal. Both arms carry `type: "log"`, so the fold leaves one case
                       // and the union stays erased - loudly.
                       Expect.stringContains source "type Onset = U2<Onset2, Onset3>" "a fold to a single case is not a union"
@@ -4472,6 +4484,12 @@ let pipelineTests =
                           "Log's intersection arms reach the same refusal Onset's flat arms do"
 
                       Expect.stringContains source "type Log = U2<Log2, Log3>" "and Log stays an erased union"
+
+                      for gone in [ "Distinct2"; "Distinct3"; "Distinct4"; "Signal2"; "Signal3"; "Terminal4"; "Scheduled2"; "Scheduled3"; "Result2"; "Result3" ] do
+                          Expect.isFalse (source.Contains $"type {gone}") $"{gone}: an unread tagged arm is dropped"
+
+                      for kept in [ "Onset2"; "Onset3"; "Log2"; "Log3"; "Loose2"; "Loose3"; "FetchInfo" ] do
+                          Expect.stringContains source $"type {kept} =" $"{kept}: an arm an erased union or name holds stays"
 
                   testCase "a union written inline is named under its owner and claimed from there"
                   <| fun _ ->
@@ -4545,6 +4563,211 @@ let pipelineTests =
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> List.contains f.Key [ "TP006"; "RA003"; "RA004"; "SY002" ]))
                           "no parameter is erased and no reference widens for want of arguments" ])
+
+        yield!
+            fixtureTests "tagged-arm-lab" (handFixture "tagged-arm-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a fold keeps a member the arms spell as one shape" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\")>] Done of owner: Task.Cases.Done.Owner
+"
+                          "equal inline objects agree, nested arrays of them included; `ok` and `note` differ"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\")>] Done
+    | [<CompiledName(\"queued\")>] Queued of position: float"
+                          "members only one arm carries still fold away"
+
+                      Expect.isFalse (source.Contains "type Choice = U2<") "an exclusive fold over an inline shared object fires"
+                      Expect.stringContains source "    abstract meta: Choice.Meta" "and reads the first arm's declaration"
+                      Expect.stringContains source "    static member Create (meta: Choice.Meta, a: float) : Choice = jsNative" "one Create per arm"
+                      Expect.stringContains source "    static member Create (meta: Choice.Meta, b: string) : Choice = jsNative" "for both arms"
+
+                  testCase "a tagged union carries the documentation its arms carried" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "/// The outcome of recovering a fiber." "the alias's comment reaches the DU"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"snapshot\">The state captured when the fiber finished.</param>"
+                          "a field comment reaches its case"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"metadata\">@deprecated Read <c>snapshot</c> instead.</param>"
+                          "a field tag reaches its case"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"type\">Which party aborted it.</param>"
+                          "an escaped field is documented under its JS key"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"channel\">TypeScript type: <c>"
+                          "a literal field records its literal"
+
+                      Expect.stringContains source "    /// <param name=\"at\"></param>" "and its undocumented sibling is written empty"
+
+                  testCase "a case with an optional or literal field has a Create" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor symbol key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && f.Key = key)
+                          |> List.map _.Message
+
+                      Expect.stringContains
+                          source
+                          "    static member CreateCompleted (?snapshot: obj, ?metadata: JS.Record<string, obj>) : Recovery = jsNative"
+                          "optional fields are omittable"
+
+                      Expect.stringContains source "    static member CreateAborted (" "a case mixing both has one"
+                      Expect.stringContains source "?reason: string) : Recovery = jsNative" "with its optional field last"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"({ verb: 'start', channel: 'bus', ...$0 })\")>]"
+                          "a literal field is written by the Emit"
+
+                      Expect.stringContains source "    static member CreateStart (at: float) : Signal = jsNative" "and binds no parameter"
+                      Expect.stringContains source "    static member CreatePong (?at: float) : Message = jsNative" "named arms' cases too"
+
+                      for absent in [ "CreatePending"; "CreateCircle"; "CreateSquare"; "CreateOpen"; "CreatePing" ] do
+                          Expect.isFalse (source.Contains absent) $"{absent}: the case constructor already builds it"
+
+                      Expect.isFalse (source.Contains "static member CreateX") "a helper name that is a case is not declared"
+
+                      Expect.equal
+                          (messagesFor "Clash.X" "DT006")
+                          [ "no case Create: 'CreateX' is already a case of the union" ]
+                          "and the collision is reported"
+
+                      Expect.equal
+                          (messagesFor "Recovery.Completed" "DT005")
+                          [ "case Create 'CreateCompleted': optional fields omittable, literal fields written" ]
+                          "a synthesized helper is reported once"
+
+                      // A folded case has a Create only where its fields alone build one of its arms.
+                      Expect.isFalse (source.Contains "static member CreateDone (value: float, ?note: string) : Report") "Report.Done builds no arm"
+                      Expect.isFalse (source.Contains ") : Report = jsNative") "so Report has no case Create"
+                      Expect.equal (messagesFor "Report.Done" "DT005") [] "and none is reported"
+
+                      Expect.stringContains
+                          source
+                          "    static member CreateDone (value: float, ?note: string) : Outcome = jsNative"
+                          "Outcome.Done carries its first arm whole"
+
+                      Expect.isFalse (source.Contains "type Outcome2 =") "the arm the case carries whole is dropped"
+                      Expect.stringContains source "type Outcome3 =" "the arm with a field the case omits stays"
+
+                  testCase "an anonymous arm's declarations nest under its case" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "Aborted of reason: string option * ``type``: Recovery.Cases.Aborted.Type"
+                          "the case field reads the declaration under its case"
+
+                      Expect.isFalse (source.Contains "Recovery3.Type") "and not under the arm's numbered name"
+                      Expect.stringContains source "Done of level: Job.Cases.Done.Level" "folded arms share their case's module"
+                      Expect.stringContains source "Shelf2.Size" "a union with a case named Cases keeps the arm path"
+                      Expect.stringContains source "Shelf3.Size" "for every arm"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\")>] Done of owner: Task.Cases.Done.Owner\n"
+                          "a member the fold kept reads the declaration under its case"
+
+                      Expect.stringContains
+                          source
+                          "    abstract meta: Choice.Meta"
+                          "an exclusive fold's shared member nests under the folded interface"
+
+                      Expect.isFalse (source.Contains "Choice2.Meta") "not under an arm the fold removed"
+
+                  testCase "an arm interface nothing reads is dropped" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor symbol key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && f.Key = key)
+                          |> List.map _.Message
+
+                      for gone in [ "Recovery2"; "Recovery3"; "Recovery4"; "Shape2"; "Shape3"; "Signal2"; "Signal3"; "Event3"; "Clash2"; "Clash3"; "Task4"; "Run4" ] do
+                          Expect.isFalse (source.Contains $"type {gone} =") $"{gone} is dropped"
+
+                      // A folded arm with a field its case omits stays declared, as the typed path
+                      // to that field.
+                      for kept in [ "Task2"; "Task3"; "Run2"; "Run3"; "Job3" ] do
+                          Expect.stringContains source $"type {kept} =" $"{kept}: its case omits one of its fields"
+
+                      Expect.stringContains source "abstract result: Run.Cases.Done.Result" "a kept arm reads its nested declaration"
+
+                      // What only a dropped arm read goes with it, transitively.
+                      for gone in [ "Meta2" ] do
+                          Expect.isFalse (source.Contains $"type {gone} =") $"{gone}: read by no declaration left"
+
+                      for kept in [ "Result"; "Failure"; "Owner2" ] do
+                          Expect.stringContains source $"type {kept} =" $"{kept}: a kept arm reads it"
+
+                      Expect.stringContains source "type Owner =" "the declaration a kept case field reads stays"
+                      Expect.stringContains source "type Meta =" "and the one the exclusive-folded interface reads"
+                      Expect.equal (messagesFor "Task.Cases.Done.Owner2" "DD003") [] "a nested declaration a kept arm reads is not dropped"
+
+                      Expect.stringContains source "type Event2 =" "an arm read through Extract stays"
+                      Expect.stringContains source "type Ping =" "a named arm stays"
+                      Expect.stringContains source "type Pong =" "a named arm stays when nothing reads it"
+                      Expect.isFalse (source.Contains "Recovery3") "a dropped arm leaves no module behind"
+                      Expect.stringContains source "module Recovery =" "its nested declarations live under the union"
+                      Expect.isFalse (source.Contains "type Job2 =") "a folded arm the case carries whole is dropped"
+                      Expect.equal (messagesFor "Job3" "DD002") [] "a folded arm with a field the case omits is not"
+
+                      let omits =
+                          "the arms sharing its tag value disagree on them, and their arm interfaces stay declared"
+
+                      Expect.equal (messagesFor "Task.Done" "DT007") [ $"case 'Done' omits ok, note: {omits}" ] "Task.Done omits ok and note"
+                      Expect.equal (messagesFor "Run.Done" "DT007") [ $"case 'Done' omits result, failure: {omits}" ] "Run.Done omits both members"
+                      Expect.equal (messagesFor "Job.Done" "DT007") [ $"case 'Done' omits code: {omits}" ] "Job.Done omits code"
+
+                      Expect.equal
+                          (messagesFor "Report.Done" "DT007")
+                          [ $"case 'Done' omits value, error: {omits}; no CreateDone: the case's fields alone build none of its arms" ]
+                          "Report.Done omits value and error, and declines its Create"
+                      Expect.isFalse (source.Contains "type Shelf2 =") "a Cases-collision union's arms are dropped as well"
+
+                      Expect.stringContains
+                          source
+                          "Cases of size: Shelf2.Size"
+                          "and their nested declarations keep the arm path, the one remaining residue"
+
+                      Expect.equal
+                          (messagesFor "Recovery2" "DD002")
+                          [ "arm interface dropped: the tagged union carries its fields and nothing else reads it" ]
+                          "each dropped arm is reported"
+
+                      Expect.equal (messagesFor "Event2" "DD002") [] "a read arm is not"
+                      Expect.stringContains source "type Hello =" "an alias-named arm stays"
+                      Expect.stringContains source "Hello.Meta" "with its nested declaration under its own name"
+
+                      for nested in [ "T1.Extra"; "T2.Idx" ] do
+                          Expect.equal (messagesFor nested "DD003") [] $"{nested}: a namespace member under an exclusive fold is not pruned"
+
+                      Expect.stringContains source "abstract note: string" "and is declared"
+
+                      Expect.equal
+                          (messagesFor "Pick.Meta2" "DD003")
+                          [ "declaration dropped: only an arm the union replaced read it" ]
+                          "while the fold's minted orphan is" ])
 
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced

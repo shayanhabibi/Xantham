@@ -4,7 +4,7 @@
   "module": "GenericTagLab",
   "counts": {
     "exact": 13,
-    "ergonomic": 27,
+    "ergonomic": 24,
     "widened": 1,
     "escape": 0
   },
@@ -40,6 +40,11 @@
       "exact": 23,
       "ergonomic": 33,
       "widened": 2
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 19,
+      "exact": 19
     }
   ]
 }

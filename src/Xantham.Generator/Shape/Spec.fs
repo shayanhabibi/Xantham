@@ -326,6 +326,11 @@ let internal isSyntheticName (name: string<symbolName>) =
     let name = string name
     name.StartsWith "__" || name.StartsWith "\""
 
+/// Whether the union arm is an inline shape, named only by the checker.
+let internal isAnonymousArm (arm: TypeFacts) =
+    (arm.SymbolName |> Option.forall isSyntheticName)
+    && ValueOption.isNone arm.Response.AliasSymbolId
+
 /// A pure index signature the checker gave no symbol of its own: reached through a type
 /// alias or written inline, rather than declared as an interface. `Bag`'s and
 /// `FrozenBag`'s own names are what their own consumers call them, and stay; this shape has
@@ -458,24 +463,72 @@ type internal TaggedShape =
     /// Every candidate property is absent or non-literal on some arm.
     | Untagged
 
+/// An object type with members only: no symbol of its own, type arguments, signatures or index
+/// signatures.
+let private plainAnonymousObject (facts: TypeFacts) =
+    flag TypeFlags.Object facts
+    && (facts.SymbolName |> Option.forall isSyntheticName)
+    && facts.TypeArguments.IsEmpty
+    && facts.IndexInfos.IsEmpty
+    && facts.CallSignatures.IsEmpty
+    && facts.ConstructSignatures.IsEmpty
+
+/// Whether two types read as one F# type: one id; two plain anonymous objects whose members pair
+/// by name, optionality and readonly with types that read as one; two unions whose members pair
+/// the same way; or two applications of one generic target whose arguments do.
+let internal sameShape (model: ShapeModel) (left: int<Measure.typeId>) (right: int<Measure.typeId>) =
+    let rec go (assumed: Set<int<Measure.typeId> * int<Measure.typeId>>) left right =
+        left = right
+        || Set.contains (left, right) assumed
+        || (match Map.tryFind left model.Types, Map.tryFind right model.Types with
+            | Some l, Some r ->
+                let assumed = Set.add (left, right) assumed
+
+                if plainAnonymousObject l && plainAnonymousObject r then
+                    l.Members.Length = r.Members.Length
+                    && l.Members
+                       |> List.forall (fun m ->
+                           r.Members
+                           |> List.exists (fun o ->
+                               o.Symbol.Name = m.Symbol.Name
+                               && o.Optional = m.Optional
+                               && o.ReadOnly = m.ReadOnly
+                               && go assumed m.TypeId o.TypeId))
+                elif flag TypeFlags.Union l && flag TypeFlags.Union r then
+                    l.UnionMembers.Length = r.UnionMembers.Length
+                    && l.UnionMembers
+                       |> List.forall (fun m -> r.UnionMembers |> List.exists (go assumed m))
+                else
+                    match l.Response.TargetTypeId, r.Response.TargetTypeId with
+                    | ValueSome lt, ValueSome rt when lt = rt && lt <> left && rt <> right ->
+                        l.TypeArguments.Length = r.TypeArguments.Length
+                        && List.forall2 (go assumed) l.TypeArguments r.TypeArguments
+                    | _ -> false
+            | _ -> false)
+
+    go Set.empty left right
+
+/// Whether `arm` declares a member under the name, type and optionality of `m`.
+let internal memberDeclaredBy (model: ShapeModel) (m: ResolvedMember) (arm: TypeFacts) : bool =
+    arm.Members
+    |> List.exists (fun other ->
+        other.Symbol.Name = m.Symbol.Name
+        && sameShape model other.TypeId m.TypeId
+        && other.Optional = m.Optional)
+
 /// One case's facts, folded from the arms sharing its tag value: the members every arm declares
 /// under the same name, type and optionality, and every signature the arms carry.
-let private foldedArm (arms: TypeFacts list) =
+let private foldedArm (model: ShapeModel) (arms: TypeFacts list) =
     match arms with
     | [ single ] -> single
     | _ ->
         let head = List.head arms
         let rest = List.tail arms
 
-        let declaredBy (m: ResolvedMember) (arm: TypeFacts) =
-            arm.Members
-            |> List.exists (fun other ->
-                other.Symbol.Name = m.Symbol.Name
-                && other.TypeId = m.TypeId
-                && other.Optional = m.Optional)
-
         { head with
-            Members = head.Members |> List.filter (fun m -> rest |> List.forall (declaredBy m))
+            Members =
+                head.Members
+                |> List.filter (fun m -> rest |> List.forall (memberDeclaredBy model m))
             CallSignatures = arms |> List.collect _.CallSignatures
             ConstructSignatures = arms |> List.collect _.ConstructSignatures
         }
@@ -540,7 +593,7 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : TaggedSha
                 let groups =
                     tagged
                     |> List.groupBy snd
-                    |> List.map (fun (value, group) -> foldedArm (group |> List.map fst), value)
+                    |> List.map (fun (value, group) -> foldedArm model (group |> List.map fst), value)
 
                 let folded =
                     tagged |> List.countBy snd |> List.filter (snd >> (<) 1) |> List.map fst
@@ -623,7 +676,7 @@ let internal exclusiveArmShape (model: ShapeModel) (facts: TypeFacts) : Exclusiv
                 else
                     let first = snd (List.head real)
 
-                    if not (real |> List.forall (fun (_, m) -> m.TypeId = first.TypeId)) then
+                    if not (real |> List.forall (fun (_, m) -> sameShape model m.TypeId first.TypeId)) then
                         None
                     elif never.IsEmpty then
                         if real |> List.forall (fun (_, m) -> m.Optional = first.Optional) then
@@ -768,6 +821,17 @@ let internal TaggedCaseFieldBudget = 12
 let internal taggedCaseFields (tag: string) (arm: TypeFacts) =
     arm.Members
     |> List.filter (fun m -> m.Symbol.Name <> tag && not (isSymbolKeyed m.Symbol.Name))
+
+/// Whether a folded case declares every field of `arm`.
+let internal caseCarriesArm (model: ShapeModel) (tag: string) (case: TypeFacts) (arm: TypeFacts) =
+    taggedCaseFields tag arm |> List.forall (fun m -> memberDeclaredBy model m case)
+
+/// Whether a folded case's fields alone build an object of `arm`: the case declares every
+/// required field of the arm.
+let internal caseConstructsArm (model: ShapeModel) (tag: string) (case: TypeFacts) (arm: TypeFacts) =
+    taggedCaseFields tag arm
+    |> List.filter (fun m -> not m.Optional)
+    |> List.forall (fun m -> memberDeclaredBy model m case)
 
 /// Whether an arm carries data a DU case can bind: properties within the budget, and neither a
 /// method nor a signature.
@@ -3902,6 +3966,32 @@ let uniqueCaseNames (names: string list) =
 
         seen <- Set.add unique seen
         unique)
+
+/// The DU case names of a discriminated union's cases, in case order.
+let internal taggedCaseNamesOf (tagged: (TypeFacts * string) list) =
+    tagged |> List.map (snd >> Naming.enumCaseOfString) |> uniqueCaseNames
+
+/// The case each arm of a union reads under once `detect-tagged-unions` declares it, keyed by
+/// the arm's type id. Arms folding into one case share its name. Empty for a union
+/// `detect-tagged-unions` does not declare.
+let internal taggedCaseNames (model: ShapeModel) (facts: TypeFacts) : Map<int<Measure.typeId>, string> =
+    if not (isTaggedDeclaration model facts) then
+        Map.empty
+    else
+        match taggedUnionShape model facts with
+        | Discriminated(tag, tagged, _) ->
+            let byValue =
+                List.zip (tagged |> List.map snd) (taggedCaseNamesOf tagged) |> Map.ofList
+
+            facts.UnionMembers
+            |> List.choose (fun armId ->
+                Map.tryFind armId model.Types
+                |> Option.bind (taggedArmValue model tag)
+                |> Option.bind byValue.TryFind
+                |> Option.map (fun caseName -> armId, caseName))
+            |> Map.ofList
+        | TagCollides _
+        | Untagged -> Map.empty
 
 /// Type abbreviations declared by a model, as name -> target. Shared by the passes that must
 /// compare signatures the way the compiler does: .NET overload resolution sees through an

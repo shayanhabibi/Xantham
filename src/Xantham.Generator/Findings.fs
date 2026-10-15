@@ -191,6 +191,9 @@ module FindingCodes =
             "DT.TaggedUnion", "DT002"
             "DT.TagValueShared", "DT003"
             "DT.ArmsMergedOnSharedTag", "DT004"
+            "DT.CaseCreateSynthesized", "DT005"
+            "DT.CaseCreateNameTaken", "DT006"
+            "DT.FoldedCaseOmitsArmMembers", "DT007"
             "SY.InstantiationNamedOnce", "SY001"
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
@@ -248,6 +251,8 @@ module FindingCodes =
             "RA.AliasKeptAsPhantom", "RA006"
             "RA.DuplicateTypeParameterUnwritable", "RA007"
             "DD.DelegateReachedNoReference", "DD001"
+            "DD.TaggedArmReachedNoReference", "DD002"
+            "DD.ArmDeclarationReachedNoReference", "DD003"
             "AC.ExportNotRepresented", "AC001"
             "GE.GroupShipped", "GE001"
             "GE.ShippedGroupWithoutDeclarations", "GE002"
@@ -859,6 +864,15 @@ type DetectTaggedUnions =
     | [<Ergonomic>] TagValueShared of tag: string * value: string
     /// Arms sharing a tag value folded into one case, which carries the members they agree on.
     | [<Ergonomic>] ArmsMergedOnSharedTag of tag: string * value: string
+    /// The case has a `Create` static member building it with its optional fields omittable and
+    /// its literal fields written.
+    | [<Exact>] CaseCreateSynthesized of create: string
+    /// The case's `Create` name is a case of the same union, so the case has no `Create`.
+    | [<Ergonomic>] CaseCreateNameTaken of create: string
+    /// The folded case omits `members`, which the arms sharing its tag value disagree on; the
+    /// arm interfaces declaring them stay declared. With `createDeclined`, the case has no
+    /// `Create`: its fields alone build none of its arms.
+    | [<Widened>] FoldedCaseOmitsArmMembers of case: string * members: string list * createDeclined: bool
 
     interface IFindingKind with
         member this.Message =
@@ -869,6 +883,19 @@ type DetectTaggedUnions =
                 $"discriminated by '{tag}', but two arms carry '{value}'; left as an erased union"
             | ArmsMergedOnSharedTag(tag, value) ->
                 $"arms sharing '{tag}' = '{value}' merged into one case, carrying the members they agree on"
+            | CaseCreateSynthesized create ->
+                $"case Create '{create}': optional fields omittable, literal fields written"
+            | CaseCreateNameTaken create -> $"no case Create: '{create}' is already a case of the union"
+            | FoldedCaseOmitsArmMembers(case, members, createDeclined) ->
+                let omitted = String.concat ", " members
+
+                let declined =
+                    if createDeclined then
+                        $"; no Create{case}: the case's fields alone build none of its arms"
+                    else
+                        ""
+
+                $"case '{case}' omits {omitted}: the arms sharing its tag value disagree on them, and their arm interfaces stay declared{declined}"
 
 /// `name-exports`.
 [<Prefix("NE", "name-exports")>]
@@ -1218,12 +1245,21 @@ type DropOrphanDelegates =
     /// The delegate was declared for a callback every reading position writes out in full, so the
     /// declaration is dropped.
     | [<Exact>] DelegateReachedNoReference
+    /// A dropped interface named for an anonymous arm: the tagged DU carries the arm whole, with
+    /// its fields, documentation and construction, and no declaration reads the interface.
+    | [<Exact>] TaggedArmReachedNoReference
+    /// The declaration was named under an arm the union no longer declares, for a member the
+    /// union's own declaration does not carry; nothing else reads it.
+    | [<Exact>] ArmDeclarationReachedNoReference
 
     interface IFindingKind with
         member this.Message =
             match this with
             | DelegateReachedNoReference ->
                 "delegate dropped: every position reading this callback writes its parameters directly"
+            | TaggedArmReachedNoReference ->
+                "arm interface dropped: the tagged union carries its fields and nothing else reads it"
+            | ArmDeclarationReachedNoReference -> "declaration dropped: only an arm the union replaced read it"
 
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]

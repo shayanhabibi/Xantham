@@ -20,6 +20,15 @@ let detectTaggedUnions: Pass<ShapeModel> =
                 async {
                     let mutable findings = []
 
+                    // The alias's own comment, which the DU is the only declaration to carry.
+                    let exportDocs =
+                        model.Harvest.Exports
+                        |> List.choose (fun export ->
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                            |> Option.bind _.Declared
+                            |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
+                        |> Map.ofList
+
                     let decls =
                         model.DeclNames
                         |> Map.toList
@@ -59,8 +68,11 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                             findings <- findings @ parameterFindings
                                             let scoped = { model with TypeVars = scope }
 
-                                            let caseNames =
-                                                tagged |> List.map (snd >> Naming.enumCaseOfString) |> uniqueCaseNames
+                                            let caseNames = taggedCaseNamesOf tagged
+
+                                            let arms =
+                                                facts.UnionMembers
+                                                |> List.choose (fun id -> Map.tryFind id model.Types)
 
                                             let cases =
                                                 List.map2
@@ -78,16 +90,102 @@ let detectTaggedUnions: Pass<ShapeModel> =
 
                                                                 findings <- findings @ refFindings
 
+                                                                let literal =
+                                                                    literalMemberValue model m m.TypeId
+                                                                    |> Option.filter (fun _ ->
+                                                                        reference = FsFloat || reference = FsString)
+
                                                                 {
                                                                     Name = Naming.memberName m.Symbol.Name
+                                                                    Docs = m.Docs
+                                                                    Tags = m.Tags
                                                                     Type = optionalRef m.Optional reference
+                                                                    Literal = literal
                                                                 })
+
+                                                        let groupArms =
+                                                            if List.contains value folded then
+                                                                arms
+                                                                |> List.filter (fun a ->
+                                                                    taggedArmValue model tag a = Some value)
+                                                            else
+                                                                []
+
+                                                        let constructible =
+                                                            groupArms.IsEmpty
+                                                            || groupArms
+                                                               |> List.exists (caseConstructsArm model tag arm)
+
+                                                        let optionalOrLiteral =
+                                                            fields
+                                                            |> List.exists (fun field ->
+                                                                field.Literal.IsSome
+                                                                || (match field.Type with
+                                                                    | FsOption _ -> true
+                                                                    | _ -> false))
+
+                                                        let wantsCreate = constructible && optionalOrLiteral
+
+                                                        let createName = $"Create{caseName}"
+                                                        let symbol = $"{name}.{caseName}"
+
+                                                        let omitted =
+                                                            groupArms
+                                                            |> List.filter (fun a ->
+                                                                not (caseCarriesArm model tag arm a))
+                                                            |> List.collect (fun a ->
+                                                                taggedCaseFields tag a
+                                                                |> List.filter (fun m ->
+                                                                    not (memberDeclaredBy model m arm))
+                                                                |> List.map _.Symbol.Name)
+                                                            |> List.distinct
+
+                                                        if not omitted.IsEmpty then
+                                                            findings <-
+                                                                findings
+                                                                @ [
+                                                                    Finding.make
+                                                                        symbol
+                                                                        (DetectTaggedUnions.FoldedCaseOmitsArmMembers(
+                                                                            caseName,
+                                                                            omitted,
+                                                                            not constructible && optionalOrLiteral
+                                                                        ))
+                                                                ]
+
+                                                        let create =
+                                                            if not wantsCreate then
+                                                                None
+                                                            elif List.contains createName caseNames then
+                                                                findings <-
+                                                                    findings
+                                                                    @ [
+                                                                        Finding.make
+                                                                            symbol
+                                                                            (DetectTaggedUnions.CaseCreateNameTaken
+                                                                                createName)
+                                                                    ]
+
+                                                                None
+                                                            else
+                                                                findings <-
+                                                                    findings
+                                                                    @ [
+                                                                        Finding.make
+                                                                            symbol
+                                                                            (DetectTaggedUnions.CaseCreateSynthesized
+                                                                                createName)
+                                                                    ]
+
+                                                                Some createName
+
 
                                                         {
                                                             Name = caseName
                                                             CompiledName =
                                                                 (if value = caseName then None else Some value)
                                                             Fields = fields
+                                                            Create = create
                                                         })
                                                     tagged
                                                     caseNames
@@ -102,12 +200,15 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                 ]
                                                 @ [ Finding.make name (DetectTaggedUnions.TaggedUnion tag) ]
 
+                                            let docs, tags =
+                                                Map.tryFind typeId exportDocs |> Option.defaultValue ("", [])
+
                                             Some(
                                                 FsTaggedUnion
                                                     {
                                                         Name = name
-                                                        Docs = ""
-                                                        Tags = []
+                                                        Docs = docs
+                                                        Tags = tags
                                                         Order =
                                                             Map.tryFind typeId model.DeclOrders
                                                             |> Option.defaultValue None

@@ -263,8 +263,9 @@ let renderTests =
                               Cases =
                                 [ { Name = "Circle"
                                     CompiledName = Some "circle"
-                                    Fields = [ { Name = "radius"; Type = FsFloat } ] }
-                                  { Name = "Blank"; CompiledName = None; Fields = [] } ] } ] }
+                                    Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsFloat; Literal = None } ]
+                                    Create = None }
+                                  { Name = "Blank"; CompiledName = None; Fields = []; Create = None } ] } ] }
 
             let source = renderAll model |> Map.find "TestPkg.fs"
 
@@ -294,7 +295,8 @@ let renderTests =
                       Cases =
                         [ { Name = "Circle"
                             CompiledName = Some "circle"
-                            Fields = [ { Name = "radius"; Type = FsTypeVar "T" } ] } ] }
+                            Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]
+                            Create = None } ] }
 
             let model =
                 { baseModel with
@@ -307,6 +309,86 @@ let renderTests =
             Expect.stringContains source "type Shape<'T> =" "the head binds the payload parameter"
             Expect.stringContains source "type Owned<'T when 'T :> Base> =" "a constraint is written at the head"
             Expect.stringContains source "Circle of radius: 'T" "the case reads the bound parameter"
+
+        testCase "a tagged case documents every field once any field carries text" <| fun _ ->
+            let field name docs literal : FsTaggedField =
+                { Name = name; Docs = docs; Tags = []; Type = FsString; Literal = literal }
+
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsTaggedUnion
+                            { Name = "Signal"
+                              Docs = "A signal."
+                              Tags = []
+                              Order = None
+                              TypeParameters = []
+                              Tag = "verb"
+                              Cases =
+                                [ { Name = "Start"
+                                    CompiledName = Some "start"
+                                    Fields =
+                                      [ field "channel" "" (Some(LitString "bus"))
+                                        field "at" "When it started." None
+                                        field "note" "" None ]
+                                    Create = None }
+                                  { Name = "Stop"; CompiledName = Some "stop"; Fields = [ field "reason" "" None ]; Create = None } ] } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains source "/// A signal." "the union carries its own comment"
+            Expect.stringContains source "    /// <param name=\"at\">When it started.</param>" "a documented field"
+
+            Expect.stringContains
+                source
+                "    /// <param name=\"note\"></param>"
+                "an undocumented field beside a documented one is written empty"
+
+            Expect.stringContains
+                source
+                "    /// <param name=\"channel\">TypeScript type: <c>"
+                "a literal field carries its TypeScript type"
+
+            Expect.isFalse (source.Contains "<param name=\"reason\">") "a case with no field text carries no doc"
+
+        testCase "a tagged case with an optional or literal field has a Create" <| fun _ ->
+            let field name ty literal : FsTaggedField =
+                { Name = name; Docs = ""; Tags = []; Type = ty; Literal = literal }
+
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsTaggedUnion
+                            { Name = "Signal"
+                              Docs = ""
+                              Tags = []
+                              Order = None
+                              TypeParameters = []
+                              Tag = "verb"
+                              Cases =
+                                [ { Name = "Start"
+                                    CompiledName = Some "start"
+                                    Fields = [ field "channel" FsString (Some(LitString "bus")); field "at" FsFloat None ]
+                                    Create = Some "CreateStart" }
+                                  { Name = "Stop"
+                                    CompiledName = Some "stop"
+                                    Fields = [ field "reason" (FsOption FsString) None; field "code" FsFloat None ]
+                                    Create = Some "CreateStop" }
+                                  { Name = "Halt"; CompiledName = Some "halt"; Fields = []; Create = None } ] } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                "    [<ParamObject; Emit(\"({ verb: 'start', channel: 'bus', ...$0 })\")>]\n    static member CreateStart (at: float) : Signal = jsNative"
+                "the tag and literal fields are written, the rest bound"
+
+            Expect.stringContains
+                source
+                "    static member CreateStop (code: float, ?reason: string) : Signal = jsNative"
+                "required parameters first, optional ones omittable"
+
+            Expect.isFalse (source.Contains "CreateHalt") "a case without the field kinds has no Create"
 
         testCase "type variables and applications print in F# order" <| fun _ ->
             Expect.equal (Render.printType (FsTypeVar "T")) "'T" "the tick is the renderer's"
