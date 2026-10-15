@@ -58,7 +58,7 @@ weighed. Companion plan, executed first: `docs/.ai/plans/2026-10-15-exclusive-fo
 | Stage | Tasks | Commits | Boundary |
 |---|---|---|---|
 | 1 | Task 1, Task 2 | 1 (Task 2) | Task 1 measures and commits nothing. Task 2 moves no golden (verified in its Step 5) and fixes the audit contract the harvest relies on. |
-| 2 | Task 3, Task 4 | 1 | Nesting and harvest move every golden with a namespace, and a golden commit is preceded by reading it. Task 3 proves the behaviour on labs and unit tests and hands Task 4 an uncommitted tree. |
+| 2 | Task 3, Task 3b, Task 4 | 1 | Nesting, harvest and namespace-qualified references (Task 3b) move every golden with a namespace, and a golden commit is preceded by reading it. Task 3 proves the behaviour on labs and unit tests and hands Task 4 an uncommitted tree. |
 | 3 | Task 5 | 2 | Core.TS and Node are regenerated only on opt-in, each in its own commit (precedent `90c35bc1`/`dae1fe29`). Stage 3 is pushed together with Stage 2: Stage 2's `ApiVersion` 9 rejects the committed Core.TS catalogue (API 8) until Task 5 regenerates it. |
 
 ## Measures (taken while planning, 2026-10-15, at `91742f98`)
@@ -215,6 +215,13 @@ Frozen-CLI evidence (`tests/.scratch/pre158/plan-namespace-member-harvest/`):
   residue prunable and the pruning sound. *Cost if wrong:* a derived claim missed by the
   recording leaves an unread copy declared, the same as today.
 
+- **R12 — A lib or referenced namespace member is written under its namespace path** (Task 3b):
+  `Fable.Core.TS.Es.Intl.NumberFormatOptions`, `<Group>.NodeJS.ProcessEnv`.
+  - *Why:* TypeScript spells `Intl.NumberFormatOptions`, and after Task 5 the declaring binding
+    does too. A flat reference to a nested declaration is FS0039.
+  - *Cost if wrong:* none. The flat spelling stops compiling once Core.TS nests. Found while
+    planning plan 3 (its former Task 4) and moved here, because this plan creates the break.
+
 ## Review Focus
 
 1. **A namespace member a signature reads today** (`Shapes.Reached`, `Pool.Conn`,
@@ -244,14 +251,15 @@ Frozen-CLI evidence (`tests/.scratch/pre158/plan-namespace-member-harvest/`):
 | File | Change | Task |
 |---|---|---|
 | `src/Xantham.Generator/Shape/Coverage.fs` | a namespace is represented through its members | 2 |
-| `tests/Xantham.Generator.Tests/Shape.test.fs` | `audit-coverage` cases after `:5375-5390`; nesting cases `:1703-1840` updated, two added | 2, 3 |
+| `tests/Xantham.Generator.Tests/Shape.test.fs` | `audit-coverage` cases after `:5375-5390`; nesting cases `:1703-1840` updated, two added; lib and referenced qualification cases in `"shape passes"` | 2, 3, 3b |
 | `src/Xantham.Generator/Harvest.fs` | `harvest-globals` harvests type-only global namespaces; `harvestNamespaceMembers`; `passes`; header and `:410-413` comments | 3 |
-| `src/Xantham.Generator/Shape/Spec.fs` | `namespacePath`, `underNamespace` after `nestUnder` (`:50-56`) | 3 |
+| `src/Xantham.Generator/Shape/Spec.fs` | `namespacePath`, `underNamespace` after `nestUnder` (`:50-56`); `namespaceQualified` above `typeRef` (`:1715`), used by `libBinding` and `referencedRef` | 3, 3b |
+| `src/Xantham.Generator/Resolve.fs` | `namespacePathOf` above `resolveMember` (`:1018`); `NamespacePath` set in the `TypeFlags.Object` branch | 3b |
 | `src/Xantham.Generator/Shape/ExportNames.fs` | unconditional nesting; `contested` and its SY004 removed; doc `:52-63` | 3 |
 | `src/Xantham.Generator/Shape/Anonymous.fs` | `namespaceOf` via `namespacePath`; unconditional nesting; SY004 only for position paths; export root | 3 |
 | `src/Xantham.Generator/Shape/Aliases.fs` | abbreviation names nest under the namespace | 3 |
 | `src/Xantham.Generator/Shape/ConstructorObjects.fs` | constructor-object names nest under the namespace | 3 |
-| `src/Xantham.Generator/Model.fs` | `HarvestModel.Namespaces` doc (`:1150-1153`); `ShapeModel.MintedNames` (after `AliasApplications`, `:1857`) | 3 |
+| `src/Xantham.Generator/Model.fs` | `HarvestModel.Namespaces` doc (`:1150-1153`); `ShapeModel.MintedNames` (after `AliasApplications`, `:1857`); `TypeFacts.NamespacePath` | 3, 3b |
 | `src/Xantham.Generator/Pipeline.fs:96`, `tests/Xantham.Generator.Tests/Build.fs:111` | `MintedNames = Set.empty` in the two `ShapeModel` literals | 3 |
 | `src/Xantham.Generator/Shape/Orphans.fs` | `prune` reads `model.MintedNames`; `mintedNames` (`:166-174`) deleted | 3 |
 | `tests/fixtures/exclusive-arms-lab/index.d.ts` | `Wrap`/`F1` residue and the `FW` false-drop guard (H §5) | 3 |
@@ -1515,6 +1523,135 @@ Run `dotnet fsi build.fsx -- test --quick --update --filter "generator e2e"` →
 Do not commit. Hand Task 4 the working tree.
 
 ---
+
+### Task 3b: Lib and referenced namespace members are written under their namespace (R12)
+
+**Files:**
+- Modify: `src/Xantham.Generator/Model.fs` (`TypeFacts`, `:1257-1333`; `TypeFacts.shallow`, `:1338-1370`)
+- Modify: `src/Xantham.Generator/Resolve.fs` (new `namespacePathOf` above `resolveMember`, `:1018`; the `TypeFlags.Object` branch, `:1464-1640`; the full record at `:1700-1817`)
+- Modify: `src/Xantham.Generator/Shape/Spec.fs` (`libBinding`, `:2192-2252`; `referencedRef`, `:2293-2318`)
+- Test: `tests/Xantham.Generator.Tests/Shape.test.fs` (in `testList "shape passes"`, `:1511`)
+
+**Interfaces:**
+- Consumes: Task 3's nesting (a namespace member of the declaring run is written `Intl.Collator`).
+- Produces: `TypeFacts.NamespacePath: string list` (TypeScript namespaces enclosing the declaration, outermost first; `[]` at top level) and `Spec.namespaceQualified`. Plan 3 (`2026-10-15-global-augmentation.md`) consumes both.
+
+Task 3 nests a namespace member in the run that declares it. A *reference* from another binding is
+written by `Spec.libBinding` and `Spec.referencedRef`, which spell `<Module>.<Name>`
+(`Spec.fs:2213-2220`, `:2305`), and the identity-only resolve branch records no parent
+(`Resolve.fs:1629-1640`). Without this task, Task 5's nested Core.TS makes every reference to an
+`Intl`/`WebAssembly`/`Temporal` member from another binding FS0039. The task leaves its changes
+uncommitted for Task 4's Stage 2 commit. Task 3 Step 4's API 9 covers its catalogue effect.
+
+- [ ] **Step 1: Write the failing unit tests**
+
+Append to `testList "shape passes"`:
+
+```fsharp
+        testCase "a lib namespace member is written under its namespace's Core.TS module" <| fun _ ->
+            let options =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some((fun value -> value * uom<symbolName>) "NumberFormatOptions")
+                    DeclFile = Some((fun value -> value * uom<declFile>) "/ts/lib/lib.es5.d.ts")
+                    NamespacePath = [ "Intl" ] }
+
+            let reference, _ = Spec.typeRef Build.context (Build.shapeModel (options :: Build.primitives)) None "Holder.options" 50<typeId>
+
+            Expect.equal reference (FsNamed "Fable.Core.TS.Es.Intl.NumberFormatOptions") "TypeScript spells Intl.NumberFormatOptions"
+
+        testCase "a referenced namespace member is written under its namespace in the group's module" <| fun _ ->
+            let env =
+                { Build.facts (Build.typeResponse 51 TypeFlags.Object) with
+                    Origin = Dependency("ns-owner-lab" * uom<npmDependency>)
+                    SymbolName = Some((fun value -> value * uom<symbolName>) "ProcessEnv")
+                    NamespacePath = [ "NodeJS" ] }
+
+            let ctx =
+                { Build.context with
+                    Config =
+                        { GeneratorConfig.Default with
+                            Groups = Map.ofList [ "ns-owner-lab" * uom<npmDependency>, Reference ] } }
+
+            let reference, _ = Spec.typeRef ctx (Build.shapeModel (env :: Build.primitives)) None "Exports.env" 51<typeId>
+
+            Expect.equal reference (FsNamed "NsOwnerLab.NodeJS.ProcessEnv") "a ship run of the group nests it there"
+```
+
+- [ ] **Step 2: Run to verify they fail**
+
+Run: `dotnet fsi build.fsx -- test --quick --filter "shape passes"`.
+Expected: FAIL to compile: `NamespacePath` is not a field of `TypeFacts`.
+
+- [ ] **Step 3: The field and its resolution**
+
+`Model.fs`, in `TypeFacts` after `SymbolParent` (`:1276`):
+
+```fsharp
+        /// The TypeScript namespaces enclosing the declaration, outermost first: `["Intl"]` for
+        /// `Intl.NumberFormatOptions`. Empty at a module's top level and for an anonymous type.
+        NamespacePath: string list
+```
+
+In `TypeFacts.shallow`, after `SymbolParent = None`: `NamespacePath = []`.
+
+`Resolve.fs`, directly above `resolveMember` (`:1018`):
+
+```fsharp
+/// The TypeScript namespaces enclosing a symbol's declaration, outermost first. A source file's
+/// module symbol or an ambient module (`"node:fs"`) ends the path: neither is a namespace.
+let rec private namespacePathOf (ctx: Context) (symbol: SymbolResponse voption) : Async<string list> =
+    async {
+        match symbol with
+        | ValueSome current when ValueOption.isSome current.Parent ->
+            let! parent = ctx.Session.getParentOfSymbol current.Id
+
+            match parent with
+            | ValueSome owner when
+                hasAny SymbolFlags.Module owner.Flags && Naming.isWritableTypeName owner.Name
+                ->
+                let! outer = namespacePathOf ctx parent
+                return outer @ [ owner.Name ]
+            | _ -> return []
+        | _ -> return []
+    }
+```
+
+In the `has TypeFlags.Object` branch, directly after `let firstOrigin = …` (`:1466`), add
+`let! namespacePath = namespacePathOf ctx symbol`. Set `NamespacePath = namespacePath` in the
+identity-only return (`{ TypeFacts.shallow ty with Origin = origin … }`, `:1629`). Set it also in
+the full record of the derived branch (the literal ending `AliasIdentity = None; UnresolvedName =
+None`, `:1815-1816`). `rtk grep -n "AliasIdentity = None" src/Xantham.Generator` lists every full
+`TypeFacts` literal. Each one that is not `shallow` gets `NamespacePath = []`, or `namespacePath`
+where the branch has a symbol in scope. That includes `Customization/Semantics.fs:881` if it
+constructs one.
+
+- [ ] **Step 4: Qualify the lib and referenced names**
+
+`Spec.fs`, directly above `let rec typeRef` (`:1715`):
+
+```fsharp
+/// `name` under the declaration's TypeScript namespaces, each segment as an F# module spells it:
+/// `Intl.NumberFormatOptions`.
+let internal namespaceQualified (facts: TypeFacts) (name: string) =
+    (facts.NamespacePath |> List.map Naming.pascalSegment) @ [ name ] |> String.concat "."
+```
+
+In `libBinding`, replace the two `Some($"Fable.Core.TS.Dom.{name}", …)` /
+`Some($"Fable.Core.TS.Es.{name}", …)` constructions (`:2213`, `:2220`) with
+`$"Fable.Core.TS.Dom.{namespaceQualified facts name}"` and
+`$"Fable.Core.TS.Es.{namespaceQualified facts name}"`. `Naming.LibBindings.tryFind name` (bare
+lib names `Promise`, `PromiseLike`, `Error`) is unchanged.
+
+In `referencedRef`, `let name = $"{moduleName}.{typeName}"` (`:2305`) becomes
+`let name = $"{moduleName}.{namespaceQualified facts typeName}"`.
+
+- [ ] **Step 5: Run the units**
+
+Run: `dotnet fsi build.fsx -- test --quick --filter "shape passes"` → PASS. Golden movement is read
+in Task 4 Step 1: references to lib or referenced namespace members move, each now qualified
+(`rtk grep -rln "Fable.Core.TS.Es.Intl\.\|Fable.Core.TS.Es.WebAssembly\.\|Fable.Core.TS.Es.Temporal\." tests/Xantham.Generator.Tests/golden`).
+Report their counts in the Stage 2 commit body.
 
 ### Task 4: Real-fixture goldens, documentation, and the Stage 2 commit
 

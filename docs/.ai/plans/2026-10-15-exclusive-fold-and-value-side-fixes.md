@@ -1714,12 +1714,20 @@ At the end of `probes ()` in `Program.fs` (`:726`), add:
 
 ```fsharp
     let plain = Probes.NullableSlot.Create(value = None)
+    let noneValue: string option = None
+    let viaValue = Probes.NullableSlot.Create(value = noneValue)
 
     printfn
-        "probe: required None writes key=%b undefined=%b null=%b"
+        "probe: required None writes key=%b undefined=%b null=%b; through a value key=%b"
         (emitJsExpr plain "\"value\" in $0")
         (emitJsExpr plain "$0.value === undefined")
         (emitJsExpr plain "$0.value === null")
+        (emitJsExpr viaValue "\"value\" in $0")
+
+    equal
+        "the normalising Emit writes null for a None held in a value"
+        true
+        (emitJsExpr (Probes.NullableSlot.CreateNormalised(value = noneValue)) "\"value\" in $0 && $0.value === null")
 
     equal
         "the normalising Emit writes null for None"
@@ -1738,6 +1746,12 @@ variant Step 5 uses:
   are rewritten.
 - **V3** `null=true`: Fable already writes `null`, so the plain `$0` is correct for null.
   `UndefinedWhenAbsent` would then be wrong. Stop and report; this plan does not cover it.
+
+Spike evidence (`2026-10-15-pre158-findings.md`, Fable spikes S2, Fable 5.17.2 from a DLL): a
+literal `None` omits the key (`({})`), and a `None` held in a value writes it as `undefined`
+(`({ k: noneVar })`). The expected probe line is therefore `key=false … through a value key=true`,
+which selects **V2**. A probe in which either form omits the key selects V2; V1 holds only when
+both forms write it. The normalising IIFE wrote `null` for both forms in the spike.
 
 - [ ] **Step 2: Extend the lab**
 

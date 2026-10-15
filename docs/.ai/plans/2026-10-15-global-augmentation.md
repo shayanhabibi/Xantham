@@ -36,11 +36,13 @@ source; blast radius, back-compat and churn are measures to report, never reason
 - `HarvestModel.Namespaces` with dotted paths;
 - `harvest-namespace-members`, whose R3 seed is narrowed to package-first global namespaces;
 - `foreign-namespace-lab`;
-- `CatalogCompatibility.ApiVersion = 9`.
+- `CatalogCompatibility.ApiVersion = 9`;
+- plan 2 Task 3b's `TypeFacts.NamespacePath` and `Spec.namespaceQualified`, which write lib and referenced namespace members under their namespace.
 
 ## Global Constraints
 
 - Generated bindings target Fable 5.x only (`Fable.Core` 5.2.0 compile gate, Fable 5.17.2 run gate).
+- An added construct signature is an **instance** extension member on the constructor object (`[<EmitConstructor>] member _.Create` or `[<Emit("new $0($1...)")>]`), never a static one. From a DLL a static `[<EmitConstructor>]` binds `$0` to its first argument and emits `new "w3"()` (`2026-10-15-pre158-findings.md`, Fable spikes S3). An array owner extends `'T ``[]``` (or `` ``[]``<'T> ``); `ResizeArray<'T>` cannot be augmented (FS0964), and `System.Array` loses `'T`.
 - Tests run only via `dotnet fsi build.fsx -- test [--quick] [--update] [--filter <prefix>] [--run-gate]`; never `dotnet test` (it stalls on the suites' nested builds). The inner loop is `dotnet fsi build.fsx -- test --quick --update --filter "<suite>"`; the unfiltered `dotnet fsi build.fsx -- test` runs before every commit.
 - Goldens change only via `--update` (or `--goldens`), never by hand, and every golden diff is read before commit: aggregate measures plus bounded samples for the large fixtures (`.claude/rules/generator-fixtures.md`). A large-fixture move the lab evidence does not explain is handed back.
 - A new finding code is a new case in `Findings.fs` + a `FindingCodes.table` row (next unused number under its prefix) + a `Findings.test.fs` pin. This plan adds `SI009`, `SI010`, `SI011` (`SI001`–`SI008` taken, none retired) and retires none.
@@ -61,7 +63,7 @@ source; blast radius, back-compat and churn are measures to report, never reason
 | Stage | Tasks | Commits | Boundary |
 |---|---|---|---|
 | 1 | 1, 2, 3 | 2 | Task 1 measures and spikes and commits nothing. Tasks 2–3 pin the two adjacent global-binding defects. |
-| 2 | 4 | 2 | Namespace-qualified foreign names and `ApiVersion` 10. The Core.TS catalogue is regenerated in the same task, so no later commit fails the catalogue suites. |
+| 2 | 4 | 2 | `ApiVersion` 10, after confirming plan 2 Task 3b qualifies foreign namespace names. The Core.TS catalogue is regenerated in the same task, so no later commit fails the catalogue suites. |
 | 3 | 5 | 1 | Harvest of a module package's global scope and the augmentation inventory. Owners are still re-homed here, so nothing is lost relative to today. |
 | 4 | 6, 7, 8 | 1 (Task 8) | Owner identity and extensions. Removing the re-homing without the extensions would drop the package's members, so Tasks 6–7 hand Task 8 an uncommitted tree. |
 | 5 | 9 | 3 | Core.TS check (expected no diff), Node regeneration as its own breaking commit, measures. |
@@ -75,7 +77,7 @@ Planning evidence, under `tests/.scratch/pre158/plan-global-augmentation/`. It w
   - Whole copies are declared as the package's own: `ArrayConstructor`, `DateConstructor`,
     `Document` (+ `module Document`), `Intl` (+ `module Intl`), `Map<'K,'V>`, `Window`.
   - `env()` returns `AugmentationOwnerLab.ProcessEnv`. That is the flat templated name; after
-    plan 2 the owner's golden declares `NodeJS.ProcessEnv`, so this reference is FS0039 (Task 4).
+    plan 2 the owner's golden declares `NodeJS.ProcessEnv`, so this reference is FS0039 until plan 2 Task 3b qualifies it.
   - `PkgAdded` is declared flat at the root, not under `NodeJS`.
   - `g`, `h`, `c`, `PkgUnreached`, `Array.last`, `ProcessEnv.X` and `extraFmt` are absent, with no
     finding.
@@ -169,12 +171,10 @@ Controller rulings (C) are restated with their consequence. Planner rulings (P) 
 - **C6 — The three new codes take the next free numbers:** `SI009 SI.AugmentationAsExtension`
   (Ergonomic), `SI010 SI.AugmentationHeritageNotInherited` (Widened) and
   `SI011 SI.AugmentationTypeParameterWidened` (Widened).
-- **C7 — `ApiVersion` 9 → 10** (Task 4). Two changes alter the F# names a catalogue's API text
-  carries:
-  - lib and referenced namespace members are written under their namespace path (Task 4);
-  - owners are no longer copied (Task 8).
-
-  Both land before the next release, so one bump covers them.
+- **C7 — `ApiVersion` 9 → 10** (Task 4). The F# names a catalogue's API text carries change
+  because owners are no longer copied (Task 8), and the additions are written as extensions on them.
+  Plan 2's API 9 covers the namespace-qualified references (plan 2 Task 3b). The bump is taken in
+  Task 4, so no later commit fails the catalogue suites.
 - **C8 — Node is a breaking regeneration in its own commit with a `BREAKING CHANGE:` footer.** It
   loses 16 copied lib types (Task 9).
 - **C9 — The compiler-lib-ownership tests are re-read** (Task 8 Step 6). The lab ships the
@@ -245,17 +245,9 @@ Controller rulings (C) are restated with their consequence. Planner rulings (P) 
     `Augmentations`.
   - *Why:* one extension block per target avoids FS0438 duplicate members.
   - *Cost if wrong:* nothing a consumer writes depends on the module name, since it is `AutoOpen`.
-- **P11 — A lib or referenced namespace member is written under its namespace path** (Task 4).
-  This applies to `Fable.Core.TS.Es.Intl.NumberFormatOptions` and
-  `AugmentationOwnerLab.NodeJS.ProcessEnv`.
-  - Plan 2 nests namespace members in the run that declares them. `Spec.libBinding` and
-    `Spec.referencedRef` still write `<Module>.<Name>` (`Spec.fs:2213-2220`, `:2305`), and the
-    identity-only resolve branch records no parent (`Resolve.fs:1629-1640`). After plan 2's Core.TS
-    regeneration, every reference to an `Intl`/`WebAssembly`/`Temporal` member from another binding
-    is therefore FS0039. So is every extension head on one.
-  - *Why:* TypeScript spells `Intl.NumberFormatOptions`, and the declaring binding now does too.
-  - *Cost if wrong:* if plan 2 already landed an equivalent, Task 4 Step 1 detects it and the task
-    reduces to the `ApiVersion` bump. **Reported to the controller as a plan 2 gap.**
+- **P11 — Moved to plan 2 as its Task 3b and R12.** A lib or referenced namespace member is written
+  under its namespace path (`Fable.Core.TS.Es.Intl.NumberFormatOptions`). Plan 2 creates the break
+  with its nested Core.TS, so it owns the fix. Task 4 Step 1 confirms it landed.
 
 ## Review Focus
 
@@ -292,7 +284,7 @@ Controller rulings (C) are restated with their consequence. Planner rulings (P) 
 | `src/Xantham.Generator/Harvest.fs` | global scope in module runs; augmentation inventory; foreign namespace walk | 5 |
 | `tests/fixtures/global-augmentation-lab/**` (+ `node_modules/augmentation-owner-lab/**`) | new lab | 5 |
 | `tests/Xantham.Generator.Tests/Pipeline.test.fs` | new lab blocks; `foreign-namespace-lab`, `dom-shadow-lab`, `augmented-dom-lab`, `compiler-lib-ownership-lab`, `mixed-subpaths-lab` pins | 2, 5, 6, 8 |
-| `tests/Xantham.Generator.Tests/{Shape,CatalogLibraryEntry,CatalogMember}.test.fs`, `Build.fs` | record literals gain `Augmentations`/`AugmentationFacts`; Task 4 unit cases | 4, 5, 6 |
+| `tests/Xantham.Generator.Tests/{Shape,CatalogLibraryEntry,CatalogMember}.test.fs`, `Build.fs` | record literals gain `Augmentations`/`AugmentationFacts` | 5, 6 |
 | `src/Xantham.Generator/Findings.fs`, `tests/Xantham.Generator.Tests/Findings.test.fs` | `SI009`–`SI011` | 7 |
 | `src/Xantham.Generator/Shape/Anonymous.fs` | walk augmentation types | 7 |
 | `src/Xantham.Generator/Shape/Augmentations.fs` (new), `Xantham.Generator.fsproj`, `Shape/Passes.fs` | `shape-augmentations` | 7 |
@@ -725,131 +717,23 @@ rtk git commit -m "test(generator): pin that a writable static binds through its
 
 ---
 
-### Task 4: Lib and referenced namespace members are written under their namespace; API 10
+### Task 4: API 10 and the Core.TS catalogue
 
 **Files:**
-- Modify: `src/Xantham.Generator/Model.fs` (`TypeFacts`, `:1257-1333`; `TypeFacts.shallow`, `:1338-1370`)
-- Modify: `src/Xantham.Generator/Resolve.fs` (new `namespacePathOf` above `resolveMember`, `:1018`; the `TypeFlags.Object` branch, `:1464-1640`; the full record at `:1700-1817`)
-- Modify: `src/Xantham.Generator/Shape/Spec.fs` (`libBinding`, `:2192-2252`; `referencedRef`, `:2293-2318`)
 - Modify: `src/Xantham.Generator/CatalogCompatibility.fs:33`, `tests/Xantham.Generator.Tests/CatalogCompatibility.test.fs:38-52`
-- Test: `tests/Xantham.Generator.Tests/Shape.test.fs` (in `testList "shape passes"`, `:1511`)
 - Modify: `src/Xantham.Fable.Core.TS/{declarations.json,catalogue-inputs.json}` (regenerated)
 
 **Interfaces:**
-- Consumes: plan 2's nested Core.TS (`Fable.Core.TS.Es.Intl.NumberFormatOptions`).
-- Produces: `TypeFacts.NamespacePath: string list` (TypeScript namespaces enclosing the declaration, outermost first; `[]` at top level), and `CatalogCompatibility.current(...).ApiVersion = 10`.
+- Consumes: plan 2 Task 3b's `TypeFacts.NamespacePath` and `Spec.namespaceQualified`; plan 2's nested Core.TS (`Fable.Core.TS.Es.Intl.NumberFormatOptions`).
+- Produces: `CatalogCompatibility.current(...).ApiVersion = 10`.
 
-- [ ] **Step 1: Check whether plan 2 landed the equivalent**
+- [ ] **Step 1: Confirm plan 2 Task 3b landed**
 
-Run `rtk grep -n "NamespacePath\|namespacePathOf" src/Xantham.Generator` and read
-`Spec.referencedRef`. If a lib or referenced type's name already carries its namespace path,
-record so in this task's commit body. Then skip Steps 2–5 and 7 and keep Steps 6, 8 and 9 (the API
-bump).
+Run `rtk grep -n "NamespacePath\|namespaceQualified" src/Xantham.Generator`. Both must exist, and
+`Spec.referencedRef` must write `namespaceQualified facts typeName`. If either is missing, hand
+back: plan 2 is incomplete, and Tasks 5–8 qualify extension heads through it.
 
-- [ ] **Step 2: Write the failing unit tests**
-
-Append to `testList "shape passes"`:
-
-```fsharp
-        testCase "a lib namespace member is written under its namespace's Core.TS module" <| fun _ ->
-            let options =
-                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
-                    Origin = CompilerLib
-                    SymbolName = Some((fun value -> value * uom<symbolName>) "NumberFormatOptions")
-                    DeclFile = Some((fun value -> value * uom<declFile>) "/ts/lib/lib.es5.d.ts")
-                    NamespacePath = [ "Intl" ] }
-
-            let reference, _ = Spec.typeRef Build.context (Build.shapeModel (options :: Build.primitives)) None "Holder.options" 50<typeId>
-
-            Expect.equal reference (FsNamed "Fable.Core.TS.Es.Intl.NumberFormatOptions") "TypeScript spells Intl.NumberFormatOptions"
-
-        testCase "a referenced namespace member is written under its namespace in the group's module" <| fun _ ->
-            let env =
-                { Build.facts (Build.typeResponse 51 TypeFlags.Object) with
-                    Origin = Dependency("augmentation-owner-lab" * uom<npmDependency>)
-                    SymbolName = Some((fun value -> value * uom<symbolName>) "ProcessEnv")
-                    NamespacePath = [ "NodeJS" ] }
-
-            let ctx =
-                { Build.context with
-                    Config =
-                        { GeneratorConfig.Default with
-                            Groups = Map.ofList [ "augmentation-owner-lab" * uom<npmDependency>, Reference ] } }
-
-            let reference, _ = Spec.typeRef ctx (Build.shapeModel (env :: Build.primitives)) None "Exports.env" 51<typeId>
-
-            Expect.equal reference (FsNamed "AugmentationOwnerLab.NodeJS.ProcessEnv") "a ship run of the group nests it there"
-```
-
-- [ ] **Step 3: Run to verify they fail**
-
-Run: `dotnet fsi build.fsx -- test --quick --filter "shape passes"`.
-Expected: FAIL to compile: `NamespacePath` is not a field of `TypeFacts`.
-
-- [ ] **Step 4: The field and its resolution**
-
-`Model.fs`, in `TypeFacts` after `SymbolParent` (`:1276`):
-
-```fsharp
-        /// The TypeScript namespaces enclosing the declaration, outermost first: `["Intl"]` for
-        /// `Intl.NumberFormatOptions`. Empty at a module's top level and for an anonymous type.
-        NamespacePath: string list
-```
-
-In `TypeFacts.shallow`, after `SymbolParent = None`: `NamespacePath = []`.
-
-`Resolve.fs`, directly above `resolveMember` (`:1018`):
-
-```fsharp
-/// The TypeScript namespaces enclosing a symbol's declaration, outermost first. A source file's
-/// module symbol or an ambient module (`"node:fs"`) ends the path: neither is a namespace.
-let rec private namespacePathOf (ctx: Context) (symbol: SymbolResponse voption) : Async<string list> =
-    async {
-        match symbol with
-        | ValueSome current when ValueOption.isSome current.Parent ->
-            let! parent = ctx.Session.getParentOfSymbol current.Id
-
-            match parent with
-            | ValueSome owner when
-                hasAny SymbolFlags.Module owner.Flags && Naming.isWritableTypeName owner.Name
-                ->
-                let! outer = namespacePathOf ctx parent
-                return outer @ [ owner.Name ]
-            | _ -> return []
-        | _ -> return []
-    }
-```
-
-In the `has TypeFlags.Object` branch, directly after `let firstOrigin = …` (`:1466`), add
-`let! namespacePath = namespacePathOf ctx symbol`. Set `NamespacePath = namespacePath` in the
-identity-only return (`{ TypeFacts.shallow ty with Origin = origin … }`, `:1629`). Set it also in
-the full record of the derived branch (the literal ending `AliasIdentity = None; UnresolvedName =
-None`, `:1815-1816`). `rtk grep -n "AliasIdentity = None" src/Xantham.Generator` lists every full
-`TypeFacts` literal. Each one that is not `shallow` gets `NamespacePath = []`, or `namespacePath`
-where the branch has a symbol in scope. That includes `Customization/Semantics.fs:881` if it
-constructs one.
-
-- [ ] **Step 5: Qualify the lib and referenced names**
-
-`Spec.fs`, directly above `let rec typeRef` (`:1715`):
-
-```fsharp
-/// `name` under the declaration's TypeScript namespaces, each segment as an F# module spells it:
-/// `Intl.NumberFormatOptions`.
-let internal namespaceQualified (facts: TypeFacts) (name: string) =
-    (facts.NamespacePath |> List.map Naming.pascalSegment) @ [ name ] |> String.concat "."
-```
-
-In `libBinding`, replace the two `Some($"Fable.Core.TS.Dom.{name}", …)` /
-`Some($"Fable.Core.TS.Es.{name}", …)` constructions (`:2213`, `:2220`) with
-`$"Fable.Core.TS.Dom.{namespaceQualified facts name}"` and
-`$"Fable.Core.TS.Es.{namespaceQualified facts name}"`. `Naming.LibBindings.tryFind name` (bare
-lib names `Promise`, `PromiseLike`, `Error`) is unchanged.
-
-In `referencedRef`, `let name = $"{moduleName}.{typeName}"` (`:2305`) becomes
-`let name = $"{moduleName}.{namespaceQualified facts typeName}"`.
-
-- [ ] **Step 6: Pin API 10**
+- [ ] **Step 2: Pin API 10**
 
 `CatalogCompatibility.fs:33`: `ApiVersion = 10`.
 
@@ -857,7 +741,7 @@ In `CatalogCompatibility.test.fs`, the `"the current contract pins every version
 
 ```fsharp
                 (1, 6, 10, 3, 1)
-                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 10 writes lib and referenced namespace members under their namespace and augmentations as extensions; inference 3 preserves source contracts at the width cutoff"
+                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 10 keeps augmented owners in their own group and writes the additions as extensions; inference 3 preserves source contracts at the width cutoff"
 ```
 
 Add after it:
@@ -871,17 +755,7 @@ Add after it:
 
 Plan 2's API 9 rejection case stays.
 
-- [ ] **Step 7: Run the units, then the e2e suite**
-
-Run: `dotnet fsi build.fsx -- test --quick --filter "shape passes"` → PASS, and
-`dotnet fsi build.fsx -- test --quick --filter "catalog compatibility"` → PASS.
-Run: `dotnet fsi build.fsx -- test --quick --update --filter "generator e2e"`, then
-`rtk git diff --stat -- tests/Xantham.Generator.Tests/golden` and
-`rtk grep -rln "Fable.Core.TS.Es.Intl\.\|Fable.Core.TS.Es.WebAssembly\.\|Fable.Core.TS.Es.Temporal\." tests/Xantham.Generator.Tests/golden`.
-Expected: only references to lib or referenced namespace members move, each now qualified.
-Report the moved goldens and their counts. Any other moved line is handed back.
-
-- [ ] **Step 8: Regenerate the Core.TS catalogue**
+- [ ] **Step 3: Regenerate the Core.TS catalogue**
 
 Run: `dotnet fsi build.fsx -- generate --only compiler-lib`, then
 `rtk git diff --stat -- src/Xantham.Fable.Core.TS`.
@@ -889,19 +763,19 @@ Expected: `declarations.json` (`"apiVersion": 10`) and `catalogue-inputs.json` c
 `Fable.Core.TS.fs` does not. Core.TS ships the compiler lib and names its own references from
 `DeclNames`, not `libBinding`. A diff in `Fable.Core.TS.fs` is handed back.
 
-- [ ] **Step 9: Gate and commit**
+- [ ] **Step 4: Gate and commit**
 
 Run: `dotnet build Xantham.slnx`, then `dotnet fsi build.fsx -- test` → PASS.
 
 ```
-rtk git add src/Xantham.Generator/Model.fs src/Xantham.Generator/Resolve.fs src/Xantham.Generator/Shape/Spec.fs src/Xantham.Generator/CatalogCompatibility.fs tests/Xantham.Generator.Tests/CatalogCompatibility.test.fs tests/Xantham.Generator.Tests/Shape.test.fs tests/Xantham.Generator.Tests/golden
+rtk git add src/Xantham.Generator/CatalogCompatibility.fs tests/Xantham.Generator.Tests/CatalogCompatibility.test.fs
 rtk git status
-rtk git commit -m "fix(generator)!: write a lib or referenced namespace member under its namespace" -m "<moved goldens and counts from Step 7, or 'plan 2 landed the qualification; API bump only'>" -m "BREAKING CHANGE: a binding's references to a standard-library or referenced namespace member carry the namespace (Fable.Core.TS.Es.Intl.NumberFormatOptions). Declaration catalogues built before this change (API 9) are rejected." -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01LySb2Kjdc8qoY9Qoikr2u5"
+rtk git commit -m "fix(generator)!: reject declaration catalogues built before global augmentation" -m "Augmented owners keep their own group and identity (Task 8), so the names in an API 9 catalogue no longer match this producer." -m "BREAKING CHANGE: declaration catalogues built before this change (API 9) are rejected." -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01LySb2Kjdc8qoY9Qoikr2u5"
 rtk git add src/Xantham.Fable.Core.TS
 rtk git commit -m "chore(core-ts)!: regenerate the declaration catalogue at API 10" -m "BREAKING CHANGE: the packaged catalogue is API version 10; generators before this release reject it. The F# surface is unchanged." -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01LySb2Kjdc8qoY9Qoikr2u5"
 ```
 
-Fill the first `-m` body from Step 7. `rtk git status` must show `.serena/project.yml` unstaged.
+`rtk git status` must show `.serena/project.yml` unstaged.
 
 ---
 
@@ -1400,7 +1274,7 @@ copies carried now reach no declaration until Task 7.
 - Test: `tests/Xantham.Generator.Tests/Pipeline.test.fs` (`globalAugmentationTests`)
 
 **Interfaces:**
-- Consumes: `HarvestModel.Augmentations` (Task 5); `TypeFacts.NamespacePath` (Task 4); spike rows (a)–(j).
+- Consumes: `HarvestModel.Augmentations` (Task 5); `TypeFacts.NamespacePath` (plan 2 Task 3b); spike rows (a)–(j).
 - Produces:
   - `type ResolvedAugmentation = { Augmentation: HarvestedAugmentation; OwnerTypeId: int<typeId>; OwnerArity: int; Members: ResolvedMember list; Overloads: (ResolvedMember * ResolvedSignature list) list; CallSignatures: ResolvedSignature list; ConstructSignatures: ResolvedSignature list; IndexInfos: ResolvedIndex list; Bases: int<typeId> list }`
   - `ResolveModel.AugmentationFacts: ResolvedAugmentation list`
@@ -1535,7 +1409,7 @@ The build lists any other full literal as FS0764; give each `[]`.
 - [ ] **Step 4: Remove the re-homing**
 
 In `Resolve.fs`, the block from `let! symbol = ctx.Session.getSymbolOfType ty.Id` (`:1465`) through
-`|> Option.defaultValue firstOrigin` (`:1481`), Task 4's `namespacePath` line included, becomes:
+`|> Option.defaultValue firstOrigin` (`:1481`), plan 2 Task 3b's `namespacePath` line included, becomes:
 
 ```fsharp
             let! symbol = ctx.Session.getSymbolOfType ty.Id
@@ -1787,7 +1661,7 @@ it, and source order keeps generation deterministic.
 
 - [ ] **Step 8: References apply the owner's own arity**
 
-`Spec.fs`, beside `namespaceQualified` (Task 4):
+`Spec.fs`, beside `namespaceQualified` (plan 2 Task 3b):
 
 ```fsharp
 /// The arity a reference to `facts` applies: `arity`, capped at the owner's own where a package's
@@ -2867,7 +2741,7 @@ Push Stages 2–5 together.
   alone, so its `declare global` stays unread (Task 5 Step 6).
 - **Plan 2 gap (P11):** lib and referenced namespace members are written flat by `libBinding` and
   `referencedRef`. After plan 2's Core.TS regeneration they are FS0039 in any consumer binding.
-  Task 4 closes it if plan 2 has not.
+  Plan 2 Task 3b closes it, and Task 4 Step 1 confirms it.
 - A shipped group's merged owner carries the entry's additions in that group's module (P3). This
   is today's behaviour and is certified as unverified scope.
 
@@ -2884,7 +2758,7 @@ Push Stages 2–5 together.
   - computed keys through `MB009`: Task 7 Step 5 (`FsSymbolKeyed`);
   - duplicate extensions: P9, P10;
   - "a var redeclaring a foreign var belongs to its owner": P4;
-  - catalogue and `ApiVersion`: P9, C7, Task 4;
+  - catalogue and `ApiVersion`: P9, C7, Task 4 (namespace qualification: plan 2 Task 3b);
   - the churn list: Task 8 Step 4 and Task 9;
   - the compiler-lib-ownership re-read: C9, Task 8 Step 6;
   - flattened lib-base members not double-reported (findings §4 risk): P4 reads only members the

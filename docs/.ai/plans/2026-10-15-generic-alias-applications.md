@@ -35,7 +35,8 @@ Plan 4 of four. It runs after:
 2. `docs/.ai/plans/2026-10-15-namespace-member-harvest.md` (plan 2: namespace members harvested
    and nested under `Spec.namespacePath`; R11 `ShapeModel.MintedNames` provenance pruning in
    `Orphans.prune`; `CatalogCompatibility.ApiVersion` 8 → 9);
-3. `docs/.ai/plans/2026-10-15-global-augmentation.md` (plan 3).
+3. `docs/.ai/plans/2026-10-15-global-augmentation.md` (plan 3: `CatalogCompatibility.ApiVersion`
+   9 → 10).
 
 ## Global Constraints
 
@@ -183,10 +184,10 @@ Task 1 replaces this estimate with the measured corpus delta.
 - **R10 — The catalogue `apiVersion` moves only if a released producer must be rejected.** Copies
   in a catalogued producer's API (`Holder.config: Holder.Config`) differ from what this generator
   emits (`Config<string>`), so a consumer comparing surfaces would fail on that producer. Plan 2
-  bumps 8 → 9. If no package release has shipped between that bump and this plan's merge, the
-  only API 9 producers are the repository's own Core.TS and Node catalogues, which hold no
-  object-alias application (Measures). Those stay valid, and no bump is made. If a release has
-  shipped, bump to 10 and regenerate both catalogues (Task 6).
+  bumps 8 → 9 and plan 3 bumps 9 → 10. If no package release has shipped between plan 3's bump
+  and this plan's merge, the only API 10 producers are the repository's own Core.TS and Node
+  catalogues, which hold no object-alias application (Measures). Those stay valid, and no bump is
+  made. If a release has shipped, bump to 11 and regenerate both catalogues (Task 6).
 - **R11 — The intersection and tagged-union form readings stay as they are.** Their heuristics are
   pinned by `hoist-conditional-lab`, `chain-lab` and `generic-tag-lab`. R2's checker-backed rule is
   added for object forms only, beside them.
@@ -1527,12 +1528,12 @@ EOF
 - [ ] **Step 1: Decide the bump**
 
 ```bash
-rtk git log --oneline --grep "chore: prepare package release" <plan 2's ApiVersion 9 commit>..HEAD
+rtk git log --oneline --grep "chore: prepare package release" <plan 3's ApiVersion 10 commit>..HEAD
 ```
 
-If this lists a release, set `ApiVersion = 10` in `CatalogCompatibility.fs:33`, and in
-`CatalogCompatibility.test.fs` update the pin plan 2 set to 9 to 10. Otherwise leave it at 9 and
-say so in the Task 5 record ("API 9 is unreleased; no released producer carries an object-alias
+If this lists a release, set `ApiVersion = 11` in `CatalogCompatibility.fs:33`, and in
+`CatalogCompatibility.test.fs` update the pin plan 3 set to 10 to 11. Otherwise leave it at 10 and
+say so in the Task 5 record ("API 10 is unreleased; no released producer carries an object-alias
 copy").
 
 - [ ] **Step 2: Regenerate on scratch and compare**
@@ -1616,7 +1617,7 @@ EOF
    option 2 (provenance pruning) is plan 2's R11, consumed here. The `:94` predicate (option 3) is
    not used.
 2. **Placeholders.** Two values are read off at execution, and both name where they come from:
-   `<commit before Task 2>` and `<plan 2's ApiVersion 9 commit>`. The `TR027` symbol carries an
+   `<commit before Task 2>` and `<plan 3's ApiVersion 10 commit>`. The `TR027` symbol carries an
    instruction to check it against the regenerated `symbols.jsonl`.
 3. **Type consistency.** `aliasInstantiationOf` returns `(string * int<typeId> * int<typeId> list
    option) option` in Task 2's definition, its `needsName` and walk matches, and Task 3's
