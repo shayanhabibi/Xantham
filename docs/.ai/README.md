@@ -28,6 +28,12 @@ notes for the agents and people who come after them. It is not rendered to the s
 - `plans/2026-10-13-w9-early-resolve-findings.md` — W9's experiment record: resolving a
   conditional at its check type's bound (`resolveConditionalConstraints`, `TR068`), measured on
   `@types/node`, `type-fest` and `solid-js`, with a recommendation.
+- `plans/2026-10-15-pre158-findings.md` — investigations A–I of defects older than #158, plus Fable
+  consumption spikes (tags shared by arms, `None` in `Create`, extensions on foreign types); the
+  spec the four 2026-10-15 plans below cite.
+- `plans/2026-10-15-exclusive-fold-and-value-side-fixes.md`, `plans/2026-10-15-namespace-member-harvest.md`,
+  `plans/2026-10-15-global-augmentation.md`, `plans/2026-10-15-generic-alias-applications.md` —
+  unexecuted plans 1–4 for those findings, in landing order.
 - `fable5-workarounds.md`, `fable-binding-gaps.md`, `fable-utility-types.md` — what Fable 5 and
   `Fable.Core` cost a generated binding. `fable5-workarounds-user-response.md` holds the user's
   answers to `fable5-workarounds.md`, section by section.
