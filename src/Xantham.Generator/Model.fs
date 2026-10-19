@@ -1693,6 +1693,29 @@ type FsTaggedField =
         Literal: FsLiteral option
     }
 
+/// The JavaScript `typeof` class of a value.
+type FsTypeofClass =
+    | TypeofString
+    | TypeofNumber
+    | TypeofBoolean
+    | TypeofBigInt
+    | TypeofSymbol
+    | TypeofFunction
+    | TypeofObject
+
+/// A test on the tested object separating one arm from the others sharing its tag value, in the
+/// order TypeScript narrows by.
+type FsCaseTest =
+    /// The property holds the literal. With `orAbsent`, the property may also be missing or
+    /// `undefined`.
+    | LiteralEquals of name: string * value: FsLiteral * orAbsent: bool
+    /// The object carries the property.
+    | HasProperty of name: string
+    /// The object carries none of the properties.
+    | LacksProperties of names: string list
+    /// The property's value is of the `typeof` class.
+    | TypeofIs of name: string * typeofClass: FsTypeofClass
+
 /// One case of a `[<TypeScriptTaggedUnion>]` DU: the case name, the tag literal when it does
 /// not spell the case name, and the arm's own properties as case fields.
 ///
@@ -1706,6 +1729,9 @@ type FsTaggedCase =
     {
         Name: string
         CompiledName: string option
+        /// The test separating the case from other cases sharing its tag value, checked after
+        /// the tag matches. Rendered as the case's `[<CaseTest>]`.
+        CaseTest: FsCaseTest option
         Fields: FsTaggedField list
         /// The name of the case's `Create` static member, which builds the case with its optional
         /// fields omittable and its literal fields written.

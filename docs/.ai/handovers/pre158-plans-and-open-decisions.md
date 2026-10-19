@@ -64,6 +64,11 @@ back-compat and scope are measures to report, never reasons for a ruling.
 
 ### D1 — Tagged unions whose arms share a tag value
 
+**Ruled 2026-10-20: option (a).** The Fable fork adds `CaseTest` (`tools/fable-fork/fork.json`,
+`Fable.Core` 5.999.0-xantham.ea2e7f8d7.2 on the Xantham feed), and PR #160 implements it per
+`docs/.ai/plans/2026-10-20-shared-tag-case-tests.md`. DT004 retires, DT007 and I6/I7 are
+superseded. The record below is the decision as it stood.
+
 **Cases.** Seven lab cases:
 - shared-tag-lab: `Terminal`, `OnEvent.Event`;
 - tagged-arm-lab: `Task`, `Run`, `Job`, `Report`, `Outcome`.

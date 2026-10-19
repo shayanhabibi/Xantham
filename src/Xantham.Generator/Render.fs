@@ -250,6 +250,34 @@ let internal jsLiteral =
     | LitString text -> jsString text
     | other -> printLiteral other
 
+/// The JavaScript of a tagged case's test, in `Emit` syntax over the tested object `$0`.
+let internal caseTestSource (test: FsCaseTest) =
+    let access (name: string) =
+        if System.Text.RegularExpressions.Regex.IsMatch(name, "^[A-Za-z_][A-Za-z0-9_]*$") then
+            $"$0.{name}"
+        else
+            $"$0[{jsString name}]"
+
+    let typeofName =
+        function
+        | TypeofString -> "string"
+        | TypeofNumber -> "number"
+        | TypeofBoolean -> "boolean"
+        | TypeofBigInt -> "bigint"
+        | TypeofSymbol -> "symbol"
+        | TypeofFunction -> "function"
+        | TypeofObject -> "object"
+
+    match test with
+    | LiteralEquals(name, value, false) -> $"{access name} === {jsLiteral value}"
+    | LiteralEquals(name, value, true) -> $"({access name} === {jsLiteral value} || {access name} === undefined)"
+    | HasProperty name -> $"{jsString name} in $0"
+    | LacksProperties names ->
+        names
+        |> List.map (fun name -> $"!({jsString name} in $0)")
+        |> String.concat " && "
+    | TypeofIs(name, typeofClass) -> $"typeof {access name} === '{typeofName typeofClass}'"
+
 /// A literal as the right-hand side of an F# `[<Literal>]` binding: numbers are `float`.
 let internal fsLiteralValue =
     function
@@ -1121,9 +1149,19 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
 
             let carries = if case.Fields.IsEmpty then "" else $" of {fields}"
 
-            match case.CompiledName with
-            | Some tag -> yield $"    | [<CompiledName({stringLit tag})>] {ident case.Name}{carries}"
-            | None -> yield $"    | {ident case.Name}{carries}"
+            let attributes =
+                [
+                    match case.CompiledName with
+                    | Some tag -> yield $"CompiledName({stringLit tag})"
+                    | None -> ()
+                    match case.CaseTest with
+                    | Some test -> yield $"CaseTest({stringLit (caseTestSource test)})"
+                    | None -> ()
+                ]
+
+            match attributes with
+            | [] -> yield $"    | {ident case.Name}{carries}"
+            | attributes -> yield $"""    | [<{String.concat "; " attributes}>] {ident case.Name}{carries}"""
 
         for case in decl.Cases do
             match caseCreate decl case with

@@ -281,12 +281,16 @@ missing table row.
   `Recovery.Aborted.Type.User` resolves `Recovery.Aborted` to the case: FS0039, and FS1127 in a
   pattern. Type annotations still resolve, so a compile gate over declarations alone misses it.
   Case declarations nest under `Recovery.Cases.Aborted` instead.
-- **A folded case is the intersection of its arms.** Arms sharing a tag value (`DT004`) fold
-  into a case carrying only the members they agree on, so a `Create<Case>` is valid only where
-  one arm's required members are all carried by the case (`Spec.caseConstructsArm`); otherwise it
-  builds an object matching no arm. An arm with a member the case omits keeps its interface as
-  the typed path to that member (`DT007`), and `drop-orphan-delegates` prunes only the arms the
-  case carries whole (`Spec.caseCarriesArm`).
+- **Two `TypeScriptTaggedUnion` cases sharing a `CompiledName` need a `CaseTest`.** Without one,
+  Fable compiles them with no warning and the later case owns the tag's `switch` slot: the first
+  is unreachable, and a value of its arm matches the second (spike S1(e),
+  `docs/.ai/plans/2026-10-15-pre158-findings.md`). `Spec.separateArms` gives every case of a
+  shared tag value its test, or `detect-tagged-unions` declines the DU (`DT003`). Each test must
+  be exclusive within its group, because a `match` checks cases in the order its clauses list
+  them. The attribute exists only in the Fable fork's `Fable.Core` (`tools/fable-fork/fork.json`).
+- **An arm interface drops only where its case carries the arm whole** (`Spec.caseCarriesArmWhole`):
+  a symbol-keyed member or an index signature is no case field, so such an arm keeps its
+  interface as the typed path to it.
 
 ## Fable runtime type tests
 

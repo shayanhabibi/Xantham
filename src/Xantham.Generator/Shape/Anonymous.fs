@@ -91,13 +91,15 @@ let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: 
             arm.Response.ObjectFlags
             |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Reference)
 
-        let corresponds (declaredArm: TypeFacts, value: string) (instanceArm: TypeFacts) =
+        let corresponds (case: TaggedArm) (instanceArm: TypeFacts) =
+            let declaredArm = case.Facts
+
             declaredArm.Response.TypeId = instanceArm.Response.TypeId
             || (isReference declaredArm
                 && isReference instanceArm
                 && declaredArm.Response.TargetTypeId.IsSome
                 && declaredArm.Response.TargetTypeId = instanceArm.Response.TargetTypeId)
-            || (taggedArmValue model tag instanceArm = Some value
+            || (taggedArmValue model tag instanceArm = Some case.Value
                 && fields instanceArm = fields declaredArm)
 
         instanceArms.Length = cases.Length

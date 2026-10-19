@@ -56,14 +56,14 @@ export type Clash =
     | { kind: "x"; note?: string }
     | { kind: "createX" };
 
-// Folded arms agreeing on an inline object member keep it: equal shapes, distinct type ids.
-// `ok` differs by literal and `note` differs inside its object, so both fold away.
+// Arms sharing `state: "done"` are cases of their own, told apart by the literal `ok`: the
+// cases' `CaseTest` reads `$0.ok === true` and `$0.ok === false`, and `Create` writes `ok`.
 export type Task =
     | { state: "done"; owner: { name: string; tags: { id: number }[] }; ok: true; note: { text: string } }
     | { state: "done"; owner: { name: string; tags: { id: number }[] }; ok: false; note: { text: number } }
     | { state: "queued" };
 
-// Members only one folded arm carries fold away.
+// Arms sharing a tag value, told apart by the member each carries alone.
 export type Run =
     | { state: "done"; result: { value: number } }
     | { state: "done"; failure: { message: string } }
@@ -79,7 +79,8 @@ export type Shelf =
     | { kind: "cases"; size: "s" | "m" }
     | { kind: "box"; size: "l" | "xl" };
 
-// Arms folding into one case nest under that case.
+// Arms sharing a tag value where only the second carries a member of its own: the first is
+// told apart by lacking it.
 export type Job =
     | { state: "done"; level: "info" | "warn" }
     | { state: "done"; level: "info" | "warn"; code: number }
@@ -107,16 +108,45 @@ export interface Idx { other: number }
 export type T2 = { [key: string]: T2.Idx | number; a: number; b?: never } | { b: string; a?: never };
 export namespace T2 { export interface Idx { note: string } }
 
-// A folded case whose fields alone build neither arm: `value` and `error` fold away, so the
-// arm interfaces stay declared and the case has no Create.
+// Arms sharing a tag value and an optional member, told apart by `value` and `error`.
 export type Report =
     | { state: "done"; note?: string; value: number }
     | { state: "done"; note?: string; error: string }
     | { state: "queued" };
 
-// A folded case carrying one arm whole: that arm builds the case's Create and is dropped, while
-// the arm with `error` stays declared.
+// Arms sharing a tag value where the second extends the first by `error`.
 export type Outcome =
     | { state: "done"; value: number; note?: string }
     | { state: "done"; value: number; note?: string; error: string }
+    | { state: "queued" };
+
+// Arms sharing a tag value with nothing to tell them apart: `x` is an object on both, so the
+// union stays an erased union. The two arms differ only inside `x`'s own union.
+export type Mirror =
+    | { state: "done"; x: { n: number } | { n: number } }
+    | { state: "done"; x: { n: number } | { s: string } }
+    | { state: "queued" };
+
+// The exclusive-arm fold compares a shared member's unions both ways: `x` reads differently on
+// the two arms, in either order, so neither union folds.
+export type W =
+    | { x: { n: number } | { n: number }; a: number; b?: never }
+    | { x: { n: number } | { s: string }; b: string; a?: never };
+export type Y =
+    | { x: { n: number } | { s: string }; a: number; b?: never }
+    | { x: { n: number } | { n: number }; b: string; a?: never };
+
+// An arm carrying a symbol-keyed member or an index signature is more than its case's fields,
+// so its interface stays declared.
+export type F =
+    | { kind: "a"; [Symbol.toStringTag]: (x: number, y: string) => void; n: number }
+    | { kind: "b" };
+export type G =
+    | { kind: "a"; n: number; [key: string]: unknown }
+    | { kind: "b" };
+
+// Arms sharing a tag value and every member name, told apart by the `typeof` of `payload`.
+export type Mixed =
+    | { state: "done"; payload: string }
+    | { state: "done"; payload: number }
     | { state: "queued" };

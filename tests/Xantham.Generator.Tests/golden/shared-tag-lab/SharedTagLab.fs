@@ -31,98 +31,33 @@ type Signal =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
 type Terminal =
-    | [<CompiledName("done")>] Done
+    | [<CompiledName("done"); CaseTest("'value' in $0")>] Done of value: float
+    | [<CompiledName("done"); CaseTest("'error' in $0")>] Done2 of error: string
     | [<CompiledName("pending")>] Pending
 
-[<Interface>]
-type Terminal2 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    abstract state: string
-    abstract value: float
-    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (value: float) : Terminal2 = jsNative
-
-module Terminal2 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    [<Literal>]
-    let state = "done"
-
-[<Interface>]
-type Terminal3 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    abstract state: string
-    abstract error: string
-    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (error: string) : Terminal3 = jsNative
-
-module Terminal3 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    [<Literal>]
-    let state = "done"
-
-type Onset = U2<Onset2, Onset3>
-
-[<Interface>]
-type Onset2 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    abstract ``type``: string
-    abstract level: string
-    abstract message: obj
-    abstract truncated: bool option
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+type Onset =
+    | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: string * message: obj * truncated: bool option
+    /// <param name="level"></param>
+    /// <param name="message"></param>
+    /// <param name="truncated">TypeScript type: <c>true</c></param>
+    | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: string * message: string * truncated: bool
     [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-    static member Create (level: string, message: obj, ?truncated: bool) : Onset2 = jsNative
+    static member CreateLog (level: string, message: obj, ?truncated: bool) : Onset = jsNative
+    [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+    static member CreateLog2 (level: string, message: string) : Onset = jsNative
 
-module Onset2 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    [<Literal>]
-    let ``type`` = "log"
-
-[<Interface>]
-type Onset3 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    abstract ``type``: string
-    abstract level: string
-    abstract message: string
-    abstract truncated: bool
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+type Log =
+    | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: string * message: obj * truncated: bool option
+    /// <param name="level"></param>
+    /// <param name="message"></param>
+    /// <param name="truncated">TypeScript type: <c>true</c></param>
+    | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: string * message: string * truncated: bool
     [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-    static member Create (level: string, message: string, truncated: bool) : Onset3 = jsNative
-
-module Onset3 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    [<Literal>]
-    let ``type`` = "log"
-
-type Log = U2<Log2, Log3>
-
-[<Interface>]
-type Log2 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    abstract ``type``: string
-    abstract level: string
-    abstract message: obj
-    abstract truncated: bool option
-    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-    static member Create (level: string, message: obj, ?truncated: bool) : Log2 = jsNative
-
-module Log2 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    [<Literal>]
-    let ``type`` = "log"
-
-[<Interface>]
-type Log3 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    abstract ``type``: string
-    abstract level: string
-    abstract message: string
-    abstract truncated: bool
-    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-    static member Create (level: string, message: string, truncated: bool) : Log3 = jsNative
-
-module Log3 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    [<Literal>]
-    let ``type`` = "log"
+    static member CreateLog (level: string, message: obj, ?truncated: bool) : Log = jsNative
+    [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+    static member CreateLog2 (level: string, message: string) : Log = jsNative
 
 type Loose = U2<Loose2, Loose3>
 
@@ -330,7 +265,15 @@ module OnEvent =
         | [<CompiledName("scheduled")>] Scheduled
         | [<CompiledName("socket")>] Socket
         | [<CompiledName("trace")>] Trace
-        | [<CompiledName("log")>] Log of level: string
+        | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: string * message: obj * truncated: bool option
+        /// <param name="level"></param>
+        /// <param name="message"></param>
+        /// <param name="truncated">TypeScript type: <c>true</c></param>
+        | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: string * message: string * truncated: bool
+        [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+        static member CreateLog (level: string, message: obj, ?truncated: bool) : Event = jsNative
+        [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+        static member CreateLog2 (level: string, message: string) : Event = jsNative
 
 module Scheduler =
     module Current =

@@ -25699,11 +25699,11 @@ module ExportedHandlerTailStreamHandler =
             abstract spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option) option with get, set
             abstract diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option) option with get, set
             abstract ``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option) option with get, set
-            abstract log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option) option with get, set
+            abstract log: (TailStream.TailEvent<Cloudflare.WorkersTypes.ExportedHandlerTailStreamHandler.Result.Item.Log.Event.Item> -> JS.Promise<unit> option) option with get, set
             abstract ``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option) option with get, set
             abstract attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option) option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
+            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<Cloudflare.WorkersTypes.ExportedHandlerTailStreamHandler.Result.Item.Log.Event.Item> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
 
         module Item =
             module Event =
@@ -25718,7 +25718,12 @@ module ExportedHandlerTailStreamHandler =
                     | [<CompiledName("spanClose")>] SpanClose of outcome: Outcome.Outcome
                     | [<CompiledName("spanOpen")>] SpanOpen of name: string * spanId: string * info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
                     | [<CompiledName("streamDiagnostic")>] StreamDiagnostic of diagnostic: DroppedEventsDiagnostic
-                    | [<CompiledName("log")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option
+                    | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: obj * truncated: bool option
+                    /// <param name="level"></param>
+                    /// <param name="errorInfo"></param>
+                    /// <param name="message"></param>
+                    /// <param name="truncated">TypeScript type: <c>true</c></param>
+                    | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: string * truncated: bool
                     [<ParamObject; Emit("({ type: 'exception', ...$0 })")>]
                     static member CreateException (name: string, message: string, ?stack: string) : Item = jsNative
                     [<ParamObject; Emit("({ type: 'onset', ...$0 })")>]
@@ -25727,38 +25732,10 @@ module ExportedHandlerTailStreamHandler =
                     static member CreateReturn (?info: FetchResponseInfo) : Item = jsNative
                     [<ParamObject; Emit("({ type: 'spanOpen', ...$0 })")>]
                     static member CreateSpanOpen (name: string, spanId: string, ?info: U3<Attributes, FetchEventInfo, JsRpcEventInfo>) : Item = jsNative
-
-                [<Interface>]
-                type Item2 =
-                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-                    abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level
-                    abstract errorInfo: TailStreamErrorInfo option[] option
-                    abstract message: obj
-                    abstract truncated: bool option
                     [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-                    static member Create (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item2 = jsNative
-
-                module Item2 =
-                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "log"
-
-                [<Interface>]
-                type Item3 =
-                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-                    abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level
-                    abstract errorInfo: TailStreamErrorInfo option[] option
-                    abstract message: string
-                    abstract truncated: bool
-                    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-                    static member Create (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : Item3 = jsNative
-
-                module Item3 =
-                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "log"
+                    static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+                    static member CreateLog2 (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: string, ?errorInfo: TailStreamErrorInfo option[]) : Item = jsNative
 
                 module Item =
                     module Cases =
@@ -25770,6 +25747,21 @@ module ExportedHandlerTailStreamHandler =
                                 | [<CompiledName("info")>] Info
                                 | [<CompiledName("log")>] Log
                                 | [<CompiledName("warn")>] Warn
+
+            module Log =
+                module Event =
+                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                    type Item =
+                        | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: obj * truncated: bool option
+                        /// <param name="level"></param>
+                        /// <param name="errorInfo"></param>
+                        /// <param name="message"></param>
+                        /// <param name="truncated">TypeScript type: <c>true</c></param>
+                        | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: string * truncated: bool
+                        [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+                        static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item = jsNative
+                        [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+                        static member CreateLog2 (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: string, ?errorInfo: TailStreamErrorInfo option[]) : Item = jsNative
 
 module FormData =
     module ForEach =

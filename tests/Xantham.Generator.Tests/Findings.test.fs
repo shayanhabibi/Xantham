@@ -157,7 +157,7 @@ let findingsTests =
                     "DT.ArmsMergedOnSharedTag DT004 ergonomic"
                     "DT.CaseCreateSynthesized DT005 exact"
                     "DT.CaseCreateNameTaken DT006 ergonomic"
-                    "DT.FoldedCaseOmitsArmMembers DT007 widened"
+                    "DT.ArmsSeparatedByCaseTest DT008 exact"
                     "SY.InstantiationNamedOnce SY001 exact"
                     "SY.HoistArgumentsNotRecovered SY002 widened"
                     "SY.IntersectionOperandNotHoisted SY003 widened"

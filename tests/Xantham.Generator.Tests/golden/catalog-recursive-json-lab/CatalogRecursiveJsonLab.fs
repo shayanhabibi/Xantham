@@ -15,6 +15,8 @@ open Fable.Core.TS.Dom
 type Exports =
     [<Import("accept", "catalog-recursive-json-lab")>]
     static member accept (output: Accept.Output) : Accept.Output = jsNative
+    [<Import("unwrap", "catalog-recursive-json-lab")>]
+    static member unwrap (payload: Identity.Support.RecursiveJsonOwnerLab.Payload) : Accept.Output = jsNative
 
 module Accept =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]

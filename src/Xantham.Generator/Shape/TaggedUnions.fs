@@ -8,8 +8,8 @@ open Xantham.Generator.Shape.Spec
 /// Declarations for the unions the checker proves are discriminated (D4, §4.5(2)): an F# DU of
 /// one payload per case, erased by Fable back to the object - `Circle(radius = 2.0)` becomes
 /// `{ kind: "circle", radius: 2 }`. An arm that is not plain data is left to `shape-aliases`.
-/// Arms sharing a tag value fold into one case carrying the members they agree on; a fold
-/// leaving a single case leaves the union to `shape-aliases` too. The DU binds the alias's type
+/// Each arm is a case of its own; arms sharing a tag value are told apart by each case's
+/// `[<CaseTest>]`, and arms no test separates leave the union to `shape-aliases`. The DU binds the alias's type
 /// parameters and those it reads from the scope it was written in (§4.9): a payload of type `T`
 /// reads `'T`. An application of a generic alias reads its declaration.
 let detectTaggedUnions: Pass<ShapeModel> =
@@ -53,8 +53,8 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                             @ [ Finding.make name (DetectTaggedUnions.TagValueShared(tag, value)) ]
 
                                         None
-                                    | Discriminated(tag, tagged, folded) ->
-                                        if not (tagged |> List.forall (fst >> isTaggedCaseData tag)) then
+                                    | Discriminated(tag, tagged, shared) ->
+                                        if not (tagged |> List.forall (fun arm -> isTaggedCaseData tag arm.Facts)) then
                                             findings <-
                                                 findings
                                                 @ [ Finding.make name (DetectTaggedUnions.ArmNotPlainData tag) ]
@@ -70,13 +70,12 @@ let detectTaggedUnions: Pass<ShapeModel> =
 
                                             let caseNames = taggedCaseNamesOf tagged
 
-                                            let arms =
-                                                facts.UnionMembers
-                                                |> List.choose (fun id -> Map.tryFind id model.Types)
-
                                             let cases =
                                                 List.map2
-                                                    (fun (arm, value) caseName ->
+                                                    (fun (tagged: TaggedArm) caseName ->
+                                                        let arm = tagged.Facts
+                                                        let value = tagged.Value
+
                                                         let fields =
                                                             taggedCaseFields tag arm
                                                             |> List.map (fun m ->
@@ -90,10 +89,24 @@ let detectTaggedUnions: Pass<ShapeModel> =
 
                                                                 findings <- findings @ refFindings
 
+                                                                // A boolean literal field is written too: it can be
+                                                                // what separates arms sharing a tag value.
+                                                                let booleanLiteral () =
+                                                                    match Map.tryFind m.TypeId model.Types with
+                                                                    | Some facts when
+                                                                        not m.Optional
+                                                                        && flag TypeFlags.BooleanLiteral facts
+                                                                        ->
+                                                                        literalOf facts
+                                                                    | _ -> None
+
                                                                 let literal =
                                                                     literalMemberValue model m m.TypeId
+                                                                    |> Option.orElseWith booleanLiteral
                                                                     |> Option.filter (fun _ ->
-                                                                        reference = FsFloat || reference = FsString)
+                                                                        reference = FsFloat
+                                                                        || reference = FsString
+                                                                        || reference = FsBool)
 
                                                                 {
                                                                     Name = Naming.memberName m.Symbol.Name
@@ -103,19 +116,6 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                     Literal = literal
                                                                 })
 
-                                                        let groupArms =
-                                                            if List.contains value folded then
-                                                                arms
-                                                                |> List.filter (fun a ->
-                                                                    taggedArmValue model tag a = Some value)
-                                                            else
-                                                                []
-
-                                                        let constructible =
-                                                            groupArms.IsEmpty
-                                                            || groupArms
-                                                               |> List.exists (caseConstructsArm model tag arm)
-
                                                         let optionalOrLiteral =
                                                             fields
                                                             |> List.exists (fun field ->
@@ -124,37 +124,11 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                     | FsOption _ -> true
                                                                     | _ -> false))
 
-                                                        let wantsCreate = constructible && optionalOrLiteral
-
                                                         let createName = $"Create{caseName}"
                                                         let symbol = $"{name}.{caseName}"
 
-                                                        let omitted =
-                                                            groupArms
-                                                            |> List.filter (fun a ->
-                                                                not (caseCarriesArm model tag arm a))
-                                                            |> List.collect (fun a ->
-                                                                taggedCaseFields tag a
-                                                                |> List.filter (fun m ->
-                                                                    not (memberDeclaredBy model m arm))
-                                                                |> List.map _.Symbol.Name)
-                                                            |> List.distinct
-
-                                                        if not omitted.IsEmpty then
-                                                            findings <-
-                                                                findings
-                                                                @ [
-                                                                    Finding.make
-                                                                        symbol
-                                                                        (DetectTaggedUnions.FoldedCaseOmitsArmMembers(
-                                                                            caseName,
-                                                                            omitted,
-                                                                            not constructible && optionalOrLiteral
-                                                                        ))
-                                                                ]
-
                                                         let create =
-                                                            if not wantsCreate then
+                                                            if not optionalOrLiteral then
                                                                 None
                                                             elif List.contains createName caseNames then
                                                                 findings <-
@@ -184,6 +158,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                             Name = caseName
                                                             CompiledName =
                                                                 (if value = caseName then None else Some value)
+                                                            CaseTest = tagged.Test
                                                             Fields = fields
                                                             Create = create
                                                         })
@@ -193,10 +168,10 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                             findings <-
                                                 findings
                                                 @ [
-                                                    for value in folded ->
+                                                    for value in shared ->
                                                         Finding.make
                                                             name
-                                                            (DetectTaggedUnions.ArmsMergedOnSharedTag(tag, value))
+                                                            (DetectTaggedUnions.ArmsSeparatedByCaseTest(tag, value))
                                                 ]
                                                 @ [ Finding.make name (DetectTaggedUnions.TaggedUnion tag) ]
 

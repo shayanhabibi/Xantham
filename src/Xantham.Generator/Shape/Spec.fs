@@ -452,13 +452,22 @@ let internal arrayMembersDropped (model: ShapeModel) (facts: TypeFacts) =
     |> List.distinct
     |> List.length
 
+/// One arm of a discriminated union, as one case: its facts, its tag value, and the test
+/// separating it from the other arms carrying the same value.
+type internal TaggedArm =
+    {
+        Facts: TypeFacts
+        Value: string
+        Test: FsCaseTest option
+    }
+
 /// What a union offers a `match` (D4, §4.5(2)).
 type internal TaggedShape =
-    /// The discriminant's TypeScript spelling, one case per distinct tag value with its facts
-    /// and value in first-occurrence order, and the tag values shared by folded arms.
-    | Discriminated of tag: string * cases: (TypeFacts * string) list * folded: string list
-    /// A discriminant every arm carries a string literal for, whose values fold to a single
-    /// case.
+    /// The discriminant's TypeScript spelling, one case per arm in union order, and the tag
+    /// values more than one arm carries.
+    | Discriminated of tag: string * cases: TaggedArm list * shared: string list
+    /// A discriminant every arm carries a string literal for, with a value whose arms no member
+    /// test separates.
     | TagCollides of tag: string * value: string
     /// Every candidate property is absent or non-literal on some arm.
     | Untagged
@@ -474,8 +483,9 @@ let private plainAnonymousObject (facts: TypeFacts) =
     && facts.ConstructSignatures.IsEmpty
 
 /// Whether two types read as one F# type: one id; two plain anonymous objects whose members pair
-/// by name, optionality and readonly with types that read as one; two unions whose members pair
-/// the same way; or two applications of one generic target whose arguments do.
+/// by name, optionality and readonly with types that read as one; two unions each of whose
+/// members reads as one of the other's; or two applications of one generic target whose
+/// arguments do.
 let internal sameShape (model: ShapeModel) (left: int<Measure.typeId>) (right: int<Measure.typeId>) =
     let rec go (assumed: Set<int<Measure.typeId> * int<Measure.typeId>>) left right =
         left = right
@@ -495,9 +505,10 @@ let internal sameShape (model: ShapeModel) (left: int<Measure.typeId>) (right: i
                                && o.ReadOnly = m.ReadOnly
                                && go assumed m.TypeId o.TypeId))
                 elif flag TypeFlags.Union l && flag TypeFlags.Union r then
-                    l.UnionMembers.Length = r.UnionMembers.Length
-                    && l.UnionMembers
-                       |> List.forall (fun m -> r.UnionMembers |> List.exists (go assumed m))
+                    l.UnionMembers
+                    |> List.forall (fun m -> r.UnionMembers |> List.exists (go assumed m))
+                    && r.UnionMembers
+                       |> List.forall (fun m -> l.UnionMembers |> List.exists (go assumed m))
                 else
                     match l.Response.TargetTypeId, r.Response.TargetTypeId with
                     | ValueSome lt, ValueSome rt when lt = rt && lt <> left && rt <> right ->
@@ -516,22 +527,140 @@ let internal memberDeclaredBy (model: ShapeModel) (m: ResolvedMember) (arm: Type
         && sameShape model other.TypeId m.TypeId
         && other.Optional = m.Optional)
 
-/// One case's facts, folded from the arms sharing its tag value: the members every arm declares
-/// under the same name, type and optionality, and every signature the arms carry.
-let private foldedArm (model: ShapeModel) (arms: TypeFacts list) =
-    match arms with
-    | [ single ] -> single
-    | _ ->
-        let head = List.head arms
-        let rest = List.tail arms
+/// Whether the member is an optional property typed `never`, which an object never carries. The
+/// checker reports `never | undefined` as `undefined`.
+let private isAbsentOnly (model: ShapeModel) (m: ResolvedMember) =
+    m.Optional
+    && (match Map.tryFind m.TypeId model.Types with
+        | Some facts -> flag TypeFlags.Never facts || flag TypeFlags.Undefined facts
+        | None -> false)
 
-        { head with
-            Members =
-                head.Members
-                |> List.filter (fun m -> rest |> List.forall (memberDeclaredBy model m))
-            CallSignatures = arms |> List.collect _.CallSignatures
-            ConstructSignatures = arms |> List.collect _.ConstructSignatures
-        }
+/// The literal a member's type is, once `undefined` is set aside from an optional member.
+let private memberLiteral (model: ShapeModel) (m: ResolvedMember) =
+    match Map.tryFind m.TypeId model.Types with
+    | Some facts when m.Optional && flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+        match
+            facts.UnionMembers
+            |> List.choose (fun id -> Map.tryFind id model.Types)
+            |> List.filter (fun arm -> not (flag TypeFlags.Undefined arm))
+        with
+        | [ single ] -> literalOf single
+        | _ -> None
+    | Some facts -> literalOf facts
+    | None -> None
+
+/// The JavaScript `typeof` class every value of the type has.
+let rec private typeofClass (model: ShapeModel) (facts: TypeFacts) =
+    if flag TypeFlags.String facts || flag TypeFlags.StringLiteral facts then
+        Some TypeofString
+    elif flag TypeFlags.Number facts || flag TypeFlags.NumberLiteral facts then
+        Some TypeofNumber
+    elif flag TypeFlags.Boolean facts || flag TypeFlags.BooleanLiteral facts then
+        Some TypeofBoolean
+    elif flag TypeFlags.BigInt facts || flag TypeFlags.BigIntLiteral facts then
+        Some TypeofBigInt
+    elif flag TypeFlags.ESSymbol facts || flag TypeFlags.UniqueESSymbol facts then
+        Some TypeofSymbol
+    elif flag TypeFlags.Union facts then
+        match
+            facts.UnionMembers
+            |> List.map (fun id -> Map.tryFind id model.Types |> Option.bind (typeofClass model))
+            |> List.distinct
+        with
+        | [ Some single ] -> Some single
+        | _ -> None
+    elif flag TypeFlags.Object facts || flag TypeFlags.NonPrimitive facts then
+        if facts.CallSignatures.IsEmpty && facts.ConstructSignatures.IsEmpty then
+            Some TypeofObject
+        else
+            Some TypeofFunction
+    else
+        None
+
+/// The tests separating arms that carry one tag value, one per arm in order, in the order
+/// TypeScript narrows by: a second literal discriminant, then a property only some arms carry,
+/// then a `typeof` class. One test form serves the whole group.
+let internal separateArms (model: ShapeModel) (tag: string) (arms: TypeFacts list) : FsCaseTest list option =
+    let fieldNames (arm: TypeFacts) =
+        arm.Members
+        |> List.map _.Symbol.Name
+        |> List.filter (fun name -> name <> tag && not (isSymbolKeyed name))
+
+    let memberOf (name: string) (arm: TypeFacts) =
+        arm.Members |> List.tryFind (fun m -> m.Symbol.Name = name)
+
+    let distinct values = List.distinct values = values
+
+    let byLiteral () =
+        fieldNames (List.head arms)
+        |> List.tryPick (fun name ->
+            let members = arms |> List.map (memberOf name)
+
+            if members |> List.exists Option.isNone then
+                None
+            else
+                let members = members |> List.map Option.get
+                let literals = members |> List.map (memberLiteral model)
+
+                if
+                    literals |> List.forall Option.isSome
+                    && distinct literals
+                    && (members |> List.filter _.Optional |> List.length) <= 1
+                then
+                    Some(
+                        List.map2
+                            (fun (m: ResolvedMember) literal -> LiteralEquals(name, Option.get literal, m.Optional))
+                            members
+                            literals
+                    )
+                else
+                    None)
+
+    let byPresence () =
+        let declares (arm: TypeFacts) (name: string) =
+            memberOf name arm |> Option.exists (fun m -> not (isAbsentOnly model m))
+
+        let own (arm: TypeFacts) =
+            arm.Members
+            |> List.tryFind (fun m ->
+                not m.Optional
+                && m.Symbol.Name <> tag
+                && not (isSymbolKeyed m.Symbol.Name)
+                && arms
+                   |> List.forall (fun other ->
+                       other.Response.TypeId = arm.Response.TypeId
+                       || not (declares other m.Symbol.Name)))
+            |> Option.map _.Symbol.Name
+
+        let owned = arms |> List.map own
+
+        if (owned |> List.filter Option.isNone |> List.length) > 1 then
+            None
+        else
+            Some(
+                owned
+                |> List.map (function
+                    | Some name -> HasProperty name
+                    | None -> LacksProperties(owned |> List.choose id))
+            )
+
+    let byTypeof () =
+        fieldNames (List.head arms)
+        |> List.tryPick (fun name ->
+            let classes =
+                arms
+                |> List.map (fun arm ->
+                    memberOf name arm
+                    |> Option.filter (fun m -> not m.Optional)
+                    |> Option.bind (fun m -> Map.tryFind m.TypeId model.Types)
+                    |> Option.bind (typeofClass model))
+
+            if classes |> List.forall Option.isSome && distinct classes then
+                Some(classes |> List.map (fun c -> TypeofIs(name, Option.get c)))
+            else
+                None)
+
+    byLiteral () |> Option.orElseWith byPresence |> Option.orElseWith byTypeof
 
 /// An arm's own string-literal value for the discriminant `tag`, when it has exactly one.
 let internal taggedArmValue (model: ShapeModel) (tag: string) (arm: TypeFacts) =
@@ -545,8 +674,8 @@ let internal taggedArmValue (model: ShapeModel) (tag: string) (arm: TypeFacts) =
 
 /// The discriminant of a tagged union (D4, §4.5(2)): the property every non-nullish object
 /// member carries with a string-literal type. A candidate whose values are all distinct wins,
-/// in the first member's order; where every candidate collides, the first one folds the arms
-/// sharing a value into one case and the fold keeps the members those arms agree on.
+/// in the first member's order. Where every candidate collides, the first candidate whose
+/// shared values `separateArms` separates wins, and each arm stays a case of its own.
 let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : TaggedShape =
     let members =
         facts.UnionMembers
@@ -584,24 +713,63 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : TaggedSha
             let values = tagged |> List.map snd
             List.distinct values = values
 
+        let untested (tagged: (TypeFacts * string) list) =
+            tagged
+            |> List.map (fun (arm, value) ->
+                {
+                    Facts = arm
+                    Value = value
+                    Test = None
+                })
+
+        // Each shared value's arms, with their tests in arm order; `Error` carries the first
+        // value no test separates.
+        let separated (tag: string, tagged: (TypeFacts * string) list) =
+            let shared =
+                tagged |> List.countBy snd |> List.filter (snd >> (<) 1) |> List.map fst
+
+            let tests =
+                shared
+                |> List.map (fun value ->
+                    let group = tagged |> List.filter (snd >> (=) value) |> List.map fst
+                    value, separateArms model tag (group))
+
+            match tests |> List.tryFind (snd >> Option.isNone) with
+            | Some(value, _) -> Error value
+            | None ->
+                let byArm =
+                    tests
+                    |> List.collect (fun (value, armTests) ->
+                        let group = tagged |> List.filter (snd >> (=) value) |> List.map fst
+                        List.zip (group |> List.map _.Response.TypeId) (Option.get armTests))
+                    |> Map.ofList
+
+                Ok(
+                    Discriminated(
+                        tag,
+                        tagged
+                        |> List.map (fun (arm, value) ->
+                            {
+                                Facts = arm
+                                Value = value
+                                Test = Map.tryFind arm.Response.TypeId byArm
+                            }),
+                        shared
+                    )
+                )
+
         match candidates |> List.tryFind discriminates with
-        | Some(tag, tagged) -> Discriminated(tag, tagged, [])
+        | Some(tag, tagged) -> Discriminated(tag, untested tagged, [])
         | None ->
-            match candidates with
+            match candidates |> List.map (fun candidate -> fst candidate, separated candidate) with
             | [] -> Untagged
-            | (tag, tagged) :: _ ->
-                let groups =
-                    tagged
-                    |> List.groupBy snd
-                    |> List.map (fun (value, group) -> foldedArm model (group |> List.map fst), value)
-
-                let folded =
-                    tagged |> List.countBy snd |> List.filter (snd >> (<) 1) |> List.map fst
-
-                if groups.Length < 2 then
-                    TagCollides(tag, List.head folded)
-                else
-                    Discriminated(tag, groups, folded)
+            | outcomes ->
+                match outcomes |> List.tryPick (snd >> Result.toOption) with
+                | Some shape -> shape
+                | None ->
+                    match List.head outcomes with
+                    | tag, Error value -> TagCollides(tag, value)
+                    | _, Ok shape -> shape
 
 /// One arm's own contribution to an exclusive-arm union: the arm's facts, and the members it
 /// carries a real type for where every other arm marks the same name `never`.
@@ -822,16 +990,12 @@ let internal taggedCaseFields (tag: string) (arm: TypeFacts) =
     arm.Members
     |> List.filter (fun m -> m.Symbol.Name <> tag && not (isSymbolKeyed m.Symbol.Name))
 
-/// Whether a folded case declares every field of `arm`.
-let internal caseCarriesArm (model: ShapeModel) (tag: string) (case: TypeFacts) (arm: TypeFacts) =
-    taggedCaseFields tag arm |> List.forall (fun m -> memberDeclaredBy model m case)
-
-/// Whether a folded case's fields alone build an object of `arm`: the case declares every
-/// required field of the arm.
-let internal caseConstructsArm (model: ShapeModel) (tag: string) (case: TypeFacts) (arm: TypeFacts) =
-    taggedCaseFields tag arm
-    |> List.filter (fun m -> not m.Optional)
-    |> List.forall (fun m -> memberDeclaredBy model m case)
+/// Whether the arm's case carries the arm whole: every member is the tag or a case field, and
+/// the arm has no index signature.
+let internal caseCarriesArmWhole (tag: string) (arm: TypeFacts) =
+    arm.IndexInfos.IsEmpty
+    && arm.Members
+       |> List.forall (fun m -> m.Symbol.Name = tag || not (isSymbolKeyed m.Symbol.Name))
 
 /// Whether an arm carries data a DU case can bind: properties within the budget, and neither a
 /// method nor a signature.
@@ -844,15 +1008,15 @@ let internal isTaggedCaseData (tag: string) (arm: TypeFacts) =
     && fields.Length <= TaggedCaseFieldBudget
 
 /// Whether a union meets the conditions `detect-tagged-unions` declares a DU under (D4,
-/// §4.5(2)): every member non-nullish, a discriminant separating the arms into at least two cases
-/// (arms sharing a value fold into one), and every case plain data. A reference to such a union
-/// applies the parameters its declaration binds.
+/// §4.5(2)): every member non-nullish, a discriminant whose shared values `separateArms`
+/// separates, and every case plain data. A reference to such a union applies the parameters its
+/// declaration binds.
 let internal isTaggedDeclaration (model: ShapeModel) (facts: TypeFacts) =
     flag TypeFlags.Union facts
     && not (flag TypeFlags.Boolean facts)
     && List.isEmpty (fst (splitNullish model facts))
     && (match taggedUnionShape model facts with
-        | Discriminated(tag, tagged, _) -> tagged |> List.forall (fst >> isTaggedCaseData tag)
+        | Discriminated(tag, tagged, _) -> tagged |> List.forall (fun arm -> isTaggedCaseData tag arm.Facts)
         | TagCollides _
         | Untagged -> false)
 
@@ -3968,27 +4132,18 @@ let uniqueCaseNames (names: string list) =
         unique)
 
 /// The DU case names of a discriminated union's cases, in case order.
-let internal taggedCaseNamesOf (tagged: (TypeFacts * string) list) =
-    tagged |> List.map (snd >> Naming.enumCaseOfString) |> uniqueCaseNames
+let internal taggedCaseNamesOf (tagged: TaggedArm list) =
+    tagged |> List.map (_.Value >> Naming.enumCaseOfString) |> uniqueCaseNames
 
 /// The case each arm of a union reads under once `detect-tagged-unions` declares it, keyed by
-/// the arm's type id. Arms folding into one case share its name. Empty for a union
-/// `detect-tagged-unions` does not declare.
+/// the arm's type id. Empty for a union `detect-tagged-unions` does not declare.
 let internal taggedCaseNames (model: ShapeModel) (facts: TypeFacts) : Map<int<Measure.typeId>, string> =
     if not (isTaggedDeclaration model facts) then
         Map.empty
     else
         match taggedUnionShape model facts with
-        | Discriminated(tag, tagged, _) ->
-            let byValue =
-                List.zip (tagged |> List.map snd) (taggedCaseNamesOf tagged) |> Map.ofList
-
-            facts.UnionMembers
-            |> List.choose (fun armId ->
-                Map.tryFind armId model.Types
-                |> Option.bind (taggedArmValue model tag)
-                |> Option.bind byValue.TryFind
-                |> Option.map (fun caseName -> armId, caseName))
+        | Discriminated(_, tagged, _) ->
+            List.zip (tagged |> List.map _.Facts.Response.TypeId) (taggedCaseNamesOf tagged)
             |> Map.ofList
         | TagCollides _
         | Untagged -> Map.empty

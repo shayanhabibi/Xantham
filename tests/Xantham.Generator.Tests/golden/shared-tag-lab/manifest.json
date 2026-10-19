@@ -3,9 +3,9 @@
   "package": "shared-tag-lab",
   "module": "SharedTagLab",
   "counts": {
-    "exact": 7,
-    "ergonomic": 31,
-    "widened": 6,
+    "exact": 8,
+    "ergonomic": 29,
+    "widened": 7,
     "escape": 0
   },
   "passes": [
@@ -16,10 +16,10 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 23,
-      "exact": 13,
-      "ergonomic": 6,
-      "widened": 4
+      "total": 35,
+      "exact": 25,
+      "ergonomic": 5,
+      "widened": 5
     },
     {
       "pass": "SI - shape-interfaces",
@@ -36,8 +36,8 @@
     },
     {
       "pass": "DD - drop-orphan-delegates",
-      "total": 10,
-      "exact": 10
+      "total": 16,
+      "exact": 16
     }
   ]
 }

@@ -193,7 +193,7 @@ module FindingCodes =
             "DT.ArmsMergedOnSharedTag", "DT004"
             "DT.CaseCreateSynthesized", "DT005"
             "DT.CaseCreateNameTaken", "DT006"
-            "DT.FoldedCaseOmitsArmMembers", "DT007"
+            "DT.ArmsSeparatedByCaseTest", "DT008"
             "SY.InstantiationNamedOnce", "SY001"
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
@@ -859,20 +859,19 @@ type ClassifyLiteralUnions =
 type DetectTaggedUnions =
     | [<Ergonomic>] ArmNotPlainData of tag: string
     | [<Exact>] TaggedUnion of tag: string
-    /// Two arms of a uniformly tagged union carry the same tag value, so a `match` on the tag
-    /// could not tell them apart. The union is retained as an erased union.
+    /// Arms of a uniformly tagged union carry the same tag value and no member test separates
+    /// them, so a `match` could not tell them apart. The union is retained as an erased union.
     | [<Ergonomic>] TagValueShared of tag: string * value: string
-    /// Arms sharing a tag value folded into one case, which carries the members they agree on.
+    /// Retired: retained so `DT004` stays reserved to this case.
     | [<Ergonomic>] ArmsMergedOnSharedTag of tag: string * value: string
     /// The case has a `Create` static member building it with its optional fields omittable and
     /// its literal fields written.
     | [<Exact>] CaseCreateSynthesized of create: string
     /// The case's `Create` name is a case of the same union, so the case has no `Create`.
     | [<Ergonomic>] CaseCreateNameTaken of create: string
-    /// The folded case omits `members`, which the arms sharing its tag value disagree on; the
-    /// arm interfaces declaring them stay declared. With `createDeclined`, the case has no
-    /// `Create`: its fields alone build none of its arms.
-    | [<Widened>] FoldedCaseOmitsArmMembers of case: string * members: string list * createDeclined: bool
+    /// Arms sharing a tag value are each a case of their own, matched by the tag and then by
+    /// the case's `[<CaseTest>]`.
+    | [<Exact>] ArmsSeparatedByCaseTest of tag: string * value: string
 
     interface IFindingKind with
         member this.Message =
@@ -880,22 +879,14 @@ type DetectTaggedUnions =
             | ArmNotPlainData tag -> $"discriminated by '{tag}', but an arm is not plain data; left as an erased union"
             | TaggedUnion tag -> $"discriminated union on '{tag}' (D4)"
             | TagValueShared(tag, value) ->
-                $"discriminated by '{tag}', but two arms carry '{value}'; left as an erased union"
+                $"discriminated by '{tag}', but no member test separates the arms carrying '{value}'; left as an erased union"
             | ArmsMergedOnSharedTag(tag, value) ->
                 $"arms sharing '{tag}' = '{value}' merged into one case, carrying the members they agree on"
             | CaseCreateSynthesized create ->
                 $"case Create '{create}': optional fields omittable, literal fields written"
             | CaseCreateNameTaken create -> $"no case Create: '{create}' is already a case of the union"
-            | FoldedCaseOmitsArmMembers(case, members, createDeclined) ->
-                let omitted = String.concat ", " members
-
-                let declined =
-                    if createDeclined then
-                        $"; no Create{case}: the case's fields alone build none of its arms"
-                    else
-                        ""
-
-                $"case '{case}' omits {omitted}: the arms sharing its tag value disagree on them, and their arm interfaces stay declared{declined}"
+            | ArmsSeparatedByCaseTest(tag, value) ->
+                $"arms sharing '{tag}' = '{value}' are separate cases, each matched by a CaseTest"
 
 /// `name-exports`.
 [<Prefix("NE", "name-exports")>]
@@ -1246,10 +1237,11 @@ type DropOrphanDelegates =
     /// declaration is dropped.
     | [<Exact>] DelegateReachedNoReference
     /// A dropped interface named for an anonymous arm: the tagged DU carries the arm whole, with
-    /// its fields, documentation and construction, and no declaration reads the interface.
+    /// its fields, documentation and construction; its only readers were dropped.
     | [<Exact>] TaggedArmReachedNoReference
-    /// The declaration was named under an arm the union no longer declares, for a member the
-    /// union's own declaration does not carry; nothing else reads it.
+    /// A dropped generator-minted declaration under an arm root (a tagged union's `Cases`
+    /// module, a dropped arm's path, or an exclusive-fold union's path), read only by
+    /// declarations already dropped.
     | [<Exact>] ArmDeclarationReachedNoReference
 
     interface IFindingKind with
@@ -1259,7 +1251,7 @@ type DropOrphanDelegates =
                 "delegate dropped: every position reading this callback writes its parameters directly"
             | TaggedArmReachedNoReference ->
                 "arm interface dropped: the tagged union carries its fields and nothing else reads it"
-            | ArmDeclarationReachedNoReference -> "declaration dropped: only an arm the union replaced read it"
+            | ArmDeclarationReachedNoReference -> "declaration dropped: only declarations already dropped read it"
 
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]

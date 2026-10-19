@@ -108,8 +108,8 @@ let private represented (names: Set<string>) (exported: string) =
     || names
        |> Set.exists (fun declared -> declared.StartsWith(exported + ".") || declared.EndsWith("." + exported))
 
-/// The interface names of the anonymous arms a declared DU carries whole: every arm of an
-/// unfolded case, and an arm of a folded case whose every field the case carries.
+/// The interface names of the anonymous arms a declared DU carries whole: every arm whose
+/// members are the tag and its case's fields, with no index signature.
 let private taggedArmNames (model: ShapeModel) : Set<string> =
     let unions =
         model.Decls
@@ -125,15 +125,7 @@ let private taggedArmNames (model: ShapeModel) : Set<string> =
     |> List.collect (fun facts ->
         let carriedWhole =
             match taggedUnionShape model facts with
-            | Discriminated(tag, cases, folded) ->
-                fun (arm: TypeFacts) ->
-                    match taggedArmValue model tag arm with
-                    | Some value when List.contains value folded ->
-                        cases
-                        |> List.exists (fun (case, caseValue) ->
-                            caseValue = value && caseCarriesArm model tag case arm)
-                    | Some _ -> true
-                    | None -> false
+            | Discriminated(tag, _, _) -> caseCarriesArmWhole tag
             | TagCollides _
             | Untagged -> fun _ -> false
 
@@ -271,13 +263,23 @@ let dropOrphanDelegates: Pass<ShapeModel> =
                     let decls, dropped =
                         prune arms (mintedNames model) (armRoots model arms) (exportNames ctx model) [] model.Decls
 
+                    // A delegate read only by declarations dropped alongside it is an arm
+                    // declaration, graded as one: its readers were arm declarations.
+                    let readByArmDeclarations (name: string) =
+                        model.Decls
+                        |> List.exists (fun decl ->
+                            List.contains name (readNames decl)
+                            && (match decl with
+                                | FsDelegateType _ -> false
+                                | _ -> true))
+
                     let model = { model with Decls = decls }
 
                     let findings =
                         dropped
                         |> List.sort
                         |> List.map (fun name ->
-                            if Set.contains name delegates then
+                            if Set.contains name delegates && not (readByArmDeclarations name) then
                                 Finding.make name DropOrphanDelegates.DelegateReachedNoReference
                             elif Set.contains name arms then
                                 Finding.make name DropOrphanDelegates.TaggedArmReachedNoReference

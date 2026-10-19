@@ -2946,3 +2946,31 @@ no arm), 2 in `shared-tag-lab` and 5 in `tagged-arm-lab`. Ergonomic
 tiers fall by the dropped nested arms. `catalog-recursive-json-lab`'s shipped group held only its
 two arm interfaces and is no longer written (`GE001` → `GE002`). Node drops 13 anonymous
 `TestEvent` arms (`DD002` 13) and gains 3 `Create<Case>` members; Core.TS's binding is unchanged.
+
+## Shared tag values as case tests (2026-10-20, D1, #158)
+
+Supersedes the fold above. Every arm of a tagged union is a case of its own, and arms sharing a
+tag value carry a `[<CaseTest>]` from the Fable fork's `Fable.Core`
+(`tools/fable-fork/fork.json`): Fable matches the tag, then the test. `Spec.separateArms` picks one
+test form per shared value, in TypeScript's narrowing order: a second literal discriminant
+(`$0.ok === true`; an optional arm also matches an absent property), a required member no other
+arm of the value declares (`'value' in $0`, with at most one arm matching by lacking the others'),
+or a member's `typeof` class. Arms no form separates leave the union an erased union (`DT003`,
+reworded); a union whose arms all share one value is a DU once they separate (`Onset`, workers
+`TailStream` `Log`). Each separated value is reported once (`DT008`). `DT004` retires (row kept);
+`DT007` is removed before release. Case names keep `uniqueCaseNames` (`Done`, `Done2`).
+
+A required boolean-literal case field is now a literal field, written by `Create<Case>` like a
+string or number one, since it can be what separates two arms (`Task.CreateDone2` writes
+`ok: false`). Interface `Create` keeps its string and number literals only. An arm interface
+drops only where its case carries it whole (`Spec.caseCarriesArmWhole`): a symbol-keyed member or
+an index signature keeps it declared (I4). A delegate read only by dropped declarations other than
+delegates grades `DD003`, not `DD001`. `Spec.sameShape` compares unions by mutual inclusion, so
+the exclusive-arm fold no longer depends on arm order (I1).
+
+Measured over the goldens against the #158 head: `DT004` 8 → 0 and `DT007` 8 → 0 (1 each in
+`@cloudflare/workers-types`); `DT008` 0 → 12 (`shared-tag-lab` 4, `tagged-arm-lab` 6,
+`@cloudflare/workers-types` 2); `DT003` 2 → 1 (`Onset` and `Log` separate; the new `Mirror`
+negative refuses); `DT002` 56 → 62; `DT005` 33 → 48; `DD002` 55 → 76 as every separated arm drops.
+`catalog-recursive-json-lab` ships its group again (`GE001`, one declaration, `Payload`).
+Core.TS's binding and Node are unchanged.

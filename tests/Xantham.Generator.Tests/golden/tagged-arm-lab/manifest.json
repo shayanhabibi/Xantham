@@ -3,40 +3,50 @@
   "package": "tagged-arm-lab",
   "module": "TaggedArmLab",
   "counts": {
-    "exact": 7,
-    "ergonomic": 54,
-    "widened": 8,
+    "exact": 15,
+    "ergonomic": 83,
+    "widened": 4,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 19,
-      "exact": 19
+      "total": 33,
+      "exact": 33
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 43,
-      "exact": 20,
-      "ergonomic": 14,
-      "widened": 9
+      "total": 50,
+      "exact": 34,
+      "ergonomic": 12,
+      "widened": 4
+    },
+    {
+      "pass": "shape-callbacks",
+      "total": 1,
+      "ergonomic": 1
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 60,
-      "ergonomic": 58,
-      "widened": 2
+      "total": 76,
+      "ergonomic": 73,
+      "widened": 3
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 83,
-      "exact": 32,
-      "ergonomic": 51
+      "total": 117,
+      "exact": 40,
+      "ergonomic": 77
+    },
+    {
+      "pass": "settle-symbol-members",
+      "total": 1,
+      "ergonomic": 1
     },
     {
       "pass": "DD - drop-orphan-delegates",
-      "total": 22,
-      "exact": 22
+      "total": 35,
+      "exact": 35
     }
   ]
 }
