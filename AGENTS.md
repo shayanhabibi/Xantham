@@ -25,11 +25,22 @@ paid for.
 
 ## Compile-gate dependency pin
 
-A compile gate is only evidence if it compiles against what a consumer will: `Fable.Core` 5.2.0
+A compile gate is only evidence if it compiles against what a consumer will: `Fable.Core`
 (`src/Xantham.Fable.Core`, `tests/Xantham.Generator.CompileGate`), `Xantham.Fable.Core.TS`
 (generated from the root compiler pin, referenced by every consumer compile gate), and the
 `typescript` 7.x pin in `package.json`, which supplies both the producer's `lib.*.d.ts` and the
 live `tsc --api` server.
+
+`Fable.Core` and the `fable` tool are built from a Fable fork, pinned by commit in
+`tools/fable-fork/fork.json`; the fork adds `CaseTest` for `TypeScriptTaggedUnion` cases that share
+a tag. Both restore from the Xantham Cloudsmith feed, which `NuGet.config` lists as a source.
+Every pin names `fork.json`'s `version`, and `tools/fable-fork.fsx -- check`, run by the `restore`
+stage of `build.fsx`, fails when one does not. To move the pin, change `ref` and `version` together,
+run `dotnet fsi tools/fable-fork.fsx -- sync` to pack both into the gitignored
+`tools/fable-fork/packages` (it clones the pin into `tools/fable-fork/upstream`; `--source
+<checkout>` packs a local Fable checkout at the pinned commit instead), and push those packages to
+the feed before committing the new pin. `publish` refuses while `version` is a fork build, because
+a consumer restoring from nuget.org alone cannot resolve it.
 
 ## Project structure
 
