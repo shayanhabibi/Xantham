@@ -26,7 +26,7 @@ function write(name, text) {
 }
 const xml = value => value.replaceAll("&", "&amp;").replaceAll("'", "&apos;");
 function project(directory, name, files, references = []) {
-  write(`${directory}/${name}.fsproj`, `<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup>${files.map(f => `<Compile Include='${xml(f)}' />`).join("")}<PackageReference Include='Fable.Core' Version='5.2.0' />${references.map(r => `<ProjectReference Include='${xml(r)}' />`).join("")}</ItemGroup></Project>`);
+  write(`${directory}/${name}.fsproj`, `<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup>${files.map(f => `<Compile Include='${xml(f)}' />`).join("")}<PackageReference Include='Fable.Core' Version='5.999.0-xantham.ea2e7f8d7.2' />${references.map(r => `<ProjectReference Include='${xml(r)}' />`).join("")}</ItemGroup></Project>`);
 }
 fs.copyFileSync(path.join(root, "global.json"), path.join(scratch, "global.json"));
 write(".config/dotnet-tools.json", fs.readFileSync(path.join(root, ".config/dotnet-tools.json"), "utf8"));
