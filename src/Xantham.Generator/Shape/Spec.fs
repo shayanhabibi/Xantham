@@ -1014,7 +1014,8 @@ let internal isClassInstance (model: ShapeModel) (facts: TypeFacts) =
     let own (facts: TypeFacts) =
         facts.AmbientClass.IsSome
         || hasAny SymbolFlags.Class facts.SymbolFlags
-        || (hasAny SymbolFlags.Interface facts.SymbolFlags && hasAny variable facts.SymbolFlags)
+        || (hasAny SymbolFlags.Interface facts.SymbolFlags
+            && hasAny variable facts.SymbolFlags)
         || facts.Response.ObjectFlags
            |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Class)
 

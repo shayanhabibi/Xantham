@@ -1754,13 +1754,19 @@ let internal applyWithProducer
                     // one alias over a use site's constrained parameter is that alias with the
                     // use site's bound added, which an abbreviation of the canonical can carry.
                     let constrainedCount (entry: Declaration) =
-                        entry.Constraints |> Array.filter (fun bound -> bound <> Canonical.option id None) |> Array.length
+                        entry.Constraints
+                        |> Array.filter (fun bound -> bound <> Canonical.option id None)
+                        |> Array.length
 
                     let entries =
                         entries
                         |> List.sortBy (fun entry ->
                             let name = localName entry
-                            constrainedCount entry, not (Set.contains name exportedNames), name.Split('.').Length, name)
+
+                            constrainedCount entry,
+                            not (Set.contains name exportedNames),
+                            name.Split('.').Length,
+                            name)
 
                     let canonical = List.head entries
 

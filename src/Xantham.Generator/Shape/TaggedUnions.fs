@@ -57,7 +57,9 @@ let detectTaggedUnions: Pass<ShapeModel> =
 
                                         None
                                     | Discriminated(tag, tagged, shared) ->
-                                        if not (tagged |> List.forall (fun arm -> isTaggedCase model tag arm.Facts)) then
+                                        if
+                                            not (tagged |> List.forall (fun arm -> isTaggedCase model tag arm.Facts))
+                                        then
                                             findings <-
                                                 findings
                                                 @ [ Finding.make name (DetectTaggedUnions.ArmNotPlainData tag) ]
@@ -91,11 +93,14 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                     typeRef ctx scoped None symbol arm.Response.TypeId
                                                                 with
                                                                 | (FsNamed armName | FsApp(armName, _)) as reference,
-                                                                  refFindings ->
-                                                                    Some(armName, reference, refFindings)
+                                                                  refFindings -> Some(armName, reference, refFindings)
                                                                 | _ when isTaggedCaseData tag arm -> None
                                                                 | reference, refFindings ->
-                                                                    Some(typeSpelling reference, reference, refFindings)
+                                                                    Some(
+                                                                        typeSpelling reference,
+                                                                        reference,
+                                                                        refFindings
+                                                                    )
 
                                                         if Option.isSome inlined then
                                                             let armName, reference, refFindings = Option.get inlined
@@ -106,7 +111,8 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                 @ [
                                                                     Finding.make
                                                                         symbol
-                                                                        (DetectTaggedUnions.CaseInlinesInterface armName)
+                                                                        (DetectTaggedUnions.CaseInlinesInterface
+                                                                            armName)
                                                                 ]
 
                                                             {
@@ -129,92 +135,94 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                             }
                                                         else
 
-                                                        let fields =
-                                                            taggedCaseFields tag arm
-                                                            |> List.map (fun m ->
-                                                                let reference, refFindings =
-                                                                    typeRef
-                                                                        ctx
-                                                                        scoped
-                                                                        None
-                                                                        $"{name}.{caseName}.{m.Symbol.Name}"
-                                                                        m.TypeId
+                                                            let fields =
+                                                                taggedCaseFields tag arm
+                                                                |> List.map (fun m ->
+                                                                    let reference, refFindings =
+                                                                        typeRef
+                                                                            ctx
+                                                                            scoped
+                                                                            None
+                                                                            $"{name}.{caseName}.{m.Symbol.Name}"
+                                                                            m.TypeId
 
-                                                                findings <- findings @ refFindings
+                                                                    findings <- findings @ refFindings
 
-                                                                // A boolean literal field is written too: it can be
-                                                                // what separates arms sharing a tag value.
-                                                                let booleanLiteral () =
-                                                                    match Map.tryFind m.TypeId model.Types with
-                                                                    | Some facts when
-                                                                        not m.Optional
-                                                                        && flag TypeFlags.BooleanLiteral facts
-                                                                        ->
-                                                                        literalOf facts
-                                                                    | _ -> None
+                                                                    // A boolean literal field is written too: it can be
+                                                                    // what separates arms sharing a tag value.
+                                                                    let booleanLiteral () =
+                                                                        match Map.tryFind m.TypeId model.Types with
+                                                                        | Some facts when
+                                                                            not m.Optional
+                                                                            && flag TypeFlags.BooleanLiteral facts
+                                                                            ->
+                                                                            literalOf facts
+                                                                        | _ -> None
 
-                                                                let literal =
-                                                                    literalMemberValue model m m.TypeId
-                                                                    |> Option.orElseWith booleanLiteral
-                                                                    |> Option.filter (fun _ ->
-                                                                        reference = FsFloat
-                                                                        || reference = FsString
-                                                                        || reference = FsBool)
+                                                                    let literal =
+                                                                        literalMemberValue model m m.TypeId
+                                                                        |> Option.orElseWith booleanLiteral
+                                                                        |> Option.filter (fun _ ->
+                                                                            reference = FsFloat
+                                                                            || reference = FsString
+                                                                            || reference = FsBool)
 
-                                                                {
-                                                                    Name = Naming.memberName m.Symbol.Name
-                                                                    Docs = m.Docs
-                                                                    Tags = m.Tags
-                                                                    Type = optionalRef m.Optional reference
-                                                                    Literal = literal
-                                                                })
+                                                                    {
+                                                                        Name = Naming.memberName m.Symbol.Name
+                                                                        Docs = m.Docs
+                                                                        Tags = m.Tags
+                                                                        Type = optionalRef m.Optional reference
+                                                                        Literal = literal
+                                                                    })
 
-                                                        let optionalOrLiteral =
-                                                            fields
-                                                            |> List.exists (fun field ->
-                                                                field.Literal.IsSome
-                                                                || (match field.Type with
-                                                                    | FsOption _ -> true
-                                                                    | _ -> false))
+                                                            let optionalOrLiteral =
+                                                                fields
+                                                                |> List.exists (fun field ->
+                                                                    field.Literal.IsSome
+                                                                    || (match field.Type with
+                                                                        | FsOption _ -> true
+                                                                        | _ -> false))
 
-                                                        let createName = $"Create{caseName}"
+                                                            let createName = $"Create{caseName}"
 
-                                                        let create =
-                                                            if not optionalOrLiteral then
-                                                                None
-                                                            elif List.contains createName caseNames then
-                                                                findings <-
-                                                                    findings
-                                                                    @ [
-                                                                        Finding.make
-                                                                            symbol
-                                                                            (DetectTaggedUnions.CaseCreateNameTaken
-                                                                                createName)
-                                                                    ]
+                                                            let create =
+                                                                if not optionalOrLiteral then
+                                                                    None
+                                                                elif List.contains createName caseNames then
+                                                                    findings <-
+                                                                        findings
+                                                                        @ [
+                                                                            Finding.make
+                                                                                symbol
+                                                                                (DetectTaggedUnions
+                                                                                    .CaseCreateNameTaken
+                                                                                    createName)
+                                                                        ]
 
-                                                                None
-                                                            else
-                                                                findings <-
-                                                                    findings
-                                                                    @ [
-                                                                        Finding.make
-                                                                            symbol
-                                                                            (DetectTaggedUnions.CaseCreateSynthesized
-                                                                                createName)
-                                                                    ]
+                                                                    None
+                                                                else
+                                                                    findings <-
+                                                                        findings
+                                                                        @ [
+                                                                            Finding.make
+                                                                                symbol
+                                                                                (DetectTaggedUnions
+                                                                                    .CaseCreateSynthesized
+                                                                                    createName)
+                                                                        ]
 
-                                                                Some createName
+                                                                    Some createName
 
 
-                                                        {
-                                                            Name = caseName
-                                                            CompiledName =
-                                                                (if value = caseName then None else Some value)
-                                                            CaseTest = tagged.Test
-                                                            Inlines = false
-                                                            Fields = fields
-                                                            Create = create
-                                                        })
+                                                            {
+                                                                Name = caseName
+                                                                CompiledName =
+                                                                    (if value = caseName then None else Some value)
+                                                                CaseTest = tagged.Test
+                                                                Inlines = false
+                                                                Fields = fields
+                                                                Create = create
+                                                            })
                                                     tagged
                                                     caseNames
 
