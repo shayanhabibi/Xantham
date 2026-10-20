@@ -3033,3 +3033,13 @@ golden-tooling tests passed.
 
 Full validation passed: 1,497 generator tests and 105 Wire tests (one ignored in each suite),
 579 runtime checks, and the Partas JSX, source/DLL and Vitest gates.
+## Exclusive-arm fold arms and signatures, value-side names (2026-10-15, #158 follow-up)
+
+`shape-interfaces` removes only an exclusive fold's anonymous arms (`Spec.isAnonymousArm`) from
+`DeclNames`. A source-named arm stays declared, under the name `name-exports` gives every
+namespace member at this point (`Contested.Left` beside a top-level `Left`, bare `Right`
+otherwise). The fold no longer leaves references to an undeclared arm (FS0039), and no longer
+widens a parameter typed by one (TR023). `exclusive-arms-lab` declares `QueryArm`, `MessagesArm`,
+`ImageArm` and `SnapshotArm` again; no other golden moved. The namespace-member harvest plan
+(`2026-10-15-namespace-member-harvest.md`, R1) later nests every namespace member, which re-pins
+pair four to `Contested.Right`.

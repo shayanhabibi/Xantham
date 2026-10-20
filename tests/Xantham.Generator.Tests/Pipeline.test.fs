@@ -95,6 +95,23 @@ let private moduleBodyOf (source: string) (name: string) =
             String.IsNullOrWhiteSpace line || line.Length - line.TrimStart().Length > indent)
         |> String.concat "\n"
 
+/// The body of a `type Name =` declaration: every non-blank line below the header more indented
+/// than it. Scopes an assertion to one declaration.
+let private declarationBodyOf (source: string) (name: string) =
+    let lines = source.Replace("\r\n", "\n").Split '\n'
+    let header = $"type {name} ="
+
+    match lines |> Array.tryFindIndex (fun line -> line.TrimStart().StartsWith header) with
+    | None -> failtest $"no declaration named {name} in the rendered source"
+    | Some start ->
+        let indent = lines[start].Length - lines[start].TrimStart().Length
+
+        lines
+        |> Array.skip (start + 1)
+        |> Array.takeWhile (fun line ->
+            not (String.IsNullOrWhiteSpace line) && line.Length - line.TrimStart().Length > indent)
+        |> String.concat "\n"
+
 /// The doc comment line immediately above a declaration line, trimmed.
 let private summaryBefore (source: string) (declaration: string) =
     let lines = source.Replace("\r\n", "\n").Split '\n'
@@ -5318,26 +5335,20 @@ let pipelineTests =
         yield!
             fixtureTests "exclusive-arms-lab" (handFixture "exclusive-arms-lab") GeneratorConfig.Default (fun package ->
                 // Wave fourteen lane CN, batch two, item 4: the exclusive-arm fold itself.
-                // `SeparableOptions` and `AnchoredOptions` fold into one interface named after
-                // the union, `never` members off the surface entirely rather than left as
-                // `unit`; `DisagreeingOptions` is not this construct and is untouched.
-                // Both pairs fold into one interface named after the union, `SeparableOptions`
-                // through `AnchoredOptions`, ending each arm's own declaration. Only the fixture's
-                // third pair - `WidgetArm`/`GadgetArm`, which the fold declines - still declares
-                // its `never` members as `unit`, so a "no `unit` anywhere" check is scoped to
-                // between the two folded types, before that decline shows up.
+                // `SeparableOptions`, `AnchoredOptions` and `Contested` fold into one interface
+                // named after the union, `never` members off the folded surface rather than left
+                // as `unit`; `DisagreeingOptions` is not this construct and is untouched. A
+                // source-named arm stays declared beside the fold, with its own `never` members
+                // as `unit`, so each "no `unit`" check reads the folded declaration's own body.
                 [ testCase "both arms anchoring their own required member fold, TR060" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
-                    let foldStart = source.IndexOf "type SeparableOptions ="
-                    let foldEnd = source.IndexOf "type AnchoredOptions ="
-                    let foldedBlock = source.Substring(foldStart, foldEnd - foldStart)
+                    let foldedBlock = declarationBodyOf source "SeparableOptions"
 
-                    Expect.isGreaterThan foldStart -1 "the fold is named after the union"
-                    Expect.isFalse (source.Contains "type QueryArm =") "the query arm no longer mints its own name"
-                    Expect.isFalse (source.Contains "type MessagesArm =") "nor does the messages arm"
-                    Expect.stringContains source "abstract query: string option" "query kept optional, not unit"
-                    Expect.stringContains source "abstract messages: string[] option" "messages kept optional, not unit"
+                    Expect.stringContains source "type QueryArm =" "a source-named arm stays declared beside the fold"
+                    Expect.stringContains source "type MessagesArm =" "on both sides"
+                    Expect.stringContains foldedBlock "abstract query: string option" "query kept optional, not unit"
+                    Expect.stringContains foldedBlock "abstract messages: string[] option" "messages kept optional, not unit"
 
                     Expect.isFalse
                         (foldedBlock.Contains ": unit")
@@ -5346,22 +5357,46 @@ let pipelineTests =
                   testCase "one arm's own required member anchors the other's optional one, TR060" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
+                      let foldedBlock = declarationBodyOf source "AnchoredOptions"
 
-                      Expect.stringContains source "type AnchoredOptions =" "the fold is named after the union"
-                      Expect.isFalse (source.Contains "type ImageArm =") "the image arm no longer mints its own name"
-                      Expect.isFalse (source.Contains "type SnapshotArm =") "nor does the snapshot arm"
-
-                      // Both of the anchored pair's own distinguishers (`image`, `snapshot`) are
-                      // real members reaching the fold - the placeholder `unit` that
-                      // `ContainerLikeOptions` still carries is `Create`-overload plumbing this
-                      // fold's own arms never contribute, so this pair folds clean too.
-                      let foldStart = source.IndexOf "type AnchoredOptions ="
-                      let foldEnd = source.IndexOf "type WidgetArm ="
-                      let foldedBlock = source.Substring(foldStart, foldEnd - foldStart)
+                      Expect.stringContains source "type ImageArm =" "a source-named arm stays declared beside the fold"
+                      Expect.stringContains source "type SnapshotArm =" "on both sides"
 
                       Expect.isFalse
                           (foldedBlock.Contains ": unit")
                           "the anchored pair's own members are real on both sides, so no `unit` survives"
+
+                  testCase "a source-named arm of a fold is declared where it is read" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      let nested = moduleBodyOf source "Contested"
+                      let holder = declarationBodyOf source "ContestedHolder"
+
+                      Expect.stringContains
+                          (declarationBodyOf source "Contested")
+                          "abstract right: string[] option"
+                          "the union still folds"
+
+                      Expect.stringContains nested "type Left =" "`Contested.Left` is declared in its namespace's module"
+                      Expect.stringContains nested "abstract left: string with get, set" "with its own members"
+                      Expect.stringContains source "type Right =" "`Contested.Right` is declared under today's bare spelling (re-pinned by the companion plan)"
+                      Expect.stringContains holder "abstract left: Contested.Left with get, set" "an interface member reads the nested arm"
+                      Expect.stringContains holder "abstract right: Right with get, set" "and the bare one"
+
+                      Expect.stringContains
+                          source
+                          "type ContestedCallback = (Contested.Left -> unit)"
+                          "a callback reads the nested arm"
+
+                      Expect.stringContains
+                          (declarationBodyOf source "Elsewhere")
+                          "abstract read: arm: Right -> Contested.Left"
+                          "a function of another namespace reads both arms"
+
+                      Expect.stringContains
+                          source
+                          "static member pickLeft (left: Contested.Left) : Right = jsNative"
+                          "a top-level function reads both arms, unwidened"
 
                   testCase "a shared member disagreeing in type is not this construct" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -5375,7 +5410,7 @@ let pipelineTests =
                            |> List.filter (fun finding -> finding.Key = "TR060" || finding.Key = "TR061")
                            |> List.map _.Symbol
                            |> List.sort)
-                          [ "AnchoredOptions"; "SeparableOptions" ]
+                          [ "AnchoredOptions"; "Contested"; "SeparableOptions" ]
                           "the disagreeing pair raises neither TR060 nor TR061" ])
 
         yield!
