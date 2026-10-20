@@ -758,17 +758,61 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                                 walk (into "Base") order operand
                             | _ -> ()
 
+    /// The role an export's value side is named for beside its type side, and whether the
+    /// shapes its values own nest under the source namespace: an enum's object, a namespace or a
+    /// variable merged with a type. A class's static side and a function are not value sides
+    /// this pass names.
+    let valueSideRole (export: HarvestedExport) =
+        let flags = export.Symbol.Flags
+
+        if hasAny (SymbolFlags.Class ||| SymbolFlags.Function) flags then
+            None
+        elif hasAny (SymbolFlags.RegularEnum ||| SymbolFlags.ConstEnum) flags then
+            Some("Enum", true)
+        elif hasAny SymbolFlags.ValueModule flags then
+            Some("Namespace", true)
+        elif hasAny (SymbolFlags.FunctionScopedVariable ||| SymbolFlags.BlockScopedVariable) flags then
+            Some("Value", false)
+        else
+            None
+
     let fallback = defaultExportName ctx
     let pathOf = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
     for export in model.Harvest.Exports do
         modulePrefix <- pathOf export |> String.concat "."
-        let root = underPrefix (Naming.pascalSegment (fsName fallback export))
+        let stem = Naming.pascalSegment (fsName fallback export)
+        let root = underPrefix stem
 
         match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
         | Some ids ->
-            for typeId in [ yield! Option.toList ids.Declared; yield! Option.toList ids.Value ] do
-                walk root export.Order typeId
+            ids.Declared |> Option.iter (walk root export.Order)
+
+            match ids.Declared, ids.Value with
+            | Some declared, Some value when declared <> value ->
+                match valueSideRole export, Map.tryFind value model.Types with
+                | Some(role, underNamespace), Some facts when
+                    Set.contains root taken
+                    && not (Map.containsKey value names)
+                    && needsName facts
+                    && not (isConstructorObject facts)
+                    ->
+                    let declaredAs = claim None $"{stem}{role}" value export.Order
+
+                    findings <-
+                        findings
+                        @ [
+                            Finding.make declaredAs (SynthesizeAnonymous.ValueSideNamed(root, declaredAs))
+                        ]
+
+                    // TypeScript reaches a namespace value's shape as `Point.defaults`: it
+                    // belongs to the namespace's module, not to the minted value interface.
+                    if underNamespace then
+                        nestBases <- Map.add value root nestBases
+                | _ -> ()
+            | _ -> ()
+
+            ids.Value |> Option.iter (walk root export.Order)
         | None -> ()
 
     { model with

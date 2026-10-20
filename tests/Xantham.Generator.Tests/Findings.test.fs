@@ -164,6 +164,7 @@ let findingsTests =
                     "SY.NameNestedUnderOwner SY004 exact"
                     "SY.NameSanitisedForIdentifier SY005 ergonomic"
                     "SY.CallbackDelegateNamed SY006 exact"
+                    "SY.ValueSideNamed SY007 ergonomic"
                     "SI.HybridLosesCallSignatures SI001 widened"
                     "SI.HybridCallSignaturesAsInvoke SI008 ergonomic"
                     "SI.BaseMembersFlattened SI002 ergonomic"
