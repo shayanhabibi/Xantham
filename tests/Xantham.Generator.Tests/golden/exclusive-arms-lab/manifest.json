@@ -3,26 +3,26 @@
   "package": "exclusive-arms-lab",
   "module": "ExclusiveArmsLab",
   "counts": {
-    "exact": 4,
-    "ergonomic": 4,
+    "exact": 8,
+    "ergonomic": 14,
     "widened": 0,
-    "escape": 4
+    "escape": 0
   },
   "passes": [
     {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "exact": 1
+    },
+    {
       "pass": "SI - shape-interfaces",
-      "total": 6,
-      "ergonomic": 6
+      "total": 15,
+      "ergonomic": 15
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2,
-      "ergonomic": 2
-    },
-    {
-      "pass": "AC - audit-coverage",
-      "total": 4,
-      "escape": 4
+      "total": 12,
+      "ergonomic": 12
     }
   ]
 }
