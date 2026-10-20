@@ -3048,3 +3048,6 @@ widens a parameter typed by one (TR023). `exclusive-arms-lab` declares `QueryArm
 `ImageArm` and `SnapshotArm` again; no other golden moved. The namespace-member harvest plan
 (`2026-10-15-namespace-member-harvest.md`, R1) later nests every namespace member, which re-pins
 pair four to `Contested.Right`.
+
+The exclusive fold also requires every arm to agree on a shared member's readonly; otherwise the
+union stays `U2`, so the folded member's setter cannot depend on which arm comes first.

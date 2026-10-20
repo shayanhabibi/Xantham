@@ -134,6 +134,9 @@ place exclusivity holds.
 
 ### D4 — Plan 3 P1: the globals container
 
+**Ruled 2026-10-20: keep `Exports`.** The user: "Shouldnt we have Exports". `module Globals`
+holds `[<Erase; Global("globalThis")>] type Exports`, as plan 3 P1 specifies.
+
 Plan 3 keeps the existing `module Globals` + `[<Erase>][<Global("globalThis")>] type Exports`.
 
 - **Why:** the run gate already proves that form, and a root `type Globals` would collide with
