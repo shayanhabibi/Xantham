@@ -3,8 +3,8 @@
   "package": "exclusive-arms-lab",
   "module": "ExclusiveArmsLab",
   "counts": {
-    "exact": 8,
-    "ergonomic": 14,
+    "exact": 11,
+    "ergonomic": 18,
     "widened": 0,
     "escape": 0
   },
@@ -16,13 +16,13 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 15,
-      "ergonomic": 15
+      "total": 19,
+      "ergonomic": 19
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 12,
-      "ergonomic": 12
+      "total": 16,
+      "ergonomic": 16
     }
   ]
 }
