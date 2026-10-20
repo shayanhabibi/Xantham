@@ -2974,3 +2974,14 @@ Measured over the goldens against the #158 head: `DT004` 8 → 0 and `DT007` 8 �
 negative refuses); `DT002` 56 → 62; `DT005` 33 → 48; `DD002` 55 → 76 as every separated arm drops.
 `catalog-recursive-json-lab` ships its group again (`GE001`, one declaration, `Payload`).
 Core.TS's binding and Node are unchanged.
+
+## Exclusive-arm fold arms and signatures, value-side names (2026-10-15, #158 follow-up)
+
+`shape-interfaces` removes only an exclusive fold's anonymous arms (`Spec.isAnonymousArm`) from
+`DeclNames`. A source-named arm stays declared, under the name `name-exports` gives every
+namespace member at this point (`Contested.Left` beside a top-level `Left`, bare `Right`
+otherwise). The fold no longer leaves references to an undeclared arm (FS0039), and no longer
+widens a parameter typed by one (TR023). `exclusive-arms-lab` declares `QueryArm`, `MessagesArm`,
+`ImageArm` and `SnapshotArm` again; no other golden moved. The namespace-member harvest plan
+(`2026-10-15-namespace-member-harvest.md`, R1) later nests every namespace member, which re-pins
+pair four to `Contested.Right`.

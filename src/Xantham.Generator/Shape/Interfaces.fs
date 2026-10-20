@@ -81,11 +81,16 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 | ExclusiveArmsDecline arms -> Some(typeId, name, Choice2Of2 arms)
                             | _ -> None)
 
+                    // The fold replaces only the arms the checker named: a source-named arm is a
+                    // declaration in its own right and stays, nesting under its namespace.
                     let foldedArmIds =
                         exclusiveUnions
                         |> List.collect (fun (_, _, outcome) ->
                             match outcome with
-                            | Choice1Of2(_, arms) -> arms |> List.map (fun a -> a.Facts.Response.TypeId)
+                            | Choice1Of2(_, arms) ->
+                                arms
+                                |> List.filter (fun a -> isAnonymousArm a.Facts)
+                                |> List.map (fun a -> a.Facts.Response.TypeId)
                             | Choice2Of2 _ -> [])
                         |> Set.ofList
 
