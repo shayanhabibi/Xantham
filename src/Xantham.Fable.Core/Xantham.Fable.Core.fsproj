@@ -38,7 +38,7 @@
     <ItemGroup>
         <!-- Fable.Core 5+, pinned: the compile gate carries the same pin, because generated
              bindings and the gate agree on one Fable.Core. -->
-        <PackageReference Include="Fable.Core" Version="5.999.0-xantham.ea2e7f8d7.2" />
+        <PackageReference Include="Fable.Core" Version="5.999.0-xantham.26e40937d" />
     </ItemGroup>
 
 </Project>

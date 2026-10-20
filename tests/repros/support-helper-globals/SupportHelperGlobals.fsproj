@@ -7,6 +7,6 @@
   <ItemGroup>
     <Compile Include="Helpers.fs" />
     <ProjectReference Include="../../../src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
-    <PackageReference Include="Fable.Core" Version="5.999.0-xantham.ea2e7f8d7.2" />
+    <PackageReference Include="Fable.Core" Version="5.999.0-xantham.26e40937d" />
   </ItemGroup>
 </Project>

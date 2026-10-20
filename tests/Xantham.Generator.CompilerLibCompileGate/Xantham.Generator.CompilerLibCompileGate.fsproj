@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Fable.Core" Version="5.999.0-xantham.ea2e7f8d7.2" />
+        <PackageReference Include="Fable.Core" Version="5.999.0-xantham.26e40937d" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core.TS\Xantham.Fable.Core.TS.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
     </ItemGroup>

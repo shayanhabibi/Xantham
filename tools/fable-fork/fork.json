@@ -2,12 +2,12 @@
   "comment": "The Fable commit every Fable.Core reference and the `fable` tool pin are built from. Both packages restore from the Xantham Cloudsmith feed. `dotnet fsi tools/fable-fork.fsx -- sync` packs Fable.Core and Fable (the CLI) from it into tools/fable-fork/packages, to push to that feed. Move `ref` and `version` together; `version` names the packages, so a stale one restores the old build from the NuGet cache.",
   "repo": "https://github.com/shayanhabibi/Fable",
   "branch": "main_fork",
-  "ref": "ea2e7f8d7505297b092086857a169e1771064c7e",
-  "version": "5.999.0-xantham.ea2e7f8d7.2",
+  "ref": "26e40937dd0ccdfbbe2f8281fb3bcb4aea8848b9",
+  "version": "5.999.0-xantham.26e40937d",
   "base": {
     "comment": "The upstream releases the fork's packages are built on, from the fork's CHANGELOGs and Fable.Transforms/Global/Compiler.fs.",
     "Fable.Core": "5.4.0",
-    "Fable": "5.21.0"
+    "Fable": "5.22.0"
   },
   "packages": [
     "src/Fable.Core/Fable.Core.fsproj",

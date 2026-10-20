@@ -21,7 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
-    <PackageReference Include="Fable.Core" Version="5.999.0-xantham.ea2e7f8d7.2" />
+    <PackageReference Include="Fable.Core" Version="5.999.0-xantham.26e40937d" />
     <PackageReference Include="Fable.Package.SDK" Version="1.4.1" PrivateAssets="all" />
   </ItemGroup>
   <Target Name="RecordDeclarationCatalogBuild" AfterTargets="Build" Inputs="$(TargetPath);@(Compile);$(MSBuildProjectFullPath);$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx" Outputs="$(TargetPath).catalogue-build.json">
