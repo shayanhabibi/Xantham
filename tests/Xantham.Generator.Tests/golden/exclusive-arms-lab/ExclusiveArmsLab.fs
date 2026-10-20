@@ -120,6 +120,42 @@ type Elsewhere =
     [<ParamObject; Emit("$0")>]
     static member Create (read: (Right -> Contested.Left)) : Elsewhere = jsNative
 
+type ReadonlyFirst = U2<ReadonlyFirst2, ReadonlyFirst3>
+
+[<Interface>]
+type ReadonlyFirst2 =
+    abstract id: string
+    abstract a: float with get, set
+    abstract b: unit option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, a: float, ?b: unit) : ReadonlyFirst2 = jsNative
+
+[<Interface>]
+type ReadonlyFirst3 =
+    abstract id: string with get, set
+    abstract b: string with get, set
+    abstract a: unit option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, b: string, ?a: unit) : ReadonlyFirst3 = jsNative
+
+type ReadonlySecond = U2<ReadonlySecond2, ReadonlySecond3>
+
+[<Interface>]
+type ReadonlySecond2 =
+    abstract id: string with get, set
+    abstract a: float with get, set
+    abstract b: unit option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, a: float, ?b: unit) : ReadonlySecond2 = jsNative
+
+[<Interface>]
+type ReadonlySecond3 =
+    abstract id: string
+    abstract b: string with get, set
+    abstract a: unit option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, b: string, ?a: unit) : ReadonlySecond3 = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -135,6 +171,8 @@ type Exports =
     static member contest (options: Contested, callback: ContestedCallback, holder: ContestedHolder) : unit = jsNative
     [<Import("pickLeft", "exclusive-arms-lab")>]
     static member pickLeft (left: Contested.Left) : Right = jsNative
+    [<Import("readonlyPairs", "exclusive-arms-lab")>]
+    static member readonlyPairs (first: ReadonlyFirst, second: ReadonlySecond) : unit = jsNative
 
 module Contested =
     [<Interface>]

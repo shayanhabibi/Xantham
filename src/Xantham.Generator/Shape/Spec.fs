@@ -519,14 +519,6 @@ let internal sameShape (model: ShapeModel) (left: int<Measure.typeId>) (right: i
 
     go Set.empty left right
 
-/// Whether `arm` declares a member under the name, type and optionality of `m`.
-let internal memberDeclaredBy (model: ShapeModel) (m: ResolvedMember) (arm: TypeFacts) : bool =
-    arm.Members
-    |> List.exists (fun other ->
-        other.Symbol.Name = m.Symbol.Name
-        && sameShape model other.TypeId m.TypeId
-        && other.Optional = m.Optional)
-
 /// Whether the member is an optional property typed `never`, which an object never carries. The
 /// checker reports `never | undefined` as `undefined`.
 let private isAbsentOnly (model: ShapeModel) (m: ResolvedMember) =
@@ -780,7 +772,7 @@ type internal ExclusiveArm =
     }
 
 /// A union of object arms exclusive on some of their members (§4.5, wave fourteen item 4):
-/// every arm agrees, by name, type and optionality, on every member it shares with the rest,
+/// every arm agrees, by name, type, optionality and readonly, on every member it shares with the rest,
 /// and every member exclusive to one arm is typed `never` on every other arm that carries it -
 /// never silently absent. `ExclusiveArmsFold` carries at least one arm whose own member is
 /// required in that arm, giving F# a required-arity fact to resolve `Create` overloads on;
@@ -844,7 +836,13 @@ let internal exclusiveArmShape (model: ShapeModel) (facts: TypeFacts) : Exclusiv
                 else
                     let first = snd (List.head real)
 
-                    if not (real |> List.forall (fun (_, m) -> sameShape model m.TypeId first.TypeId)) then
+                    if
+                        not (
+                            real
+                            |> List.forall (fun (_, m) ->
+                                sameShape model m.TypeId first.TypeId && m.ReadOnly = first.ReadOnly)
+                        )
+                    then
                         None
                     elif never.IsEmpty then
                         if real |> List.forall (fun (_, m) -> m.Optional = first.Optional) then

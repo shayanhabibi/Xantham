@@ -81,3 +81,13 @@ export namespace Elsewhere {
 }
 export function contest(options: Contested, callback: ContestedCallback, holder: ContestedHolder): void;
 export function pickLeft(left: Contested.Left): Contested.Right;
+
+// A shared member readonly on one arm only: either fold would declare the head arm's setter
+// or its lack for both, so neither folds.
+export type ReadonlyFirst =
+    | { readonly id: string; a: number; b?: never }
+    | { id: string; b: string; a?: never };
+export type ReadonlySecond =
+    | { id: string; a: number; b?: never }
+    | { readonly id: string; b: string; a?: never };
+export function readonlyPairs(first: ReadonlyFirst, second: ReadonlySecond): void;

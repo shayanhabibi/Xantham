@@ -5411,7 +5411,14 @@ let pipelineTests =
                            |> List.map _.Symbol
                            |> List.sort)
                           [ "AnchoredOptions"; "Contested"; "SeparableOptions" ]
-                          "the disagreeing pair raises neither TR060 nor TR061" ])
+                          "the disagreeing pair raises neither TR060 nor TR061"
+
+                  testCase "a shared member readonly on one arm only keeps the union erased" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type ReadonlyFirst = U2<" "the readonly-first pair does not fold"
+                      Expect.stringContains source "type ReadonlySecond = U2<" "nor does the readonly-second pair" ])
 
         yield!
             fixtureTests "frontier-width-lab" (handFixture "frontier-width-lab") GeneratorConfig.Default (fun package ->
