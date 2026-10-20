@@ -221,6 +221,10 @@ let pins =
         "tests/repros/support-helper-globals/SupportHelperGlobals.fsproj", fableCore
         "tests/Xantham.Generator.PartasGate/verify.mjs", fableCore
         "tools/catalog-portability.fsx", fableCore
+        "src/Xantham.Generator/Customization/Compile.fs", fableCore
+        "tests/Xantham.Generator.Tests/Customization.test.fs", fableCore
+        "tests/Xantham.Generator.Tests/DeclarationCatalog.test.fs", fableCore
+        "tests/Xantham.Generator.Tests/ExportProvenance.test.fs", fableCore
     ]
 
 let check () =

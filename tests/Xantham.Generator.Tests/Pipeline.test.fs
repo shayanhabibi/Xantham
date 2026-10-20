@@ -4568,7 +4568,7 @@ let pipelineTests =
                       // `obj` until the union carried a name.
                       Expect.stringContains source "abstract ``event``: Wide.Event" "the member reads a declaration"
                       Expect.stringContains source "TypeScriptTaggedUnion(\"type\", CaseRules.None)" "declared as a DU"
-                      Expect.stringContains source "| [<CompiledName(\"fetch\")>] Fetch of url: string" "carrying the arm's fields"
+                      Expect.stringContains source "| [<CompiledName(\"fetch\"); InlineInterface>] Fetch of FetchInfo" "carrying the named arm's interface"
                       Expect.stringContains source "| [<CompiledName(\"queue\")>] Queue" "and a tag-only arm as a bare case"
                       Expect.equal (keysFor "Wide.Event") [ "DT002"; "SY004" ] "the mint is reported under the name it claimed"
 
@@ -4727,7 +4727,7 @@ let pipelineTests =
                           "a literal field is written by the Emit"
 
                       Expect.stringContains source "    static member CreateStart (at: float) : Signal = jsNative" "and binds no parameter"
-                      Expect.stringContains source "    static member CreatePong (?at: float) : Message = jsNative" "named arms' cases too"
+                      Expect.stringContains source "    | [<CompiledName(\"pong\"); InlineInterface>] Pong of Pong" "a named arm's case carries its interface, built by the interface's own Create"
 
                       for absent in [ "CreatePending"; "CreateCircle"; "CreateSquare"; "CreateOpen"; "CreatePing" ] do
                           Expect.isFalse (source.Contains absent) $"{absent}: the case constructor already builds it"
@@ -5125,7 +5125,7 @@ let pipelineTests =
                       Expect.stringContains source "type Owned<'T when 'T :> Base> =" "a constraint at the head"
                       Expect.stringContains source "type Marker<'T> =" "a parameter no arm reads"
                       Expect.stringContains source "Node of children: Tree<'T>[]" "a recursive reference re-applies the parameter"
-                      Expect.stringContains source "Fulfilled of value: 'T" "a named interface arm"
+                      Expect.stringContains source "Fulfilled of Fulfilled<'T>" "a named interface arm, applied"
                       Expect.stringContains source "Once of id: string * payload: 'T * at: float" "an intersection distributed over the arms"
                       Expect.stringContains source "type Task<'T> = Job<'T>" "a second export abbreviates at the same arity"
                       Expect.stringContains source "type JobAlias<'T> =" "a new alias over an application declares its own union"
@@ -5566,7 +5566,7 @@ let pipelineTests =
 
                         Expect.stringContains
                             source
-                            "| [<CompiledName(\"ok\")>] Ok of value: string"
+                            "| [<CompiledName(\"ok\"); InlineInterface>] Ok of Ok<string>"
                             "the generic arm's members were read after it was met as a reference" ])
         yield!
             fixtureTests "export-layout-lab" (handFixture "export-layout-lab") GeneratorConfig.Default <| fun package -> [
@@ -6905,4 +6905,67 @@ let catalogLibraryEntryFixtureTests =
     let package = handFixture "catalog-library-entry-lab"
     testList "catalog library entry fixture" [
         yield! fixtureTests "catalog-library-entry-lab" package (handConfig package) (fun _ -> [])
+    ]
+
+[<Tests>]
+let inlineArmFixtureTests =
+    testList "inline arm fixture" [
+        yield!
+            fixtureTests "inline-arm-lab" (handFixture "inline-arm-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a case carries a named arm's interface whole" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "    | [<CompiledName(\"ping\"); InlineInterface>] Ping of Ping" "a named arm is the case's field"
+                      Expect.stringContains source "    | [<CompiledName(\"pong\"); InlineInterface>] Pong of Pong" "for every named arm"
+                      Expect.isFalse (source.Contains "CreatePong") "the arm interface's own Create builds the case's value"
+                      Expect.stringContains source "    | [<CompiledName(\"ready\"); InlineInterface>] Ready of Ready<'T>" "a generic arm applies the union's parameter"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\"); CaseTest(\"'value' in $0\"); InlineInterface>] Done of Done"
+                          "an inlined case sharing a tag value keeps its test"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\"); CaseTest(\"'reason' in $0\"); InlineInterface>] Aborted of Aborted"
+                          "and a named arm sharing a tag value is the case of its own name"
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Symbol = "Message.Ping" && f.Key = "DT009")
+                           |> List.map _.Message)
+                          [ "case carries the arm interface 'Ping' whole (InlineInterface)" ]
+                          "the case records the interface it carries"
+
+                  testCase "an arm more than its case's fields is carried by its interface" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isTrue
+                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""file""\); InlineInterface>\] File of \w+"))
+                          "an arm with a method"
+
+                      Expect.isTrue
+                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""bag""\); InlineInterface>\] Bag of \w+"))
+                          "an arm with an index signature"
+
+                      Expect.isTrue
+                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""wide""\); InlineInterface>\] Wide of \w+"))
+                          "an arm past the field budget"
+
+                      Expect.stringContains source "    | [<CompiledName(\"circle\")>] Circle of radius: float" "a plain anonymous arm keeps its fields"
+
+                      Expect.isTrue
+                          (Text.RegularExpressions.Regex.IsMatch(source, @"type Thunk = U2<"))
+                          "a callable arm leaves the union erased"
+
+                      Expect.isNonEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Symbol = "Thunk" && f.Key = "DT001"))
+                          "and says why"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"token\")>] Token of value: string"
+                          "a class arm keeps its fields" ])
     ]

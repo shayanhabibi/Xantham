@@ -3,8 +3,8 @@
   "package": "fable-core-ts-input",
   "module": "FableCoreTsInput",
   "counts": {
-    "exact": 1318,
-    "ergonomic": 2677,
+    "exact": 1319,
+    "ergonomic": 2676,
     "widened": 277,
     "escape": 5
   },
@@ -21,9 +21,10 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 4,
-      "exact": 1,
-      "ergonomic": 3
+      "total": 38,
+      "exact": 16,
+      "ergonomic": 4,
+      "widened": 18
     },
     {
       "pass": "shape-callbacks",
@@ -40,9 +41,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 112,
-      "ergonomic": 26,
-      "widened": 81,
+      "total": 106,
+      "ergonomic": 22,
+      "widened": 79,
       "escape": 5
     },
     {

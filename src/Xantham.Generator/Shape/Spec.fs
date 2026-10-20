@@ -1005,16 +1005,53 @@ let internal isTaggedCaseData (tag: string) (arm: TypeFacts) =
     && (fields |> List.forall (fun m -> not (hasAny SymbolFlags.Method m.Symbol.Flags)))
     && fields.Length <= TaggedCaseFieldBudget
 
+/// Whether a value of the type is a class instance: of a class, or of an interface an ambient
+/// `declare var` constructs. An instantiation reads its target's.
+let internal isClassInstance (model: ShapeModel) (facts: TypeFacts) =
+    let variable =
+        SymbolFlags.FunctionScopedVariable ||| SymbolFlags.BlockScopedVariable
+
+    let own (facts: TypeFacts) =
+        facts.AmbientClass.IsSome
+        || hasAny SymbolFlags.Class facts.SymbolFlags
+        || (hasAny SymbolFlags.Interface facts.SymbolFlags && hasAny variable facts.SymbolFlags)
+        || facts.Response.ObjectFlags
+           |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Class)
+
+    own facts
+    || facts.Response.TargetTypeId
+       |> ValueOption.toOption
+       |> Option.bind (fun target -> Map.tryFind target model.Types)
+       |> Option.exists own
+
+/// Whether an arm's case carries the arm's interface as its one `[<InlineInterface>]` field: the
+/// arm is neither callable, constructable nor a class instance, and is named, or is more than its
+/// case's fields carry.
+let internal caseInlinesArm (model: ShapeModel) (tag: string) (arm: TypeFacts) =
+    //FOR-REVIEW Constructing an inlined case copies the value onto its prototype. The copy of a
+    //FOR-REVIEW function is not callable, and the copy of a class instance loses its internal state,
+    //FOR-REVIEW so both stay out until the fork constructs by identity.
+    arm.CallSignatures.IsEmpty
+    && arm.ConstructSignatures.IsEmpty
+    && not (isClassInstance model arm)
+    && (not (isAnonymousArm arm)
+        || not (caseCarriesArmWhole tag arm)
+        || not (isTaggedCaseData tag arm))
+
+/// Whether an arm is a case of a declared DU: as its fields, or as its interface.
+let internal isTaggedCase (model: ShapeModel) (tag: string) (arm: TypeFacts) =
+    isTaggedCaseData tag arm || caseInlinesArm model tag arm
+
 /// Whether a union meets the conditions `detect-tagged-unions` declares a DU under (D4,
 /// §4.5(2)): every member non-nullish, a discriminant whose shared values `separateArms`
-/// separates, and every case plain data. A reference to such a union applies the parameters its
+/// separates, and every arm a case. A reference to such a union applies the parameters its
 /// declaration binds.
 let internal isTaggedDeclaration (model: ShapeModel) (facts: TypeFacts) =
     flag TypeFlags.Union facts
     && not (flag TypeFlags.Boolean facts)
     && List.isEmpty (fst (splitNullish model facts))
     && (match taggedUnionShape model facts with
-        | Discriminated(tag, tagged, _) -> tagged |> List.forall (fun arm -> isTaggedCaseData tag arm.Facts)
+        | Discriminated(tag, tagged, _) -> tagged |> List.forall (fun arm -> isTaggedCase model tag arm.Facts)
         | TagCollides _
         | Untagged -> false)
 
@@ -4129,9 +4166,27 @@ let uniqueCaseNames (names: string list) =
         seen <- Set.add unique seen
         unique)
 
-/// The DU case names of a discriminated union's cases, in case order.
+/// The DU case names of a discriminated union's cases, in case order: the tag value, or, for a
+/// named arm sharing its tag value with another arm, the arm's own name.
 let internal taggedCaseNamesOf (tagged: TaggedArm list) =
-    tagged |> List.map (_.Value >> Naming.enumCaseOfString) |> uniqueCaseNames
+    let shared =
+        tagged
+        |> List.countBy _.Value
+        |> List.filter (snd >> (<) 1)
+        |> List.map fst
+        |> Set.ofList
+
+    tagged
+    |> List.map (fun arm ->
+        match arm.Facts.SymbolName with
+        | Some name when
+            Set.contains arm.Value shared
+            && not (isAnonymousArm arm.Facts)
+            && not (isSyntheticName name)
+            ->
+            Naming.enumCaseOfString (string name)
+        | _ -> Naming.enumCaseOfString arm.Value)
+    |> uniqueCaseNames
 
 /// The case each arm of a union reads under once `detect-tagged-unions` declares it, keyed by
 /// the arm's type id. Empty for a union `detect-tagged-unions` does not declare.

@@ -312,25 +312,25 @@ let private nestedNames () =
         (emitJsExpr () "globalThis.__nestedNameLabConfigure.verbose")
 
 let private taggedUnions () =
-    let circle = PhaseBLab.Shape.Circle 2.0
+    let circle = PhaseBLab.Shape.Circle(PhaseBLab.CircleShape.Create 2.0)
     equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (json circle)
     equal "and JavaScript reads it off the tag" (System.Math.PI * 4.0) (PhaseBLab.Exports.area circle)
-    let rect = PhaseBLab.Shape.RoundRect(2.0, 3.0, 1.0)
+    let rect = PhaseBLab.Shape.RoundRect(PhaseBLab.RoundRectShape.Create(2.0, 3.0, 1.0))
 
     equal
-        "a multi-field case carries its CompiledName tag"
+        "a case built from its arm interface carries its CompiledName tag"
         """{"kind":"round-rect","width":2,"height":3,"radius":1}"""
         (json rect)
 
     equal "and the JavaScript side agrees on its arm" 6.0 (PhaseBLab.Exports.area rect)
 
     match PhaseBLab.Exports.makeRoundRect (4.0, 5.0, 0.5) with
-    | PhaseBLab.Shape.RoundRect(width, height, radius) ->
+    | PhaseBLab.Shape.RoundRect rect ->
         equal
-            "a JavaScript-built tagged object matches the F# case with its fields"
+            "a JavaScript-built tagged object matches the F# case as its arm interface"
             (4.0, 5.0, 0.5)
-            (width, height, radius)
-    | PhaseBLab.Shape.Circle radius -> check $"a JavaScript-built round-rect matched Circle {radius}" false
+            (rect.width, rect.height, rect.radius)
+    | PhaseBLab.Shape.Circle circle -> check $"a JavaScript-built round-rect matched Circle {circle.radius}" false
 
 /// The workarounds of docs/.ai/fable5-workarounds.md, each read back through
 /// `tests/fixtures/fable-workaround-lab/index.js`. Where the document says the direct F#
@@ -1936,19 +1936,19 @@ let private mintedTaggedCases () =
     equal
         "a case minted from an inline union erases to the tagged object"
         """{"type":"fetch","url":"/x"}"""
-        (json (SharedTagLab.Wide.Event.Fetch "/x"))
+        (json (SharedTagLab.Wide.Event.Fetch(SharedTagLab.FetchInfo.Create "/x")))
 
     equal
         "and an arm carrying the tag alone erases to it alone"
         """{"type":"queue"}"""
-        (json SharedTagLab.Wide.Event.Queue)
+        (json (SharedTagLab.Wide.Event.Queue(SharedTagLab.QueueInfo.Create())))
 
     let above: SharedTagLab.Wide.Event =
         emitJsExpr () """({ type: "jsrpc", methodName: "ping" })"""
 
     match above with
-    | SharedTagLab.Wide.Event.Jsrpc methodName ->
-        equal "a JavaScript-built object reaches the case its tag names" "ping" methodName
+    | SharedTagLab.Wide.Event.Jsrpc info ->
+        equal "a JavaScript-built object reaches the case its tag names" "ping" info.methodName
     | _ -> check "a JavaScript-built jsrpc reached another case" false
 
     // Three arms, below the erased-union cap: the arm an erased union would have written under
@@ -1956,7 +1956,7 @@ let private mintedTaggedCases () =
     let below: SharedTagLab.Narrow.Event = emitJsExpr () """({ type: "email" })"""
 
     match below with
-    | SharedTagLab.Narrow.Event.Email -> check "a union claimed below the cap matches on its tag too" true
+    | SharedTagLab.Narrow.Event.Email _ -> check "a union claimed below the cap matches on its tag too" true
     | _ -> check "a JavaScript-built email reached another case" false
 
 /// A tagged union over a type parameter. The case fields read `'T`, and Fable erases a generic
@@ -1980,6 +1980,38 @@ let private genericTaggedCases () =
     | SharedTagLab.Scheduled.Repeat(payload, Some previous) ->
         equal "a JavaScript-built object reaches its case with both payloads" "1:0" $"{payload}:{previous}"
     | _ -> check "a JavaScript-built repeat reached another case" false
+
+/// A case carrying its arm's interface is the arm value with the tag set: a value of the interface
+/// constructs it, and a match reaches the interface again.
+let private inlinedArmCases () =
+    let ping = InlineArmLab.Ping.Create(at = 5.0)
+
+    equal
+        "a case built from its arm interface is the arm, tagged"
+        """{"op":"ping","at":5}"""
+        (json (InlineArmLab.Message.Ping ping))
+
+    let received: InlineArmLab.Message = emitJsExpr () """({ op: "pong", at: 2 })"""
+
+    match received with
+    | InlineArmLab.Message.Pong pong -> equal "a JavaScript-built object reaches its case as the arm" (Some 2.0) pong.at
+    | _ -> check "a JavaScript-built pong reached another case" false
+
+    let outcome: InlineArmLab.Outcome =
+        emitJsExpr () """({ state: "done", reason: "stop" })"""
+
+    match outcome with
+    | InlineArmLab.Outcome.Aborted aborted -> equal "named arms sharing a tag match by their test" "stop" aborted.reason
+    | _ -> check "an aborted outcome reached another case" false
+
+    let handle: InlineArmLab.Handle =
+        emitJsExpr () """({ kind: "file", path: "/a", close() { this.path = "closed" } })"""
+
+    match handle with
+    | InlineArmLab.Handle.File file ->
+        file.close ()
+        equal "an arm with a method reaches its case with the method" "closed" file.path
+    | _ -> check "a file handle reached another case" false
 
 /// A case `Create` builds the object its case builds, absent optional fields omitted and literal
 /// fields written, and the result matches the case its tag names.
@@ -2410,6 +2442,7 @@ let main _ =
     separatedTaggedCases ()
     mintedTaggedCases ()
     genericTaggedCases ()
+    inlinedArmCases ()
     taggedCaseCreates ()
     nestedNames ()
     optionalHooks ()

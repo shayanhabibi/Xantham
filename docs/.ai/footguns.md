@@ -290,7 +290,13 @@ missing table row.
   them. The attribute exists only in the Fable fork's `Fable.Core` (`tools/fable-fork/fork.json`).
 - **An arm interface drops only where its case carries the arm whole** (`Spec.caseCarriesArmWhole`):
   a symbol-keyed member or an index signature is no case field, so such an arm keeps its
-  interface as the typed path to it.
+  interface as the typed path to it. Such an arm is now an `[<InlineInterface>]` case, which
+  reads the interface, so it stays declared through that read.
+- **Only Fable checks an `[<InlineInterface>]` case.** The case must have one field whose type is
+  an interface; .NET compiles any field, so the compile gate passes a case Fable rejects ("the
+  case must have exactly one field, whose type is an interface"). A golden carrying a new inlined
+  shape needs the run gate (`build.fsx -- test --run-gate`), or a Fable compile of it, as
+  evidence.
 
 ## Fable runtime type tests
 

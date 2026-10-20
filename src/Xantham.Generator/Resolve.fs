@@ -1786,6 +1786,10 @@ let private deriveFacts
                                 Grouping.declFile symbol
                                 |> Option.map (fun value -> value * uom<Measure.declFile>)
                             SymbolParent = symbol |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
+                            SymbolFlags =
+                                symbol
+                                |> ValueOption.map _.Flags
+                                |> ValueOption.defaultValue SymbolFlags.None
                             Members = structure.Members
                             Declarations = []
                             DeclarationArguments = []

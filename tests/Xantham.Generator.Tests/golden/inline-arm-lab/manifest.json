@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "package": "inline-arm-lab",
+  "module": "InlineArmLab",
+  "counts": {
+    "exact": 11,
+    "ergonomic": 19,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "DT - detect-tagged-unions",
+      "total": 19,
+      "exact": 18,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 24,
+      "ergonomic": 23,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 37,
+      "exact": 17,
+      "ergonomic": 20
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 7,
+      "exact": 7
+    }
+  ]
+}

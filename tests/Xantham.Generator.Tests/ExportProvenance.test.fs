@@ -45,7 +45,7 @@ let private compile directory (source: string) (consumer: string) =
     File.WriteAllText(Path.Combine(directory, "Consumer.fsproj"), $"""<Project Sdk="Microsoft.NET.Sdk">
 <PropertyGroup><TargetFramework>net10.0</TargetFramework><NuGetAudit>false</NuGetAudit></PropertyGroup>
 <ItemGroup><Compile Include="Binding.fs"/><Compile Include="Consumer.fs"/></ItemGroup>
-<ItemGroup><PackageReference Include="Fable.Core" Version="5.2.0"/></ItemGroup>
+<ItemGroup><PackageReference Include="Fable.Core" Version="5.999.0-xantham.26e40937d"/></ItemGroup>
 <ItemGroup><ProjectReference Include="{coreTs}"/></ItemGroup>
 </Project>""")
     run "dotnet" directory [ "build"; "Consumer.fsproj"; "--verbosity"; "quiet" ]

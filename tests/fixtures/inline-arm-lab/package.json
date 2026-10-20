@@ -1,0 +1,1 @@
+{"name":"inline-arm-lab","type":"module","types":"index.d.ts","description":"Tagged-union arms a case carries whole through InlineInterface: named arms, arms more than their case's fields, and the arms that keep their fields."}

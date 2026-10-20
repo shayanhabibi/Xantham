@@ -1144,7 +1144,11 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
             // Named fields, so the JS keys survive: Fable emits each field under its own name.
             let fields =
                 case.Fields
-                |> List.map (fun field -> $"{ident field.Name}: {printTypeIn true field.Type}")
+                |> List.map (fun field ->
+                    if case.Inlines then
+                        printTypeIn true field.Type
+                    else
+                        $"{ident field.Name}: {printTypeIn true field.Type}")
                 |> String.concat " * "
 
             let carries = if case.Fields.IsEmpty then "" else $" of {fields}"
@@ -1157,6 +1161,8 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
                     match case.CaseTest with
                     | Some test -> yield $"CaseTest({stringLit (caseTestSource test)})"
                     | None -> ()
+                    if case.Inlines then
+                        yield "InlineInterface"
                 ]
 
             match attributes with

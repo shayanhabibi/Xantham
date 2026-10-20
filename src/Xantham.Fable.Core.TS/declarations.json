@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "f53183dc12d09a005c368afd33c95b32b17fbf43ba8c5062bb8a91101f700064",
-  "generator": "45ac0dca293034f74b16f83d766aeecc6553354cd45f7ee138b3f86eb6b8042f",
+  "generator": "543a4e7686af27a4a2a3871163145cc797945c19e49dd56654dcec833cd59f7e",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -495714,7 +495714,7 @@
       "fSharpName": "Fable.Core.TS.Es.ClassMemberDecoratorContext",
       "arity": 0,
       "constraints": [],
-      "api": "cfdd2cf6f9cecca0d2e9a131ee89df264261c03e465ff09234416c259d66d431",
+      "api": "80e8ff176c9327ba9cfe0d1251f30fbb63ca083f39eb352c10b809d13bcb863e",
       "owner": "FableCoreTsInput"
     },
     {
@@ -497770,7 +497770,7 @@
       "fSharpName": "Fable.Core.TS.Es.DecoratorContext",
       "arity": 0,
       "constraints": [],
-      "api": "f641b6578a14fdb5aebee60aeadf6b0c45d5c05835c5ff297a08889f5b8a0573",
+      "api": "c03b0b31a7fb4817a058e3c5ead4e76cc6d05c4962072d64fb04e309cc78cb7c",
       "owner": "FableCoreTsInput"
     },
     {
@@ -522861,7 +522861,7 @@
       "constraints": [
         "none"
       ],
-      "api": "ff2cecf4b024afd59a30df03629a10e6d12b938aca117d07c57cbd90f807080b",
+      "api": "2c93a89f70cf85069ad1dc14709a48ace4c7e70ecffaa7a7bbc1c30ca9bf39c0",
       "owner": "FableCoreTsInput"
     },
     {

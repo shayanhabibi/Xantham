@@ -1274,6 +1274,9 @@ type TypeFacts =
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
         SymbolParent: int<symbolId> option
+        /// Flags of the type's own symbol: `Class`, or `Interface` merged with a variable for a
+        /// constructable host interface. `None` where the type has no symbol.
+        SymbolFlags: SymbolFlags
         Members: ResolvedMember list
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
@@ -1345,6 +1348,7 @@ module TypeFacts =
             DeclarationArguments = []
             AliasDeclarations = []
             SymbolParent = None
+            SymbolFlags = SymbolFlags.None
             Members = []
             IndexInfos = []
             CallSignatures = []
@@ -1723,8 +1727,8 @@ type FsCaseTest =
 /// itself from the case's compiled name. Verified against Fable 5.13: `Circle(radius = 2.0)`
 /// emits `{ kind: "circle", radius: 2 }`, and a `None` in an optional field omits the key
 /// rather than writing `undefined`, which is exactly TypeScript's optional-property semantics.
-/// Carrying the arm type as a single payload field instead does *not* work - Fable wraps it as
-/// `{ kind: "circle", Item: x }`, an object no TypeScript signature would accept.
+/// A plain single payload field is wrapped as `{ kind: "circle", Item: x }`; an `Inlines` case
+/// is the arm itself.
 type FsTaggedCase =
     {
         Name: string
@@ -1732,6 +1736,9 @@ type FsTaggedCase =
         /// The test separating the case from other cases sharing its tag value, checked after
         /// the tag matches. Rendered as the case's `[<CaseTest>]`.
         CaseTest: FsCaseTest option
+        /// Whether the case's one field is the arm's interface, rendered `[<InlineInterface>]`:
+        /// the case compiles as the arm with the tag set, and `Fields` holds that one field.
+        Inlines: bool
         Fields: FsTaggedField list
         /// The name of the case's `Create` static member, which builds the case with its optional
         /// fields omittable and its literal fields written.
