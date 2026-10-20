@@ -5423,6 +5423,57 @@ let pipelineTests =
                       Expect.stringContains source "type ReadonlySecond = U2<" "nor does the readonly-second pair" ])
 
         yield!
+            fixtureTests "value-side-lab" (handFixture "value-side-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a merged export's value side is named for its role, SY007" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map (fun f -> f.Symbol, f.Message)
+                          |> List.sort
+
+                      Expect.stringContains source "static member Shape: ShapeNamespace = jsNative" "a namespace merged with a tagged union"
+                      Expect.isFalse (source.Contains "type Shape4") "no number left over from the dropped arms"
+                      Expect.stringContains source "static member Point: PointNamespace = jsNative" "a namespace merged with an interface"
+
+                      let pointValue = declarationBodyOf source "PointNamespace"
+                      let pointModule = moduleBodyOf source "Point"
+
+                      Expect.stringContains pointValue "abstract defaults: Point.Defaults" "a value-owned shape nests under the source namespace"
+                      Expect.isFalse (source.Contains "PointNamespace.") "nothing nests under the minted value interface"
+                      Expect.isFalse (source.Contains "Point2") "nor under a collision number"
+                      Expect.stringContains pointModule "type Defaults =" "it is declared in the namespace's module"
+                      Expect.stringContains pointValue "abstract pinned: Point.Anchor" "the namespace type keeps its spelling"
+                      Expect.stringContains pointValue "abstract anchor: Point.Anchor2" "the value-owned shape it collides with takes the number"
+                      Expect.stringContains pointModule "type Anchor2 =" "declared beside the namespace type"
+                      Expect.stringContains source "static member Level: LevelEnum = jsNative" "an enum's value side"
+                      Expect.stringContains source "static member Mode: ModeNamespace2 = jsNative" "a taken role name takes a number"
+
+                      Expect.stringContains
+                          (declarationBodyOf source "ModeNamespace")
+                          "abstract reserved: string with get, set"
+                          "and the exported type holding the role name is untouched"
+
+                      Expect.stringContains source "static member Config: Config = jsNative" "a namespace alone keeps its name"
+                      Expect.stringContains source "static member Token: TokenValue = jsNative" "a const merged with a type"
+
+                      Expect.stringContains
+                          (declarationBodyOf source "TokenValue")
+                          "abstract options: TokenValue.Options"
+                          "a variable has no source namespace; its value-owned shape nests under its own name"
+
+                      Expect.equal
+                          (messagesFor "SY007")
+                          [ "LevelEnum", "Level's value side declared as LevelEnum; Level is the type side"
+                            "ModeNamespace2", "Mode's value side declared as ModeNamespace2; Mode is the type side"
+                            "PointNamespace", "Point's value side declared as PointNamespace; Point is the type side"
+                            "ShapeNamespace", "Shape's value side declared as ShapeNamespace; Shape is the type side"
+                            "TokenValue", "Token's value side declared as TokenValue; Token is the type side" ]
+                          "each role-named value side is reported, and only those" ])
+
+        yield!
             fixtureTests "frontier-width-lab" (handFixture "frontier-width-lab") GeneratorConfig.Default (fun package ->
                 // Wave sixteen: `Frontier<T>.map<U>`'s return type applies the interface to the
                 // method's own type parameter, which the checker clones afresh per

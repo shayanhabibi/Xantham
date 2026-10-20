@@ -17,18 +17,18 @@ type Kind =
     | [<CompiledName("twofactor")>] N2fa
 
 [<Interface>]
-type Kind2 =
+type KindEnum =
     abstract ``@cf/meta``: string
     abstract ``beta channel``: string
     abstract ``2fa``: string
     [<ParamObject; Emit("$0")>]
-    static member Create (``@cf/meta``: string, ``beta channel``: string, ``2fa``: string) : Kind2 = jsNative
+    static member Create (``@cf/meta``: string, ``beta channel``: string, ``2fa``: string) : KindEnum = jsNative
 
 type Collide =
     | AB = 1
     | AB2 = 2
 
-type Collide2 =
+type CollideEnum =
     abstract ``a-b``: float
     abstract a_b: float
     [<EmitIndexer>]
@@ -40,10 +40,10 @@ type Collide2 =
 type Plain = string
 
 [<Interface>]
-type Plain2 =
+type PlainEnum =
     abstract ``one-two``: string
     [<ParamObject; Emit("$0")>]
-    static member Create (``one-two``: string) : Plain2 = jsNative
+    static member Create (``one-two``: string) : PlainEnum = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -54,14 +54,14 @@ type Exports =
     /// becomes the case; its value stays the compiled text a JavaScript consumer reads.
     /// </summary>
     [<Import("Kind", "case-sanitise-lab")>]
-    static member Kind: Kind2 = jsNative
+    static member Kind: KindEnum = jsNative
     /// <summary>
     /// Negative: two member names that sanitise to the same identifier must still keep separate cases.
     /// </summary>
     [<Import("Collide", "case-sanitise-lab")>]
-    static member Collide: Collide2 = jsNative
+    static member Collide: CollideEnum = jsNative
     /// <summary>
     /// Negative: an ordinary dash/underscore/dot-separated member name is untouched noise-wise.
     /// </summary>
     [<Import("Plain", "case-sanitise-lab")>]
-    static member Plain: Plain2 = jsNative
+    static member Plain: PlainEnum = jsNative
