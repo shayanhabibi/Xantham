@@ -3,9 +3,9 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 775,
-    "ergonomic": 2185,
-    "widened": 608,
+    "exact": 815,
+    "ergonomic": 2158,
+    "widened": 595,
     "escape": 5
   },
   "passes": [
@@ -59,17 +59,17 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 1753,
+      "total": 1355,
       "exact": 8,
-      "ergonomic": 1218,
-      "widened": 527
+      "ergonomic": 950,
+      "widened": 397
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2238,
-      "exact": 70,
-      "ergonomic": 2140,
-      "widened": 28
+      "total": 2135,
+      "exact": 69,
+      "ergonomic": 2042,
+      "widened": 24
     },
     {
       "pass": "settle-symbol-members",
@@ -91,9 +91,9 @@
     },
     {
       "pass": "resolve-export-collisions",
-      "total": 35,
+      "total": 34,
       "ergonomic": 4,
-      "widened": 31
+      "widened": 30
     },
     {
       "pass": "DD - drop-orphan-delegates",
