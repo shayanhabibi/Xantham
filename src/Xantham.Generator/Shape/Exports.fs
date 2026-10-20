@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.Exports
+module Xantham.Generator.Shape.Exports
 
 open Xantham.Generator
 open Xantham.Generator.Measure
@@ -71,7 +71,15 @@ let shapeExports: Pass<ShapeModel> =
                                 | None ->
                                     emit (Finding.make findingName ShapeExports.NoValueType)
                                     []
-                                | Some facts when not facts.CallSignatures.IsEmpty ->
+                                // A function's value is a method only where its call signatures
+                                // are all it carries; one merged with a namespace holding values
+                                // is a hybrid object, bound whole and called through `Invoke`.
+                                | Some facts when
+                                    not facts.CallSignatures.IsEmpty
+                                    && facts.Members.IsEmpty
+                                    && facts.IndexInfos.IsEmpty
+                                    && facts.ConstructSignatures.IsEmpty
+                                    ->
                                     facts.CallSignatures
                                     |> List.mapi (fun ordinal signature ->
                                         let typeParameters, parameters, returns, signatureFindings =

@@ -774,8 +774,14 @@ module Es =
         abstract keys: o: obj -> string[]
         [<EmitConstructor>]
         abstract Create: ?value: obj -> Object
+        /// <summary>
+        /// Provides functionality common to all JavaScript objects.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: unit -> obj
+        /// <summary>
+        /// Provides functionality common to all JavaScript objects.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: value: obj -> obj
 
@@ -817,6 +823,9 @@ module Es =
     type FunctionConstructor =
         [<EmitConstructor>]
         abstract Create: [<ParamArray>] args: string[] -> Function
+        /// <summary>
+        /// Creates a new function.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: [<ParamArray>] args: string[] -> Function
 
@@ -1061,6 +1070,9 @@ module Es =
         abstract fromCharCode: [<ParamArray>] codes: float[] -> string
         [<EmitConstructor>]
         abstract Create: ?value: obj -> String
+        /// <summary>
+        /// Allows manipulation and formatting of text strings and determination and location of substrings within strings.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: ?value: obj -> string
 
@@ -1143,6 +1155,9 @@ module Es =
         abstract POSITIVE_INFINITY: float
         [<EmitConstructor>]
         abstract Create: ?value: obj -> Number
+        /// <summary>
+        /// An object that represents a number of any kind. All JavaScript numbers are 64-bit floating-point numbers.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: ?value: obj -> float
 
@@ -1575,6 +1590,9 @@ module Es =
         abstract Create: value: U2<string, float> -> Date
         [<EmitConstructor>]
         abstract Create: year: float * monthIndex: float * ?date: float * ?hours: float * ?minutes: float * ?seconds: float * ?ms: float -> Date
+        /// <summary>
+        /// Enables basic storage and retrieval of dates and times.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: unit -> string
 
