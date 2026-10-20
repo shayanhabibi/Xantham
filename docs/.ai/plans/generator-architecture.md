@@ -3056,3 +3056,12 @@ dropped). The shapes an enum's or namespace's values own nest under the source n
 `Point.Anchor` holds the name. Renamed in the goldens: `case-sanitise-lab` `KindEnum`,
 `CollideEnum`, `PlainEnum`; `literal-member-lab` `LevelEnum`. This change leaves Core.TS and Node
 unchanged.
+
+`shape-exports` binds a callable value export as a method only where its value type carries
+call signatures alone. A function merged with a namespace holding values, or a callable `const`
+carrying properties, binds as that hybrid object (`static member stamp: Stamp`) and is called
+through `Invoke`. Its value side is role-named like any merged value side (`MergedNamespace`,
+`SY007`; Task D's rule now excludes classes only). `synthesize-paramobjects` refuses `Create` on
+any declaration whose type is callable (SP003 "the declaration is callable…"), including one
+whose call is the SI001 loss: no object literal is callable. Node: ~76 function+namespace
+exports move to the property form, and 64 callable hybrids lose `Create`; Core.TS loses 2.

@@ -3,9 +3,9 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 53,
-    "ergonomic": 224,
-    "widened": 68,
+    "exact": 66,
+    "ergonomic": 217,
+    "widened": 62,
     "escape": 5
   },
   "passes": [
@@ -41,8 +41,8 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 44,
-      "ergonomic": 44
+      "total": 4,
+      "ergonomic": 4
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -61,11 +61,6 @@
       "total": 3,
       "ergonomic": 1,
       "widened": 2
-    },
-    {
-      "pass": "resolve-export-collisions",
-      "total": 6,
-      "widened": 6
     },
     {
       "pass": "render-source",

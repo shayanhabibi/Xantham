@@ -23,71 +23,75 @@ type Widget =
 /// <summary>
 /// The same shape, written as a named declaration directly.
 /// </summary>
-[<Interface>]
 type Trigger =
     abstract label: string with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: value: float -> float
-    [<ParamObject; Emit("$0")>]
-    static member Create (label: string) : Trigger = jsNative
 
 /// <summary>
 /// Two call signatures on one hybrid, distinguished by arity: both become <c>Invoke</c> overloads.
 /// </summary>
-[<Interface>]
 type Multi =
     abstract tag: string with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: x: float -> float
     [<Emit("$0($1...)")>]
     abstract Invoke: x: float * y: float -> float
-    [<ParamObject; Emit("$0")>]
-    static member Create (tag: string) : Multi = jsNative
 
 /// <summary>
 /// Two call signatures that do not separate under F#'s overload rules - same parameter types,
 /// different return types only. One <c>Invoke</c> overload survives; <c>dedupe-overloads</c> drops the
 /// other the same way it drops any other colliding overload.
 /// </summary>
-[<Interface>]
 type Ambiguous =
     abstract note: string with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: x: float -> float
-    [<ParamObject; Emit("$0")>]
-    static member Create (note: string) : Ambiguous = jsNative
 
 /// <summary>
 /// A generic call signature, where the interface itself owns no type parameters.
 /// </summary>
-[<Interface>]
 type Identity =
     abstract calls: float with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke<'T>: value: 'T -> 'T
-    [<ParamObject; Emit("$0")>]
-    static member Create (calls: float) : Identity = jsNative
 
 /// <summary>
 /// A generic interface whose call signature reads the interface's own type parameter.
 /// </summary>
-[<Interface>]
 type Boxed<'T> =
     abstract value: 'T with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> 'T
-    [<ParamObject; Emit("$0")>]
-    static member Create (value: 'T) : Boxed<'T> = jsNative
 
 /// <summary>
 /// A hybrid whose own member is already called <c>Invoke</c>: emitting a second one would collide, so
 /// the call signature stays a loss (SI001) rather than reaching Invoke (SI008).
 /// </summary>
-[<Interface>]
 type Collides =
     abstract Invoke: string with get, set
+
+type Stamp =
+    abstract version: string
+    [<Emit("$0($1...)")>]
+    abstract Invoke: s: string -> float
+
+[<Interface>]
+type Merged =
+    abstract m: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (Invoke: string) : Collides = jsNative
+    static member Create (m: string) : Merged = jsNative
+
+type MergedNamespace =
+    abstract version: string
+    [<Emit("$0($1...)")>]
+    abstract Invoke: unit -> Merged
+
+[<Interface>]
+type Fn =
+    abstract value: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: float) : Fn = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -95,25 +99,28 @@ type Exports =
     [<Import("widget", "callable-hybrid-lab")>]
     static member widget: Widget = jsNative
     [<Import("trigger", "callable-hybrid-lab")>]
-    static member trigger (value: float) : float = jsNative
+    static member trigger: Trigger = jsNative
     [<Import("multi", "callable-hybrid-lab")>]
-    static member multi (x: float) : float = jsNative
-    [<Import("multi", "callable-hybrid-lab")>]
-    static member multi (x: float, y: float) : float = jsNative
+    static member multi: Multi = jsNative
     [<Import("ambiguous", "callable-hybrid-lab")>]
-    static member ambiguous (x: float) : U2<float, string> = jsNative
+    static member ambiguous: Ambiguous = jsNative
     [<Import("identity", "callable-hybrid-lab")>]
-    static member identity<'T> (value: 'T) : 'T = jsNative
+    static member identity: Identity = jsNative
     [<Import("boxedNumber", "callable-hybrid-lab")>]
-    static member boxedNumber () : float = jsNative
+    static member boxedNumber: Boxed<float> = jsNative
     [<Import("collides", "callable-hybrid-lab")>]
-    static member collides (x: float) : float = jsNative
+    static member collides: Collides = jsNative
+    [<Import("stamp", "callable-hybrid-lab")>]
+    static member stamp: Stamp = jsNative
+    [<Import("Merged", "callable-hybrid-lab")>]
+    static member Merged: MergedNamespace = jsNative
+    [<Import("solo", "callable-hybrid-lab")>]
+    static member solo (x: string) : float = jsNative
+    [<Import("Fn", "callable-hybrid-lab")>]
+    static member Fn (value: float) : Fn = jsNative
 
 module Widget =
-    [<Interface>]
     type Handler =
         abstract enabled: bool with get, set
         [<Emit("$0($1...)")>]
         abstract Invoke: ``event``: string -> string
-        [<ParamObject; Emit("$0")>]
-        static member Create (enabled: bool) : Handler = jsNative
