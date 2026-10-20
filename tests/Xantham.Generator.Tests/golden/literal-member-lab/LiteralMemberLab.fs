@@ -157,7 +157,7 @@ type Level =
     | Low = 0
     | High = 1
 
-type Level2 =
+type LevelEnum =
     abstract Low: float
     abstract High: float
     [<EmitIndexer>]
@@ -179,7 +179,7 @@ type NotLiterals =
 [<Erase>]
 type Exports =
     [<Import("Level", "literal-member-lab")>]
-    static member Level: Level2 = jsNative
+    static member Level: LevelEnum = jsNative
     [<Import("event", "literal-member-lab")>]
     static member ``event``: PhaseEvent = jsNative
     [<Import("inspect", "literal-member-lab")>]

@@ -200,6 +200,7 @@ module FindingCodes =
             "SY.NameNestedUnderOwner", "SY004"
             "SY.NameSanitisedForIdentifier", "SY005"
             "SY.CallbackDelegateNamed", "SY006"
+            "SY.ValueSideNamed", "SY007"
             "SI.HybridLosesCallSignatures", "SI001"
             "SI.BaseMembersFlattened", "SI002"
             "SI.IntersectionFlattened", "SI003"
@@ -930,6 +931,12 @@ type SynthesizeAnonymous =
     /// parameters carry the names TypeScript spelled, and its arity stays guaranteed.
     | [<Exact>] CallbackDelegateNamed of declaredAs: string
 
+    /// A merged export's value side, which TypeScript spells only as `typeof X`, declared under
+    /// its role (`<Stem>Enum`, `<Stem>Namespace`, `<Stem>Value`) beside the type side holding the
+    /// export's own name, and numbered only where the role name is taken. `Exports.Shape` reads
+    /// `ShapeNamespace`.
+    | [<Ergonomic>] ValueSideNamed of typeSide: string * declaredAs: string
+
     interface IFindingKind with
         member this.Message =
             match this with
@@ -940,6 +947,8 @@ type SynthesizeAnonymous =
                 $"{name} intersects an operand no declaration names; that operand's members are dropped"
             | NameNestedUnderOwner nestedAs -> $"anonymous shape named {nestedAs} under the declaration that owns it"
             | CallbackDelegateNamed declaredAs -> $"callback declared as the named delegate {declaredAs}"
+            | ValueSideNamed(typeSide, declaredAs) ->
+                $"{typeSide}'s value side declared as {declaredAs}; {typeSide} is the type side"
             | NameSanitisedForIdentifier(key, sanitised) ->
                 $"{key} declared as {sanitised}; the source name spells characters an F# declaration name refuses"
 

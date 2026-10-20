@@ -3046,3 +3046,13 @@ pair four to `Contested.Right`.
 
 The exclusive fold also requires every arm to agree on a shared member's readonly; otherwise the
 union stays `U2`, so the folded member's setter cannot depend on which arm comes first.
+
+Where the bare name is taken, `synthesize-anonymous` names an enum's value side `<Stem>Enum`, a
+namespace merged with a type `<Stem>Namespace`, and a variable merged with a type `<Stem>Value`
+(`SY007`), instead of the first free number. The number had also counted arms that
+`drop-orphan-delegates` later prunes (`Shape4` beside a DU whose `Shape2`/`Shape3` were
+dropped). The shapes an enum's or namespace's values own nest under the source namespace
+(`nestBases[value] = root`): `Point.Defaults`, or `Point.Anchor2` where the namespace type
+`Point.Anchor` holds the name. Renamed in the goldens: `case-sanitise-lab` `KindEnum`,
+`CollideEnum`, `PlainEnum`; `literal-member-lab` `LevelEnum`. This change leaves Core.TS and Node
+unchanged.

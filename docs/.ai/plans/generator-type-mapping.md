@@ -857,6 +857,14 @@ Fable F# tuples *are* JS arrays — a happy exact match:
     separates them: the arms of an anonymous union, the parameters of two overloads of one
     member, and two exports of one name with no namespace between them.
     The corpus counts were carried in lane handovers retired on 2026-09-22.
+  - **Landed, #158 follow-up D.** TypeScript spells a merged export's value side only as
+    `typeof X`. It is named for its role beside the type side holding the export's name: an
+    enum's object `<Stem>Enum`, a namespace merged with a type `<Stem>Namespace`, and a variable
+    merged with a type `<Stem>Value`. This mirrors a class static side's `<Stem>Constructor`.
+    `SY.ValueSideNamed` reports each one, and a taken role name takes a number
+    (`ModeNamespace2`). An anonymous shape owned by a namespace's value nests under the
+    namespace's module (`Point.Defaults`), the spelling TypeScript reaches it by; it is numbered
+    only where that module already holds the name.
 - JSDoc → XML doc comments (`getDocumentationComment`, `getJsDocTags`); `@deprecated` →
   `[<Obsolete>]`; `@see`/`@example` carried into `<remarks>`/`<example>`. The tier
   annotation from §1 also lands here. JSDoc is markdown and XML docs are not, so a fenced
