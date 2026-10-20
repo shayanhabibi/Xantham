@@ -6705,6 +6705,27 @@ let catalogRecursiveJsonTests =
     ]
 
 [<Tests>]
+let catalogMappedAliasTests =
+    let package = handFixture "catalog-mapped-alias-lab"
+    testList "catalog mapped alias fixture" [
+        yield!
+            fixtureTests "catalog-mapped-alias-lab" package { handConfig package with DeclarationCatalog = false } (fun package ->
+                [ testCase "aliases applying one mapped-type alias to different arguments keep their own declarations" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (handConfig (Some package)) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      for name in [ "inferFlattenedErrors"; "partialFlattened" ] do
+                          Expect.isFalse
+                              (source.Contains $"type {name}<'T, 'U> = CatalogMappedAliasLab.ZodFlattenedError<'T, 'U>")
+                              $"{name} is not written as ZodFlattenedError"
+
+                          Expect.stringContains
+                              (declarationBodyOf source $"{name}<'T, 'U>")
+                              "abstract formErrors: 'U[] with get, set"
+                              $"{name} declares its own members" ])
+    ]
+
+[<Tests>]
 let classImplementsTests =
     testList "class implements fixture" [
         yield!

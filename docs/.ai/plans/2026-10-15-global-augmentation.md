@@ -740,8 +740,8 @@ back: plan 2 is incomplete, and Tasks 5–8 qualify extension heads through it.
 In `CatalogCompatibility.test.fs`, the `"the current contract pins every version"` expectation becomes:
 
 ```fsharp
-                (1, 6, 10, 3, 1)
-                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 10 keeps augmented owners in their own group and writes the additions as extensions; inference 3 preserves source contracts at the width cutoff"
+                (1, 7, 10, 3, 1)
+                "identity 7 keys an alias over an instantiated mapped type by its own declaration; API 10 keeps augmented owners in their own group and writes the additions as extensions; inference 3 preserves source contracts at the width cutoff"
 ```
 
 Add after it:

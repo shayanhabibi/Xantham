@@ -463,6 +463,19 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 // Intrinsic checker types are shared by unrelated exports. Their aliases
                 // belong to the individual declaration, never the aggregate export handles.
                 None
+            | Some facts when
+                (facts.Response.ObjectFlags
+                 |> ValueOption.exists (fun flags ->
+                     flags.HasFlag ObjectFlags.Mapped && flags.HasFlag ObjectFlags.Instantiated))
+                && facts.Members.IsEmpty
+                && facts.IndexInfos.IsEmpty
+                && facts.MappedRecord.IsNone
+                ->
+                // An instantiated mapped type with unresolved members is keyed by nothing but its
+                // declaration, which every instantiation shares: `{ [P in keyof T]?: U[] }` over
+                // `T` and over `output<T>` would claim one identity. It has none, so the
+                // declaration reading it is keyed by its own alias.
+                None
             | Some facts ->
                 let flags = facts.Response.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "f53183dc12d09a005c368afd33c95b32b17fbf43ba8c5062bb8a91101f700064",
-  "generator": "e838cf0198a818c57188240e415adcaafce2bb2cf7804d36a93d77f75113b632",
+  "generator": "14b052979a1b774b72bc89391d84ce403defeadf736fc6fb6cb39da075d80064",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -519563,9 +519563,9 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "f57d01eb590fd635208da2c6c00a976c490f44076a168202c324b2f77d8a20ac",
+      "identity": "ae1af1320ba4c2b92404e2f64b76db183658ed35c240ad48eb3358cbc7e16594",
       "handles": [
-        "typescript@7.1.0-dev.20260902.1/lib/lib.es5.d.ts#6609.201"
+        "typescript@7.1.0-dev.20260902.1/lib/lib.es5.d.ts#6679.266"
       ],
       "sources": [
         {
@@ -519576,7 +519576,7 @@
           "manifestSha256": "b882cd61538265c33526c4e5ef9d4a2f2636a9da08224b8329fd263ca7a8fddf"
         }
       ],
-      "role": "type",
+      "role": "alias",
       "fSharpName": "Fable.Core.TS.Es.Omit",
       "arity": 2,
       "constraints": [
@@ -540048,7 +540048,7 @@
     "apiVersion": 8,
     "contractVersion": 1,
     "customizationVersion": 1,
-    "identityVersion": 6,
+    "identityVersion": 7,
     "inferenceVersion": 3,
     "compiler": {
       "astProtocolVersion": 8,

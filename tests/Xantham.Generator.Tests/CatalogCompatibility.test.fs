@@ -44,8 +44,8 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 6, 8, 3, 1)
-                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 8 emits literal-keyed methods; inference 3 preserves source contracts at the width cutoff"
+                (1, 7, 8, 3, 1)
+                "identity 7 keys an alias over an instantiated mapped type by its own declaration; API 8 emits literal-keyed methods; inference 3 preserves source contracts at the width cutoff"
 
         testCase "the API contract rejects catalogues built before literal-keyed methods" <| fun _ ->
             rejects "API version" (fun () ->

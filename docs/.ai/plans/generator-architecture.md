@@ -3007,3 +3007,15 @@ through `Invoke`. Its value side is role-named like any merged value side (`Merg
 any declaration whose type is callable (SP003 "the declaration is callable…"), including one
 whose call is the SI001 loss: no object literal is callable. Node: ~76 function+namespace
 exports move to the property form, and 64 callable hybrids lose `Create`; Core.TS loses 2.
+
+## Catalogue identity of an alias over an instantiated mapped type (2026-10-20)
+
+An instantiated mapped type with unresolved members (`{ [P in keyof T]?: U[] }`) has no
+catalogue identity of its own: its only key was its declaration, which every instantiation shares,
+so aliases applying one object alias to different arguments (`ZodFlattenedError<T, U>`,
+`inferFlattenedErrors<T, U> = $ZodFlattenedError<output<T>, U>`) claimed one identity. The
+catalogue then redirected the later aliases to the first, writing `inferFlattenedErrors<'T, 'U> =
+ZodFlattenedError<'T, 'U>`, or refused a pair whose constraints differ (zod's `zod-v4` owner in
+FSharp.CloudEdge). Such an alias is now keyed by its own declaration. A mapped type `MappedRecord`
+describes keeps its structural key. `IdentityVersion` 6 → 7: Core.TS's `Es.Omit` identity moves;
+its binding is unchanged. `catalog-mapped-alias-lab` pins the three aliases.
