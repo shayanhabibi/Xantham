@@ -9310,7 +9310,6 @@ module Es =
         [<Emit("$0($1...)")>]
         abstract Invoke: [<ParamArray>] args: string[] -> GeneratorFunction
 
-    [<Interface>]
     type SymbolConstructor =
         /// <summary>
         /// A method that returns the default iterator for an object. Called by the semantics of the
@@ -9405,31 +9404,6 @@ module Es =
 
         [<Emit("$0($1...)")>]
         abstract Invoke: ?description: U2<string, float> -> obj
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                iterator: obj,
-                prototype: Symbol,
-                ``for``: (string -> obj),
-                keyFor: (obj -> string option),
-                hasInstance: obj,
-                isConcatSpreadable: obj,
-                ``match``: obj,
-                replace: obj,
-                search: obj,
-                species: obj,
-                split: obj,
-                toPrimitive: obj,
-                toStringTag: obj,
-                unscopables: obj,
-                asyncIterator: obj,
-                matchAll: obj,
-                metadata: obj,
-                dispose: obj,
-                asyncDispose: obj
-            ) : SymbolConstructor =
-            jsNative
 
     [<Interface>]
     type IteratorYieldResult<'TYield> =
@@ -10883,7 +10857,6 @@ module Es =
         [<Emit("$0[Symbol.toStringTag]")>]
         abstract SymbolToStringTag: string
 
-    [<Interface>]
     type BigIntConstructor =
         abstract prototype: BigInt
         /// <summary>
@@ -10903,12 +10876,6 @@ module Es =
 
         [<Emit("$0($1...)")>]
         abstract Invoke: value: U4<string, float, bigint, bool> -> bigint
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (prototype: BigInt, asIntN: Func<float, bigint, bigint>, asUintN: Func<float, bigint, bigint>)
-            : BigIntConstructor =
-            jsNative
 
     /// <summary>
     /// A typed array of 64-bit signed integer values. The contents are initialized to 0. If the
@@ -13053,9 +13020,15 @@ module Es =
         [<EmitConstructor>]
         abstract Create: ?value: obj -> Object
 
+        /// <summary>
+        /// Provides functionality common to all JavaScript objects.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: unit -> obj
 
+        /// <summary>
+        /// Provides functionality common to all JavaScript objects.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: value: obj -> obj
 
@@ -13115,6 +13088,9 @@ module Es =
         [<EmitConstructor>]
         abstract Create: [<ParamArray>] args: string[] -> Function
 
+        /// <summary>
+        /// Creates a new function.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: [<ParamArray>] args: string[] -> Function
 
@@ -13693,6 +13669,9 @@ module Es =
         [<EmitConstructor>]
         abstract Create: ?value: obj -> String
 
+        /// <summary>
+        /// Allows manipulation and formatting of text strings and determination and location of substrings within strings.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: ?value: obj -> string
 
@@ -13843,6 +13822,9 @@ module Es =
         [<EmitConstructor>]
         abstract Create: ?value: obj -> Number
 
+        /// <summary>
+        /// An object that represents a number of any kind. All JavaScript numbers are 64-bit floating-point numbers.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: ?value: obj -> float
 
@@ -14487,6 +14469,9 @@ module Es =
         [<EmitConstructor>]
         abstract Create: value: U3<string, float, Date> -> Date
 
+        /// <summary>
+        /// Enables basic storage and retrieval of dates and times.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: unit -> string
 
