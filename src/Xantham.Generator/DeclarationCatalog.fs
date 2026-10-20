@@ -1750,23 +1750,38 @@ let internal applyWithProducer
                 owned
                 |> List.groupBy _.Identity
                 |> List.map (fun (identity, entries) ->
+                    // The least constrained declaration is the canonical one: an application of
+                    // one alias over a use site's constrained parameter is that alias with the
+                    // use site's bound added, which an abbreviation of the canonical can carry.
+                    let constrainedCount (entry: Declaration) =
+                        entry.Constraints |> Array.filter (fun bound -> bound <> Canonical.option id None) |> Array.length
+
                     let entries =
                         entries
                         |> List.sortBy (fun entry ->
                             let name = localName entry
-                            not (Set.contains name exportedNames), name.Split('.').Length, name)
+                            constrainedCount entry, not (Set.contains name exportedNames), name.Split('.').Length, name)
 
                     let canonical = List.head entries
+
+                    // Every bound the canonical declares, the entry declares too.
+                    let narrows (entry: Declaration) =
+                        entry.Constraints.Length = canonical.Constraints.Length
+                        && Array.forall2
+                            (fun (canonicalBound: string) entryBound ->
+                                canonicalBound = Canonical.option id None || canonicalBound = entryBound)
+                            canonical.Constraints
+                            entry.Constraints
 
                     for entry in List.tail entries do
                         if
                             entry.Arity <> canonical.Arity
-                            || entry.Constraints <> canonical.Constraints
+                            || not (narrows entry)
                             || entry.Sources <> canonical.Sources
                             || entry.Api <> canonical.Api
                         then
                             fail
-                                $"incompatible F# declarations claim identity {identity}: {canonical.FSharpName}, {entry.FSharpName} (arity {canonical.Arity}/{entry.Arity}, constraints {canonical.Constraints = entry.Constraints}, sources {canonical.Sources.Length}/{entry.Sources.Length})"
+                                $"incompatible F# declarations claim identity {identity}: {canonical.FSharpName}, {entry.FSharpName} (arity {canonical.Arity}/{entry.Arity}, constraints {canonical.Constraints = entry.Constraints}, sources {canonical.Sources.Length}/{entry.Sources.Length}, api {canonical.Api = entry.Api})"
 
                     canonical, List.tail entries |> List.map (fun entry -> localName entry, canonical))
                 |> List.unzip
