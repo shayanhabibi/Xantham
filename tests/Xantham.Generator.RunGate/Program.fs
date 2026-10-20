@@ -2048,10 +2048,8 @@ let private recordIndex () =
 
 /// §4.4's call side: a hybrid's own call signature reaches Invoke, so `x.Invoke(a)` compiles to
 /// `x(a)` rather than a method call named `Invoke`, mirroring `[<EmitConstructor>]` on the
-/// construct side. `widget.handler` is the one value in this fixture reached at a member
-/// position, so it is the one case that still exposes an explicit `.Invoke` to call through;
-/// every other export is itself the callable value, so `Exports` (unrelated to this pass) already
-/// renders it as a direct static function rather than an object carrying an `Invoke` member.
+/// construct side. A callable export carrying members is bound as that object, so its call and
+/// its members read off the one value; a function standing alone stays a direct static method.
 let private callableHybrids () =
     let widget = CallableHybridLab.Exports.widget
 
@@ -2063,36 +2061,45 @@ let private callableHybrids () =
     equal "and its sibling property still reads off the same object" true widget.handler.enabled
 
     equal
-        "a named-declaration hybrid's export calls straight through to the same function"
+        "a named-declaration hybrid's export calls through Invoke"
         42.0
-        (CallableHybridLab.Exports.trigger 21.0)
+        (CallableHybridLab.Exports.trigger.Invoke 21.0)
+
+    equal "and reads its property off the same function" "double" CallableHybridLab.Exports.trigger.label
 
     equal
-        "an overloaded hybrid's export reaches the two-argument arity"
+        "an overloaded hybrid's Invoke reaches the two-argument arity"
         7.0
-        (CallableHybridLab.Exports.multi (3.0, 4.0))
+        (CallableHybridLab.Exports.multi.Invoke(3.0, 4.0))
 
-    equal "and the one-argument arity" 4.0 (CallableHybridLab.Exports.multi 3.0)
+    equal "and the one-argument arity" 4.0 (CallableHybridLab.Exports.multi.Invoke 3.0)
 
     equal
         "a hybrid whose overloads collided on their parameters calls the one function, under the union of their returns"
         30.0
-        (unbox<float>(CallableHybridLab.Exports.ambiguous 3.0))
+        (unbox<float>(CallableHybridLab.Exports.ambiguous.Invoke 3.0))
 
     equal
         "a call signature's own type parameter reaches through generically"
         "id"
-        (CallableHybridLab.Exports.identity "id")
+        (CallableHybridLab.Exports.identity.Invoke "id")
 
     equal
         "a generic interface's call signature reads its own type parameter"
         42.0
-        (CallableHybridLab.Exports.boxedNumber ())
+        (CallableHybridLab.Exports.boxedNumber.Invoke())
 
     equal
-        "a hybrid whose member is already named Invoke keeps the plain call"
-        6.0
-        (CallableHybridLab.Exports.collides 5.0)
+        "a hybrid whose member is already named Invoke reads that member; its call is the SI001 loss"
+        "not-a-function"
+        CallableHybridLab.Exports.collides.Invoke
+
+    equal "a function merged with a namespace calls through Invoke" 3.0 (CallableHybridLab.Exports.stamp.Invoke "abc")
+    equal "and reads the namespace's value off the same function" "1.0" CallableHybridLab.Exports.stamp.version
+    equal "an interface-merged function calls through Invoke" "made" (CallableHybridLab.Exports.Merged.Invoke()).m
+    equal "and reads its namespace value" "2.0" CallableHybridLab.Exports.Merged.version
+    equal "a function standing alone stays a method" 5.0 (CallableHybridLab.Exports.solo "hello")
+    equal "as does one merged with a type alone" 4.0 (CallableHybridLab.Exports.Fn 4.0).value
 
 /// §4.4's routing counterpart: two call signatures sharing a hoisted type-parameter name under
 /// different bounds reach an interface, each keeping its own `Invoke` overload. `makeCoalescer`

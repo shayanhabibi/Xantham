@@ -1305,9 +1305,7 @@ let pipelineTests =
                             "abstract Invoke: string with get, set"
                             "the declared member keeps its name and type"
 
-                        let collidesStart = source.IndexOf "type Collides ="
-                        let collidesEnd = source.IndexOf("type Exports =", collidesStart)
-                        let collidesBlock = source.Substring(collidesStart, collidesEnd - collidesStart)
+                        let collidesBlock = declarationBodyOf source "Collides"
 
                         Expect.isFalse
                             (collidesBlock.Contains "[<Emit(\"$0($1...)\")>]")
@@ -1317,6 +1315,53 @@ let pipelineTests =
                             (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
                             ("SI001", "Collides")
                             "the residue is reported honestly, not silently dropped"
+
+                    testCase "a callable value carrying members binds whole, called through Invoke" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+                        let merged = declarationBodyOf source "MergedNamespace"
+
+                        Expect.stringContains source "static member stamp: Stamp = jsNative" "a function merged with a namespace"
+                        Expect.stringContains (declarationBodyOf source "Stamp") "abstract version: string" "keeps its namespace value"
+                        Expect.stringContains (declarationBodyOf source "Stamp") "abstract Invoke: s: string -> float" "and its call"
+                        Expect.stringContains source "static member Merged: MergedNamespace = jsNative" "the stem the interface holds takes the role name"
+                        Expect.stringContains merged "abstract Invoke: unit -> Merged" "the call returns the interface"
+                        Expect.stringContains merged "abstract version: string" "beside the namespace value"
+                        Expect.isFalse (source.Contains "type Merged2") "no collision number"
+                        Expect.stringContains source "static member trigger: Trigger = jsNative" "a callable const binds its declared hybrid"
+                        Expect.stringContains source "static member collides: Collides = jsNative" "a hybrid whose call is the SI001 loss binds the same"
+                        Expect.stringContains source "static member solo (x: string) : float = jsNative" "a function alone stays a method"
+                        Expect.stringContains source "static member Fn (value: float) : Fn = jsNative" "a function merged with a type alone stays a method"
+
+                        Expect.contains
+                            (rendered.Findings |> List.filter (fun f -> f.Key = "SY007") |> List.map _.Symbol)
+                            "MergedNamespace"
+                            "the role name is reported"
+
+                    testCase "a callable declaration has no Create" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        for name in [ "Trigger"; "Multi"; "Ambiguous"; "Identity"; "Collides"; "Stamp"; "MergedNamespace" ] do
+                            Expect.isFalse
+                                ((declarationBodyOf source name).Contains "static member Create")
+                                $"{name} is callable, which no object literal is"
+
+                            Expect.equal
+                                (rendered.Findings
+                                 |> List.filter (fun f -> f.Symbol = name && f.Key = "SP003")
+                                 |> List.map _.Message)
+                                [ "no ParamObject Create synthesized: the declaration is callable, which no object literal is" ]
+                                $"{name}'s refusal is reported"
+
+                        Expect.isFalse
+                            ((declarationBodyOf source "Boxed<'T>").Contains "static member Create")
+                            "a generic hybrid the same"
+
+                        Expect.stringContains
+                            (declarationBodyOf source "Widget")
+                            "static member Create (handler: Widget.Handler) : Widget = jsNative"
+                            "a declaration holding a callable member is not itself callable"
                 ])
 
         yield!

@@ -47,10 +47,7 @@ type Exports =
     static member roundPad (length: float) : float = jsNative
 
 module Timers =
-    [<Interface>]
     type Schedule =
         abstract cancel: unit -> unit
         [<Emit("$0($1...)")>]
         abstract Invoke: unit -> unit
-        [<ParamObject; Emit("$0")>]
-        static member Create (cancel: (unit -> unit)) : Schedule = jsNative

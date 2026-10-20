@@ -172,7 +172,6 @@ type MemoOptions<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (?equals: U2<bool, MemoOptions.Equals<'T>>, ?name: string) : MemoOptions<'T> = jsNative
 
-[<Interface>]
 type Errored =
     /// <remarks>TypeScript type: <c>"errored"</c></remarks>
     abstract state: string with get, set
@@ -181,15 +180,12 @@ type Errored =
     abstract latest: unit
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> unit
-    [<ParamObject; Emit("({ state: 'errored', ...$0 })")>]
-    static member Create (loading: bool, error: obj) : Errored = jsNative
 
 module Errored =
     /// <remarks>TypeScript type: <c>"errored"</c></remarks>
     [<Literal>]
     let state = "errored"
 
-[<Interface>]
 type Pending =
     /// <remarks>TypeScript type: <c>"pending"</c></remarks>
     abstract state: string with get, set
@@ -198,15 +194,12 @@ type Pending =
     abstract latest: unit
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> unit
-    [<ParamObject; Emit("({ state: 'pending', ...$0 })")>]
-    static member Create (loading: bool) : Pending = jsNative
 
 module Pending =
     /// <remarks>TypeScript type: <c>"pending"</c></remarks>
     [<Literal>]
     let state = "pending"
 
-[<Interface>]
 type Ready<'T> =
     /// <remarks>TypeScript type: <c>"ready"</c></remarks>
     abstract state: string with get, set
@@ -215,15 +208,12 @@ type Ready<'T> =
     abstract latest: 'T with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> 'T
-    [<ParamObject; Emit("({ state: 'ready', ...$0 })")>]
-    static member Create (loading: bool, latest: 'T) : Ready<'T> = jsNative
 
 module Ready =
     /// <remarks>TypeScript type: <c>"ready"</c></remarks>
     [<Literal>]
     let state = "ready"
 
-[<Interface>]
 type Refreshing<'T> =
     /// <remarks>TypeScript type: <c>"refreshing"</c></remarks>
     abstract state: string with get, set
@@ -232,8 +222,6 @@ type Refreshing<'T> =
     abstract latest: 'T with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> 'T
-    [<ParamObject; Emit("({ state: 'refreshing', ...$0 })")>]
-    static member Create (loading: bool, latest: 'T) : Refreshing<'T> = jsNative
 
 module Refreshing =
     /// <remarks>TypeScript type: <c>"refreshing"</c></remarks>
@@ -242,7 +230,6 @@ module Refreshing =
 
 type Resource<'T> = U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved>
 
-[<Interface>]
 type Unresolved =
     /// <remarks>TypeScript type: <c>"unresolved"</c></remarks>
     abstract state: string with get, set
@@ -251,8 +238,6 @@ type Unresolved =
     abstract latest: unit
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> unit
-    [<ParamObject; Emit("({ state: 'unresolved', ...$0 })")>]
-    static member Create (loading: bool) : Unresolved = jsNative
 
 module Unresolved =
     /// <remarks>TypeScript type: <c>"unresolved"</c></remarks>
@@ -339,13 +324,10 @@ type ResolvedJSXElement = U4<float, bool, Fable.Core.TS.Dom.Node, string> option
 
 type ResolvedChildren = U5<float, bool, ResolvedJSXElement[], Fable.Core.TS.Dom.Node, string> option
 
-[<Interface>]
 type ChildrenReturn =
     abstract toArray: (unit -> ResolvedJSXElement[]) with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> ResolvedChildren
-    [<ParamObject; Emit("$0")>]
-    static member Create (toArray: (unit -> ResolvedJSXElement[])) : ChildrenReturn = jsNative
 
 [<Interface>]
 type ExternalSource =
@@ -1440,19 +1422,16 @@ module From =
 
 /// <summary>solid-js/h</summary>
 module H =
-    [<Interface>]
     type H =
         abstract Fragment: (H.H.Fragment.Props -> H.H.Fragment.Props.Children.Item.Result[]) with get, set
         [<Emit("$0($1...)")>]
         abstract Invoke: [<ParamArray>] args: obj[] -> (unit -> U2<H.H.Fragment.Props.Children.Item.Result[], H.H.Fragment.Props.Children.Item.Result>)
-        [<ParamObject; Emit("$0")>]
-        static member Create (Fragment: (H.H.Fragment.Props -> H.H.Fragment.Props.Children.Item.Result[])) : H = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
         [<Import("default", "solid-js/h")>]
-        static member h ([<ParamArray>] args: obj[]) : (unit -> U2<H.H.Fragment.Props.Children.Item.Result[], H.H.Fragment.Props.Children.Item.Result>) = jsNative
+        static member h: H = jsNative
 
     module H =
         module Fragment =

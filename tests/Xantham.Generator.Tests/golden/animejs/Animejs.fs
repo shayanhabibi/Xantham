@@ -3923,13 +3923,10 @@ type ChainablesMap =
 
 type ChainedUtilsResult = (float -> float)
 
-[<Interface>]
 type ChainableUtil =
     inherit ChainablesMap
     [<Emit("$0($1...)")>]
     abstract Invoke: value: float -> float
-    [<ParamObject; Emit("$0")>]
-    static member Create (clamp: ChainedClamp, round: ChainedRound, snap: ChainedSnap, wrap: ChainedWrap, lerp: ChainedLerp, damp: ChainedDamp, mapRange: ChainedMapRange, roundPad: ChainedRoundPad, padStart: ChainedPadStart, padEnd: ChainedPadEnd, degToRad: ChainedDegToRad, radToDeg: ChainedRadToDeg) : ChainableUtil = jsNative
 
 type ChainedRoundPad = (float -> ChainableUtil)
 
@@ -4564,13 +4561,10 @@ module AutoLayoutParams =
         [<Emit("$0($1...)")>]
         abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
 
-    [<Interface>]
     type Delay2 =
         inherit TweakRegister
         [<Emit("$0($1...)")>]
         abstract Invoke: ?target: Target * ?index: float * ?targets: Target[] * ?prevTween: Tween -> FunctionValueReturn
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, defaultValue: obj) : Delay2 = jsNative
 
     type Ease = delegate of target: Target option * index: float option * targets: Target[] option * prevTween: Tween option -> FunctionValueReturn
 

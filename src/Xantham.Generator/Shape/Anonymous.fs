@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.Anonymous
+module Xantham.Generator.Shape.Anonymous
 
 open Xantham.Generator
 open Xantham.Generator.Measure
@@ -760,12 +760,11 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
     /// The role an export's value side is named for beside its type side, and whether the
     /// shapes its values own nest under the source namespace: an enum's object, a namespace or a
-    /// variable merged with a type. A class's static side and a function are not value sides
-    /// this pass names.
+    /// variable merged with a type. A class's static side is not a value side this pass names.
     let valueSideRole (export: HarvestedExport) =
         let flags = export.Symbol.Flags
 
-        if hasAny (SymbolFlags.Class ||| SymbolFlags.Function) flags then
+        if hasAny SymbolFlags.Class flags then
             None
         elif hasAny (SymbolFlags.RegularEnum ||| SymbolFlags.ConstEnum) flags then
             Some("Enum", true)

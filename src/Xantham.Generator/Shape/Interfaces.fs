@@ -64,6 +64,18 @@ let shapeInterfaces: Pass<ShapeModel> =
                             |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
                         |> Map.ofList
 
+                    // The JSDoc of the export whose value a declaration is: a function merged
+                    // with a namespace documents its call signatures, which the hybrid's
+                    // `Invoke` carries.
+                    let valueDocs =
+                        model.Harvest.Exports
+                        |> List.choose (fun export ->
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                            |> Option.bind _.Value
+                            |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
+                        |> List.distinctBy fst
+                        |> Map.ofList
+
                     // A union whose arms agree on every member except which ones they declare
                     // `never` (wave fourteen item 4): folded into one interface named after the
                     // union itself, with the exclusive members optional and one `Create`
@@ -328,10 +340,13 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                             findings <- findings @ signatureFindings
 
+                                            let docs, tags =
+                                                Map.tryFind typeId valueDocs |> Option.defaultValue ("", [])
+
                                             FsInvoke
                                                 {
-                                                    Docs = ""
-                                                    Tags = []
+                                                    Docs = docs
+                                                    Tags = signatureTags tags signature
                                                     TypeParameters = typeParameters
                                                     Parameters = parameters
                                                     Return = returns

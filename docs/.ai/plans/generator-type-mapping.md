@@ -810,6 +810,11 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   checker has already merged: `getExportsOfModule`/`getMembersOfSymbol` on the *symbol* see
   the union. Generate from symbols, not from individual declaration nodes, and merging costs
   nothing. (This bit ts2fable hard; it falls out for free here.)
+- A function merged with a namespace that holds values is one hybrid value: the export binds as
+  the object (`Exports.stamp: Stamp`), its call through `Invoke` and its namespace values as
+  members (#158 follow-up F). A function with no namespace values stays a static method per
+  signature. A callable declaration has no `Create`: TypeScript accepts no object literal for it.
+  A global `declare var X: XConstructor` binds the same way, as the constructor object.
 - Re-exports / barrel files → follow `getAliasedSymbol` to the origin, emit once at the
   origin, alias elsewhere (F# module abbreviations / type abbreviations).
 - A required `function` declaration of a namespace object (`export * as ns`), of `globalThis`

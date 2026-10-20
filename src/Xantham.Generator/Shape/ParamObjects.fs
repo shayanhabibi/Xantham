@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.ParamObjects
+module Xantham.Generator.Shape.ParamObjects
 
 open Xantham.Generator
 open Xantham.TypeScript.Wire
@@ -27,6 +27,9 @@ module private Reason =
     [<Literal>]
     let EntrypointClass =
         "the declaration is a class a consumer inherits, where `new` is the construction"
+
+    [<Literal>]
+    let Callable = "the declaration is callable, which no object literal is"
 
     [<Literal>]
     let SymbolKeyed =
@@ -68,7 +71,7 @@ let private isLiteralMember (m: FsMember) = (literalMember m).IsSome
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
 /// and carries no `Create` parameter of its own.
-let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
+let private refusal (callable: bool) (decl: FsInterfaceDecl) (members: FsMember list) =
     let methodNames =
         members
         |> List.choose (function
@@ -77,6 +80,8 @@ let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
 
     if decl.Entrypoint.IsSome then
         Some Reason.EntrypointClass
+    elif callable || decl.Members |> List.exists isInvoke then
+        Some Reason.Callable
     elif
         decl.Members |> List.exists isSymbolKeyed'
         || decl.Inherits |> List.exists (sequenceElement >> Option.isSome)
@@ -142,6 +147,17 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                 async {
                     let mutable findings = []
 
+                    // A declaration whose type is callable, whether or not its call signatures
+                    // reached `Invoke` (SI001 leaves none when a member is named `Invoke`).
+                    let callable =
+                        model.DeclNames
+                        |> Map.toList
+                        |> List.choose (fun (typeId, name) ->
+                            match Map.tryFind typeId model.Types with
+                            | Some facts when not facts.CallSignatures.IsEmpty -> Some name
+                            | _ -> None)
+                        |> Set.ofList
+
                     let decls =
                         model.Decls
                         |> List.map (function
@@ -158,7 +174,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                 // binds only the properties and methods beside it.
                                 let members = decl.Members |> List.filter (isInvoke >> not)
 
-                                match refusal decl members with
+                                match refusal (Set.contains decl.Name callable) decl members with
                                 | Some reason ->
                                     findings <-
                                         findings
