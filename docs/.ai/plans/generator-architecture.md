@@ -2975,6 +2975,36 @@ negative refuses); `DT002` 56 → 62; `DT005` 33 → 48; `DD002` 55 → 76 as ev
 `catalog-recursive-json-lab` ships its group again (`GE001`, one declaration, `Payload`).
 Core.TS's binding and Node are unchanged.
 
+## Arm interfaces carried whole (2026-10-20, InlineInterface)
+
+A case whose arm has a declared name, or whose arm carries more than its case's fields (a method,
+an index signature), is a case of one `[<InlineInterface>]` field, the arm's interface, from the
+Fable fork's `Fable.Core` (`tools/fable-fork/fork.json`): `Ping of Ping` compiles as the `Ping`
+value with the tag set, and a field read returns the union value itself (`DT009`). An anonymous
+plain-data arm keeps its fields. `Spec.caseInlinesArm` excludes an arm with a call or construct
+signature and a class instance (`Spec.isClassInstance`: an ambient class, a class symbol, an
+interface merged with a variable such as a DOM host interface, or an instantiation of one):
+the fork constructs an inlined case by copying the value onto its prototype, which loses a
+function's callability and a host object's internal state. Such a union stays an erased union
+(`DT001`). `TypeFacts.SymbolFlags` carries the flags of the type's own symbol for that test. A
+named arm sharing its tag value takes its case name from the arm (`Done`, `Aborted`), not
+`uniqueCaseNames`' numbered tag. A tag-only named arm is no longer a bare case: it carries its
+interface (`Queue of QueueInfo`). Only Fable validates an `[<InlineInterface>]` case
+(`footguns.md`); the projection companions, catalogue consumers and width-admission scratch
+projects now pin the fork's `Fable.Core`, checked by `fable-fork.fsx -- check`.
+
+Measured over the goldens against `3b40e89a`: `DT009` 0 → 135 (`@cloudflare/workers-types` 75,
+`shared-tag-lab` 25, `compiler-lib-ownership-lab` 11, `inline-arm-lab` 9, `tagged-arm-lab` 5, 2
+each in `generic-tag-lab`, `instantiation-operand-lab`, `nominal-lab`, `phase-b-lab`,
+`projection-lab`); `DT005` 37 → 16 (workers 24 → 5) as inlined cases need no `Create<Case>`;
+workers `TR032` 3565 → 3529 and tiers 417/1257/285/1 → 427/1251/282/1. `compiler-lib-ownership-lab`'s
+`ClassMemberDecoratorContext` and `DecoratorContext` become DUs (`DT001` 2 → 0, `DT002` 0 → 2);
+their `unknown` arguments now report `TR009` per case (20 → 36), the same widening. Core.TS
+regenerated: the two decorator contexts become DUs and `PromiseSettledResult` carries
+`PromiseFulfilledResult<'T>` and `PromiseRejectedResult` whole, 13 inlined cases in all;
+`FileSystemDirectoryHandle | FileSystemFileHandle` stays `U2`. The changed goldens and Core.TS
+compile under Fable.
+
 ## Exclusive-arm fold arms and signatures, value-side names (2026-10-15, #158 follow-up)
 
 `shape-interfaces` removes only an exclusive fold's anonymous arms (`Spec.isAnonymousArm`) from

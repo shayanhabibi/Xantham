@@ -4569,7 +4569,7 @@ let pipelineTests =
                       Expect.stringContains source "abstract ``event``: Wide.Event" "the member reads a declaration"
                       Expect.stringContains source "TypeScriptTaggedUnion(\"type\", CaseRules.None)" "declared as a DU"
                       Expect.stringContains source "| [<CompiledName(\"fetch\"); InlineInterface>] Fetch of FetchInfo" "carrying the named arm's interface"
-                      Expect.stringContains source "| [<CompiledName(\"queue\")>] Queue" "and a tag-only arm as a bare case"
+                      Expect.stringContains source "| [<CompiledName(\"queue\"); InlineInterface>] Queue of QueueInfo" "and a tag-only named arm as its interface"
                       Expect.equal (keysFor "Wide.Event") [ "DT002"; "SY004" ] "the mint is reported under the name it claimed"
 
                       // The same union at a callback parameter: one type id, one declaration.

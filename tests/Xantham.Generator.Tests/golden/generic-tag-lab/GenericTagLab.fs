@@ -94,8 +94,8 @@ module Rejected =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
 type Settled<'T> =
-    | [<CompiledName("fulfilled")>] Fulfilled of value: 'T
-    | [<CompiledName("rejected")>] Rejected of reason: string
+    | [<CompiledName("fulfilled"); InlineInterface>] Fulfilled of Fulfilled<'T>
+    | [<CompiledName("rejected"); InlineInterface>] Rejected of Rejected
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Job<'T> =

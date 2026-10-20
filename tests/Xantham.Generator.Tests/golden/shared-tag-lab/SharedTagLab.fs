@@ -214,9 +214,9 @@ type OnWide = (Wide.Event -> unit)
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Named =
-    | [<CompiledName("alarm")>] Alarm of scheduledTime: float
-    | [<CompiledName("fetch")>] Fetch of url: string
-    | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
+    | [<CompiledName("alarm"); InlineInterface>] Alarm of AlarmInfo
+    | [<CompiledName("fetch"); InlineInterface>] Fetch of FetchInfo
+    | [<CompiledName("jsrpc"); InlineInterface>] Jsrpc of JsRpcInfo
 
 [<Interface>]
 type Alias =
@@ -249,22 +249,22 @@ type Scheduler =
 module Narrow =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Event =
-        | [<CompiledName("email")>] Email
-        | [<CompiledName("queue")>] Queue
-        | [<CompiledName("scheduled")>] Scheduled
+        | [<CompiledName("email"); InlineInterface>] Email of EmailInfo
+        | [<CompiledName("queue"); InlineInterface>] Queue of QueueInfo
+        | [<CompiledName("scheduled"); InlineInterface>] Scheduled of ScheduledInfo
 
 module OnEvent =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Event =
-        | [<CompiledName("alarm")>] Alarm of scheduledTime: float
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("email")>] Email
-        | [<CompiledName("fetch")>] Fetch of url: string
-        | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
-        | [<CompiledName("queue")>] Queue
-        | [<CompiledName("scheduled")>] Scheduled
-        | [<CompiledName("socket")>] Socket
-        | [<CompiledName("trace")>] Trace
+        | [<CompiledName("alarm"); InlineInterface>] Alarm of AlarmInfo
+        | [<CompiledName("custom"); InlineInterface>] Custom of CustomInfo
+        | [<CompiledName("email"); InlineInterface>] Email of EmailInfo
+        | [<CompiledName("fetch"); InlineInterface>] Fetch of FetchInfo
+        | [<CompiledName("jsrpc"); InlineInterface>] Jsrpc of JsRpcInfo
+        | [<CompiledName("queue"); InlineInterface>] Queue of QueueInfo
+        | [<CompiledName("scheduled"); InlineInterface>] Scheduled of ScheduledInfo
+        | [<CompiledName("socket"); InlineInterface>] Socket of SocketInfo
+        | [<CompiledName("trace"); InlineInterface>] Trace of TraceInfo
         | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: string * message: obj * truncated: bool option
         /// <param name="level"></param>
         /// <param name="message"></param>
@@ -287,13 +287,13 @@ module Scheduler =
 module Wide =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Event =
-        | [<CompiledName("alarm")>] Alarm of scheduledTime: float
-        | [<CompiledName("connect")>] Connect
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("email")>] Email
-        | [<CompiledName("fetch")>] Fetch of url: string
-        | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
-        | [<CompiledName("queue")>] Queue
-        | [<CompiledName("scheduled")>] Scheduled
-        | [<CompiledName("socket")>] Socket
-        | [<CompiledName("trace")>] Trace
+        | [<CompiledName("alarm"); InlineInterface>] Alarm of AlarmInfo
+        | [<CompiledName("connect"); InlineInterface>] Connect of ConnectInfo
+        | [<CompiledName("custom"); InlineInterface>] Custom of CustomInfo
+        | [<CompiledName("email"); InlineInterface>] Email of EmailInfo
+        | [<CompiledName("fetch"); InlineInterface>] Fetch of FetchInfo
+        | [<CompiledName("jsrpc"); InlineInterface>] Jsrpc of JsRpcInfo
+        | [<CompiledName("queue"); InlineInterface>] Queue of QueueInfo
+        | [<CompiledName("scheduled"); InlineInterface>] Scheduled of ScheduledInfo
+        | [<CompiledName("socket"); InlineInterface>] Socket of SocketInfo
+        | [<CompiledName("trace"); InlineInterface>] Trace of TraceInfo

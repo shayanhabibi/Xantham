@@ -38,8 +38,8 @@ module Err =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Outcome =
-    | [<CompiledName("err")>] Err of message: string
-    | [<CompiledName("ok")>] Ok of value: string
+    | [<CompiledName("err"); InlineInterface>] Err of Err
+    | [<CompiledName("ok"); InlineInterface>] Ok of Ok<string>
 
 [<Interface>]
 type Api =
