@@ -120,10 +120,12 @@ module internal WireMeasures =
             this.IndexType |> ValueOption.map (fun value -> value * uom<typeId>)
 
         member this.SymbolId =
-            this.Symbol |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
+            this.Symbol
+            |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
 
         member this.AliasSymbolId =
-            this.AliasSymbol |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
+            this.AliasSymbol
+            |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
 
         member this.AliasArgumentTypeIds =
             this.AliasTypeArguments
@@ -135,10 +137,12 @@ module internal WireMeasures =
                 File = this.Reference.File |> ValueOption.map _.NodeId
                 Id = this.Reference.Id
             }
+
         member this.SymbolName = this.Name * uom<symbolName>
 
         member this.ParentSymbolId =
-            this.Parent |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
+            this.Parent
+            |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
 
         member this.DeclarationHandles =
             this.Declarations

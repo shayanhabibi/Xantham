@@ -34,7 +34,10 @@ let compact (id: int) : CompactSymbolReference = { Id = int64 id; File = ValueNo
 
 /// The compact reference a type or a parent names the symbol by.
 let compactOf (symbol: SymbolResponse) : CompactSymbolReference =
-    { Id = symbol.Reference.Id; File = symbol.Reference.File |> ValueOption.map _.NodeId }
+    {
+        Id = symbol.Reference.Id
+        File = symbol.Reference.File |> ValueOption.map _.NodeId
+    }
 
 let symbol (id: int) (name: string) (flags: SymbolFlags) : SymbolResponse =
     {

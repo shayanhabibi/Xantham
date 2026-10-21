@@ -1997,10 +1997,7 @@ and internal indexedAccessRef
             match indexedAccessValues model facts with
             | Some values -> erasedUnionRef ctx model self owner values
             | None ->
-                match
-                    valueOfOperand model facts
-                    |> Option.bind (typeVarById model)
-                with
+                match valueOfOperand model facts |> Option.bind (typeVarById model) with
                 | Some name ->
                     FsApp("proptypelock", [ FsTypeVar name ]),
                     [ Finding.make owner (TypeReference.ValueOfAsPropTypeLock name) ]
