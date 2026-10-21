@@ -231,7 +231,7 @@ summary line (`enums 20 over 448 members (11 flag sets)`).
 ## 8. `ANCHORS`, the kind-numbering tripwire — loud
 
 **Where:** `tools/tsc-ast/kinds.mts`, `const ANCHORS`: `Unknown = 0`, `EndOfFile = 1`,
-`Identifier = 79`, `SourceFile = 307`.
+`Identifier = 79`, `SourceFile = 308` (307 before `SourceKeyword` arrived in 7.1.0-beta).
 
 **What it reflects:** `SyntaxKind` values are *derived*, by numbering `kinds.elements` in
 declaration order and skipping comment-only entries, exactly as upstream's `generate-go-ast.ts`

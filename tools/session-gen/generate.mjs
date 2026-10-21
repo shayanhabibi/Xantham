@@ -61,7 +61,28 @@ const ts = (() => {
 
 const DTS = path.join(tsPkgDir, "dist/api/proto.generated.d.ts");
 const schemaVersion = JSON.parse(fs.readFileSync(path.join(tsPkgDir, "package.json"), "utf8")).version;
-const src = ts.createSourceFile(DTS, fs.readFileSync(DTS, "utf8"), ts.ScriptTarget.Latest, true);
+const parse = file => ts.createSourceFile(file, fs.readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+const src = parse(DTS);
+
+// The sibling generated modules and AST brands the schema imports, read as proto-gen reads them.
+const importsOf = (file, prefix) =>
+  file.statements.filter(st => ts.isImportDeclaration(st) && st.moduleSpecifier.text.startsWith(prefix));
+const declarationFile = (from, specifier) =>
+  path.join(path.dirname(from), specifier.replace(/.ts$/, ".d.ts"));
+const siblings = importsOf(src, "./").map(st => parse(declarationFile(DTS, st.moduleSpecifier.text)));
+const sources = [src, ...siblings];
+const astImports = sources.flatMap(file => importsOf(file, "../ast/"));
+const astNames = new Set(astImports.flatMap(st => (st.importClause?.namedBindings?.elements ?? []).map(e => e.name.text)));
+const astFile = astImports.length ? parse(path.join(tsPkgDir, "dist/ast/ast.d.ts")) : null;
+const enumImports = new Set(
+  sources.flatMap(file => importsOf(file, "#enums/"))
+    .flatMap(st => (st.importClause?.namedBindings?.elements ?? []).map(e => e.name.text)));
+const aliases = new Map();
+for (const st of sources.flatMap(file => file.statements))
+  if (ts.isTypeAliasDeclaration(st)) aliases.set(st.name.text, st);
+for (const st of astFile?.statements ?? [])
+  if (ts.isTypeAliasDeclaration(st) && astNames.has(st.name.text)) aliases.set(st.name.text, st);
+const HANDWRITTEN_ALIASES = new Set(["DocumentIdentifier", "EnsurePrograms"]);
 
 /** Anything skipped, printed at the end. Not fatal: see the header. */
 const skipped = [];
@@ -134,14 +155,25 @@ function mapType(node, ctx) {
       if (mapped.every(m => m.literal !== undefined)) {
         return { fs: "string", nullable, literals: mapped.map(m => m.literal) };
       }
+      if (mapped.every(m => m.fs === mapped[0].fs && m.literal === undefined && !m.nullable && !m.unmapped)) {
+        return { fs: mapped[0].fs, nullable };
+      }
       // The one structural union in the schema is DocumentIdentifier.
       if (ctx.endsWith("#docid")) return { fs: "DocumentIdentifier", nullable };
       return { fs: "JsonNode", nullable: true, unmapped: node.getText().slice(0, 70) };
     }
     case ts.SyntaxKind.TypeLiteral:
       return { fs: "JsonObject", nullable: false };
+    case ts.SyntaxKind.IntersectionType: {
+      const bases = node.types.filter(t => t.kind !== ts.SyntaxKind.TypeLiteral);
+      if (bases.length === 1) return mapType(bases[0], ctx);
+      break;
+    }
     case ts.SyntaxKind.TypeReference: {
       const name = node.typeName.getText();
+      if (ts.isQualifiedName(node.typeName) && enumImports.has(node.typeName.left.getText()))
+        return { fs: node.typeName.left.getText(), nullable: false };
+      if (aliases.has(name) && !HANDWRITTEN_ALIASES.has(name)) return mapType(aliases.get(name).type, ctx);
       if (name === "Record") return { fs: "JsonObject", nullable: false };
       if (name === "Array" || name === "ReadonlyArray")
         return { fs: `${mapType(node.typeArguments[0], ctx).fs}[]`, nullable: false };
@@ -204,8 +236,21 @@ function docLines(node) {
 // ── read the schema ───────────────────────────────────────────────────────
 
 const interfaces = [];
-for (const st of src.statements) {
+for (const st of sources.flatMap(file => file.statements)) {
   if (ts.isInterfaceDeclaration(st)) interfaces.push(st);
+}
+const interfaceByName = new Map(interfaces.map(decl => [decl.name.text, decl]));
+
+/** The interface's properties with those it extends, in proto-gen's order. */
+function propertiesOf(decl) {
+  const byName = new Map();
+  for (const clause of decl.heritageClauses ?? [])
+    for (const base of clause.types) {
+      const baseDecl = interfaceByName.get(base.expression.getText());
+      if (baseDecl) for (const m of propertiesOf(baseDecl)) byName.set(m.name.getText(), m);
+    }
+  for (const m of decl.members.filter(ts.isPropertySignature)) byName.set(m.name.getText(), m);
+  return [...byName.values()];
 }
 
 // Both sides of a batch entry are schema-untyped UTF-8 JSON in `Proto.generated.fs`, spliced into
@@ -221,7 +266,7 @@ for (const decl of interfaces) {
   if (name === "APIMethodInfo") continue;
   const fields = [];
   recordFields.set(name, fields);
-  for (const m of decl.members.filter(ts.isPropertySignature)) {
+  for (const m of propertiesOf(decl)) {
     const wire = m.name.getText().replace(/^["']|["']$/g, "");
     const isDocId = m.type.getText().includes("DocumentIdentifier");
     const mapped = retype(mapType(m.type, `${name}.${wire}${isDocId ? "#docid" : ""}`), `${name}.${wire}`);
@@ -399,6 +444,7 @@ out.w("// </auto-generated>");
 out.blank();
 out.w("open System.Runtime.CompilerServices");
 out.w("open System.Text.Json.Nodes");
+out.w("open Xantham.TypeScript.Wire.ProtoEnums");
 out.w("open Xantham.TypeScript.Wire.Proto");
 out.blank();
 
@@ -423,9 +469,9 @@ doc(out,
   "`mailbox.Session(...)`.\n" +
   "\n" +
   "Handles mean something only within the program that produced them, so a session is also the\n" +
-  "scope in which a symbol or type id is valid. A response that names a different project -\n" +
-  "`SymbolResponse.Project`, which the schema documents as the default for follow-up lookups -\n" +
-  "is followed with `ForSymbol`, not by passing a project argument.");
+  "scope in which a symbol or type id is valid. A symbol whose reference names a different\n" +
+  "project - `SymbolResponse.Reference.Project`, set on a snapshot-owned symbol - is followed\n" +
+  "with `ForSymbol`, not by passing a project argument.");
 out.w("type Session<'T> =");
 out.indent(out => {
   out.w("{ Transport: 'T");
@@ -439,14 +485,20 @@ out.indent(out => {
   out.w("member this.WithProject(project: string) = { this with Project = project }");
   out.blank();
   doc(out, 
-    "The same session against another snapshot - what `Sessionless.updateSnapshot` hands back\n" +
-    "after a file changes.");
+    "The same session against another snapshot - the `Snapshot` of what `Sessionless.updateSnapshot`\n" +
+    "hands back after a file changes.");
   out.w("member this.WithSnapshot(snapshot: int) = { this with Snapshot = snapshot }");
   out.blank();
   doc(out, 
-    "Retargets to the project a symbol was first observed in. Follow-up lookups on a symbol can\n" +
-    "vary by project, and the response carries the one to use.");
-  out.w("member this.ForSymbol(symbol: SymbolResponse) = { this with Project = symbol.Project }");
+    "Retargets to the project a snapshot-owned symbol was first observed in. Follow-up lookups on\n" +
+    "a symbol can vary by project, and its reference carries the one to use. A file-owned symbol\n" +
+    "names no project, and the session is returned unchanged.");
+  out.w("member this.ForSymbol(symbol: SymbolResponse) =");
+  out.indent(out => {
+    out.w("match symbol.Reference.Project with");
+    out.w("| ValueSome project -> { this with Project = project }");
+    out.w("| ValueNone -> this");
+  });
 });
 out.blank();
 
@@ -503,34 +555,24 @@ out.indent(out => {
     out.blank();
 
     doc(out, 
-      "A session on what `createProgram` handed back. Raises when the response carries no\n" +
-      "project, which is the compiler saying the root files resolved to no program at all.");
-    out.w("[<Extension>]");
-    out.w(`static member Session(this: ${transport}, program: CreateProgramResponse) =`);
-    out.indent(out => {
-      out.w("match program.Project with");
-      out.w("| ValueSome project -> { Transport = this; Snapshot = program.Snapshot; Project = project.Id }");
-      out.w("| ValueNone -> failwith \"createProgram returned no project, so there is nothing to open a session on\"");
-    });
-    out.blank();
-
-    doc(out, 
       "A session on one project of a snapshot, named by id. A snapshot can hold several, so the\n" +
       "project is not inferred.");
     out.w("[<Extension>]");
-    out.w(`static member Session(this: ${transport}, snapshot: UpdateSnapshotResponse, project: string) =`);
+    out.w(`static member Session(this: ${transport}, snapshot: CreateSnapshotResponse, project: string) =`);
     out.indent(out => out.w("{ Transport = this; Snapshot = snapshot.Snapshot; Project = project }"));
     out.blank();
 
     doc(out, 
-      "A session on a snapshot's only project. Raises when the snapshot holds none or several,\n" +
-      "so a caller opening one project never has to index into the array.");
+      "A session on the program a snapshot created (`createPrograms`) when it created exactly one,\n" +
+      "and otherwise on the snapshot's only project. Raises when neither names a single project, so\n" +
+      "a caller opening one program never has to index into the response.");
     out.w("[<Extension>]");
-    out.w(`static member Session(this: ${transport}, snapshot: UpdateSnapshotResponse) =`);
+    out.w(`static member Session(this: ${transport}, snapshot: CreateSnapshotResponse) =`);
     out.indent(out => {
-      out.w("match snapshot.Projects with");
-      out.w("| [| project |] -> { Transport = this; Snapshot = snapshot.Snapshot; Project = project.Id }");
-      out.w("| projects ->");
+      out.w("match snapshot.Operation.CreatedPrograms, snapshot.Projects with");
+      out.w("| ValueSome [| program |], _ -> { Transport = this; Snapshot = snapshot.Snapshot; Project = program }");
+      out.w("| _, [| project |] -> { Transport = this; Snapshot = snapshot.Snapshot; Project = project.Id }");
+      out.w("| _, projects ->");
       out.indent(out => out.w(
         "failwithf \"the snapshot holds %d projects, so name the one to open a session on\" projects.Length"));
     });

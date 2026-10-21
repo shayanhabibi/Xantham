@@ -17,7 +17,7 @@ as an independent package for your own tools.
 
 ```bash frame=terminal
 dotnet add package Xantham.TypeScript.Wire
-npm install --save-exact typescript@7.1.0-dev.20260902.1
+npm install --save-exact typescript@7.1.0-beta
 ```
 
 :::caution

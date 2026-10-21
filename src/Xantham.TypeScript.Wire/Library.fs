@@ -730,10 +730,10 @@ module Ast =
 
 
     [<Literal>]
-    let ProtocolVersion = 8u
+    let ProtocolVersion = 9u
 
     [<Literal>]
-    let private HeaderSize = 44
+    let private HeaderSize = 64
 
     [<Literal>]
     let private NodeLen = 28
@@ -805,7 +805,7 @@ module Ast =
     let inline private i32 (data: byte[]) (offset: int) =
         BinaryPrimitives.ReadInt32LittleEndian(ReadOnlySpan(data, offset, 4))
 
-    /// Reads the 44-byte header. Rejects incompatible protocol versions
+    /// Reads the 64-byte header. Rejects incompatible protocol versions
     let read (data: byte[]) : SourceFile =
         if data.Length < HeaderSize then
             failwithf $"source file blob is %d{data.Length} bytes, shorter than the %d{HeaderSize}-byte header"
@@ -832,6 +832,19 @@ module Ast =
         + hex (u32 file.Data 12)
         + hex (u32 file.Data 8)
         + hex (u32 file.Data 4)
+
+    let inline private optionalU64 (data: byte[]) (offset: int) =
+        match BinaryPrimitives.ReadUInt64LittleEndian(ReadOnlySpan(data, offset, 8)) with
+        | 0UL -> ValueNone
+        | value -> ValueSome value
+
+    /// The source file's node ID, which the server validates remote references against.
+    let sourceFileId (file: SourceFile) = optionalU64 file.Data 44
+
+    /// The session-scoped lease that keeps a standalone source file (`createSourceFile`,
+    /// `createSourceFileFromFile`, `retainSourceFile`) available remotely until
+    /// `releaseSourceFile` is sent with it. A file read from a snapshot carries none.
+    let lease (file: SourceFile) = optionalU64 file.Data 52
 
     let inline private nodeAt (file: SourceFile) (index: int) = file.Nodes + index * NodeLen
 

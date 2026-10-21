@@ -60,6 +60,27 @@ type DocumentIdentifierConverter() =
             writer.WriteString("uri", uri)
             writer.WriteEndObject()
 
+/// `EnsurePrograms` is `true | ProjectId[]` on the wire.
+type EnsureProgramsConverter() =
+    inherit JsonConverter<EnsurePrograms>()
+
+    override _.Read(reader, _, options) =
+        match reader.TokenType with
+        | JsonTokenType.True -> AllPrograms
+        | JsonTokenType.StartArray -> Programs(JsonSerializer.Deserialize<string[]>(&reader, options))
+        | other -> failwithf $"EnsurePrograms expected true or an array, got %A{other}"
+
+    override _.Write(writer, value, _) =
+        match value with
+        | AllPrograms -> writer.WriteBooleanValue true
+        | Programs projects ->
+            writer.WriteStartArray()
+
+            for project in projects do
+                writer.WriteStringValue project
+
+            writer.WriteEndArray()
+
 /// Serialisation for the generated wire types, and the typed request helpers built on it.
 [<RequireQualifiedAccess>]
 module ProtoJson =
@@ -71,6 +92,7 @@ module ProtoJson =
         let options = JsonSerializerOptions(JsonSerializerDefaults.General)
         options.Converters.Add(ValueOptionConverterFactory())
         options.Converters.Add(DocumentIdentifierConverter())
+        options.Converters.Add(EnsureProgramsConverter())
         options.DefaultIgnoreCondition <- JsonIgnoreCondition.Never
         options
 
