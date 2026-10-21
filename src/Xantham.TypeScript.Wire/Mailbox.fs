@@ -169,9 +169,10 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
                             | ValueNone when isNull response.Result -> Ok [||]
                             // The AST methods return their blob raw when sent alone, but a batch
                             // response is JSON and cannot carry bytes, so here the same result is a
-                            // base64 string.
+                            // `SourceFileResponse`, the blob base64-encoded under `data`.
                             | ValueNone when Method.binaryResultMethods.Contains response.Method ->
-                                Ok(Convert.FromBase64String(ProtoJson.deserialize<string> response.Result))
+                                let encoded = ProtoJson.deserialize<SourceFileResponse> response.Result
+                                Ok(Convert.FromBase64String encoded.Data)
                             // caller's payload as raw UTF-8 JSON
                             | ValueNone -> Ok response.Result)
 

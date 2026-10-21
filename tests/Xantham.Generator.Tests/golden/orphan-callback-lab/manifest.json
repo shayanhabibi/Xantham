@@ -33,10 +33,10 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 6,
+      "total": 7,
       "exact": 4,
       "ergonomic": 1,
-      "widened": 1
+      "widened": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",

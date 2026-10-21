@@ -5527,6 +5527,24 @@ type NonEmptyTuple<'T> = 'T[]
 type NonNullableDeep<'T> = private NonNullableDeep__ of obj
 
 /// <summary>
+/// Matches the hidden <c>Infinity</c> type.
+/// <br /><br />
+/// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/32277">this issue</a> if you want to have this type as a built-in in TypeScript.
+/// </summary>
+/// <remarks>@see {@link NegativeInfinity}</remarks>
+/// <remarks>@category Numeric</remarks>
+type PositiveInfinity = float
+
+/// <summary>
+/// Matches the hidden <c>-Infinity</c> type.
+/// <br /><br />
+/// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/32277">this issue</a> if you want to have this type as a built-in in TypeScript.
+/// </summary>
+/// <remarks>@see {@link PositiveInfinity}</remarks>
+/// <remarks>@category Numeric</remarks>
+type NegativeInfinity = float
+
+/// <summary>
 /// A finite <c>number</c>.
 /// You can't pass a <c>bigint</c> as they are already guaranteed to be finite.
 /// <br /><br />

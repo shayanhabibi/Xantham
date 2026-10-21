@@ -128,7 +128,7 @@ let private testsFor compression =
                 let metadata = document["compatibility"]
                 let compiler = metadata["compiler"]
                 Expect.equal (compiler["kind"].GetValue<string>()) "typescript-package" "recognized installed compiler"
-                Expect.equal (compiler["astProtocolVersion"].GetValue<int>()) 8 "binary AST protocol")
+                Expect.equal (compiler["astProtocolVersion"].GetValue<int>()) (int Xantham.TypeScript.Wire.Ast.ProtocolVersion) "binary AST protocol")
 
         testCase "legacy catalogue remains usable under exact fingerprints" <| fun _ ->
             withProducer (fun directory package _ config catalog ->

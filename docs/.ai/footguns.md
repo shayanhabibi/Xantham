@@ -9,6 +9,14 @@ reproducible from this checkout and were dropped rather than carried.
 
 ## Compiler API
 
+**A symbol id alone does not identify a symbol.** At TypeScript 7.1 a symbol is a reference. A
+file-owned one, which a declaration's symbol, a module's and its exports are, carries its source
+file and an id unique within that file. A snapshot-owned one, a transient or merged symbol, carries
+a project and an id unique within the snapshot, offset by 2^48. Key by `SymbolKey` (`SymbolId`,
+owning file node id and `int64` id), and send a symbol back as its `SymbolResponse.Reference`; a
+compact reference (`TypeResponse.Symbol`, `SymbolResponse.Parent`) names the file by node id only and
+cannot be sent. A file-owned symbol names no project, so `Session.ForSymbol` leaves the session's.
+
 **`getTypeAtLocation` is wrong for class heritage.** It adds an internal trailing `this`
 argument, so `Model<string>` reads as two type arguments. Read heritage nodes and ask
 `getTypeFromTypeNode` for each contract. `TypeFacts.ImplementedTypes` records explicit

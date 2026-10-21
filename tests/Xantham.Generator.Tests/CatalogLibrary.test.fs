@@ -110,7 +110,7 @@ let tests = testSequenced <| testList "catalog library identity" [
         "library source identity", "source hash mismatch", fun document -> document["declarations"].AsArray() |> Seq.find (fun d -> d["fSharpName"].GetValue<string>() = "Library.Owner.Dom.TextStreamReader") |> fun d -> d["sources"].[0]["package"] <- JsonValue.Create "other-library"
         "compiler release", "compiler version", fun document -> document["compatibility"].["compiler"]["version"] <- JsonValue.Create "other-version"
         "compiler revision", "compiler revision", fun document -> document["compatibility"].["compiler"]["revision"] <- JsonValue.Create (String.replicate 40 "a")
-        "AST protocol", "AST protocol", fun document -> document["compatibility"].["compiler"]["astProtocolVersion"] <- JsonValue.Create 9
+        "AST protocol", "AST protocol", fun document -> document["compatibility"].["compiler"]["astProtocolVersion"] <- JsonValue.Create(Xantham.TypeScript.Wire.Ast.ProtocolVersion + 1u)
         "old platform identity contract", "identity version", fun document -> document["compatibility"]["identityVersion"] <- JsonValue.Create 2
     ] do
         testCase ("reader rejects changed " + label) <| fun () ->
@@ -138,8 +138,8 @@ let tests = testSequenced <| testList "catalog library identity" [
         Expect.isNonEmpty sources "real compiler libraries were emitted"
         let es5 = sources |> List.find (fun source -> source.GetProperty("file").GetString() = "lib/lib.es5.d.ts")
         Expect.equal (es5.GetProperty("sha256").GetString())
-            "6388847232654d7fcbed7fe89ea511a65ad1f5104b41e905c43f90910e1408b6"
-            "Windows library bytes match the Linux-produced Core.TS catalogue at origin/develop"
+            "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215"
+            "library bytes match the committed Core.TS catalogue on every OS"
         for source in sources do
             Expect.equal (source.GetProperty("package").GetString()) "typescript" "library ownership is independent of OS and CPU"
         for declaration in catalog.GetProperty("declarations").EnumerateArray() do

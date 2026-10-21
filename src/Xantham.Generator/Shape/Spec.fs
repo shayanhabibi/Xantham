@@ -1645,6 +1645,28 @@ type internal Descent() =
 
         Descent.path
 
+/// The name a type parameter is bound under in scope: by its type id, or by its symbol. A
+/// conditional's check type is a type distinct from the declaration's parameter it was written
+/// as, sharing that parameter's symbol.
+let internal typeVarOf (model: ShapeModel) (typeId: int<Measure.typeId>) (facts: TypeFacts) =
+    match Map.tryFind typeId model.TypeVars with
+    | Some name -> Some name
+    | None ->
+        facts.Response.SymbolId
+        |> ValueOption.toOption
+        |> Option.bind (fun symbol ->
+            model.TypeVars
+            |> Map.tryPick (fun boundId name ->
+                match Map.tryFind boundId model.Types with
+                | Some bound when bound.Response.SymbolId = ValueSome symbol -> Some name
+                | _ -> None))
+
+/// `typeVarOf` for a type named by id alone, an operand read off another type's facts.
+let internal typeVarById (model: ShapeModel) (typeId: int<Measure.typeId>) =
+    match Map.tryFind typeId model.Types with
+    | Some facts -> typeVarOf model typeId facts
+    | None -> Map.tryFind typeId model.TypeVars
+
 /// The F# type written at a reference position, with the findings any widening produces.
 /// `self` is the name of the declaration being shaped, so a polymorphic `this` return resolves
 /// to it. A type carries several flags at once, so the arm order below picks which finding.
@@ -1764,7 +1786,7 @@ and internal typeRefOnPath
 
                     // In scope only where the declaration being shaped bound it (§4.9); a
                     // parameter of some *other* declaration has no name here to write.
-                    match Map.tryFind typeId model.TypeVars with
+                    match typeVarOf model typeId facts with
                     | Some name -> FsTypeVar name, []
                     | None ->
                         // Its constraint is the tightest thing still true of it, and `obj` is
@@ -1857,7 +1879,7 @@ and internal keyOfRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : F
     let operand =
         facts.Response.TargetTypeId
         |> ValueOption.toOption
-        |> Option.bind (fun id -> Map.tryFind id model.TypeVars)
+        |> Option.bind (typeVarById model)
 
     match operand with
     | Some name -> FsApp("keyof", [ FsTypeVar name ]), [ Finding.make owner (TypeReference.KeyOfOpenOperand name) ]
@@ -1977,7 +1999,7 @@ and internal indexedAccessRef
             | None ->
                 match
                     valueOfOperand model facts
-                    |> Option.bind (fun id -> Map.tryFind id model.TypeVars)
+                    |> Option.bind (typeVarById model)
                 with
                 | Some name ->
                     FsApp("proptypelock", [ FsTypeVar name ]),
@@ -2112,7 +2134,7 @@ and internal propertyRecordRef
     : (FsTypeRef * Finding list) option =
     facts.MappedRecord
     |> Option.filter (fun _ -> facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
-    |> Option.bind (fun (operand, value) -> Map.tryFind operand model.TypeVars |> Option.map (fun name -> name, value))
+    |> Option.bind (fun (operand, value) -> typeVarById model operand |> Option.map (fun name -> name, value))
     |> Option.map (fun (name, value) ->
         let valueRef, valueFindings = typeRef ctx model self owner value
 

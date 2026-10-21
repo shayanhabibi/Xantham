@@ -279,7 +279,8 @@ byte-identical diff rather than alongside another one.
 
 ## 12. Blob layout constants — loud for the version, unchecked for the masks
 
-**Where:** `Library.fs`, `module Ast`: `ProtocolVersion = 8u`, `HeaderSize = 44`, `NodeLen = 28`,
+**Where:** `Library.fs`, `module Ast`: `ProtocolVersion = 9u`, `HeaderSize = 64`, `NodeLen = 28`,
+the source-file ID and lease offsets `44` and `52` read by `sourceFileId` and `lease`,
 and the data-word masks `DataTypeMask = 0xC0000000u`, `ChildMask = 0x000000FFu`,
 `StringIndexMask` / `ExtendedDataMask = 0x00FFFFFFu`, `CommonDataMask = 0x3F000000u`,
 `CommonDataShift = 24`.
@@ -290,7 +291,7 @@ which carries these as named constants — that file is vendored specifically so
 folklore.
 
 **Failure mode:** loud for the version. `Ast.read` rejects any blob whose protocol version is not
-8, naming both numbers. The masks are unchecked, but a wrong one breaks every test at once rather
+9, naming both numbers. The masks are unchecked, but a wrong one breaks every test at once rather
 than subtly.
 
 **To update:** on a protocol bump, diff `node.infrastructure.ts` against these and bump
@@ -396,6 +397,48 @@ than at a user's process exit.
 **Failure mode:** a renamed `"any"` reads every written `any` as the error type, which `unresolved-any-lab`'s e2e test catches, and leaves `handler-return-lab`'s selected returns at `obj`; a renamed `"intrinsic"` moves the `compiler-lib-ownership-lab` golden. `"error"` and `"unresolved"` are not matched by name: every Any the two names above miss is reported as the error type, so a new intrinsic surfaces as `TR063` rather than passing as a written `any`. A checker that stops chaining unresolved parents drops the qualifier, which `unresolved-any-lab`'s `Probe.qualified` catches.
 
 **To update:** on a compiler upgrade, re-read the intrinsic declarations in `checker.go` and `isErrorType` in `dist/api/sync/api.js`.
+
+## 16. `FIELD_WIDTHS`, the proto fields wider than `int` — checked for staleness
+
+**Where:** `FIELD_WIDTHS` in both `tools/proto-gen/generate.mjs` and `tools/session-gen/generate.mjs`:
+`SymbolReference.id` and `CompactSymbolReference.id`, both `int64`.
+
+**What it reflects:** the schema types every number as `number`, which the generators map to `int`.
+A snapshot-owned symbol's id is offset by 2^48 (`281474976710660` at the pinned compiler), which an
+`int` cannot hold; a file-owned one's is small. Observed against the live server, not declared
+anywhere: upstream's JavaScript holds both as `number`.
+
+**Failure mode:** half-loud. A key that matches no field fails the run. Another `number` field that
+starts exceeding `int` is silent until a response carries one, and then a `JsonException` names the
+path.
+
+**To update:** on a compiler upgrade, probe a fixture with inherited members (`inherit-lab`) and
+check the ids its snapshot-owned properties carry.
+
+## 17. `HANDWRITTEN_ALIASES`, the two-shape unions — checked, by tests
+
+**Where:** `HANDWRITTEN_ALIASES` in both generators; the types in `tools/proto-gen/generate.mjs` and
+their converters in `ProtoJson.fs`.
+
+**What it reflects:** two schema aliases whose wire form is a union of two shapes, which no
+generated record carries: `DocumentIdentifier` (`string | { uri: string }`) and `EnsurePrograms`
+(`true | ProjectId[]`).
+
+**Failure mode:** loud on absence: proto-gen reports an `EnsurePrograms` the schema no longer
+declares, and the converters' round trips in `Json.test.fs` fail on a changed shape. A third such
+alias maps through its arms and fails the run as an unsupported union.
+
+## 18. Batched AST results — checked, by a test
+
+**Where:** `Mailbox.fs`, the batch path of `TscMailbox`.
+
+**What it reflects:** a method whose result is binary returns the blob raw when sent alone, but a
+batch response is JSON, so inside a batch the same result is a `SourceFileResponse` carrying the
+blob base64-encoded under `data`. Transcribed from `sourceFileResponseToUint8Array` in
+`dist/api/node/encoder.js`.
+
+**Failure mode:** loud. `Mailbox.test.fs`'s "a batched AST decodes to the same tree as a solo one"
+fails on a changed shape.
 
 ## What is *not* on this list
 
