@@ -26,12 +26,9 @@ let private withMain (test: Node<SourceFile> -> unit) =
             Api.initialize channel |> ignore
 
             let snapshot =
-                Api.updateSnapshot channel
-                    { OpenProjects = ValueSome [| file "tsconfig.json" |]
-                      CloseProjects = ValueNone
-                      FileChanges = ValueNone
-                      OpenFiles = ValueNone
-                      CloseFiles = ValueNone }
+                Api.createSnapshot channel
+                    { CreateSnapshotParams.Default with
+                        OpenProjects = ValueSome [| file "tsconfig.json" |] }
 
             match
                 Api.getSourceFile channel
@@ -71,7 +68,7 @@ let private withRepresentatives (test: Node<AnyNode>[] -> unit) =
             use channel = new TscChannel(exe, fixtures)
             Api.initialize channel |> ignore
 
-            let snapshot = channel.updateSnapshot(openProjects = [| file "tsconfig.json" |])
+            let snapshot = channel.createSnapshot(openProjects = [| file "tsconfig.json" |])
             let project = snapshot.Projects[0].Id
             let names = channel.getSourceFileNames(snapshot.Snapshot, project)
 

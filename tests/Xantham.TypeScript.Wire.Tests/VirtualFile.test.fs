@@ -37,12 +37,9 @@ let private withMain (test: Ast.SourceFile -> unit) =
             Api.initialize channel |> ignore
 
             let snapshot =
-                Api.updateSnapshot channel
-                    { OpenProjects = ValueSome [| file "tsconfig.json" |]
-                      CloseProjects = ValueNone
-                      FileChanges = ValueNone
-                      OpenFiles = ValueNone
-                      CloseFiles = ValueNone }
+                Api.createSnapshot channel
+                    { CreateSnapshotParams.Default with
+                        OpenProjects = ValueSome [| file "tsconfig.json" |] }
 
             match
                 Api.getSourceFile channel

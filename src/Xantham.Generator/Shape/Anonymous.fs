@@ -58,7 +58,7 @@ let private isAliasTaggedForm (model: ShapeModel) (facts: TypeFacts) =
 /// symbol -> the smallest type id carrying it that binds parameters of its own. Every larger id
 /// carrying the same alias symbol is read as an application of that form. Where the declared type
 /// is in the table it is the form, since the checker creates it before any instantiation.
-let private aliasDeclarationForms (model: ShapeModel) : Map<int<Measure.symbolId>, int<Measure.typeId>> =
+let private aliasDeclarationForms (model: ShapeModel) : Map<SymbolKey, int<Measure.typeId>> =
     model.Types
     |> Map.toList
     |> List.sortBy fst
@@ -230,7 +230,7 @@ let private unifyAlias
 /// operand paths recover a complete, consistent substitution for the declaration parameters.
 let internal aliasInstantiationOf
     (model: ShapeModel)
-    (forms: Map<int<Measure.symbolId>, int<Measure.typeId>>)
+    (forms: Map<SymbolKey, int<Measure.typeId>>)
     (facts: TypeFacts)
     : (string * int<Measure.typeId> list option) option =
     match facts.Response.AliasSymbolId with

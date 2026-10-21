@@ -22,7 +22,7 @@ let private withSession (test: Session<TscChannel> -> unit) =
         | Some exe ->
             use channel = new TscChannel(exe, fixtures)
             Api.initialize channel |> ignore
-            let snapshot = channel.updateSnapshot(openProjects = [| file "tsconfig.json" |])
+            let snapshot = channel.createSnapshot(openProjects = [| file "tsconfig.json" |])
             test (channel.Session snapshot)
 
 /// The parameters of the one call signature of an exported function, in declaration order.
@@ -34,12 +34,12 @@ let private parametersOf (session: Session<TscChannel>) (name: string) =
         |> ValueOption.defaultWith (fun () -> failtest "optional.d.ts declares no module")
 
     let export =
-        session.getExportsOfModule moduleSymbol.Id
+        session.getExportsOfModule moduleSymbol.Reference
         |> ValueOption.defaultValue [||]
         |> Array.find (fun symbol -> symbol.Name = name)
 
     let signature =
-        session.getSignaturesOfType((session.getTypeOfSymbol export.Id).Id, SignatureKind.Call)
+        session.getSignaturesOfType((session.getTypeOfSymbol export.Reference).Id, SignatureKind.Call)
         |> Array.exactlyOne
 
     session.getParametersOfSignature signature.Id |> ValueOption.defaultValue [||]
@@ -104,12 +104,12 @@ let nodeHandleTests =
                 |> ValueOption.defaultWith (fun () -> failtest "optional.d.ts declares no module")
 
             let marked =
-                session.getExportsOfModule declared.Id
+                session.getExportsOfModule declared.Reference
                 |> ValueOption.defaultValue [||]
                 |> Array.find (fun symbol -> symbol.Name = "Marked")
 
             let property =
-                session.getPropertiesOfType (session.getDeclaredTypeOfSymbol marked.Id).Id
+                session.getPropertiesOfType (session.getDeclaredTypeOfSymbol marked.Reference).Id
                 |> ValueOption.defaultValue [||]
                 |> Array.exactlyOne
 

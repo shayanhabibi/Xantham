@@ -207,8 +207,17 @@ const FIELD_ENUMS = {
 };
 
 const retypedFields = new Set();
+/**
+ * Fields the schema types as a bare `number` that exceed `int`: a snapshot-owned symbol's id is
+ * offset by 2^48 (`281474976710660`). Both stay below 2^53, so `int64` holds them exactly.
+ */
+const FIELD_WIDTHS = {
+  "SymbolReference.id": "int64",
+  "CompactSymbolReference.id": "int64",
+};
+
 function retype(mapped, key) {
-  const enumName = FIELD_ENUMS[key];
+  const enumName = FIELD_ENUMS[key] ?? FIELD_WIDTHS[key];
   if (!enumName) return mapped;
   retypedFields.add(key);
   if (mapped.fs === "int") return { ...mapped, fs: enumName };
@@ -283,7 +292,7 @@ for (const decl of interfaces) {
   }
 }
 
-for (const key of Object.keys(FIELD_ENUMS)) {
+for (const key of [...Object.keys(FIELD_ENUMS), ...Object.keys(FIELD_WIDTHS)]) {
   if (!retypedFields.has(key)) skipped.push(`FIELD_ENUMS: ${key} matched no field in the schema`);
 }
 
@@ -486,7 +495,7 @@ out.indent(out => {
   out.blank();
   doc(out, 
     "The same session against another snapshot - the `Snapshot` of what `Sessionless.updateSnapshot`\n" +
-    "hands back after a file changes.");
+    "`updateSnapshot` hands back after a file changes.");
   out.w("member this.WithSnapshot(snapshot: int) = { this with Snapshot = snapshot }");
   out.blank();
   doc(out, 

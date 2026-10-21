@@ -88,7 +88,7 @@ let mailboxTests =
         // the assertion that keeps it honest.
         testCase "a batched AST decodes to the same tree as a solo one" <| withMailbox (fun mailbox ->
             let snapshot =
-                mailbox.updateSnapshot(openProjects = [| file "tsconfig.json" |]) |> Async.RunSynchronously
+                mailbox.createSnapshot(openProjects = [| file "tsconfig.json" |]) |> Async.RunSynchronously
 
             let project = snapshot.Projects[0].Id
             let nodes (ast: Ast.SourceFile voption) = ast |> ValueOption.map (fun ast -> ast.NodeCount)
@@ -114,7 +114,10 @@ let mailboxTests =
         // fail and their fellow travellers still get answers.
         testCase "a result the server cannot encode fails its own request, not its batch" <| withMailbox (fun mailbox ->
             let program =
-                mailbox.createProgram(Proto.CreateProgramOptions.Default, rootFiles = [| file "infinity.ts" |])
+                mailbox.createSnapshot(
+                    createPrograms =
+                        [| { Proto.CreateSnapshotProgramParams.Default with RootFiles = ValueSome [| file "infinity.ts" |] } |]
+                )
                 |> Async.RunSynchronously
 
             let session = mailbox.Session program
@@ -125,7 +128,7 @@ let mailboxTests =
                 |> ValueOption.defaultWith (fun () -> failtest "infinity.ts is a module")
 
             let exports =
-                session.getExportsOfModule moduleSymbol.Id
+                session.getExportsOfModule moduleSymbol.Reference
                 |> Async.RunSynchronously
                 |> ValueOption.defaultValue [||]
 
@@ -137,7 +140,7 @@ let mailboxTests =
                 |> Array.map (fun export ->
                     async {
                         try
-                            let! _ = session.getDeclaredTypeOfSymbol export.Id
+                            let! _ = session.getDeclaredTypeOfSymbol export.Reference
                             return export.Name, None
                         with TsGoError(_, message) ->
                             return export.Name, Some message
@@ -201,9 +204,12 @@ let mailboxTests =
 
                 let held =
                     Async.StartAsTask(
-                        mailbox.createProgram(
-                            { Proto.CreateProgramParams.Default with
-                                RootFiles = ValueSome [| Proto.DocumentIdentifier.FileName virtualFile |] }
+                        mailbox.createSnapshot(
+                            createPrograms =
+                                [|
+                                    { Proto.CreateSnapshotProgramParams.Default with
+                                        RootFiles = ValueSome [| Proto.DocumentIdentifier.FileName virtualFile |] }
+                                |]
                         )
                     )
 

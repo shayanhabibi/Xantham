@@ -26,10 +26,26 @@ let context =
         SkippedPaths = []
     }
 
+/// A snapshot-owned symbol's key: no owning file.
+let symbolKey (id: int) : SymbolKey = { File = ValueNone; Id = int64 id }
+
+/// A compact reference to a snapshot-owned symbol, as a type or a parent names one.
+let compact (id: int) : CompactSymbolReference = { Id = int64 id; File = ValueNone }
+
+/// The compact reference a type or a parent names the symbol by.
+let compactOf (symbol: SymbolResponse) : CompactSymbolReference =
+    { Id = symbol.Reference.Id; File = symbol.Reference.File |> ValueOption.map _.NodeId }
+
 let symbol (id: int) (name: string) (flags: SymbolFlags) : SymbolResponse =
     {
-        Id = id
-        Project = "test"
+        Reference =
+            {
+                Kind = ProtoEnums.SymbolOwnerKind.Snapshot
+                File = ValueNone
+                Snapshot = ValueSome 1
+                Project = ValueSome "test"
+                Id = int64 id
+            }
         Name = name
         Flags = flags
         CheckFlags = Unchecked.defaultof<CheckFlags>
@@ -54,6 +70,11 @@ let typeResponse (id: int) (flags: TypeFlags) : TypeResponse =
         FixedLength = ValueNone
         Readonly = ValueNone
         LabeledElementDeclarations = ValueNone
+        TypeParameter = ValueNone
+        ConstraintType = ValueNone
+        NameType = ValueNone
+        TemplateType = ValueNone
+        ThisType = ValueNone
         ObjectType = ValueNone
         IndexType = ValueNone
         CheckType = ValueNone

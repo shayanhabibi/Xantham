@@ -45,12 +45,17 @@ let private withChannel fs (test: TscChannel -> unit) =
 
 /// Compiles the virtual file as the only root, and hands back the session.
 let private programOf (channel: TscChannel) =
-    let program =
-        Api.createProgram channel
-            { CreateProgramParams.Default with
-                RootFiles = ValueSome [| DocumentIdentifier.FileName virtualFile |] }
+    let snapshot =
+        Api.createSnapshot channel
+            { CreateSnapshotParams.Default with
+                CreatePrograms =
+                    ValueSome
+                        [|
+                            { CreateSnapshotProgramParams.Default with
+                                RootFiles = ValueSome [| DocumentIdentifier.FileName virtualFile |] }
+                        |] }
 
-    program.Snapshot, program.Project.Value.Id
+    snapshot.Snapshot, snapshot.Operation.CreatedPrograms.Value[0]
 
 [<Tests>]
 let callbackTests =
@@ -134,7 +139,7 @@ let callbackTests =
                 |> Flip.Expect.equal "unanswered falls back" ""
 
             testCase "getAccessibleEntries answers names in two arrays" <| fun _ ->
-                let entries = { Files = [| "a.ts" |]; Directories = [| "sub" |] }
+                let entries: FileSystemEntries = { Files = [| "a.ts" |]; Directories = [| "sub" |] }
 
                 reply "getAccessibleEntries"
                     { VirtualFileSystem.Default with GetAccessibleEntries = ValueSome(fun _ -> ValueSome entries) }

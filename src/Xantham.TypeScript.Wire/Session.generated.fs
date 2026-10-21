@@ -44,7 +44,7 @@ type Session<'T> =
     member this.WithProject(project: string) = { this with Project = project }
 
     /// The same session against another snapshot - the `Snapshot` of what `Sessionless.updateSnapshot`
-    /// hands back after a file changes.
+    /// `updateSnapshot` hands back after a file changes.
     member this.WithSnapshot(snapshot: int) = { this with Snapshot = snapshot }
 
     /// Retargets to the project a snapshot-owned symbol was first observed in. Follow-up lookups on

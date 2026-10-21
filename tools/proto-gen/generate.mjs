@@ -180,8 +180,17 @@ const FIELD_ENUMS = {
  * than something to retype anyway.
  */
 const retypedFields = new Set();
+/**
+ * Fields the schema types as a bare `number` that exceed `int`: a snapshot-owned symbol's id is
+ * offset by 2^48 (`281474976710660`). Both stay below 2^53, so `int64` holds them exactly.
+ */
+const FIELD_WIDTHS = {
+  "SymbolReference.id": "int64",
+  "CompactSymbolReference.id": "int64",
+};
+
 function retype(mapped, key) {
-  const enumName = FIELD_ENUMS[key];
+  const enumName = FIELD_ENUMS[key] ?? FIELD_WIDTHS[key];
   if (!enumName) return mapped;
   retypedFields.add(key);
   if (mapped.fs === "int") return { ...mapped, fs: enumName };
@@ -450,7 +459,7 @@ for (const [name, at] of [...recordClose].sort((a, b) => b[1] - a[1])) {
 
 // A key that matches nothing is a table entry the schema has moved out from under, and it would
 // otherwise go unnoticed as a field quietly staying an `int`.
-for (const key of Object.keys(FIELD_ENUMS)) {
+for (const key of [...Object.keys(FIELD_ENUMS), ...Object.keys(FIELD_WIDTHS)]) {
   if (!retypedFields.has(key)) problems.push(`FIELD_ENUMS: ${key} matches no field in the schema`);
 }
 

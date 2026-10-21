@@ -51,7 +51,7 @@ let private namespacesAmong (symbols: SymbolResponse seq) =
 let private followAlias (ctx: Context) (export: SymbolResponse) =
     async {
         if export.Flags.HasFlag SymbolFlags.Alias then
-            let! origin = ctx.Session.getAliasedSymbol export.Id
+            let! origin = ctx.Session.getAliasedSymbol export.Reference
             return export.Name, origin
         else
             return export.Name, export
@@ -73,7 +73,7 @@ let private harvestPublicPath
         match moduleSymbol with
         | ValueNone -> return [], []
         | ValueSome moduleSymbol ->
-            let! exports = ctx.Session.getExportsOfModule moduleSymbol.Id
+            let! exports = ctx.Session.getExportsOfModule moduleSymbol.Reference
             let exports = exports |> ValueOption.defaultValue [||]
 
             // Fan out the alias-following freely - the mailbox coalesces it - but
@@ -194,19 +194,19 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
                 ],
                 None
         else
-            let! exports = ctx.Session.getExportsOfModule moduleSymbol.Id
+            let! exports = ctx.Session.getExportsOfModule moduleSymbol.Reference
             let exports = exports |> ValueOption.defaultValue [||]
 
             if exports.Length = 0 then
                 return [], [ Finding.make moduleSymbol.Name HarvestGlobals.AmbientModuleDropped ], None
             else
                 let! resolved = exports |> Array.map (followAlias ctx) |> Async.Parallel
-                let! parent = ctx.Session.getParentOfSymbol exports[0].Id
+                let! parent = ctx.Session.Sessionless.getParentOfSymbol exports[0].Reference
 
                 let body =
                     parent
                     |> ValueOption.filter (fun (p: SymbolResponse) -> p.Name <> moduleSymbol.Name)
-                    |> ValueOption.map (fun p -> p.Id, p.Name)
+                    |> ValueOption.map (fun p -> p.SymbolId, p.Name)
                     |> ValueOption.toOption
 
                 let valueExport = ExportProvenance.reader ctx
@@ -453,7 +453,7 @@ let harvestGlobals: Pass<HarvestModel> =
                         let harvested =
                             [
                                 for symbol in writable do
-                                    if not (Set.contains symbol.Id moduleBodies) then
+                                    if not (Set.contains symbol.SymbolId moduleBodies) then
                                         {
                                             ExportName = symbol.Name
                                             Symbol = symbol
@@ -522,8 +522,8 @@ let harvestDocs: Pass<HarvestModel> =
                         model.Exports
                         |> List.map (fun export ->
                             async {
-                                let! docs = ctx.Session.getDocumentationComment export.Symbol.Id
-                                let! tags = ctx.Session.getJsDocTags export.Symbol.Id
+                                let! docs = ctx.Session.getDocumentationComment export.Symbol.Reference
+                                let! tags = ctx.Session.getJsDocTags export.Symbol.Reference
 
                                 return
                                     { export with

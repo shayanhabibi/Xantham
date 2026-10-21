@@ -2564,7 +2564,7 @@ module rec Proto =
         Project: string voption
 
         [<JsonPropertyName "id">]
-        Id: int
+        Id: int64
     }
 
     /// CompactSymbolReference is embedded in other responses. It identifies a cached
@@ -2573,7 +2573,7 @@ module rec Proto =
     /// the symbol, it fetches a full SymbolResponse through the corresponding property method.
     type CompactSymbolReference = {
         [<JsonPropertyName "id">]
-        Id: int
+        Id: int64
 
         [<JsonPropertyName "file">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
