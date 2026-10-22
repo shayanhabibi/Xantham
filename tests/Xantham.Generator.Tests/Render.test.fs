@@ -25,7 +25,7 @@ let private owned index (member_: FsExportMember) =
     { Owner = EntryModule
       HarvestIndex = index
       ExportName = member_.Name
-      SourceSymbolId = index * uom<symbolId>
+      SourceSymbolId = Build.symbolKey index
       SignatureOrdinal = None
       Member = member_ }
 

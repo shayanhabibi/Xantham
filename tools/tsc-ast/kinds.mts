@@ -22,12 +22,12 @@ export function kindValues(): Map<string, number> {
 }
 
 /**
- * Values that must hold for the numbering to be wire-compatible. `307` and `79` are the
- * magic numbers hard-coded in the live tests today.
+ * Values that must hold for the numbering to be wire-compatible, checked against the pinned
+ * compiler. `SourceFile` moves whenever upstream adds a kind before it.
  */
 export const ANCHORS: ReadonlyArray<readonly [string, number]> = [
   ["Unknown", 0],
   ["EndOfFile", 1],
   ["Identifier", 79],
-  ["SourceFile", 307],
+  ["SourceFile", 308],
 ];

@@ -9,7 +9,7 @@ order: 4
 <div class="xantham-welcome__copy"><p class="xantham-lead">Shared utility types and standard-library bindings keep generated packages working with the same F# types.</p></div>
 </div>
 
-Use these alongside `Fable.Core` **5.2.0**, with Xantham package versions matching
+Use these alongside `Fable.Core` **5.5.0**, with Xantham package versions matching
 your generator release.
 
 Add the [temporary Cloudsmith source](installation.md#install-xantham) before

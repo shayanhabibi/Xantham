@@ -8,6 +8,11 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const environment = { ...process.env };
 delete environment.NUGET_API_KEY;
 
+// SDK 10.0.402 reuses project.assets.ridpackage.json across local tools. Fickl
+// must be last, or a cold restore reads its command for the following tools.
+const toolManifest = JSON.parse(fs.readFileSync(path.join(root, ".config/dotnet-tools.json"), "utf8"));
+assert.equal(Object.keys(toolManifest.tools).at(-1), "fickl", "Restore the RID-specific Fickl package last");
+
 function build(...args) {
   if (args.includes("--explain")) args.push("--json");
   const result = spawnSync("dotnet", ["fsi", "build.fsx", "--", ...args], {
@@ -108,7 +113,7 @@ assert.match(shard.output, /customization Partas gate\s+\(skipped\)/);
 
 const gateShard = build("test", "--ci", "--shard", "1/8", "--run-gate", "--explain");
 assert.equal(gateShard.status, 0, gateShard.output);
-assert.match(gateShard.output, /dotnet fable .*--run node/);
+assert.match(gateShard.output, /dotnet fickl .*--run node/);
 assert.match(gateShard.output, /node tests\/Xantham.Generator.PartasGate\/verify.mjs/);
 
 const bump = build("bump", "--dry-run", "--explain");

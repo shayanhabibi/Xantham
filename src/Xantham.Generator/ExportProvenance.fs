@@ -8,8 +8,8 @@ open Xantham.TypeScript.Wire.Proto
 open Measure
 
 type private Key =
-    | Export of moduleId: int<symbolId> * name: string
-    | Symbol of symbolId: int<symbolId>
+    | Export of moduleId: SymbolKey * name: string
+    | Symbol of symbolId: SymbolKey
 
 type private Rule =
     | Present
@@ -55,8 +55,8 @@ let rec private typeOnly (node: Node<AnyNode>) =
 /// One module inventory's cache. Symbol ids are
 /// session-local graph keys only; the catalog's persistent declaration identity is unchanged.
 let reader (ctx: Context) =
-    let symbols = Dictionary<int<symbolId>, SymbolResponse>()
-    let modules = Dictionary<int<symbolId>, ModuleExports>()
+    let symbols = Dictionary<SymbolKey, SymbolResponse>()
+    let modules = Dictionary<SymbolKey, ModuleExports>()
     let files = Dictionary<string<declFile>, Ast.SourceFile voption>()
     let rules = Dictionary<Key, Rule>()
     let present = HashSet<Key>()
@@ -95,7 +95,7 @@ let reader (ctx: Context) =
     let origin (symbol: SymbolResponse) =
         async {
             if symbol.Flags.HasFlag SymbolFlags.Alias then
-                let! target = ctx.Session.getAliasedSymbol symbol.Id
+                let! target = ctx.Session.getAliasedSymbol symbol.Reference
                 return remember target
             else
                 return symbol
@@ -106,8 +106,9 @@ let reader (ctx: Context) =
             match modules.TryGetValue moduleId with
             | true, exports -> return exports
             | _ ->
-                let! direct = ctx.Session.getExportsOfSymbol (moduleId / uom<_>)
-                let! all = ctx.Session.getExportsOfModule (moduleId / uom<_>)
+                let reference = symbols[moduleId].Reference
+                let! direct = ctx.Session.Sessionless.getExportsOfSymbol reference
+                let! all = ctx.Session.getExportsOfModule reference
 
                 let inventory (values: SymbolResponse[] voption) =
                     values
@@ -149,7 +150,7 @@ let reader (ctx: Context) =
 
     let immediate (symbol: SymbolResponse) =
         async {
-            let! target = ctx.Session.getImmediateAliasedSymbol symbol.Id
+            let! target = ctx.Session.getImmediateAliasedSymbol symbol.Reference
 
             return
                 match target with
@@ -271,7 +272,7 @@ let reader (ctx: Context) =
                                                         let! candidate = origin candidate
 
                                                         return
-                                                            if candidate.Id = expected.Id then
+                                                            if candidate.SymbolId = expected.SymbolId then
                                                                 Some(Export(target.SymbolId, name))
                                                             else
                                                                 None

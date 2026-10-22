@@ -1150,7 +1150,7 @@ type HarvestModel =
         /// The namespaces the entry package declares, by symbol id, under names an F# module
         /// can be spelled with. A declaration written inside one nests under it where a second
         /// declaration claims the same name.
-        Namespaces: Map<int<symbolId>, string<symbolName>>
+        Namespaces: Map<SymbolKey, string<symbolName>>
         /// Count of the entry package's own declared names that a `lib.*.d.ts` declaration of
         /// the same name precedes: `harvest-globals` groups such a name as the compiler lib
         /// (`Grouping.classify`) and it does not reach `Exports` - unless the compiler-lib
@@ -1273,7 +1273,7 @@ type TypeFacts =
         AliasDeclarations: string<declHandle> list
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
-        SymbolParent: int<symbolId> option
+        SymbolParent: SymbolKey option
         Members: ResolvedMember list
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
@@ -1381,7 +1381,7 @@ type ResolveModel =
     {
         Harvest: HarvestModel
         /// Export symbol id -> the type ids the checker gave for it.
-        ExportTypes: Map<int<symbolId>, ExportTypeIds>
+        ExportTypes: Map<SymbolKey, ExportTypeIds>
         /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
         /// `NotFollowed` - that closure is the tier's invariant.
         Types: Map<int<typeId>, TypeFacts>
@@ -1593,7 +1593,7 @@ type OwnedExportMember =
         Owner: ExportOwner
         HarvestIndex: int
         ExportName: string
-        SourceSymbolId: int<symbolId>
+        SourceSymbolId: SymbolKey
         SignatureOrdinal: int option
         Member: FsExportMember
     }
@@ -1864,7 +1864,7 @@ type KeyBinding =
 type ShapeModel =
     {
         Harvest: HarvestModel
-        ExportTypes: Map<int<symbolId>, ExportTypeIds>
+        ExportTypes: Map<SymbolKey, ExportTypeIds>
         Types: Map<int<typeId>, TypeFacts>
         NotFollowed: Map<int<typeId>, string>
         /// Type id -> the F# type name this run declares for it - exports named first, then

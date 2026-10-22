@@ -65,7 +65,7 @@ application wrapper and verify its runtime behavior.
 
 Check these first:
 
-- Use Fable 5.x and `Fable.Core` 5.2.0.
+- Use Fable 5.x and `Fable.Core` 5.5.0.
 - Reference `Xantham.Fable.Core` and `Xantham.Fable.Core.TS`.
 - Compile shipped groups and catalog producers before their consumers.
 - Use a consumer target framework of net8.0 or later.

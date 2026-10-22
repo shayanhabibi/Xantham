@@ -195,6 +195,11 @@ module AmbientLab =
             member _.cause
                 with get (): obj option = jsNative
                 and set (_: obj option): unit = jsNative
+            /// <summary>
+            /// Indicates whether the argument provided is a built-in Error instance or not.
+            /// </summary>
+            [<Import("Snag.isError", "ambient-lab:tools")>]
+            static member isError (error: obj) : bool = jsNative
 
         /// <summary>
         /// A class whose base this run declares. An F# class reaches its base through a constructor

@@ -212,9 +212,9 @@ let tests =
             Expect.equal (Bootstrap.compilerPath ctx) selected "session executable is captured"
             match discover selected |> Async.RunSynchronously with
             | TypeScriptPackage(actualVersion, actualRevision, protocol) ->
-                Expect.equal actualVersion version "live pinned release"
-                Expect.equal actualRevision "43a90f4c105bc9db7cb7aa299beddafbabe1d23e" "live pinned revision"
-                Expect.equal protocol 8u "live AST protocol"
+                Expect.equal actualVersion "7.1.0-beta" "live pinned release"
+                Expect.equal actualRevision "3e9236361fa97a9e6c685f4833ac457ae2d8c50a" "live pinned revision"
+                Expect.equal protocol Ast.ProtocolVersion "live AST protocol"
             | Binary _ -> failtest "the pinned installed compiler must have portable identity"
 
         testCase "unregistered context cannot infer a session compiler" <| fun _ ->

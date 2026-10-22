@@ -3,16 +3,16 @@
   "package": "fable-core-ts-input",
   "module": "FableCoreTsInput",
   "counts": {
-    "exact": 1302,
-    "ergonomic": 2688,
-    "widened": 290,
+    "exact": 1324,
+    "ergonomic": 2737,
+    "widened": 304,
     "escape": 5
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 1033,
-      "exact": 1033
+      "total": 1049,
+      "exact": 1049
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -27,22 +27,22 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 890,
-      "ergonomic": 755,
+      "total": 893,
+      "ergonomic": 758,
       "widened": 135
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 82141,
-      "exact": 879,
-      "ergonomic": 80725,
-      "widened": 537
+      "total": 83194,
+      "exact": 893,
+      "ergonomic": 81699,
+      "widened": 602
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 112,
+      "total": 113,
       "ergonomic": 26,
-      "widened": 81,
+      "widened": 82,
       "escape": 5
     },
     {
@@ -53,15 +53,15 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2949,
-      "exact": 138,
-      "ergonomic": 2808,
+      "total": 3046,
+      "exact": 156,
+      "ergonomic": 2887,
       "widened": 3
     },
     {
       "pass": "settle-symbol-members",
-      "total": 140,
-      "ergonomic": 140
+      "total": 142,
+      "ergonomic": 142
     },
     {
       "pass": "DO - dedupe-overloads",

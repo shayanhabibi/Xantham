@@ -83,7 +83,7 @@ let shapeExports: Pass<ShapeModel> =
                                             OwnedExportMember.Owner = owner
                                             HarvestIndex = index
                                             ExportName = export.ExportName
-                                            SourceSymbolId = export.Symbol.Id * uom<symbolId>
+                                            SourceSymbolId = export.Symbol.SymbolId
                                             SignatureOrdinal = Some ordinal
                                             Member =
                                                 {

@@ -88,7 +88,7 @@ let mailboxTests =
         // the assertion that keeps it honest.
         testCase "a batched AST decodes to the same tree as a solo one" <| withMailbox (fun mailbox ->
             let snapshot =
-                mailbox.updateSnapshot(openProjects = [| file "tsconfig.json" |]) |> Async.RunSynchronously
+                mailbox.createSnapshot(openProjects = [| file "tsconfig.json" |]) |> Async.RunSynchronously
 
             let project = snapshot.Projects[0].Id
             let nodes (ast: Ast.SourceFile voption) = ast |> ValueOption.map (fun ast -> ast.NodeCount)
@@ -107,14 +107,12 @@ let mailboxTests =
             |> Async.RunSynchronously
             |> Array.iter (fun ast -> nodes ast |> Flip.Expect.equal "the batched AST matches the solo one" solo))
 
-        // A batch response is marshalled by the server in one piece, so one result it cannot
-        // encode refuses every request travelling with it. `infinity.ts` declares `1e999`, which
-        // is `+Inf` to Go's JSON encoder (upstream, at the pinned compiler); the agent replays a
-        // refused batch member by member, so only the requests for the two unencodable types
-        // fail and their fellow travellers still get answers.
-        testCase "a result the server cannot encode fails its own request, not its batch" <| withMailbox (fun mailbox ->
+        testCase "non-finite literal types survive alongside other batched results" <| withMailbox (fun mailbox ->
             let program =
-                mailbox.createProgram(Proto.CreateProgramOptions.Default, rootFiles = [| file "infinity.ts" |])
+                mailbox.createSnapshot(
+                    createPrograms =
+                        [| { Proto.CreateSnapshotProgramParams.Default with RootFiles = ValueSome [| file "infinity.ts" |] } |]
+                )
                 |> Async.RunSynchronously
 
             let session = mailbox.Session program
@@ -125,34 +123,33 @@ let mailboxTests =
                 |> ValueOption.defaultWith (fun () -> failtest "infinity.ts is a module")
 
             let exports =
-                session.getExportsOfModule moduleSymbol.Id
+                session.getExportsOfModule moduleSymbol.Reference
                 |> Async.RunSynchronously
                 |> ValueOption.defaultValue [||]
 
             exports.Length |> Flip.Expect.equal "the fixture's exports" 8
 
-            // All in flight at once, so that the unencodable pair shares a batch with the rest.
             let outcomes =
                 exports
                 |> Array.map (fun export ->
                     async {
-                        try
-                            let! _ = session.getDeclaredTypeOfSymbol export.Id
-                            return export.Name, None
-                        with TsGoError(_, message) ->
-                            return export.Name, Some message
+                        let! result = session.getDeclaredTypeOfSymbol export.Reference
+                        return export.Name, result
                     })
                 |> Async.Parallel
                 |> Async.RunSynchronously
                 |> Map.ofArray
 
-            let refused = outcomes |> Map.filter (fun _ message -> message.IsSome) |> Map.keys |> List.ofSeq
+            outcomes.Count |> Flip.Expect.equal "every caller receives a type" 8
+            outcomes["Finite"].Value.GetValue<int>() |> Flip.Expect.equal "finite literal value" 1
 
-            refused
-            |> Flip.Expect.equal "exactly the non-finite literals are refused" [ "Infinite"; "NegativeInfinite" ]
-
-            for message in outcomes |> Map.values |> Seq.choose id do
-                Expect.stringContains message "Inf" "and the refusal names the encoder's complaint")
+            for name in [ "Infinite"; "NegativeInfinite" ] do
+                let result = outcomes[name]
+                result.Flags.HasFlag TypeFlags.NumberLiteral |> Flip.Expect.isTrue "the numeric literal kind survives"
+                let symbol = exports |> Array.find (fun export -> export.Name = name)
+                let solo = session.getDeclaredTypeOfSymbol symbol.Reference |> Async.RunSynchronously
+                result.Value.ToJsonString()
+                |> Flip.Expect.equal "the batch preserves the solo literal value" (solo.Value.ToJsonString()))
 
         testCase "disposal is idempotent, and the channel goes with it" <| withMailbox (fun mailbox ->
             mailbox.Dispose()
@@ -201,9 +198,12 @@ let mailboxTests =
 
                 let held =
                     Async.StartAsTask(
-                        mailbox.createProgram(
-                            { Proto.CreateProgramParams.Default with
-                                RootFiles = ValueSome [| Proto.DocumentIdentifier.FileName virtualFile |] }
+                        mailbox.createSnapshot(
+                            createPrograms =
+                                [|
+                                    { Proto.CreateSnapshotProgramParams.Default with
+                                        RootFiles = ValueSome [| Proto.DocumentIdentifier.FileName virtualFile |] }
+                                |]
                         )
                     )
 

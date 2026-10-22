@@ -187,16 +187,19 @@ module Es =
         /// <example>
         /// <code>
         /// ```ts
-        /// function customElement(name: string): ClassDecoratorFunction {
-        ///   return (target, context) =&gt; {
+        /// function customElement(name: string) {
+        ///   return &lt;Class extends CustomElementConstructor&gt;(
+        ///     target: Class,
+        ///     context: ClassDecoratorContext&lt;Class&gt;,
+        ///   ) =&gt; {
         ///     context.addInitializer(function () {
         ///       customElements.define(name, this);
         ///     });
-        ///   }
+        ///   };
         /// }
         ///
         /// @customElement("my-element")
-        /// class MyElement {}
+        /// class MyElement extends HTMLElement {}
         /// </code>
         /// <code>
         /// </code>
@@ -254,10 +257,14 @@ module Es =
         /// <example>
         /// <code>
         /// ```ts
-        /// const bound: ClassMethodDecoratorFunction = (value, context) {
+        /// function bound&lt;This, Value extends (...args: any) =&gt; any&gt;(
+        ///   value: Value,
+        ///   context: ClassMethodDecoratorContext&lt;This, Value&gt;,
+        /// ) {
         ///   if (context.private) throw new TypeError("Not supported on private methods.");
-        ///   context.addInitializer(function () {
-        ///     this[context.name] = this[context.name].bind(this);
+        ///   context.addInitializer(function (this: This) {
+        ///     const self = this as Record&lt;PropertyKey, any&gt;;
+        ///     self[context.name] = self[context.name].bind(this);
         ///   });
         /// }
         ///
@@ -1595,7 +1602,7 @@ module Es =
         /// <param name="string">String on which to perform the search.</param>
         abstract test: string: string -> bool
         /// <summary>
-        /// Returns a copy of the text of the regular expression pattern. Read-only. The regExp argument is a Regular expression object. It can be a variable name or a literal.
+        /// Returns a copy of the text of the regular expression pattern. Read-only.
         /// </summary>
         abstract source: string
         /// <summary>

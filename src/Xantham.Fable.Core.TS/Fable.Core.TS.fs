@@ -61,16 +61,19 @@ module Es =
         /// <example>
         /// <code>
         /// ```ts
-        /// function customElement(name: string): ClassDecoratorFunction {
-        ///   return (target, context) =&gt; {
+        /// function customElement(name: string) {
+        ///   return &lt;Class extends CustomElementConstructor&gt;(
+        ///     target: Class,
+        ///     context: ClassDecoratorContext&lt;Class&gt;,
+        ///   ) =&gt; {
         ///     context.addInitializer(function () {
         ///       customElements.define(name, this);
         ///     });
-        ///   }
+        ///   };
         /// }
         ///
         /// @customElement("my-element")
-        /// class MyElement {}
+        /// class MyElement extends HTMLElement {}
         /// </code>
         /// <code>
         /// </code>
@@ -132,10 +135,14 @@ module Es =
         /// <example>
         /// <code>
         /// ```ts
-        /// const bound: ClassMethodDecoratorFunction = (value, context) {
+        /// function bound&lt;This, Value extends (...args: any) =&gt; any&gt;(
+        ///   value: Value,
+        ///   context: ClassMethodDecoratorContext&lt;This, Value&gt;,
+        /// ) {
         ///   if (context.private) throw new TypeError("Not supported on private methods.");
-        ///   context.addInitializer(function () {
-        ///     this[context.name] = this[context.name].bind(this);
+        ///   context.addInitializer(function (this: This) {
+        ///     const self = this as Record&lt;PropertyKey, any&gt;;
+        ///     self[context.name] = self[context.name].bind(this);
         ///   });
         /// }
         ///
@@ -1678,6 +1685,16 @@ module Es =
         /// </remarks>
         abstract CSSCounterStyleRule: Fable.Core.TS.Dom.CSSCounterStyleRuleConstructor with get, set
         /// <summary>
+        /// The <b><c>CSSFontFaceDescriptors</c></b> interface represents a CSS declaration block for an
+        /// </summary>
+        /// <remarks>
+        /// @font-face
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSFontFaceDescriptors">MDN Reference</a>
+        /// </remarks>
+        abstract CSSFontFaceDescriptors: Fable.Core.TS.Dom.CSSFontFaceDescriptorsConstructor with get, set
+        /// <summary>
         /// The <b><c>CSSFontFaceRule</c></b> interface represents an
         /// </summary>
         /// <remarks>
@@ -1770,6 +1787,11 @@ module Es =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSSLayerStatementRule">MDN Reference</a>
         /// </remarks>
         abstract CSSLayerStatementRule: Fable.Core.TS.Dom.CSSLayerStatementRuleConstructor with get, set
+        /// <summary>
+        /// The <b><c>CSSMathClamp</c></b> interface of the CSS Typed Object Model API represents the CSS clamp() function. It inherits properties and methods from its parent CSSNumericValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathClamp">MDN Reference</a>
+        /// </summary>
         abstract CSSMathClamp: Fable.Core.TS.Dom.CSSMathClampConstructor with get, set
         /// <summary>
         /// The <b><c>CSSMathInvert</c></b> interface of the CSS Typed Object Model API represents a CSS calc() used as calc(1 / &lt;value&gt;). It inherits properties and methods from its parent CSSNumericValue.
@@ -2035,7 +2057,7 @@ module Es =
         /// </summary>
         abstract CSSTranslate: Fable.Core.TS.Dom.CSSTranslateConstructor with get, set
         /// <summary>
-        /// The <b><c>CSSUnitValue</c></b> interface of the CSS Typed Object Model API represents values that contain a single unit type. For example, "42px" would be represented by a CSSNumericValue.
+        /// The <b><c>CSSUnitValue</c></b> interface of the CSS Typed Object Model API represents values that contain a single unit type.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSSUnitValue">MDN Reference</a>
         /// </summary>
@@ -2151,6 +2173,12 @@ module Es =
         /// </summary>
         abstract CloseEvent: Fable.Core.TS.Dom.CloseEventConstructor with get, set
         /// <summary>
+        /// The <b><c>CloseWatcher</c></b> interface allows a custom UI component with open and close semantics to respond to device-specific close actions in the same way as a built-in component.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CloseWatcher">MDN Reference</a>
+        /// </summary>
+        abstract CloseWatcher: Fable.Core.TS.Dom.CloseWatcherConstructor with get, set
+        /// <summary>
         /// The <b><c>CommandEvent</c></b> interface represents an event notifying the user when a button element with valid commandForElement and command attributes is about to invoke an interactive element.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CommandEvent">MDN Reference</a>
@@ -2250,7 +2278,7 @@ module Es =
         /// </summary>
         abstract CryptoKey: Fable.Core.TS.Dom.CryptoKeyConstructor with get, set
         /// <summary>
-        /// The <b><c>CustomElementRegistry</c></b> interface provides methods for registering custom elements and querying registered elements. To get an instance of it, use the window.customElements property.
+        /// The <b><c>CustomElementRegistry</c></b> interface provides methods for registering custom elements and querying registered elements. To get an instance of it, use the window.customElements property. To create a scoped registry, use the CustomElementRegistry() constructor.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CustomElementRegistry">MDN Reference</a>
         /// </summary>
@@ -2415,6 +2443,20 @@ module Es =
         /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentFragment">MDN Reference</a>
         /// </summary>
         abstract DocumentFragment: Fable.Core.TS.Dom.DocumentFragmentConstructor with get, set
+        /// <summary>
+        /// The <b><c>DocumentPictureInPicture</c></b> interface of the Document Picture-in-Picture API is the entry point for creating and handling document picture-in-picture windows.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPicture">MDN Reference</a>
+        /// </summary>
+        abstract DocumentPictureInPicture: Fable.Core.TS.Dom.DocumentPictureInPictureConstructor with get, set
+        /// <summary>
+        /// The <b><c>DocumentPictureInPictureEvent</c></b> interface of the Document Picture-in-Picture API is the event object for the enter event, which fires when the Picture-in-Picture window is opened.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPictureEvent">MDN Reference</a>
+        /// </summary>
+        abstract DocumentPictureInPictureEvent: Fable.Core.TS.Dom.DocumentPictureInPictureEventConstructor with get, set
         /// <summary>
         /// The <b><c>DocumentTimeline</c></b> interface of the Web Animations API represents animation timelines, including the default document timeline (accessed via Document.timeline).
         /// <br /><br />
@@ -3371,7 +3413,7 @@ module Es =
         /// </summary>
         abstract Headers: Fable.Core.TS.Dom.HeadersConstructor with get, set
         /// <summary>
-        /// The <b><c>Highlight</c></b> interface of the CSS Custom Highlight API is used to represent a collection of Range instances to be styled using the API.
+        /// The <b><c>Highlight</c></b> interface of the CSS Custom Highlight API is used to represent a collection of AbstractRange instances to be styled using the API.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Highlight">MDN Reference</a>
         /// </summary>
@@ -3892,7 +3934,7 @@ module Es =
         /// </summary>
         abstract NavigationPreloadManager: Fable.Core.TS.Dom.NavigationPreloadManagerConstructor with get, set
         /// <summary>
-        /// The <b><c>NavigationTransition</c></b> interface of the Navigation API represents an ongoing navigation, that is, a navigation that hasn't yet reached the navigatesuccess or navigateerror stage.
+        /// The <b><c>NavigationTransition</c></b> interface of the Navigation API represents an ongoing navigation — a navigation that hasn't yet reached the navigatesuccess or navigateerror stage.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationTransition">MDN Reference</a>
         /// </summary>
@@ -3958,6 +4000,7 @@ module Es =
         /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvasRenderingContext2D">MDN Reference</a>
         /// </summary>
         abstract OffscreenCanvasRenderingContext2D: Fable.Core.TS.Dom.OffscreenCanvasRenderingContext2DConstructor with get, set
+        abstract Origin: Fable.Core.TS.Dom.OriginConstructor with get, set
         /// <summary>
         /// The <b><c>OscillatorNode</c></b> interface represents a periodic waveform, such as a sine wave. It is an AudioScheduledSourceNode audio-processing module that causes a specified frequency of a given wave to be created—in effect, a constant tone.
         /// <br /><br />
@@ -5016,6 +5059,8 @@ module Es =
         abstract SVGViewElement: Fable.Core.TS.Dom.SVGViewElementConstructor with get, set
         /// <summary>
         /// The <b><c>Sanitizer</c></b> interface of the HTML Sanitizer API defines a configuration object that specifies what elements, attributes and comments are allowed or should be removed when inserting strings of HTML into an Element or ShadowRoot, or when parsing an HTML string into a Document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Sanitizer">MDN Reference</a>
         /// </summary>
         abstract Sanitizer: Fable.Core.TS.Dom.SanitizerConstructor with get, set
         /// <summary>
@@ -5065,6 +5110,20 @@ module Es =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Selection">MDN Reference</a>
         /// </summary>
         abstract Selection: Fable.Core.TS.Dom.SelectionConstructor with get, set
+        /// <summary>
+        /// The <b><c>Serial</c></b> interface of the Web Serial API provides attributes and methods for finding and connecting to serial ports from a web page.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Serial">MDN Reference</a>
+        /// </summary>
+        abstract Serial: Fable.Core.TS.Dom.SerialConstructor with get, set
+        /// <summary>
+        /// The <b><c>SerialPort</c></b> interface of the Web Serial API provides access to a serial port on the host device.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort">MDN Reference</a>
+        /// </summary>
+        abstract SerialPort: Fable.Core.TS.Dom.SerialPortConstructor with get, set
         /// <summary>
         /// The <b><c>ServiceWorker</c></b> interface of the Service Worker API provides a reference to a service worker. Multiple browsing contexts (e.g., pages, workers, etc.) can be associated with the same service worker, each through a unique ServiceWorker object.
         /// Available only in secure contexts.
@@ -5656,6 +5715,20 @@ module Es =
         /// </summary>
         abstract WebTransportError: Fable.Core.TS.Dom.WebTransportErrorConstructor with get, set
         /// <summary>
+        /// The <b><c>WebTransportReceiveStream</c></b> interface of the WebTransport API is a ReadableStream that can be used to read from an incoming unidirectional or bidirectional WebTransport stream.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportReceiveStream">MDN Reference</a>
+        /// </summary>
+        abstract WebTransportReceiveStream: Fable.Core.TS.Dom.WebTransportReceiveStreamConstructor with get, set
+        /// <summary>
+        /// The <b><c>WebTransportSendStream</c></b> interface of the WebTransport API is a specialized WritableStream that is used to send outbound data in both unidirectional or bidirectional WebTransport streams.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportSendStream">MDN Reference</a>
+        /// </summary>
+        abstract WebTransportSendStream: Fable.Core.TS.Dom.WebTransportSendStreamConstructor with get, set
+        /// <summary>
         /// The <b><c>WheelEvent</c></b> interface represents events that occur due to the user moving a mouse wheel or similar input device.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WheelEvent">MDN Reference</a>
@@ -5756,6 +5829,11 @@ module Es =
         /// The <b><c>CSS</c></b> interface holds useful CSS-related methods. No objects with this interface are implemented: it contains only static methods and is therefore a utilitarian interface.
         /// </summary>
         abstract CSS: Fable.Core.TS.Dom.CSS with get, set
+        abstract GPUBufferUsage: Fable.Core.TS.Dom.GPUBufferUsage with get, set
+        abstract GPUColorWrite: Fable.Core.TS.Dom.GPUColorWrite with get, set
+        abstract GPUMapMode: Fable.Core.TS.Dom.GPUMapMode with get, set
+        abstract GPUShaderStage: Fable.Core.TS.Dom.GPUShaderStage with get, set
+        abstract GPUTextureUsage: Fable.Core.TS.Dom.GPUTextureUsage with get, set
         abstract WebAssembly: Fable.Core.TS.Dom.WebAssembly with get, set
         abstract console: Fable.Core.TS.Dom.Console with get, set
         abstract Audio: Fable.Core.TS.Dom.AudioConstructor with get, set
@@ -5781,7 +5859,7 @@ module Es =
         /// </summary>
         abstract cookieStore: Fable.Core.TS.Dom.CookieStore with get, set
         /// <summary>
-        /// The <b><c>customElements</c></b> read-only property of the Window interface returns a reference to the CustomElementRegistry object, which can be used to register new custom elements and get information about previously registered custom elements.
+        /// The <b><c>customElements</c></b> read-only property of the Window interface returns a reference to the global CustomElementRegistry object, which can be used to register new custom elements and get information about previously registered custom elements.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/customElements">MDN Reference</a>
         /// </summary>
@@ -5798,6 +5876,13 @@ module Es =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/document">MDN Reference</a>
         /// </summary>
         abstract document: Fable.Core.TS.Dom.Document with get, set
+        /// <summary>
+        /// The <b><c>documentPictureInPicture</c></b> read-only property of the Window interface returns a reference to the DocumentPictureInPicture object for the current document context.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Window/documentPictureInPicture">MDN Reference</a>
+        /// </summary>
+        abstract documentPictureInPicture: Fable.Core.TS.Dom.DocumentPictureInPicture with get, set
         /// <summary>
         /// The read-only Window property <b><c>event</c></b> returns the Event which is currently being handled by the site's code. Outside the context of an event handler, the value is always undefined.
         /// </summary>
@@ -7792,11 +7877,15 @@ module Es =
     type PluralRules =
         abstract resolvedOptions: unit -> ResolvedPluralRulesOptions
         abstract ``select``: n: float -> LDMLPluralRule
+        abstract selectRange: start: float * ``end``: float -> LDMLPluralRule
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (resolvedOptions: (unit -> ResolvedPluralRulesOptions), ``select``: (float -> LDMLPluralRule))
-            : PluralRules =
+            (
+                resolvedOptions: (unit -> ResolvedPluralRulesOptions),
+                ``select``: (float -> LDMLPluralRule),
+                selectRange: Func<float, float, LDMLPluralRule>
+            ) : PluralRules =
             jsNative
 
     type PluralRulesConstructor =
@@ -7851,6 +7940,14 @@ module Es =
         | [<CompiledName("nanoseconds")>] Nanoseconds
         | [<CompiledName("second")>] Second
         | [<CompiledName("seconds")>] Seconds
+
+    [<Interface>]
+    type RawJSONInstance =
+        abstract ``__#1@#isRawJson``: obj with get, set
+        abstract rawJSON: string
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(``__#1@#isRawJson``: obj, rawJSON: string) : RawJSONInstance = jsNative
 
     type Reflect =
         /// <summary>
@@ -9404,7 +9501,7 @@ module Es =
         abstract asyncDispose: obj
 
         [<Emit("$0($1...)")>]
-        abstract Invoke: ?description: U2<string, float> -> obj
+        abstract Invoke: ?description: Fable.Core.TS.Dom.BluetoothServiceUUID -> obj
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -9599,6 +9696,23 @@ module Es =
         /// immediately returns that element value. Otherwise, find returns undefined.
         /// </param>
         abstract find: predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate2<'T> -> 'T option
+        /// <summary>
+        /// Creates an iterator whose values are arrays containing successive values from this iterator.
+        /// </summary>
+        /// <param name="chunkSize">The maximum number of values in each array.</param>
+        abstract chunks: chunkSize: float -> IteratorObject<'T[], unit, obj>
+        /// <summary>
+        /// Creates a string by concatenating the values of this iterator, separated by the specified separator.
+        /// <c>null</c> and <c>undefined</c> values contribute an empty string.
+        /// </summary>
+        /// <param name="separator">A string used to separate values. If omitted, a comma is used.</param>
+        abstract join: ?separator: string -> string
+        /// <summary>
+        /// Determines whether this iterator yields the specified value using SameValueZero comparison.
+        /// </summary>
+        /// <param name="searchElement">The value to locate.</param>
+        /// <param name="skippedElements">The number of values to skip before searching.</param>
+        abstract includes: searchElement: 'T * ?skippedElements: float -> bool
 
         [<Emit("$0[Symbol.toStringTag]")>]
         abstract SymbolToStringTag: string
@@ -10057,6 +10171,20 @@ module Es =
         /// </returns>
         abstract ``try``<'T, 'U> :
             callbackFn: ('U -> U2<'T, JS.Promise<'T>>) * [<ParamArray>] args: 'U -> JS.Promise<obj>
+
+        /// <summary>
+        /// Creates a Promise that is resolved with an object of results when all of the provided Promises resolve,
+        /// or rejected when any Promise is rejected.
+        /// </summary>
+        /// <param name="promises">An object of Promises.</param>
+        /// <returns>A new Promise.</returns>
+        abstract allKeyed<'T> : promises: 'T -> JS.Promise<obj>
+        /// <summary>
+        /// Creates a Promise that is resolved with an object of results when all of the provided Promises resolve or reject.
+        /// </summary>
+        /// <param name="promises">An object of Promises.</param>
+        /// <returns>A new Promise.</returns>
+        abstract allSettledKeyed<'T> : promises: 'T -> JS.Promise<obj>
 
         [<Emit("$0[Symbol.species]")>]
         abstract SymbolSpecies: PromiseConstructor
@@ -11246,7 +11374,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> bigint option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -11742,7 +11870,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> bigint option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -12714,9 +12842,173 @@ module Es =
         /// </summary>
         /// <param name="value">An iterator or iterable object to convert a native iterator.</param>
         abstract from<'T> : value: U2<Iterable<'T, obj, unit>, Iterator<'T, obj, unit>> -> IteratorObject<'T, unit, obj>
+        /// <summary>
+        /// Creates an iterator that yields the values of each iterable in sequence.
+        /// </summary>
+        /// <param name="iterables">Iterable objects to concatenate.</param>
+        abstract concat: [<ParamArray>] iterables: obj[] -> IteratorObject<obj, unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are arrays containing values yielded at the same position by each input iterator or iterable.
+        /// </summary>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zip:
+            iterables: obj[] *
+            ?options:
+                U3<IteratorConstructor.Zip.Options, IteratorConstructor.Zip.Options2, IteratorConstructor.Zip.Options3> ->
+                IteratorObject<unit, unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are arrays containing values yielded at the same position by each input iterator or iterable.
+        /// </summary>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zip<'T> :
+            iterables: 'T * ?options: U2<IteratorConstructor.Zip.Options2, IteratorConstructor.Zip.Options3> ->
+                IteratorObject<obj[], unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are arrays containing values yielded at the same position by each input iterator or iterable.
+        /// </summary>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zip<'T, 'TPadding> :
+            iterables: 'T * options: IteratorConstructor.Zip.Options4<'TPadding> -> IteratorObject<obj[], unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are arrays containing values yielded at the same position by each input iterator or iterable.
+        /// </summary>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zip<'T, 'TPadding> :
+            iterables: 'T *
+            ?options:
+                U3<
+                    IteratorConstructor.Zip.Options5<'TPadding>,
+                    IteratorConstructor.Zip.Options2,
+                    IteratorConstructor.Zip.Options3
+                 > ->
+                IteratorObject<obj[], unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are arrays containing values yielded at the same position by each input iterator or iterable.
+        /// </summary>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zip:
+            iterables: obj * ?options: U2<IteratorConstructor.Zip.Options2, IteratorConstructor.Zip.Options3> ->
+                IteratorObject<obj[], unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are arrays containing values yielded at the same position by each input iterator or iterable.
+        /// </summary>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        /// <param name="iterables">An iterable of iterators or iterables to zip.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zip<'TPadding> :
+            iterables: obj *
+            ?options:
+                U3<
+                    IteratorConstructor.Zip.Options6<'TPadding>,
+                    IteratorConstructor.Zip.Options2,
+                    IteratorConstructor.Zip.Options3
+                 > ->
+                IteratorObject<obj option[], unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are objects containing values yielded at the same position by each iterator or iterable in the input object.
+        /// Accepts objects whose types include inherited or non-enumerable properties.
+        /// Property ownership and enumerability are not represented in object types, so the result values are unknown.
+        /// Iterator records use the preceding overloads to preserve their inferred result types.
+        /// </summary>
+        /// <param name="iterables">An object whose enumerable own properties contain iterators or iterables to zip. Undefined values are ignored.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zipKeyed:
+            iterables: obj * ?options: U2<IteratorConstructor.Zip.Options2, IteratorConstructor.Zip.Options3> ->
+                IteratorObject<DecoratorMetadataObject.Base, unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are objects containing values yielded at the same position by each iterator or iterable in the input object.
+        /// Accepts objects whose types include inherited or non-enumerable properties.
+        /// Property ownership and enumerability are not represented in object types, so the result values are unknown.
+        /// Iterator records use the preceding overloads to preserve their inferred result types.
+        /// </summary>
+        /// <param name="iterables">An object whose enumerable own properties contain iterators or iterables to zip. Undefined values are ignored.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zipKeyed<'TPadding> :
+            iterables: obj * options: IteratorConstructor.ZipKeyed.Options<'TPadding> ->
+                IteratorObject<DecoratorMetadataObject.Base, unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are objects containing values yielded at the same position by each iterator or iterable in the input object.
+        /// Accepts objects whose types include inherited or non-enumerable properties.
+        /// Property ownership and enumerability are not represented in object types, so the result values are unknown.
+        /// Iterator records use the preceding overloads to preserve their inferred result types.
+        /// </summary>
+        /// <param name="iterables">An object whose enumerable own properties contain iterators or iterables to zip. Undefined values are ignored.</param>
+        /// <param name="options">Controls how differing input lengths are handled.</param>
+        abstract zipKeyed<'TPadding> :
+            iterables: obj *
+            ?options:
+                U3<
+                    Fable.Core.TS.Es.IteratorConstructor.Zip.Options5<'TPadding>,
+                    IteratorConstructor.Zip.Options2,
+                    IteratorConstructor.Zip.Options3
+                 > ->
+                IteratorObject<DecoratorMetadataObject.Base, unit, obj>
+
+        /// <summary>
+        /// Creates an iterator whose values are objects containing values yielded at the same position by each iterator or iterable in the input object.
+        /// Accepts objects whose types include inherited or non-enumerable properties.
+        /// Property ownership and enumerability are not represented in object types, so the result values are unknown.
+        /// Iterator records use the preceding overloads to preserve their inferred result types.
+        /// </summary>
+        abstract zipKeyed:
+            iterables: obj *
+            ?options:
+                U3<
+                    IteratorConstructor.ZipKeyed.Options3,
+                    IteratorConstructor.Zip.Options2,
+                    IteratorConstructor.Zip.Options3
+                 > ->
+                IteratorObject<DecoratorMetadataObject.Base, unit, obj>
 
         [<EmitConstructor>]
         abstract Create<'T, 'TResult, 'TNext> : unit -> Iterator2<'T, 'TResult, 'TNext>
+
+    /// <summary>
+    /// A frozen object containing JSON text for a primitive value, created by <c>JSON.rawJSON()</c>.
+    /// </summary>
+    [<Interface>]
+    type RawJSON =
+        inherit RawJSONInstance
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(``__#1@#isRawJson``: obj, rawJSON: string) : RawJSON = jsNative
 
     type Symbol =
         /// <summary>
@@ -14121,6 +14413,13 @@ module Es =
         /// </summary>
         /// <param name="x">A numeric expression.</param>
         abstract f16round: x: float -> float
+        /// <summary>
+        /// Sums the values in an iterable while minimizing loss of precision.
+        /// </summary>
+        /// <param name="items">An iterable of numbers to sum.</param>
+        /// <remarks>@throws {TypeError} If <c>items</c> is not iterable or contains a value that is not a number.</remarks>
+        /// <remarks>@throws {RangeError} If <c>items</c> contains 2^53 or more values.</remarks>
+        abstract sumPrecise: items: Iterable<float, obj, obj> -> float
 
         [<Emit("$0[Symbol.toStringTag]")>]
         abstract SymbolToStringTag: string
@@ -14471,7 +14770,7 @@ module Es =
         abstract Create: unit -> Date
 
         [<EmitConstructor>]
-        abstract Create: value: U2<string, float> -> Date
+        abstract Create: value: Fable.Core.TS.Dom.BluetoothServiceUUID -> Date
 
         [<EmitConstructor>]
         abstract Create:
@@ -14506,7 +14805,7 @@ module Es =
         /// <param name="string">String on which to perform the search.</param>
         abstract test: string: string -> bool
         /// <summary>
-        /// Returns a copy of the text of the regular expression pattern. Read-only. The regExp argument is a Regular expression object. It can be a variable name or a literal.
+        /// Returns a copy of the text of the regular expression pattern. Read-only.
         /// </summary>
         abstract source: string
         /// <summary>
@@ -14889,19 +15188,32 @@ module Es =
         /// If a member contains nested objects, the nested objects are transformed before the parent object is.
         /// </param>
         /// <remarks>@throws {SyntaxError} If <c>text</c> is not valid JSON.</remarks>
+        /// <param name="text">A valid JSON string.</param>
+        /// <param name="reviver">
+        /// A function that transforms the results. This function is called for each member of the object.
+        /// If a member contains nested objects, the nested objects are transformed before the parent object is.
+        /// The context object has a <c>source</c> property when the property is unmodified and its value is primitive.
+        /// </param>
+        /// <remarks>@throws {SyntaxError} If <c>text</c> is not valid JSON.</remarks>
         abstract parse: text: string * ?reviver: JSON.Parse.Reviver -> obj
         /// <summary>
-        /// Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+        /// Converts a JavaScript Object Notation (JSON) string into an object.
         /// </summary>
-        /// <param name="value">A JavaScript value, usually an object or array, to be converted.</param>
-        /// <param name="replacer">A function that transforms the results.</param>
-        /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
-        /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
-        /// <param name="value">A JavaScript value, usually an object or array, to be converted.</param>
-        /// <param name="replacer">An array of strings and numbers that acts as an approved list for selecting the object properties that will be stringified.</param>
-        /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
-        /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
-        abstract stringify: value: obj * ?replacer: JSON.Stringify.Replacer * ?space: U2<string, float> -> string
+        /// <param name="text">A valid JSON string.</param>
+        /// <param name="reviver">
+        /// A function that transforms the results. This function is called for each member of the object.
+        /// If a member contains nested objects, the nested objects are transformed before the parent object is.
+        /// </param>
+        /// <remarks>@throws {SyntaxError} If <c>text</c> is not valid JSON.</remarks>
+        /// <param name="text">A valid JSON string.</param>
+        /// <param name="reviver">
+        /// A function that transforms the results. This function is called for each member of the object.
+        /// If a member contains nested objects, the nested objects are transformed before the parent object is.
+        /// The context object has a <c>source</c> property when the property is unmodified and its value is primitive.
+        /// </param>
+        /// <remarks>@throws {SyntaxError} If <c>text</c> is not valid JSON.</remarks>
+        abstract parse: text: string * reviver: JSON.Parse.Reviver2 -> obj
+
         /// <summary>
         /// Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
         /// </summary>
@@ -14913,7 +15225,37 @@ module Es =
         /// <param name="replacer">An array of strings and numbers that acts as an approved list for selecting the object properties that will be stringified.</param>
         /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
         /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
-        abstract stringify: value: obj * ?replacer: U2<string, float>[] * ?space: U2<string, float> -> string
+        abstract stringify:
+            value: obj * ?replacer: JSON.Stringify.Replacer * ?space: Fable.Core.TS.Dom.BluetoothServiceUUID -> string
+
+        /// <summary>
+        /// Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
+        /// </summary>
+        /// <param name="value">A JavaScript value, usually an object or array, to be converted.</param>
+        /// <param name="replacer">A function that transforms the results.</param>
+        /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
+        /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
+        /// <param name="value">A JavaScript value, usually an object or array, to be converted.</param>
+        /// <param name="replacer">An array of strings and numbers that acts as an approved list for selecting the object properties that will be stringified.</param>
+        /// <param name="space">Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.</param>
+        /// <remarks>@throws {TypeError} If a circular reference or a BigInt value is found.</remarks>
+        abstract stringify:
+            value: obj *
+            ?replacer: Fable.Core.TS.Dom.BluetoothServiceUUID[] *
+            ?space: Fable.Core.TS.Dom.BluetoothServiceUUID ->
+                string
+
+        /// <summary>
+        /// Creates a frozen object containing JSON text for a primitive value.
+        /// </summary>
+        /// <param name="text">Valid JSON text representing a string, number, boolean, or null value.</param>
+        /// <remarks>@throws {SyntaxError} If <c>text</c> is not valid JSON text for a primitive value.</remarks>
+        abstract rawJSON: text: string -> RawJSON
+        /// <summary>
+        /// Indicates whether the provided value is an object returned by <c>JSON.rawJSON()</c>.
+        /// </summary>
+        /// <param name="value">The value to test.</param>
+        abstract isRawJSON: value: obj -> bool
 
         [<Emit("$0[Symbol.toStringTag]")>]
         abstract SymbolToStringTag: string
@@ -15004,11 +15346,11 @@ module Es =
         /// </summary>
         /// <param name="iterableOrArrayLike">An async iterator or array-like object to convert to an array.</param>
         /// <param name="iterableOrArrayLike">An async iterator or array-like object to convert to an array.</param>
-        /// <param name="mapfn">
-        /// A mapping function to call on every element of itarableOrArrayLike.
+        /// <param name="mapFn">
+        /// A mapping function to call on every element of iterableOrArrayLike.
         /// Each return value is awaited before being added to result array.
         /// </param>
-        /// <param name="thisArg">Value of 'this' used when executing mapfn.</param>
+        /// <param name="thisArg">Value of 'this' used when executing mapFn.</param>
         abstract fromAsync<'T> :
             iterableOrArrayLike:
                 U3<
@@ -15023,11 +15365,11 @@ module Es =
         /// </summary>
         /// <param name="iterableOrArrayLike">An async iterator or array-like object to convert to an array.</param>
         /// <param name="iterableOrArrayLike">An async iterator or array-like object to convert to an array.</param>
-        /// <param name="mapfn">
-        /// A mapping function to call on every element of itarableOrArrayLike.
+        /// <param name="mapFn">
+        /// A mapping function to call on every element of iterableOrArrayLike.
         /// Each return value is awaited before being added to result array.
         /// </param>
-        /// <param name="thisArg">Value of 'this' used when executing mapfn.</param>
+        /// <param name="thisArg">Value of 'this' used when executing mapFn.</param>
         abstract fromAsync<'T, 'U> :
             iterableOrArrayLike: U3<ArrayLike<'T>, AsyncIterable<'T, obj, obj>, Iterable<'T, obj, obj>> *
             mapFn: ArrayConstructor.FromAsync.MapFn<'T, 'U> *
@@ -15927,7 +16269,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -16487,7 +16829,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -17107,7 +17449,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
 
         /// <summary>
@@ -17674,7 +18016,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -18234,7 +18576,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -18794,7 +19136,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -19354,7 +19696,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -19917,7 +20259,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -20480,7 +20822,7 @@ module Es =
         /// <summary>
         /// Returns the item located at the specified index.
         /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+        /// <param name="index">The zero-based index of the desired item. A negative index will count back from the last item.</param>
         abstract at: index: float -> float option
         /// <summary>
         /// Returns the value of the last element in the array where predicate is true, and undefined
@@ -20820,6 +21162,10 @@ module Es =
     type AsyncDisposableStackConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> AsyncDisposableStack
+
+    type AbstractModuleSource =
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
 
     module ArrayBufferConstructor =
         [<Interface>]
@@ -22058,9 +22404,167 @@ module Es =
                 | [<CompiledName("timeZone")>] TimeZone
                 | [<CompiledName("unit")>] Unit
 
+    module IteratorConstructor =
+        module Zip =
+            [<Interface>]
+            type Options =
+                /// <summary>
+                /// Continues until every input is exhausted.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                abstract mode: string with get, set
+                /// <summary>
+                /// Values used when an input is exhausted before the others.
+                /// </summary>
+                abstract padding: obj option with get, set
+
+                [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
+                static member Create(?padding: obj) : Options = jsNative
+
+            module Options =
+                /// <summary>
+                /// Continues until every input is exhausted.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                [<Literal>]
+                let mode = "longest"
+
+            [<Interface>]
+            type Options2 =
+                /// <summary>
+                /// Stops when any input is exhausted.
+                /// </summary>
+                abstract mode: string option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?mode: string) : Options2 = jsNative
+
+            [<Interface>]
+            type Options3 =
+                /// <summary>
+                /// Requires every input to yield the same number of values.
+                /// If not, a <c>TypeError</c> will be thrown when an input is exhausted before others.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"strict"</c></remarks>
+                abstract mode: string with get, set
+
+                [<Emit("({ mode: 'strict' })")>]
+                static member Create() : Options3 = jsNative
+
+            module Options3 =
+                /// <summary>
+                /// Requires every input to yield the same number of values.
+                /// If not, a <c>TypeError</c> will be thrown when an input is exhausted before others.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"strict"</c></remarks>
+                [<Literal>]
+                let mode = "strict"
+
+            [<Interface>]
+            type Options4<'TPadding> =
+                inherit Fable.Core.TS.Es.IteratorConstructor.Zip.Options5<'TPadding>
+                /// <summary>
+                /// Values used when an input is exhausted before the others.
+                /// </summary>
+                abstract padding: obj with get, set
+
+                [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
+                static member Create(padding: obj) : Options4<'TPadding> = jsNative
+
+            [<Interface>]
+            type Options5<'TPadding> =
+                /// <summary>
+                /// Continues until every input is exhausted.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                abstract mode: string with get, set
+                /// <summary>
+                /// Values used when an input is exhausted before the others.
+                /// </summary>
+                abstract padding: obj option with get, set
+
+                [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
+                static member Create(?padding: obj) : Options5<'TPadding> = jsNative
+
+            module Options5 =
+                /// <summary>
+                /// Continues until every input is exhausted.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                [<Literal>]
+                let mode = "longest"
+
+            [<Interface>]
+            type Options6<'TPadding> =
+                /// <summary>
+                /// Continues until every input is exhausted.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                abstract mode: string with get, set
+                /// <summary>
+                /// Values used when an input is exhausted before the others.
+                /// </summary>
+                abstract padding: obj option with get, set
+
+                [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
+                static member Create(?padding: obj) : Options6<'TPadding> = jsNative
+
+            module Options6 =
+                /// <summary>
+                /// Continues until every input is exhausted.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                [<Literal>]
+                let mode = "longest"
+
+        module ZipKeyed =
+            [<Interface>]
+            type Options<'TPadding> =
+                inherit Fable.Core.TS.Es.IteratorConstructor.Zip.Options5<'TPadding>
+                /// <summary>
+                /// Values used when an input is exhausted before the others.
+                /// </summary>
+                abstract padding: obj with get, set
+
+                [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
+                static member Create(padding: obj) : Options<'TPadding> = jsNative
+
+            [<Interface>]
+            type Options3 =
+                /// <summary>
+                /// Continues until every input is exhausted.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                abstract mode: string with get, set
+                /// <summary>
+                /// Values used when an input is exhausted before the others.
+                /// </summary>
+                abstract padding: obj option with get, set
+
+                [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
+                static member Create(?padding: obj) : Options3 = jsNative
+
+            module Options3 =
+                /// <summary>
+                /// Continues until every input is exhausted.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                [<Literal>]
+                let mode = "longest"
+
     module JSON =
         module Parse =
             type Reviver = delegate of key: string * value: obj -> obj
+
+            type Reviver2 = delegate of key: string * value: obj * context: JSON.Parse.Reviver2.Context -> obj
+
+            module Reviver2 =
+                [<Interface>]
+                type Context =
+                    abstract source: string option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(?source: string) : Context = jsNative
 
         module Stringify =
             type Replacer = delegate of key: string * value: obj -> obj
@@ -23324,6 +23828,7 @@ module Dom =
     [<Interface>]
     type AnimationEventInit =
         inherit EventInit
+        abstract animation: CSSAnimation option with get, set
         abstract animationName: string option with get, set
         abstract elapsedTime: float option with get, set
         abstract pseudoElement: string option with get, set
@@ -23331,6 +23836,7 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
+                ?animation: CSSAnimation,
                 ?animationName: string,
                 ?elapsedTime: float,
                 ?pseudoElement: string,
@@ -23886,6 +24392,14 @@ module Dom =
         static member Create(?endings: EndingType, ?``type``: string) : BlobPropertyBag = jsNative
 
     [<Interface>]
+    type CSSContainerCondition =
+        abstract name: string with get, set
+        abstract query: string with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(name: string, query: string) : CSSContainerCondition = jsNative
+
+    [<Interface>]
     type CSSMatrixComponentOptions =
         abstract is2D: bool option with get, set
 
@@ -23969,6 +24483,9 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
         /// </summary>
         abstract Q: value: float -> CSSUnitValue
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
+        /// </summary>
         abstract cap: value: float -> CSSUnitValue
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
@@ -24064,11 +24581,17 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
         /// </summary>
         abstract grad: value: float -> CSSUnitValue
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
+        /// </summary>
         abstract ic: value: float -> CSSUnitValue
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
         /// </summary>
         abstract kHz: value: float -> CSSUnitValue
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
+        /// </summary>
         abstract lh: value: float -> CSSUnitValue
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
@@ -24126,7 +24649,13 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
         /// </summary>
         abstract rad: value: float -> CSSUnitValue
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
+        /// </summary>
         abstract rcap: value: float -> CSSUnitValue
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
+        /// </summary>
         abstract rch: value: float -> CSSUnitValue
         /// <summary>
         /// The <b><c>CSS.registerProperty()</c></b> static method registers custom properties, allowing for property type checking, default values, and properties that do or do not inherit their value.
@@ -24138,8 +24667,17 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
         /// </summary>
         abstract rem: value: float -> CSSUnitValue
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
+        /// </summary>
         abstract rex: value: float -> CSSUnitValue
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
+        /// </summary>
         abstract ric: value: float -> CSSUnitValue
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
+        /// </summary>
         abstract rlh: value: float -> CSSUnitValue
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSS/factory_functions_static">MDN Reference</a>
@@ -24269,8 +24807,207 @@ module Dom =
     type ExportValue = U4<Fable.Core.TS.Es.Function, Global<WebAssembly.Global.Prototype.Item>, Memory, Table>
 
     [<Interface>]
+    type GPUBufferUsage =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        abstract MAP_READ: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        abstract MAP_WRITE: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        abstract COPY_SRC: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        abstract COPY_DST: float
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        abstract INDEX: float
+        /// <remarks>TypeScript type: <c>32</c></remarks>
+        abstract VERTEX: float
+        /// <remarks>TypeScript type: <c>64</c></remarks>
+        abstract UNIFORM: float
+        /// <remarks>TypeScript type: <c>128</c></remarks>
+        abstract STORAGE: float
+        /// <remarks>TypeScript type: <c>256</c></remarks>
+        abstract INDIRECT: float
+        /// <remarks>TypeScript type: <c>512</c></remarks>
+        abstract QUERY_RESOLVE: float
+
+        [<Emit("({ MAP_READ: 1, MAP_WRITE: 2, COPY_SRC: 4, COPY_DST: 8, INDEX: 16, VERTEX: 32, UNIFORM: 64, STORAGE: 128, INDIRECT: 256, QUERY_RESOLVE: 512 })")>]
+        static member Create() : GPUBufferUsage = jsNative
+
+    module GPUBufferUsage =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let MAP_READ = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let MAP_WRITE = 2.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let COPY_SRC = 4.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let COPY_DST = 8.0
+
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        [<Literal>]
+        let INDEX = 16.0
+
+        /// <remarks>TypeScript type: <c>32</c></remarks>
+        [<Literal>]
+        let VERTEX = 32.0
+
+        /// <remarks>TypeScript type: <c>64</c></remarks>
+        [<Literal>]
+        let UNIFORM = 64.0
+
+        /// <remarks>TypeScript type: <c>128</c></remarks>
+        [<Literal>]
+        let STORAGE = 128.0
+
+        /// <remarks>TypeScript type: <c>256</c></remarks>
+        [<Literal>]
+        let INDIRECT = 256.0
+
+        /// <remarks>TypeScript type: <c>512</c></remarks>
+        [<Literal>]
+        let QUERY_RESOLVE = 512.0
+
+    [<Interface>]
+    type GPUColorWrite =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        abstract RED: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        abstract GREEN: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        abstract BLUE: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        abstract ALPHA: float
+        /// <remarks>TypeScript type: <c>15</c></remarks>
+        abstract ALL: float
+
+        [<Emit("({ RED: 1, GREEN: 2, BLUE: 4, ALPHA: 8, ALL: 15 })")>]
+        static member Create() : GPUColorWrite = jsNative
+
+    module GPUColorWrite =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let RED = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let GREEN = 2.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let BLUE = 4.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let ALPHA = 8.0
+
+        /// <remarks>TypeScript type: <c>15</c></remarks>
+        [<Literal>]
+        let ALL = 15.0
+
+    [<Interface>]
+    type GPUMapMode =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        abstract READ: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        abstract WRITE: float
+
+        [<Emit("({ READ: 1, WRITE: 2 })")>]
+        static member Create() : GPUMapMode = jsNative
+
+    module GPUMapMode =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let READ = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let WRITE = 2.0
+
+    [<Interface>]
+    type GPUShaderStage =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        abstract VERTEX: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        abstract FRAGMENT: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        abstract COMPUTE: float
+
+        [<Emit("({ VERTEX: 1, FRAGMENT: 2, COMPUTE: 4 })")>]
+        static member Create() : GPUShaderStage = jsNative
+
+    module GPUShaderStage =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let VERTEX = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let FRAGMENT = 2.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let COMPUTE = 4.0
+
+    [<Interface>]
+    type GPUTextureUsage =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        abstract COPY_SRC: float
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        abstract COPY_DST: float
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        abstract TEXTURE_BINDING: float
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        abstract STORAGE_BINDING: float
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        abstract RENDER_ATTACHMENT: float
+        /// <remarks>TypeScript type: <c>32</c></remarks>
+        abstract TRANSIENT_ATTACHMENT: float
+
+        [<Emit("({ COPY_SRC: 1, COPY_DST: 2, TEXTURE_BINDING: 4, STORAGE_BINDING: 8, RENDER_ATTACHMENT: 16, TRANSIENT_ATTACHMENT: 32 })")>]
+        static member Create() : GPUTextureUsage = jsNative
+
+    module GPUTextureUsage =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let COPY_SRC = 1.0
+
+        /// <remarks>TypeScript type: <c>2</c></remarks>
+        [<Literal>]
+        let COPY_DST = 2.0
+
+        /// <remarks>TypeScript type: <c>4</c></remarks>
+        [<Literal>]
+        let TEXTURE_BINDING = 4.0
+
+        /// <remarks>TypeScript type: <c>8</c></remarks>
+        [<Literal>]
+        let STORAGE_BINDING = 8.0
+
+        /// <remarks>TypeScript type: <c>16</c></remarks>
+        [<Literal>]
+        let RENDER_ATTACHMENT = 16.0
+
+        /// <remarks>TypeScript type: <c>32</c></remarks>
+        [<Literal>]
+        let TRANSIENT_ATTACHMENT = 32.0
+
+    [<Interface>]
     type Global<'T> =
+        /// <summary>
+        /// The <b><c>value</c></b> property of the WebAssembly.Global object prototype returns the value contained inside the global variable.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global/value">MDN Reference</a>
+        /// </summary>
         abstract value: obj with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global/valueOf">MDN Reference</a>
+        /// </summary>
         abstract valueOf: unit -> obj
 
         [<ParamObject; Emit("$0")>]
@@ -24530,7 +25267,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/compile_static">MDN Reference</a>
         /// </summary>
-        abstract compile: bytes: BufferSource * ?options: WebAssemblyCompileOptions -> JS.Promise<obj>
+        abstract compile: bytes: AllowSharedBufferSource * ?options: WebAssemblyCompileOptions -> JS.Promise<obj>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/compileStreaming_static">MDN Reference</a>
@@ -24542,7 +25279,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiate_static">MDN Reference</a>
         /// </summary>
         abstract instantiate:
-            bytes: BufferSource *
+            bytes: AllowSharedBufferSource *
             ?importObject: JS.Record<string, JS.Record<string, ImportValue>> *
             ?options: WebAssemblyCompileOptions ->
                 JS.Promise<WebAssemblyInstantiatedSource>
@@ -24565,7 +25302,7 @@ module Dom =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/validate_static">MDN Reference</a>
         /// </summary>
-        abstract validate: bytes: BufferSource * ?options: WebAssemblyCompileOptions -> bool
+        abstract validate: bytes: AllowSharedBufferSource * ?options: WebAssemblyCompileOptions -> bool
 
     [<Interface>]
     type WebAssemblyCompileOptions =
@@ -24680,6 +25417,13 @@ module Dom =
             jsNative
 
     [<Interface>]
+    type CloseWatcherOptions =
+        abstract signal: AbortSignal option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(?signal: AbortSignal) : CloseWatcherOptions = jsNative
+
+    [<Interface>]
     type CommandEventInit =
         inherit EventInit
         abstract command: string option with get, set
@@ -24747,7 +25491,7 @@ module Dom =
         abstract offset: float option with get, set
 
         [<EmitIndexer>]
-        abstract Item: string -> U2<string, float> option with get, set
+        abstract Item: string -> BluetoothServiceUUID option with get, set
 
     [<Interface>]
     type ConstantSourceOptions =
@@ -25156,6 +25900,30 @@ module Dom =
             jsNative
 
     [<Interface>]
+    type DocumentPictureInPictureEventInit =
+        inherit EventInit
+        abstract window: Window with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (window: Window, ?bubbles: bool, ?cancelable: bool, ?composed: bool)
+            : DocumentPictureInPictureEventInit =
+            jsNative
+
+    [<Interface>]
+    type DocumentPictureInPictureOptions =
+        abstract disallowReturnToOpener: bool option with get, set
+        abstract height: float option with get, set
+        abstract preferInitialWindowPlacement: bool option with get, set
+        abstract width: float option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (?disallowReturnToOpener: bool, ?height: float, ?preferInitialWindowPlacement: bool, ?width: float)
+            : DocumentPictureInPictureOptions =
+            jsNative
+
+    [<Interface>]
     type DocumentTimelineOptions =
         abstract originTime: float option with get, set
 
@@ -25541,10 +26309,14 @@ module Dom =
 
     [<Interface>]
     type FullscreenOptions =
+        abstract keyboardLock: FullscreenKeyboardLock option with get, set
         abstract navigationUI: FullscreenNavigationUI option with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(?navigationUI: FullscreenNavigationUI) : FullscreenOptions = jsNative
+        static member Create
+            (?keyboardLock: FullscreenKeyboardLock, ?navigationUI: FullscreenNavigationUI)
+            : FullscreenOptions =
+            jsNative
 
     [<Interface>]
     type GPUBindGroupDescriptor =
@@ -25916,10 +26688,11 @@ module Dom =
     type GPUPipelineLayoutDescriptor =
         inherit GPUObjectDescriptorBase
         abstract bindGroupLayouts: GPUBindGroupLayout option[] with get, set
+        abstract immediateSize: float option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (bindGroupLayouts: GPUBindGroupLayout option[], ?label: string)
+            (bindGroupLayouts: GPUBindGroupLayout option[], ?immediateSize: float, ?label: string)
             : GPUPipelineLayoutDescriptor =
             jsNative
 
@@ -26441,6 +27214,21 @@ module Dom =
             jsNative
 
     [<Interface>]
+    type HighlightHitResult =
+        abstract highlight: Highlight option with get, set
+        abstract ranges: AbstractRange[] option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(?highlight: Highlight, ?ranges: AbstractRange[]) : HighlightHitResult = jsNative
+
+    [<Interface>]
+    type HighlightsFromPointOptions =
+        abstract shadowRoots: ShadowRoot[] option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(?shadowRoots: ShadowRoot[]) : HighlightsFromPointOptions = jsNative
+
+    [<Interface>]
     type HkdfParams =
         inherit Algorithm
         abstract hash: AlgorithmIdentifier with get, set
@@ -26758,7 +27546,7 @@ module Dom =
         abstract offset: float option with get, set
 
         [<EmitIndexer>]
-        abstract Item: string -> U2<string, float> option with get, set
+        abstract Item: string -> U3<string, float, CSSStyleValue> option with get, set
 
     [<Interface>]
     type KeyframeAnimationOptions =
@@ -27559,6 +28347,14 @@ module Dom =
         static member Create(state: obj) : NavigationUpdateCurrentEntryOptions = jsNative
 
     [<Interface>]
+    type NotificationAction =
+        abstract action: string with get, set
+        abstract title: string with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(action: string, title: string) : NotificationAction = jsNative
+
+    [<Interface>]
     type NotificationOptions =
         abstract badge: string option with get, set
         abstract body: string option with get, set
@@ -27610,7 +28406,7 @@ module Dom =
     type OptionalEffectTiming =
         abstract delay: float option with get, set
         abstract direction: PlaybackDirection option with get, set
-        abstract duration: U2<string, float> option with get, set
+        abstract duration: BluetoothServiceUUID option with get, set
         abstract easing: string option with get, set
         abstract endDelay: float option with get, set
         abstract fill: FillMode option with get, set
@@ -27623,7 +28419,7 @@ module Dom =
             (
                 ?delay: float,
                 ?direction: PlaybackDirection,
-                ?duration: U2<string, float>,
+                ?duration: BluetoothServiceUUID,
                 ?easing: string,
                 ?endDelay: float,
                 ?fill: FillMode,
@@ -27754,6 +28550,13 @@ module Dom =
                 ?channelInterpretation: ChannelInterpretation
             ) : PannerOptions =
             jsNative
+
+    [<Interface>]
+    type ParseHTMLUnsafeOptions =
+        abstract sanitizer: U3<string, Sanitizer, SanitizerConfig> option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(?sanitizer: U3<string, Sanitizer, SanitizerConfig>) : ParseHTMLUnsafeOptions = jsNative
 
     [<Interface>]
     type PayerErrors =
@@ -27944,12 +28747,12 @@ module Dom =
     type PerformanceMeasureOptions =
         abstract detail: obj option with get, set
         abstract duration: float option with get, set
-        abstract ``end``: U2<string, float> option with get, set
-        abstract start: U2<string, float> option with get, set
+        abstract ``end``: BluetoothServiceUUID option with get, set
+        abstract start: BluetoothServiceUUID option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (?detail: obj, ?duration: float, ?``end``: U2<string, float>, ?start: U2<string, float>)
+            (?detail: obj, ?duration: float, ?``end``: BluetoothServiceUUID, ?start: BluetoothServiceUUID)
             : PerformanceMeasureOptions =
             jsNative
 
@@ -28131,7 +28934,7 @@ module Dom =
         abstract offset: U2<float, float option[]> option with get, set
 
         [<EmitIndexer>]
-        abstract Item: string -> U4<string, float, string[], float option[]> option with get, set
+        abstract Item: string -> U6<string, float, string[], CSSStyleValue[], float option[], CSSStyleValue> option with get, set
 
     [<Interface>]
     type PublicKeyCredentialCreationOptions =
@@ -29363,8 +30166,10 @@ module Dom =
         abstract comments: bool option with get, set
         abstract dataAttributes: bool option with get, set
         abstract elements: SanitizerElementWithAttributes[] option with get, set
+        abstract processingInstructions: SanitizerPI[] option with get, set
         abstract removeAttributes: SanitizerAttribute[] option with get, set
         abstract removeElements: SanitizerElement[] option with get, set
+        abstract removeProcessingInstructions: SanitizerPI[] option with get, set
         abstract replaceWithChildrenElements: SanitizerElement[] option with get, set
 
         [<ParamObject; Emit("$0")>]
@@ -29374,8 +30179,10 @@ module Dom =
                 ?comments: bool,
                 ?dataAttributes: bool,
                 ?elements: SanitizerElementWithAttributes[],
+                ?processingInstructions: SanitizerPI[],
                 ?removeAttributes: SanitizerAttribute[],
                 ?removeElements: SanitizerElement[],
+                ?removeProcessingInstructions: SanitizerPI[],
                 ?replaceWithChildrenElements: SanitizerElement[]
             ) : SanitizerConfig =
             jsNative
@@ -29403,6 +30210,13 @@ module Dom =
                 ?``namespace``: string
             ) : SanitizerElementNamespaceWithAttributes =
             jsNative
+
+    [<Interface>]
+    type SanitizerProcessingInstruction =
+        abstract target: string with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(target: string) : SanitizerProcessingInstruction = jsNative
 
     [<Interface>]
     type SchedulerPostTaskOptions =
@@ -29486,6 +30300,99 @@ module Dom =
                 ?composed: bool
             ) : SecurityPolicyViolationEventInit =
             jsNative
+
+    [<Interface>]
+    type SerialInputSignals =
+        abstract clearToSend: bool with get, set
+        abstract dataCarrierDetect: bool with get, set
+        abstract dataSetReady: bool with get, set
+        abstract ringIndicator: bool with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (clearToSend: bool, dataCarrierDetect: bool, dataSetReady: bool, ringIndicator: bool)
+            : SerialInputSignals =
+            jsNative
+
+    [<Interface>]
+    type SerialOptions =
+        abstract baudRate: float with get, set
+        abstract bufferSize: float option with get, set
+        abstract dataBits: float option with get, set
+        abstract flowControl: FlowControlType option with get, set
+        abstract parity: ParityType option with get, set
+        abstract stopBits: float option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (
+                baudRate: float,
+                ?bufferSize: float,
+                ?dataBits: float,
+                ?flowControl: FlowControlType,
+                ?parity: ParityType,
+                ?stopBits: float
+            ) : SerialOptions =
+            jsNative
+
+    [<Interface>]
+    type SerialOutputSignals =
+        abstract ``break``: bool option with get, set
+        abstract dataTerminalReady: bool option with get, set
+        abstract requestToSend: bool option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(?``break``: bool, ?dataTerminalReady: bool, ?requestToSend: bool) : SerialOutputSignals =
+            jsNative
+
+    [<Interface>]
+    type SerialPortFilter =
+        abstract bluetoothServiceClassId: BluetoothServiceUUID option with get, set
+        abstract usbProductId: float option with get, set
+        abstract usbVendorId: float option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (?bluetoothServiceClassId: BluetoothServiceUUID, ?usbProductId: float, ?usbVendorId: float)
+            : SerialPortFilter =
+            jsNative
+
+    [<Interface>]
+    type SerialPortInfo =
+        abstract bluetoothServiceClassId: BluetoothServiceUUID option with get, set
+        abstract usbProductId: float option with get, set
+        abstract usbVendorId: float option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (?bluetoothServiceClassId: BluetoothServiceUUID, ?usbProductId: float, ?usbVendorId: float)
+            : SerialPortInfo =
+            jsNative
+
+    [<Interface>]
+    type SerialPortRequestOptions =
+        abstract allowedBluetoothServiceClassIds: BluetoothServiceUUID[] option with get, set
+        abstract filters: SerialPortFilter[] option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (?allowedBluetoothServiceClassIds: BluetoothServiceUUID[], ?filters: SerialPortFilter[])
+            : SerialPortRequestOptions =
+            jsNative
+
+    [<Interface>]
+    type SetHTMLOptions =
+        abstract sanitizer: U3<string, Sanitizer, SanitizerConfig> option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(?sanitizer: U3<string, Sanitizer, SanitizerConfig>) : SetHTMLOptions = jsNative
+
+    [<Interface>]
+    type SetHTMLUnsafeOptions =
+        abstract sanitizer: U3<string, Sanitizer, SanitizerConfig> option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(?sanitizer: U3<string, Sanitizer, SanitizerConfig>) : SetHTMLUnsafeOptions = jsNative
 
     [<Interface>]
     type ShadowRootInit =
@@ -29903,6 +30810,7 @@ module Dom =
     [<Interface>]
     type TransitionEventInit =
         inherit EventInit
+        abstract animation: CSSTransition option with get, set
         abstract elapsedTime: float option with get, set
         abstract propertyName: string option with get, set
         abstract pseudoElement: string option with get, set
@@ -29910,6 +30818,7 @@ module Dom =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
+                ?animation: CSSTransition,
                 ?elapsedTime: float,
                 ?propertyName: string,
                 ?pseudoElement: string,
@@ -30463,6 +31372,43 @@ module Dom =
         static member Create(?closeCode: float, ?reason: string) : WebTransportCloseInfo = jsNative
 
     [<Interface>]
+    type WebTransportConnectionStats =
+        abstract bytesReceived: float option with get, set
+        abstract datagrams: WebTransportDatagramStats with get, set
+        abstract minRtt: float option with get, set
+        abstract packetsLost: float option with get, set
+        abstract packetsReceived: float option with get, set
+        abstract packetsSent: float option with get, set
+        abstract rttVariation: float option with get, set
+        abstract smoothedRtt: float option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (
+                datagrams: WebTransportDatagramStats,
+                ?bytesReceived: float,
+                ?minRtt: float,
+                ?packetsLost: float,
+                ?packetsReceived: float,
+                ?packetsSent: float,
+                ?rttVariation: float,
+                ?smoothedRtt: float
+            ) : WebTransportConnectionStats =
+            jsNative
+
+    [<Interface>]
+    type WebTransportDatagramStats =
+        abstract droppedIncoming: float option with get, set
+        abstract expiredOutgoing: float option with get, set
+        abstract lostOutgoing: float option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (?droppedIncoming: float, ?expiredOutgoing: float, ?lostOutgoing: float)
+            : WebTransportDatagramStats =
+            jsNative
+
+    [<Interface>]
     type WebTransportErrorOptions =
         abstract source: WebTransportErrorSource option with get, set
         abstract streamErrorCode: float option with get, set
@@ -30499,6 +31445,14 @@ module Dom =
             jsNative
 
     [<Interface>]
+    type WebTransportReceiveStreamStats =
+        abstract bytesRead: float option with get, set
+        abstract bytesReceived: float option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(?bytesRead: float, ?bytesReceived: float) : WebTransportReceiveStreamStats = jsNative
+
+    [<Interface>]
     type WebTransportSendOptions =
         abstract sendOrder: float option with get, set
 
@@ -30511,6 +31465,18 @@ module Dom =
 
         [<ParamObject; Emit("$0")>]
         static member Create(?sendOrder: float) : WebTransportSendStreamOptions = jsNative
+
+    [<Interface>]
+    type WebTransportSendStreamStats =
+        abstract bytesAcknowledged: float option with get, set
+        abstract bytesSent: float option with get, set
+        abstract bytesWritten: float option with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (?bytesAcknowledged: float, ?bytesSent: float, ?bytesWritten: float)
+            : WebTransportSendStreamStats =
+            jsNative
 
     type WheelEventInit =
         inherit MouseEventInit
@@ -30608,210 +31574,314 @@ module Dom =
 
     type ARIAMixin =
         /// <summary>
+        /// The <b><c>ariaActiveDescendantElement</c></b> property of the Element interface represents the current active element when focus is on a composite widget, combobox, textbox, group, or application.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaActiveDescendantElement">MDN Reference</a>
         /// </summary>
         abstract ariaActiveDescendantElement: Element option with get, set
         /// <summary>
+        /// The <b><c>ariaAtomic</c></b> property of the Element interface reflects the value of the aria-atomic attribute, which indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaAtomic">MDN Reference</a>
         /// </summary>
         abstract ariaAtomic: string option with get, set
         /// <summary>
+        /// The <b><c>ariaAutoComplete</c></b> property of the Element interface reflects the value of the aria-autocomplete attribute, which indicates whether inputting text could trigger display of one or more predictions of the user's intended value for a combobox, searchbox, or textbox and specifies how predictions would be presented if they were made.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaAutoComplete">MDN Reference</a>
         /// </summary>
         abstract ariaAutoComplete: string option with get, set
         /// <summary>
+        /// The <b><c>ariaBrailleLabel</c></b> property of the Element interface reflects the value of the aria-braillelabel attribute, which defines the ARIA braille label of the element.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBrailleLabel">MDN Reference</a>
         /// </summary>
         abstract ariaBrailleLabel: string option with get, set
         /// <summary>
+        /// The <b><c>ariaBrailleRoleDescription</c></b> property of the Element interface reflects the value of the aria-brailleroledescription attribute, which defines the ARIA braille role description of the element.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBrailleRoleDescription">MDN Reference</a>
         /// </summary>
         abstract ariaBrailleRoleDescription: string option with get, set
         /// <summary>
+        /// The <b><c>ariaBusy</c></b> property of the Element interface reflects the value of the aria-busy attribute, which indicates whether an element is being modified, as assistive technologies may want to wait until the modifications are complete before exposing them to the user.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBusy">MDN Reference</a>
         /// </summary>
         abstract ariaBusy: string option with get, set
         /// <summary>
+        /// The <b><c>ariaChecked</c></b> property of the Element interface reflects the value of the aria-checked attribute, which indicates the current "checked" state of checkboxes, radio buttons, and other widgets that have a checked state.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaChecked">MDN Reference</a>
         /// </summary>
         abstract ariaChecked: string option with get, set
         /// <summary>
+        /// The <b><c>ariaColCount</c></b> property of the Element interface reflects the value of the aria-colcount attribute, which defines the number of columns in a table, grid, or treegrid.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColCount">MDN Reference</a>
         /// </summary>
         abstract ariaColCount: string option with get, set
         /// <summary>
+        /// The <b><c>ariaColIndex</c></b> property of the Element interface reflects the value of the aria-colindex attribute, which defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColIndex">MDN Reference</a>
         /// </summary>
         abstract ariaColIndex: string option with get, set
         /// <summary>
+        /// The <b><c>ariaColIndexText</c></b> property of the Element interface reflects the value of the aria-colindextext attribute, which defines a human readable text alternative of aria-colindex.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColIndexText">MDN Reference</a>
         /// </summary>
         abstract ariaColIndexText: string option with get, set
         /// <summary>
+        /// The <b><c>ariaColSpan</c></b> property of the Element interface reflects the value of the aria-colspan attribute, which defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColSpan">MDN Reference</a>
         /// </summary>
         abstract ariaColSpan: string option with get, set
         /// <summary>
+        /// The <b><c>ariaControlsElements</c></b> property of the Element interface is an array containing the elements that are controlled by the element it is applied to. For example, this might be set on a combobox to indicate the element that it pops up, or on a scrollbar to indicate the ID of the element it controls.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaControlsElements">MDN Reference</a>
         /// </summary>
         abstract ariaControlsElements: Element[] option with get, set
         /// <summary>
+        /// The <b><c>ariaCurrent</c></b> property of the Element interface reflects the value of the aria-current attribute, which indicates the element that represents the current item within a container or set of related elements.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaCurrent">MDN Reference</a>
         /// </summary>
         abstract ariaCurrent: string option with get, set
         /// <summary>
+        /// The <b><c>ariaDescribedByElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an accessible description for the element it is applied to. The accessible description is similar to the accessible label (see ariaLabelledByElements), but provides more verbose information.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDescribedByElements">MDN Reference</a>
         /// </summary>
         abstract ariaDescribedByElements: Element[] option with get, set
         /// <summary>
+        /// The <b><c>ariaDescription</c></b> property of the Element interface reflects the value of the aria-description attribute, which defines a string value that describes or annotates the current element.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDescription">MDN Reference</a>
         /// </summary>
         abstract ariaDescription: string option with get, set
         /// <summary>
+        /// The <b><c>ariaDetailsElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an accessible details for the element it is applied to. The accessible details are similar to the accessible description (see ariaDescribedByElements), but provides more verbose information.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDetailsElements">MDN Reference</a>
         /// </summary>
         abstract ariaDetailsElements: Element[] option with get, set
         /// <summary>
+        /// The <b><c>ariaDisabled</c></b> property of the Element interface reflects the value of the aria-disabled attribute, which indicates that the element is perceivable but disabled, so it is not editable or otherwise operable.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDisabled">MDN Reference</a>
         /// </summary>
         abstract ariaDisabled: string option with get, set
         /// <summary>
+        /// The <b><c>ariaErrorMessageElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an error message for the element it is applied to.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaErrorMessageElements">MDN Reference</a>
         /// </summary>
         abstract ariaErrorMessageElements: Element[] option with get, set
         /// <summary>
+        /// The <b><c>ariaExpanded</c></b> property of the Element interface reflects the value of the aria-expanded attribute, which indicates whether a grouping element owned or controlled by this element is expanded or collapsed.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaExpanded">MDN Reference</a>
         /// </summary>
         abstract ariaExpanded: string option with get, set
         /// <summary>
+        /// The <b><c>ariaFlowToElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an alternate reading order of content, overriding the general default reading order at the user's discretion. If just one element is provided this is the next element in the reading order. If multiple elements are provided, then each element represents a possible path that should be offered to the user for selection.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaFlowToElements">MDN Reference</a>
         /// </summary>
         abstract ariaFlowToElements: Element[] option with get, set
         /// <summary>
+        /// The <b><c>ariaHasPopup</c></b> property of the Element interface reflects the value of the aria-haspopup attribute, which indicates the availability and type of interactive popup element, such as menu or dialog, that can be triggered by an element.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaHasPopup">MDN Reference</a>
         /// </summary>
         abstract ariaHasPopup: string option with get, set
         /// <summary>
+        /// The <b><c>ariaHidden</c></b> property of the Element interface reflects the value of the aria-hidden) attribute, which indicates whether the element is exposed to an accessibility API.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaHidden">MDN Reference</a>
         /// </summary>
         abstract ariaHidden: string option with get, set
         /// <summary>
+        /// The <b><c>ariaInvalid</c></b> property of the Element interface reflects the value of the aria-invalid attribute. Relevant for the application, checkbox, combobox, gridcell, listbox, radiogroup, slider, spinbutton, textbox, and tree roles, it indicates to the accessibility API whether the entered value does not conform to the format expected by the application.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaInvalid">MDN Reference</a>
         /// </summary>
         abstract ariaInvalid: string option with get, set
         /// <summary>
+        /// The <b><c>ariaKeyShortcuts</c></b> property of the Element interface reflects the value of the aria-keyshortcuts attribute, which indicates keyboard shortcuts that an author has implemented to activate or give focus to an element.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaKeyShortcuts">MDN Reference</a>
         /// </summary>
         abstract ariaKeyShortcuts: string option with get, set
         /// <summary>
+        /// The <b><c>ariaLabel</c></b> property of the Element interface reflects the value of the aria-label attribute, which defines a string value that labels the current element.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLabel">MDN Reference</a>
         /// </summary>
         abstract ariaLabel: string option with get, set
         /// <summary>
+        /// The <b><c>ariaLabelledByElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an accessible name for the element it is applied to.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLabelledByElements">MDN Reference</a>
         /// </summary>
         abstract ariaLabelledByElements: Element[] option with get, set
         /// <summary>
+        /// The <b><c>ariaLevel</c></b> property of the Element interface reflects the value of the aria-level attribute, which defines the hierarchical level of an element within a structure.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLevel">MDN Reference</a>
         /// </summary>
         abstract ariaLevel: string option with get, set
         /// <summary>
+        /// The <b><c>ariaLive</c></b> property of the Element interface reflects the value of the aria-live attribute, which indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLive">MDN Reference</a>
         /// </summary>
         abstract ariaLive: string option with get, set
         /// <summary>
+        /// The <b><c>ariaModal</c></b> property of the Element interface reflects the value of the aria-modal attribute, which indicates whether an element is modal when displayed. Applying the aria-modal property to an element with role="dialog" replaces the technique of using aria-hidden on the background for informing assistive technologies that content outside a dialog is inert.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaModal">MDN Reference</a>
         /// </summary>
         abstract ariaModal: string option with get, set
         /// <summary>
+        /// The <b><c>ariaMultiLine</c></b> property of the Element interface reflects the value of the aria-multiline attribute, which indicates whether a text box accepts multiple lines of input or only a single line.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaMultiLine">MDN Reference</a>
         /// </summary>
         abstract ariaMultiLine: string option with get, set
         /// <summary>
+        /// The <b><c>ariaMultiSelectable</c></b> property of the Element interface reflects the value of the aria-multiselectable attribute, which indicates that the user may select more than one item from the current selectable descendants.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaMultiSelectable">MDN Reference</a>
         /// </summary>
         abstract ariaMultiSelectable: string option with get, set
         /// <summary>
+        /// The <b><c>ariaOrientation</c></b> property of the Element interface reflects the value of the aria-orientation attribute, which indicates whether the element's orientation is horizontal, vertical, or unknown/ambiguous.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaOrientation">MDN Reference</a>
         /// </summary>
         abstract ariaOrientation: string option with get, set
         /// <summary>
+        /// The <b><c>ariaOwnsElements</c></b> property of the Element interface is an array containing the element (or elements) that define a visual, functional, or contextual relationship between a parent element that it is applied to, and its child elements. This is used when the DOM hierarchy cannot be used to represent the relationship, and it would not otherwise be available to assistive technology,
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaOwnsElements">MDN Reference</a>
         /// </summary>
         abstract ariaOwnsElements: Element[] option with get, set
         /// <summary>
+        /// The <b><c>ariaPlaceholder</c></b> property of the Element interface reflects the value of the aria-placeholder attribute, which defines a short hint intended to aid the user with data entry when the control has no value.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPlaceholder">MDN Reference</a>
         /// </summary>
         abstract ariaPlaceholder: string option with get, set
         /// <summary>
+        /// The <b><c>ariaPosInSet</c></b> property of the Element interface reflects the value of the aria-posinset attribute, which defines an element's number or position in the current set of listitems or treeitems.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPosInSet">MDN Reference</a>
         /// </summary>
         abstract ariaPosInSet: string option with get, set
         /// <summary>
+        /// The <b><c>ariaPressed</c></b> property of the Element interface reflects the value of the aria-pressed attribute, which indicates the current "pressed" state of toggle buttons.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPressed">MDN Reference</a>
         /// </summary>
         abstract ariaPressed: string option with get, set
         /// <summary>
+        /// The <b><c>ariaReadOnly</c></b> property of the Element interface reflects the value of the aria-readonly attribute, which indicates that the element is not editable, but is otherwise operable.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaReadOnly">MDN Reference</a>
         /// </summary>
         abstract ariaReadOnly: string option with get, set
         /// <summary>
+        /// The <b><c>ariaRelevant</c></b> property of the Element interface reflects the value of the aria-relevant attribute, which indicates what notifications the user agent will trigger when the accessibility tree within a live region is modified. This is used to describe what changes in an aria-live region are relevant and should be announced.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRelevant">MDN Reference</a>
         /// </summary>
         abstract ariaRelevant: string option with get, set
         /// <summary>
+        /// The <b><c>ariaRequired</c></b> property of the Element interface reflects the value of the aria-required attribute, which indicates that user input is required on the element before a form may be submitted.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRequired">MDN Reference</a>
         /// </summary>
         abstract ariaRequired: string option with get, set
         /// <summary>
+        /// The <b><c>ariaRoleDescription</c></b> property of the Element interface reflects the value of the aria-roledescription attribute, which defines a human-readable, author-localized description for the role of an element.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRoleDescription">MDN Reference</a>
         /// </summary>
         abstract ariaRoleDescription: string option with get, set
         /// <summary>
+        /// The <b><c>ariaRowCount</c></b> property of the Element interface reflects the value of the aria-rowcount attribute, which defines the total number of rows in a table, grid, or treegrid.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowCount">MDN Reference</a>
         /// </summary>
         abstract ariaRowCount: string option with get, set
         /// <summary>
+        /// The <b><c>ariaRowIndex</c></b> property of the Element interface reflects the value of the aria-rowindex attribute, which defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowIndex">MDN Reference</a>
         /// </summary>
         abstract ariaRowIndex: string option with get, set
         /// <summary>
+        /// The <b><c>ariaRowIndexText</c></b> property of the Element interface reflects the value of the aria-rowindextext attribute, which defines a human readable text alternative of aria-rowindex.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowIndexText">MDN Reference</a>
         /// </summary>
         abstract ariaRowIndexText: string option with get, set
         /// <summary>
+        /// The <b><c>ariaRowSpan</c></b> property of the Element interface reflects the value of the aria-rowspan attribute, which defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowSpan">MDN Reference</a>
         /// </summary>
         abstract ariaRowSpan: string option with get, set
         /// <summary>
+        /// The <b><c>ariaSelected</c></b> property of the Element interface reflects the value of the aria-selected attribute, which indicates the current "selected" state of elements that have a selected state.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSelected">MDN Reference</a>
         /// </summary>
         abstract ariaSelected: string option with get, set
         /// <summary>
+        /// The <b><c>ariaSetSize</c></b> property of the Element interface reflects the value of the aria-setsize attribute, which defines the number of items in the current set of listitems or treeitems.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSetSize">MDN Reference</a>
         /// </summary>
         abstract ariaSetSize: string option with get, set
         /// <summary>
+        /// The <b><c>ariaSort</c></b> property of the Element interface reflects the value of the aria-sort attribute, which indicates if items in a table or grid are sorted in ascending or descending order.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSort">MDN Reference</a>
         /// </summary>
         abstract ariaSort: string option with get, set
         /// <summary>
+        /// The <b><c>ariaValueMax</c></b> property of the Element interface reflects the value of the aria-valuemax attribute, which defines the maximum allowed value for a range widget.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueMax">MDN Reference</a>
         /// </summary>
         abstract ariaValueMax: string option with get, set
         /// <summary>
+        /// The <b><c>ariaValueMin</c></b> property of the Element interface reflects the value of the aria-valuemin attribute, which defines the minimum allowed value for a range widget.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueMin">MDN Reference</a>
         /// </summary>
         abstract ariaValueMin: string option with get, set
         /// <summary>
+        /// The <b><c>ariaValueNow</c></b> property of the Element interface reflects the value of the aria-valuenow attribute, which defines the current value for a range widget.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueNow">MDN Reference</a>
         /// </summary>
         abstract ariaValueNow: string option with get, set
         /// <summary>
+        /// The <b><c>ariaValueText</c></b> property of the Element interface reflects the value of the aria-valuetext attribute, which defines the human-readable text alternative of aria-valuenow for a range widget.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueText">MDN Reference</a>
         /// </summary>
         abstract ariaValueText: string option with get, set
         /// <summary>
+        /// The <b><c>role</c></b> property of the Element interface returns the explicitly set WAI-ARIA role for the element.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/role">MDN Reference</a>
         /// </summary>
         abstract role: string option with get, set
@@ -33266,34 +34336,50 @@ module Dom =
     [<Interface>]
     type Body =
         /// <summary>
+        /// The <b><c>body</c></b> read-only property of the Request interface contains a ReadableStream with the body contents that have been added to the request. Note that a request using the GET or HEAD method cannot have a body and null is returned in these cases.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/body">MDN Reference</a>
         /// </summary>
         abstract body: ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>> option
         /// <summary>
+        /// The <b><c>bodyUsed</c></b> read-only property of the Request interface is a boolean value that indicates whether the request body has been read yet.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bodyUsed">MDN Reference</a>
         /// </summary>
         abstract bodyUsed: bool
         /// <summary>
+        /// The <b><c>arrayBuffer()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with an ArrayBuffer.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/arrayBuffer">MDN Reference</a>
         /// </summary>
         abstract arrayBuffer: unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
         /// <summary>
+        /// The <b><c>blob()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with a Blob.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/blob">MDN Reference</a>
         /// </summary>
         abstract blob: unit -> JS.Promise<Blob>
         /// <summary>
+        /// The <b><c>bytes()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with a Uint8Array.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bytes">MDN Reference</a>
         /// </summary>
         abstract bytes: unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
         /// <summary>
+        /// The <b><c>formData()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with a FormData object.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/formData">MDN Reference</a>
         /// </summary>
         abstract formData: unit -> JS.Promise<FormData>
         /// <summary>
+        /// The <b><c>json()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with the result of parsing the body text as JSON.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/json">MDN Reference</a>
         /// </summary>
         abstract json: unit -> JS.Promise<obj>
         /// <summary>
+        /// The <b><c>text()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with a String. The response is always decoded using UTF-8.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Request/text">MDN Reference</a>
         /// </summary>
         abstract text: unit -> JS.Promise<string>
@@ -33509,6 +34595,10 @@ module Dom =
     type CSSContainerRule =
         inherit CSSConditionRule
         /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSContainerRule/conditions">MDN Reference</a>
+        /// </summary>
+        abstract conditions: CSSContainerCondition[]
+        /// <summary>
         /// The read-only <b><c>containerName</c></b> property of the CSSContainerRule interface represents the container name of the associated CSS
         /// </summary>
         /// <remarks>
@@ -33533,6 +34623,7 @@ module Dom =
           Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
+                conditions: CSSContainerCondition[],
                 containerName: string,
                 containerQuery: string,
                 conditionText: string,
@@ -33656,6 +34747,39 @@ module Dom =
         abstract Create: unit -> CSSCounterStyleRule
 
     /// <summary>
+    /// The <b><c>CSSFontFaceDescriptors</c></b> interface represents a CSS declaration block for an
+    /// </summary>
+    /// <remarks>
+    /// @font-face
+    /// at-rule.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CSSFontFaceDescriptors">MDN Reference</a>
+    /// </remarks>
+    type CSSFontFaceDescriptors =
+        inherit CSSStyleDeclarationBase
+        abstract ``font-display``: string with get, set
+        abstract ``font-family``: string with get, set
+        abstract ``font-feature-settings``: string with get, set
+        abstract ``font-stretch``: string with get, set
+        abstract ``font-style``: string with get, set
+        abstract ``font-weight``: string with get, set
+        abstract fontDisplay: string with get, set
+        abstract fontFamily: string with get, set
+        abstract fontFeatureSettings: string with get, set
+        abstract fontStretch: string with get, set
+        abstract fontStyle: string with get, set
+        abstract fontWeight: string with get, set
+        abstract ``size-adjust``: string with get, set
+        abstract sizeAdjust: string with get, set
+        abstract src: string with get, set
+        abstract ``unicode-range``: string with get, set
+        abstract unicodeRange: string with get, set
+
+    type CSSFontFaceDescriptorsConstructor =
+        [<EmitConstructor>]
+        abstract Create: unit -> CSSFontFaceDescriptors
+
+    /// <summary>
     /// The <b><c>CSSFontFaceRule</c></b> interface represents an
     /// </summary>
     /// <remarks>
@@ -33668,7 +34792,7 @@ module Dom =
     type CSSFontFaceRule =
         inherit CSSRule
         /// <summary>
-        /// The read-only <b><c>style</c></b> property of the CSSFontFaceRule interface contains a CSSStyleDeclaration object representing the descriptors available in the
+        /// The read-only <b><c>style</c></b> property of the CSSFontFaceRule interface returns a CSSFontFaceDescriptors object representing the descriptors available in the
         /// </summary>
         /// <remarks>
         /// @font-face
@@ -33676,13 +34800,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSSFontFaceRule/style">MDN Reference</a>
         /// </remarks>
-        abstract style: CSSStyleDeclaration with get, set
+        abstract style: CSSFontFaceDescriptors with get, set
 
         [<ParamObject;
           Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
         static member Create
             (
-                style: CSSStyleDeclaration,
+                style: CSSFontFaceDescriptors,
                 cssText: string,
                 ``type``: float,
                 ?parentRule: CSSRule,
@@ -34105,11 +35229,31 @@ module Dom =
         [<EmitConstructor>]
         abstract Create: unit -> CSSLayerStatementRule
 
+    /// <summary>
+    /// The <b><c>CSSMathClamp</c></b> interface of the CSS Typed Object Model API represents the CSS clamp() function. It inherits properties and methods from its parent CSSNumericValue.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathClamp">MDN Reference</a>
+    /// </summary>
     [<Interface>]
     type CSSMathClamp =
         inherit CSSMathValue
+        /// <summary>
+        /// The <b><c>lower</c></b> read-only property of the CSSMathClamp interface returns a CSSNumericValue object containing the minimum value of a CSSMathClamp object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathClamp/lower">MDN Reference</a>
+        /// </summary>
         abstract lower: CSSNumericValue
+        /// <summary>
+        /// The <b><c>upper</c></b> read-only property of the CSSMathClamp interface returns a CSSNumericValue object containing the maximum value of a CSSMathClamp object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathClamp/upper">MDN Reference</a>
+        /// </summary>
         abstract upper: CSSNumericValue
+        /// <summary>
+        /// The <b><c>value</c></b> read-only property of the CSSMathClamp interface returns a CSSNumericValue object containing the preferred value of a CSSMathClamp object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathClamp/value">MDN Reference</a>
+        /// </summary>
         abstract value: CSSNumericValue
 
         [<ParamObject; Emit("$0")>]
@@ -36016,6 +37160,8 @@ module Dom =
         abstract backgroundSize: string with get, set
         /// <summary>
         /// The baseline-shift CSS property repositions the dominant-baseline of a text element relative to the dominant-baseline of its parent text content element. The shifted element might be a sub- or superscript. If the property is present, the value overrides the element's baseline-shift attribute.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/CSS/Reference/Properties/baseline-shift">MDN Reference</a>
         /// </summary>
         abstract baselineShift: string with get, set
         /// <summary>
@@ -36552,7 +37698,7 @@ module Dom =
         /// </summary>
         abstract columnWidth: string with get, set
         /// <summary>
-        /// The <b><c>columns</c></b> CSS shorthand property sets the number of columns to use when drawing an element's contents, as well as those columns' widths.
+        /// The <b><c>columns</c></b> CSS shorthand property sets the maximum number of columns to use when drawing an element's contents, along with the minimum width and maximum height of the element's columns.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/CSS/Reference/Properties/columns">MDN Reference</a>
         /// </summary>
@@ -37175,7 +38321,7 @@ module Dom =
         /// </summary>
         abstract left: string with get, set
         /// <summary>
-        /// The letter-spacing CSS property sets the horizontal spacing behavior between text characters. This value is added to the natural spacing between characters while rendering the text. Positive values of letter-spacing causes characters to spread farther apart, while negative values of letter-spacing bring characters closer together.
+        /// The letter-spacing CSS property sets the spacing between text characters. This value is added to the natural spacing between characters while rendering the text. Positive values of letter-spacing spread characters further apart, while negative values of letter-spacing bring characters closer together.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/CSS/Reference/Properties/letter-spacing">MDN Reference</a>
         /// </summary>
@@ -37253,7 +38399,7 @@ module Dom =
         /// </summary>
         abstract marginBottom: string with get, set
         /// <summary>
-        /// The margin-inline CSS shorthand property is a shorthand property that defines both the logical inline start and end margins of an element, which maps to physical margins depending on the element's writing mode, directionality, and text orientation.
+        /// The margin-inline CSS shorthand property defines both the logical inline start and end margins of an element, which maps to physical margins depending on the element's writing mode, directionality, and text orientation.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/CSS/Reference/Properties/margin-inline">MDN Reference</a>
         /// </summary>
@@ -38436,7 +39582,7 @@ module Dom =
         /// </summary>
         abstract vectorEffect: string with get, set
         /// <summary>
-        /// The vertical-align CSS property sets vertical alignment of an inline, inline-block or table-cell box.
+        /// The vertical-align CSS shorthand property sets the vertical alignment of an inline, inline-block, or table-cell box.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/CSS/Reference/Properties/vertical-align">MDN Reference</a>
         /// </summary>
@@ -39009,7 +40155,7 @@ module Dom =
         /// </summary>
         abstract wordBreak: string with get, set
         /// <summary>
-        /// The word-spacing CSS property sets the length of space between words and between tags.
+        /// The word-spacing CSS property sets the spacing between words and between tags.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/CSS/Reference/Properties/word-spacing">MDN Reference</a>
         /// </summary>
@@ -39387,7 +40533,7 @@ module Dom =
         abstract Create: x: CSSNumericValue * y: CSSNumericValue * ?z: CSSNumericValue -> CSSTranslate
 
     /// <summary>
-    /// The <b><c>CSSUnitValue</c></b> interface of the CSS Typed Object Model API represents values that contain a single unit type. For example, "42px" would be represented by a CSSNumericValue.
+    /// The <b><c>CSSUnitValue</c></b> interface of the CSS Typed Object Model API represents values that contain a single unit type.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CSSUnitValue">MDN Reference</a>
     /// </summary>
@@ -39395,7 +40541,7 @@ module Dom =
     type CSSUnitValue =
         inherit CSSNumericValue
         /// <summary>
-        /// The <b><c>CSSUnitValue.unit</c></b> read-only property of the CSSUnitValue interface returns a string indicating the type of unit.
+        /// The <b><c>CSSUnitValue.unit</c></b> read-only property of the CSSUnitValue interface returns a string indicating the unit type.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CSSUnitValue/unit">MDN Reference</a>
         /// </summary>
@@ -40057,7 +41203,7 @@ module Dom =
         inherit CanvasTransform
         inherit CanvasUserInterface
         /// <summary>
-        /// The <b><c>CanvasRenderingContext2D.canvas</c></b> property, part of the Canvas API, is a read-only reference to the HTMLCanvasElement object that is associated with a given context. It might be null if there is no associated &lt;canvas&gt; element.
+        /// The <b><c>CanvasRenderingContext2D.canvas</c></b> property, part of the Canvas API, is a read-only reference to the HTMLCanvasElement object that is associated with a given context.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/canvas">MDN Reference</a>
         /// </summary>
@@ -40175,6 +41321,10 @@ module Dom =
         /// </summary>
         abstract fontVariantCaps: CanvasFontVariantCaps with get, set
         /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/lang">MDN Reference</a>
+        /// </summary>
+        abstract lang: string with get, set
+        /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/letterSpacing">MDN Reference</a>
         /// </summary>
         abstract letterSpacing: string with get, set
@@ -40203,6 +41353,7 @@ module Dom =
                 fontKerning: CanvasFontKerning,
                 fontStretch: CanvasFontStretch,
                 fontVariantCaps: CanvasFontVariantCaps,
+                lang: string,
                 letterSpacing: string,
                 textAlign: CanvasTextAlign,
                 textBaseline: CanvasTextBaseline,
@@ -40635,6 +41786,94 @@ module Dom =
     type CloseEventConstructor =
         [<EmitConstructor>]
         abstract Create: ``type``: string * ?eventInitDict: CloseEventInit -> CloseEvent
+
+    [<Interface>]
+    type CloseWatcherEventMap =
+        abstract cancel: Event with get, set
+        abstract close: Event with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(cancel: Event, close: Event) : CloseWatcherEventMap = jsNative
+
+    /// <summary>
+    /// The <b><c>CloseWatcher</c></b> interface allows a custom UI component with open and close semantics to respond to device-specific close actions in the same way as a built-in component.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/CloseWatcher">MDN Reference</a>
+    /// </summary>
+    type CloseWatcher =
+        inherit EventTarget
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CloseWatcher/cancel_event">MDN Reference</a>
+        /// </summary>
+        abstract oncancel: (Event -> unit) option with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CloseWatcher/close_event">MDN Reference</a>
+        /// </summary>
+        abstract onclose: (Event -> unit) option with get, set
+        /// <summary>
+        /// The <b><c>close()</c></b> method of the CloseWatcher interface lets you skip any logic in the cancel event handler and immediately fire the close event. It then deactivates the close watcher as if destroy() was called.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CloseWatcher/close">MDN Reference</a>
+        /// </summary>
+        abstract close: unit -> unit
+        /// <summary>
+        /// The <b><c>destroy()</c></b> method of the CloseWatcher interface deactivates the close watcher. This is intended to be called if the relevant UI element is torn down in some other way than being closed.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CloseWatcher/destroy">MDN Reference</a>
+        /// </summary>
+        abstract destroy: unit -> unit
+        /// <summary>
+        /// The <b><c>requestClose()</c></b> method of the CloseWatcher interface fires a cancel event and if that event is not canceled with Event.preventDefault(), proceeds to fire a close event, and then finally deactivates the close watcher as if destroy() was called.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CloseWatcher/requestClose">MDN Reference</a>
+        /// </summary>
+        abstract requestClose: unit -> unit
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<CloseWatcherEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener:
+            ``type``: string *
+            listener: EventListenerOrEventListenerObject *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<CloseWatcherEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener:
+            ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
+                unit
+
+    type CloseWatcherConstructor =
+        [<EmitConstructor>]
+        abstract Create: ?options: CloseWatcherOptions -> CloseWatcher
 
     /// <summary>
     /// The <b><c>CommandEvent</c></b> interface represents an event notifying the user when a button element with valid commandForElement and command attributes is about to invoke an interactive element.
@@ -41136,6 +42375,13 @@ module Dom =
         static member Create(id: string, ``type``: string) : Credential = jsNative
 
     type CredentialConstructor =
+        /// <summary>
+        /// The <b><c>isConditionalMediationAvailable()</c></b> static method of the Credential interface returns a Promise which resolves to false.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Credential/isConditionalMediationAvailable_static">MDN Reference</a>
+        /// </summary>
+        abstract isConditionalMediationAvailable: unit -> JS.Promise<bool>
+
         [<EmitConstructor>]
         abstract Create: unit -> Credential
 
@@ -41269,7 +42515,7 @@ module Dom =
         abstract Create: unit -> CryptoKey
 
     /// <summary>
-    /// The <b><c>CustomElementRegistry</c></b> interface provides methods for registering custom elements and querying registered elements. To get an instance of it, use the window.customElements property.
+    /// The <b><c>CustomElementRegistry</c></b> interface provides methods for registering custom elements and querying registered elements. To get an instance of it, use the window.customElements property. To create a scoped registry, use the CustomElementRegistry() constructor.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/CustomElementRegistry">MDN Reference</a>
     /// </summary>
@@ -41295,6 +42541,11 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/CustomElementRegistry/getName">MDN Reference</a>
         /// </summary>
         abstract getName: ``constructor``: CustomElementConstructor -> string option
+        /// <summary>
+        /// The <b><c>initialize()</c></b> method of the CustomElementRegistry interface associates this registry with a DOM subtree, setting the customElementRegistry of each inclusive descendant that doesn't already have one, and attempting to upgrade any custom elements found.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CustomElementRegistry/initialize">MDN Reference</a>
+        /// </summary>
         abstract initialize: root: Node -> unit
         /// <summary>
         /// The <b><c>upgrade()</c></b> method of the CustomElementRegistry interface upgrades all shadow-containing custom elements in a Node subtree, even before they are connected to the main document.
@@ -41768,7 +43019,7 @@ module Dom =
     [<Interface>]
     type DOMImplementation =
         /// <summary>
-        /// The <b><c>DOMImplementation.createDocument()</c></b> method creates and returns an XMLDocument.
+        /// The <b><c>createDocument()</c></b> method of the DOMImplementation interface creates and returns an XMLDocument.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/DOMImplementation/createDocument">MDN Reference</a>
         /// </summary>
@@ -43159,14 +44410,18 @@ module Dom =
     type DigitalCredential =
         inherit Credential
         abstract data: obj
+        /// <remarks>TypeScript type: <c>"org-iso-mdoc"</c></remarks>
         abstract protocol: string
         abstract toJSON: unit -> obj
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (data: obj, protocol: string, toJSON: (unit -> obj), id: string, ``type``: string)
-            : DigitalCredential =
+        [<ParamObject; Emit("({ protocol: 'org-iso-mdoc', ...$0 })")>]
+        static member Create(data: obj, toJSON: (unit -> obj), id: string, ``type``: string) : DigitalCredential =
             jsNative
+
+    module DigitalCredential =
+        /// <remarks>TypeScript type: <c>"org-iso-mdoc"</c></remarks>
+        [<Literal>]
+        let protocol = "org-iso-mdoc"
 
     type DigitalCredentialConstructor =
         abstract userAgentAllowsProtocol: protocol: string -> bool
@@ -43534,13 +44789,13 @@ module Dom =
         /// </summary>
         abstract close: unit -> unit
         /// <summary>
-        /// The <b><c>Document.createAttribute()</c></b> method creates a new attribute node, and returns it. The object created is a node implementing the Attr interface. The DOM does not enforce what sort of attributes can be added to a particular element in this manner.
+        /// The <b><c>createAttribute()</c></b> method of the Document interface creates a new attribute node.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createAttribute">MDN Reference</a>
         /// </summary>
         abstract createAttribute: localName: string -> Attr
         /// <summary>
-        /// The <b><c>Document.createAttributeNS()</c></b> method creates a new attribute node with the specified namespace URI and qualified name, and returns it. The object created is a node implementing the Attr interface. The DOM does not enforce what sort of attributes can be added to a particular element in this manner.
+        /// The <b><c>createAttributeNS()</c></b> method of the Document interface creates a new attribute node with the specified namespace URI and qualified name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createAttributeNS">MDN Reference</a>
         /// </summary>
@@ -43565,7 +44820,7 @@ module Dom =
         abstract createDocumentFragment: unit -> DocumentFragment
 
         /// <summary>
-        /// In an HTML document, the <b><c>document.createElement()</c></b> method creates the HTML element specified by localName, or an HTMLUnknownElement if localName isn't recognized.
+        /// The <b><c>createElement()</c></b> method of the Document interface creates a new HTMLElement that has the specified localName.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElement">MDN Reference</a>
         /// </summary>
@@ -43573,7 +44828,7 @@ module Dom =
             tagName: typekeyof<HTMLElementTagNameMap, 'E> * ?options: ElementCreationOptions -> 'E
 
         /// <summary>
-        /// In an HTML document, the <b><c>document.createElement()</c></b> method creates the HTML element specified by localName, or an HTMLUnknownElement if localName isn't recognized.
+        /// The <b><c>createElement()</c></b> method of the Document interface creates a new HTMLElement that has the specified localName.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElement">MDN Reference</a>
         /// </summary>
@@ -43582,14 +44837,14 @@ module Dom =
             tagName: typekeyof<HTMLElementDeprecatedTagNameMap, 'E> * ?options: ElementCreationOptions -> 'E
 
         /// <summary>
-        /// In an HTML document, the <b><c>document.createElement()</c></b> method creates the HTML element specified by localName, or an HTMLUnknownElement if localName isn't recognized.
+        /// The <b><c>createElement()</c></b> method of the Document interface creates a new HTMLElement that has the specified localName.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElement">MDN Reference</a>
         /// </summary>
         abstract createElement: tagName: string * ?options: ElementCreationOptions -> HTMLElement
 
         /// <summary>
-        /// Creates an element with the specified namespace URI and qualified name.
+        /// The <b><c>createElementNS()</c></b> method of the Document interface creates a new element with the specified namespace URI and qualified name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
         /// <code lang="ts">
@@ -43633,7 +44888,7 @@ module Dom =
         abstract createElementNSHttpWwwW3Org1998MathMathML: qualifiedName: string -> MathMLElement
 
         /// <summary>
-        /// Creates an element with the specified namespace URI and qualified name.
+        /// The <b><c>createElementNS()</c></b> method of the Document interface creates a new element with the specified namespace URI and qualified name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
         /// </summary>
@@ -43641,7 +44896,7 @@ module Dom =
             namespaceURI: string option * qualifiedName: string * ?options: ElementCreationOptions -> Element
 
         /// <summary>
-        /// Creates an element with the specified namespace URI and qualified name.
+        /// The <b><c>createElementNS()</c></b> method of the Document interface creates a new element with the specified namespace URI and qualified name.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/createElementNS">MDN Reference</a>
         /// </summary>
@@ -43762,6 +45017,14 @@ module Dom =
         /// </summary>
         [<Emit("$0.createEvent('DeviceOrientationEvent')")>]
         abstract createEventDeviceOrientationEvent: unit -> DeviceOrientationEvent
+
+        /// <summary>
+        /// <code lang="ts">
+        /// createEvent(eventInterface: "DocumentPictureInPictureEvent"): DocumentPictureInPictureEvent
+        /// </code>
+        /// </summary>
+        [<Emit("$0.createEvent('DocumentPictureInPictureEvent')")>]
+        abstract createEventDocumentPictureInPictureEvent: unit -> DocumentPictureInPictureEvent
 
         /// <summary>
         /// <code lang="ts">
@@ -44487,7 +45750,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/parseHTMLUnsafe_static">MDN Reference</a>
         /// </summary>
-        abstract parseHTMLUnsafe: html: string -> Document
+        abstract parseHTMLUnsafe: html: string * ?options: ParseHTMLUnsafeOptions -> Document
 
         [<EmitConstructor>]
         abstract Create: unit -> Document
@@ -44526,41 +45789,58 @@ module Dom =
     [<Interface>]
     type DocumentOrShadowRoot =
         /// <summary>
-        /// Returns the deepest element in the document through which or to which key events are being routed. This is, roughly speaking, the focused element in the document.
-        /// <br /><br />
-        /// For the purposes of this API, when a child browsing context is focused, its container is focused in the parent browsing context. For example, if the user moves the focus to a text control in an iframe, the iframe is the element returned by the activeElement API in the iframe's node document.
-        /// <br /><br />
-        /// Similarly, when the focused element is in a different node tree than documentOrShadowRoot, the element returned will be the host that's located in the same node tree as documentOrShadowRoot if documentOrShadowRoot is a shadow-including inclusive ancestor of the focused element, and null if not.
+        /// The <b><c>activeElement</c></b> read-only property of the Document interface returns the Element within the DOM that is receiving keyboard events such as keydown and keyup. This is usually analogous to the focused element.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/activeElement">MDN Reference</a>
         /// </summary>
         abstract activeElement: Element option
         /// <summary>
+        /// The <b><c>adoptedStyleSheets</c></b> property of the Document interface is used for setting an array of constructed stylesheets to be used by the document.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/adoptedStyleSheets">MDN Reference</a>
         /// </summary>
         abstract adoptedStyleSheets: CSSStyleSheet[] with get, set
+        /// <summary>
+        /// The <b><c>customElementRegistry</c></b> read-only property of the Document interface returns the CustomElementRegistry object associated with this document, or null if one has not been set.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document/customElementRegistry">MDN Reference</a>
+        /// </summary>
         abstract customElementRegistry: CustomElementRegistry option
         /// <summary>
-        /// Returns document's fullscreen element.
+        /// The <b><c>Document.fullscreenElement</c></b> read-only property returns the Element that is currently being presented in fullscreen mode in this document, or null if fullscreen mode is not currently in use.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/fullscreenElement">MDN Reference</a>
         /// </summary>
         abstract fullscreenElement: Element option
         /// <summary>
+        /// The read-only <b><c>pictureInPictureElement</c></b> property of the Document interface returns the Element that is currently being presented in picture-in-picture mode in this document, or null if picture-in-picture mode is not currently in use.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/pictureInPictureElement">MDN Reference</a>
         /// </summary>
         abstract pictureInPictureElement: Element option
         /// <summary>
+        /// The <b><c>pointerLockElement</c></b> read-only property of the Document interface provides the element set as the target for mouse events while the pointer is locked. It is null if lock is pending, pointer is unlocked, or the target is in another document.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/pointerLockElement">MDN Reference</a>
         /// </summary>
         abstract pointerLockElement: Element option
         /// <summary>
+        /// The <b><c>styleSheets</c></b> read-only property of the Document interface returns a StyleSheetList of CSSStyleSheet objects, for stylesheets explicitly linked into or embedded in a document.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/styleSheets">MDN Reference</a>
         /// </summary>
         abstract styleSheets: StyleSheetList
+        /// <summary>
+        /// The <b><c>elementFromPoint()</c></b> method, available on the Document object, returns the topmost Element at the specified coordinates (relative to the viewport).
+        /// </summary>
         abstract elementFromPoint: x: float * y: float -> Element option
+        /// <summary>
+        /// The <b><c>elementsFromPoint()</c></b> method of the Document interface returns an array of all elements at the specified coordinates (relative to the viewport). The elements are ordered from the topmost to the bottommost box of the viewport.
+        /// </summary>
         abstract elementsFromPoint: x: float * y: float -> Element[]
         /// <summary>
+        /// The <b><c>getAnimations()</c></b> method of the Document interface returns an array of all Animation objects currently in effect whose target elements are descendants of the document. This array includes CSS Animations, CSS Transitions, and Web Animations.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getAnimations">MDN Reference</a>
         /// </summary>
         abstract getAnimations: unit -> Animation[]
@@ -44580,6 +45860,130 @@ module Dom =
                 ?pointerLockElement: Element
             ) : DocumentOrShadowRoot =
             jsNative
+
+    [<Interface>]
+    type DocumentPictureInPictureEventMap =
+        abstract enter: DocumentPictureInPictureEvent with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(enter: DocumentPictureInPictureEvent) : DocumentPictureInPictureEventMap = jsNative
+
+    /// <summary>
+    /// The <b><c>DocumentPictureInPicture</c></b> interface of the Document Picture-in-Picture API is the entry point for creating and handling document picture-in-picture windows.
+    /// Available only in secure contexts.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPicture">MDN Reference</a>
+    /// </summary>
+    type DocumentPictureInPicture =
+        inherit EventTarget
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPicture/enter_event">MDN Reference</a>
+        /// </summary>
+        abstract onenter: (DocumentPictureInPictureEvent -> unit) option with get, set
+        /// <summary>
+        /// The <b><c>window</c></b> read-only property of the DocumentPictureInPicture interface returns a Window instance representing the browsing context inside the Picture-in-Picture window.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPicture/window">MDN Reference</a>
+        /// </summary>
+        abstract window: Window
+        /// <summary>
+        /// The <b><c>requestWindow()</c></b> method of the DocumentPictureInPicture interface opens the Picture-in-Picture window for the current main browsing context. It returns a Promise that fulfills with a Window instance representing the browsing context inside the Picture-in-Picture window.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPicture/requestWindow">MDN Reference</a>
+        /// </summary>
+        abstract requestWindow: ?options: DocumentPictureInPictureOptions -> JS.Promise<Window>
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<DocumentPictureInPictureEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener:
+            ``type``: string *
+            listener: EventListenerOrEventListenerObject *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<DocumentPictureInPictureEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener:
+            ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
+                unit
+
+    type DocumentPictureInPictureConstructor =
+        [<EmitConstructor>]
+        abstract Create: unit -> DocumentPictureInPicture
+
+    /// <summary>
+    /// The <b><c>DocumentPictureInPictureEvent</c></b> interface of the Document Picture-in-Picture API is the event object for the enter event, which fires when the Picture-in-Picture window is opened.
+    /// Available only in secure contexts.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPictureEvent">MDN Reference</a>
+    /// </summary>
+    [<Interface>]
+    type DocumentPictureInPictureEvent =
+        inherit Event
+        /// <summary>
+        /// The <b><c>window</c></b> read-only property of the DocumentPictureInPictureEvent interface returns a Window instance representing the browsing context inside the DocumentPictureInPicture window the event was fired on.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPictureEvent/window">MDN Reference</a>
+        /// </summary>
+        abstract window: Window
+
+        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        static member Create
+            (
+                window: Window,
+                bubbles: bool,
+                cancelBubble: bool,
+                cancelable: bool,
+                composed: bool,
+                defaultPrevented: bool,
+                eventPhase: float,
+                isTrusted: bool,
+                returnValue: bool,
+                timeStamp: float,
+                ``type``: string,
+                composedPath: (unit -> EventTarget[]),
+                initEvent: Action<string, bool option, bool option>,
+                preventDefault: (unit -> unit),
+                stopImmediatePropagation: (unit -> unit),
+                stopPropagation: (unit -> unit),
+                ?currentTarget: EventTarget,
+                ?srcElement: EventTarget,
+                ?target: EventTarget
+            ) : DocumentPictureInPictureEvent =
+            jsNative
+
+    type DocumentPictureInPictureEventConstructor =
+        [<EmitConstructor>]
+        abstract Create:
+            ``type``: string * eventInitDict: DocumentPictureInPictureEventInit -> DocumentPictureInPictureEvent
 
     /// <summary>
     /// The <b><c>DocumentTimeline</c></b> interface of the Web Animations API represents animation timelines, including the default document timeline (accessed via Document.timeline).
@@ -45053,6 +46457,11 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/currentCSSZoom">MDN Reference</a>
         /// </summary>
         abstract currentCSSZoom: float
+        /// <summary>
+        /// The <b><c>customElementRegistry</c></b> read-only property of the Element interface returns the CustomElementRegistry object associated with this element, or null if one has not been set.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/customElementRegistry">MDN Reference</a>
+        /// </summary>
         abstract customElementRegistry: CustomElementRegistry option
         /// <summary>
         /// The <b><c>id</c></b> property of the Element interface represents the element's identifier, reflecting the id global attribute.
@@ -45491,11 +46900,17 @@ module Dom =
         /// </summary>
         abstract setAttributeNodeNS: attr: Attr -> Attr option
         /// <summary>
+        /// The <b><c>setHTML()</c></b> method of the Element interface provides an XSS-safe method to parse and sanitize a string of HTML and insert it into the DOM as a subtree of the element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setHTML">MDN Reference</a>
+        /// </summary>
+        abstract setHTML: html: string * ?options: SetHTMLOptions -> unit
+        /// <summary>
         /// The <b><c>setHTMLUnsafe()</c></b> method of the Element interface is used to parse HTML input into a DocumentFragment, optionally filtering out unwanted elements and attributes, and those that don't belong in the context, and then using it to replace the element's subtree in the DOM.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setHTMLUnsafe">MDN Reference</a>
         /// </summary>
-        abstract setHTMLUnsafe: html: string -> unit
+        abstract setHTMLUnsafe: html: string * ?options: SetHTMLUnsafeOptions -> unit
         /// <summary>
         /// The <b><c>setPointerCapture()</c></b> method of the Element interface is used to designate a specific element as the capture target of future pointer events. Subsequent events for the pointer will be targeted at the capture element until capture is released (via Element.releasePointerCapture() or the pointerup event is fired).
         /// <br /><br />
@@ -45503,7 +46918,7 @@ module Dom =
         /// </summary>
         abstract setPointerCapture: pointerId: float -> unit
         /// <summary>
-        /// The <b><c>toggleAttribute()</c></b> method of the Element interface toggles a Boolean attribute (removing it if it is present and adding it if it is not present) on the given element.
+        /// The <b><c>toggleAttribute()</c></b> method of the Element interface toggles a Boolean attribute on the given element, removing it if present and adding it if not present.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Element/toggleAttribute">MDN Reference</a>
         /// </summary>
@@ -45912,7 +47327,7 @@ module Dom =
         /// </summary>
         abstract eventPhase: float
         /// <summary>
-        /// The <b><c>isTrusted</c></b> read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+        /// The <b><c>isTrusted</c></b> read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The click event fired through HTMLElement.click() sets the isTrusted property to false.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Event/isTrusted">MDN Reference</a>
         /// </summary>
@@ -48970,10 +50385,14 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits#instance_properties">MDN Reference</a>
         /// </summary>
         abstract maxStorageBufferBindingSize: float
+        abstract maxStorageBuffersInFragmentStage: float
+        abstract maxStorageBuffersInVertexStage: float
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits#instance_properties">MDN Reference</a>
         /// </summary>
         abstract maxStorageBuffersPerShaderStage: float
+        abstract maxStorageTexturesInFragmentStage: float
+        abstract maxStorageTexturesInVertexStage: float
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits#instance_properties">MDN Reference</a>
         /// </summary>
@@ -50229,6 +51648,7 @@ module Dom =
     type HTMLAnchorElement =
         inherit HTMLElement
         inherit HTMLHyperlinkElementUtils
+        inherit HyperlinkElementUtils
         /// <remarks>@deprecated</remarks>
         abstract charset: string with get, set
         /// <remarks>@deprecated</remarks>
@@ -50239,12 +51659,6 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/download">MDN Reference</a>
         /// </summary>
         abstract download: string with get, set
-        /// <summary>
-        /// The <b><c>hreflang</c></b> property of the HTMLAnchorElement interface is a string that is the language of the linked resource.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/hreflang">MDN Reference</a>
-        /// </summary>
-        abstract hreflang: string with get, set
         /// <remarks>@deprecated</remarks>
         abstract name: string with get, set
         /// <summary>
@@ -50276,23 +51690,11 @@ module Dom =
         /// <remarks>@deprecated</remarks>
         abstract shape: string with get, set
         /// <summary>
-        /// The <b><c>target</c></b> property of the HTMLAnchorElement interface is a string that indicates where to display the linked resource.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/target">MDN Reference</a>
-        /// </summary>
-        abstract target: string with get, set
-        /// <summary>
         /// The <b><c>text</c></b> property of the HTMLAnchorElement represents the text inside the element. This property represents the same information as Node.textContent.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/text">MDN Reference</a>
         /// </summary>
         abstract text: string with get, set
-        /// <summary>
-        /// The <b><c>type</c></b> property of the HTMLAnchorElement interface is a string that indicates the MIME type of the linked resource.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/type">MDN Reference</a>
-        /// </summary>
-        abstract ``type``: string with get, set
 
     type HTMLAnchorElementConstructor =
         [<EmitConstructor>]
@@ -50306,6 +51708,7 @@ module Dom =
     type HTMLAreaElement =
         inherit HTMLElement
         inherit HTMLHyperlinkElementUtils
+        inherit HyperlinkElementUtils
         /// <summary>
         /// The <b><c>alt</c></b> property of the HTMLAreaElement interface specifies the text of the hyperlink, defining the textual label for an image map's link. It reflects the &lt;area&gt; element's alt attribute.
         /// <br /><br />
@@ -50356,12 +51759,6 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAreaElement/shape">MDN Reference</a>
         /// </summary>
         abstract shape: string with get, set
-        /// <summary>
-        /// The <b><c>target</c></b> property of the HTMLAreaElement interface is a string that indicates where to display the linked resource.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAreaElement/target">MDN Reference</a>
-        /// </summary>
-        abstract target: string with get, set
 
     type HTMLAreaElementConstructor =
         [<EmitConstructor>]
@@ -50658,6 +52055,14 @@ module Dom =
         abstract getContextWebgl2: ?options: WebGLContextAttributes -> WebGL2RenderingContext option
 
         /// <summary>
+        /// <code lang="ts">
+        /// getContext(contextId: "webgpu"): GPUCanvasContext | null
+        /// </code>
+        /// </summary>
+        [<Emit("$0.getContext('webgpu')")>]
+        abstract getContextWebgpu: unit -> GPUCanvasContext option
+
+        /// <summary>
         /// The <b><c>HTMLCanvasElement.getContext()</c></b> method returns a drawing context on the canvas, or null if the context identifier is not supported, or the canvas has already been set to a different context mode.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/getContext">MDN Reference</a>
@@ -50919,6 +52324,7 @@ module Dom =
         inherit ElementContentEditable
         inherit GlobalEventHandlers
         inherit HTMLOrSVGElement
+        inherit HTMLOrSVGOrMathMLElement
         /// <summary>
         /// The <b><c>HTMLElement.accessKey</c></b> property sets the keystroke which a user can press to jump to a given element.
         /// <br /><br />
@@ -51538,109 +52944,21 @@ module Dom =
     [<Interface>]
     type HTMLHyperlinkElementUtils =
         /// <summary>
-        /// Returns the hyperlink's URL's fragment (includes leading "#" if non-empty).
-        /// <br /><br />
-        /// Can be set, to change the URL's fragment (ignores leading "#").
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/hash">MDN Reference</a>
-        /// </summary>
-        abstract hash: string with get, set
-        /// <summary>
-        /// Returns the hyperlink's URL's host and port (if different from the default port for the scheme).
-        /// <br /><br />
-        /// Can be set, to change the URL's host and port.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/host">MDN Reference</a>
-        /// </summary>
-        abstract host: string with get, set
-        /// <summary>
-        /// Returns the hyperlink's URL's host.
-        /// <br /><br />
-        /// Can be set, to change the URL's host.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/hostname">MDN Reference</a>
-        /// </summary>
-        abstract hostname: string with get, set
-        /// <summary>
-        /// Returns the hyperlink's URL.
-        /// <br /><br />
-        /// Can be set, to change the URL.
+        /// The <b><c>href</c></b> property of the HTMLAnchorElement interface is a stringifier that returns the absolute URL corresponding to the element's href attribute (or an empty string if href is unset). Setting this property updates the element's href attribute to the provided value.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/href">MDN Reference</a>
         /// </summary>
         abstract href: string with get, set
         abstract toString: unit -> string
         /// <summary>
-        /// Returns the hyperlink's URL's origin.
+        /// The <b><c>target</c></b> property of the HTMLAnchorElement interface is a string that indicates where to display the linked resource.
         /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/origin">MDN Reference</a>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/target">MDN Reference</a>
         /// </summary>
-        abstract origin: string
-        /// <summary>
-        /// Returns the hyperlink's URL's password.
-        /// <br /><br />
-        /// Can be set, to change the URL's password.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/password">MDN Reference</a>
-        /// </summary>
-        abstract password: string with get, set
-        /// <summary>
-        /// Returns the hyperlink's URL's path.
-        /// <br /><br />
-        /// Can be set, to change the URL's path.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/pathname">MDN Reference</a>
-        /// </summary>
-        abstract pathname: string with get, set
-        /// <summary>
-        /// Returns the hyperlink's URL's port.
-        /// <br /><br />
-        /// Can be set, to change the URL's port.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/port">MDN Reference</a>
-        /// </summary>
-        abstract port: string with get, set
-        /// <summary>
-        /// Returns the hyperlink's URL's scheme.
-        /// <br /><br />
-        /// Can be set, to change the URL's scheme.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/protocol">MDN Reference</a>
-        /// </summary>
-        abstract protocol: string with get, set
-        /// <summary>
-        /// Returns the hyperlink's URL's query (includes leading "?" if non-empty).
-        /// <br /><br />
-        /// Can be set, to change the URL's query (ignores leading "?").
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/search">MDN Reference</a>
-        /// </summary>
-        abstract search: string with get, set
-        /// <summary>
-        /// Returns the hyperlink's URL's username.
-        /// <br /><br />
-        /// Can be set, to change the URL's username.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/username">MDN Reference</a>
-        /// </summary>
-        abstract username: string with get, set
+        abstract target: string with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                hash: string,
-                host: string,
-                hostname: string,
-                href: string,
-                toString: (unit -> string),
-                origin: string,
-                password: string,
-                pathname: string,
-                port: string,
-                protocol: string,
-                search: string,
-                username: string
-            ) : HTMLHyperlinkElementUtils =
+        static member Create(href: string, toString: (unit -> string), target: string) : HTMLHyperlinkElementUtils =
             jsNative
 
     /// <summary>
@@ -51685,7 +53003,7 @@ module Dom =
         /// </summary>
         abstract height: string with get, set
         /// <summary>
-        /// The <b><c>loading</c></b> property of the HTMLIFrameElement interface is a string that provides a hint to the user agent indicating whether the iframe should be loaded immediately on page load, or only when it is needed.
+        /// The <b><c>loading</c></b> property of the HTMLIFrameElement interface is a string that provides a hint to the browser indicating whether the iframe should be loaded immediately on page load, or only when it is needed.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLIFrameElement/loading">MDN Reference</a>
         /// </summary>
@@ -51779,7 +53097,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLImageElement/crossOrigin">MDN Reference</a>
         /// </summary>
-        abstract crossOrigin: string option with get, set
+        abstract crossOrigin: HTMLImageElement.CrossOrigin option with get, set
         /// <summary>
         /// The <b><c>currentSrc</c></b> read-only property of the HTMLImageElement interface indicates the URL of the image selected by the browser to load.
         /// <br /><br />
@@ -51816,7 +53134,7 @@ module Dom =
         /// </summary>
         abstract isMap: bool with get, set
         /// <summary>
-        /// The <b><c>loading</c></b> property of the HTMLImageElement interface provides a hint to the user agent on how to handle the loading of the image which is currently outside the window's visual viewport. This helps to optimize the loading of the document's contents by postponing loading the image until it's expected to be needed, rather than immediately during the initial page load. It reflects the &lt;img&gt; element's loading content attribute.
+        /// The <b><c>loading</c></b> property of the HTMLImageElement interface provides a hint to the browser on how to handle the loading of the image which is currently outside the window's visual viewport. This helps to optimize the loading of the document's contents by postponing loading the image until it's expected to be needed, rather than immediately during the initial page load. It reflects the &lt;img&gt; element's loading content attribute.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLImageElement/loading">MDN Reference</a>
         /// </summary>
@@ -51852,7 +53170,7 @@ module Dom =
         /// </summary>
         abstract referrerPolicy: string with get, set
         /// <summary>
-        /// The <b><c>sizes</c></b> property of the HTMLImageElement interface allows you to specify the layout width of the image for each of a list of media queries. This provides the ability to automatically select among different images—even images of different orientations or aspect ratios—as the document state changes to match different media conditions. It reflects the &lt;img&gt; element's sizes content attribute.
+        /// The <b><c>sizes</c></b> property of the HTMLImageElement interface allows you to specify the layout width of the image for each of a list of media queries, or auto for lazy-loaded images to allow the browser to automatically select an image to display based on the layout size of the element. This allows the browser to choose between different images specified in the element srcset to match different media conditions — even images with different orientations or aspect ratios.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLImageElement/sizes">MDN Reference</a>
         /// </summary>
@@ -51949,6 +53267,12 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/checked">MDN Reference</a>
         /// </summary>
         abstract ``checked``: bool with get, set
+        /// <summary>
+        /// The <b><c>colorSpace</c></b> property of the HTMLInputElement interface reflects the &lt;input&gt; element's colorspace attribute, which indicates whether the color space of the serialized CSS color is sRGB (the default) or display-p3. It is only relevant to color controls.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement/colorSpace">MDN Reference</a>
+        /// </summary>
+        abstract colorSpace: string with get, set
         /// <summary>
         /// The <b><c>defaultChecked</c></b> property of the HTMLInputElement interface specifies the default checkedness state of the element. This property reflects the &lt;input&gt; element's checked attribute.
         /// <br /><br />
@@ -52727,6 +54051,12 @@ module Dom =
         /// </summary>
         abstract canPlayType: ``type``: string -> CanPlayTypeResult
         /// <summary>
+        /// The <b><c>captureStream()</c></b> method of the HTMLMediaElement interface returns a MediaStream object that streams a real-time capture of the content being rendered in the media element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/captureStream">MDN Reference</a>
+        /// </summary>
+        abstract captureStream: unit -> MediaStream
+        /// <summary>
         /// The <b><c>HTMLMediaElement.fastSeek()</c></b> method quickly seeks the media to the new time with precision tradeoff.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/fastSeek">MDN Reference</a>
@@ -53335,6 +54665,22 @@ module Dom =
 
     [<Interface>]
     type HTMLOrSVGElement =
+        inherit HTMLOrSVGOrMathMLElement
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (
+                autofocus: bool,
+                dataset: DOMStringMap,
+                nonce: string,
+                tabIndex: float,
+                blur: (unit -> unit),
+                focus: (FocusOptions option -> unit)
+            ) : HTMLOrSVGElement =
+            jsNative
+
+    [<Interface>]
+    type HTMLOrSVGOrMathMLElement =
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement/autofocus">MDN Reference</a>
         /// </summary>
@@ -53369,7 +54715,7 @@ module Dom =
                 tabIndex: float,
                 blur: (unit -> unit),
                 focus: (FocusOptions option -> unit)
-            ) : HTMLOrSVGElement =
+            ) : HTMLOrSVGOrMathMLElement =
             jsNative
 
     /// <summary>
@@ -54397,6 +55743,11 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTemplateElement/shadowRootClonable">MDN Reference</a>
         /// </summary>
         abstract shadowRootClonable: bool with get, set
+        /// <summary>
+        /// The <b><c>shadowRootCustomElementRegistry</c></b> property of the HTMLTemplateElement interface reflects the value of the shadowrootcustomelementregistry attribute of the associated &lt;template&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTemplateElement/shadowRootCustomElementRegistry">MDN Reference</a>
+        /// </summary>
         abstract shadowRootCustomElementRegistry: string with get, set
         /// <summary>
         /// The <b><c>shadowRootDelegatesFocus</c></b> property of the HTMLTemplateElement interface reflects the value of the shadowrootdelegatesfocus attribute of the associated &lt;template&gt; element.
@@ -55015,7 +56366,7 @@ module Dom =
         abstract Create: ?init: HeadersInit -> Headers
 
     /// <summary>
-    /// The <b><c>Highlight</c></b> interface of the CSS Custom Highlight API is used to represent a collection of Range instances to be styled using the API.
+    /// The <b><c>Highlight</c></b> interface of the CSS Custom Highlight API is used to represent a collection of AbstractRange instances to be styled using the API.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Highlight">MDN Reference</a>
     /// </summary>
@@ -55080,6 +56431,12 @@ module Dom =
     /// </summary>
     type HighlightRegistry =
         inherit Fable.Core.TS.Es.Map<string, Highlight>
+        /// <summary>
+        /// The <b><c>highlightsFromPoint()</c></b> method of the HighlightRegistry interface returns an array of objects representing the custom highlights applied at a specific point within the viewport.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HighlightRegistry/highlightsFromPoint">MDN Reference</a>
+        /// </summary>
+        abstract highlightsFromPoint: x: float * y: float * ?options: HighlightsFromPointOptions -> HighlightHitResult[]
         /// <summary>
         /// Executes a provided function once per each key/value pair in the Map, in insertion order.
         /// </summary>
@@ -55199,6 +56556,99 @@ module Dom =
     type HistoryConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> History
+
+    [<Interface>]
+    type HyperlinkElementUtils =
+        /// <summary>
+        /// The <b><c>hash</c></b> property of the HTMLAnchorElement interface is a string containing a "#" followed by the fragment identifier of the &lt;a&gt; element's href. If the URL does not have a fragment identifier, this property contains an empty string, "".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/hash">MDN Reference</a>
+        /// </summary>
+        abstract hash: string with get, set
+        /// <summary>
+        /// The <b><c>host</c></b> property of the HTMLAnchorElement interface is a string containing the host, which is the hostname, and then, if the port of the URL is nonempty, a ":", followed by the port of the URL. If the URL does not have a hostname, this property contains an empty string, "".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/host">MDN Reference</a>
+        /// </summary>
+        abstract host: string with get, set
+        /// <summary>
+        /// The <b><c>hostname</c></b> property of the HTMLAnchorElement interface is a string containing either the domain name or IP address of the &lt;a&gt; element's href. If the URL does not have a hostname, this property contains an empty string, "". IPv4 and IPv6 addresses are normalized, such as stripping leading zeros, and domain names are converted to IDN.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/hostname">MDN Reference</a>
+        /// </summary>
+        abstract hostname: string with get, set
+        /// <summary>
+        /// The <b><c>hreflang</c></b> property of the HTMLAnchorElement interface is a string that is the language of the linked resource.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/hreflang">MDN Reference</a>
+        /// </summary>
+        abstract hreflang: string with get, set
+        /// <summary>
+        /// The <b><c>origin</c></b> read-only property of the HTMLAnchorElement interface returns a string containing the Unicode serialization of the origin of the &lt;a&gt; element's href.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/origin">MDN Reference</a>
+        /// </summary>
+        abstract origin: string
+        /// <summary>
+        /// The <b><c>password</c></b> property of the HTMLAnchorElement interface is a string containing the password component of the &lt;a&gt; element's href. If the URL does not have a password, this property contains an empty string, "".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/password">MDN Reference</a>
+        /// </summary>
+        abstract password: string with get, set
+        /// <summary>
+        /// The <b><c>HTMLAnchorElement.pathname</c></b> property is a string containing an initial '/' followed by the path of the URL not including the query string or fragment (or the empty string if there is no path).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/pathname">MDN Reference</a>
+        /// </summary>
+        abstract pathname: string with get, set
+        /// <summary>
+        /// The <b><c>port</c></b> property of the HTMLAnchorElement interface is a string containing the port number of the &lt;a&gt; element's href. If the port is the default for the protocol (80 for ws: and http:, 443 for wss: and https:, and 21 for ftp:), this property contains an empty string, "".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/port">MDN Reference</a>
+        /// </summary>
+        abstract port: string with get, set
+        /// <summary>
+        /// The <b><c>protocol</c></b> property of the HTMLAnchorElement interface is a string containing the protocol or scheme of the &lt;area&gt; element's href, including the final ":".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/protocol">MDN Reference</a>
+        /// </summary>
+        abstract protocol: string with get, set
+        /// <summary>
+        /// The <b><c>search</c></b> property of the HTMLAnchorElement interface is a search string, also called a query string, that is a string containing a "?" followed by the parameters of the &lt;a&gt; element's href. If the URL does not have a search query, this property contains an empty string, "".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/search">MDN Reference</a>
+        /// </summary>
+        abstract search: string with get, set
+        /// <summary>
+        /// The <b><c>type</c></b> property of the HTMLAnchorElement interface is a string that indicates the MIME type of the linked resource.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/type">MDN Reference</a>
+        /// </summary>
+        abstract ``type``: string with get, set
+        /// <summary>
+        /// The <b><c>username</c></b> property of the HTMLAnchorElement interface is a string containing the username component of the &lt;a&gt; element's href. If the URL does not have a username, this property contains an empty string, "".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/username">MDN Reference</a>
+        /// </summary>
+        abstract username: string with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (
+                hash: string,
+                host: string,
+                hostname: string,
+                hreflang: string,
+                origin: string,
+                password: string,
+                pathname: string,
+                port: string,
+                protocol: string,
+                search: string,
+                ``type``: string,
+                username: string
+            ) : HyperlinkElementUtils =
+            jsNative
 
     /// <summary>
     /// The <b><c>IDBCursor</c></b> interface of the IndexedDB API represents a cursor for traversing or iterating over multiple records in a database.
@@ -57934,7 +59384,7 @@ module Dom =
         inherit Element
         inherit ElementCSSInlineStyle
         inherit GlobalEventHandlers
-        inherit HTMLOrSVGElement
+        inherit HTMLOrSVGOrMathMLElement
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -60720,12 +62170,15 @@ module Dom =
         abstract Create: unit -> NavigationPreloadManager
 
     /// <summary>
-    /// The <b><c>NavigationTransition</c></b> interface of the Navigation API represents an ongoing navigation, that is, a navigation that hasn't yet reached the navigatesuccess or navigateerror stage.
+    /// The <b><c>NavigationTransition</c></b> interface of the Navigation API represents an ongoing navigation — a navigation that hasn't yet reached the navigatesuccess or navigateerror stage.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationTransition">MDN Reference</a>
     /// </summary>
     [<Interface>]
     type NavigationTransition =
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationTransition/committed">MDN Reference</a>
+        /// </summary>
         abstract committed: JS.Promise<unit>
         /// <summary>
         /// The <b><c>finished</c></b> read-only property of the NavigationTransition interface returns a Promise that fulfills at the same time the navigatesuccess event fires, or rejects at the same time the navigateerror event fires.
@@ -60840,6 +62293,12 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Navigator/permissions">MDN Reference</a>
         /// </summary>
         abstract permissions: Permissions
+        /// <summary>
+        /// The <b><c>serial</c></b> read-only property of the Navigator interface returns a Serial object which represents the entry point into the Web Serial API.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Navigator/serial">MDN Reference</a>
+        /// </summary>
+        abstract serial: Serial
         /// <summary>
         /// The <b><c>serviceWorker</c></b> read-only property of the Navigator interface returns the ServiceWorkerContainer object for the associated document, which provides access to registration, removal, upgrade, and communication with the ServiceWorker.
         /// Available only in secure contexts.
@@ -61879,7 +63338,7 @@ module Dom =
     [<Interface>]
     type NonElementParentNode =
         /// <summary>
-        /// Returns the first element within node's descendants whose ID is elementId.
+        /// The <b><c>getElementById()</c></b> method of the Document interface returns an Element object representing the element whose id property matches the specified string. Since element IDs are required to be unique if specified, they're a useful way to get access to a specific element quickly.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/getElementById">MDN Reference</a>
         /// </summary>
@@ -61905,6 +63364,12 @@ module Dom =
     /// </summary>
     type Notification =
         inherit EventTarget
+        /// <summary>
+        /// The <b><c>actions</c></b> read-only property of the Notification interface provides the actions available for users to choose from for interacting with the notification.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Notification/actions">MDN Reference</a>
+        /// </summary>
+        abstract actions: NotificationAction[]
         /// <summary>
         /// The <b><c>body</c></b> read-only property of the Notification interface indicates the body string of the notification, as specified in the body option of the Notification() constructor.
         /// <br /><br />
@@ -62025,6 +63490,12 @@ module Dom =
                 unit
 
     type NotificationConstructor =
+        /// <summary>
+        /// The <b><c>maxActions</c></b> read-only static property of the Notification interface returns the maximum number of actions supported by the device and the User Agent. Effectively, this is the maximum number of elements in Notification.actions array which will be respected by the User Agent.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Notification/maxActions_static">MDN Reference</a>
+        /// </summary>
+        abstract maxActions: float
         /// <summary>
         /// The <b><c>permission</c></b> read-only static property of the Notification interface indicates the current permission granted by the user for the current origin to display web notifications.
         /// <br /><br />
@@ -62480,13 +63951,21 @@ module Dom =
         abstract getContextWebgl2: ?options: obj -> WebGL2RenderingContext option
 
         /// <summary>
+        /// <code lang="ts">
+        /// getContext(contextId: "webgpu"): GPUCanvasContext | null
+        /// </code>
+        /// </summary>
+        [<Emit("$0.getContext('webgpu')")>]
+        abstract getContextWebgpu: unit -> GPUCanvasContext option
+
+        /// <summary>
         /// The <b><c>OffscreenCanvas.getContext()</c></b> method returns a drawing context for an offscreen canvas, or null if the context identifier is not supported, or the offscreen canvas has already been set to a different context mode.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/getContext">MDN Reference</a>
         /// </summary>
         abstract getContext: contextId: OffscreenRenderingContextId * ?options: obj -> OffscreenRenderingContext option
         /// <summary>
-        /// The <b><c>OffscreenCanvas.transferToImageBitmap()</c></b> method creates an ImageBitmap object from the most recently rendered image of the OffscreenCanvas. The OffscreenCanvas allocates a new image for its subsequent rendering.
+        /// The <b><c>transferToImageBitmap()</c></b> method of the OffscreenCanvas interface creates an ImageBitmap object from the most recently rendered image of the OffscreenCanvas. The image in the OffscreenCanvas is replaced with a new blank image for subsequent rendering.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas/transferToImageBitmap">MDN Reference</a>
         /// </summary>
@@ -62567,6 +64046,22 @@ module Dom =
     type OffscreenCanvasRenderingContext2DConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> OffscreenCanvasRenderingContext2D
+
+    [<Interface>]
+    type Origin =
+        abstract opaque: bool
+        abstract isSameOrigin: other: Origin -> bool
+        abstract isSameSite: other: Origin -> bool
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(opaque: bool, isSameOrigin: (Origin -> bool), isSameSite: (Origin -> bool)) : Origin =
+            jsNative
+
+    type OriginConstructor =
+        abstract from: value: obj -> Origin
+
+        [<EmitConstructor>]
+        abstract Create: unit -> Origin
 
     /// <summary>
     /// The <b><c>OscillatorNode</c></b> interface represents a periodic waveform, such as a sine wave. It is an AudioScheduledSourceNode audio-processing module that causes a specified frequency of a given wave to be created—in effect, a constant tone.
@@ -62771,7 +64266,13 @@ module Dom =
 
     [<Interface>]
     type PaintTimingMixin =
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/LargestContentfulPaint/paintTime">MDN Reference</a>
+        /// </summary>
         abstract paintTime: float
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/LargestContentfulPaint/presentationTime">MDN Reference</a>
+        /// </summary>
         abstract presentationTime: float option
 
         [<ParamObject; Emit("$0")>]
@@ -62886,81 +64387,81 @@ module Dom =
     type ParentNode =
         inherit Node
         /// <summary>
+        /// The <b><c>Document.childElementCount</c></b> read-only property returns the number of child elements of the document.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/childElementCount">MDN Reference</a>
         /// </summary>
         abstract childElementCount: float
         /// <summary>
-        /// Returns the child elements.
+        /// The read-only <b><c>children</c></b> property returns a live HTMLCollection which contains all of the child elements of the document upon which it was called.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/children">MDN Reference</a>
         /// </summary>
         abstract children: HTMLCollection
         /// <summary>
-        /// Returns the first child that is an element, and null otherwise.
+        /// The <b><c>Document.firstElementChild</c></b> read-only property returns the document's first child Element, or null if there are no child elements.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/firstElementChild">MDN Reference</a>
         /// </summary>
         abstract firstElementChild: Element option
         /// <summary>
-        /// Returns the last child that is an element, and null otherwise.
+        /// The <b><c>Document.lastElementChild</c></b> read-only property returns the document's last child Element, or null if there are no child elements.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/lastElementChild">MDN Reference</a>
         /// </summary>
         abstract lastElementChild: Element option
         /// <summary>
-        /// Inserts nodes after the last child of node, while replacing strings in nodes with equivalent Text nodes.
-        /// <br /><br />
-        /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
+        /// The <b><c>Document.append()</c></b> method inserts a set of Node objects or strings after the last child of the document. Strings are inserted as equivalent Text nodes.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/append">MDN Reference</a>
         /// </summary>
         abstract append: [<ParamArray>] nodes: U2<string, Node>[] -> unit
         /// <summary>
+        /// The <b><c>moveBefore()</c></b> method of the Document interface moves a given Node inside the Document DOM node as a direct child, before a given reference node.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/moveBefore">MDN Reference</a>
         /// </summary>
         abstract moveBefore: node: Node * ?child: Node -> unit
         /// <summary>
-        /// Inserts nodes before the first child of node, while replacing strings in nodes with equivalent Text nodes.
-        /// <br /><br />
-        /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
+        /// The <b><c>Document.prepend()</c></b> method inserts a set of Node objects or strings before the first child of the document. Strings are inserted as equivalent Text nodes.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/prepend">MDN Reference</a>
         /// </summary>
         abstract prepend: [<ParamArray>] nodes: U2<string, Node>[] -> unit
         /// <summary>
-        /// Returns the first element that is a descendant of node that matches selectors.
+        /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
         /// </summary>
         abstract querySelector<'E> : selectors: typekeyof<HTMLElementTagNameMap, 'E> -> 'E option
         /// <summary>
-        /// Returns the first element that is a descendant of node that matches selectors.
+        /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
         /// </summary>
         abstract querySelector<'E> : selectors: typekeyof<SVGElementTagNameMap, 'E> -> 'E option
         /// <summary>
-        /// Returns the first element that is a descendant of node that matches selectors.
+        /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
         /// </summary>
         abstract querySelector<'E> : selectors: typekeyof<MathMLElementTagNameMap, 'E> -> 'E option
         /// <summary>
-        /// Returns the first element that is a descendant of node that matches selectors.
+        /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
         /// </summary>
         /// <remarks>@deprecated</remarks>
         abstract querySelector<'E> : selectors: typekeyof<HTMLElementDeprecatedTagNameMap, 'E> -> 'E option
         /// <summary>
-        /// Returns the first element that is a descendant of node that matches selectors.
+        /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
         /// </summary>
         abstract querySelector<'E when 'E :> Element> : selectors: string -> 'E option
 
         /// <summary>
-        /// Returns all element descendants of node that match selectors.
+        /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
         /// </summary>
@@ -62968,14 +64469,14 @@ module Dom =
             selectors: typekeyof<HTMLElementTagNameMap, 'E> -> NodeListOf<'E>
 
         /// <summary>
-        /// Returns all element descendants of node that match selectors.
+        /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
         /// </summary>
         abstract querySelectorAll<'E when 'E :> Node> : selectors: typekeyof<SVGElementTagNameMap, 'E> -> NodeListOf<'E>
 
         /// <summary>
-        /// Returns all element descendants of node that match selectors.
+        /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
         /// </summary>
@@ -62983,7 +64484,7 @@ module Dom =
             selectors: typekeyof<MathMLElementTagNameMap, 'E> -> NodeListOf<'E>
 
         /// <summary>
-        /// Returns all element descendants of node that match selectors.
+        /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
         /// </summary>
@@ -62992,15 +64493,13 @@ module Dom =
             selectors: typekeyof<HTMLElementDeprecatedTagNameMap, 'E> -> NodeListOf<'E>
 
         /// <summary>
-        /// Returns all element descendants of node that match selectors.
+        /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
         /// </summary>
         abstract querySelectorAll<'E when 'E :> Element> : selectors: string -> NodeListOf<'E>
         /// <summary>
-        /// Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes.
-        /// <br /><br />
-        /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
+        /// The <b><c>Document.replaceChildren()</c></b> method replaces the existing children of a Document with a specified new set of children.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Document/replaceChildren">MDN Reference</a>
         /// </summary>
@@ -64065,7 +65564,6 @@ module Dom =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming">MDN Reference</a>
     /// </summary>
-    [<Interface>]
     type PerformanceResourceTiming =
         inherit PerformanceEntry
         /// <summary>
@@ -64081,11 +65579,23 @@ module Dom =
         /// </summary>
         abstract connectStart: float
         /// <summary>
+        /// The <b><c>contentType</c></b> read-only property of the PerformanceResourceTiming interface is a string indicating the content type of the fetched resource, formatted as a MIME type and subtype separated by a forward slash.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/contentType">MDN Reference</a>
+        /// </summary>
+        abstract contentType: string
+        /// <summary>
         /// The <b><c>decodedBodySize</c></b> read-only property returns the size (in octets) received from the fetch (HTTP or cache) of the message body after removing any applied content encoding (like gzip or Brotli). If the resource is retrieved from an application cache or local resources, it returns the size of the payload after removing any applied content encoding.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/decodedBodySize">MDN Reference</a>
         /// </summary>
         abstract decodedBodySize: float
+        /// <summary>
+        /// The <b><c>deliveryType</c></b> read-only property is a string indicating how the resource was delivered — for example from the cache or from a navigational prefetch.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/deliveryType">MDN Reference</a>
+        /// </summary>
+        abstract deliveryType: string
         /// <summary>
         /// The <b><c>domainLookupEnd</c></b> read-only property returns the timestamp immediately after the browser finishes the domain-name lookup for the resource.
         /// <br /><br />
@@ -64110,6 +65620,18 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/fetchStart">MDN Reference</a>
         /// </summary>
         abstract fetchStart: float
+        /// <summary>
+        /// The <b><c>finalResponseHeadersStart</c></b> read-only property returns a timestamp immediately after the browser receives the first byte of the final document response (for example, 200 OK) from the server.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/finalResponseHeadersStart">MDN Reference</a>
+        /// </summary>
+        abstract finalResponseHeadersStart: float
+        /// <summary>
+        /// The <b><c>firstInterimResponseStart</c></b> read-only property returns a timestamp immediately after the browser receives the first byte of the interim 1xx response (for example, 100 Continue or 103 Early Hints) from the server.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/firstInterimResponseStart">MDN Reference</a>
+        /// </summary>
+        abstract firstInterimResponseStart: float
         /// <summary>
         /// The <b><c>initiatorType</c></b> read-only property is a string representing web platform feature that initiated the resource load.
         /// <br /><br />
@@ -64182,36 +65704,6 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/workerStart">MDN Reference</a>
         /// </summary>
         abstract workerStart: float
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                connectEnd: float,
-                connectStart: float,
-                decodedBodySize: float,
-                domainLookupEnd: float,
-                domainLookupStart: float,
-                encodedBodySize: float,
-                fetchStart: float,
-                initiatorType: string,
-                nextHopProtocol: string,
-                redirectEnd: float,
-                redirectStart: float,
-                requestStart: float,
-                responseEnd: float,
-                responseStart: float,
-                responseStatus: float,
-                secureConnectionStart: float,
-                serverTiming: PerformanceServerTiming[],
-                transferSize: float,
-                workerStart: float,
-                toJSON: (unit -> obj),
-                duration: float,
-                entryType: string,
-                name: string,
-                startTime: float
-            ) : PerformanceResourceTiming =
-            jsNative
 
     type PerformanceResourceTimingConstructor =
         [<EmitConstructor>]
@@ -64866,10 +66358,14 @@ module Dom =
     [<Interface>]
     type PopoverTargetAttributes =
         /// <summary>
+        /// The <b><c>popoverTargetAction</c></b> property of the HTMLButtonElement interface gets and sets the action to be performed ("hide", "show", or "toggle") on a popover element being controlled by a button.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLButtonElement/popoverTargetAction">MDN Reference</a>
         /// </summary>
         abstract popoverTargetAction: string with get, set
         /// <summary>
+        /// The <b><c>popoverTargetElement</c></b> property of the HTMLButtonElement interface gets and sets the popover element to control via a button.
+        /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLButtonElement/popoverTargetElement">MDN Reference</a>
         /// </summary>
         abstract popoverTargetElement: Element option with get, set
@@ -65808,7 +67304,7 @@ module Dom =
         /// </summary>
         abstract timestamp: float
         /// <summary>
-        /// The <b><c>type</c></b> read-only property of the RTCEncodedVideoFrame interface indicates whether this frame is a key frame, delta frame, or empty frame.
+        /// The <b><c>type</c></b> read-only property of the RTCEncodedVideoFrame interface indicates whether this frame is a key frame or a delta frame.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCEncodedVideoFrame/type">MDN Reference</a>
         /// </summary>
@@ -66115,6 +67611,12 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCIceTransport/statechange_event">MDN Reference</a>
         /// </summary>
         abstract onstatechange: (Event -> unit) option with get, set
+        /// <summary>
+        /// The <b><c>role</c></b> read-only property of the RTCIceTransport interface indicates which ICE role the transport is fulfilling: that of the controlling agent, or the agent that is being controlled.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCIceTransport/role">MDN Reference</a>
+        /// </summary>
+        abstract role: RTCIceRole
         /// <summary>
         /// The <b><c>state</c></b> read-only property of the RTCIceTransport interface returns the current state of the ICE transport, so you can determine the state of ICE gathering in which the ICE agent currently is operating.
         /// <br /><br />
@@ -66551,9 +68053,21 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnectionIceErrorEvent/address">MDN Reference</a>
         /// </summary>
         abstract address: string option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnectionIceErrorEvent/errorCode">MDN Reference</a>
+        /// </summary>
         abstract errorCode: float
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnectionIceErrorEvent/errorText">MDN Reference</a>
+        /// </summary>
         abstract errorText: string
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnectionIceErrorEvent/port">MDN Reference</a>
+        /// </summary>
         abstract port: float option
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnectionIceErrorEvent/url">MDN Reference</a>
+        /// </summary>
         abstract url: string
 
         [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
@@ -66719,7 +68233,7 @@ module Dom =
 
     type RTCRtpScriptTransformConstructor =
         [<EmitConstructor>]
-        abstract Create: worker: Worker * ?options: obj * ?transfer: obj[] -> RTCRtpScriptTransform
+        abstract Create: workerOrWorkerAndParameters: Worker * ?options: obj * ?transfer: obj[] -> RTCRtpScriptTransform
 
     /// <summary>
     /// The <b><c>RTCRtpSender</c></b> interface provides the ability to control and obtain details about how a particular MediaStreamTrack is encoded and sent to a remote peer.
@@ -67526,7 +69040,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/view">MDN Reference</a>
         /// </summary>
-        abstract view: Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer> option
+        abstract view: Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer> option
         /// <summary>
         /// The <b><c>respond()</c></b> method of the ReadableStreamBYOBRequest interface is used to signal to the associated readable byte stream that the specified number of bytes were written into the ReadableStreamBYOBRequest.view.
         /// <br /><br />
@@ -67545,7 +69059,7 @@ module Dom =
             (
                 respond: (float -> unit),
                 respondWithNewView: (Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer> -> unit),
-                ?view: Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>
+                ?view: Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
             ) : ReadableStreamBYOBRequest =
             jsNative
 
@@ -68616,7 +70130,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedRect/animVal">MDN Reference</a>
         /// </summary>
-        abstract animVal: DOMRectReadOnly
+        abstract animVal: DOMRect
         /// <summary>
         /// The <b><c>baseVal</c></b> read-only property of the SVGAnimatedRect interface represents the current non-animated value of the viewBox attribute of an SVG element.
         /// <br /><br />
@@ -68625,7 +70139,7 @@ module Dom =
         abstract baseVal: DOMRect
 
         [<ParamObject; Emit("$0")>]
-        static member Create(animVal: DOMRectReadOnly, baseVal: DOMRect) : SVGAnimatedRect = jsNative
+        static member Create(animVal: DOMRect, baseVal: DOMRect) : SVGAnimatedRect = jsNative
 
     type SVGAnimatedRectConstructor =
         [<EmitConstructor>]
@@ -68967,6 +70481,7 @@ module Dom =
         inherit ElementCSSInlineStyle
         inherit GlobalEventHandlers
         inherit HTMLOrSVGElement
+        inherit HTMLOrSVGOrMathMLElement
         /// <remarks>@deprecated</remarks>
         abstract className: obj
         /// <summary>
@@ -70440,7 +71955,6 @@ module Dom =
     /// </summary>
     type SVGFilterElement =
         inherit SVGElement
-        inherit SVGURIReference
         /// <summary>
         /// The <b><c>filterUnits</c></b> read-only property of the SVGFilterElement interface reflects the filterUnits attribute of the given &lt;filter&gt; element. It takes one of the SVG_UNIT_TYPE_* constants defined in SVGUnitTypes.
         /// <br /><br />
@@ -71927,7 +73441,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGSVGElement/currentTranslate">MDN Reference</a>
         /// </summary>
-        abstract currentTranslate: DOMPointReadOnly
+        abstract currentTranslate: DOMPoint
         /// <summary>
         /// The <b><c>height</c></b> read-only property of the SVGSVGElement interface describes the vertical size of element as an SVGAnimatedLength. It reflects the &lt;svg&gt; element's height attribute, which may not be the SVG's rendered height.
         /// <br /><br />
@@ -71963,13 +73477,13 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGSVGElement/checkEnclosure">MDN Reference</a>
         /// </summary>
-        abstract checkEnclosure: element: SVGElement * rect: DOMRectReadOnly -> bool
+        abstract checkEnclosure: element: SVGElement * rect: DOMRect -> bool
         /// <summary>
         /// The <b><c>checkIntersection()</c></b> method of the SVGSVGElement interface checks if the rendered content of the given element intersects the supplied rectangle.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGSVGElement/checkIntersection">MDN Reference</a>
         /// </summary>
-        abstract checkIntersection: element: SVGElement * rect: DOMRectReadOnly -> bool
+        abstract checkIntersection: element: SVGElement * rect: DOMRect -> bool
         /// <summary>
         /// The <b><c>createSVGAngle()</c></b> method of the SVGSVGElement interface creates an SVGAngle object outside of any document trees.
         /// <br /><br />
@@ -72038,8 +73552,8 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/SVGSVGElement/getElementById">MDN Reference</a>
         /// </summary>
         abstract getElementById: elementId: string -> Element option
-        abstract getEnclosureList: rect: DOMRectReadOnly * ?referenceElement: SVGElement -> NodeListOf<Node>
-        abstract getIntersectionList: rect: DOMRectReadOnly * ?referenceElement: SVGElement -> NodeListOf<Node>
+        abstract getEnclosureList: rect: DOMRect * ?referenceElement: SVGElement -> NodeListOf<Node>
+        abstract getIntersectionList: rect: DOMRect * ?referenceElement: SVGElement -> NodeListOf<Node>
         /// <summary>
         /// The <b><c>pauseAnimations()</c></b> method of the SVGSVGElement interface suspends (i.e., pauses) all currently running animations that are defined within the SVG document fragment corresponding to this &lt;svg&gt; element, causing the animation clock corresponding to this document fragment to stand still until it is unpaused.
         /// <br /><br />
@@ -72947,6 +74461,8 @@ module Dom =
 
     /// <summary>
     /// The <b><c>Sanitizer</c></b> interface of the HTML Sanitizer API defines a configuration object that specifies what elements, attributes and comments are allowed or should be removed when inserting strings of HTML into an Element or ShadowRoot, or when parsing an HTML string into a Document.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Sanitizer">MDN Reference</a>
     /// </summary>
     [<Interface>]
     type Sanitizer =
@@ -72981,7 +74497,7 @@ module Dom =
         /// </summary>
         abstract removeElement: element: SanitizerElement -> bool
         /// <summary>
-        /// The <b><c>removeUnsafe()</c></b> method of the Sanitizer interface configures the sanitizer configuration so that it will remove all elements, attributes, and event handler content attributes that are considered XSS-unsafe by the browser.
+        /// The <b><c>removeUnsafe()</c></b> method of the Sanitizer interface configures the sanitizer so that it will remove all elements and attributes that are considered XSS-unsafe by the browser.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Sanitizer/removeUnsafe">MDN Reference</a>
         /// </summary>
@@ -73330,7 +74846,7 @@ module Dom =
         /// </summary>
         abstract blockedURI: string
         /// <summary>
-        /// The <b><c>columnNumber</c></b> read-only property of the SecurityPolicyViolationEvent interface is the column number in the document or worker script at which the Content Security Policy (CSP) violation occurred.
+        /// The <b><c>columnNumber</c></b> read-only property of the SecurityPolicyViolationEvent interface is the character position in the source file line of the document or worker script at which the Content Security Policy (CSP) violation occurred.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/SecurityPolicyViolationEvent/columnNumber">MDN Reference</a>
         /// </summary>
@@ -73556,6 +75072,170 @@ module Dom =
     type SelectionConstructor =
         [<EmitConstructor>]
         abstract Create: unit -> Selection
+
+    /// <summary>
+    /// The <b><c>Serial</c></b> interface of the Web Serial API provides attributes and methods for finding and connecting to serial ports from a web page.
+    /// Available only in secure contexts.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Serial">MDN Reference</a>
+    /// </summary>
+    [<Interface>]
+    type Serial =
+        inherit EventTarget
+        /// <summary>
+        /// The <b><c>getPorts()</c></b> method of the Serial interface returns a Promise that resolves with an array of SerialPort objects representing serial ports connected to the host which the origin has permission to access.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Serial/getPorts">MDN Reference</a>
+        /// </summary>
+        abstract getPorts: unit -> JS.Promise<SerialPort[]>
+        /// <summary>
+        /// The <b><c>Serial.requestPort()</c></b> method of the Serial interface presents the user with a dialog asking them to select a serial device to connect to. It returns a Promise that resolves with an instance of SerialPort representing the device chosen by the user.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Serial/requestPort">MDN Reference</a>
+        /// </summary>
+        abstract requestPort: ?options: SerialPortRequestOptions -> JS.Promise<SerialPort>
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (
+                getPorts: (unit -> JS.Promise<SerialPort[]>),
+                requestPort: (SerialPortRequestOptions option -> JS.Promise<SerialPort>),
+                addEventListener:
+                    Action<string, EventListenerOrEventListenerObject option, U2<bool, AddEventListenerOptions> option>,
+                dispatchEvent: (Event -> bool),
+                removeEventListener:
+                    Action<string, EventListenerOrEventListenerObject option, U2<bool, EventListenerOptions> option>
+            ) : Serial =
+            jsNative
+
+    type SerialConstructor =
+        [<EmitConstructor>]
+        abstract Create: unit -> Serial
+
+    [<Interface>]
+    type SerialPortEventMap =
+        abstract connect: Event with get, set
+        abstract disconnect: Event with get, set
+
+        [<ParamObject; Emit("$0")>]
+        static member Create(connect: Event, disconnect: Event) : SerialPortEventMap = jsNative
+
+    /// <summary>
+    /// The <b><c>SerialPort</c></b> interface of the Web Serial API provides access to a serial port on the host device.
+    /// Available only in secure contexts.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort">MDN Reference</a>
+    /// </summary>
+    type SerialPort =
+        inherit EventTarget
+        /// <summary>
+        /// The <b><c>connected</c></b> read-only property of the SerialPort interface returns a boolean value that indicates whether the port is logically connected to the device.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/connected">MDN Reference</a>
+        /// </summary>
+        abstract connected: bool
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/connect_event">MDN Reference</a>
+        /// </summary>
+        abstract onconnect: (Event -> unit) option with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/disconnect_event">MDN Reference</a>
+        /// </summary>
+        abstract ondisconnect: (Event -> unit) option with get, set
+        /// <summary>
+        /// The <b><c>readable</c></b> read-only property of the SerialPort interface returns a ReadableStream for receiving data from the device connected to the port. Chunks read from this stream are instances of Uint8Array. This property is non-null as long as the port is open and has not encountered a fatal error.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/readable">MDN Reference</a>
+        /// </summary>
+        abstract readable: ReadableStream<obj> option
+        /// <summary>
+        /// The <b><c>writable</c></b> read-only property of the SerialPort interface returns a WritableStream for sending data to the device connected to the port. Chunks written to this stream must be instances of ArrayBuffer, TypedArray, or DataView. This property is non-null as long as the port is open and has not encountered a fatal error.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/writable">MDN Reference</a>
+        /// </summary>
+        abstract writable: WritableStream<obj> option
+        /// <summary>
+        /// The <b><c>SerialPort.close()</c></b> method of the SerialPort interface returns a Promise that resolves when the port closes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/close">MDN Reference</a>
+        /// </summary>
+        abstract close: unit -> JS.Promise<unit>
+        /// <summary>
+        /// The <b><c>SerialPort.forget()</c></b> method of the SerialPort interface returns a Promise that resolves when access to the serial port is revoked.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/forget">MDN Reference</a>
+        /// </summary>
+        abstract forget: unit -> JS.Promise<unit>
+        /// <summary>
+        /// The <b><c>getInfo()</c></b> method of the SerialPort interface returns an object containing identifying information for the device available via the port.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/getInfo">MDN Reference</a>
+        /// </summary>
+        abstract getInfo: unit -> SerialPortInfo
+        /// <summary>
+        /// The <b><c>SerialPort.getSignals()</c></b> method of the SerialPort interface returns a Promise that resolves with an object containing the current state of the port's control signals.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/getSignals">MDN Reference</a>
+        /// </summary>
+        abstract getSignals: unit -> JS.Promise<SerialInputSignals>
+        /// <summary>
+        /// The <b><c>open()</c></b> method of the SerialPort interface returns a Promise that resolves when the port is opened. By default the port is opened with 8 data bits, 1 stop bit and no parity checking. The baudRate parameter is required.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/open">MDN Reference</a>
+        /// </summary>
+        abstract ``open``: options: SerialOptions -> JS.Promise<unit>
+        /// <summary>
+        /// The <b><c>setSignals()</c></b> method of the SerialPort interface sets control signals on the port and returns a Promise that resolves when they are set.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort/setSignals">MDN Reference</a>
+        /// </summary>
+        abstract setSignals: ?signals: SerialOutputSignals -> JS.Promise<unit>
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener<'E> :
+            ``type``: typekeyof<SerialPortEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
+        /// </summary>
+        abstract addEventListener:
+            ``type``: string *
+            listener: EventListenerOrEventListenerObject *
+            ?options: U2<bool, AddEventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener<'E> :
+            ``type``: typekeyof<SerialPortEventMap, 'E> *
+            listener: ('E -> obj) *
+            ?options: U2<bool, EventListenerOptions> ->
+                unit
+
+        /// <summary>
+        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
+        /// </summary>
+        abstract removeEventListener:
+            ``type``: string * listener: EventListenerOrEventListenerObject * ?options: U2<bool, EventListenerOptions> ->
+                unit
+
+    type SerialPortConstructor =
+        [<EmitConstructor>]
+        abstract Create: unit -> SerialPort
 
     [<Interface>]
     type ServiceWorkerEventMap =
@@ -73949,7 +75629,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/ShadowRoot/setHTMLUnsafe">MDN Reference</a>
         /// </summary>
-        abstract setHTMLUnsafe: html: string -> unit
+        abstract setHTMLUnsafe: html: string * ?options: SetHTMLUnsafeOptions -> unit
 
         /// <summary>
         /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -76805,7 +78485,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/enqueue">MDN Reference</a>
         /// </summary>
-        abstract enqueue: ?chunk: 'O -> unit
+        abstract enqueue: chunk: 'O -> unit
         /// <summary>
         /// The <b><c>error()</c></b> method of the TransformStreamDefaultController interface errors both sides of the stream. Any further interactions with it will fail with the given error message, and any chunks in the queue will be discarded.
         /// <br /><br />
@@ -76821,7 +78501,7 @@ module Dom =
 
         [<ParamObject; Emit("$0")>]
         static member Create
-            (enqueue: ('O option -> unit), error: (obj option -> unit), terminate: (unit -> unit), ?desiredSize: float)
+            (enqueue: ('O -> unit), error: (obj option -> unit), terminate: (unit -> unit), ?desiredSize: float)
             : TransformStreamDefaultController<'O> =
             jsNative
 
@@ -77464,13 +79144,37 @@ module Dom =
     /// </summary>
     [<Interface>]
     type VTTRegion =
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion/id">MDN Reference</a>
+        /// </summary>
         abstract id: string with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion/lines">MDN Reference</a>
+        /// </summary>
         abstract lines: float with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion/regionAnchorX">MDN Reference</a>
+        /// </summary>
         abstract regionAnchorX: float with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion/regionAnchorY">MDN Reference</a>
+        /// </summary>
         abstract regionAnchorY: float with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion/scroll">MDN Reference</a>
+        /// </summary>
         abstract scroll: ScrollSetting with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion/viewportAnchorX">MDN Reference</a>
+        /// </summary>
         abstract viewportAnchorX: float with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion/viewportAnchorY">MDN Reference</a>
+        /// </summary>
         abstract viewportAnchorY: float with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion/width">MDN Reference</a>
+        /// </summary>
         abstract width: float with get, set
 
         [<ParamObject; Emit("$0")>]
@@ -78179,9 +79883,10 @@ module Dom =
     type VisualViewportEventMap =
         abstract resize: Event with get, set
         abstract scroll: Event with get, set
+        abstract scrollend: Event with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(resize: Event, scroll: Event) : VisualViewportEventMap = jsNative
+        static member Create(resize: Event, scroll: Event, scrollend: Event) : VisualViewportEventMap = jsNative
 
     /// <summary>
     /// The <b><c>VisualViewport</c></b> interface of the CSSOM view API represents the visual viewport for a given window. For a page containing iframes, each iframe, as well as the containing page, will have a unique window object. Each window on a page will have a unique VisualViewport representing the properties associated with that window.
@@ -78216,6 +79921,10 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/VisualViewport/scroll_event">MDN Reference</a>
         /// </summary>
         abstract onscroll: (Event -> unit) option with get, set
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VisualViewport/scrollend_event">MDN Reference</a>
+        /// </summary>
+        abstract onscrollend: (Event -> unit) option with get, set
         /// <summary>
         /// The <b><c>pageLeft</c></b> read-only property of the VisualViewport interface returns the x coordinate of the left edge of the visual viewport relative to the initial containing block origin, in CSS pixels, or 0 if current document is not fully active.
         /// <br /><br />
@@ -78993,13 +80702,13 @@ module Dom =
     [<Interface>]
     type WEBGL_lose_context =
         /// <summary>
-        /// The <b><c>WEBGL_lose_context.loseContext()</c></b> method is part of the WebGL API and allows you to simulate losing the context of a WebGLRenderingContext context.
+        /// The <b><c>loseContext()</c></b> method of the WEBGL_lose_context extension is part of the WebGL API and allows you to simulate losing the context of a WebGLRenderingContext.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_lose_context/loseContext">MDN Reference</a>
         /// </summary>
         abstract loseContext: unit -> unit
         /// <summary>
-        /// The <b><c>WEBGL_lose_context.restoreContext()</c></b> method is part of the WebGL API and allows you to simulate restoring the context of a WebGLRenderingContext object.
+        /// The <b><c>restoreContext()</c></b> method of the WEBGL_lose_context extension is part of the WebGL API and allows you to simulate restoring the context of a WebGLRenderingContext.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_lose_context/restoreContext">MDN Reference</a>
         /// </summary>
@@ -90664,6 +92373,12 @@ module Dom =
         /// </summary>
         abstract closed: JS.Promise<WebTransportCloseInfo>
         /// <summary>
+        /// The <b><c>congestionControl</c></b> read-only property of the WebTransport interface indicates the application's preference for either high throughput or low-latency when sending data.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/congestionControl">MDN Reference</a>
+        /// </summary>
+        abstract congestionControl: WebTransportCongestionControl
+        /// <summary>
         /// The <b><c>datagrams</c></b> read-only property of the WebTransport interface returns a WebTransportDatagramDuplexStream instance that can be used to send and receive datagrams — unreliable data transmission.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/datagrams">MDN Reference</a>
@@ -90681,12 +92396,19 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/incomingUnidirectionalStreams">MDN Reference</a>
         /// </summary>
         abstract incomingUnidirectionalStreams: ReadableStream<obj>
+        abstract protocol: string
         /// <summary>
         /// The <b><c>ready</c></b> read-only property of the WebTransport interface returns a promise that resolves when the transport is ready to use.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/ready">MDN Reference</a>
         /// </summary>
         abstract ready: JS.Promise<unit>
+        /// <summary>
+        /// The <b><c>reliability</c></b> read-only property of the WebTransport interface indicates whether the connection supports reliable transports only, or whether it also supports unreliable transports (such as UDP).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/reliability">MDN Reference</a>
+        /// </summary>
+        abstract reliability: WebTransportReliabilityMode
         /// <summary>
         /// The <b><c>close()</c></b> method of the WebTransport interface closes an ongoing WebTransport session.
         /// <br /><br />
@@ -90708,19 +92430,29 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/createUnidirectionalStream">MDN Reference</a>
         /// </summary>
         abstract createUnidirectionalStream: ?options: WebTransportSendStreamOptions -> JS.Promise<WritableStream<obj>>
+        /// <summary>
+        /// The <b><c>getStats()</c></b> method of the WebTransport interface asynchronously returns an object containing HTTP/3 connection statistics.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport/getStats">MDN Reference</a>
+        /// </summary>
+        abstract getStats: unit -> JS.Promise<WebTransportConnectionStats>
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 closed: JS.Promise<WebTransportCloseInfo>,
+                congestionControl: WebTransportCongestionControl,
                 datagrams: WebTransportDatagramDuplexStream,
                 incomingBidirectionalStreams: ReadableStream<obj>,
                 incomingUnidirectionalStreams: ReadableStream<obj>,
+                protocol: string,
                 ready: JS.Promise<unit>,
+                reliability: WebTransportReliabilityMode,
                 close: (WebTransportCloseInfo option -> unit),
                 createBidirectionalStream:
                     (WebTransportSendStreamOptions option -> JS.Promise<WebTransportBidirectionalStream>),
-                createUnidirectionalStream: (WebTransportSendStreamOptions option -> JS.Promise<WritableStream<obj>>)
+                createUnidirectionalStream: (WebTransportSendStreamOptions option -> JS.Promise<WritableStream<obj>>),
+                getStats: (unit -> JS.Promise<WebTransportConnectionStats>)
             ) : WebTransport =
             jsNative
 
@@ -90868,6 +92600,114 @@ module Dom =
         abstract Create: ?message: string * ?options: WebTransportErrorOptions -> WebTransportError
 
     /// <summary>
+    /// The <b><c>WebTransportReceiveStream</c></b> interface of the WebTransport API is a ReadableStream that can be used to read from an incoming unidirectional or bidirectional WebTransport stream.
+    /// Available only in secure contexts.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportReceiveStream">MDN Reference</a>
+    /// </summary>
+    type WebTransportReceiveStream =
+        inherit ReadableStream<obj>
+        /// <summary>
+        /// The <b><c>getStats()</c></b> method of the WebTransportReceiveStream interface asynchronously returns an object containing statistics for the current stream.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportReceiveStream/getStats">MDN Reference</a>
+        /// </summary>
+        abstract getStats: unit -> JS.Promise<WebTransportReceiveStreamStats>
+        /// <summary>
+        /// The <b><c>getReader()</c></b> method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader">MDN Reference</a>
+        /// </summary>
+        abstract getReader: options: Fable.Core.TS.Dom.ReadableStream.GetReader.Options -> ReadableStreamBYOBReader
+        /// <summary>
+        /// The <b><c>getReader()</c></b> method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader">MDN Reference</a>
+        /// </summary>
+        abstract getReader: unit -> ReadableStreamDefaultReader<obj>
+
+        /// <summary>
+        /// The <b><c>getReader()</c></b> method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader">MDN Reference</a>
+        /// </summary>
+        abstract getReader:
+            ?options: ReadableStreamGetReaderOptions -> U2<ReadableStreamBYOBReader, ReadableStreamDefaultReader<obj>>
+
+        /// <summary>
+        /// The <b><c>pipeThrough()</c></b> method of the ReadableStream interface provides a chainable way of piping the current stream through a transform stream or any other writable/readable pair.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeThrough">MDN Reference</a>
+        /// </summary>
+        abstract pipeThrough<'T> :
+            transform: ReadableWritablePair<'T, obj> * ?options: StreamPipeOptions -> ReadableStream<'T>
+
+        /// <summary>
+        /// The <b><c>pipeTo()</c></b> method of the ReadableStream interface pipes the current ReadableStream to a given WritableStream and returns a Promise that fulfills when the piping process completes successfully, or rejects if any errors were encountered.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeTo">MDN Reference</a>
+        /// </summary>
+        abstract pipeTo: destination: WritableStream<obj> * ?options: StreamPipeOptions -> JS.Promise<unit>
+        /// <summary>
+        /// The <b><c>tee()</c></b> method of the ReadableStream interface tees the current readable stream, returning a two-element array containing the two resulting branches as new ReadableStream instances.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/tee">MDN Reference</a>
+        /// </summary>
+        abstract tee: unit -> ReadableStream<obj> * ReadableStream<obj>
+        abstract values: ?options: ReadableStreamIteratorOptions -> ReadableStreamAsyncIterator<obj>
+
+        [<Emit("$0[Symbol.asyncIterator]($1...)")>]
+        abstract SymbolAsyncIterator: ?options: ReadableStreamIteratorOptions -> ReadableStreamAsyncIterator<obj>
+
+    type WebTransportReceiveStreamConstructor =
+        [<EmitConstructor>]
+        abstract Create: unit -> WebTransportReceiveStream
+
+    /// <summary>
+    /// The <b><c>WebTransportSendStream</c></b> interface of the WebTransport API is a specialized WritableStream that is used to send outbound data in both unidirectional or bidirectional WebTransport streams.
+    /// Available only in secure contexts.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportSendStream">MDN Reference</a>
+    /// </summary>
+    [<Interface>]
+    type WebTransportSendStream =
+        inherit WritableStream<obj>
+        /// <summary>
+        /// The <b><c>sendOrder</c></b> property of the WebTransportSendStream interface indicates the send priority of this stream relative to other streams for which the value has been set.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportSendStream/sendOrder">MDN Reference</a>
+        /// </summary>
+        abstract sendOrder: float with get, set
+        /// <summary>
+        /// The <b><c>getStats()</c></b> method of the WebTransportSendStream interface asynchronously returns an object containing statistics for the current stream.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportSendStream/getStats">MDN Reference</a>
+        /// </summary>
+        abstract getStats: unit -> JS.Promise<WebTransportSendStreamStats>
+        /// <summary>
+        /// The <b><c>getWriter()</c></b> method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter">MDN Reference</a>
+        /// </summary>
+        abstract getWriter: unit -> WritableStreamDefaultWriter<obj>
+
+        [<ParamObject; Emit("$0")>]
+        static member Create
+            (
+                sendOrder: float,
+                getStats: (unit -> JS.Promise<WebTransportSendStreamStats>),
+                locked: bool,
+                abort: (obj option -> JS.Promise<unit>),
+                close: (unit -> JS.Promise<unit>),
+                getWriter: (unit -> WritableStreamDefaultWriter<obj>)
+            ) : WebTransportSendStream =
+            jsNative
+
+    type WebTransportSendStreamConstructor =
+        [<EmitConstructor>]
+        abstract Create: unit -> WebTransportSendStream
+
+    /// <summary>
     /// The <b><c>WheelEvent</c></b> interface represents events that occur due to the user moving a mouse wheel or similar input device.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WheelEvent">MDN Reference</a>
@@ -90979,7 +92819,7 @@ module Dom =
         /// </summary>
         abstract cookieStore: CookieStore
         /// <summary>
-        /// The <b><c>customElements</c></b> read-only property of the Window interface returns a reference to the CustomElementRegistry object, which can be used to register new custom elements and get information about previously registered custom elements.
+        /// The <b><c>customElements</c></b> read-only property of the Window interface returns a reference to the global CustomElementRegistry object, which can be used to register new custom elements and get information about previously registered custom elements.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/customElements">MDN Reference</a>
         /// </summary>
@@ -90996,6 +92836,13 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/Window/document">MDN Reference</a>
         /// </summary>
         abstract document: Document
+        /// <summary>
+        /// The <b><c>documentPictureInPicture</c></b> read-only property of the Window interface returns a reference to the DocumentPictureInPicture object for the current document context.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Window/documentPictureInPicture">MDN Reference</a>
+        /// </summary>
+        abstract documentPictureInPicture: DocumentPictureInPicture
         /// <summary>
         /// The read-only Window property <b><c>event</c></b> returns the Event which is currently being handled by the site's code. Outside the context of an event handler, the value is always undefined.
         /// </summary>
@@ -91907,7 +93754,7 @@ module Dom =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/write">MDN Reference</a>
         /// </summary>
-        abstract write: ?chunk: 'W -> JS.Promise<unit>
+        abstract write: chunk: 'W -> JS.Promise<unit>
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -91917,7 +93764,7 @@ module Dom =
                 abort: (obj option -> JS.Promise<unit>),
                 close: (unit -> JS.Promise<unit>),
                 releaseLock: (unit -> unit),
-                write: ('W option -> JS.Promise<unit>),
+                write: ('W -> JS.Promise<unit>),
                 ?desiredSize: float
             ) : WritableStreamDefaultWriter<'W> =
             jsNative
@@ -93277,6 +95124,8 @@ module Dom =
     type BlobPart =
         U4<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>, Blob>
 
+    type BluetoothServiceUUID = U2<string, float>
+
     type BodyInit =
         U7<
             string,
@@ -93530,6 +95379,8 @@ module Dom =
     type SanitizerElement = U2<string, SanitizerElementNamespace>
 
     type SanitizerElementWithAttributes = U2<string, SanitizerElementNamespaceWithAttributes>
+
+    type SanitizerPI = U2<string, SanitizerProcessingInstruction>
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type SelectionDirection =
@@ -93895,6 +95746,7 @@ module Dom =
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type CompressionFormat =
+        | [<CompiledName("brotli")>] Brotli
         | [<CompiledName("deflate")>] Deflate
         | [<CompiledName("deflate-raw")>] DeflateRaw
         | [<CompiledName("gzip")>] Gzip
@@ -93919,6 +95771,8 @@ module Dom =
         | [<CompiledName("image/svg+xml")>] ImageSvgXml
         | [<CompiledName("text/html")>] TextHtml
         | [<CompiledName("text/xml")>] TextXml
+
+    type DigitalCredentialPresentationProtocol = string
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type DirectionSetting =
@@ -93989,6 +95843,11 @@ module Dom =
         | [<CompiledName("none")>] None
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type FlowControlType =
+        | [<CompiledName("hardware")>] Hardware
+        | [<CompiledName("none")>] None
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type FontDisplay =
         | [<CompiledName("auto")>] Auto
         | [<CompiledName("block")>] Block
@@ -94007,6 +95866,11 @@ module Dom =
     type FontFaceSetLoadStatus =
         | [<CompiledName("loaded")>] Loaded
         | [<CompiledName("loading")>] Loading
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type FullscreenKeyboardLock =
+        | [<CompiledName("browser")>] Browser
+        | [<CompiledName("none")>] None
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type FullscreenNavigationUI =
@@ -94353,6 +96217,7 @@ module Dom =
         | [<CompiledName("sint8")>] Sint8
         | [<CompiledName("sint8x2")>] Sint8x2
         | [<CompiledName("sint8x4")>] Sint8x4
+        | [<CompiledName("snorm10-10-10-2")>] Snorm1010102
         | [<CompiledName("snorm16")>] Snorm16
         | [<CompiledName("snorm16x2")>] Snorm16x2
         | [<CompiledName("snorm16x4")>] Snorm16x4
@@ -94729,6 +96594,12 @@ module Dom =
         | [<CompiledName("equalpower")>] Equalpower
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ParityType =
+        | [<CompiledName("even")>] Even
+        | [<CompiledName("none")>] None
+        | [<CompiledName("odd")>] Odd
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type PaymentComplete =
         | [<CompiledName("fail")>] Fail
         | [<CompiledName("success")>] Success
@@ -95051,6 +96922,7 @@ module Dom =
         | [<CompiledName("frame")>] Frame
         | [<CompiledName("iframe")>] Iframe
         | [<CompiledName("image")>] Image
+        | [<CompiledName("json")>] Json
         | [<CompiledName("manifest")>] Manifest
         | [<CompiledName("object")>] Object
         | [<CompiledName("paintworklet")>] Paintworklet
@@ -95304,6 +97176,12 @@ module Dom =
     type WebTransportErrorSource =
         | [<CompiledName("session")>] Session
         | [<CompiledName("stream")>] Stream
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type WebTransportReliabilityMode =
+        | [<CompiledName("pending")>] Pending
+        | [<CompiledName("reliable-only")>] ReliableOnly
+        | [<CompiledName("supports-unreliable")>] SupportsUnreliable
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type WorkerType =
@@ -96035,6 +97913,11 @@ module Dom =
 
     module HTMLImageElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CrossOrigin =
+            | [<CompiledName("anonymous")>] Anonymous
+            | [<CompiledName("use-credentials")>] UseCredentials
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Decoding =
             | [<CompiledName("async")>] Async
             | [<CompiledName("auto")>] Auto
@@ -96233,7 +98116,7 @@ module Dom =
             abstract imports: moduleObject: obj -> ModuleImportDescriptor[]
 
             [<EmitConstructor>]
-            abstract Create: bytes: BufferSource * ?options: WebAssemblyCompileOptions -> obj
+            abstract Create: bytes: AllowSharedBufferSource * ?options: WebAssemblyCompileOptions -> obj
 
         type TagConstructor =
             [<EmitConstructor>]

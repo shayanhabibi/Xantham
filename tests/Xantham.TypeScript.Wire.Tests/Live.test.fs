@@ -18,7 +18,7 @@ let private file name = DocumentIdentifier.FileName(Path.Combine(fixtures, name)
 
 /// A fresh session per test, for the same reason as the Xantham.TsGo suite: snapshot state
 /// from a failing test would otherwise leak into its successors.
-let private withSession (test: TscChannel -> UpdateSnapshotResponse -> string -> unit) =
+let private withSession (test: TscChannel -> CreateSnapshotResponse -> string -> unit) =
     fun () ->
         match exePath with
         | None -> ()
@@ -27,12 +27,9 @@ let private withSession (test: TscChannel -> UpdateSnapshotResponse -> string ->
             Api.initialize channel |> ignore
 
             let snapshot =
-                Api.updateSnapshot channel
-                    { OpenProjects = ValueSome [| file "tsconfig.json" |]
-                      CloseProjects = ValueNone
-                      FileChanges = ValueNone
-                      OpenFiles = ValueNone
-                      CloseFiles = ValueNone }
+                Api.createSnapshot channel
+                    { CreateSnapshotParams.Default with
+                        OpenProjects = ValueSome [| file "tsconfig.json" |] }
 
             test channel snapshot snapshot.Projects[0].Id
 

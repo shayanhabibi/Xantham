@@ -3848,21 +3848,19 @@ let pipelineTests =
 
         yield!
             fixtureTests "type-fest" (npmFixture "type-fest") GeneratorConfig.Default (fun package ->
-                [ testCase "a type the compiler cannot encode is an owned escape, not a crash" <| fun _ ->
-                      // `PositiveInfinity = 1e999` is `+Inf` to the server's JSON encoder, which
-                      // refuses the response outright. The resolve tier turns that refusal into a
-                      // finding on the export and carries on with the other 247.
+                [ testCase "a non-finite numeric literal type widens to float like any other" <| fun _ ->
+                      // `PositiveInfinity = 1e999` is a numeric literal type whose value is not
+                      // finite. TypeScript 7.1's server encodes it, where 7.0's refused the response.
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                       for name in [ "PositiveInfinity"; "NegativeInfinity" ] do
                           Expect.isTrue
-                              (rendered.Findings
-                               |> List.exists (fun f ->
-                                   f.Symbol = name
-                                   && f.Pass = "resolve-export-types"
-                                   && f.Tier = Escape
-                                   && f.Message.Contains "Inf"))
-                              $"{name} is escaped by the resolve tier with the encoder's complaint"
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol = name && f.Key = "TR007"))
+                              $"{name} widens to float"
+
+                          Expect.isFalse
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol = name && f.Tier = Escape))
+                              $"{name} is represented"
 
                       Expect.isEmpty (unexplainedDrops rendered) "every drop is owned by a pass that named its reason"
 

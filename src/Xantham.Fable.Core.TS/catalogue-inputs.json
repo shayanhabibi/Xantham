@@ -2,14 +2,14 @@
   "bindings": [
     {
       "file": "Fable.Core.TS.fs",
-      "sha256": "66d871df6e0865e8abe7c5999d3bdb00c10c984bab67a3629246bf6ff64cf28d"
+      "sha256": "45c48724e1f7e97c1d6cbf3728d34c55202b370740fe248c66f0f84fc9fdc82d"
     },
     {
       "file": "Fable.Core.TS.Extensions.fs",
       "sha256": "a5fabb5b9f43d06b0b56507854f83dd6f5f90ce583c4085d490bf646b7cadfcf"
     }
   ],
-  "catalogueSha256": "1fe9b7e7794c3a45146a071db026abed97df2cc1aef5bfa2e613c3ad5a319b7d",
+  "catalogueSha256": "5c6275726f093b6a27829c98cfd66acfe80a2c4b51f0bfd9cf7aa1bbb076e988",
   "generationConfigurationSha256": "07441901ce7c61d9f1d3b8c0ec5b9545ddac16da020228a54f558761ec0a9c3c",
   "producer": [
     {
@@ -22,5 +22,5 @@
     }
   ],
   "schemaVersion": 1,
-  "typescript": "7.1.0-dev.20260902.1"
+  "typescript": "7.1.0-beta"
 }

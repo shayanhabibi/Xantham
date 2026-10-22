@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <!-- The Fable *run* gate of docs/plans/generator-architecture.md §5: where the compile gate
          proves the goldens type-check, this one proves the erased idioms they lean on *behave* -
@@ -10,7 +10,7 @@
          `register.mjs` installs the ambient globals and resolves the fixture package names.
 
          It is an executable, not a test project: `dotnet build` type-checks it, and
-         `build.fsx test` runs `dotnet fable` on it after the suites; the exact command is the
+         `build.fsx test` runs `dotnet fickl` on it after the suites; the exact command is the
          `run gate` stage there (an XML comment cannot spell a double-dash flag), and it runs
          from this directory.
 
@@ -74,7 +74,7 @@
 
     <ItemGroup>
         <!-- One Fable.Core across the support package, the compile gate and this gate. -->
-        <PackageReference Include="Fable.Core" Version="5.999.0-xantham.ea2e7f8d7.2" />
+        <PackageReference Include="Fable.Core" Version="5.5.0" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core.TS\Xantham.Fable.Core.TS.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
     </ItemGroup>
