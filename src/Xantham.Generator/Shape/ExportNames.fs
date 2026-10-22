@@ -34,7 +34,7 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
                 origin <> firstOrigin
                 && GeneratorConfig.disposition ctx.Config origin = Ship
                 && (Map.tryFind typeId model.Types
-                    |> Option.exists (fun facts -> facts.Response.Symbol = ValueSome export.Symbol.Id)))
+                    |> Option.exists (fun facts -> facts.Response.SymbolId = ValueSome export.Symbol.SymbolId)))
             |> Option.defaultValue (
                 exports
                 |> List.indexed

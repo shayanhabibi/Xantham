@@ -2900,3 +2900,44 @@ Measured in scratch with the flag on:
 Tiers, table size and wall time did not move. Core.TS and Node are not regenerated, since
 neither configuration sets the flag. Enabling it for Node is the recommendation, left to
 integration.
+
+## TypeScript 7.1.0-beta (2026-10-21)
+
+The compiler pin moves to `typescript` 7.1.0-beta (`3e9236361fa9`), binary AST protocol 9. Two
+checker changes reach the generator.
+
+A symbol is a reference: a file-owned symbol (a declaration's, a module's and its exports') carries
+its file and an id unique within it, a snapshot-owned one a project and an id offset by 2^48.
+Every symbol-keyed table keys by `SymbolKey`, the owning file's node id and an `int64` id, and every
+symbol request sends `SymbolResponse.Reference`. The ids are handles the server assigns as symbols
+are first requested, so two sessions over one program number them differently; no output depends
+on them, and tests comparing models across sessions normalise `SourceSymbolId`.
+
+A conditional's check type is a type distinct from the declaration's parameter it was written as,
+sharing that parameter's symbol. `Spec.typeVarOf` binds a type parameter by type id, then by
+symbol, for a reference and for an operand read off another type's facts (`keyof`, value-of and
+property-record operands). Without it `Proven<T>` and `Inhabited<T>` deferred to an erased phantom
+and type-fest's `RequiredKeysOf`/`WritableKeysOf` lost their `keyof<'Type>`; with it both labs and
+type-fest match their 7.0 goldens.
+
+The server now encodes a non-finite numeric literal type: type-fest's `PositiveInfinity` and
+`NegativeInfinity` widen to `float` (`TR007`) where 7.0 refused the response (`RE001`, `AC001`).
+
+Measured over the goldens against `origin/master`: type-fest `RE001` 2 → 0, `AC001` 2 → 0, `TR007`
+0 → 2, tiers 27/66/202/2 → 27/66/204/0. The rest is the 7.1 lib: `Error.isError(error: unknown)`,
+inherited as a static by every `Error` subclass (`TR009` +1 in `ambient-module-lab` and
+`orphan-callback-lab`, +3 in `error-class-lab`), and `setHTML`/`setHTMLUnsafe` options (animejs
+`MB001` and `TR032` +2). Core.TS gains the 7.1 lib's declarations (Web Serial, WebTransport,
+`JSON.rawJSON`, GPU usage flags) and its catalogue records the new compiler in every entry; Node is
+unchanged.
+
+Validation follow-up (2026-10-22): filesystem callbacks use the 7.1 tagged replies from
+`dist/api/fsCallbacks.js`: value, missing and useOS. The old Boolean response terminated the
+server before the mailbox disposal test reached its read callback. Callback encoding and
+live virtual-file tests now cover the revised protocol.
+
+The JavaScript compiler tool is Fickl 0.5.1 (Fable 5.23.0), pinned in the root and standalone
+support-helper manifests. The build and Partas gates invoke `dotnet fickl`; Fable.Core remains
+5.2.0. All 1,489 generator tests and 105 Wire tests passed across the validation runs. The new
+compiler passed 564 runtime checks, Partas JSX and source/DLL acceptance, its Vitest check,
+and all five standalone support-helper Node tests. Build-command verification also passed.

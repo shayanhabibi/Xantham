@@ -5,15 +5,10 @@
   "counts": {
     "exact": 27,
     "ergonomic": 66,
-    "widened": 202,
-    "escape": 2
+    "widened": 204,
+    "escape": 0
   },
   "passes": [
-    {
-      "pass": "RE - resolve-export-types",
-      "total": 2,
-      "escape": 2
-    },
     {
       "pass": "SY - synthesize-anonymous",
       "total": 43,
@@ -28,10 +23,10 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 573,
+      "total": 575,
       "exact": 1,
       "ergonomic": 213,
-      "widened": 359
+      "widened": 361
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -42,11 +37,6 @@
       "pass": "RA - repair-arity",
       "total": 2,
       "widened": 2
-    },
-    {
-      "pass": "AC - audit-coverage",
-      "total": 2,
-      "escape": 2
     }
   ]
 }

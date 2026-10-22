@@ -62,9 +62,8 @@ if id / Measure.uom<Measure.typeId> <> 42 || name / Measure.uom<Measure.symbolNa
             let code, output = compile positive
             Expect.equal code 0 ("correctly tagged consumer must compile and run: " + output)
             for kind, sourceMeasure, targetMeasure in [
-                "int", "symbolId", "typeId"
                 "int", "typeId", "nodeId"
-                "int", "nodeId", "symbolId"
+                "int", "nodeId", "typeId"
                 "string", "symbolName", "declFile"
                 "string", "declFile", "declHandle"
                 "string", "declHandle", "symbolName"
