@@ -3136,3 +3136,49 @@ The restored 0.5.3 packages passed the solution compile gates, 11 selected sessi
 NuGet package was packed and inspected: Fickl.Core is a transitive dependency for both target
 frameworks and the temporary source is absent. The unchanged generator suite was not repeated
 after this dependency-only follow-up.
+
+## PR #160 resync with develop (2026-10-22)
+
+Merged develop through `74308014`, retaining the tagged-arm and shared-tag CaseTest behavior.
+The compiler tool is Fickl 0.5.3 and Fable.Core is public 5.5.0, which supplies CaseTest.
+The private fork pin, build helper and publication blocker are removed. InlineInterface belongs
+to the later branch and is not introduced into this PR. Core.TS, Node and fixture goldens are
+regenerated against this branch and TypeScript 7.1.0-beta.
+
+Core.TS exact/ergonomic/widened/escape counts move 1302/2688/290/5 to 1324/2737/304/5;
+Node remains 775/2185/608/5 with no generated binding changes. Type-fest moves 27/66/202/2
+to 27/66/204/0 through the beta's non-finite literal support. Other fixture tier counts are
+unchanged. All 136 golden-writing tests passed. The official `gh stack` extension tracks the
+dependent PRs, and validation workflows now include feature-base PRs. All 48 CI-policy and
+golden-tooling tests passed.
+
+Full validation passed: 1,497 generator tests and 105 Wire tests (one ignored in each suite),
+579 runtime checks, and the Partas JSX, source/DLL and Vitest gates.
+## PR #161 resync onto #160 (2026-10-22)
+
+The official gh stack extension restacks this slice onto #160 at 3f860134.
+It inherits TypeScript 7.1.0-beta, public Fable.Core 5.5.0 and Fickl 0.5.3.
+The source-named arms, readonly agreement, role-named value sides and callable hybrids
+are retained. Generated catalogue conflicts are resolved by regeneration.
+
+Against the previous #161 head, Core.TS tiers move 1318/2677/277/5 to 1340/2726/291/5
+through the beta library additions. Node stays 815/2158/595/5 with identical bindings.
+Type-fest moves 27/66/202/2 to 27/66/204/0; other fixture tier counts are unchanged.
+All 137 golden-writing tests passed without further fixture changes.
+
+Full validation passed: 1,504 generator tests and 105 Wire tests (one ignored in each suite),
+586 runtime checks, and the Partas JSX, source/DLL and Vitest gates. Resync reviews found
+no introduced spec or standards issues.
+
+
+## InlineInterface stack sync (2026-10-22)
+
+Merged the resynced #161 to retain the earlier integration merge resolutions.
+Source, bindings, compiler pins and build inputs are unchanged from bc537272; the update
+adds the stack workflow policy and validation coverage for feature-base pull requests.
+Each slice is validated in turn; upper-layer CI does not gate assessment of a lower slice.
+
+Core.TS and Node regeneration reproduced their binding code and tier counts. Core.TS
+metadata refreshes the generator binary fingerprint and one session-assigned symbol id in
+a Date finding. All 31 selected workflow, golden-provenance and catalogue-portability tests
+passed. The unchanged generator/runtime suites were not repeated for this workflow-only sync.
