@@ -3070,3 +3070,19 @@ through `Invoke`. Its value side is role-named like any merged value side (`Merg
 any declaration whose type is callable (SP003 "the declaration is callable…"), including one
 whose call is the SI001 loss: no object literal is callable. Node: ~76 function+namespace
 exports move to the property form, and 64 callable hybrids lose `Create`; Core.TS loses 2.
+
+## PR #161 resync onto #160 (2026-10-22)
+
+The official gh stack extension restacks this slice onto #160 at 3f860134.
+It inherits TypeScript 7.1.0-beta, public Fable.Core 5.5.0 and Fickl 0.5.3.
+The source-named arms, readonly agreement, role-named value sides and callable hybrids
+are retained. Generated catalogue conflicts are resolved by regeneration.
+
+Against the previous #161 head, Core.TS tiers move 1318/2677/277/5 to 1340/2726/291/5
+through the beta library additions. Node stays 815/2158/595/5 with identical bindings.
+Type-fest moves 27/66/202/2 to 27/66/204/0; other fixture tier counts are unchanged.
+All 137 golden-writing tests passed without further fixture changes.
+
+Full validation passed: 1,504 generator tests and 105 Wire tests (one ignored in each suite),
+586 runtime checks, and the Partas JSX, source/DLL and Vitest gates. Resync reviews found
+no introduced spec or standards issues.
