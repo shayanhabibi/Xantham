@@ -2069,210 +2069,314 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract removeEventListener: ``type``: string * listener: U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject> * ?options: U2<bool, Fable.Core.TS.Dom.EventListenerOptions> -> unit
     /// <summary>
+    /// The <b><c>ariaActiveDescendantElement</c></b> property of the Element interface represents the current active element when focus is on a composite widget, combobox, textbox, group, or application.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaActiveDescendantElement">MDN Reference</a>
     /// </summary>
     abstract ariaActiveDescendantElement: Fable.Core.TS.Dom.Element option with get, set
     /// <summary>
+    /// The <b><c>ariaAtomic</c></b> property of the Element interface reflects the value of the aria-atomic attribute, which indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaAtomic">MDN Reference</a>
     /// </summary>
     abstract ariaAtomic: string option with get, set
     /// <summary>
+    /// The <b><c>ariaAutoComplete</c></b> property of the Element interface reflects the value of the aria-autocomplete attribute, which indicates whether inputting text could trigger display of one or more predictions of the user's intended value for a combobox, searchbox, or textbox and specifies how predictions would be presented if they were made.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaAutoComplete">MDN Reference</a>
     /// </summary>
     abstract ariaAutoComplete: string option with get, set
     /// <summary>
+    /// The <b><c>ariaBrailleLabel</c></b> property of the Element interface reflects the value of the aria-braillelabel attribute, which defines the ARIA braille label of the element.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBrailleLabel">MDN Reference</a>
     /// </summary>
     abstract ariaBrailleLabel: string option with get, set
     /// <summary>
+    /// The <b><c>ariaBrailleRoleDescription</c></b> property of the Element interface reflects the value of the aria-brailleroledescription attribute, which defines the ARIA braille role description of the element.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBrailleRoleDescription">MDN Reference</a>
     /// </summary>
     abstract ariaBrailleRoleDescription: string option with get, set
     /// <summary>
+    /// The <b><c>ariaBusy</c></b> property of the Element interface reflects the value of the aria-busy attribute, which indicates whether an element is being modified, as assistive technologies may want to wait until the modifications are complete before exposing them to the user.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaBusy">MDN Reference</a>
     /// </summary>
     abstract ariaBusy: string option with get, set
     /// <summary>
+    /// The <b><c>ariaChecked</c></b> property of the Element interface reflects the value of the aria-checked attribute, which indicates the current "checked" state of checkboxes, radio buttons, and other widgets that have a checked state.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaChecked">MDN Reference</a>
     /// </summary>
     abstract ariaChecked: string option with get, set
     /// <summary>
+    /// The <b><c>ariaColCount</c></b> property of the Element interface reflects the value of the aria-colcount attribute, which defines the number of columns in a table, grid, or treegrid.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColCount">MDN Reference</a>
     /// </summary>
     abstract ariaColCount: string option with get, set
     /// <summary>
+    /// The <b><c>ariaColIndex</c></b> property of the Element interface reflects the value of the aria-colindex attribute, which defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColIndex">MDN Reference</a>
     /// </summary>
     abstract ariaColIndex: string option with get, set
     /// <summary>
+    /// The <b><c>ariaColIndexText</c></b> property of the Element interface reflects the value of the aria-colindextext attribute, which defines a human readable text alternative of aria-colindex.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColIndexText">MDN Reference</a>
     /// </summary>
     abstract ariaColIndexText: string option with get, set
     /// <summary>
+    /// The <b><c>ariaColSpan</c></b> property of the Element interface reflects the value of the aria-colspan attribute, which defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaColSpan">MDN Reference</a>
     /// </summary>
     abstract ariaColSpan: string option with get, set
     /// <summary>
+    /// The <b><c>ariaControlsElements</c></b> property of the Element interface is an array containing the elements that are controlled by the element it is applied to. For example, this might be set on a combobox to indicate the element that it pops up, or on a scrollbar to indicate the ID of the element it controls.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaControlsElements">MDN Reference</a>
     /// </summary>
     abstract ariaControlsElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
+    /// The <b><c>ariaCurrent</c></b> property of the Element interface reflects the value of the aria-current attribute, which indicates the element that represents the current item within a container or set of related elements.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaCurrent">MDN Reference</a>
     /// </summary>
     abstract ariaCurrent: string option with get, set
     /// <summary>
+    /// The <b><c>ariaDescribedByElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an accessible description for the element it is applied to. The accessible description is similar to the accessible label (see ariaLabelledByElements), but provides more verbose information.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDescribedByElements">MDN Reference</a>
     /// </summary>
     abstract ariaDescribedByElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
+    /// The <b><c>ariaDescription</c></b> property of the Element interface reflects the value of the aria-description attribute, which defines a string value that describes or annotates the current element.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDescription">MDN Reference</a>
     /// </summary>
     abstract ariaDescription: string option with get, set
     /// <summary>
+    /// The <b><c>ariaDetailsElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an accessible details for the element it is applied to. The accessible details are similar to the accessible description (see ariaDescribedByElements), but provides more verbose information.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDetailsElements">MDN Reference</a>
     /// </summary>
     abstract ariaDetailsElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
+    /// The <b><c>ariaDisabled</c></b> property of the Element interface reflects the value of the aria-disabled attribute, which indicates that the element is perceivable but disabled, so it is not editable or otherwise operable.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaDisabled">MDN Reference</a>
     /// </summary>
     abstract ariaDisabled: string option with get, set
     /// <summary>
+    /// The <b><c>ariaErrorMessageElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an error message for the element it is applied to.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaErrorMessageElements">MDN Reference</a>
     /// </summary>
     abstract ariaErrorMessageElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
+    /// The <b><c>ariaExpanded</c></b> property of the Element interface reflects the value of the aria-expanded attribute, which indicates whether a grouping element owned or controlled by this element is expanded or collapsed.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaExpanded">MDN Reference</a>
     /// </summary>
     abstract ariaExpanded: string option with get, set
     /// <summary>
+    /// The <b><c>ariaFlowToElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an alternate reading order of content, overriding the general default reading order at the user's discretion. If just one element is provided this is the next element in the reading order. If multiple elements are provided, then each element represents a possible path that should be offered to the user for selection.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaFlowToElements">MDN Reference</a>
     /// </summary>
     abstract ariaFlowToElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
+    /// The <b><c>ariaHasPopup</c></b> property of the Element interface reflects the value of the aria-haspopup attribute, which indicates the availability and type of interactive popup element, such as menu or dialog, that can be triggered by an element.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaHasPopup">MDN Reference</a>
     /// </summary>
     abstract ariaHasPopup: string option with get, set
     /// <summary>
+    /// The <b><c>ariaHidden</c></b> property of the Element interface reflects the value of the aria-hidden) attribute, which indicates whether the element is exposed to an accessibility API.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaHidden">MDN Reference</a>
     /// </summary>
     abstract ariaHidden: string option with get, set
     /// <summary>
+    /// The <b><c>ariaInvalid</c></b> property of the Element interface reflects the value of the aria-invalid attribute. Relevant for the application, checkbox, combobox, gridcell, listbox, radiogroup, slider, spinbutton, textbox, and tree roles, it indicates to the accessibility API whether the entered value does not conform to the format expected by the application.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaInvalid">MDN Reference</a>
     /// </summary>
     abstract ariaInvalid: string option with get, set
     /// <summary>
+    /// The <b><c>ariaKeyShortcuts</c></b> property of the Element interface reflects the value of the aria-keyshortcuts attribute, which indicates keyboard shortcuts that an author has implemented to activate or give focus to an element.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaKeyShortcuts">MDN Reference</a>
     /// </summary>
     abstract ariaKeyShortcuts: string option with get, set
     /// <summary>
+    /// The <b><c>ariaLabel</c></b> property of the Element interface reflects the value of the aria-label attribute, which defines a string value that labels the current element.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLabel">MDN Reference</a>
     /// </summary>
     abstract ariaLabel: string option with get, set
     /// <summary>
+    /// The <b><c>ariaLabelledByElements</c></b> property of the Element interface is an array containing the element (or elements) that provide an accessible name for the element it is applied to.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLabelledByElements">MDN Reference</a>
     /// </summary>
     abstract ariaLabelledByElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
+    /// The <b><c>ariaLevel</c></b> property of the Element interface reflects the value of the aria-level attribute, which defines the hierarchical level of an element within a structure.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLevel">MDN Reference</a>
     /// </summary>
     abstract ariaLevel: string option with get, set
     /// <summary>
+    /// The <b><c>ariaLive</c></b> property of the Element interface reflects the value of the aria-live attribute, which indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaLive">MDN Reference</a>
     /// </summary>
     abstract ariaLive: string option with get, set
     /// <summary>
+    /// The <b><c>ariaModal</c></b> property of the Element interface reflects the value of the aria-modal attribute, which indicates whether an element is modal when displayed. Applying the aria-modal property to an element with role="dialog" replaces the technique of using aria-hidden on the background for informing assistive technologies that content outside a dialog is inert.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaModal">MDN Reference</a>
     /// </summary>
     abstract ariaModal: string option with get, set
     /// <summary>
+    /// The <b><c>ariaMultiLine</c></b> property of the Element interface reflects the value of the aria-multiline attribute, which indicates whether a text box accepts multiple lines of input or only a single line.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaMultiLine">MDN Reference</a>
     /// </summary>
     abstract ariaMultiLine: string option with get, set
     /// <summary>
+    /// The <b><c>ariaMultiSelectable</c></b> property of the Element interface reflects the value of the aria-multiselectable attribute, which indicates that the user may select more than one item from the current selectable descendants.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaMultiSelectable">MDN Reference</a>
     /// </summary>
     abstract ariaMultiSelectable: string option with get, set
     /// <summary>
+    /// The <b><c>ariaOrientation</c></b> property of the Element interface reflects the value of the aria-orientation attribute, which indicates whether the element's orientation is horizontal, vertical, or unknown/ambiguous.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaOrientation">MDN Reference</a>
     /// </summary>
     abstract ariaOrientation: string option with get, set
     /// <summary>
+    /// The <b><c>ariaOwnsElements</c></b> property of the Element interface is an array containing the element (or elements) that define a visual, functional, or contextual relationship between a parent element that it is applied to, and its child elements. This is used when the DOM hierarchy cannot be used to represent the relationship, and it would not otherwise be available to assistive technology,
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaOwnsElements">MDN Reference</a>
     /// </summary>
     abstract ariaOwnsElements: Fable.Core.TS.Dom.Element[] option with get, set
     /// <summary>
+    /// The <b><c>ariaPlaceholder</c></b> property of the Element interface reflects the value of the aria-placeholder attribute, which defines a short hint intended to aid the user with data entry when the control has no value.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPlaceholder">MDN Reference</a>
     /// </summary>
     abstract ariaPlaceholder: string option with get, set
     /// <summary>
+    /// The <b><c>ariaPosInSet</c></b> property of the Element interface reflects the value of the aria-posinset attribute, which defines an element's number or position in the current set of listitems or treeitems.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPosInSet">MDN Reference</a>
     /// </summary>
     abstract ariaPosInSet: string option with get, set
     /// <summary>
+    /// The <b><c>ariaPressed</c></b> property of the Element interface reflects the value of the aria-pressed attribute, which indicates the current "pressed" state of toggle buttons.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaPressed">MDN Reference</a>
     /// </summary>
     abstract ariaPressed: string option with get, set
     /// <summary>
+    /// The <b><c>ariaReadOnly</c></b> property of the Element interface reflects the value of the aria-readonly attribute, which indicates that the element is not editable, but is otherwise operable.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaReadOnly">MDN Reference</a>
     /// </summary>
     abstract ariaReadOnly: string option with get, set
     /// <summary>
+    /// The <b><c>ariaRelevant</c></b> property of the Element interface reflects the value of the aria-relevant attribute, which indicates what notifications the user agent will trigger when the accessibility tree within a live region is modified. This is used to describe what changes in an aria-live region are relevant and should be announced.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRelevant">MDN Reference</a>
     /// </summary>
     abstract ariaRelevant: string option with get, set
     /// <summary>
+    /// The <b><c>ariaRequired</c></b> property of the Element interface reflects the value of the aria-required attribute, which indicates that user input is required on the element before a form may be submitted.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRequired">MDN Reference</a>
     /// </summary>
     abstract ariaRequired: string option with get, set
     /// <summary>
+    /// The <b><c>ariaRoleDescription</c></b> property of the Element interface reflects the value of the aria-roledescription attribute, which defines a human-readable, author-localized description for the role of an element.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRoleDescription">MDN Reference</a>
     /// </summary>
     abstract ariaRoleDescription: string option with get, set
     /// <summary>
+    /// The <b><c>ariaRowCount</c></b> property of the Element interface reflects the value of the aria-rowcount attribute, which defines the total number of rows in a table, grid, or treegrid.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowCount">MDN Reference</a>
     /// </summary>
     abstract ariaRowCount: string option with get, set
     /// <summary>
+    /// The <b><c>ariaRowIndex</c></b> property of the Element interface reflects the value of the aria-rowindex attribute, which defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowIndex">MDN Reference</a>
     /// </summary>
     abstract ariaRowIndex: string option with get, set
     /// <summary>
+    /// The <b><c>ariaRowIndexText</c></b> property of the Element interface reflects the value of the aria-rowindextext attribute, which defines a human readable text alternative of aria-rowindex.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowIndexText">MDN Reference</a>
     /// </summary>
     abstract ariaRowIndexText: string option with get, set
     /// <summary>
+    /// The <b><c>ariaRowSpan</c></b> property of the Element interface reflects the value of the aria-rowspan attribute, which defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaRowSpan">MDN Reference</a>
     /// </summary>
     abstract ariaRowSpan: string option with get, set
     /// <summary>
+    /// The <b><c>ariaSelected</c></b> property of the Element interface reflects the value of the aria-selected attribute, which indicates the current "selected" state of elements that have a selected state.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSelected">MDN Reference</a>
     /// </summary>
     abstract ariaSelected: string option with get, set
     /// <summary>
+    /// The <b><c>ariaSetSize</c></b> property of the Element interface reflects the value of the aria-setsize attribute, which defines the number of items in the current set of listitems or treeitems.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSetSize">MDN Reference</a>
     /// </summary>
     abstract ariaSetSize: string option with get, set
     /// <summary>
+    /// The <b><c>ariaSort</c></b> property of the Element interface reflects the value of the aria-sort attribute, which indicates if items in a table or grid are sorted in ascending or descending order.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaSort">MDN Reference</a>
     /// </summary>
     abstract ariaSort: string option with get, set
     /// <summary>
+    /// The <b><c>ariaValueMax</c></b> property of the Element interface reflects the value of the aria-valuemax attribute, which defines the maximum allowed value for a range widget.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueMax">MDN Reference</a>
     /// </summary>
     abstract ariaValueMax: string option with get, set
     /// <summary>
+    /// The <b><c>ariaValueMin</c></b> property of the Element interface reflects the value of the aria-valuemin attribute, which defines the minimum allowed value for a range widget.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueMin">MDN Reference</a>
     /// </summary>
     abstract ariaValueMin: string option with get, set
     /// <summary>
+    /// The <b><c>ariaValueNow</c></b> property of the Element interface reflects the value of the aria-valuenow attribute, which defines the current value for a range widget.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueNow">MDN Reference</a>
     /// </summary>
     abstract ariaValueNow: string option with get, set
     /// <summary>
+    /// The <b><c>ariaValueText</c></b> property of the Element interface reflects the value of the aria-valuetext attribute, which defines the human-readable text alternative of aria-valuenow for a range widget.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/ariaValueText">MDN Reference</a>
     /// </summary>
     abstract ariaValueText: string option with get, set
     /// <summary>
+    /// The <b><c>role</c></b> property of the Element interface returns the explicitly set WAI-ARIA role for the element.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/role">MDN Reference</a>
     /// </summary>
     abstract role: string option with get, set
@@ -2356,6 +2460,11 @@ type DrawableSVGGeometry =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/currentCSSZoom">MDN Reference</a>
     /// </summary>
     abstract currentCSSZoom: float
+    /// <summary>
+    /// The <b><c>customElementRegistry</c></b> read-only property of the Element interface returns the CustomElementRegistry object associated with this element, or null if one has not been set.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/customElementRegistry">MDN Reference</a>
+    /// </summary>
     abstract customElementRegistry: Fable.Core.TS.Dom.CustomElementRegistry option
     /// <summary>
     /// The <b><c>id</c></b> property of the Element interface represents the element's identifier, reflecting the id global attribute.
@@ -2788,11 +2897,17 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract setAttributeNodeNS: attr: Fable.Core.TS.Dom.Attr -> Fable.Core.TS.Dom.Attr option
     /// <summary>
+    /// The <b><c>setHTML()</c></b> method of the Element interface provides an XSS-safe method to parse and sanitize a string of HTML and insert it into the DOM as a subtree of the element.
+    /// <br /><br />
+    /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setHTML">MDN Reference</a>
+    /// </summary>
+    abstract setHTML: html: string * ?options: Fable.Core.TS.Dom.SetHTMLOptions -> unit
+    /// <summary>
     /// The <b><c>setHTMLUnsafe()</c></b> method of the Element interface is used to parse HTML input into a DocumentFragment, optionally filtering out unwanted elements and attributes, and those that don't belong in the context, and then using it to replace the element's subtree in the DOM.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/setHTMLUnsafe">MDN Reference</a>
     /// </summary>
-    abstract setHTMLUnsafe: html: string -> unit
+    abstract setHTMLUnsafe: html: string * ?options: Fable.Core.TS.Dom.SetHTMLUnsafeOptions -> unit
     /// <summary>
     /// The <b><c>setPointerCapture()</c></b> method of the Element interface is used to designate a specific element as the capture target of future pointer events. Subsequent events for the pointer will be targeted at the capture element until capture is released (via Element.releasePointerCapture() or the pointerup event is fired).
     /// <br /><br />
@@ -2800,7 +2915,7 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract setPointerCapture: pointerId: float -> unit
     /// <summary>
-    /// The <b><c>toggleAttribute()</c></b> method of the Element interface toggles a Boolean attribute (removing it if it is present and adding it if it is not present) on the given element.
+    /// The <b><c>toggleAttribute()</c></b> method of the Element interface toggles a Boolean attribute on the given element, removing it if present and adding it if not present.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Element/toggleAttribute">MDN Reference</a>
     /// </summary>
@@ -3523,113 +3638,111 @@ type DrawableSVGGeometry =
     /// </summary>
     abstract previousElementSibling: Fable.Core.TS.Dom.Element option
     /// <summary>
+    /// The <b><c>Document.childElementCount</c></b> read-only property returns the number of child elements of the document.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/childElementCount">MDN Reference</a>
     /// </summary>
     abstract childElementCount: float
     /// <summary>
-    /// Returns the child elements.
+    /// The read-only <b><c>children</c></b> property returns a live HTMLCollection which contains all of the child elements of the document upon which it was called.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/children">MDN Reference</a>
     /// </summary>
     abstract children: Fable.Core.TS.Dom.HTMLCollection
     /// <summary>
-    /// Returns the first child that is an element, and null otherwise.
+    /// The <b><c>Document.firstElementChild</c></b> read-only property returns the document's first child Element, or null if there are no child elements.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/firstElementChild">MDN Reference</a>
     /// </summary>
     abstract firstElementChild: Fable.Core.TS.Dom.Element option
     /// <summary>
-    /// Returns the last child that is an element, and null otherwise.
+    /// The <b><c>Document.lastElementChild</c></b> read-only property returns the document's last child Element, or null if there are no child elements.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/lastElementChild">MDN Reference</a>
     /// </summary>
     abstract lastElementChild: Fable.Core.TS.Dom.Element option
     /// <summary>
-    /// Inserts nodes after the last child of node, while replacing strings in nodes with equivalent Text nodes.
-    /// <br /><br />
-    /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
+    /// The <b><c>Document.append()</c></b> method inserts a set of Node objects or strings after the last child of the document. Strings are inserted as equivalent Text nodes.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/append">MDN Reference</a>
     /// </summary>
     abstract append: [<ParamArray>] nodes: U2<string, Fable.Core.TS.Dom.Node>[] -> unit
     /// <summary>
+    /// The <b><c>moveBefore()</c></b> method of the Document interface moves a given Node inside the Document DOM node as a direct child, before a given reference node.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/moveBefore">MDN Reference</a>
     /// </summary>
     abstract moveBefore: node: Fable.Core.TS.Dom.Node * ?child: Fable.Core.TS.Dom.Node -> unit
     /// <summary>
-    /// Inserts nodes before the first child of node, while replacing strings in nodes with equivalent Text nodes.
-    /// <br /><br />
-    /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
+    /// The <b><c>Document.prepend()</c></b> method inserts a set of Node objects or strings before the first child of the document. Strings are inserted as equivalent Text nodes.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/prepend">MDN Reference</a>
     /// </summary>
     abstract prepend: [<ParamArray>] nodes: U2<string, Fable.Core.TS.Dom.Node>[] -> unit
     /// <summary>
-    /// Returns the first element that is a descendant of node that matches selectors.
+    /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> 'E option
     /// <summary>
-    /// Returns the first element that is a descendant of node that matches selectors.
+    /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> 'E option
     /// <summary>
-    /// Returns the first element that is a descendant of node that matches selectors.
+    /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> 'E option
     /// <summary>
-    /// Returns the first element that is a descendant of node that matches selectors.
+    /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract querySelector<'E>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap, 'E> -> 'E option
     /// <summary>
-    /// Returns the first element that is a descendant of node that matches selectors.
+    /// The Document method <b><c>querySelector()</c></b> returns the first Element within the document that matches the specified CSS selector, or group of CSS selectors. If no matches are found, null is returned.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelector">MDN Reference</a>
     /// </summary>
     abstract querySelector<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> 'E option
     /// <summary>
-    /// Returns all element descendants of node that match selectors.
+    /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
-    /// Returns all element descendants of node that match selectors.
+    /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.SVGElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
-    /// Returns all element descendants of node that match selectors.
+    /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.MathMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
-    /// Returns all element descendants of node that match selectors.
+    /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Node>: selectors: typekeyof<Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap, 'E> -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
-    /// Returns all element descendants of node that match selectors.
+    /// The Document method <b><c>querySelectorAll()</c></b> returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
     /// </summary>
     abstract querySelectorAll<'E when 'E :> Fable.Core.TS.Dom.Element>: selectors: string -> Fable.Core.TS.Dom.NodeListOf<'E>
     /// <summary>
-    /// Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes.
-    /// <br /><br />
-    /// Throws a "HierarchyRequestError" DOMException if the constraints of the node tree are violated.
+    /// The <b><c>Document.replaceChildren()</c></b> method replaces the existing children of a Document with a specified new set of children.
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Document/replaceChildren">MDN Reference</a>
     /// </summary>

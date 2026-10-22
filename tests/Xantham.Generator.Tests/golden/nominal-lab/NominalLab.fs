@@ -72,5 +72,5 @@ type Exports =
 module Wide =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
     type Item =
-        | [<CompiledName("attr"); InlineInterface>] Attr of Attr
-        | [<CompiledName("gl"); InlineInterface>] Gl of GLAttr
+        | [<CompiledName("attr"); Fickl.Core.InlineInterface>] Attr of Attr
+        | [<CompiledName("gl"); Fickl.Core.InlineInterface>] Gl of GLAttr

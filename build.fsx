@@ -1,4 +1,4 @@
-﻿#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
+#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
 #r "nuget: Partas.Build, 0.8.0"
 #r "nuget: Partas.Build.Baked, 0.2.0"
 #r "nuget: Partas.Build.EasyBuild.ShipIt, 0.1.0"
@@ -294,7 +294,6 @@ module Stages =
                 stage "restore" {
                     quiet
                     when' (not quick)
-                    run "dotnet fsi tools/fable-fork.fsx -- check"
                     run (cmd $"dotnet restore {Repo.Project.SolutionFile} -v q")
                     run "dotnet tool restore -v q"
                 }
@@ -684,7 +683,7 @@ module Stages =
                         workingDir "tests/Xantham.Generator.RunGate"
 
                         run
-                            "dotnet fable . -o fable-out --noCache --exclude Xantham.Fable.Core.TS --run node --import ./register.mjs fable-out/Program.js"
+                            "dotnet fickl . -o fable-out --noCache --exclude Xantham.Fable.Core.TS --run node --import ./register.mjs fable-out/Program.js"
                     }
 
                     stage "customization Partas gate" {
@@ -843,7 +842,7 @@ module Stages =
 
                     for project in projects do
                         stage $"pack-{project.Name}" {
-                            // `dotnet fable` in the run gate restores the support package for
+                            // `dotnet fickl` in the run gate restores the support package for
                             // netstandard2.1 alone, and `--no-build` implies `--no-restore`.
                             // The restore puts every target framework back into the assets file.
                             run (cmd $"dotnet restore {project.Path} -v q")
@@ -933,27 +932,6 @@ module Stages =
                 }
         }
 
-    /// Fails while Fable.Core is pinned to the fork build: only the Xantham feed carries it, so a
-    /// consumer restoring from nuget.org alone cannot restore the published packages' dependency.
-    let requireReleasedFable =
-        stage "require released fable" {
-            run (fun _ ->
-                use document =
-                    System.Text.Json.JsonDocument.Parse(
-                        System.IO.File.ReadAllText(
-                            System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tools", "fable-fork", "fork.json")
-                        )
-                    )
-
-                let version = document.RootElement.GetProperty("version").GetString()
-
-                if version.Contains "-xantham." then
-                    Error
-                        $"Fable.Core is pinned to the fork build {version} (tools/fable-fork/fork.json), which only the Xantham feed carries. Publish once the pins name a released Fable."
-                else
-                    Ok())
-        }
-
     let publish =
         input {
             let! apiKey = Baked.NuGet.apiKey.option
@@ -1038,13 +1016,11 @@ exit (
         command "publish" {
             command "artifacts" {
                 Stages.requireApiKey
-                Stages.requireReleasedFable
                 Stages.validatePackages
                 Stages.publish
             }
 
             Stages.requireApiKey
-            Stages.requireReleasedFable
             Stages.restore
             Stages.clean
             Stages.format

@@ -51,9 +51,6 @@ module Measure =
     type directory
 
     [<Measure>]
-    type symbolId = symbol * uniqueId
-
-    [<Measure>]
     type typeId = type' * uniqueId
 
     [<Measure>]
@@ -93,6 +90,12 @@ module Measure =
 
     let inline uom<[<Measure>] 'U> = Unchecked.defaultof<UoM<'U>>
 
+/// A symbol's identity within a snapshot. A file-owned symbol's id is unique within the source
+/// file `File` names by its node id; a snapshot-owned symbol has no `File`, and its id is unique
+/// within the snapshot.
+[<Struct>]
+type SymbolKey = { File: string voption; Id: int64 }
+
 /// Tag the compiler's unmeasured protocol fields at the generator boundary.
 /// The protocol remains unchanged; generator tables never mix type and symbol ids.
 [<AutoOpen>]
@@ -117,21 +120,29 @@ module internal WireMeasures =
             this.IndexType |> ValueOption.map (fun value -> value * uom<typeId>)
 
         member this.SymbolId =
-            this.Symbol |> ValueOption.map (fun value -> value * uom<symbolId>)
+            this.Symbol
+            |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
 
         member this.AliasSymbolId =
-            this.AliasSymbol |> ValueOption.map (fun value -> value * uom<symbolId>)
+            this.AliasSymbol
+            |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
 
         member this.AliasArgumentTypeIds =
             this.AliasTypeArguments
             |> ValueOption.map (Array.map (fun value -> value * uom<typeId>))
 
     type SymbolResponse with
-        member this.SymbolId = this.Id * uom<symbolId>
+        member this.SymbolId: SymbolKey =
+            {
+                File = this.Reference.File |> ValueOption.map _.NodeId
+                Id = this.Reference.Id
+            }
+
         member this.SymbolName = this.Name * uom<symbolName>
 
         member this.ParentSymbolId =
-            this.Parent |> ValueOption.map (fun value -> value * uom<symbolId>)
+            this.Parent
+            |> ValueOption.map (fun value -> ({ File = value.File; Id = value.Id }: SymbolKey))
 
         member this.DeclarationHandles =
             this.Declarations

@@ -241,10 +241,10 @@ let resolveExportTypes: Pass<ResolveModel> =
                         model.Harvest.Exports
                         |> List.map (fun export ->
                             async {
-                                let ask relevant (request: int -> Async<TypeResponse>) =
+                                let ask relevant (request: SymbolReference -> Async<TypeResponse>) =
                                     if relevant then
                                         async {
-                                            let! ty = attempt (request export.Symbol.Id)
+                                            let! ty = attempt (request export.Symbol.Reference)
                                             return Some ty
                                         }
                                     else
@@ -626,7 +626,7 @@ let internal declarationTypeClosure (ctx: Context) (roots: string<declHandle> li
                                         | ValueSome symbol ->
                                             let! symbol =
                                                 if symbol.Flags.HasFlag SymbolFlags.Alias then
-                                                    ctx.Session.getAliasedSymbol symbol.Id
+                                                    ctx.Session.getAliasedSymbol symbol.Reference
                                                 else
                                                     async.Return symbol
 
@@ -1017,15 +1017,15 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
 
 let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
     async {
-        let! propertyType = ctx.Session.getTypeOfSymbol property.Id
-        let! docs = ctx.Session.getDocumentationComment property.Id
-        let! tags = ctx.Session.getJsDocTags property.Id
+        let! propertyType = ctx.Session.getTypeOfSymbol property.Reference
+        let! docs = ctx.Session.getDocumentationComment property.Reference
+        let! tags = ctx.Session.getJsDocTags property.Reference
 
         // `CheckFlags.Readonly` only marks transient symbols; a declared
         // `readonly` modifier is the checker's to see, so ask it.
         let! readOnly =
             if isProperty then
-                ctx.Session.isReadonlySymbol property.Id
+                ctx.Session.isReadonlySymbol property.Reference
             else
                 async.Return false
 
@@ -1048,7 +1048,7 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
                 async.Return true
             elif property.Flags.HasFlag SymbolFlags.Alias then
                 async {
-                    let! target = ctx.Session.getAliasedSymbol property.Id
+                    let! target = ctx.Session.getAliasedSymbol property.Reference
                     return target.Flags.HasFlag SymbolFlags.Function
                 }
             else
@@ -1236,7 +1236,7 @@ let private deriveFacts
     (ctx: Context)
     (trace: Trace option)
     (registers: Registers)
-    (ambientClasses: Map<int<symbolId>, HarvestedExport>)
+    (ambientClasses: Map<SymbolKey, HarvestedExport>)
     (ty: TypeResponse)
     : Async<TypeFacts * TypeResponse list> =
     async {
@@ -1306,7 +1306,7 @@ let private deriveFacts
 
                                         match symbol with
                                         | ValueSome symbol ->
-                                            let! declared = ctx.Session.getDeclaredTypeOfSymbol symbol.Id
+                                            let! declared = ctx.Session.getDeclaredTypeOfSymbol symbol.Reference
                                             return declared.Id = result.Id
                                         | ValueNone -> return false
                                 }
@@ -1364,7 +1364,7 @@ let private deriveFacts
 
                         match symbol with
                         | ValueSome symbol when not plainLiteralUnion ->
-                            let! declared = ctx.Session.getDeclaredTypeOfSymbol symbol.Id
+                            let! declared = ctx.Session.getDeclaredTypeOfSymbol symbol.Reference
                             return if declared.Id = ty.Id then ValueSome symbol else ValueNone
                         | symbol -> return symbol
                     else
@@ -1737,7 +1737,7 @@ let private deriveFacts
                                 |> Option.bind (fun symbol -> Map.tryFind symbol.SymbolId ambientClasses)
                             with
                             | Some export when objectFlags.HasFlag ObjectFlags.Class ->
-                                let! value = ctx.Session.getTypeOfSymbol export.Symbol.Id
+                                let! value = ctx.Session.getTypeOfSymbol export.Symbol.Reference
                                 let! signatures = resolveSignatures ctx trace registers value SignatureKind.Construct
 
                                 return
@@ -1845,7 +1845,7 @@ let private deriveFacts
                         return!
                             properties
                             |> ValueOption.defaultValue [||]
-                            |> Array.map (fun property -> ctx.Session.getTypeOfSymbol property.Id)
+                            |> Array.map (fun property -> ctx.Session.getTypeOfSymbol property.Reference)
                             |> Async.Parallel
                     }
                 | _ -> async.Return [||]
@@ -2036,7 +2036,7 @@ let private deriveFacts
                                         | ValueSome _, ValueNone -> async.Return false
                                         | ValueSome _, ValueSome alias ->
                                             async {
-                                                let! declared = ctx.Session.getDeclaredTypeOfSymbol alias.Id
+                                                let! declared = ctx.Session.getDeclaredTypeOfSymbol alias.Reference
                                                 return declared.Id = ty.Id
                                             }
 
@@ -2088,7 +2088,7 @@ let private deriveFacts
                         let rec qualified (symbol: SymbolResponse) (name: string) =
                             async {
                                 if symbol.CheckFlags.HasFlag CheckFlags.Unresolved && symbol.Parent.IsSome then
-                                    let! parent = ctx.Session.getParentOfSymbol symbol.Id
+                                    let! parent = ctx.Session.Sessionless.getParentOfSymbol symbol.Reference
 
                                     match parent with
                                     | ValueSome parent -> return! qualified parent $"{parent.Name}.{name}"
@@ -2444,10 +2444,10 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                                             return!
                                                 symbols
                                                 |> Array.choose ValueOption.toOption
-                                                |> Array.distinctBy _.Id
+                                                |> Array.distinctBy _.SymbolId
                                                 |> Array.sortBy (fun symbol -> symbol.Declarations, symbol.Name)
                                                 |> Array.map (fun symbol ->
-                                                    ctx.Session.getDeclaredTypeOfSymbol symbol.Id)
+                                                    ctx.Session.getDeclaredTypeOfSymbol symbol.Reference)
                                                 |> Async.Sequential
                                         }
                                     else

@@ -44,7 +44,7 @@ let private compileConsumer (generated: RenderModel) (consumer: string) =
     let support = ["Xantham.Fable.Core"; "Xantham.Fable.Core.TS"] |> List.map (fun name ->
         let dll = supportAssembly root name
         $"<Reference Include='{name}'><HintPath>{dll}</HintPath></Reference>") |> String.concat ""
-    File.WriteAllText(Path.Combine(scratch.Path, "Consumer.fsproj"), $"<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup>{items}<Compile Include='Consumer.fs' /><PackageReference Include='Fable.Core' Version='5.999.0-xantham.26e40937d' />{support}</ItemGroup></Project>")
+    File.WriteAllText(Path.Combine(scratch.Path, "Consumer.fsproj"), $"<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup>{items}<Compile Include='Consumer.fs' /><PackageReference Include='Fable.Core' Version='5.5.0' />{support}</ItemGroup></Project>")
     let start = ProcessStartInfo("dotnet", WorkingDirectory = scratch.Path, RedirectStandardOutput = true, RedirectStandardError = true)
     for arg in ["build"; "Consumer.fsproj"; "--nologo"; "-v:q"; "-nodeReuse:false"] do start.ArgumentList.Add arg
     use child = Process.Start start

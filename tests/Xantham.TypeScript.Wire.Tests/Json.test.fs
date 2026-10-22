@@ -12,10 +12,11 @@ let private read<'T> (json: string) = JsonSerializer.Deserialize<'T>(json, Proto
 
 /// A symbol response with every optional field absent, as the server sends one for a symbol
 /// with no parent and no declarations.
-let private symbol = """{"id":7,"project":"p","name":"yy","flags":4,"checkFlags":0}"""
+let private symbol =
+    """{"reference":{"kind":1,"snapshot":1,"project":"p","id":7},"name":"yy","flags":4,"checkFlags":0}"""
 
-let private snapshotWith openProjects : UpdateSnapshotParams =
-    { UpdateSnapshotParams.Default with OpenProjects = openProjects }
+let private snapshotWith openProjects : CreateSnapshotParams =
+    { CreateSnapshotParams.Default with OpenProjects = openProjects }
 
 /// Every generated record that carries a `Default`, paired with its type, found the way a caller
 /// would find it. A record gains one when each of its fields is optional or is itself such a
@@ -73,12 +74,12 @@ let jsonTests =
                 obj.ReferenceEquals(CompilerOptions.Default, CompilerOptions.Default)
                 |> Flip.Expect.isTrue "the same record comes back"
 
-            // The reason CreateProgramOptions has a Default at all: its `compilerOptions` is
-            // required by the schema, and stands in its own Default. This is also the case that
-            // catches the initialisation-order trap - the field is declared 300 lines before the
-            // record it names, so a non-deferred default reads back as null here.
+            // The reason CreateSnapshotProgramParams has a Default at all: its `compilerOptions`
+            // is required by the schema, and stands in its own Default. This is also the case that
+            // catches the initialisation-order trap - the field is declared before the record it
+            // names, so a non-deferred default reads back as null here.
             testCase "a required field of a defaultable record takes that record's Default" <| fun _ ->
-                obj.ReferenceEquals(CreateProgramOptions.Default.CompilerOptions, CompilerOptions.Default)
+                obj.ReferenceEquals(CreateSnapshotProgramParams.Default.CompilerOptions, RawCompilerOptions.Default)
                 |> Flip.Expect.isTrue "nested Default"
 
             // `paths?` is optional in the schema but maps to a bare JsonObject, which is a
@@ -108,6 +109,35 @@ let jsonTests =
             ] <| fun (expected, json) -> read<DocumentIdentifier> json |> Flip.Expect.equal "" expected
         ]
 
+        testList "EnsurePrograms" [
+            // `true | ProjectId[]`: every project, or the projects listed.
+            let inline (==>) ensure json = ensure, json
+
+            testTheory "writes the arm the server expects" [
+                AllPrograms ==> "true"
+                Programs [| "/dev/null/synthetic/1" |] ==> """["/dev/null/synthetic/1"]"""
+            ] <| fun (ensure, expected) -> write ensure |> Flip.Expect.equal "" expected
+
+            testTheory "reads either arm back" [
+                AllPrograms ==> "true"
+                Programs [| "/dev/null/synthetic/1" |] ==> """["/dev/null/synthetic/1"]"""
+            ] <| fun (expected, json) -> read<EnsurePrograms> json |> Flip.Expect.equal "" expected
+        ]
+
+        // A snapshot-owned symbol's id is offset by 2^48, past an int32.
+        testCase "a snapshot-owned symbol id reads as int64" <| fun _ ->
+            read<SymbolReference>("""{"kind":1,"snapshot":1,"project":"p","id":281474976710660}""").Id
+            |> Flip.Expect.equal "" 281474976710660L
+
+        testCase "well-known symbol ids preserve the snapshot offset" <| fun _ ->
+            let response =
+                read<WellKnownSymbolsResponse>
+                    """{"unknown":281474976710658,"undefined":281474976710656,"arguments":281474976710657}"""
+
+            int64 response.Unknown |> Flip.Expect.equal "unknown" 281474976710658L
+            int64 response.Undefined |> Flip.Expect.equal "undefined" 281474976710656L
+            int64 response.Arguments |> Flip.Expect.equal "arguments" 281474976710657L
+
         testList "reading optionals" [
             // Absent and null both mean "no value" on the way in, even though only absent is
             // legal on the way out.
@@ -115,8 +145,9 @@ let jsonTests =
 
             testTheory "absent and null both read as ValueNone" [
                 symbol ==> ValueNone
-                """{"id":7,"project":"p","name":"yy","flags":4,"checkFlags":0,"parent":null}""" ==> ValueNone
-                """{"id":7,"project":"p","name":"yy","flags":4,"checkFlags":0,"parent":3}""" ==> ValueSome 3
+                symbol.Replace("\"checkFlags\":0", "\"checkFlags\":0,\"parent\":null") ==> ValueNone
+                symbol.Replace("\"checkFlags\":0", "\"checkFlags\":0,\"parent\":{\"id\":3}")
+                ==> ValueSome { Id = 3L; File = ValueNone }
             ] <| fun (json, expected) -> read<SymbolResponse>(json).Parent |> Flip.Expect.equal "" expected
         ]
 
@@ -125,7 +156,7 @@ let jsonTests =
         testCase "a record deserialises through its constructor" <| fun _ ->
             let response = read<SymbolResponse> symbol
             response.Name |> Flip.Expect.equal "name" "yy"
-            response.Id |> Flip.Expect.equal "id" 7
+            response.Reference.Id |> Flip.Expect.equal "id" 7L
             response.Declarations |> Flip.Expect.equal "declarations" ValueNone
 
         // `end` and `file` are F# keywords, so the generator escapes them. The escaping must not
@@ -147,7 +178,7 @@ let jsonTests =
                 { Snapshot = 1; Project = "p"; File = DocumentIdentifier.FileName "a.ts"; Position = 4 }
 
             testCase "any parameter record encodes into a batch entry" <| fun _ ->
-                { Requests = ValueSome [| ProtoJson.batchEntry Method.GetSymbolAtPosition symbolParams |] }
+                { Requests = ValueSome [| ProtoJson.batchEntry Method.GetSymbolAtPosition symbolParams |]; ContinuationToken = ValueNone; MaxResponseBytesPerPage = ValueNone }
                 |> write
                 |> Flip.Expect.equal ""
                     """{"requests":[{"method":"getSymbolAtPosition","params":{"snapshot":1,"project":"p","file":"a.ts","position":4}}]}"""
@@ -159,7 +190,7 @@ let jsonTests =
 
             // Null is still the absent value, exactly as it was for the JsonNode it replaced.
             testCase "a parameterless entry omits the payload" <| fun _ ->
-                { Requests = ValueSome [| ProtoJson.batchEntryNoParams Method.GetVoidType |] }
+                { Requests = ValueSome [| ProtoJson.batchEntryNoParams Method.GetVoidType |]; ContinuationToken = ValueNone; MaxResponseBytesPerPage = ValueNone }
                 |> write
                 |> Flip.Expect.equal "" """{"requests":[{"method":"getVoidType"}]}"""
 

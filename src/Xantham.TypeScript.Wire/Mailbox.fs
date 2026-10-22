@@ -12,17 +12,29 @@ open Xantham.TypeScript.Wire.Proto
 [<RequireQualifiedAccess>]
 module Batch =
 
-    /// The methods that change server state: they create or free a snapshot or program, write
-    /// files, or toggle profiling. In a batch refused as a whole, each reports the batch error and
-    /// is never re-sent. Its outcome is then unknown: the server may already have applied its
-    /// effect.
+    /// The methods that change server state: they create or free a snapshot, a source-file lease,
+    /// a module resolver or a build orchestrator, build or write files, or toggle profiling. In a
+    /// batch refused as a whole, each reports the batch error and is never re-sent. Its outcome is
+    /// then unknown: the server may already have applied its effect.
     let sideEffectingMethods =
         HashSet<string>
             [
                 Method.Release
+                Method.CreateSnapshot
                 Method.UpdateSnapshot
-                Method.UpdateTemporarySnapshot
-                Method.CreateProgram
+                Method.GetCurrentLanguageServerSnapshot
+                Method.CreateSourceFile
+                Method.CreateSourceFileFromFile
+                Method.RetainSourceFile
+                Method.ReleaseSourceFile
+                Method.CreateModuleResolver
+                Method.ReleaseModuleResolver
+                Method.CreateBuildOrchestrator
+                Method.DisposeBuildOrchestrator
+                Method.Build
+                Method.BuildReferences
+                Method.CleanBuild
+                Method.CleanReferences
                 Method.Emit
                 Method.StartCPUProfile
                 Method.StopCPUProfile
@@ -114,26 +126,53 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
                             channel.Request(request.Method, request.Params)
 
                     let many (requests: BatchRequest[]) =
-                        let response =
+                        let page parameters =
                             ProtoJson.request<BatchRequestsParams, BatchRequestsResponse>
                                 channel
                                 Method.BatchRequests
-                                { Requests = ValueSome requests }
+                                parameters
 
-                        if response.Responses.Length <> requests.Length then
-                            failwithf
-                                $"batchRequests answered %d{response.Responses.Length} of %d{requests.Length} requests"
+                        // The server answers a large batch in pages: each carries a token for
+                        // the next until the last, and a continuation sends no requests.
+                        let rec pages (responses: BatchResponse list) (token: string voption) =
+                            match token with
+                            | ValueNone -> responses
+                            | ValueSome token ->
+                                let next =
+                                    page
+                                        {
+                                            Requests = ValueSome [||]
+                                            ContinuationToken = ValueSome token
+                                            MaxResponseBytesPerPage = ValueNone
+                                        }
 
-                        response.Responses
+                                pages (responses @ List.ofArray next.Responses) next.ContinuationToken
+
+                        let first =
+                            page
+                                {
+                                    Requests = ValueSome requests
+                                    ContinuationToken = ValueNone
+                                    MaxResponseBytesPerPage = ValueNone
+                                }
+
+                        let responses =
+                            pages (List.ofArray first.Responses) first.ContinuationToken |> Array.ofList
+
+                        if responses.Length <> requests.Length then
+                            failwithf $"batchRequests answered %d{responses.Length} of %d{requests.Length} requests"
+
+                        responses
                         |> Array.map (fun response ->
                             match response.Error with
                             | ValueSome error -> Error(TsGoError(response.Method, error))
                             | ValueNone when isNull response.Result -> Ok [||]
                             // The AST methods return their blob raw when sent alone, but a batch
                             // response is JSON and cannot carry bytes, so here the same result is a
-                            // base64 string.
+                            // `SourceFileResponse`, the blob base64-encoded under `data`.
                             | ValueNone when Method.binaryResultMethods.Contains response.Method ->
-                                Ok(Convert.FromBase64String(ProtoJson.deserialize<string> response.Result))
+                                let encoded = ProtoJson.deserialize<SourceFileResponse> response.Result
+                                Ok(Convert.FromBase64String encoded.Data)
                             // caller's payload as raw UTF-8 JSON
                             | ValueNone -> Ok response.Result)
 

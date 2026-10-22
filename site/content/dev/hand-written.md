@@ -231,7 +231,7 @@ summary line (`enums 20 over 448 members (11 flag sets)`).
 ## 8. `ANCHORS`, the kind-numbering tripwire — loud
 
 **Where:** `tools/tsc-ast/kinds.mts`, `const ANCHORS`: `Unknown = 0`, `EndOfFile = 1`,
-`Identifier = 79`, `SourceFile = 307`.
+`Identifier = 79`, `SourceFile = 308` (307 before `SourceKeyword` arrived in 7.1.0-beta).
 
 **What it reflects:** `SyntaxKind` values are *derived*, by numbering `kinds.elements` in
 declaration order and skipping comment-only entries, exactly as upstream's `generate-go-ast.ts`
@@ -279,7 +279,8 @@ byte-identical diff rather than alongside another one.
 
 ## 12. Blob layout constants — loud for the version, unchecked for the masks
 
-**Where:** `Library.fs`, `module Ast`: `ProtocolVersion = 8u`, `HeaderSize = 44`, `NodeLen = 28`,
+**Where:** `Library.fs`, `module Ast`: `ProtocolVersion = 9u`, `HeaderSize = 64`, `NodeLen = 28`,
+the source-file ID and lease offsets `44` and `52` read by `sourceFileId` and `lease`,
 and the data-word masks `DataTypeMask = 0xC0000000u`, `ChildMask = 0x000000FFu`,
 `StringIndexMask` / `ExtendedDataMask = 0x00FFFFFFu`, `CommonDataMask = 0x3F000000u`,
 `CommonDataShift = 24`.
@@ -290,7 +291,7 @@ which carries these as named constants — that file is vendored specifically so
 folklore.
 
 **Failure mode:** loud for the version. `Ast.read` rejects any blob whose protocol version is not
-8, naming both numbers. The masks are unchecked, but a wrong one breaks every test at once rather
+9, naming both numbers. The masks are unchecked, but a wrong one breaks every test at once rather
 than subtly.
 
 **To update:** on a protocol bump, diff `node.infrastructure.ts` against these and bump
@@ -357,33 +358,30 @@ server may invoke (`readFile`, `fileExists`, `directoryExists`, `getAccessibleEn
 `realpath`, `writeFile`).
 
 **What it reflects:** the wire form of a `MSG_CALL` reply, which the schema does not describe at
-all. Transcribed from `dist/api/sync/client.js:35-56`, the JS client's own adapter, and typed
+all. Transcribed from `dist/api/fsCallbacks.js` at the TypeScript 7.1.0-beta pin, and typed
 against `dist/api/fs.d.ts`:
 
 | Callback | Argument | Reply |
 | --- | --- | --- |
-| `readFile` | JSON string path | `{"content": <string>}`, `{"content": null}` for absent, or empty for fall-back |
-| `fileExists`, `directoryExists` | JSON string path | `true` / `false`, or empty |
-| `getAccessibleEntries` | JSON string path | `{"files": [...], "directories": [...]}`, or empty |
-| `realpath` | JSON string path | a JSON string, or empty |
-| `writeFile` | `{"path": ..., "data": ...}` | empty |
+| `readFile` | JSON string path | `{"kind":"value","value":<string>}`, `{"kind":"missing"}`, or `{"kind":"useOS"}` |
+| `fileExists`, `directoryExists` | JSON string path | `{"kind":"value","value":<bool>}`, or `{"kind":"useOS"}` |
+| `getAccessibleEntries` | JSON string path | `{"kind":"value","value":{"files":[...],"directories":[...]}}`, or `{"kind":"useOS"}` |
+| `realpath` | JSON string path | `{"kind":"value","value":<string>}`, or `{"kind":"useOS"}` |
+| `writeFile` | `{"path": ..., "data": ...}` | `{"kind":"value"}` |
 
-Two distinctions carry meaning and are the reason `readFile` answers an object rather than a
-string. `{"content": null}` means the file does not exist and resolution stops; an **empty reply**
-means "not answered", and the server reads the real filesystem instead. The F# type says this out
-loud - `Content` / `Missing` / `FallBack` - because the two are one character apart on the wire
-and swapping them changes module resolution without erroring.
+`Missing` stops resolution for that file; `FallBack` delegates to the server's filesystem.
+`Content ""` supplies an existing empty file. Each has a distinct tagged reply.
 
 **Failure mode:** was the worst kind, which is why the typed layer exists. A wrong reply shape is
-not an error frame: it is a Go panic - `json: unable to unmarshal JSON string into Go struct
-{ Content *string }` - that kills the process mid-request, so the caller sees an `IOException`
+not an error frame: it is a Go panic - `json: cannot unmarshal JSON boolean into Go api.callbackResponse`
+- that kills the process mid-request, so the caller sees an `IOException`
 reading `tsgo closed the pipe mid-frame`, with the real message in the server stderr appended
 to it. A failed callback is equally
 terminal by design: the server treats `MSG_CALL_ERROR` as unrecoverable and exits, so a raising
 callback spends the channel.
 
-**To update:** re-read `dist/api/sync/client.js` on a compiler upgrade, and `fsCallbackNames` in
-`dist/api/fs.js` for the list itself. `Callbacks.test.fs` pins every reply shape without a server,
+**To update:** re-read `encodeFileSystemCallbackResult` and `fileSystemCallbackTable` in
+`dist/api/fsCallbacks.js` on a compiler upgrade. `Callbacks.test.fs` pins every reply shape without a server,
 and compiles a file that exists only in memory with one, so a changed shape fails there rather
 than at a user's process exit.
 
@@ -396,6 +394,65 @@ than at a user's process exit.
 **Failure mode:** a renamed `"any"` reads every written `any` as the error type, which `unresolved-any-lab`'s e2e test catches, and leaves `handler-return-lab`'s selected returns at `obj`; a renamed `"intrinsic"` moves the `compiler-lib-ownership-lab` golden. `"error"` and `"unresolved"` are not matched by name: every Any the two names above miss is reported as the error type, so a new intrinsic surfaces as `TR063` rather than passing as a written `any`. A checker that stops chaining unresolved parents drops the qualifier, which `unresolved-any-lab`'s `Probe.qualified` catches.
 
 **To update:** on a compiler upgrade, re-read the intrinsic declarations in `checker.go` and `isErrorType` in `dist/api/sync/api.js`.
+
+## 16. `FIELD_WIDTHS`, the proto fields wider than `int` — checked for staleness
+
+**Where:** `FIELD_WIDTHS` in both `tools/proto-gen/generate.mjs` and `tools/session-gen/generate.mjs`:
+`SymbolReference.id`, `CompactSymbolReference.id`, and `WellKnownSymbolsResponse.unknown`,
+`.undefined`, and `.arguments`, all `int64`.
+
+**What it reflects:** the schema types every number as `number`, which the generators map to `int`.
+A snapshot-owned symbol's id is offset by 2^48 (`281474976710660` at the pinned compiler), which an
+`int` cannot hold; a file-owned one's is small. Observed against the live server, not declared
+anywhere: upstream's JavaScript holds both as `number`.
+
+**Failure mode:** half-loud. A key that matches no field fails the run. Another `number` field that
+starts exceeding `int` is silent until a response carries one, and then a `JsonException` names the
+path.
+
+**To update:** on a compiler upgrade, probe a fixture with inherited members (`inherit-lab`) and
+check the ids its snapshot-owned properties carry.
+
+## 17. `HANDWRITTEN_ALIASES`, the two-shape unions — checked, by tests
+
+**Where:** `HANDWRITTEN_ALIASES` in both generators; the types in `tools/proto-gen/generate.mjs` and
+their converters in `ProtoJson.fs`.
+
+**What it reflects:** two schema aliases whose wire form is a union of two shapes, which no
+generated record carries: `DocumentIdentifier` (`string | { uri: string }`) and `EnsurePrograms`
+(`true | ProjectId[]`).
+
+**Failure mode:** loud on absence: proto-gen reports an `EnsurePrograms` the schema no longer
+declares, and the converters' round trips in `Json.test.fs` fail on a changed shape. A third such
+alias maps through its arms and fails the run as an unsupported union.
+
+## 18. Batched AST results — checked, by a test
+
+**Where:** `Mailbox.fs`, the batch path of `TscMailbox`.
+
+**What it reflects:** a method whose result is binary returns the blob raw when sent alone, but a
+batch response is JSON, so inside a batch the same result is a `SourceFileResponse` carrying the
+blob base64-encoded under `data`. Transcribed from `sourceFileResponseToUint8Array` in
+`dist/api/node/encoder.js`.
+
+**Failure mode:** loud. `Mailbox.test.fs`'s "a batched AST decodes to the same tree as a solo one"
+fails on a changed shape.
+
+## 19. Temporary InlineInterface attribute source
+
+**Where:** `src/Xantham.Fable.Core/Fickl.Core.InlineInterface.fs`, compiled into the support
+assembly and included in its Fable sources.
+
+**What it reflects:** the `Fickl.Core.InlineInterfaceAttribute` declaration from Fickl 0.5.1,
+commit `56687cf139247d3ef0e2552a1451a3acd8ca6a5d`. The source carries its upstream URL and MIT
+notice. Fickl recognizes the attribute by its full type name when consuming source or a DLL.
+Released Fable.Core 5.5.0 supplies CaseTest. Fickl.Core 0.5.2 was checked on 2026-10-22:
+its package contains Fable.Core.dll without InlineInterface, so it cannot replace this source.
+
+**Update:** when Fickl.Core ships InlineInterface, remove this temporary source and its project Compile
+and packed Content entries, then add a public Fickl.Core package dependency. Keep generated
+attribute references qualified as `Fickl.Core.InlineInterface`. The tagged-arm runtime checks
+and source/DLL consumption gates verify the compiler behavior.
 
 ## What is *not* on this list
 

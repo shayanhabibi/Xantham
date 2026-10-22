@@ -38,8 +38,8 @@ module Err =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Outcome =
-    | [<CompiledName("err"); InlineInterface>] Err of Err
-    | [<CompiledName("ok"); InlineInterface>] Ok of Ok<string>
+    | [<CompiledName("err"); Fickl.Core.InlineInterface>] Err of Err
+    | [<CompiledName("ok"); Fickl.Core.InlineInterface>] Ok of Ok<string>
 
 [<Interface>]
 type Api =

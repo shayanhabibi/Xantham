@@ -38,8 +38,8 @@ module Pong =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("op", CaseRules.None)>]
 type Message =
-    | [<CompiledName("ping"); InlineInterface>] Ping of Ping
-    | [<CompiledName("pong"); InlineInterface>] Pong of Pong
+    | [<CompiledName("ping"); Fickl.Core.InlineInterface>] Ping of Ping
+    | [<CompiledName("pong"); Fickl.Core.InlineInterface>] Pong of Pong
 
 [<Interface>]
 type Ready<'T> =
@@ -69,8 +69,8 @@ module Failed =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
 type Result<'T> =
-    | [<CompiledName("failed"); InlineInterface>] Failed of Failed
-    | [<CompiledName("ready"); InlineInterface>] Ready of Ready<'T>
+    | [<CompiledName("failed"); Fickl.Core.InlineInterface>] Failed of Failed
+    | [<CompiledName("ready"); Fickl.Core.InlineInterface>] Ready of Ready<'T>
 
 [<Interface>]
 type Done =
@@ -100,13 +100,13 @@ module Aborted =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
 type Outcome =
-    | [<CompiledName("done"); CaseTest("'reason' in $0"); InlineInterface>] Aborted of Aborted
-    | [<CompiledName("done"); CaseTest("'value' in $0"); InlineInterface>] Done of Done
+    | [<CompiledName("done"); CaseTest("'reason' in $0"); Fickl.Core.InlineInterface>] Aborted of Aborted
+    | [<CompiledName("done"); CaseTest("'value' in $0"); Fickl.Core.InlineInterface>] Done of Done
     | [<CompiledName("queued")>] Queued
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Handle =
-    | [<CompiledName("file"); InlineInterface>] File of Handle2
+    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of Handle2
     | [<CompiledName("none")>] None
 
 [<Interface>]
@@ -125,7 +125,7 @@ module Handle2 =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Bag =
-    | [<CompiledName("bag"); InlineInterface>] Bag of Bag2
+    | [<CompiledName("bag"); Fickl.Core.InlineInterface>] Bag of Bag2
     | [<CompiledName("empty")>] Empty
 
 type Bag2 =
@@ -141,7 +141,7 @@ module Bag2 =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Wide =
-    | [<CompiledName("wide"); InlineInterface>] Wide of Wide2
+    | [<CompiledName("wide"); Fickl.Core.InlineInterface>] Wide of Wide2
     | [<CompiledName("narrow")>] Narrow
 
 [<Interface>]

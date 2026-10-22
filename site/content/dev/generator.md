@@ -72,7 +72,7 @@ finding counts changed.
 
 ## Consumer compatibility
 
-Compile against `Fable.Core` **5.2.0**, `Xantham.Fable.Core`, and
+Compile against `Fable.Core` **5.5.0**, `Xantham.Fable.Core`, and
 `Xantham.Fable.Core.TS` generated from the root TypeScript pin.
 Bindings target Fable 5.x.
 

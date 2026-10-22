@@ -35,7 +35,7 @@ let internal compileConsumer directory sources (consumer: string) =
     File.WriteAllText(Path.Combine(directory, "Consumer.fsproj"), $"""<Project Sdk="Microsoft.NET.Sdk">
 <PropertyGroup><TargetFramework>net10.0</TargetFramework><NuGetAudit>false</NuGetAudit></PropertyGroup>
 <ItemGroup>{includes}<Compile Include="Consumer.fs"/></ItemGroup>
-<ItemGroup><PackageReference Include="Fable.Core" Version="5.999.0-xantham.26e40937d"/></ItemGroup>
+<ItemGroup><PackageReference Include="Fable.Core" Version="5.5.0"/></ItemGroup>
 <ItemGroup><ProjectReference Include="{coreTs}"/></ItemGroup>
 </Project>""")
     let start = ProcessStartInfo("dotnet")

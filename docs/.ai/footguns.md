@@ -9,6 +9,14 @@ reproducible from this checkout and were dropped rather than carried.
 
 ## Compiler API
 
+**A symbol id alone does not identify a symbol.** At TypeScript 7.1 a symbol is a reference. A
+file-owned one, which a declaration's symbol, a module's and its exports are, carries its source
+file and an id unique within that file. A snapshot-owned one, a transient or merged symbol, carries
+a project and an id unique within the snapshot, offset by 2^48. Key by `SymbolKey` (`SymbolId`,
+owning file node id and `int64` id), and send a symbol back as its `SymbolResponse.Reference`; a
+compact reference (`TypeResponse.Symbol`, `SymbolResponse.Parent`) names the file by node id only and
+cannot be sent. A file-owned symbol names no project, so `Session.ForSymbol` leaves the session's.
+
 **`getTypeAtLocation` is wrong for class heritage.** It adds an internal trailing `this`
 argument, so `Model<string>` reads as two type arguments. Read heritage nodes and ask
 `getTypeFromTypeNode` for each contract. `TypeFacts.ImplementedTypes` records explicit
@@ -473,6 +481,23 @@ into its scratch feed. Its `PackageVersion` override propagates through project 
 so both test packages use that override. Packing Core.TS alone can appear green while a
 published stable support version satisfies its prerelease range, then fail with NU1102 after
 the next Core.TS bump. Downloaded-package verification still restores real published dependencies.
+
+## Fickl must be last in the tool manifest
+
+After a Fable/Fickl run, restore the solution before a quick .NET build: compilation can leave
+the multi-targeted support project's assets restored for netstandard2.1 only. Run
+`dotnet restore Xantham.slnx -v q` to restore every solution target.
+
+With SDK 10.0.402, a cold Linux `dotnet tool restore` fails if another tool follows Fickl:
+fsdocs-tool and Fantomas are reported as containing only the `fickl` command. The SDK's
+`ToolPackageDownloaderBase` reuses its local assets directory without clearing
+`project.assets.ridpackage.json`; `ToolPackageInstance` prefers that leftover file for the
+next package. See the [SDK implementation at 10.0.402](https://github.com/dotnet/sdk/blob/v10.0.402/src/Cli/dotnet/ToolPackage/ToolPackageDownloaderBase.cs).
+
+Keep Fickl last in `.config/dotnet-tools.json` until the SDK fixes this. `--disable-parallel`
+does not fix a cold restore; warm-cache retries can conceal the problem. `tools/verify-build.mjs`
+guards the ordering. The workaround was verified with separate empty `DOTNET_CLI_HOME` and
+`NUGET_PACKAGES` directories on Linux, using the CI SDK version.
 
 ## Release markers after a squashed release
 

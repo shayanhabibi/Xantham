@@ -3,8 +3,8 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 815,
-    "ergonomic": 2158,
+    "exact": 817,
+    "ergonomic": 2156,
     "widened": 595,
     "escape": 5
   },
@@ -27,9 +27,8 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 15,
-      "exact": 7,
-      "ergonomic": 8
+      "total": 20,
+      "exact": 20
     },
     {
       "pass": "shape-callbacks",

@@ -31,16 +31,14 @@ A compile gate is only evidence if it compiles against what a consumer will: `Fa
 `typescript` 7.x pin in `package.json`, which supplies both the producer's `lib.*.d.ts` and the
 live `tsc --api` server.
 
-`Fable.Core` and the `fable` tool are built from a Fable fork, pinned by commit in
-`tools/fable-fork/fork.json`; the fork adds `CaseTest` for `TypeScriptTaggedUnion` cases that share
-a tag. Both restore from the Xantham Cloudsmith feed, which `NuGet.config` lists as a source.
-Every pin names `fork.json`'s `version`, and `tools/fable-fork.fsx -- check`, run by the `restore`
-stage of `build.fsx`, fails when one does not. To move the pin, change `ref` and `version` together,
-run `dotnet fsi tools/fable-fork.fsx -- sync` to pack both into the gitignored
-`tools/fable-fork/packages` (it clones the pin into `tools/fable-fork/upstream`; `--source
-<checkout>` packs a local Fable checkout at the pinned commit instead), and push those packages to
-the feed before committing the new pin. `publish` refuses while `version` is a fork build, because
-a consumer restoring from nuget.org alone cannot resolve it.
+`Fable.Core` 5.5.0 supplies `CaseTest`. `Xantham.Fable.Core` temporarily carries the upstream
+`Fickl.Core.InlineInterfaceAttribute` source until Fickl.Core is published. Replace that source
+with a public Fickl.Core package dependency when it becomes available; keep the attribute's
+namespace stable for generated bindings and DLL consumers.
+
+JavaScript runtime gates use Fickl, pinned in `.config/dotnet-tools.json`. Restore with
+`dotnet tool restore` and compile with `dotnet fickl`; `build.fsx -- test --run-gate`
+runs both the bindings and Partas gates with that local pin.
 
 ## Project structure
 
@@ -152,7 +150,7 @@ our code runs against; `dist/` wins over upstream `main` when they disagree; (2)
 `tools/tsc-ast/upstream/`, vendored at the pinned, checksummed commit (`sync tsc-ast --check`
 reports drift); (3) `gh api repos/microsoft/TypeScript/contents/<path>` for the rest.
 
-Known drift: the binary AST `ProtocolVersion` is **8** (`Ast` in `Library.fs`) — a note quoting
-version 7 predates the merge. Kind ordinals are positional in `ast.json`, not the JavaScript
+Known drift: the binary AST `ProtocolVersion` is **9** (`Ast` in `Library.fs`) — a note quoting
+an earlier version predates this pin. Kind ordinals are positional in `ast.json`, not the JavaScript
 compiler API's — never hand-write one; `SyntaxKind` in `Ast.generated.fs` is diffed against
 upstream's `syntaxKind.enum.ts` on every generator run.

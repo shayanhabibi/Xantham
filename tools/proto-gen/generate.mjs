@@ -42,7 +42,24 @@ const ts = (() => {
 const DTS = path.join(tsPkgDir, "dist/api/proto.generated.d.ts");
 const ENUM_DIR = path.join(tsPkgDir, "dist/enums");
 const schemaVersion = JSON.parse(fs.readFileSync(path.join(tsPkgDir, "package.json"), "utf8")).version;
-const src = ts.createSourceFile(DTS, fs.readFileSync(DTS, "utf8"), ts.ScriptTarget.Latest, true);
+const parse = file => ts.createSourceFile(file, fs.readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+const src = parse(DTS);
+
+// The schema imports records from sibling generated modules (`./compilerOptions.generated.ts`)
+// and branded path types from `../ast/index.ts`. The siblings are part of the schema: their
+// interfaces are emitted as records beside its own. The AST module contributes only the aliases
+// the schema imports from it.
+const importsOf = (file, prefix) =>
+  file.statements.filter(st => ts.isImportDeclaration(st) && st.moduleSpecifier.text.startsWith(prefix));
+const declarationFile = (from, specifier) =>
+  path.join(path.dirname(from), specifier.replace(/\.ts$/, ".d.ts"));
+const siblings = importsOf(src, "./").map(st => parse(declarationFile(DTS, st.moduleSpecifier.text)));
+const sources = [src, ...siblings];
+const astImports = sources.flatMap(file => importsOf(file, "../ast/"));
+const astNames = new Set(astImports.flatMap(st => (st.importClause?.namedBindings?.elements ?? []).map(e => e.name.text)));
+const astFile = astImports.length
+  ? parse(path.join(tsPkgDir, "dist/ast/ast.d.ts"))
+  : null;
 
 const problems = [];
 const pascal = s => s[0].toUpperCase() + s.slice(1);
@@ -88,6 +105,11 @@ function mapType(node, ctx) {
       if (mapped.every(m => m.literal !== undefined)) {
         return { fs: "string", nullable, literals: mapped.map(m => m.literal) };
       }
+      // Arms that are one F# type: members of one enum (`ResolutionMode`), or brands of one
+      // primitive (`ProjectId`).
+      if (mapped.every(m => m.fs === mapped[0].fs && m.literal === undefined && !m.nullable)) {
+        return { fs: mapped[0].fs, nullable };
+      }
       // The one structural union in the schema is DocumentIdentifier, hand-written below.
       if (ctx.endsWith("#docid")) return { fs: "DocumentIdentifier", nullable };
       problems.push(`${ctx}: unsupported union '${node.getText().slice(0, 70)}'`);
@@ -95,8 +117,18 @@ function mapType(node, ctx) {
     }
     case ts.SyntaxKind.TypeLiteral:
       return { fs: "JsonObject", nullable: false, anonymous: node.getText().slice(0, 60) };
+    case ts.SyntaxKind.IntersectionType: {
+      // A brand - `string & { __brand: any }` - is its base type on the wire.
+      const bases = node.types.filter(t => t.kind !== ts.SyntaxKind.TypeLiteral);
+      if (bases.length === 1) return mapType(bases[0], ctx);
+      break;
+    }
     case ts.SyntaxKind.TypeReference: {
       const name = node.typeName.getText();
+      // One member of an imported enum (`ModuleKind.None`) is that enum's type.
+      if (ts.isQualifiedName(node.typeName) && enumImports.has(node.typeName.left.getText()))
+        return { fs: node.typeName.left.getText(), nullable: false };
+      if (aliases.has(name) && !HANDWRITTEN_ALIASES.has(name)) return mapType(aliases.get(name).type, ctx);
       if (name === "Record") return { fs: "JsonObject", nullable: false };
       if (name === "Array" || name === "ReadonlyArray")
         return { fs: `${mapType(node.typeArguments[0], ctx).fs}[]`, nullable: false };
@@ -148,8 +180,20 @@ const FIELD_ENUMS = {
  * than something to retype anyway.
  */
 const retypedFields = new Set();
+/**
+ * Fields the schema types as a bare `number` that exceed `int`: a snapshot-owned symbol's id is
+ * offset by 2^48 (`281474976710660`). These stay below 2^53, so `int64` holds them exactly.
+ */
+const FIELD_WIDTHS = {
+  "SymbolReference.id": "int64",
+  "CompactSymbolReference.id": "int64",
+  "WellKnownSymbolsResponse.unknown": "int64",
+  "WellKnownSymbolsResponse.undefined": "int64",
+  "WellKnownSymbolsResponse.arguments": "int64",
+};
+
 function retype(mapped, key) {
-  const enumName = FIELD_ENUMS[key];
+  const enumName = FIELD_ENUMS[key] ?? FIELD_WIDTHS[key];
   if (!enumName) return mapped;
   retypedFields.add(key);
   if (mapped.fs === "int") return { ...mapped, fs: enumName };
@@ -177,17 +221,45 @@ function docLines(node) {
 // ── collect declarations ──────────────────────────────────────────────────
 const interfaces = [];
 const aliases = new Map();
-for (const st of src.statements) {
+for (const st of sources.flatMap(file => file.statements)) {
   if (ts.isInterfaceDeclaration(st)) interfaces.push(st);
   else if (ts.isTypeAliasDeclaration(st)) aliases.set(st.name.text, st);
 }
+for (const st of astFile?.statements ?? []) {
+  if (ts.isTypeAliasDeclaration(st) && astNames.has(st.name.text)) aliases.set(st.name.text, st);
+}
+for (const name of astNames) {
+  if (!aliases.has(name)) problems.push(`${name}: imported from the AST module, but no alias declares it`);
+}
+const interfaceByName = new Map(interfaces.map(decl => [decl.name.text, decl]));
+
+/** The interface's properties with those it extends: bases first, then its own, an own property
+ * replacing an inherited one of the same name. */
+function propertiesOf(decl) {
+  const byName = new Map();
+  for (const clause of decl.heritageClauses ?? []) {
+    for (const base of clause.types) {
+      const name = base.expression.getText();
+      const baseDecl = interfaceByName.get(name);
+      if (!baseDecl) {
+        problems.push(`${decl.name.text}: extends '${name}', which the schema does not declare`);
+        continue;
+      }
+      for (const m of propertiesOf(baseDecl)) byName.set(m.name.getText(), m);
+    }
+  }
+  for (const m of decl.members.filter(ts.isPropertySignature)) byName.set(m.name.getText(), m);
+  return [...byName.values()];
+}
+
+// Aliases written out by hand below: their wire form is a union of two shapes, which no
+// generated record can carry.
+const HANDWRITTEN_ALIASES = new Set(["DocumentIdentifier", "EnsurePrograms"]);
 
 // ── enums referenced by the schema ────────────────────────────────────────
 const enumImports = new Set();
-for (const st of src.statements) {
-  if (ts.isImportDeclaration(st) && st.moduleSpecifier.text.startsWith("#enums/")) {
-    for (const e of st.importClause?.namedBindings?.elements ?? []) enumImports.add(e.name.text);
-  }
+for (const st of sources.flatMap(file => importsOf(file, "#enums/"))) {
+  for (const e of st.importClause?.namedBindings?.elements ?? []) enumImports.add(e.name.text);
 }
 function readEnum(name) {
   const file = path.join(ENUM_DIR, name[0].toLowerCase() + name.slice(1) + ".js");
@@ -258,6 +330,21 @@ w("        /// A document URI, written as `{ \"uri\": ... }`.");
 w("        | Uri of uri: string");
 w();
 
+const ensureAlias = aliases.get("EnsurePrograms");
+if (ensureAlias) {
+  emitDoc(ensureAlias, "    ");
+  w("    /// The schema types this as `true | readonly ProjectId[]`: every project, or the projects");
+  w("    /// listed. `EnsureProgramsConverter`, which `ProtoJson.options` registers, writes each arm.");
+  w("    type EnsurePrograms =");
+  w("        /// Every project, written as `true`.");
+  w("        | AllPrograms");
+  w("        /// The projects listed, written as an array of project IDs.");
+  w("        | Programs of projects: string[]");
+  w();
+} else {
+  problems.push("EnsurePrograms: written by hand, but the schema no longer declares it");
+}
+
 // Schema-untyped payloads that are only ever spliced into, or lifted out of, a larger document.
 // Emitting these as raw UTF-8 JSON rather than a JsonNode DOM lets callers reuse
 // ProtoJson.serialize and ProtoJson.deserialize unchanged; see RawJson.fs. Both sides of a batch
@@ -325,7 +412,7 @@ for (const decl of interfaces) {
   if (name === "APIMethodInfo") continue; // emitted below as the method table
   recordNames.push(name);
   emitDoc(decl, "    ");
-  const members = decl.members.filter(ts.isPropertySignature);
+  const members = propertiesOf(decl);
   const fields = [];
   recordFields.set(name, fields);
   if (members.length === 0) {
@@ -375,7 +462,7 @@ for (const [name, at] of [...recordClose].sort((a, b) => b[1] - a[1])) {
 
 // A key that matches nothing is a table entry the schema has moved out from under, and it would
 // otherwise go unnoticed as a field quietly staying an `int`.
-for (const key of Object.keys(FIELD_ENUMS)) {
+for (const key of [...Object.keys(FIELD_ENUMS), ...Object.keys(FIELD_WIDTHS)]) {
   if (!retypedFields.has(key)) problems.push(`FIELD_ENUMS: ${key} matches no field in the schema`);
 }
 
@@ -436,6 +523,7 @@ a("//   Do not edit by hand - re-run the generator when the compiler is upgraded
 a("// </auto-generated>");
 a();
 a("open System.Text.Json.Nodes");
+a("open Xantham.TypeScript.Wire.ProtoEnums");
 a("open Xantham.TypeScript.Wire.Proto");
 a();
 a("/// One function per server method, each taking the channel and the method's parameter record.");
@@ -593,6 +681,7 @@ m("//   Do not edit by hand - re-run the generator when the compiler is upgraded
 m("// </auto-generated>");
 m();
 m("open System.Text.Json.Nodes");
+m("open Xantham.TypeScript.Wire.ProtoEnums");
 m("open Xantham.TypeScript.Wire.Proto");
 m();
 m("/// One function per server method, each taking the mailbox and the method's parameter record.");

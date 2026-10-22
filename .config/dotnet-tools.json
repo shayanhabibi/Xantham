@@ -7,13 +7,6 @@
       "commands": ["shipit"],
       "rollForward": false
     },
-    "fable": {
-      "version": "5.999.0-xantham.26e40937d",
-      "commands": [
-        "fable"
-      ],
-      "rollForward": false
-    },
     "fsdocs-tool": {
       "version": "22.0.0",
       "commands": [
@@ -25,6 +18,13 @@
       "version": "8.0.0-beta-001",
       "commands": [
         "fantomas"
+      ],
+      "rollForward": false
+    },
+    "fickl": {
+      "version": "0.5.1",
+      "commands": [
+        "fickl"
       ],
       "rollForward": false
     }

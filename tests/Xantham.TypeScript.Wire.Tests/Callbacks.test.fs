@@ -45,12 +45,17 @@ let private withChannel fs (test: TscChannel -> unit) =
 
 /// Compiles the virtual file as the only root, and hands back the session.
 let private programOf (channel: TscChannel) =
-    let program =
-        Api.createProgram channel
-            { CreateProgramParams.Default with
-                RootFiles = ValueSome [| DocumentIdentifier.FileName virtualFile |] }
+    let snapshot =
+        Api.createSnapshot channel
+            { CreateSnapshotParams.Default with
+                CreatePrograms =
+                    ValueSome
+                        [|
+                            { CreateSnapshotProgramParams.Default with
+                                RootFiles = ValueSome [| DocumentIdentifier.FileName virtualFile |] }
+                        |] }
 
-    program.Snapshot, program.Project.Value.Id
+    snapshot.Snapshot, snapshot.Operation.CreatedPrograms.Value[0]
 
 [<Tests>]
 let callbackTests =
@@ -112,41 +117,39 @@ let callbackTests =
 
             testCase "readFile distinguishes content, missing and fall-back" <| fun _ ->
                 reply "readFile" { VirtualFileSystem.Default with ReadFile = ValueSome(fun _ -> Content "a\"b") }
-                |> Flip.Expect.equal "content is a JSON string in an object" """{"content":"a\u0022b"}"""
+                |> Flip.Expect.equal "content is a JSON string in a value reply" """{"kind":"value","value":"a\u0022b"}"""
 
                 reply "readFile" { VirtualFileSystem.Default with ReadFile = ValueSome(fun _ -> Content "") }
-                |> Flip.Expect.equal "an empty file is not a missing one" """{"content":""}"""
+                |> Flip.Expect.equal "an empty file is not a missing one" """{"kind":"value","value":""}"""
 
                 reply "readFile" { VirtualFileSystem.Default with ReadFile = ValueSome(fun _ -> Missing) }
-                |> Flip.Expect.equal "null means the file does not exist" """{"content":null}"""
+                |> Flip.Expect.equal "missing is explicit" """{"kind":"missing"}"""
 
                 reply "readFile" { VirtualFileSystem.Default with ReadFile = ValueSome(fun _ -> FallBack) }
-                |> Flip.Expect.equal "an empty reply means fall back" ""
+                |> Flip.Expect.equal "fall back to the server filesystem" """{"kind":"useOS"}"""
 
-            testCase "the predicates answer bare booleans, or nothing" <| fun _ ->
+            testCase "the predicates answer Boolean values or useOS" <| fun _ ->
                 reply "fileExists" { VirtualFileSystem.Default with FileExists = ValueSome(fun _ -> ValueSome true) }
-                |> Flip.Expect.equal "" "true"
+                |> Flip.Expect.equal "" """{"kind":"value","value":true}"""
 
                 reply "directoryExists" { VirtualFileSystem.Default with DirectoryExists = ValueSome(fun _ -> ValueSome false) }
-                |> Flip.Expect.equal "" "false"
+                |> Flip.Expect.equal "" """{"kind":"value","value":false}"""
 
                 reply "fileExists" { VirtualFileSystem.Default with FileExists = ValueSome(fun _ -> ValueNone) }
-                |> Flip.Expect.equal "unanswered falls back" ""
+                |> Flip.Expect.equal "unanswered falls back" """{"kind":"useOS"}"""
 
             testCase "getAccessibleEntries answers names in two arrays" <| fun _ ->
-                let entries = { Files = [| "a.ts" |]; Directories = [| "sub" |] }
+                let entries: FileSystemEntries = { Files = [| "a.ts" |]; Directories = [| "sub" |] }
 
                 reply "getAccessibleEntries"
                     { VirtualFileSystem.Default with GetAccessibleEntries = ValueSome(fun _ -> ValueSome entries) }
-                |> Flip.Expect.equal "" """{"files":["a.ts"],"directories":["sub"]}"""
+                |> Flip.Expect.equal "" """{"kind":"value","value":{"files":["a.ts"],"directories":["sub"]}}"""
 
             testCase "realpath answers a JSON string" <| fun _ ->
                 reply "realpath" { VirtualFileSystem.Default with Realpath = ValueSome(fun p -> ValueSome p) }
-                |> Flip.Expect.equal "" "\"C:/x.ts\""
+                |> Flip.Expect.equal "" """{"kind":"value","value":"C:/x.ts"}"""
 
-            // The only callback whose argument is an object rather than a path, and the only one
-            // the server wants no answer from.
-            testCase "writeFile takes a path and content, and answers nothing" <| fun _ ->
+            testCase "writeFile takes a path and content, and acknowledges completion" <| fun _ ->
                 let mutable written = ValueNone
 
                 let fs =
@@ -154,7 +157,7 @@ let callbackTests =
                         WriteFile = ValueSome(fun path data -> written <- ValueSome(path, data)) }
 
                 (VirtualFileSystem.callbacks fs)["writeFile"] """{"path":"C:/x.ts","data":"hi"}"""
-                |> Flip.Expect.equal "no answer" ""
+                |> Flip.Expect.equal "write completed" """{"kind":"value"}"""
 
                 written |> Flip.Expect.equal "" (ValueSome("C:/x.ts", "hi"))
         ]

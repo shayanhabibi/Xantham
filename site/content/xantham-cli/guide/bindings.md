@@ -11,7 +11,7 @@ order: 3
 In your Fable project directory:
 
 ```bash frame=terminal
-dotnet add package Fable.Core --version 5.2.0
+dotnet add package Fable.Core --version 5.5.0
 dotnet add package Xantham.Fable.Core
 dotnet add package Xantham.Fable.Core.TS
 ```
@@ -21,6 +21,10 @@ packages, add `--prerelease` to the corresponding install commands.
 
 Bindings target **Fable 5.x**. Use **net8.0 or later** for the F# project:
 generated object builders can use static interface members with bodies.
+
+Compile bindings that carry `[<Fickl.Core.InlineInterface>]` with **Fickl 0.5.1**.
+Xantham's support package supplies that attribute temporarily until Fickl.Core is published.
+`CaseTest` comes from Fable.Core 5.5.0.
 
 ## Include files in order
 

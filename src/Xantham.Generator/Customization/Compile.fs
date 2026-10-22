@@ -62,7 +62,7 @@ let validate compiler (files: (string * string) list) (contracts: string list) =
 
             File.WriteAllText(
                 Path.Combine(workspace, "Validation.fsproj"),
-                $"<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup>{items}<Compile Include='Contracts.fs' /><PackageReference Include='Fable.Core' Version='5.999.0-xantham.26e40937d' />{refs}</ItemGroup></Project>"
+                $"<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup>{items}<Compile Include='Contracts.fs' /><PackageReference Include='Fable.Core' Version='5.5.0' />{refs}</ItemGroup></Project>"
             )
 
             let start =

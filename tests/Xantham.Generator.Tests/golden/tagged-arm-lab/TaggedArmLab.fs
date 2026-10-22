@@ -105,8 +105,8 @@ module Pong =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("op", CaseRules.None)>]
 type Message =
-    | [<CompiledName("ping"); InlineInterface>] Ping of Ping
-    | [<CompiledName("pong"); InlineInterface>] Pong of Pong
+    | [<CompiledName("ping"); Fickl.Core.InlineInterface>] Ping of Ping
+    | [<CompiledName("pong"); Fickl.Core.InlineInterface>] Pong of Pong
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Clash =
@@ -177,7 +177,7 @@ module Hello =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Greeting =
-    | [<CompiledName("hello"); InlineInterface>] Hello of Hello
+    | [<CompiledName("hello"); Fickl.Core.InlineInterface>] Hello of Hello
     | [<CompiledName("bye")>] Bye
 
 [<Interface>]
@@ -342,7 +342,7 @@ type Y3 =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type F =
-    | [<CompiledName("a"); InlineInterface>] A of F2
+    | [<CompiledName("a"); Fickl.Core.InlineInterface>] A of F2
     | [<CompiledName("b")>] B
 
 type F2 =
@@ -361,7 +361,7 @@ module F2 =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type G =
-    | [<CompiledName("a"); InlineInterface>] A of G2
+    | [<CompiledName("a"); Fickl.Core.InlineInterface>] A of G2
     | [<CompiledName("b")>] B
 
 type G2 =

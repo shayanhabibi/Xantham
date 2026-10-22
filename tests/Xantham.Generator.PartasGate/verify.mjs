@@ -26,7 +26,7 @@ function write(name, text) {
 }
 const xml = value => value.replaceAll("&", "&amp;").replaceAll("'", "&apos;");
 function project(directory, name, files, references = []) {
-  write(`${directory}/${name}.fsproj`, `<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup>${files.map(f => `<Compile Include='${xml(f)}' />`).join("")}<PackageReference Include='Fable.Core' Version='5.999.0-xantham.26e40937d' />${references.map(r => `<ProjectReference Include='${xml(r)}' />`).join("")}</ItemGroup></Project>`);
+  write(`${directory}/${name}.fsproj`, `<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup>${files.map(f => `<Compile Include='${xml(f)}' />`).join("")}<PackageReference Include='Fable.Core' Version='5.5.0' />${references.map(r => `<ProjectReference Include='${xml(r)}' />`).join("")}</ItemGroup></Project>`);
 }
 fs.copyFileSync(path.join(root, "global.json"), path.join(scratch, "global.json"));
 write(".config/dotnet-tools.json", fs.readFileSync(path.join(root, ".config/dotnet-tools.json"), "utf8"));
@@ -45,7 +45,7 @@ write("partas/Consumer.fs", fs.readFileSync(path.join(gate, "Consumer.fs"), "utf
 const partas = path.join(scratch, "vendor/src/Partas.Solid/Partas.Solid.fsproj");
 const plugin = path.join(scratch, "vendor/src/Partas.Solid.FablePlugin/Partas.Solid.FablePlugin.fsproj");
 project("partas", "PartasGate", ["Companions.fs", "Consumer.fs"], [partas, plugin]);
-run("dotnet", ["fable", "PartasGate.fsproj", "-o", "js", "-e", ".fs.jsx", "--noCache", "--exclude", "Xantham.Fable.Core.TS", "--exclude", "Partas.Solid.FablePlugin"], path.join(scratch, "partas"));
+run("dotnet", ["fickl", "PartasGate.fsproj", "-o", "js", "-e", ".fs.jsx", "--noCache", "--exclude", "Xantham.Fable.Core.TS", "--exclude", "Partas.Solid.FablePlugin"], path.join(scratch, "partas"));
 const jsxPath = path.join(scratch, "partas/js/Consumer.fs.jsx");
 assert.ok(fs.existsSync(jsxPath), "Fable must produce Consumer.fs.jsx");
 const normalized = text => text.replace(/\s+/g, " ").trim();
@@ -63,7 +63,7 @@ const bindingProject = path.join(scratch, "bindings/CustomizationBindings.fsproj
 project("source", "SourceGate", ["Consumer.fs"], [bindingProject]);
 project("dll", "DllGate", ["Consumer.fs"], [bindingProject]);
 for (const [directory, name, extra] of [["source", "SourceGate", []], ["dll", "DllGate", ["--exclude", "CustomizationBindings"]]]) {
-  run("dotnet", ["fable", `${name}.fsproj`, "-o", "js", "-e", ".js", "--noCache", "--exclude", "Xantham.Fable.Core.TS", ...extra], path.join(scratch, directory));
+  run("dotnet", ["fickl", `${name}.fsproj`, "-o", "js", "-e", ".js", "--noCache", "--exclude", "Xantham.Fable.Core.TS", ...extra], path.join(scratch, directory));
   run(process.execPath, ["js/Consumer.js"], path.join(scratch, directory));
 }
 console.log("Generated direct getter/setter access passed from source and binding DLL.");

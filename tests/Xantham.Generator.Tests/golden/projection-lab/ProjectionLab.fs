@@ -85,8 +85,8 @@ type Exports =
 module Input =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Item =
-        | [<CompiledName("image"); InlineInterface>] Image of ImageContent
-        | [<CompiledName("text"); InlineInterface>] Text of TextContent
+        | [<CompiledName("image"); Fickl.Core.InlineInterface>] Image of ImageContent
+        | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of TextContent
 
 module OtherSession =
     module Submit =

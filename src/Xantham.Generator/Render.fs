@@ -1162,7 +1162,7 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
                     | Some test -> yield $"CaseTest({stringLit (caseTestSource test)})"
                     | None -> ()
                     if case.Inlines then
-                        yield "InlineInterface"
+                        yield "Fickl.Core.InlineInterface"
                 ]
 
             match attributes with

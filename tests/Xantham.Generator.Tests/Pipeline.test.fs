@@ -3910,21 +3910,19 @@ let pipelineTests =
 
         yield!
             fixtureTests "type-fest" (npmFixture "type-fest") GeneratorConfig.Default (fun package ->
-                [ testCase "a type the compiler cannot encode is an owned escape, not a crash" <| fun _ ->
-                      // `PositiveInfinity = 1e999` is `+Inf` to the server's JSON encoder, which
-                      // refuses the response outright. The resolve tier turns that refusal into a
-                      // finding on the export and carries on with the other 247.
+                [ testCase "a non-finite numeric literal type widens to float like any other" <| fun _ ->
+                      // `PositiveInfinity = 1e999` is a numeric literal type whose value is not
+                      // finite. TypeScript 7.1's server encodes it, where 7.0's refused the response.
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                       for name in [ "PositiveInfinity"; "NegativeInfinity" ] do
                           Expect.isTrue
-                              (rendered.Findings
-                               |> List.exists (fun f ->
-                                   f.Symbol = name
-                                   && f.Pass = "resolve-export-types"
-                                   && f.Tier = Escape
-                                   && f.Message.Contains "Inf"))
-                              $"{name} is escaped by the resolve tier with the encoder's complaint"
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol = name && f.Key = "TR007"))
+                              $"{name} widens to float"
+
+                          Expect.isFalse
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol = name && f.Tier = Escape))
+                              $"{name} is represented"
 
                       Expect.isEmpty (unexplainedDrops rendered) "every drop is owned by a pass that named its reason"
 
@@ -4568,8 +4566,8 @@ let pipelineTests =
                       // `obj` until the union carried a name.
                       Expect.stringContains source "abstract ``event``: Wide.Event" "the member reads a declaration"
                       Expect.stringContains source "TypeScriptTaggedUnion(\"type\", CaseRules.None)" "declared as a DU"
-                      Expect.stringContains source "| [<CompiledName(\"fetch\"); InlineInterface>] Fetch of FetchInfo" "carrying the named arm's interface"
-                      Expect.stringContains source "| [<CompiledName(\"queue\"); InlineInterface>] Queue of QueueInfo" "and a tag-only named arm as its interface"
+                      Expect.stringContains source "| [<CompiledName(\"fetch\"); Fickl.Core.InlineInterface>] Fetch of FetchInfo" "carrying the named arm's interface"
+                      Expect.stringContains source "| [<CompiledName(\"queue\"); Fickl.Core.InlineInterface>] Queue of QueueInfo" "and a tag-only named arm as its interface"
                       Expect.equal (keysFor "Wide.Event") [ "DT002"; "SY004" ] "the mint is reported under the name it claimed"
 
                       // The same union at a callback parameter: one type id, one declaration.
@@ -4727,7 +4725,7 @@ let pipelineTests =
                           "a literal field is written by the Emit"
 
                       Expect.stringContains source "    static member CreateStart (at: float) : Signal = jsNative" "and binds no parameter"
-                      Expect.stringContains source "    | [<CompiledName(\"pong\"); InlineInterface>] Pong of Pong" "a named arm's case carries its interface, built by the interface's own Create"
+                      Expect.stringContains source "    | [<CompiledName(\"pong\"); Fickl.Core.InlineInterface>] Pong of Pong" "a named arm's case carries its interface, built by the interface's own Create"
 
                       for absent in [ "CreatePending"; "CreateCircle"; "CreateSquare"; "CreateOpen"; "CreatePing" ] do
                           Expect.isFalse (source.Contains absent) $"{absent}: the case constructor already builds it"
@@ -5566,7 +5564,7 @@ let pipelineTests =
 
                         Expect.stringContains
                             source
-                            "| [<CompiledName(\"ok\"); InlineInterface>] Ok of Ok<string>"
+                            "| [<CompiledName(\"ok\"); Fickl.Core.InlineInterface>] Ok of Ok<string>"
                             "the generic arm's members were read after it was met as a reference" ])
         yield!
             fixtureTests "export-layout-lab" (handFixture "export-layout-lab") GeneratorConfig.Default <| fun package -> [
@@ -6916,19 +6914,19 @@ let inlineArmFixtureTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      Expect.stringContains source "    | [<CompiledName(\"ping\"); InlineInterface>] Ping of Ping" "a named arm is the case's field"
-                      Expect.stringContains source "    | [<CompiledName(\"pong\"); InlineInterface>] Pong of Pong" "for every named arm"
+                      Expect.stringContains source "    | [<CompiledName(\"ping\"); Fickl.Core.InlineInterface>] Ping of Ping" "a named arm is the case's field"
+                      Expect.stringContains source "    | [<CompiledName(\"pong\"); Fickl.Core.InlineInterface>] Pong of Pong" "for every named arm"
                       Expect.isFalse (source.Contains "CreatePong") "the arm interface's own Create builds the case's value"
-                      Expect.stringContains source "    | [<CompiledName(\"ready\"); InlineInterface>] Ready of Ready<'T>" "a generic arm applies the union's parameter"
+                      Expect.stringContains source "    | [<CompiledName(\"ready\"); Fickl.Core.InlineInterface>] Ready of Ready<'T>" "a generic arm applies the union's parameter"
 
                       Expect.stringContains
                           source
-                          "    | [<CompiledName(\"done\"); CaseTest(\"'value' in $0\"); InlineInterface>] Done of Done"
+                          "    | [<CompiledName(\"done\"); CaseTest(\"'value' in $0\"); Fickl.Core.InlineInterface>] Done of Done"
                           "an inlined case sharing a tag value keeps its test"
 
                       Expect.stringContains
                           source
-                          "    | [<CompiledName(\"done\"); CaseTest(\"'reason' in $0\"); InlineInterface>] Aborted of Aborted"
+                          "    | [<CompiledName(\"done\"); CaseTest(\"'reason' in $0\"); Fickl.Core.InlineInterface>] Aborted of Aborted"
                           "and a named arm sharing a tag value is the case of its own name"
 
                       Expect.equal
@@ -6943,15 +6941,15 @@ let inlineArmFixtureTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.isTrue
-                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""file""\); InlineInterface>\] File of \w+"))
+                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""file""\); Fickl.Core.InlineInterface>\] File of \w+"))
                           "an arm with a method"
 
                       Expect.isTrue
-                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""bag""\); InlineInterface>\] Bag of \w+"))
+                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""bag""\); Fickl.Core.InlineInterface>\] Bag of \w+"))
                           "an arm with an index signature"
 
                       Expect.isTrue
-                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""wide""\); InlineInterface>\] Wide of \w+"))
+                          (Text.RegularExpressions.Regex.IsMatch(source, @"\| \[<CompiledName\(""wide""\); Fickl.Core.InlineInterface>\] Wide of \w+"))
                           "an arm past the field budget"
 
                       Expect.stringContains source "    | [<CompiledName(\"circle\")>] Circle of radius: float" "a plain anonymous arm keeps its fields"

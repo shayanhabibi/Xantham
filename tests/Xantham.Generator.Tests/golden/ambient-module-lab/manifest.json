@@ -24,10 +24,10 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 4,
+      "total": 5,
       "exact": 2,
       "ergonomic": 1,
-      "widened": 1
+      "widened": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",

@@ -42,7 +42,7 @@ let private placement expected exportedNames names declarations facts =
     let model =
         { shapeModel facts with
             Harvest = { HarvestModel.Empty with Exports = exported |> List.map snd }
-            ExportTypes = exported |> List.map (fun (typeId, export) -> export.Symbol.Id * Measure.uom<Measure.symbolId>, { Declared = Some (typeId * Measure.uom<Measure.typeId>); Value = None }) |> Map.ofList
+            ExportTypes = exported |> List.map (fun (typeId, export) -> export.Symbol.SymbolId, { Declared = Some (typeId * Measure.uom<Measure.typeId>); Value = None }) |> Map.ofList
             DeclNames = names |> List.map (fun (id, name) -> id * Measure.uom<Measure.typeId>, name) |> Map.ofList
             Decls = declarations }
 
@@ -71,7 +71,7 @@ let private sharedName expected definingFile =
         { symbol 101 "LocalType" SymbolFlags.TypeAlias with
             Declarations = ValueSome [| "1.TypeAliasDeclaration./packages/ownership/index.d.ts" |] }
     let shared =
-        facts { typeResponse 10 TypeFlags.Object with Symbol = ValueSome definition.Id }
+        facts { typeResponse 10 TypeFlags.Object with Symbol = ValueSome(Build.compactOf definition) }
     let model =
         { shapeModel [ shared ] with
             Harvest =
@@ -81,8 +81,8 @@ let private sharedName expected definingFile =
                           { export "SharedType" definition with Order = definingOrder } ] }
             ExportTypes =
                 Map.ofList
-                    [ 100<Measure.symbolId>, { Declared = Some 10<Measure.typeId>; Value = None }
-                      101<Measure.symbolId>, { Declared = Some 10<Measure.typeId>; Value = None } ] }
+                    [ (Build.symbolKey 100), { Declared = Some 10<Measure.typeId>; Value = None }
+                      (Build.symbolKey 101), { Declared = Some 10<Measure.typeId>; Value = None } ] }
 
     let named, _ =
         Pipeline.runTier ctx [ Shape.ExportNames.nameExports ] model |> Async.RunSynchronously
@@ -282,7 +282,7 @@ let groupedCompilerAliasTests =
                         { HarvestModel.Empty with
                             Exports = if exported then [ export "RequestCache" exportedSymbol ] else [] }
                     ExportTypes =
-                        if exported then Map.ofList [ 100<Measure.symbolId>, { Declared = Some 10<Measure.typeId>; Value = None } ]
+                        if exported then Map.ofList [ (Build.symbolKey 100), { Declared = Some 10<Measure.typeId>; Value = None } ]
                         else Map.empty
                     DeclNames =
                         (10<Measure.typeId>, "RequestCache") :: (reads |> List.map (fun (id, name, _) -> id * Measure.uom<Measure.typeId>, name)) |> Map.ofList

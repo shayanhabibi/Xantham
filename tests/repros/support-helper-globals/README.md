@@ -2,7 +2,7 @@
 
 This opt-in repro references `src/Xantham.Fable.Core` directly. It needs the
 repository's .NET SDK and Node.js, with no CloudEdge checkout or npm dependencies.
-Its local tool manifest pins Fable 5.17.2; Fable.Core is pinned to 5.2.0.
+Its local tool manifest pins Fickl 0.5.1 (Fable 5.23.0); Fable.Core is pinned to 5.2.0.
 It is a small standalone companion to the support-helper checks in the default
 runtime gate.
 
@@ -12,7 +12,7 @@ From the Xantham repository root:
 cd tests/repros/support-helper-globals
 dotnet tool restore
 dotnet build SupportHelperGlobals.fsproj --nologo
-dotnet tool run fable -- SupportHelperGlobals.fsproj --outDir fable-out --noCache
+dotnet tool run fickl -- SupportHelperGlobals.fsproj --outDir fable-out --noCache
 node --test check.mjs
 ```
 

@@ -3049,3 +3049,78 @@ ZodFlattenedError<'T, 'U>`, or refused a pair whose constraints differ (zod's `z
 FSharp.CloudEdge). Such an alias is now keyed by its own declaration. A mapped type `MappedRecord`
 describes keeps its structural key. `IdentityVersion` 6 → 7: Core.TS's `Es.Omit` identity moves;
 its binding is unchanged. `catalog-mapped-alias-lab` pins the three aliases.
+
+## TypeScript 7.1.0-beta (2026-10-21)
+
+The compiler pin moves to `typescript` 7.1.0-beta (`3e9236361fa9`), binary AST protocol 9. Two
+checker changes reach the generator.
+
+A symbol is a reference: a file-owned symbol (a declaration's, a module's and its exports') carries
+its file and an id unique within it, a snapshot-owned one a project and an id offset by 2^48.
+Every symbol-keyed table keys by `SymbolKey`, the owning file's node id and an `int64` id, and every
+symbol request sends `SymbolResponse.Reference`. The ids are handles the server assigns as symbols
+are first requested, so two sessions over one program number them differently; no output depends
+on them, and tests comparing models across sessions normalise `SourceSymbolId`.
+
+A conditional's check type is a type distinct from the declaration's parameter it was written as,
+sharing that parameter's symbol. `Spec.typeVarOf` binds a type parameter by type id, then by
+symbol, for a reference and for an operand read off another type's facts (`keyof`, value-of and
+property-record operands). Without it `Proven<T>` and `Inhabited<T>` deferred to an erased phantom
+and type-fest's `RequiredKeysOf`/`WritableKeysOf` lost their `keyof<'Type>`; with it both labs and
+type-fest match their 7.0 goldens.
+
+The server now encodes a non-finite numeric literal type: type-fest's `PositiveInfinity` and
+`NegativeInfinity` widen to `float` (`TR007`) where 7.0 refused the response (`RE001`, `AC001`).
+
+Measured over the goldens against `origin/master`: type-fest `RE001` 2 → 0, `AC001` 2 → 0, `TR007`
+0 → 2, tiers 27/66/202/2 → 27/66/204/0. The rest is the 7.1 lib: `Error.isError(error: unknown)`,
+inherited as a static by every `Error` subclass (`TR009` +1 in `ambient-module-lab` and
+`orphan-callback-lab`, +3 in `error-class-lab`), and `setHTML`/`setHTMLUnsafe` options (animejs
+`MB001` and `TR032` +2). Core.TS gains the 7.1 lib's declarations (Web Serial, WebTransport,
+`JSON.rawJSON`, GPU usage flags) and its catalogue records the new compiler in every entry; Node is
+unchanged.
+
+Validation follow-up (2026-10-22): filesystem callbacks use the 7.1 tagged replies from
+`dist/api/fsCallbacks.js`: value, missing and useOS. The old Boolean response terminated the
+server before the mailbox disposal test reached its read callback. Callback encoding and
+live virtual-file tests now cover the revised protocol.
+
+The JavaScript compiler tool is Fickl 0.5.1 (Fable 5.23.0), pinned in the root and standalone
+support-helper manifests. The build and Partas gates invoke `dotnet fickl`; Fable.Core remains
+5.2.0. All 1,489 generator tests and 105 Wire tests passed across the validation runs. The new
+compiler passed 564 runtime checks, Partas JSX and source/DLL acceptance, its Vitest check,
+and all five standalone support-helper Node tests. Build-command verification also passed.
+
+## Tagged-arm integration with TypeScript beta and Fickl (2026-10-22)
+
+Merged develop after PR #162 into tagged-inline-interface. Symbol parents retain the beta
+SymbolKey identity alongside the arm symbol flags used to reject class and host instances.
+Core.TS, Node and fixture goldens are regenerated from the composed generator and compiler pin.
+
+The user directed removal of the private Fable fork. Runtime compilation uses Fickl 0.5.1;
+all Fable.Core references use released 5.5.0, which supplies CaseTest. With explicit user
+approval, Xantham.Fable.Core temporarily carries the upstream InlineInterface attribute source
+in the Fickl.Core namespace until the user publishes Fickl.Core. Render emits the qualified
+attribute name. The private fork build script, pin and publication blocker are removed.
+
+This integration preserves the existing arm-admission rules and copying behavior. The proposed
+identity-preserving construction and subsequent frontier work remain separate decisions.
+
+Compared with the tagged-inline-interface parent, Core.TS tiers (exact/ergonomic/widened/escape)
+move from 1319/2676/277/5 to 1341/2725/291/5 with the beta library additions. Regenerating Node
+with the branch's existing InlineInterface support moves 815/2158/595/5 to 817/2156/595/5;
+DNS records and network-interface unions now carry their named interface arms. Type-fest moves
+27/66/202/2 to 27/66/204/0 through the beta's non-finite numeric literal support. Other fixture
+tier counts are unchanged. All 139 golden-writing tests passed.
+
+PR #162 was squash-merged into develop as `40a70f03`. Its final Wire follow-up widens the
+Unknown, Undefined and Arguments well-known-symbol responses to int64, matching the 7.1
+protocol; all 106 Wire tests and all 15 CI checks passed before that merge. The temporary beta
+handover is retired here.
+
+Integration validation: the full `build.fsx -- test --run-gate` pipeline passed, with 1,512
+generator tests, 590 runtime checks, Partas JSX and source/DLL consumption, and its Vitest
+check. The standalone Wire suite passed all 106 tests with no skips. Build-command checks
+also passed. These gates used Fickl 0.5.1. During validation, Fickl 0.5.2 appeared on NuGet,
+but its Windows platform package was not yet restorable. Fickl.Core 0.5.2 contains
+Fable.Core.dll without InlineInterface; the temporary source remains necessary.
