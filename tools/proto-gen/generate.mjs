@@ -182,11 +182,14 @@ const FIELD_ENUMS = {
 const retypedFields = new Set();
 /**
  * Fields the schema types as a bare `number` that exceed `int`: a snapshot-owned symbol's id is
- * offset by 2^48 (`281474976710660`). Both stay below 2^53, so `int64` holds them exactly.
+ * offset by 2^48 (`281474976710660`). These stay below 2^53, so `int64` holds them exactly.
  */
 const FIELD_WIDTHS = {
   "SymbolReference.id": "int64",
   "CompactSymbolReference.id": "int64",
+  "WellKnownSymbolsResponse.unknown": "int64",
+  "WellKnownSymbolsResponse.undefined": "int64",
+  "WellKnownSymbolsResponse.arguments": "int64",
 };
 
 function retype(mapped, key) {

@@ -129,6 +129,15 @@ let jsonTests =
             read<SymbolReference>("""{"kind":1,"snapshot":1,"project":"p","id":281474976710660}""").Id
             |> Flip.Expect.equal "" 281474976710660L
 
+        testCase "well-known symbol ids preserve the snapshot offset" <| fun _ ->
+            let response =
+                read<WellKnownSymbolsResponse>
+                    """{"unknown":281474976710658,"undefined":281474976710656,"arguments":281474976710657}"""
+
+            int64 response.Unknown |> Flip.Expect.equal "unknown" 281474976710658L
+            int64 response.Undefined |> Flip.Expect.equal "undefined" 281474976710656L
+            int64 response.Arguments |> Flip.Expect.equal "arguments" 281474976710657L
+
         testList "reading optionals" [
             // Absent and null both mean "no value" on the way in, even though only absent is
             // legal on the way out.

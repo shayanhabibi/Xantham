@@ -2499,13 +2499,13 @@ module rec Proto =
     /// without a round-trip on every check.
     type WellKnownSymbolsResponse = {
         [<JsonPropertyName "unknown">]
-        Unknown: int
+        Unknown: int64
 
         [<JsonPropertyName "undefined">]
-        Undefined: int
+        Undefined: int64
 
         [<JsonPropertyName "arguments">]
-        Arguments: int
+        Arguments: int64
     }
 
     /// WellKnownSignaturesResponse carries the handle id of the per-checker singleton

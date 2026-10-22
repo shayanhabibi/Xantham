@@ -453,6 +453,19 @@ so both test packages use that override. Packing Core.TS alone can appear green 
 published stable support version satisfies its prerelease range, then fail with NU1102 after
 the next Core.TS bump. Downloaded-package verification still restores real published dependencies.
 
+## Fickl must be last in the tool manifest
+
+With SDK 10.0.402, a cold Linux `dotnet tool restore` fails if another tool follows Fickl:
+fsdocs-tool and Fantomas are reported as containing only the `fickl` command. The SDK's
+`ToolPackageDownloaderBase` reuses its local assets directory without clearing
+`project.assets.ridpackage.json`; `ToolPackageInstance` prefers that leftover file for the
+next package. See the [SDK implementation at 10.0.402](https://github.com/dotnet/sdk/blob/v10.0.402/src/Cli/dotnet/ToolPackage/ToolPackageDownloaderBase.cs).
+
+Keep Fickl last in `.config/dotnet-tools.json` until the SDK fixes this. `--disable-parallel`
+does not fix a cold restore; warm-cache retries can conceal the problem. `tools/verify-build.mjs`
+guards the ordering. The workaround was verified with separate empty `DOTNET_CLI_HOME` and
+`NUGET_PACKAGES` directories on Linux, using the CI SDK version.
+
 ## Release markers after a squashed release
 
 PR #117 was squashed into master at `500a04a`, which is the repository commit recorded by all

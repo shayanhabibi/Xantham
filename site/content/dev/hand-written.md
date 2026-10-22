@@ -398,7 +398,8 @@ than at a user's process exit.
 ## 16. `FIELD_WIDTHS`, the proto fields wider than `int` — checked for staleness
 
 **Where:** `FIELD_WIDTHS` in both `tools/proto-gen/generate.mjs` and `tools/session-gen/generate.mjs`:
-`SymbolReference.id` and `CompactSymbolReference.id`, both `int64`.
+`SymbolReference.id`, `CompactSymbolReference.id`, and `WellKnownSymbolsResponse.unknown`,
+`.undefined`, and `.arguments`, all `int64`.
 
 **What it reflects:** the schema types every number as `number`, which the generators map to `int`.
 A snapshot-owned symbol's id is offset by 2^48 (`281474976710660` at the pinned compiler), which an
