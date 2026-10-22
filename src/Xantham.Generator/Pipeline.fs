@@ -10,6 +10,10 @@ open Xantham.Generator.Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
+// The generator's package classification, which `Proto.PackageId` (a resolved module's npm
+// identity) would otherwise shadow.
+type private PackageId = Xantham.Generator.PackageId
+
 /// A complete program-source check, independent of which exports happened to be harvested.
 /// Empty sources and `export {}` add no declarations. Other non-library sources leave the
 /// global scope unverified, including sources imported only for their augmentations.

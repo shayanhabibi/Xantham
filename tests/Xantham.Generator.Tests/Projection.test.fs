@@ -28,8 +28,22 @@ let private companionFiles (model: RenderModel) = model.Files |> List.filter (fs
 let private run compiler projections config =
     Pipeline.generateProjectedWith compiler projections [] config package |> Async.RunSynchronously
 
+// A symbol id is a handle the server assigns as symbols are first asked for, so two sessions over
+// one program number them by their request order.
+let private withoutSymbolHandles (decl: FsDecl) =
+    match decl with
+    | FsExports exports ->
+        FsExports
+            { exports with
+                Members =
+                    exports.Members
+                    |> List.map (fun owned -> { owned with SourceSymbolId = { File = ValueNone; Id = 0L } }) }
+    | other -> other
+
 let private stableFindings (model: RenderModel) =
-    {model with Findings = model.Findings |> List.sortBy (fun finding -> finding.Pass, finding.Symbol, finding.Key, sprintf "%A" finding.Kind)}
+    {model with
+        Decls = model.Decls |> List.map withoutSymbolHandles
+        Findings = model.Findings |> List.sortBy (fun finding -> finding.Pass, finding.Symbol, finding.Key, sprintf "%A" finding.Kind)}
 
 let private rejects code action =
     let failure = try action (); None with error -> Some (error.ToString())

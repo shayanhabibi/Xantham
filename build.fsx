@@ -683,7 +683,7 @@ module Stages =
                         workingDir "tests/Xantham.Generator.RunGate"
 
                         run
-                            "dotnet fable . -o fable-out --noCache --exclude Xantham.Fable.Core.TS --run node --import ./register.mjs fable-out/Program.js"
+                            "dotnet fickl . -o fable-out --noCache --exclude Xantham.Fable.Core.TS --run node --import ./register.mjs fable-out/Program.js"
                     }
 
                     stage "customization Partas gate" {
@@ -842,7 +842,7 @@ module Stages =
 
                     for project in projects do
                         stage $"pack-{project.Name}" {
-                            // `dotnet fable` in the run gate restores the support package for
+                            // `dotnet fickl` in the run gate restores the support package for
                             // netstandard2.1 alone, and `--no-build` implies `--no-restore`.
                             // The restore puts every target framework back into the assets file.
                             run (cmd $"dotnet restore {project.Path} -v q")

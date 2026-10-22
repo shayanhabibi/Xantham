@@ -11,6 +11,8 @@ notes for the agents and people who come after them. It is not rendered to the s
   living documents and are updated in the same commit as a behaviour change.
 - `handovers/myriad-early-projections.md` — the early Myriad projection increment, gates,
   ownership boundaries and residuals; retire on merge.
+- `handovers/typescript-7.1.0-beta.md` — beta migration and Fickl follow-up: worktree, callback
+  fixes and completed local validation for the integration PR; retire on merge.
 - `footguns.md` — facts that constrain future changes: compiler-API traps, declaration-catalog
   identity rules, pass invariants, and the threads left open when a lane closed.
 - `plans/2026-10-09-portable-catalogue-design.md` and

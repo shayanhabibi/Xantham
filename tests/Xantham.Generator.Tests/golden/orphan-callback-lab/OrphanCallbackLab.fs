@@ -98,6 +98,11 @@ module OrphanLab =
             member _.cause
                 with get (): obj option = jsNative
                 and set (_: obj option): unit = jsNative
+            /// <summary>
+            /// Indicates whether the argument provided is a built-in Error instance or not.
+            /// </summary>
+            [<Import("Wharf.isError", "orphan-lab:runtime")>]
+            static member isError (error: obj) : bool = jsNative
 
         /// <summary>
         /// A class whose base this run declares. F# admits no <c>inherit</c> of an interface, so the
