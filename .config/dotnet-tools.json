@@ -7,10 +7,10 @@
       "commands": ["shipit"],
       "rollForward": false
     },
-    "fable": {
-      "version": "5.17.2",
+    "fickl": {
+      "version": "0.5.1",
       "commands": [
-        "fable"
+        "fickl"
       ],
       "rollForward": false
     },

@@ -48,7 +48,7 @@ let private parametersOf (session: Session<TscChannel>) (name: string) =
 let nodeHandleTests =
     testList "node handle" [
         testCase "a Windows path keeps its drive colon and its dots" <| fun _ ->
-            let handle = "12.170.c:/packages/some.pkg/index.d.ts"
+            let handle = $"12.{int SyntaxKind.Parameter}.c:/packages/some.pkg/index.d.ts"
 
             match NodeHandle.parse handle with
             | ValueNone -> failtest "a well-formed handle was refused"

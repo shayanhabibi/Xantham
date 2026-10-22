@@ -108,7 +108,7 @@ assert.match(shard.output, /customization Partas gate\s+\(skipped\)/);
 
 const gateShard = build("test", "--ci", "--shard", "1/8", "--run-gate", "--explain");
 assert.equal(gateShard.status, 0, gateShard.output);
-assert.match(gateShard.output, /dotnet fable .*--run node/);
+assert.match(gateShard.output, /dotnet fickl .*--run node/);
 assert.match(gateShard.output, /node tests\/Xantham.Generator.PartasGate\/verify.mjs/);
 
 const bump = build("bump", "--dry-run", "--explain");

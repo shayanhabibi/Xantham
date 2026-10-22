@@ -10,7 +10,7 @@
          `register.mjs` installs the ambient globals and resolves the fixture package names.
 
          It is an executable, not a test project: `dotnet build` type-checks it, and
-         `build.fsx test` runs `dotnet fable` on it after the suites; the exact command is the
+         `build.fsx test` runs `dotnet fickl` on it after the suites; the exact command is the
          `run gate` stage there (an XML comment cannot spell a double-dash flag), and it runs
          from this directory.
 

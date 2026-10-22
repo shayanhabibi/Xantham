@@ -49,10 +49,10 @@ type internal MessageType =
 /// nothing structured to match on.
 exception TsGoError of method: string * message: string
 
-/// A filesystem callback the server may invoke on us (`--callbacks=...`). The argument arrives
-/// **JSON-encoded** - a path is `"C:/..."` with the quotes - so it must be parsed, not used raw.
-/// The result is JSON too, and `null` is not the same as absent: an explicit null changes module
-/// resolution semantics.
+/// <summary>
+/// A filesystem callback with a JSON argument and a tagged JSON reply.
+/// Paths arrive as JSON strings; replies use the value, missing or useOS kind.
+/// </summary>
 type TsGoCallback = string -> string
 
 /// The entries of one directory, as `getAccessibleEntries` answers them: names, not paths.
@@ -80,13 +80,9 @@ type FileRead =
 /// unset is not registered at all, so the server never asks about it.
 /// </summary>
 /// <remarks>
-/// <para>This exists because the raw <see cref="T:Xantham.TypeScript.Wire.TsGoCallback"/> surface is
-/// unforgiving: each callback has its own reply shape, the shapes appear nowhere in the schema, and
-/// a wrong one is not an error but a Go panic that kills the process mid-request. The encoding is
-/// applied here once, transcribed from <c>dist/api/sync/client.js:35-56</c>.</para>
-/// <para><c>ValueNone</c> from a member means "not answered" - the empty reply the server reads as
-/// "fall back to the real filesystem" - which is why <c>ReadFile</c> has its own three-way type
-/// rather than returning an option.</para>
+/// <para>Replies follow <c>dist/api/fsCallbacks.js</c>. Invalid reply shapes terminate the server.</para>
+/// <para><c>ValueNone</c> delegates to the server filesystem through a <c>useOS</c> reply.
+/// <c>ReadFile</c> distinguishes missing files from delegation through <c>FileRead</c>.</para>
 /// </remarks>
 type VirtualFileSystem =
     {
@@ -95,7 +91,7 @@ type VirtualFileSystem =
         GetAccessibleEntries: (string -> FileSystemEntries voption) voption
         ReadFile: (string -> FileRead) voption
         Realpath: (string -> string voption) voption
-        /// Takes the path and then the content to write. The server expects no answer.
+        /// <summary>Takes the path and content to write; successful return acknowledges completion.</summary>
         WriteFile: (string -> string -> unit) voption
     }
 
@@ -119,11 +115,13 @@ module VirtualFileSystem =
 
     let private json (value: 'T) = Json.JsonSerializer.Serialize<'T> value
 
-    /// An empty reply is how "not answered" reaches the server; anything else is JSON.
+    let private valueReply value =
+        "{\"kind\":\"value\",\"value\":" + value + "}"
+
     let private orFallBack (encode: 'T -> string) (value: 'T voption) =
         match value with
-        | ValueSome value -> encode value
-        | ValueNone -> ""
+        | ValueSome value -> encode value |> valueReply
+        | ValueNone -> """{"kind":"useOS"}"""
 
     let private ofBool exists = if exists then "true" else "false"
 
@@ -137,13 +135,11 @@ module VirtualFileSystem =
 
         fs.ReadFile
         |> ValueOption.iter (fun readFile ->
-            // The one callback whose reply is an object: it has to carry the difference between a
-            // content of `null` and no answer at all, which a bare string cannot.
             add "readFile" (fun argument ->
                 match readFile (path argument) with
-                | Content content -> "{\"content\":" + json content + "}"
-                | Missing -> "{\"content\":null}"
-                | FallBack -> ""))
+                | Content content -> json content |> valueReply
+                | Missing -> """{"kind":"missing"}"""
+                | FallBack -> """{"kind":"useOS"}"""))
 
         fs.FileExists
         |> ValueOption.iter (fun fileExists -> add "fileExists" (path >> fileExists >> orFallBack ofBool))
@@ -170,8 +166,6 @@ module VirtualFileSystem =
 
         fs.WriteFile
         |> ValueOption.iter (fun writeFile ->
-            // The only callback whose argument is an object rather than a path, and the only one
-            // the server expects nothing back from.
             add "writeFile" (fun argument ->
                 use document = Json.JsonDocument.Parse argument
 
@@ -179,7 +173,7 @@ module VirtualFileSystem =
                     document.RootElement.GetProperty(name: string).GetString()
 
                 writeFile (field "path") (field "data")
-                ""))
+                """{"kind":"value"}"""))
 
         table
 

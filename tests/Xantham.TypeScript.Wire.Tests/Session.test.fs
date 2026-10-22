@@ -87,17 +87,14 @@ let sessionCoverageTests =
             Set.difference (membersOf "SessionlessExtensions") (membersOf "AsyncSessionlessExtensions")
             |> Flip.Expect.equal "only batchRequests is absent asynchronously" (Set.ofList [ "batchRequests" ])
 
-        // The partition is the claim the layer rests on: a method belongs on the session when it
-        // names a snapshot, and on `Sessionless` when it does not. `updateSnapshot` creates one
-        // and so cannot presuppose it; `getSourceFile` reads one and so can.
-        testCase "the partition puts snapshot-creating methods outside the session" <| fun _ ->
+        testCase "the partition binds methods that take an existing snapshot" <| fun _ ->
             let session = membersOf "SessionExtensions"
             let sessionless = membersOf "SessionlessExtensions"
-            for method in [ "updateSnapshot"; "createProgram"; "initialize"; "transpileModule" ] do
+            for method in [ "createSnapshot"; "initialize"; "transpileModule" ] do
                 Set.contains method sessionless
                 |> Flip.Expect.isTrue $"{method} takes no snapshot, so it belongs on Sessionless"
                 Set.contains method session |> Flip.Expect.isFalse $"{method} is not a session method"
-            for method in [ "getSourceFile"; "getSymbolAtPosition"; "getAnyType"; "release" ] do
+            for method in [ "updateSnapshot"; "getSourceFile"; "getSymbolAtPosition"; "getAnyType"; "release" ] do
                 Set.contains method session |> Flip.Expect.isTrue $"{method} names a snapshot"
                 Set.contains method sessionless |> Flip.Expect.isFalse $"{method} is not sessionless"
     ]

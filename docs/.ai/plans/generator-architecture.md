@@ -2930,3 +2930,14 @@ inherited as a static by every `Error` subclass (`TR009` +1 in `ambient-module-l
 `MB001` and `TR032` +2). Core.TS gains the 7.1 lib's declarations (Web Serial, WebTransport,
 `JSON.rawJSON`, GPU usage flags) and its catalogue records the new compiler in every entry; Node is
 unchanged.
+
+Validation follow-up (2026-10-22): filesystem callbacks use the 7.1 tagged replies from
+`dist/api/fsCallbacks.js`: value, missing and useOS. The old Boolean response terminated the
+server before the mailbox disposal test reached its read callback. Callback encoding and
+live virtual-file tests now cover the revised protocol.
+
+The JavaScript compiler tool is Fickl 0.5.1 (Fable 5.23.0), pinned in the root and standalone
+support-helper manifests. The build and Partas gates invoke `dotnet fickl`; Fable.Core remains
+5.2.0. All 1,489 generator tests and 105 Wire tests passed across the validation runs. The new
+compiler passed 564 runtime checks, Partas JSX and source/DLL acceptance, its Vitest check,
+and all five standalone support-helper Node tests. Build-command verification also passed.

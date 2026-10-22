@@ -31,6 +31,10 @@ A compile gate is only evidence if it compiles against what a consumer will: `Fa
 `typescript` 7.x pin in `package.json`, which supplies both the producer's `lib.*.d.ts` and the
 live `tsc --api` server.
 
+JavaScript runtime gates use Fickl, pinned in `.config/dotnet-tools.json`. Restore with
+`dotnet tool restore` and compile with `dotnet fickl`; `build.fsx -- test --run-gate`
+runs both the bindings and Partas gates with that local pin.
+
 ## Project structure
 
 - `src/Xantham.TypeScript.Wire` — the compiler client: API surface, binary AST reader, typed

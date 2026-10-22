@@ -358,33 +358,30 @@ server may invoke (`readFile`, `fileExists`, `directoryExists`, `getAccessibleEn
 `realpath`, `writeFile`).
 
 **What it reflects:** the wire form of a `MSG_CALL` reply, which the schema does not describe at
-all. Transcribed from `dist/api/sync/client.js:35-56`, the JS client's own adapter, and typed
+all. Transcribed from `dist/api/fsCallbacks.js` at the TypeScript 7.1.0-beta pin, and typed
 against `dist/api/fs.d.ts`:
 
 | Callback | Argument | Reply |
 | --- | --- | --- |
-| `readFile` | JSON string path | `{"content": <string>}`, `{"content": null}` for absent, or empty for fall-back |
-| `fileExists`, `directoryExists` | JSON string path | `true` / `false`, or empty |
-| `getAccessibleEntries` | JSON string path | `{"files": [...], "directories": [...]}`, or empty |
-| `realpath` | JSON string path | a JSON string, or empty |
-| `writeFile` | `{"path": ..., "data": ...}` | empty |
+| `readFile` | JSON string path | `{"kind":"value","value":<string>}`, `{"kind":"missing"}`, or `{"kind":"useOS"}` |
+| `fileExists`, `directoryExists` | JSON string path | `{"kind":"value","value":<bool>}`, or `{"kind":"useOS"}` |
+| `getAccessibleEntries` | JSON string path | `{"kind":"value","value":{"files":[...],"directories":[...]}}`, or `{"kind":"useOS"}` |
+| `realpath` | JSON string path | `{"kind":"value","value":<string>}`, or `{"kind":"useOS"}` |
+| `writeFile` | `{"path": ..., "data": ...}` | `{"kind":"value"}` |
 
-Two distinctions carry meaning and are the reason `readFile` answers an object rather than a
-string. `{"content": null}` means the file does not exist and resolution stops; an **empty reply**
-means "not answered", and the server reads the real filesystem instead. The F# type says this out
-loud - `Content` / `Missing` / `FallBack` - because the two are one character apart on the wire
-and swapping them changes module resolution without erroring.
+`Missing` stops resolution for that file; `FallBack` delegates to the server's filesystem.
+`Content ""` supplies an existing empty file. Each has a distinct tagged reply.
 
 **Failure mode:** was the worst kind, which is why the typed layer exists. A wrong reply shape is
-not an error frame: it is a Go panic - `json: unable to unmarshal JSON string into Go struct
-{ Content *string }` - that kills the process mid-request, so the caller sees an `IOException`
+not an error frame: it is a Go panic - `json: cannot unmarshal JSON boolean into Go api.callbackResponse`
+- that kills the process mid-request, so the caller sees an `IOException`
 reading `tsgo closed the pipe mid-frame`, with the real message in the server stderr appended
 to it. A failed callback is equally
 terminal by design: the server treats `MSG_CALL_ERROR` as unrecoverable and exits, so a raising
 callback spends the channel.
 
-**To update:** re-read `dist/api/sync/client.js` on a compiler upgrade, and `fsCallbackNames` in
-`dist/api/fs.js` for the list itself. `Callbacks.test.fs` pins every reply shape without a server,
+**To update:** re-read `encodeFileSystemCallbackResult` and `fileSystemCallbackTable` in
+`dist/api/fsCallbacks.js` on a compiler upgrade. `Callbacks.test.fs` pins every reply shape without a server,
 and compiles a file that exists only in memory with one, so a changed shape fails there rather
 than at a user's process exit.
 
