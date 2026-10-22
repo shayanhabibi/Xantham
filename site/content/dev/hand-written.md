@@ -438,22 +438,6 @@ blob base64-encoded under `data`. Transcribed from `sourceFileResponseToUint8Arr
 **Failure mode:** loud. `Mailbox.test.fs`'s "a batched AST decodes to the same tree as a solo one"
 fails on a changed shape.
 
-## 19. Temporary InlineInterface attribute source
-
-**Where:** `src/Xantham.Fable.Core/Fickl.Core.InlineInterface.fs`, compiled into the support
-assembly and included in its Fable sources.
-
-**What it reflects:** the `Fickl.Core.InlineInterfaceAttribute` declaration from Fickl 0.5.1,
-commit `56687cf139247d3ef0e2552a1451a3acd8ca6a5d`. The source carries its upstream URL and MIT
-notice. Fickl recognizes the attribute by its full type name when consuming source or a DLL.
-Released Fable.Core 5.5.0 supplies CaseTest. Fickl.Core 0.5.2 was checked on 2026-10-22:
-its package contains Fable.Core.dll without InlineInterface, so it cannot replace this source.
-
-**Update:** when Fickl.Core ships InlineInterface, remove this temporary source and its project Compile
-and packed Content entries, then add a public Fickl.Core package dependency. Keep generated
-attribute references qualified as `Fickl.Core.InlineInterface`. The tagged-arm runtime checks
-and source/DLL consumption gates verify the compiler behavior.
-
 ## What is *not* on this list
 
 Everything else is derived, and worth naming so the boundary is clear: kind ordinals and their 34

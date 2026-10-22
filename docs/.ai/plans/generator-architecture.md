@@ -3124,3 +3124,15 @@ check. The standalone Wire suite passed all 106 tests with no skips. Build-comma
 also passed. These gates used Fickl 0.5.1. During validation, Fickl 0.5.2 appeared on NuGet,
 but its Windows platform package was not yet restorable. Fickl.Core 0.5.2 contains
 Fable.Core.dll without InlineInterface; the temporary source remains necessary.
+
+Follow-up: Fickl 0.5.3 and its Windows platform package restore from NuGet. Fickl.Core 0.5.3
+ships Fickl.Core.dll, InlineInterface and the compiler's F# sources, with a dependency on public
+Fable.Core 5.5.0. The support project now depends on this package and the temporary attribute
+source is removed. Root and standalone compiler manifests use 0.5.3; generated attribute
+names and arm-construction semantics are unchanged.
+
+The restored 0.5.3 packages passed the solution compile gates, 11 selected session tests,
+590 runtime checks, Partas JSX and source/DLL consumption, and Partas Vitest. The support
+NuGet package was packed and inspected: Fickl.Core is a transitive dependency for both target
+frameworks and the temporary source is absent. The unchanged generator suite was not repeated
+after this dependency-only follow-up.

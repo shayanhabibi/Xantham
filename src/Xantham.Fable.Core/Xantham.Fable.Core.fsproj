@@ -24,7 +24,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Fickl.Core.InlineInterface.fs" />
         <Compile Include="Library.fs" />
         <Compile Include="Helpers.fs" />
         <None Include="README.md" Pack="true" PackagePath="\" />
@@ -33,13 +32,14 @@
     <!-- Fable compiles a package from its `fable/` sources, and the inline helpers have no body
          in the DLL. docs/.ai/footguns.md, "Fable consumption of bindings". -->
     <ItemGroup>
-        <Content Include="Xantham.Fable.Core.fsproj;Fickl.Core.InlineInterface.fs;Library.fs;Helpers.fs" Pack="true" PackagePath="fable/" />
+        <Content Include="Xantham.Fable.Core.fsproj;Library.fs;Helpers.fs" Pack="true" PackagePath="fable/" />
     </ItemGroup>
 
     <ItemGroup>
         <!-- Fable.Core 5+, pinned: the compile gate carries the same pin, because generated
              bindings and the gate agree on one Fable.Core. -->
         <PackageReference Include="Fable.Core" Version="5.5.0" />
+        <PackageReference Include="Fickl.Core" Version="0.5.3" />
     </ItemGroup>
 
 </Project>
