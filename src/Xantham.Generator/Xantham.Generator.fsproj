@@ -39,6 +39,7 @@
     <Compile Include="Shape\MixedUnionCensus.fs" />
     <Compile Include="Shape\LiteralUnions.fs" />
     <Compile Include="Shape\TaggedUnions.fs" />
+    <Compile Include="Shape\ErasedObjectUnions.fs" />
     <Compile Include="Shape\Callbacks.fs" />
     <Compile Include="Shape\Interfaces.fs" />
     <Compile Include="Shape\Aliases.fs" />

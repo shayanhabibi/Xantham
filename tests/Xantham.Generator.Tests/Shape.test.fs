@@ -10,6 +10,91 @@ open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator
 open Xantham.Generator.Shape
 
+[<Tests>]
+let erasedObjectUnionTests =
+    let model rightSignatures =
+        let memberOf id name ty optional =
+            { Build.resolvedMember (Build.symbol id name SymbolFlags.Property) ty with Optional = optional }
+        let signature = Build.signature [ memberOf 100 "value" 2 false ] 2
+        let left =
+            { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                Members = [ memberOf 101 "left" 2 false; memberOf 102 "right" 5 true ]
+                CallSignatures = [ signature ] }
+        let right =
+            { Build.facts (Build.typeResponse 11 TypeFlags.Object) with
+                Members = [ memberOf 103 "right" 1 false; memberOf 104 "left" 5 true ]
+                CallSignatures = rightSignatures signature }
+        let union =
+            { Build.facts (Build.typeResponse 12 TypeFlags.Union) with UnionMembers = [ 10<typeId>; 11<typeId> ] }
+        { Build.shapeModel (left :: right :: union :: Build.primitives) with
+            DeclNames = Map.ofList [ 10<typeId>, "Left"; 11<typeId>, "Right"; 12<typeId>, "Calls" ] }
+    let shaped model =
+        let result, _ = Build.runPass ErasedObjectUnions.detectErasedObjectUnions model
+        result.Decls |> List.pick (function FsErasedObjectUnion decl -> Some decl | _ -> None)
+    testList "erased object unions" [
+        testCase "shared calls require every arm to agree" <| fun _ ->
+            Expect.equal (shaped (model List.singleton)).Invokes.Length 1 "the same source call is shared"
+            Expect.isEmpty (shaped (model (fun _ -> []))).Invokes "data arms are not callable"
+            Expect.isEmpty (shaped (model (fun signature -> [ { signature with ReturnTypeId = 1<typeId> } ]))).Invokes "different returns are not shared"
+            Expect.isEmpty (shaped (model (fun signature -> [ { signature with HasRest = true } ]))).Invokes "different rest conventions are not shared"
+        testCase "typed payloads and defined-value tests are retained" <| fun _ ->
+            let decl = shaped (model List.singleton)
+            Expect.equal (decl.Cases |> List.map _.Payload) [ FsNamed "Left"; FsNamed "Right" ] "payloads keep arm types"
+            Expect.equal (decl.Cases |> List.map _.Test) [ IsDefined "left"; IsDefined "right" ] "undefined on the other arm cannot match"
+        testCase "an intersection must prove that its required discriminator is defined" <| fun _ ->
+            let source = model List.singleton
+            let left = source.Types[10<typeId>]
+            let source =
+                { source with
+                    Types = source.Types
+                            |> Map.add 20<typeId> (Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter))
+                            |> Map.add 21<typeId> { Build.facts (Build.typeResponse 21 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 5<typeId> ] }
+                            |> Map.add 10<typeId> { left with Members = left.Members |> List.map (fun m -> if m.Symbol.Name = "left" then { m with TypeId = 21<typeId> } else m) } }
+            Expect.isNone (Spec.erasedObjectUnionShape source source.Types[12<typeId>]) "T & undefined can be undefined"
+        testCase "generic calls compare parameter bindings and constraints" <| fun _ ->
+            let source = model List.singleton
+            let generic id bound =
+                { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with Constraint = bound }
+            let signature id =
+                { Build.signature [ Build.resolvedMember (Build.symbol 200 "value" SymbolFlags.Property) id ] id with
+                    TypeParameters = [ id * uom<typeId> ] }
+            let withConstraint bound =
+                { source with
+                    Types =
+                        source.Types
+                        |> Map.add 20<typeId> (generic 20 (Some 2<typeId>))
+                        |> Map.add 21<typeId> (generic 21 bound)
+                        |> Map.add 10<typeId> { source.Types[10<typeId>] with CallSignatures = [ signature 20 ] }
+                        |> Map.add 11<typeId> { source.Types[11<typeId>] with CallSignatures = [ signature 21 ] } }
+            Expect.equal (shaped (withConstraint (Some 2<typeId>))).Invokes.Length 1 "alpha-equivalent generic calls are shared"
+            Expect.isEmpty (shaped (withConstraint (Some 1<typeId>))).Invokes "different constraints are not shared"
+            Expect.isEmpty (shaped (withConstraint None)).Invokes "a missing constraint is not equivalent"
+            let union id variable =
+                { Build.facts (Build.typeResponse id TypeFlags.Union) with UnionMembers = [ variable; 1<typeId> ] }
+            let wrapped = withConstraint (Some 2<typeId>)
+            let wrapParameter unionId (arm: TypeFacts) =
+                let signatures =
+                    arm.CallSignatures |> List.map (fun signature ->
+                        { signature with Parameters = signature.Parameters |> List.map (fun parameter -> { parameter with TypeId = unionId }) })
+                { arm with CallSignatures = signatures }
+            let wrapped =
+                { wrapped with
+                    Types =
+                        wrapped.Types
+                        |> Map.add 30<typeId> (union 30 20<typeId>)
+                        |> Map.add 31<typeId> (union 31 21<typeId>)
+                        |> Map.add 10<typeId> (wrapParameter 30<typeId> wrapped.Types[10<typeId>])
+                        |> Map.add 11<typeId> (wrapParameter 31<typeId> wrapped.Types[11<typeId>]) }
+            Expect.equal (shaped wrapped).Invokes.Length 1 "union members compare in both directions under the same bindings"
+        testCase "widened shared overloads are deduplicated" <| fun _ ->
+            let decl = shaped (model List.singleton)
+            let source = { model List.singleton with Decls = [ FsErasedObjectUnion { decl with Invokes = decl.Invokes @ decl.Invokes } ] }
+            let result, findings = Build.runPass Overloads.dedupeOverloads source
+            let actual = result.Decls |> List.pick (function FsErasedObjectUnion value -> Some value | _ -> None)
+            Expect.equal actual.Invokes.Length 1 "the emitted CLR signature occurs once"
+            Expect.isTrue (findings |> List.exists (fun finding -> finding.Symbol = "Calls.Invoke" && finding.Key = "DO001")) "the loss is reported"
+    ]
+
 /// A string-literal type carrying its payload.
 let private stringLiteral (id: int) (text: string) =
     Build.facts

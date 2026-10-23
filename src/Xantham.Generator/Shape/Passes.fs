@@ -15,6 +15,7 @@ let passes: Pass<ShapeModel> list =
         MixedUnionCensus.countMixedUnions
         LiteralUnions.classifyLiteralUnions
         TaggedUnions.detectTaggedUnions
+        ErasedObjectUnions.detectErasedObjectUnions
         Callbacks.shapeCallbacks
         Interfaces.shapeInterfaces
         Aliases.shapeAliases

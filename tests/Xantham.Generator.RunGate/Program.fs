@@ -2428,6 +2428,7 @@ let main _ =
     dependencyEntrypoint ()
     SupportHelpers.run check
     ErasedCases.run check
+    GeneratedErasedCases.run check
     ExportProvenance.run check
     bindingExtensions ()
     globals ()

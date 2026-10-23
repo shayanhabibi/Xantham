@@ -486,7 +486,7 @@ let private plainAnonymousObject (facts: TypeFacts) =
 /// by name, optionality and readonly with types that read as one; two unions each of whose
 /// members reads as one of the other's; or two applications of one generic target whose
 /// arguments do.
-let internal sameShape (model: ShapeModel) (left: int<Measure.typeId>) (right: int<Measure.typeId>) =
+let internal sameShapeUnder bindings (model: ShapeModel) (left: int<Measure.typeId>) (right: int<Measure.typeId>) =
     let rec go (assumed: Set<int<Measure.typeId> * int<Measure.typeId>>) left right =
         left = right
         || Set.contains (left, right) assumed
@@ -517,7 +517,10 @@ let internal sameShape (model: ShapeModel) (left: int<Measure.typeId>) (right: i
                     | _ -> false
             | _ -> false)
 
-    go Set.empty left right
+    go (Set.union bindings (bindings |> Set.map (fun (left, right) -> right, left))) left right
+
+let internal sameShape model left right =
+    sameShapeUnder Set.empty model left right
 
 /// Whether the member is an optional property typed `never`, which an object never carries. The
 /// checker reports `never | undefined` as `undefined`.
@@ -796,6 +799,69 @@ let private isNeverTyped (model: ShapeModel) (m: ResolvedMember) =
         | Some facts -> flag TypeFlags.Never facts || flag TypeFlags.Undefined facts
         | None -> false)
 
+/// Callable or constructable object arms with a defined property unique to each arm.
+let internal erasedObjectUnionShape (model: ShapeModel) (facts: TypeFacts) =
+    let arms = facts.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+    let rec excludesUndefined typeId =
+        match Map.tryFind typeId model.Types with
+        | Some t when flag TypeFlags.Union t ->
+            not t.UnionMembers.IsEmpty && List.forall excludesUndefined t.UnionMembers
+        | Some t when flag TypeFlags.Intersection t -> List.exists excludesUndefined t.IntersectionMembers
+        | Some t ->
+            [
+                TypeFlags.Object
+                TypeFlags.String
+                TypeFlags.StringLiteral
+                TypeFlags.Number
+                TypeFlags.NumberLiteral
+                TypeFlags.Boolean
+                TypeFlags.BooleanLiteral
+                TypeFlags.BigInt
+                TypeFlags.BigIntLiteral
+                TypeFlags.ESSymbol
+                TypeFlags.UniqueESSymbol
+                TypeFlags.Null
+            ]
+            |> List.exists (fun flag_ -> flag flag_ t)
+        | None -> false
+
+    let testFor (arm: TypeFacts) =
+        arm.Members
+        |> List.tryFind (fun m ->
+            not m.Optional
+            && not (isSymbolKeyed m.Symbol.Name)
+            && excludesUndefined m.TypeId
+            && arms
+               |> List.forall (fun other ->
+                   other.Response.TypeId = arm.Response.TypeId
+                   || (other.Members
+                       |> List.tryFind (fun candidate -> candidate.Symbol.Name = m.Symbol.Name)
+                       |> Option.exists (isNeverTyped model))))
+        |> Option.map (fun m -> arm, IsDefined m.Symbol.Name)
+
+    if
+        not (flag TypeFlags.Union facts)
+        || arms.Length < 2
+        || arms.Length <> facts.UnionMembers.Length
+        || not (
+            arms
+            |> List.forall (fun arm -> flag TypeFlags.Object arm || flag TypeFlags.Intersection arm)
+        )
+        || not (
+            arms
+            |> List.exists (fun arm -> not arm.CallSignatures.IsEmpty || not arm.ConstructSignatures.IsEmpty)
+        )
+    then
+        None
+    else
+        let tested = List.map testFor arms
+
+        if List.forall Option.isSome tested then
+            Some(List.choose id tested)
+        else
+            None
+
 let internal exclusiveArmShape (model: ShapeModel) (facts: TypeFacts) : ExclusiveArmsShape =
     let arms =
         facts.UnionMembers
@@ -806,7 +872,12 @@ let internal exclusiveArmShape (model: ShapeModel) (facts: TypeFacts) : Exclusiv
         (flag TypeFlags.Object m || flag TypeFlags.Intersection m)
         && not m.Members.IsEmpty
 
-    if arms.Length < 2 || not (arms |> List.forall isObjectArm) then
+    if
+        arms.Length < 2
+        || not (arms |> List.forall isObjectArm)
+        || arms
+           |> List.exists (fun arm -> not arm.CallSignatures.IsEmpty || not arm.ConstructSignatures.IsEmpty)
+    then
         NotExclusiveArms
     else
         let names =
@@ -1057,6 +1128,10 @@ let internal isTaggedDeclaration (model: ShapeModel) (facts: TypeFacts) =
         | Discriminated(tag, tagged, _) -> tagged |> List.forall (fun arm -> isTaggedCase model tag arm.Facts)
         | TagCollides _
         | Untagged -> false)
+
+/// A named object union whose declaration binds its own and captured type parameters.
+let internal isObjectUnionDeclaration model facts =
+    isTaggedDeclaration model facts || (erasedObjectUnionShape model facts).IsSome
 
 /// A tuple element the checker marked `...rest` or variadic. F# tuples are fixed-arity, so a
 /// tuple carrying one has no tuple form at all.
@@ -2846,7 +2921,7 @@ and internal unionRef
             match freeParamsOf model typeId with
             | [] -> FsNamed name, []
             | arguments -> appliedRefTo ctx model self owner name (declParamIds declared) arguments
-        | None, Some named when isTaggedDeclaration model named ->
+        | None, Some named when isObjectUnionDeclaration model named ->
             match declParamIds named @ freeParamsOf model typeId |> List.distinct with
             | [] -> FsNamed name, []
             | arguments -> appliedRef ctx model self owner name arguments
@@ -2860,7 +2935,7 @@ and internal unionRef
             Map.containsKey id model.TypeVars || Map.containsKey id model.KeyVars
 
         match Map.tryFind typeId model.AliasApplications, Map.tryFind typeId model.Types with
-        | None, Some named when isTaggedDeclaration model named ->
+        | None, Some named when isObjectUnionDeclaration model named ->
             let own = declParamIds named
             let free = freeParamsOf model typeId
 

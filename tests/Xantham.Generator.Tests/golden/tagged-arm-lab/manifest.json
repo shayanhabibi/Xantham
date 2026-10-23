@@ -3,8 +3,8 @@
   "package": "tagged-arm-lab",
   "module": "TaggedArmLab",
   "counts": {
-    "exact": 16,
-    "ergonomic": 88,
+    "exact": 17,
+    "ergonomic": 89,
     "widened": 5,
     "escape": 0
   },
@@ -22,21 +22,26 @@
       "widened": 4
     },
     {
+      "pass": "EO - detect-erased-object-unions",
+      "total": 1,
+      "exact": 1
+    },
+    {
       "pass": "shape-callbacks",
       "total": 1,
       "ergonomic": 1
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 81,
-      "ergonomic": 77,
+      "total": 83,
+      "ergonomic": 79,
       "widened": 4
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 126,
+      "total": 128,
       "exact": 44,
-      "ergonomic": 82
+      "ergonomic": 84
     },
     {
       "pass": "settle-symbol-members",

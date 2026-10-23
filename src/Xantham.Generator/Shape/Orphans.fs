@@ -82,6 +82,10 @@ let internal readNames (decl: FsDecl) : string list =
     | FsTaggedUnion u ->
         typeParamNames u.TypeParameters
         @ (u.Cases |> List.collect (_.Fields >> List.collect (_.Type >> namesOf)))
+    | FsErasedObjectUnion u ->
+        typeParamNames u.TypeParameters
+        @ (u.Cases |> List.collect (_.Payload >> namesOf))
+        @ (u.Invokes |> List.collect (FsInvoke >> memberNames))
     | FsExports container -> container.Members |> List.collect (_.Member >> exportMemberNames)
     | FsStringEnum _
     | FsEnum _ -> []
@@ -93,6 +97,7 @@ let private declaredNames (decls: FsDecl list) : Set<string> =
         | FsInterface d -> [ d.Name ]
         | FsStringEnum d -> [ d.Name ]
         | FsTaggedUnion d -> [ d.Name ]
+        | FsErasedObjectUnion d -> [ d.Name ]
         | FsEnum d -> [ d.Name ]
         | FsAbbrev d -> [ d.Name ]
         | FsDelegateType d -> [ d.Name ]
@@ -115,6 +120,7 @@ let private taggedArmNames (model: ShapeModel) : Set<string> =
         model.Decls
         |> List.choose (function
             | FsTaggedUnion u -> Some u.Name
+            | FsErasedObjectUnion u -> Some u.Name
             | _ -> None)
         |> Set.ofList
 
@@ -171,6 +177,7 @@ let private declName (decl: FsDecl) =
     | FsInterface d -> Some d.Name
     | FsStringEnum d -> Some d.Name
     | FsTaggedUnion d -> Some d.Name
+    | FsErasedObjectUnion d -> Some d.Name
     | FsEnum d -> Some d.Name
     | FsAbbrev d -> Some d.Name
     | FsDelegateType d -> Some d.Name

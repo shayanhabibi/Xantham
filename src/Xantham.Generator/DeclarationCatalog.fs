@@ -316,6 +316,7 @@ let private parameters =
     | FsDelegateType decl -> decl.TypeParameters
     | FsPhantom decl -> decl.TypeParameters
     | FsTaggedUnion decl -> decl.TypeParameters
+    | FsErasedObjectUnion decl -> decl.TypeParameters
     | _ -> []
 
 let private order =
@@ -327,6 +328,7 @@ let private order =
     | FsMeasure decl -> decl.Order
     | FsStringEnum decl -> decl.Order
     | FsTaggedUnion decl -> decl.Order
+    | FsErasedObjectUnion decl -> decl.Order
     | FsEnum decl -> decl.Order
     | FsExports _ -> None
 
@@ -1629,6 +1631,21 @@ let internal applyWithProducer
                                                     "field"
                                                     [ Canonical.text field.Name; typeText vars field.Type ])
                                         ])
+                            ]
+                    | FsErasedObjectUnion union ->
+                        Canonical.node
+                            "erased-object-union"
+                            [
+                                union.Cases
+                                |> Canonical.list (fun case ->
+                                    Canonical.node
+                                        "case"
+                                        [
+                                            Canonical.text case.Name
+                                            typeText vars case.Payload
+                                            Canonical.text (Render.caseTestSource case.Test)
+                                        ])
+                                union.Invokes |> List.map (FsInvoke >> member_) |> Canonical.list id
                             ]
                     | FsPhantom phantom -> Canonical.node "phantom" [ typeText vars phantom.Carrier ]
                     | FsMeasure measure -> Canonical.node "measure" [ typeText vars measure.Primitive ]

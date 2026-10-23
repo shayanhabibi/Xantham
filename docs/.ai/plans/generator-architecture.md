@@ -137,6 +137,7 @@ order — each row cites its mapping-doc section:
 | `hoist-nullability` | strip `null`/`undefined` union members → `option` flag (per-symbol overrides applied) | §4.3, D1 |
 | `classify-literal-unions` | StringEnum / enum / CompiledValue mixed cases | §4.2, D12 |
 | `detect-tagged-unions` | common literal tag ⇒ `TypeScriptTaggedUnion` shape | §4.5, D4 |
+| `detect-erased-object-unions` | callable/constructable exclusive arms ⇒ typed erased cases with defined-value predicates; shared calls require equivalent source signatures | §4.5, October 23 D2 |
 | `classify-unions-by-position` | input: overloads/erased ctors; output: tagged/test-helpers; `U_n ≤ 4` | §4.5, D4 |
 | `detect-brands` | primitive ∩ phantom-object ⇒ measure-tagged primitive | §4.6 |
 | `flatten-intersections` | apparent-members flattening + interface inheritance where nominal | §4.6 |

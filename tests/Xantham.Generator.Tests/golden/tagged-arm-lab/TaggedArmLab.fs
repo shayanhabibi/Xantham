@@ -196,14 +196,23 @@ type Extra =
     [<ParamObject; Emit("$0")>]
     static member Create (other: float) : Extra = jsNative
 
-[<Interface>]
+[<RequireQualifiedAccess; Erase>]
 type T1 =
-    abstract a: float option with get, set
-    abstract b: string option with get, set
+    | [<Fickl.Core.CaseTest("$0.a !== undefined")>] A of T12
+    | [<Fickl.Core.CaseTest("$0.b !== undefined")>] B of T13
+
+type T12 =
+    abstract a: float with get, set
+    abstract b: unit option with get, set
+    [<Emit("$0($1...)")>]
+    abstract Invoke: e: T1.Extra -> unit
+
+[<Interface>]
+type T13 =
+    abstract b: string with get, set
+    abstract a: unit option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (a: float) : T1 = jsNative
-    [<ParamObject; Emit("$0")>]
-    static member Create (b: string) : T1 = jsNative
+    static member Create (b: string, ?a: unit) : T13 = jsNative
 
 [<Interface>]
 type Idx =

@@ -22,11 +22,12 @@ packages, add `--prerelease` to the corresponding install commands.
 Bindings target **Fable 5.x**. Use **net8.0 or later** for the F# project:
 generated object builders can use static interface members with bodies.
 
-Compile bindings that carry `[<Fickl.Core.InlineInterface>]` with **Fickl 0.5.4**.
+Compile bindings that carry `[<Fickl.Core.InlineInterface>]` or erased union case predicates
+with **Fickl 0.5.4**.
 Xantham's support package depends on Fickl.Core 0.5.4, which supplies that attribute.
 This compiler also supports `CaseTest` predicates on erased union cases, preserving the
 original callable or constructor value during construction and matching.
-`CaseTest` comes from Fable.Core 5.5.0.
+Tagged-case `CaseTest` comes from Fable.Core 5.5.0; erased cases use `Fickl.Core.CaseTest`.
 
 ## Include files in order
 
@@ -104,6 +105,24 @@ A binding is rooted in a generated F# module.
 
 The same type exported through several paths has a shared canonical location.
 Use the emitted signature to find it.
+
+## Match callable alternatives
+
+When TypeScript gives each alternative a reliable exclusive property, a union containing
+functions or constructors becomes an erased DU with typed cases. Pass an existing arm to a
+case constructor; the same JavaScript value comes back when you match it:
+
+```fsharp
+let wrapped = Calls.LeftCall existingLeft
+match wrapped with
+| Calls.LeftCall left -> left.Invoke 3.
+| Calls.RightCall right -> right.Invoke 3.
+```
+
+Each arm retains its own members. The union also offers `Invoke` when all arms share that call
+signature. Constructor arms keep `Create` on their extracted payload. Wrapping adds no tag and
+does not copy the function or object. Where the source has no reliable discriminator, the
+binding retains the ordinary erased-union fallback.
 
 ## Build and run
 
