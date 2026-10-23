@@ -22,7 +22,7 @@
       "rollForward": false
     },
     "fickl": {
-      "version": "0.5.3",
+      "version": "0.5.4",
       "commands": [
         "fickl"
       ],

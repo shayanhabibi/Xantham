@@ -69,6 +69,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\projection-lab-companions\*.fs" Link="projection-lab-companions\%(Filename)%(Extension)" />
         <Compile Include="..\Xantham.Generator.Tests\golden\projection-operations\*.fs" Link="projection-operations\%(Filename)%(Extension)" />
         <Compile Include="Projections.fs" />
+        <Compile Include="ErasedCases.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>

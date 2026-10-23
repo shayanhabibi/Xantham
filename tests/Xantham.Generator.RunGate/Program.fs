@@ -2427,6 +2427,7 @@ let private tagMapKeys () =
 let main _ =
     dependencyEntrypoint ()
     SupportHelpers.run check
+    ErasedCases.run check
     ExportProvenance.run check
     bindingExtensions ()
     globals ()
