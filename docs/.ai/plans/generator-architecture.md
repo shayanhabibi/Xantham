@@ -2960,6 +2960,11 @@ reworded); a union whose arms all share one value is a DU once they separate (`O
 `TailStream` `Log`). Each separated value is reported once (`DT008`). `DT004` retires (row kept);
 `DT007` is removed before release. Case names keep `uniqueCaseNames` (`Done`, `Done2`).
 
+The `typeof` strategy requires positive evidence for one runtime class. TypeScript `object`
+and structural object types without call signatures still admit callable values, so neither
+proves `typeof === "object"`. They retain the erased-union fallback unless another strategy
+separates the arms. `tagged-arm-lab` pins both refusals alongside the string/number separation.
+
 A required boolean-literal case field is now a literal field, written by `Create<Case>` like a
 string or number one, since it can be what separates two arms (`Task.CreateDone2` writes
 `ok: false`). Interface `Create` keeps its string and number literals only. An arm interface

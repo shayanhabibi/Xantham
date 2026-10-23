@@ -561,12 +561,14 @@ let rec private typeofClass (model: ShapeModel) (facts: TypeFacts) =
         with
         | [ Some single ] -> Some single
         | _ -> None
-    elif flag TypeFlags.Object facts || flag TypeFlags.NonPrimitive facts then
-        if facts.CallSignatures.IsEmpty && facts.ConstructSignatures.IsEmpty then
-            Some TypeofObject
-        else
-            Some TypeofFunction
+    elif
+        flag TypeFlags.Object facts
+        && (not facts.CallSignatures.IsEmpty || not facts.ConstructSignatures.IsEmpty)
+    then
+        Some TypeofFunction
     else
+        // `object` and structural object types also admit functions. An absent call signature
+        // does not prove a non-callable value, so these types cannot justify a typeof test.
         None
 
 /// The tests separating arms that carry one tag value, one per arm in order, in the order
