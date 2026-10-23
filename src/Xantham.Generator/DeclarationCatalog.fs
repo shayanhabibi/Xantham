@@ -463,6 +463,19 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 // Intrinsic checker types are shared by unrelated exports. Their aliases
                 // belong to the individual declaration, never the aggregate export handles.
                 None
+            | Some facts when
+                (facts.Response.ObjectFlags
+                 |> ValueOption.exists (fun flags ->
+                     flags.HasFlag ObjectFlags.Mapped && flags.HasFlag ObjectFlags.Instantiated))
+                && facts.Members.IsEmpty
+                && facts.IndexInfos.IsEmpty
+                && facts.MappedRecord.IsNone
+                ->
+                // An instantiated mapped type with unresolved members is keyed by nothing but its
+                // declaration, which every instantiation shares: `{ [P in keyof T]?: U[] }` over
+                // `T` and over `output<T>` would claim one identity. It has none, so the
+                // declaration reading it is keyed by its own alias.
+                None
             | Some facts ->
                 let flags = facts.Response.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
@@ -1737,23 +1750,44 @@ let internal applyWithProducer
                 owned
                 |> List.groupBy _.Identity
                 |> List.map (fun (identity, entries) ->
+                    // The least constrained declaration is the canonical one: an application of
+                    // one alias over a use site's constrained parameter is that alias with the
+                    // use site's bound added, which an abbreviation of the canonical can carry.
+                    let constrainedCount (entry: Declaration) =
+                        entry.Constraints
+                        |> Array.filter (fun bound -> bound <> Canonical.option id None)
+                        |> Array.length
+
                     let entries =
                         entries
                         |> List.sortBy (fun entry ->
                             let name = localName entry
-                            not (Set.contains name exportedNames), name.Split('.').Length, name)
+
+                            constrainedCount entry,
+                            not (Set.contains name exportedNames),
+                            name.Split('.').Length,
+                            name)
 
                     let canonical = List.head entries
+
+                    // Every bound the canonical declares, the entry declares too.
+                    let narrows (entry: Declaration) =
+                        entry.Constraints.Length = canonical.Constraints.Length
+                        && Array.forall2
+                            (fun (canonicalBound: string) entryBound ->
+                                canonicalBound = Canonical.option id None || canonicalBound = entryBound)
+                            canonical.Constraints
+                            entry.Constraints
 
                     for entry in List.tail entries do
                         if
                             entry.Arity <> canonical.Arity
-                            || entry.Constraints <> canonical.Constraints
+                            || not (narrows entry)
                             || entry.Sources <> canonical.Sources
                             || entry.Api <> canonical.Api
                         then
                             fail
-                                $"incompatible F# declarations claim identity {identity}: {canonical.FSharpName}, {entry.FSharpName} (arity {canonical.Arity}/{entry.Arity}, constraints {canonical.Constraints = entry.Constraints}, sources {canonical.Sources.Length}/{entry.Sources.Length})"
+                                $"incompatible F# declarations claim identity {identity}: {canonical.FSharpName}, {entry.FSharpName} (arity {canonical.Arity}/{entry.Arity}, constraints {canonical.Constraints = entry.Constraints}, sources {canonical.Sources.Length}/{entry.Sources.Length}, api {canonical.Api = entry.Api})"
 
                     canonical, List.tail entries |> List.map (fun entry -> localName entry, canonical))
                 |> List.unzip

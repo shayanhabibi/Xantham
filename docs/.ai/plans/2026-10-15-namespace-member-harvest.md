@@ -999,8 +999,8 @@ In `CatalogCompatibility.test.fs`, change the `"the current contract pins every 
 expectation (`:47-48`) to:
 
 ```fsharp
-                (1, 6, 9, 3, 1)
-                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 9 nests namespace members under their namespaces; inference 3 preserves source contracts at the width cutoff"
+                (1, 7, 9, 3, 1)
+                "identity 7 keys an alias over an instantiated mapped type by its own declaration; API 9 nests namespace members under their namespaces; inference 3 preserves source contracts at the width cutoff"
 ```
 
 and add after it:

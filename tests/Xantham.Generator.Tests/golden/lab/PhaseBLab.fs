@@ -129,8 +129,8 @@ module RoundRectShape =
 /// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Shape =
-    | [<CompiledName("circle")>] Circle of radius: float
-    | [<CompiledName("round-rect")>] RoundRect of width: float * height: float * radius: float
+    | [<CompiledName("circle"); Fickl.Core.InlineInterface>] Circle of CircleShape
+    | [<CompiledName("round-rect"); Fickl.Core.InlineInterface>] RoundRect of RoundRectShape
 
 /// <summary>
 /// A generic declaration, referenced from its own members (§4.9).

@@ -262,10 +262,10 @@ let renderTests =
                               Tag = "kind"
                               Cases =
                                 [ { Name = "Circle"
-                                    CompiledName = Some "circle"; CaseTest = None
+                                    CompiledName = Some "circle"; CaseTest = None; Inlines = false
                                     Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsFloat; Literal = None } ]
                                     Create = None }
-                                  { Name = "Blank"; CompiledName = None; CaseTest = None; Fields = []; Create = None } ] } ] }
+                                  { Name = "Blank"; CompiledName = None; CaseTest = None; Inlines = false; Fields = []; Create = None } ] } ] }
 
             let source = renderAll model |> Map.find "TestPkg.fs"
 
@@ -294,7 +294,7 @@ let renderTests =
                       Tag = "kind"
                       Cases =
                         [ { Name = "Circle"
-                            CompiledName = Some "circle"; CaseTest = None
+                            CompiledName = Some "circle"; CaseTest = None; Inlines = false
                             Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]
                             Create = None } ] }
 
@@ -326,13 +326,13 @@ let renderTests =
                               Tag = "verb"
                               Cases =
                                 [ { Name = "Start"
-                                    CompiledName = Some "start"; CaseTest = None
+                                    CompiledName = Some "start"; CaseTest = None; Inlines = false
                                     Fields =
                                       [ field "channel" "" (Some(LitString "bus"))
                                         field "at" "When it started." None
                                         field "note" "" None ]
                                     Create = None }
-                                  { Name = "Stop"; CompiledName = Some "stop"; CaseTest = None; Fields = [ field "reason" "" None ]; Create = None } ] } ] }
+                                  { Name = "Stop"; CompiledName = Some "stop"; CaseTest = None; Inlines = false; Fields = [ field "reason" "" None ]; Create = None } ] } ] }
 
             let source = renderAll model |> Map.find "TestPkg.fs"
 
@@ -367,14 +367,14 @@ let renderTests =
                               Tag = "verb"
                               Cases =
                                 [ { Name = "Start"
-                                    CompiledName = Some "start"; CaseTest = None
+                                    CompiledName = Some "start"; CaseTest = None; Inlines = false
                                     Fields = [ field "channel" FsString (Some(LitString "bus")); field "at" FsFloat None ]
                                     Create = Some "CreateStart" }
                                   { Name = "Stop"
-                                    CompiledName = Some "stop"; CaseTest = None
+                                    CompiledName = Some "stop"; CaseTest = None; Inlines = false
                                     Fields = [ field "reason" (FsOption FsString) None; field "code" FsFloat None ]
                                     Create = Some "CreateStop" }
-                                  { Name = "Halt"; CompiledName = Some "halt"; CaseTest = None; Fields = []; Create = None } ] } ] }
+                                  { Name = "Halt"; CompiledName = Some "halt"; CaseTest = None; Inlines = false; Fields = []; Create = None } ] } ] }
 
             let source = renderAll model |> Map.find "TestPkg.fs"
 

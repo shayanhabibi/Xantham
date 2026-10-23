@@ -3,8 +3,8 @@
   "package": "tagged-arm-lab",
   "module": "TaggedArmLab",
   "counts": {
-    "exact": 15,
-    "ergonomic": 89,
+    "exact": 16,
+    "ergonomic": 88,
     "widened": 5,
     "escape": 0
   },
@@ -16,9 +16,9 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 52,
-      "exact": 34,
-      "ergonomic": 14,
+      "total": 55,
+      "exact": 38,
+      "ergonomic": 13,
       "widened": 4
     },
     {

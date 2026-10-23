@@ -194,6 +194,7 @@ module FindingCodes =
             "DT.CaseCreateSynthesized", "DT005"
             "DT.CaseCreateNameTaken", "DT006"
             "DT.ArmsSeparatedByCaseTest", "DT008"
+            "DT.CaseInlinesInterface", "DT009"
             "SY.InstantiationNamedOnce", "SY001"
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
@@ -873,6 +874,10 @@ type DetectTaggedUnions =
     /// Arms sharing a tag value are each a case of their own, matched by the tag and then by
     /// the case's `[<CaseTest>]`.
     | [<Exact>] ArmsSeparatedByCaseTest of tag: string * value: string
+    /// The case's one field is the arm's interface, which `[<InlineInterface>]` compiles as the
+    /// arm itself with the tag set: a value of the interface constructs the case, and reading
+    /// the field returns the union value.
+    | [<Exact>] CaseInlinesInterface of arm: string
 
     interface IFindingKind with
         member this.Message =
@@ -888,6 +893,7 @@ type DetectTaggedUnions =
             | CaseCreateNameTaken create -> $"no case Create: '{create}' is already a case of the union"
             | ArmsSeparatedByCaseTest(tag, value) ->
                 $"arms sharing '{tag}' = '{value}' are separate cases, each matched by a CaseTest"
+            | CaseInlinesInterface arm -> $"case carries the arm interface '{arm}' whole (InlineInterface)"
 
 /// `name-exports`.
 [<Prefix("NE", "name-exports")>]

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "889f38b1edf1c1081f82f593d8df681736f992cebf394f422e1b3a6368fb6164",
+  "generator": "4ec3787a5ddb997500cdaa83162aa6232d24f9e25a2a499b9d8c45948d8f80e2",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -535277,7 +535277,7 @@
       "fSharpName": "Fable.Core.TS.Es.ClassMemberDecoratorContext",
       "arity": 0,
       "constraints": [],
-      "api": "7f0895237feee413f71a3e5b899d5eb7fb81d715a9bfce10963ccf9baa7c2c08",
+      "api": "e1edf9b3a8b68047016bf7607ee4ef73048bef192b898c341260648f6d438546",
       "owner": "FableCoreTsInput"
     },
     {
@@ -537410,7 +537410,7 @@
       "fSharpName": "Fable.Core.TS.Es.DecoratorContext",
       "arity": 0,
       "constraints": [],
-      "api": "5176b45971f3745e83b40fdc2fd8bbe66d2db1ded7cf5b08ebb52fd580b4ee81",
+      "api": "d1f6d9d9c5438fcbdaeadd54ddd0ab22ff39a8796b891cd4e11ba8fa9196eb37",
       "owner": "FableCoreTsInput"
     },
     {
@@ -560798,9 +560798,9 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "7a3e2f78ba7d802eae467593302707963a1d0d26acc79568bbb2710e47bb10ac",
+      "identity": "de76bd1511f9add782438479a089244fa88d035460cb06ff019fa3effcf95cea",
       "handles": [
-        "typescript@7.1.0-beta/lib/lib.es5.d.ts#6609.202"
+        "typescript@7.1.0-beta/lib/lib.es5.d.ts#6679.267"
       ],
       "sources": [
         {
@@ -560811,7 +560811,7 @@
           "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
         }
       ],
-      "role": "type",
+      "role": "alias",
       "fSharpName": "Fable.Core.TS.Es.Omit",
       "arity": 2,
       "constraints": [
@@ -564252,7 +564252,7 @@
       "constraints": [
         "none"
       ],
-      "api": "ff2cecf4b024afd59a30df03629a10e6d12b938aca117d07c57cbd90f807080b",
+      "api": "557f68350e4b31ae53f6f41c6623b672491b523581cabf75910ab44872064f9c",
       "owner": "FableCoreTsInput"
     },
     {
@@ -582335,7 +582335,7 @@
     "apiVersion": 8,
     "contractVersion": 1,
     "customizationVersion": 1,
-    "identityVersion": 6,
+    "identityVersion": 7,
     "inferenceVersion": 3,
     "compiler": {
       "astProtocolVersion": 9,

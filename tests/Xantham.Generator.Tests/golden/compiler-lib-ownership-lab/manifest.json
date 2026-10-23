@@ -16,8 +16,10 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 2,
-      "ergonomic": 2
+      "total": 35,
+      "exact": 13,
+      "ergonomic": 4,
+      "widened": 18
     },
     {
       "pass": "shape-callbacks",
@@ -34,9 +36,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 50,
-      "ergonomic": 14,
-      "widened": 31,
+      "total": 44,
+      "ergonomic": 10,
+      "widened": 29,
       "escape": 5
     },
     {

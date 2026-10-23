@@ -90074,8 +90074,8 @@ module Dns =
     /// <remarks>@deprecated Use <c>AnyARecord</c> or <c>AnyAaaaRecord</c> instead.</remarks>
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type AnyRecordWithTtl =
-        | A of address: string * ttl: float
-        | AAAA of address: string * ttl: float
+        | [<Fickl.Core.InlineInterface>] A of AnyARecord
+        | [<Fickl.Core.InlineInterface>] AAAA of AnyAaaaRecord
 
     [<Interface>]
     type AnyARecord =
@@ -90362,49 +90362,18 @@ module Dns =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type AnyRecord =
-        | A of address: string * ttl: float
-        | AAAA of address: string * ttl: float
-        | CAA of
-            critical: float *
-            issue: string option *
-            issuewild: string option *
-            iodef: string option *
-            contactemail: string option *
-            contactphone: string option
-        | CNAME of value: string
-        | MX of priority: float * exchange: string
-        | NAPTR of
-            flags: string *
-            service: string *
-            regexp: string *
-            replacement: string *
-            order: float *
-            preference: float
-        | NS of value: string
-        | PTR of value: string
-        | SOA of
-            nsname: string *
-            hostmaster: string *
-            serial: float *
-            refresh: float *
-            retry: float *
-            expire: float *
-            minttl: float
-        | SRV of priority: float * weight: float * port: float * name: string
-        | TLSA of certUsage: float * selector: float * ``match``: float * data: Fable.Core.TS.Es.ArrayBuffer
-        | TXT of entries: string[]
-
-        [<ParamObject; Emit("({ type: 'CAA', ...$0 })")>]
-        static member CreateCAA
-            (
-                critical: float,
-                ?issue: string,
-                ?issuewild: string,
-                ?iodef: string,
-                ?contactemail: string,
-                ?contactphone: string
-            ) : AnyRecord =
-            jsNative
+        | [<Fickl.Core.InlineInterface>] A of AnyARecord
+        | [<Fickl.Core.InlineInterface>] AAAA of AnyAaaaRecord
+        | [<Fickl.Core.InlineInterface>] CAA of AnyCaaRecord
+        | [<Fickl.Core.InlineInterface>] CNAME of AnyCnameRecord
+        | [<Fickl.Core.InlineInterface>] MX of AnyMxRecord
+        | [<Fickl.Core.InlineInterface>] NAPTR of AnyNaptrRecord
+        | [<Fickl.Core.InlineInterface>] NS of AnyNsRecord
+        | [<Fickl.Core.InlineInterface>] PTR of AnyPtrRecord
+        | [<Fickl.Core.InlineInterface>] SOA of AnySoaRecord
+        | [<Fickl.Core.InlineInterface>] SRV of AnySrvRecord
+        | [<Fickl.Core.InlineInterface>] TLSA of AnyTlsaRecord
+        | [<Fickl.Core.InlineInterface>] TXT of AnyTxtRecord
 
     [<Interface>]
     type ResolverOptions =
@@ -152061,32 +152030,8 @@ module Os =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("family", CaseRules.None)>]
     type NetworkInterfaceInfo =
-        | IPv4 of
-            address: string *
-            netmask: string *
-            mac: string *
-            ``internal``: bool *
-            cidr: string option *
-            scopeid: float option
-        | IPv6 of
-            scopeid: float *
-            address: string *
-            netmask: string *
-            mac: string *
-            ``internal``: bool *
-            cidr: string option
-
-        [<ParamObject; Emit("({ family: 'IPv4', ...$0 })")>]
-        static member CreateIPv4
-            (address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string, ?scopeid: float)
-            : NetworkInterfaceInfo =
-            jsNative
-
-        [<ParamObject; Emit("({ family: 'IPv6', ...$0 })")>]
-        static member CreateIPv6
-            (scopeid: float, address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string)
-            : NetworkInterfaceInfo =
-            jsNative
+        | [<Fickl.Core.InlineInterface>] IPv4 of NetworkInterfaceInfoIPv4
+        | [<Fickl.Core.InlineInterface>] IPv6 of NetworkInterfaceInfoIPv6
 
     [<Interface>]
     type UserInfoOptions =

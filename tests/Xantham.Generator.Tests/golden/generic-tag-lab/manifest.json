@@ -16,8 +16,8 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 11,
-      "exact": 11
+      "total": 13,
+      "exact": 13
     },
     {
       "pass": "SI - shape-interfaces",

@@ -155,12 +155,25 @@ module Es =
     /// <summary>
     /// The decorator context types provided to class element decorators.
     /// </summary>
-    type ClassMemberDecoratorContext = U5<ClassAccessorDecoratorContext<obj, obj>, ClassFieldDecoratorContext<obj, obj>, ClassGetterDecoratorContext<obj, obj>, ClassMethodDecoratorContext<obj, (obj -> obj)>, ClassSetterDecoratorContext<obj, obj>>
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+    type ClassMemberDecoratorContext =
+        | [<CompiledName("accessor"); Fickl.Core.InlineInterface>] Accessor of ClassAccessorDecoratorContext<obj, obj>
+        | [<CompiledName("field"); Fickl.Core.InlineInterface>] Field of ClassFieldDecoratorContext<obj, obj>
+        | [<CompiledName("getter"); Fickl.Core.InlineInterface>] Getter of ClassGetterDecoratorContext<obj, obj>
+        | [<CompiledName("method"); Fickl.Core.InlineInterface>] Method of ClassMethodDecoratorContext<obj, (obj -> obj)>
+        | [<CompiledName("setter"); Fickl.Core.InlineInterface>] Setter of ClassSetterDecoratorContext<obj, obj>
 
     /// <summary>
     /// The decorator context types provided to any decorator.
     /// </summary>
-    type DecoratorContext = U6<ClassAccessorDecoratorContext<obj, obj>, ClassDecoratorContext<DecoratorContext.ItemConstructor>, ClassFieldDecoratorContext<obj, obj>, ClassGetterDecoratorContext<obj, obj>, ClassMethodDecoratorContext<obj, (obj -> obj)>, ClassSetterDecoratorContext<obj, obj>>
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+    type DecoratorContext =
+        | [<CompiledName("accessor"); Fickl.Core.InlineInterface>] Accessor of ClassAccessorDecoratorContext<obj, obj>
+        | [<CompiledName("class"); Fickl.Core.InlineInterface>] Class of ClassDecoratorContext<DecoratorContext.ItemConstructor>
+        | [<CompiledName("field"); Fickl.Core.InlineInterface>] Field of ClassFieldDecoratorContext<obj, obj>
+        | [<CompiledName("getter"); Fickl.Core.InlineInterface>] Getter of ClassGetterDecoratorContext<obj, obj>
+        | [<CompiledName("method"); Fickl.Core.InlineInterface>] Method of ClassMethodDecoratorContext<obj, (obj -> obj)>
+        | [<CompiledName("setter"); Fickl.Core.InlineInterface>] Setter of ClassSetterDecoratorContext<obj, obj>
 
     type DecoratorMetadataObject = obj
 

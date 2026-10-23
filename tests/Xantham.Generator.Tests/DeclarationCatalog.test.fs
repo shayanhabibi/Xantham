@@ -35,7 +35,7 @@ let internal compileConsumer directory sources (consumer: string) =
     File.WriteAllText(Path.Combine(directory, "Consumer.fsproj"), $"""<Project Sdk="Microsoft.NET.Sdk">
 <PropertyGroup><TargetFramework>net10.0</TargetFramework><NuGetAudit>false</NuGetAudit></PropertyGroup>
 <ItemGroup>{includes}<Compile Include="Consumer.fs"/></ItemGroup>
-<ItemGroup><PackageReference Include="Fable.Core" Version="5.2.0"/></ItemGroup>
+<ItemGroup><PackageReference Include="Fable.Core" Version="5.5.0"/></ItemGroup>
 <ItemGroup><ProjectReference Include="{coreTs}"/></ItemGroup>
 </Project>""")
     let start = ProcessStartInfo("dotnet")
@@ -493,8 +493,8 @@ export interface Late {next:Middle}
         let code, output = compileConsumer directory ["Identity.Root.fs"] """module Consumer
 let read (api: Identity.Root.Api) : string =
     match api.run() with
-    | Identity.Root.Outcome.Ok value -> value
-    | Identity.Root.Outcome.Err message -> message
+    | Identity.Root.Outcome.Ok ok -> ok.value
+    | Identity.Root.Outcome.Err err -> err.message
 let nested (value: Identity.Root.Nested) (request: Identity.Root.Request<Fable.Core.U2<Identity.Root.Other, Identity.Root.Location<obj>>>) : Fable.Core.U2<Identity.Root.Other, Identity.Root.Location<obj>> =
     value.fetcher.fetch(request).cf
 let early (value: Identity.Root.Early) : string = value.prop.Value.value

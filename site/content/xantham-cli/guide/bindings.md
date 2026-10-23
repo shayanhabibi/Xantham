@@ -22,6 +22,10 @@ packages, add `--prerelease` to the corresponding install commands.
 Bindings target **Fable 5.x**. Use **net8.0 or later** for the F# project:
 generated object builders can use static interface members with bodies.
 
+Compile bindings that carry `[<Fickl.Core.InlineInterface>]` with **Fickl 0.5.3**.
+Xantham's support package depends on Fickl.Core 0.5.3, which supplies that attribute.
+`CaseTest` comes from Fable.Core 5.5.0.
+
 ## Include files in order
 
 Add the output to your `.fsproj` before the application files that use it.

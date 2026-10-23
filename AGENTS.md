@@ -31,7 +31,9 @@ A compile gate is only evidence if it compiles against what a consumer will: `Fa
 `typescript` 7.x pin in `package.json`, which supplies both the producer's `lib.*.d.ts` and the
 live `tsc --api` server.
 
-`Fable.Core` 5.5.0 supplies `CaseTest` from nuget.org.
+`Fable.Core` supplies `CaseTest`; the public `Fickl.Core` package supplies
+`Fickl.Core.InlineInterfaceAttribute` through the support project's dependency. Keep that
+dependency transitive for generated bindings and DLL consumers.
 
 JavaScript runtime gates use Fickl, pinned in `.config/dotnet-tools.json`. Restore with
 `dotnet tool restore` and compile with `dotnet fickl`; `build.fsx -- test --run-gate`

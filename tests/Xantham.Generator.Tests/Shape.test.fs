@@ -4361,16 +4361,11 @@ let shapePassTests =
 
             Expect.equal (findings |> List.map _.Tier) [ Exact ] "a tagged union costs no fidelity"
 
-        testCase "detect-tagged-unions leaves an arm that is not plain data alone" <| fun _ ->
-            let method' id =
-                { Build.facts (Build.typeResponse id TypeFlags.Object) with
-                    CallSignatures = [ Build.signature [] 4 ] }
-
+        testCase "detect-tagged-unions leaves a callable arm alone" <| fun _ ->
             let arm id tag =
                 { Build.facts (Build.typeResponse id TypeFlags.Object) with
-                    Members =
-                        [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag
-                          Build.resolvedMember (Build.symbol (id * 10 + 1) "run" SymbolFlags.Method) 30 ] }
+                    Members = [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag ]
+                    CallSignatures = [ Build.signature [] 4 ] }
 
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20<typeId>; 21<typeId> ] }
@@ -4378,7 +4373,6 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (
                       union
-                      :: method' 30
                       :: arm 20 7
                       :: arm 21 8
                       :: stringLiteral 7 "a"
@@ -4391,7 +4385,7 @@ let shapePassTests =
 
             Expect.isEmpty
                 (shaped.Decls |> List.choose (function FsTaggedUnion d -> Some d | _ -> None))
-                "a method has no case-field form, so the erased union stands"
+                "a callable arm has no case form, so the erased union stands"
 
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the missed match is reported"
 
@@ -4584,7 +4578,7 @@ let shapePassTests =
                                 Order = None
                                 TypeParameters = [ { Name = "T"; Constraint = None } ]
                                 Tag = "kind"
-                                Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]; Create = None } ] }
+                                Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Inlines = false; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]; Create = None } ] }
                           FsInterface
                               { Name = "Holder"
                                 Docs = ""

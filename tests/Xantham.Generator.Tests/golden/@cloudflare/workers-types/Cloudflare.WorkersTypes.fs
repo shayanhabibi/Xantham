@@ -1039,9 +1039,9 @@ module HibernatableWebSocketEventInfo =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Info =
-        | [<CompiledName("close")>] Close of code: float * wasClean: bool
-        | [<CompiledName("error")>] Error
-        | [<CompiledName("message")>] Message
+        | [<CompiledName("close"); Fickl.Core.InlineInterface>] Close of HibernatableWebSocketEventInfoClose
+        | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of HibernatableWebSocketEventInfoError
+        | [<CompiledName("message"); Fickl.Core.InlineInterface>] Message of HibernatableWebSocketEventInfoMessage
 
 [<Interface>]
 type HibernatableWebSocketEventInfoClose =
@@ -1118,18 +1118,16 @@ module Onset =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Info =
-        | [<CompiledName("alarm")>] Alarm of scheduledTime: Fable.Core.TS.Es.Date
-        | [<CompiledName("connect")>] Connect
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("email")>] Email of mailFrom: string * rcptTo: string * rawSize: float
-        | [<CompiledName("fetch")>] Fetch of ``method``: string * url: string * cfJson: obj option * headers: Header[]
-        | [<CompiledName("hibernatableWebSocket")>] HibernatableWebSocket of info: Cloudflare.WorkersTypes.HibernatableWebSocketEventInfo.Info
-        | [<CompiledName("jsrpc")>] Jsrpc
-        | [<CompiledName("queue")>] Queue of queueName: string * batchSize: float
-        | [<CompiledName("scheduled")>] Scheduled of scheduledTime: Fable.Core.TS.Es.Date * cron: string
-        | [<CompiledName("trace")>] Trace of traces: string option[]
-        [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
-        static member CreateFetch (``method``: string, url: string, headers: Header[], ?cfJson: obj) : Info = jsNative
+        | [<CompiledName("alarm"); Fickl.Core.InlineInterface>] Alarm of AlarmEventInfo
+        | [<CompiledName("connect"); Fickl.Core.InlineInterface>] Connect of ConnectEventInfo
+        | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of CustomEventInfo
+        | [<CompiledName("email"); Fickl.Core.InlineInterface>] Email of EmailEventInfo
+        | [<CompiledName("fetch"); Fickl.Core.InlineInterface>] Fetch of FetchEventInfo
+        | [<CompiledName("hibernatableWebSocket"); Fickl.Core.InlineInterface>] HibernatableWebSocket of HibernatableWebSocketEventInfo
+        | [<CompiledName("jsrpc"); Fickl.Core.InlineInterface>] Jsrpc of JsRpcEventInfo
+        | [<CompiledName("queue"); Fickl.Core.InlineInterface>] Queue of QueueEventInfo
+        | [<CompiledName("scheduled"); Fickl.Core.InlineInterface>] Scheduled of ScheduledEventInfo
+        | [<CompiledName("trace"); Fickl.Core.InlineInterface>] Trace of TraceEventInfo
 
 [<Interface>]
 type Outcome =
@@ -7513,10 +7511,10 @@ module ChatCompletionContentPartRefusal =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionContentPart =
-    | [<CompiledName("file")>] File of file: ChatCompletionContentPartFile.File
-    | [<CompiledName("image_url")>] ImageUrl of image_url: ChatCompletionContentPartImage.ImageUrl
-    | [<CompiledName("input_audio")>] InputAudio of input_audio: ChatCompletionContentPartInputAudio.InputAudio
-    | [<CompiledName("text")>] Text of text: string
+    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of ChatCompletionContentPartFile
+    | [<CompiledName("image_url"); Fickl.Core.InlineInterface>] ImageUrl of ChatCompletionContentPartImage
+    | [<CompiledName("input_audio"); Fickl.Core.InlineInterface>] InputAudio of ChatCompletionContentPartInputAudio
+    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of ChatCompletionContentPartText
 
 [<Interface>]
 type FunctionDefinition =
@@ -7580,8 +7578,8 @@ module ChatCompletionCustomToolTextFormat =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionCustomToolFormat =
-    | [<CompiledName("grammar")>] Grammar of grammar: ChatCompletionCustomToolGrammarFormat.Grammar
-    | [<CompiledName("text")>] Text
+    | [<CompiledName("grammar"); Fickl.Core.InlineInterface>] Grammar of ChatCompletionCustomToolGrammarFormat
+    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of ChatCompletionCustomToolTextFormat
 
 [<Interface>]
 type ChatCompletionCustomTool =
@@ -7606,8 +7604,8 @@ module ChatCompletionCustomTool =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionTool =
-    | [<CompiledName("custom")>] Custom of custom: ChatCompletionCustomTool.Custom
-    | [<CompiledName("function")>] Function of ``function``: FunctionDefinition
+    | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of ChatCompletionCustomTool
+    | [<CompiledName("function"); Fickl.Core.InlineInterface>] Function of ChatCompletionFunctionTool
 
 [<Interface>]
 type ChatCompletionMessageFunctionToolCall =
@@ -7656,8 +7654,8 @@ module ChatCompletionMessageCustomToolCall =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ChatCompletionMessageToolCall =
-    | [<CompiledName("custom")>] Custom of id: string * custom: ChatCompletionMessageCustomToolCall.Custom
-    | [<CompiledName("function")>] Function of id: string * ``function``: ChatCompletionMessageFunctionToolCall.Function
+    | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of ChatCompletionMessageCustomToolCall
+    | [<CompiledName("function"); Fickl.Core.InlineInterface>] Function of ChatCompletionMessageFunctionToolCall
 
 [<Interface>]
 type ChatCompletionToolChoiceFunction =
@@ -7895,20 +7893,12 @@ module FunctionMessage =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("role", CaseRules.None)>]
 type ChatCompletionMessageParam =
-    | [<CompiledName("assistant")>] Assistant of content: U2<string, AssistantMessageContentPart[]> option * refusal: string option * name: string option * audio: AssistantMessage.Audio option * tool_calls: ChatCompletionMessageToolCall[] option * function_call: AssistantMessage.FunctionCall option
-    | [<CompiledName("developer")>] Developer of content: U2<string, DeveloperMessage.Content.Item[]> * name: string option
-    | [<CompiledName("function")>] Function of content: string * name: string
-    | [<CompiledName("system")>] System of content: U2<string, SystemMessage.Content.Item[]> * name: string option
-    | [<CompiledName("tool")>] Tool of content: U2<string, ToolMessage.Content.Item[]> * tool_call_id: string
-    | [<CompiledName("user")>] User of content: U2<string, UserMessageContentPart[]> * name: string option
-    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
-    static member CreateAssistant (?content: U2<string, AssistantMessageContentPart[]>, ?refusal: string, ?name: string, ?audio: AssistantMessage.Audio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: AssistantMessage.FunctionCall) : ChatCompletionMessageParam = jsNative
-    [<ParamObject; Emit("({ role: 'developer', ...$0 })")>]
-    static member CreateDeveloper (content: U2<string, DeveloperMessage.Content.Item[]>, ?name: string) : ChatCompletionMessageParam = jsNative
-    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
-    static member CreateSystem (content: U2<string, SystemMessage.Content.Item[]>, ?name: string) : ChatCompletionMessageParam = jsNative
-    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
-    static member CreateUser (content: U2<string, UserMessageContentPart[]>, ?name: string) : ChatCompletionMessageParam = jsNative
+    | [<CompiledName("assistant"); Fickl.Core.InlineInterface>] Assistant of AssistantMessage
+    | [<CompiledName("developer"); Fickl.Core.InlineInterface>] Developer of DeveloperMessage
+    | [<CompiledName("function"); Fickl.Core.InlineInterface>] Function of FunctionMessage
+    | [<CompiledName("system"); Fickl.Core.InlineInterface>] System of SystemMessage
+    | [<CompiledName("tool"); Fickl.Core.InlineInterface>] Tool of ToolMessage
+    | [<CompiledName("user"); Fickl.Core.InlineInterface>] User of UserMessage
 
 [<Interface>]
 type ChatCompletionsResponseFormatText =
@@ -7958,9 +7948,9 @@ module ResponseFormatJSONSchema =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFormat =
-    | [<CompiledName("json_object")>] JsonObject
-    | [<CompiledName("text")>] Text
-    | [<CompiledName("json_schema")>] JsonSchema of json_schema: ResponseFormatJSONSchema.JsonSchema
+    | [<CompiledName("json_object"); Fickl.Core.InlineInterface>] JsonObject of ChatCompletionsResponseFormatJSONObject
+    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of ChatCompletionsResponseFormatText
+    | [<CompiledName("json_schema"); Fickl.Core.InlineInterface>] JsonSchema of ResponseFormatJSONSchema
 
 [<Interface>]
 type ChatCompletionsStreamOptions =
@@ -8327,17 +8317,11 @@ type Reasoning =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseContent =
-    | [<CompiledName("reasoning_text")>] ReasoningText of text: string
-    /// <param name="detail"></param>
-    /// <param name="image_url">Base64 encoded image</param>
-    | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail * image_url: string option
-    | [<CompiledName("input_text")>] InputText of text: string
-    | [<CompiledName("refusal")>] Refusal of refusal: string
-    | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
-    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
-    static member CreateInputImage (detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseContent = jsNative
-    [<ParamObject; Emit("({ type: 'output_text', ...$0 })")>]
-    static member CreateOutputText (text: string, ?logprobs: Logprob[]) : ResponseContent = jsNative
+    | [<CompiledName("reasoning_text"); Fickl.Core.InlineInterface>] ReasoningText of ResponseContentReasoningText
+    | [<CompiledName("input_image"); Fickl.Core.InlineInterface>] InputImage of ResponseInputImage
+    | [<CompiledName("input_text"); Fickl.Core.InlineInterface>] InputText of ResponseInputText
+    | [<CompiledName("refusal"); Fickl.Core.InlineInterface>] Refusal of ResponseOutputRefusal
+    | [<CompiledName("output_text"); Fickl.Core.InlineInterface>] OutputText of ResponseOutputText
 
 [<Interface>]
 type ResponseContentReasoningText =
@@ -8450,11 +8434,9 @@ module ResponseFormatJSONObject =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFormatTextConfig =
-    | [<CompiledName("json_object")>] JsonObject
-    | [<CompiledName("text")>] Text
-    | [<CompiledName("json_schema")>] JsonSchema of name: string * schema: JS.Record<string, obj> * description: string option * strict: bool option
-    [<ParamObject; Emit("({ type: 'json_schema', ...$0 })")>]
-    static member CreateJsonSchema (name: string, schema: JS.Record<string, obj>, ?description: string, ?strict: bool) : ResponseFormatTextConfig = jsNative
+    | [<CompiledName("json_object"); Fickl.Core.InlineInterface>] JsonObject of ResponseFormatJSONObject
+    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of ResponseFormatText
+    | [<CompiledName("json_schema"); Fickl.Core.InlineInterface>] JsonSchema of ResponseFormatTextJSONSchemaConfig
 
 [<Interface>]
 type ResponseFormatTextJSONSchemaConfig =
@@ -8507,12 +8489,8 @@ module ResponseFunctionCallArgumentsDoneEvent =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFunctionCallOutputItem =
-    /// <param name="detail"></param>
-    /// <param name="image_url">Base64 encoded image</param>
-    | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail option * image_url: string option
-    | [<CompiledName("input_text")>] InputText of text: string
-    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
-    static member CreateInputImage (?detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseFunctionCallOutputItem = jsNative
+    | [<CompiledName("input_image"); Fickl.Core.InlineInterface>] InputImage of ResponseInputImageContent
+    | [<CompiledName("input_text"); Fickl.Core.InlineInterface>] InputText of ResponseInputTextContent
 
 type ResponseFunctionCallOutputItemList = ResponseFunctionCallOutputItem[]
 
@@ -8585,12 +8563,8 @@ type ResponseInput = ResponseInputItem[]
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseInputContent =
-    /// <param name="detail"></param>
-    /// <param name="image_url">Base64 encoded image</param>
-    | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail * image_url: string option
-    | [<CompiledName("input_text")>] InputText of text: string
-    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
-    static member CreateInputImage (detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseInputContent = jsNative
+    | [<CompiledName("input_image"); Fickl.Core.InlineInterface>] InputImage of ResponseInputImage
+    | [<CompiledName("input_text"); Fickl.Core.InlineInterface>] InputText of ResponseInputText
 
 [<Interface>]
 type ResponseInputImage =
@@ -8695,19 +8669,9 @@ type ResponseItem = U4<ResponseFunctionToolCallItem, ResponseFunctionToolCallOut
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseOutputItem =
-    | [<CompiledName("function_call")>] FunctionCall of arguments: string * call_id: string * name: string * id: string option * status: ResponseFunctionToolCall.Status option
-    /// <param name="id"></param>
-    /// <param name="content"></param>
-    /// <param name="role">TypeScript type: <c>"assistant"</c></param>
-    /// <param name="status"></param>
-    | [<CompiledName("message")>] Message of id: string * content: ResponseOutputMessage.Content.Item[] * role: string * status: ResponseFunctionToolCall.Status
-    | [<CompiledName("reasoning")>] Reasoning of id: string * summary: ResponseReasoningSummaryItem[] * content: ResponseReasoningContentItem[] option * encrypted_content: string option * status: ResponseFunctionToolCall.Status option
-    [<ParamObject; Emit("({ type: 'function_call', ...$0 })")>]
-    static member CreateFunctionCall (arguments: string, call_id: string, name: string, ?id: string, ?status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
-    [<ParamObject; Emit("({ type: 'message', role: 'assistant', ...$0 })")>]
-    static member CreateMessage (id: string, content: ResponseOutputMessage.Content.Item[], status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
-    [<ParamObject; Emit("({ type: 'reasoning', ...$0 })")>]
-    static member CreateReasoning (id: string, summary: ResponseReasoningSummaryItem[], ?content: ResponseReasoningContentItem[], ?encrypted_content: string, ?status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
+    | [<CompiledName("function_call"); Fickl.Core.InlineInterface>] FunctionCall of ResponseFunctionToolCall
+    | [<CompiledName("message"); Fickl.Core.InlineInterface>] Message of ResponseOutputMessage
+    | [<CompiledName("reasoning"); Fickl.Core.InlineInterface>] Reasoning of ResponseReasoningItem
 
 [<Interface>]
 type ResponseOutputItemAddedEvent =
@@ -8762,10 +8726,8 @@ module ResponseOutputMessage =
     module Content =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
         type Item =
-            | [<CompiledName("refusal")>] Refusal of refusal: string
-            | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
-            [<ParamObject; Emit("({ type: 'output_text', ...$0 })")>]
-            static member CreateOutputText (text: string, ?logprobs: Logprob[]) : Item = jsNative
+            | [<CompiledName("refusal"); Fickl.Core.InlineInterface>] Refusal of ResponseOutputRefusal
+            | [<CompiledName("output_text"); Fickl.Core.InlineInterface>] OutputText of ResponseOutputText
 
 [<Interface>]
 type ResponseOutputRefusal =
@@ -8916,23 +8878,21 @@ type ResponseStatus =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseStreamEvent =
-    | [<CompiledName("response.completed")>] ResponseCompleted of response: Response * sequence_number: float
-    | [<CompiledName("response.created")>] ResponseCreated of response: Response * sequence_number: float
-    | [<CompiledName("error")>] Error of code: string option * message: string * param: string option * sequence_number: float
-    | [<CompiledName("response.failed")>] ResponseFailed of response: Response * sequence_number: float
-    | [<CompiledName("response.function_call_arguments.delta")>] ResponseFunctionCallArgumentsDelta of delta: string * item_id: string * output_index: float * sequence_number: float
-    | [<CompiledName("response.function_call_arguments.done")>] ResponseFunctionCallArgumentsDone of arguments: string * item_id: string * name: string * output_index: float * sequence_number: float
-    | [<CompiledName("response.incomplete")>] ResponseIncomplete of response: Response * sequence_number: float
-    | [<CompiledName("response.output_item.added")>] ResponseOutputItemAdded of item: ResponseOutputItem * output_index: float * sequence_number: float
-    | [<CompiledName("response.output_item.done")>] ResponseOutputItemDone of item: ResponseOutputItem * output_index: float * sequence_number: float
-    | [<CompiledName("response.reasoning_text.delta")>] ResponseReasoningTextDelta of content_index: float * delta: string * item_id: string * output_index: float * sequence_number: float
-    | [<CompiledName("response.reasoning_text.done")>] ResponseReasoningTextDone of content_index: float * item_id: string * output_index: float * sequence_number: float * text: string
-    | [<CompiledName("response.refusal.delta")>] ResponseRefusalDelta of content_index: float * delta: string * item_id: string * output_index: float * sequence_number: float
-    | [<CompiledName("response.refusal.done")>] ResponseRefusalDone of content_index: float * item_id: string * output_index: float * refusal: string * sequence_number: float
-    | [<CompiledName("response.output_text.delta")>] ResponseOutputTextDelta of content_index: float * delta: string * item_id: string * logprobs: Logprob[] * output_index: float * sequence_number: float
-    | [<CompiledName("response.output_text.done")>] ResponseOutputTextDone of content_index: float * item_id: string * logprobs: Logprob[] * output_index: float * sequence_number: float * text: string
-    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
-    static member CreateError (message: string, sequence_number: float, ?code: string, ?param: string) : ResponseStreamEvent = jsNative
+    | [<CompiledName("response.completed"); Fickl.Core.InlineInterface>] ResponseCompleted of ResponseCompletedEvent
+    | [<CompiledName("response.created"); Fickl.Core.InlineInterface>] ResponseCreated of ResponseCreatedEvent
+    | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of ResponseErrorEvent
+    | [<CompiledName("response.failed"); Fickl.Core.InlineInterface>] ResponseFailed of ResponseFailedEvent
+    | [<CompiledName("response.function_call_arguments.delta"); Fickl.Core.InlineInterface>] ResponseFunctionCallArgumentsDelta of ResponseFunctionCallArgumentsDeltaEvent
+    | [<CompiledName("response.function_call_arguments.done"); Fickl.Core.InlineInterface>] ResponseFunctionCallArgumentsDone of ResponseFunctionCallArgumentsDoneEvent
+    | [<CompiledName("response.incomplete"); Fickl.Core.InlineInterface>] ResponseIncomplete of ResponseIncompleteEvent
+    | [<CompiledName("response.output_item.added"); Fickl.Core.InlineInterface>] ResponseOutputItemAdded of ResponseOutputItemAddedEvent
+    | [<CompiledName("response.output_item.done"); Fickl.Core.InlineInterface>] ResponseOutputItemDone of ResponseOutputItemDoneEvent
+    | [<CompiledName("response.reasoning_text.delta"); Fickl.Core.InlineInterface>] ResponseReasoningTextDelta of ResponseReasoningTextDeltaEvent
+    | [<CompiledName("response.reasoning_text.done"); Fickl.Core.InlineInterface>] ResponseReasoningTextDone of ResponseReasoningTextDoneEvent
+    | [<CompiledName("response.refusal.delta"); Fickl.Core.InlineInterface>] ResponseRefusalDelta of ResponseRefusalDeltaEvent
+    | [<CompiledName("response.refusal.done"); Fickl.Core.InlineInterface>] ResponseRefusalDone of ResponseRefusalDoneEvent
+    | [<CompiledName("response.output_text.delta"); Fickl.Core.InlineInterface>] ResponseOutputTextDelta of ResponseTextDeltaEvent
+    | [<CompiledName("response.output_text.done"); Fickl.Core.InlineInterface>] ResponseOutputTextDone of ResponseTextDoneEvent
 
 [<Interface>]
 type ResponseCompletedEvent =
@@ -15911,9 +15871,9 @@ type IncomingRequestCfPropertiesCloudflareAccessOrApiShield =
     /// The property <c>certPresented</c> will be set to <c>"1"</c> when
     /// the object is populated (i.e. the above conditions were met).
     /// </summary>
-    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
+    abstract tlsClientAuth: IncomingRequestCfProperties.TlsClientAuth with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder>) : IncomingRequestCfPropertiesCloudflareAccessOrApiShield = jsNative
+    static member Create (tlsClientAuth: IncomingRequestCfProperties.TlsClientAuth) : IncomingRequestCfPropertiesCloudflareAccessOrApiShield = jsNative
 
 /// <summary>
 /// Metadata about the request's TLS handshake
@@ -25709,29 +25669,21 @@ module ExportedHandlerTailStreamHandler =
             module Event =
                 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
                 type Item =
-                    | [<CompiledName("attributes")>] Attributes of info: Attribute[]
-                    | [<CompiledName("diagnosticChannel")>] DiagnosticChannel of channel: string * message: obj
-                    | [<CompiledName("exception")>] Exception of name: string * message: string * stack: string option
-                    | [<CompiledName("onset")>] Onset of attributes: Attribute[] * spanId: string * dispatchNamespace: string option * entrypoint: string option * executionModel: string * durableObjectId: string option * scriptName: string option * scriptTags: string[] option * scriptVersion: TailStream.ScriptVersion option * preview: TailStream.TracePreviewInfo option * info: Onset.Info
-                    | [<CompiledName("outcome")>] Outcome of outcome: Outcome.Outcome * cpuTime: float * wallTime: float
-                    | [<CompiledName("return")>] Return of info: FetchResponseInfo option
-                    | [<CompiledName("spanClose")>] SpanClose of outcome: Outcome.Outcome
-                    | [<CompiledName("spanOpen")>] SpanOpen of name: string * spanId: string * info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
-                    | [<CompiledName("streamDiagnostic")>] StreamDiagnostic of diagnostic: DroppedEventsDiagnostic
+                    | [<CompiledName("attributes"); Fickl.Core.InlineInterface>] Attributes of Attributes
+                    | [<CompiledName("diagnosticChannel"); Fickl.Core.InlineInterface>] DiagnosticChannel of DiagnosticChannelEvent
+                    | [<CompiledName("exception"); Fickl.Core.InlineInterface>] Exception of Exception
+                    | [<CompiledName("onset"); Fickl.Core.InlineInterface>] Onset of Onset
+                    | [<CompiledName("outcome"); Fickl.Core.InlineInterface>] Outcome of Outcome
+                    | [<CompiledName("return"); Fickl.Core.InlineInterface>] Return of Return
+                    | [<CompiledName("spanClose"); Fickl.Core.InlineInterface>] SpanClose of SpanClose
+                    | [<CompiledName("spanOpen"); Fickl.Core.InlineInterface>] SpanOpen of SpanOpen
+                    | [<CompiledName("streamDiagnostic"); Fickl.Core.InlineInterface>] StreamDiagnostic of StreamDiagnostic
                     | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: obj * truncated: bool option
                     /// <param name="level"></param>
                     /// <param name="errorInfo"></param>
                     /// <param name="message"></param>
                     /// <param name="truncated">TypeScript type: <c>true</c></param>
                     | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: string * truncated: bool
-                    [<ParamObject; Emit("({ type: 'exception', ...$0 })")>]
-                    static member CreateException (name: string, message: string, ?stack: string) : Item = jsNative
-                    [<ParamObject; Emit("({ type: 'onset', ...$0 })")>]
-                    static member CreateOnset (attributes: Attribute[], spanId: string, executionModel: string, info: Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Item = jsNative
-                    [<ParamObject; Emit("({ type: 'return', ...$0 })")>]
-                    static member CreateReturn (?info: FetchResponseInfo) : Item = jsNative
-                    [<ParamObject; Emit("({ type: 'spanOpen', ...$0 })")>]
-                    static member CreateSpanOpen (name: string, spanId: string, ?info: U3<Attributes, FetchEventInfo, JsRpcEventInfo>) : Item = jsNative
                     [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
                     static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item = jsNative
                     [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
@@ -26136,6 +26088,11 @@ module IncomingRequestCfProperties =
         | ZA
         | ZM
         | ZW
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("certPresented", CaseRules.None)>]
+    type TlsClientAuth =
+        | [<CompiledName("1"); Fickl.Core.InlineInterface>] N1 of IncomingRequestCfPropertiesTLSClientAuth
+        | [<CompiledName("0"); Fickl.Core.InlineInterface>] N0 of IncomingRequestCfPropertiesTLSClientAuthPlaceholder
 
 module InstanceStatus =
     [<Interface>]

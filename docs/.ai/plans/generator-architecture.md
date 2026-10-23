@@ -2980,6 +2980,81 @@ negative refuses); `DT002` 56 → 62; `DT005` 33 → 48; `DD002` 55 → 76 as ev
 `catalog-recursive-json-lab` ships its group again (`GE001`, one declaration, `Payload`).
 Core.TS's binding and Node are unchanged.
 
+## Arm interfaces carried whole (2026-10-20, InlineInterface)
+
+A case whose arm has a declared name, or whose arm carries more than its case's fields (a method,
+an index signature), is a case of one `[<InlineInterface>]` field, the arm's interface, from the
+Fable fork's `Fable.Core` (`tools/fable-fork/fork.json`): `Ping of Ping` compiles as the `Ping`
+value with the tag set, and a field read returns the union value itself (`DT009`). An anonymous
+plain-data arm keeps its fields. `Spec.caseInlinesArm` excludes an arm with a call or construct
+signature and a class instance (`Spec.isClassInstance`: an ambient class, a class symbol, an
+interface merged with a variable such as a DOM host interface, or an instantiation of one):
+the fork constructs an inlined case by copying the value onto its prototype, which loses a
+function's callability and a host object's internal state. Such a union stays an erased union
+(`DT001`). `TypeFacts.SymbolFlags` carries the flags of the type's own symbol for that test. A
+named arm sharing its tag value takes its case name from the arm (`Done`, `Aborted`), not
+`uniqueCaseNames`' numbered tag. A tag-only named arm is no longer a bare case: it carries its
+interface (`Queue of QueueInfo`). Only Fable validates an `[<InlineInterface>]` case
+(`footguns.md`); the projection companions, catalogue consumers and width-admission scratch
+projects now pin the fork's `Fable.Core`, checked by `fable-fork.fsx -- check`.
+
+Measured over the goldens against `3b40e89a`: `DT009` 0 → 135 (`@cloudflare/workers-types` 75,
+`shared-tag-lab` 25, `compiler-lib-ownership-lab` 11, `inline-arm-lab` 9, `tagged-arm-lab` 5, 2
+each in `generic-tag-lab`, `instantiation-operand-lab`, `nominal-lab`, `phase-b-lab`,
+`projection-lab`); `DT005` 37 → 16 (workers 24 → 5) as inlined cases need no `Create<Case>`;
+workers `TR032` 3565 → 3529 and tiers 417/1257/285/1 → 427/1251/282/1. `compiler-lib-ownership-lab`'s
+`ClassMemberDecoratorContext` and `DecoratorContext` become DUs (`DT001` 2 → 0, `DT002` 0 → 2);
+their `unknown` arguments now report `TR009` per case (20 → 36), the same widening. Core.TS
+regenerated: the two decorator contexts become DUs and `PromiseSettledResult` carries
+`PromiseFulfilledResult<'T>` and `PromiseRejectedResult` whole, 13 inlined cases in all;
+`FileSystemDirectoryHandle | FileSystemFileHandle` stays `U2`. The changed goldens and Core.TS
+compile under Fable.
+
+## Exclusive-arm fold arms and signatures, value-side names (2026-10-15, #158 follow-up)
+
+`shape-interfaces` removes only an exclusive fold's anonymous arms (`Spec.isAnonymousArm`) from
+`DeclNames`. A source-named arm stays declared, under the name `name-exports` gives every
+namespace member at this point (`Contested.Left` beside a top-level `Left`, bare `Right`
+otherwise). The fold no longer leaves references to an undeclared arm (FS0039), and no longer
+widens a parameter typed by one (TR023). `exclusive-arms-lab` declares `QueryArm`, `MessagesArm`,
+`ImageArm` and `SnapshotArm` again; no other golden moved. The namespace-member harvest plan
+(`2026-10-15-namespace-member-harvest.md`, R1) later nests every namespace member, which re-pins
+pair four to `Contested.Right`.
+
+The exclusive fold also requires every arm to agree on a shared member's readonly; otherwise the
+union stays `U2`, so the folded member's setter cannot depend on which arm comes first.
+
+Where the bare name is taken, `synthesize-anonymous` names an enum's value side `<Stem>Enum`, a
+namespace merged with a type `<Stem>Namespace`, and a variable merged with a type `<Stem>Value`
+(`SY007`), instead of the first free number. The number had also counted arms that
+`drop-orphan-delegates` later prunes (`Shape4` beside a DU whose `Shape2`/`Shape3` were
+dropped). The shapes an enum's or namespace's values own nest under the source namespace
+(`nestBases[value] = root`): `Point.Defaults`, or `Point.Anchor2` where the namespace type
+`Point.Anchor` holds the name. Renamed in the goldens: `case-sanitise-lab` `KindEnum`,
+`CollideEnum`, `PlainEnum`; `literal-member-lab` `LevelEnum`. This change leaves Core.TS and Node
+unchanged.
+
+`shape-exports` binds a callable value export as a method only where its value type carries
+call signatures alone. A function merged with a namespace holding values, or a callable `const`
+carrying properties, binds as that hybrid object (`static member stamp: Stamp`) and is called
+through `Invoke`. Its value side is role-named like any merged value side (`MergedNamespace`,
+`SY007`; Task D's rule now excludes classes only). `synthesize-paramobjects` refuses `Create` on
+any declaration whose type is callable (SP003 "the declaration is callable…"), including one
+whose call is the SI001 loss: no object literal is callable. Node: ~76 function+namespace
+exports move to the property form, and 64 callable hybrids lose `Create`; Core.TS loses 2.
+
+## Catalogue identity of an alias over an instantiated mapped type (2026-10-20)
+
+An instantiated mapped type with unresolved members (`{ [P in keyof T]?: U[] }`) has no
+catalogue identity of its own: its only key was its declaration, which every instantiation shares,
+so aliases applying one object alias to different arguments (`ZodFlattenedError<T, U>`,
+`inferFlattenedErrors<T, U> = $ZodFlattenedError<output<T>, U>`) claimed one identity. The
+catalogue then redirected the later aliases to the first, writing `inferFlattenedErrors<'T, 'U> =
+ZodFlattenedError<'T, 'U>`, or refused a pair whose constraints differ (zod's `zod-v4` owner in
+FSharp.CloudEdge). Such an alias is now keyed by its own declaration. A mapped type `MappedRecord`
+describes keeps its structural key. `IdentityVersion` 6 → 7: Core.TS's `Es.Omit` identity moves;
+its binding is unchanged. `catalog-mapped-alias-lab` pins the three aliases.
+
 ## TypeScript 7.1.0-beta (2026-10-21)
 
 The compiler pin moves to `typescript` 7.1.0-beta (`3e9236361fa9`), binary AST protocol 9. Two
@@ -3021,6 +3096,52 @@ support-helper manifests. The build and Partas gates invoke `dotnet fickl`; Fabl
 compiler passed 564 runtime checks, Partas JSX and source/DLL acceptance, its Vitest check,
 and all five standalone support-helper Node tests. Build-command verification also passed.
 
+## Tagged-arm integration with TypeScript beta and Fickl (2026-10-22)
+
+Merged develop after PR #162 into tagged-inline-interface. Symbol parents retain the beta
+SymbolKey identity alongside the arm symbol flags used to reject class and host instances.
+Core.TS, Node and fixture goldens are regenerated from the composed generator and compiler pin.
+
+The user directed removal of the private Fable fork. Runtime compilation uses Fickl 0.5.1;
+all Fable.Core references use released 5.5.0, which supplies CaseTest. With explicit user
+approval, Xantham.Fable.Core temporarily carries the upstream InlineInterface attribute source
+in the Fickl.Core namespace until the user publishes Fickl.Core. Render emits the qualified
+attribute name. The private fork build script, pin and publication blocker are removed.
+
+This integration preserves the existing arm-admission rules and copying behavior. The proposed
+identity-preserving construction and subsequent frontier work remain separate decisions.
+
+Compared with the tagged-inline-interface parent, Core.TS tiers (exact/ergonomic/widened/escape)
+move from 1319/2676/277/5 to 1341/2725/291/5 with the beta library additions. Regenerating Node
+with the branch's existing InlineInterface support moves 815/2158/595/5 to 817/2156/595/5;
+DNS records and network-interface unions now carry their named interface arms. Type-fest moves
+27/66/202/2 to 27/66/204/0 through the beta's non-finite numeric literal support. Other fixture
+tier counts are unchanged. All 139 golden-writing tests passed.
+
+PR #162 was squash-merged into develop as `40a70f03`. Its final Wire follow-up widens the
+Unknown, Undefined and Arguments well-known-symbol responses to int64, matching the 7.1
+protocol; all 106 Wire tests and all 15 CI checks passed before that merge. The temporary beta
+handover is retired here.
+
+Integration validation: the full `build.fsx -- test --run-gate` pipeline passed, with 1,512
+generator tests, 590 runtime checks, Partas JSX and source/DLL consumption, and its Vitest
+check. The standalone Wire suite passed all 106 tests with no skips. Build-command checks
+also passed. These gates used Fickl 0.5.1. During validation, Fickl 0.5.2 appeared on NuGet,
+but its Windows platform package was not yet restorable. Fickl.Core 0.5.2 contains
+Fable.Core.dll without InlineInterface; the temporary source remains necessary.
+
+Follow-up: Fickl 0.5.3 and its Windows platform package restore from NuGet. Fickl.Core 0.5.3
+ships Fickl.Core.dll, InlineInterface and the compiler's F# sources, with a dependency on public
+Fable.Core 5.5.0. The support project now depends on this package and the temporary attribute
+source is removed. Root and standalone compiler manifests use 0.5.3; generated attribute
+names and arm-construction semantics are unchanged.
+
+The restored 0.5.3 packages passed the solution compile gates, 11 selected session tests,
+590 runtime checks, Partas JSX and source/DLL consumption, and Partas Vitest. The support
+NuGet package was packed and inspected: Fickl.Core is a transitive dependency for both target
+frameworks and the temporary source is absent. The unchanged generator suite was not repeated
+after this dependency-only follow-up.
+
 ## PR #160 resync with develop (2026-10-22)
 
 Merged develop through `74308014`, retaining the tagged-arm and shared-tag CaseTest behavior.
@@ -3038,39 +3159,6 @@ golden-tooling tests passed.
 
 Full validation passed: 1,497 generator tests and 105 Wire tests (one ignored in each suite),
 579 runtime checks, and the Partas JSX, source/DLL and Vitest gates.
-## Exclusive-arm fold arms and signatures, value-side names (2026-10-15, #158 follow-up)
-
-`shape-interfaces` removes only an exclusive fold's anonymous arms (`Spec.isAnonymousArm`) from
-`DeclNames`. A source-named arm stays declared, under the name `name-exports` gives every
-namespace member at this point (`Contested.Left` beside a top-level `Left`, bare `Right`
-otherwise). The fold no longer leaves references to an undeclared arm (FS0039), and no longer
-widens a parameter typed by one (TR023). `exclusive-arms-lab` declares `QueryArm`, `MessagesArm`,
-`ImageArm` and `SnapshotArm` again; no other golden moved. The namespace-member harvest plan
-(`2026-10-15-namespace-member-harvest.md`, R1) later nests every namespace member, which re-pins
-pair four to `Contested.Right`.
-
-The exclusive fold also requires every arm to agree on a shared member's readonly; otherwise the
-union stays `U2`, so the folded member's setter cannot depend on which arm comes first.
-
-Where the bare name is taken, `synthesize-anonymous` names an enum's value side `<Stem>Enum`, a
-namespace merged with a type `<Stem>Namespace`, and a variable merged with a type `<Stem>Value`
-(`SY007`), instead of the first free number. The number had also counted arms that
-`drop-orphan-delegates` later prunes (`Shape4` beside a DU whose `Shape2`/`Shape3` were
-dropped). The shapes an enum's or namespace's values own nest under the source namespace
-(`nestBases[value] = root`): `Point.Defaults`, or `Point.Anchor2` where the namespace type
-`Point.Anchor` holds the name. Renamed in the goldens: `case-sanitise-lab` `KindEnum`,
-`CollideEnum`, `PlainEnum`; `literal-member-lab` `LevelEnum`. This change leaves Core.TS and Node
-unchanged.
-
-`shape-exports` binds a callable value export as a method only where its value type carries
-call signatures alone. A function merged with a namespace holding values, or a callable `const`
-carrying properties, binds as that hybrid object (`static member stamp: Stamp`) and is called
-through `Invoke`. Its value side is role-named like any merged value side (`MergedNamespace`,
-`SY007`; Task D's rule now excludes classes only). `synthesize-paramobjects` refuses `Create` on
-any declaration whose type is callable (SP003 "the declaration is callable…"), including one
-whose call is the SI001 loss: no object literal is callable. Node: ~76 function+namespace
-exports move to the property form, and 64 callable hybrids lose `Create`; Core.TS loses 2.
-
 ## PR #161 resync onto #160 (2026-10-22)
 
 The official gh stack extension restacks this slice onto #160 at 3f860134.
@@ -3086,3 +3174,21 @@ All 137 golden-writing tests passed without further fixture changes.
 Full validation passed: 1,504 generator tests and 105 Wire tests (one ignored in each suite),
 586 runtime checks, and the Partas JSX, source/DLL and Vitest gates. Resync reviews found
 no introduced spec or standards issues.
+
+
+## InlineInterface stack sync (2026-10-22)
+
+Final review (2026-10-23): customization validation projects explicitly restore Fickl.Core
+0.5.3 alongside Fable.Core 5.5.0. Their raw support-assembly references do not restore transitive
+NuGet dependencies, and generated InlineInterface cases require the attribute assembly. The
+projection-companion compile tests reproduce the missing-reference failure and gate the fix.
+
+Merged the resynced #161 to retain the earlier integration merge resolutions.
+Source, bindings, compiler pins and build inputs are unchanged from bc537272; the update
+adds the stack workflow policy and validation coverage for feature-base pull requests.
+Each slice is validated in turn; upper-layer CI does not gate assessment of a lower slice.
+
+Core.TS and Node regeneration reproduced their binding code and tier counts. Core.TS
+metadata refreshes the generator binary fingerprint and one session-assigned symbol id in
+a Date finding. All 31 selected workflow, golden-provenance and catalogue-portability tests
+passed. The unchanged generator/runtime suites were not repeated for this workflow-only sync.

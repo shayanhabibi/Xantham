@@ -158,6 +158,7 @@ let findingsTests =
                     "DT.CaseCreateSynthesized DT005 exact"
                     "DT.CaseCreateNameTaken DT006 ergonomic"
                     "DT.ArmsSeparatedByCaseTest DT008 exact"
+                    "DT.CaseInlinesInterface DT009 exact"
                     "SY.InstantiationNamedOnce SY001 exact"
                     "SY.HoistArgumentsNotRecovered SY002 widened"
                     "SY.IntersectionOperandNotHoisted SY003 widened"
