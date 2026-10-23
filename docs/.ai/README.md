@@ -17,8 +17,6 @@ notes for the agents and people who come after them. It is not rendered to the s
   ownership boundaries and residuals; retire on merge.
 - `footguns.md` — facts that constrain future changes: compiler-API traps, declaration-catalog
   identity rules, pass invariants, and the threads left open when a lane closed.
-- `plans/2026-10-23-erased-exclusive-arms.md` — approved typed-arm erased unions for callable
-  and constructable alternatives, using released Fickl 0.5.4 predicates.
 - `plans/2026-10-09-portable-catalogue-design.md` and
   `plans/2026-10-09-portable-catalogue-implementation.md` — approved compatibility spec and active
   implementation plan for issue #110; read before changing portable catalogue validation,
