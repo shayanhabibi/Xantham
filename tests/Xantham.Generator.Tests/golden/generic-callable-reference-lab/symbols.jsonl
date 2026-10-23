@@ -1,0 +1,5 @@
+{"name":"PairCallback","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"TR.CallbackKeptAsDelegate","key":"TR055","pass":"shape-callbacks","tier":"ergonomic","symbol":"PairCallback","fields":{"reason":"it takes 2 arguments"},"message":"callback kept as a delegate: it takes 2 arguments"}]}
+{"name":"Pair","file":"index.d.ts","tier":"exact","findings":[]}
+{"name":"Exports.pair","tier":"exact","findings":[]}
+{"name":"Exports.callback","tier":"exact","findings":[]}
+{"name":"Exports.accept","tier":"exact","findings":[]}

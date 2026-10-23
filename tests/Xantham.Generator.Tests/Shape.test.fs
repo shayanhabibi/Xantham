@@ -11,6 +11,28 @@ open Xantham.Generator
 open Xantham.Generator.Shape
 
 [<Tests>]
+let genericCallableReferenceTests =
+    testList "generic callable references shaping" [
+        testCase "a declared generic callback application is not expanded into a new delegate" <| fun _ ->
+            let parameter =
+                { Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter) with SymbolName = Some("T" * uom<symbolName>) }
+            let target =
+                { Build.facts { Build.typeResponse 10 TypeFlags.Object with Target = ValueSome 10; ObjectFlags = ValueSome ObjectFlags.Reference } with
+                    TypeArguments = [ 20<typeId> ] }
+            let application =
+                { Build.facts { Build.typeResponse 11 TypeFlags.Object with Target = ValueSome 10; ObjectFlags = ValueSome ObjectFlags.Reference } with
+                    TypeArguments = [ 1<typeId> ]
+                    CallSignatures = [ Build.signature [ Build.resolvedMember (Build.symbol 30 "left" SymbolFlags.Property) 1; Build.resolvedMember (Build.symbol 31 "right" SymbolFlags.Property) 1 ] 1 ] }
+            let model =
+                { Build.shapeModel (target :: application :: parameter :: Build.primitives) with DeclNames = Map.ofList [ 10<typeId>, "PairCallback" ] }
+            let reference, findings = Spec.objectRef Build.context model None "accept.value" application
+            Expect.equal reference (FsApp("PairCallback", [ FsString ])) "the existing declaration owns the callable contract"
+            Expect.isEmpty findings "using a declared application adds no callback-shaping loss"
+            let unnamed, _ = Spec.objectRef Build.context { model with DeclNames = Map.empty } None "accept.value" application
+            Expect.equal unnamed (FsDelegate([ FsString; FsString ], FsString)) "an undeclared callback keeps the ordinary fallback"
+    ]
+
+[<Tests>]
 let erasedObjectUnionTests =
     let model rightSignatures =
         let memberOf id name ty optional =

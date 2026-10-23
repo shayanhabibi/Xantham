@@ -2391,7 +2391,7 @@ and internal objectRef
         | None ->
             if isTuple facts then
                 tupleRef ctx model self owner facts
-            elif isPureCallback facts then
+            elif isPureCallback facts && (instantiationOf model facts).IsNone then
                 delegateRef ctx model self owner facts
             elif isPureIndexSignature facts then
                 recordRef ctx model self owner facts

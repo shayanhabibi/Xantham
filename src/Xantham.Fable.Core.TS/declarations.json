@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "4ec3787a5ddb997500cdaa83162aa6232d24f9e25a2a499b9d8c45948d8f80e2",
+  "generator": "174c36729884714f717ce42bcdcb52e30c80a3d5df932a447bf1806f40f132a1",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -484350,7 +484350,7 @@
         "none",
         "none"
       ],
-      "api": "43a246fc4f05d5615c0fe9c8fe5be54253547b04fd33d3acfe8bc281d14bcdd7",
+      "api": "25ab91cb05437cce209c3905415c0dc2d1a9b4ebae431792d40909d6d83d9cc3",
       "owner": "FableCoreTsInput"
     },
     {
@@ -489263,7 +489263,7 @@
       "constraints": [
         "none"
       ],
-      "api": "1b6b165ead7b629a7ab6c35479c073c1360917a05484c6ee2778280940833de8",
+      "api": "64a3c47ad686e2dc289947006b4331f54578a755e3e9a0f9b4bc4d930fbc39f5",
       "owner": "FableCoreTsInput"
     },
     {

@@ -3,9 +3,9 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 70,
+    "exact": 71,
     "ergonomic": 189,
-    "widened": 82,
+    "widened": 81,
     "escape": 1
   },
   "passes": [
@@ -39,10 +39,10 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 107,
+      "total": 57,
       "exact": 4,
-      "ergonomic": 38,
-      "widened": 65
+      "ergonomic": 18,
+      "widened": 35
     },
     {
       "pass": "SE - shape-exports",
