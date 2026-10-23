@@ -3178,6 +3178,11 @@ no introduced spec or standards issues.
 
 ## InlineInterface stack sync (2026-10-22)
 
+Final review (2026-10-23): customization validation projects explicitly restore Fickl.Core
+0.5.3 alongside Fable.Core 5.5.0. Their raw support-assembly references do not restore transitive
+NuGet dependencies, and generated InlineInterface cases require the attribute assembly. The
+projection-companion compile tests reproduce the missing-reference failure and gate the fix.
+
 Merged the resynced #161 to retain the earlier integration merge resolutions.
 Source, bindings, compiler pins and build inputs are unchanged from bc537272; the update
 adds the stack workflow policy and validation coverage for feature-base pull requests.
