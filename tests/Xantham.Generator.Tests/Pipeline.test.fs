@@ -2798,9 +2798,9 @@ let pipelineTests =
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
-                      // The expansion leaves `Element` out of scope, so the element widens; the
-                      // array around it does not.
-                      Expect.stringContains source "type ReadonlyTuple = obj[]" "an array of a widened element"
+                      // The declaration binds Element even though the deferred tuple loses
+                      // its length computation. Preserve both arity and the known carrier.
+                      Expect.stringContains source "type ReadonlyTuple<'Element, 'Length> = private ReadonlyTuple__ of 'Element[]" "the element binder and array carrier survive"
 
                   testCase "an indexable shape with none of Array's members stays a shape" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -6227,8 +6227,8 @@ let pipelineTests =
                       Expect.equal (sitesOf rendered "TR012") [] "every hoisted parameter is in scope"
                       Expect.equal
                           (sitesOf rendered "TR013")
-                          [ "NoInfer"; "Ns.format(value)" ]
-                          "the alias declaration and the function-typed constant"
+                          [ "Ns.format(value)" ]
+                          "the remaining function-typed constant; the alias now binds T"
                       Expect.equal (sitesOf rendered "TR027") [ "Container.queryLike()" ] "the structural bound"
                       Expect.equal (sitesOf rendered "TP006") [ "Container.queryLike" ] "the structural bound" ])
 
@@ -6300,7 +6300,7 @@ let pipelineTests =
                   testCase "tag-map-lab: T[keyof T] reads as proptypelock" <| fun _ ->
                       let source = generate () |> sourceOf
 
-                      Expect.stringContains source "type ValueOf<'ObjectType> = proptypelock<'ObjectType>" "W8.5: a defaulted key"
+                      Expect.stringContains source "type ValueOf<'ObjectType, 'ValueType> = private ValueOf__ of proptypelock<'ObjectType>" "the defaulted key binder survives with the known carrier"
                       Expect.stringContains source "type ValuesOf<'T> = proptypelock<'T>" "a written keyof"
 
                       Expect.stringContains
@@ -6308,7 +6308,7 @@ let pipelineTests =
                           "static member valuesOf<'T> (source: 'T) : proptypelock<'T>[] = jsNative"
                           "a signature's own parameter"
 
-                      Expect.stringContains source "type Picked = obj" "a key with no default stays widened"
+                      Expect.stringContains source "type Picked<'T, 'K> = private Picked__ of obj" "a key with no default stays widened without losing its binders"
 
                   testCase "tag-map-lab: a key-independent mapped type reads as PropertyRecord" <| fun _ ->
                       let rendered = generate ()
@@ -7045,6 +7045,51 @@ let genericCallableReferenceFixtureTests =
                     DeclarationCatalogTests.compileConsumer scratch.Path
                         [ "producer/CallbackOwner.fs"; "consumer-out/CallbackConsumer.fs" ]
                         "module Check\nlet accept (value: CallbackOwner.PairCallback<string>) = CallbackConsumer.Exports.accept value\n"
+                Expect.equal exitCode 0 diagnostics
+        ])
+    ]
+
+[<Tests>]
+let identityAliasFixtureTests =
+    testList "identity alias declarations" [
+        yield! fixtureTests "identity-alias-lab" (handFixture "identity-alias-lab") GeneratorConfig.Default (fun package -> [
+            testCase "identity aliases retain declaration binders" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type Store<'T> = 'T" "the alias binds its own source parameter"
+                Expect.stringContains source "type Phantom<'T>" "a shared checker body does not erase the owning alias binder"
+                Expect.stringContains source "type ExistingPhantom<'T>" "an already-shaped carrier does not erase the alias binder"
+                Expect.stringContains source "type FirstPhantom<'T>" "a phantom declared first retains its binder"
+                Expect.stringContains source "type LaterPlain =" "a plain alias does not inherit the first declaration's binder"
+                Expect.isFalse (source.Contains "of obj") "unused binders preserve the known carrier regardless of declaration order"
+                Expect.stringContains source "type Reordered<'A, 'B> = 'B * 'A" "source parameter order is independent of first use"
+                Expect.stringContains source "type NoInfer<'T> = JS.NoInfer<'T>" "the no-inference alias retains its operand binder"
+                Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR013")) "neither alias reads an out-of-scope parameter"
+            testCase "identity aliases compile at independent type arguments" <| fun _ ->
+                use scratch = Scratch.directory "identity-alias-consumer"
+                let output = Path.Combine(scratch.Path, "bindings")
+                Pipeline.run GeneratorConfig.Default package output |> Async.RunSynchronously |> ignore
+                let exitCode, diagnostics =
+                    DeclarationCatalogTests.compileConsumer scratch.Path
+                        [ "bindings/IdentityAliasLab.fs" ]
+                        "module Check\nopen IdentityAliasLab\nlet text (value: Store<string>): string = value\nlet number (value: Store<int>): int = value\nlet retain (value: NoInfer<int>): int = value\nlet phantom (value: ExistingPhantom<int>) = value\nlet reverse (value: FirstPhantom<int>) = value\n"
+                Expect.equal exitCode 0 diagnostics
+            testCase "identity aliases retain binders through catalogue reuse" <| fun _ ->
+                use scratch = Scratch.directory "identity-alias-catalog"
+                let producer = Path.Combine(scratch.Path, "producer")
+                let config = { GeneratorConfig.Default with DeclarationCatalog = true; ModuleName = Some "AliasOwner" }
+                Pipeline.run config package producer |> Async.RunSynchronously |> ignore
+                let consumer = Path.Combine(scratch.Path, "consumer")
+                Directory.CreateDirectory consumer |> ignore
+                File.WriteAllText(Path.Combine(consumer, "package.json"), """{"name":"alias-consumer-lab","version":"1.0.0","types":"index.d.ts"}""")
+                let source = Path.Combine(package, "index").Replace('\\', '/')
+                File.WriteAllText(Path.Combine(consumer, "index.d.ts"), $"import type {{ Store, NoInfer, Reordered, Existing }} from '{source}';\nexport function text(value: Store<string>): NoInfer<string>;\nexport function number(value: Store<number>): NoInfer<number>;\nexport function reorder(value: Reordered<string, number>): Existing;\n")
+                let references = { config with ModuleName = Some "AliasConsumer"; DeclarationReferences = [ Path.Combine(producer, "declarations.json") ] }
+                Pipeline.run references consumer (Path.Combine(scratch.Path, "consumer-out")) |> Async.RunSynchronously |> ignore
+                let exitCode, diagnostics =
+                    DeclarationCatalogTests.compileConsumer scratch.Path
+                        [ "producer/AliasOwner.fs"; "consumer-out/AliasConsumer.fs" ]
+                        "module Check\nlet text: string = AliasConsumer.Exports.text \"a\"\nlet number: float = AliasConsumer.Exports.number 1.0\nlet reorder (value: AliasOwner.Reordered<string, float>): AliasOwner.Existing = AliasConsumer.Exports.reorder value\n"
                 Expect.equal exitCode 0 diagnostics
         ])
     ]

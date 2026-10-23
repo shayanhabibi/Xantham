@@ -16,7 +16,8 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 3,
+      "total": 5,
+      "ergonomic": 2,
       "widened": 3
     },
     {
@@ -28,6 +29,11 @@
       "pass": "SP - synthesize-paramobjects",
       "total": 1,
       "ergonomic": 1
+    },
+    {
+      "pass": "RA - repair-arity",
+      "total": 1,
+      "widened": 1
     }
   ]
 }

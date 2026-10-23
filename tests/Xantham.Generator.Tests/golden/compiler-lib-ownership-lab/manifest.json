@@ -36,10 +36,10 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 44,
-      "ergonomic": 10,
-      "widened": 29,
-      "escape": 5
+      "total": 53,
+      "ergonomic": 14,
+      "widened": 30,
+      "escape": 9
     },
     {
       "pass": "SE - shape-exports",
@@ -60,9 +60,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 3,
+      "total": 7,
       "ergonomic": 1,
-      "widened": 2
+      "widened": 6
     },
     {
       "pass": "render-source",

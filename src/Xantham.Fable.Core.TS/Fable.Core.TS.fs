@@ -39,7 +39,7 @@ module Es =
 
     type DecoratorMetadataObject = obj
 
-    type DecoratorMetadata = DecoratorMetadataObject
+    type DecoratorMetadata = obj
 
     /// <summary>
     /// Context provided to a class decorator.
@@ -10871,7 +10871,8 @@ module Es =
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> AsyncIteratorObject<'T, 'TReturn, 'TNext>
 
-    type FlatArray = obj
+    [<Erase>]
+    type FlatArray<'Arr, 'Depth> = private FlatArray__ of obj
 
     [<Interface>]
     type BigIntToLocaleStringOptions =
@@ -15555,27 +15556,32 @@ module Es =
     /// <summary>
     /// Marker for non-inference type position
     /// </summary>
-    type Uppercase = obj
+    [<Erase>]
+    type Uppercase<'S> = private Uppercase__ of obj
 
     /// <summary>
     /// Convert string literal type to lowercase
     /// </summary>
-    type Lowercase = Uppercase
+    [<Erase>]
+    type Lowercase<'S> = private Lowercase__ of obj
 
     /// <summary>
     /// Convert first character of string literal type to uppercase
     /// </summary>
-    type Capitalize = Uppercase
+    [<Erase>]
+    type Capitalize<'S> = private Capitalize__ of obj
 
     /// <summary>
     /// Convert first character of string literal type to lowercase
     /// </summary>
-    type Uncapitalize = Uppercase
+    [<Erase>]
+    type Uncapitalize<'S> = private Uncapitalize__ of obj
 
     /// <summary>
     /// Marker for non-inference type position
     /// </summary>
-    type NoInfer = Uppercase
+    [<Erase>]
+    type NoInfer<'T> = private NoInfer__ of obj
 
     /// <summary>
     /// Marker for contextual 'this' type
@@ -95158,9 +95164,9 @@ module Dom =
 
     type CookieList = CookieListItem[]
 
-    type DOMHighResTimeStamp = COSEAlgorithmIdentifier
+    type DOMHighResTimeStamp = float
 
-    type EpochTimeStamp = COSEAlgorithmIdentifier
+    type EpochTimeStamp = float
 
     type EventListenerOrEventListenerObject = U2<EventListener, EventListenerObject>
 
@@ -95177,87 +95183,87 @@ module Dom =
 
     type FormDataEntryValue = U2<string, File>
 
-    type GLbitfield = COSEAlgorithmIdentifier
+    type GLbitfield = float
 
     type GLboolean = bool
 
-    type GLclampf = COSEAlgorithmIdentifier
+    type GLclampf = float
 
-    type GLenum = COSEAlgorithmIdentifier
+    type GLenum = float
 
-    type GLfloat = COSEAlgorithmIdentifier
+    type GLfloat = float
 
-    type GLint = COSEAlgorithmIdentifier
+    type GLint = float
 
-    type GLint64 = COSEAlgorithmIdentifier
+    type GLint64 = float
 
-    type GLintptr = COSEAlgorithmIdentifier
+    type GLintptr = float
 
-    type GLsizei = COSEAlgorithmIdentifier
+    type GLsizei = float
 
-    type GLsizeiptr = COSEAlgorithmIdentifier
+    type GLsizeiptr = float
 
-    type GLuint = COSEAlgorithmIdentifier
+    type GLuint = float
 
-    type GLuint64 = COSEAlgorithmIdentifier
+    type GLuint64 = float
 
     type GPUBindingResource =
         U6<GPUBuffer, GPUBufferBinding, GPUExternalTexture, GPUSampler, GPUTexture, GPUTextureView>
 
-    type GPUBufferDynamicOffset = COSEAlgorithmIdentifier
+    type GPUBufferDynamicOffset = float
 
-    type GPUBufferUsageFlags = COSEAlgorithmIdentifier
+    type GPUBufferUsageFlags = float
 
     type GPUColor = U2<float[], GPUColorDict>
 
-    type GPUColorWriteFlags = COSEAlgorithmIdentifier
+    type GPUColorWriteFlags = float
 
     type GPUCopyExternalImageSource =
         U7<HTMLCanvasElement, HTMLImageElement, HTMLVideoElement, ImageBitmap, ImageData, OffscreenCanvas, VideoFrame>
 
-    type GPUDepthBias = COSEAlgorithmIdentifier
+    type GPUDepthBias = float
 
     type GPUExtent3D = U2<float[], GPUExtent3DDict>
 
-    type GPUFlagsConstant = COSEAlgorithmIdentifier
+    type GPUFlagsConstant = float
 
-    type GPUIndex32 = COSEAlgorithmIdentifier
+    type GPUIndex32 = float
 
-    type GPUIntegerCoordinate = COSEAlgorithmIdentifier
+    type GPUIntegerCoordinate = float
 
-    type GPUIntegerCoordinateOut = COSEAlgorithmIdentifier
+    type GPUIntegerCoordinateOut = float
 
-    type GPUMapModeFlags = COSEAlgorithmIdentifier
+    type GPUMapModeFlags = float
 
     type GPUOrigin2D = U2<float[], GPUOrigin2DDict>
 
     type GPUOrigin3D = U2<float[], GPUOrigin3DDict>
 
-    type GPUPipelineConstantValue = COSEAlgorithmIdentifier
+    type GPUPipelineConstantValue = float
 
-    type GPUSampleMask = COSEAlgorithmIdentifier
+    type GPUSampleMask = float
 
-    type GPUShaderStageFlags = COSEAlgorithmIdentifier
+    type GPUShaderStageFlags = float
 
-    type GPUSignedOffset32 = COSEAlgorithmIdentifier
+    type GPUSignedOffset32 = float
 
-    type GPUSize32 = COSEAlgorithmIdentifier
+    type GPUSize32 = float
 
-    type GPUSize32Out = COSEAlgorithmIdentifier
+    type GPUSize32Out = float
 
-    type GPUSize64 = COSEAlgorithmIdentifier
+    type GPUSize64 = float
 
-    type GPUSize64Out = COSEAlgorithmIdentifier
+    type GPUSize64Out = float
 
-    type GPUStencilValue = COSEAlgorithmIdentifier
+    type GPUStencilValue = float
 
-    type GPUTextureUsageFlags = COSEAlgorithmIdentifier
+    type GPUTextureUsageFlags = float
 
     type HTMLOrSVGImageElement = U2<HTMLImageElement, SVGImageElement>
 
     type HTMLOrSVGScriptElement = U2<HTMLScriptElement, SVGScriptElement>
 
-    type HashAlgorithmIdentifier = AlgorithmIdentifier
+    type HashAlgorithmIdentifier = U2<string, Algorithm>
 
     type HeadersInit = U3<(string * string)[], Headers, JS.Record<string, string>>
 
@@ -95308,7 +95314,7 @@ module Dom =
         | [<CompiledName("characterData")>] CharacterData
         | [<CompiledName("childList")>] ChildList
 
-    type NamedCurve = Base64URLString
+    type NamedCurve = string
 
     type OffscreenRenderingContext =
         U5<
@@ -95324,18 +95330,18 @@ module Dom =
     type OnErrorEventHandler = OnErrorEventHandlerNonNull option
 
     [<Erase>]
-    type OptionalPostfixToken<'T> = private OptionalPostfixToken__ of obj
+    type OptionalPostfixToken<'T> = private OptionalPostfixToken__ of string
 
     [<Erase>]
-    type OptionalPrefixToken<'T> = private OptionalPrefixToken__ of obj
+    type OptionalPrefixToken<'T> = private OptionalPrefixToken__ of string
 
     type PerformanceEntryList = PerformanceEntry[]
 
     type PublicKeyCredentialClientCapabilities = JS.Record<string, bool>
 
-    type RTCRtpReceiverTransform = RTCRtpScriptTransform
+    type RTCRtpReceiverTransform = obj
 
-    type RTCRtpSenderTransform = RTCRtpScriptTransform
+    type RTCRtpSenderTransform = obj
 
     type ReadableStreamController<'T> = U2<ReadableByteStreamController, ReadableStreamDefaultController<'T>>
 
@@ -95866,7 +95872,7 @@ module Dom =
         | [<CompiledName("mirror-repeat")>] MirrorRepeat
         | [<CompiledName("repeat")>] Repeat
 
-    type GPUAutoLayoutMode = AutoKeyword
+    type GPUAutoLayoutMode = string
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type GPUBlendFactor =

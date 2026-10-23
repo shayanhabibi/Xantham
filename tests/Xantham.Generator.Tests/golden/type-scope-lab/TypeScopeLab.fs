@@ -106,7 +106,7 @@ type Container =
 /// <summary>
 /// W7.1 extension: NoInfer, the solid-js idiom.
 /// </summary>
-type NoInfer = JS.NoInfer<obj>
+type NoInfer<'T> = JS.NoInfer<'T>
 
 [<Interface>]
 type Options<'T, 'S> =

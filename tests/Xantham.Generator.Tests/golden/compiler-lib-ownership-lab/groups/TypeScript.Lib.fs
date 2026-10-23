@@ -1997,27 +1997,32 @@ module Es =
     /// <summary>
     /// Marker for non-inference type position
     /// </summary>
-    type Uppercase = obj
+    [<Erase>]
+    type Uppercase<'S> = private Uppercase__ of obj
 
     /// <summary>
     /// Convert string literal type to lowercase
     /// </summary>
-    type Lowercase = Uppercase
+    [<Erase>]
+    type Lowercase<'S> = private Lowercase__ of obj
 
     /// <summary>
     /// Convert first character of string literal type to uppercase
     /// </summary>
-    type Capitalize = Uppercase
+    [<Erase>]
+    type Capitalize<'S> = private Capitalize__ of obj
 
     /// <summary>
     /// Convert first character of string literal type to lowercase
     /// </summary>
-    type Uncapitalize = Uppercase
+    [<Erase>]
+    type Uncapitalize<'S> = private Uncapitalize__ of obj
 
     /// <summary>
     /// Marker for non-inference type position
     /// </summary>
-    type NoInfer = Uppercase
+    [<Erase>]
+    type NoInfer<'T> = private NoInfer__ of obj
 
     /// <summary>
     /// Marker for contextual 'this' type

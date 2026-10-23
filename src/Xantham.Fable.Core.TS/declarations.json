@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "174c36729884714f717ce42bcdcb52e30c80a3d5df932a447bf1806f40f132a1",
+  "generator": "df8684c34c901ca6174b7a682b7da626b3036637e06ce75ae84058d7a1953d34",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -318643,7 +318643,7 @@
       "constraints": [
         "none"
       ],
-      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
+      "api": "ba285f844f9c961cb67b2256a317c3627b341d9cd0a309ccafb22e01f3cc599c",
       "owner": "FableCoreTsInput"
     },
     {
@@ -318666,7 +318666,7 @@
       "constraints": [
         "none"
       ],
-      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
+      "api": "ba285f844f9c961cb67b2256a317c3627b341d9cd0a309ccafb22e01f3cc599c",
       "owner": "FableCoreTsInput"
     },
     {
@@ -534869,9 +534869,11 @@
       ],
       "role": "alias",
       "fSharpName": "Fable.Core.TS.Es.Capitalize",
-      "arity": 0,
-      "constraints": [],
-      "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
+      "arity": 1,
+      "constraints": [
+        "none"
+      ],
+      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
       "owner": "FableCoreTsInput"
     },
     {
@@ -540044,9 +540046,12 @@
       ],
       "role": "type",
       "fSharpName": "Fable.Core.TS.Es.FlatArray",
-      "arity": 0,
-      "constraints": [],
-      "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
+      "arity": 2,
+      "constraints": [
+        "none",
+        "none"
+      ],
+      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
       "owner": "FableCoreTsInput"
     },
     {
@@ -558478,9 +558483,11 @@
       ],
       "role": "alias",
       "fSharpName": "Fable.Core.TS.Es.Lowercase",
-      "arity": 0,
-      "constraints": [],
-      "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
+      "arity": 1,
+      "constraints": [
+        "none"
+      ],
+      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
       "owner": "FableCoreTsInput"
     },
     {
@@ -559451,9 +559458,11 @@
       ],
       "role": "alias",
       "fSharpName": "Fable.Core.TS.Es.NoInfer",
-      "arity": 0,
-      "constraints": [],
-      "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
+      "arity": 1,
+      "constraints": [
+        "none"
+      ],
+      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
       "owner": "FableCoreTsInput"
     },
     {
@@ -580899,9 +580908,11 @@
       ],
       "role": "alias",
       "fSharpName": "Fable.Core.TS.Es.Uncapitalize",
-      "arity": 0,
-      "constraints": [],
-      "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
+      "arity": 1,
+      "constraints": [
+        "none"
+      ],
+      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
       "owner": "FableCoreTsInput"
     },
     {
@@ -580920,9 +580931,11 @@
       ],
       "role": "alias",
       "fSharpName": "Fable.Core.TS.Es.Uppercase",
-      "arity": 0,
-      "constraints": [],
-      "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
+      "arity": 1,
+      "constraints": [
+        "none"
+      ],
+      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
       "owner": "FableCoreTsInput"
     },
     {

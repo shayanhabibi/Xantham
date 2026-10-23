@@ -381,7 +381,8 @@ type AndAll<'T> = private AndAll__ of obj
 /// <remarks>@see {@link AndAll}</remarks>
 /// <remarks>@see {@link Or}</remarks>
 /// <remarks>@see {@link Xor}</remarks>
-type And = obj
+[<Erase>]
+type And<'A, 'B> = private And__ of obj
 
 /// <summary>
 /// Extracts the element type of an array or tuple.
@@ -446,7 +447,7 @@ type ArrayElement<'T> = private ArrayElement__ of obj
 /// <remarks>@see {@link ArrayValues}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayIndices<'Element> = private ArrayIndices__ of obj
+type ArrayIndices<'Element> = private ArrayIndices__ of float
 
 /// <summary>
 /// Return the length of an array. Equivalent to <c>T['length']</c> where <c>T</c> extends any array.
@@ -482,7 +483,8 @@ type ArrayIndices<'Element> = private ArrayIndices__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Array</remarks>
-type ArrayLength = obj
+[<Erase>]
+type ArrayLength<'T> = private ArrayLength__ of obj
 
 /// <summary>
 /// Reverse the order of elements in a tuple type.
@@ -618,7 +620,7 @@ type ArraySlice<'Array_, 'Start, 'End> = private ArraySlice__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private ArraySplice__ of obj
+type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private ArraySplice__ of obj[]
 
 /// <summary>
 /// Extract the type of an array or tuple minus the first element.
@@ -696,7 +698,8 @@ type ArrayTail<'TArray> = private ArrayTail__ of obj
 /// </example>
 /// <remarks>@see {@link ArrayIndices}</remarks>
 /// <remarks>@category Array</remarks>
-type ArrayValues = obj
+[<Erase>]
+type ArrayValues<'T> = private ArrayValues__ of obj
 
 /// <summary>
 /// Create a type that represents either the value or an array of the value.
@@ -1161,7 +1164,8 @@ type Alphanumeric =
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type ConditionalExcept = obj
+[<Erase>]
+type ConditionalExcept<'Base, 'Condition> = private ConditionalExcept__ of obj
 
 /// <summary>
 /// Extract the keys from a type where the value type of the key extends the given <c>Condition</c>.
@@ -2473,7 +2477,8 @@ type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
 /// <remarks>@see {@link ExcludeRestElement}</remarks>
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
-type ExtractRestElement = obj
+[<Erase>]
+type ExtractRestElement<'T> = private ExtractRestElement__ of obj
 
 /// <summary>
 /// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully extract something from <c>T</c>.
@@ -2911,7 +2916,7 @@ type GreaterThan<'A, 'B> = private GreaterThan__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasOptionalKeys<'BaseType> = private HasOptionalKeys__ of obj
+type HasOptionalKeys<'BaseType> = private HasOptionalKeys__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type has any readonly fields.
@@ -2933,7 +2938,7 @@ type HasOptionalKeys<'BaseType> = private HasOptionalKeys__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of obj
+type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type has any required fields.
@@ -3879,7 +3884,7 @@ type IsNumericLiteral<'T> = private IsNumericLiteral__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsOptionalKeyOf<'Type, 'Key> = private IsOptionalKeyOf__ of obj
+type IsOptionalKeyOf<'Type, 'Key> = private IsOptionalKeyOf__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type includes <c>undefined</c>.
@@ -4706,7 +4711,8 @@ type KebabCasedProperties<'Value, 'Options> = private KebabCasedProperties__ of 
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type KeyAsString = string
+[<Erase>]
+type KeyAsString<'BaseType> = private KeyAsString__ of string
 
 /// <summary>
 /// Create a union of all keys from a given type, even those exclusive to specific union members.
@@ -4745,7 +4751,8 @@ type KeyAsString = string
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type KeysOfUnion = obj
+[<Erase>]
+type KeysOfUnion<'ObjectType> = private KeysOfUnion__ of obj
 
 /// <summary>
 /// Extract the type of the last element of an array.
@@ -6209,7 +6216,8 @@ type OrAll<'T> = private OrAll__ of obj
 /// <remarks>@see {@link OrAll}</remarks>
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link Xor}</remarks>
-type Or = obj
+[<Erase>]
+type Or<'A, 'B> = private Or__ of obj
 
 /// <summary>
 /// Override existing properties of the given type. Similar to <c>Merge</c>, but enforces that the original type has the properties you want to override.
@@ -7223,7 +7231,8 @@ type ReadonlyKeysOf<'Type> = private ReadonlyKeysOf__ of obj
 /// </example>
 /// <remarks>@deprecated This type will be removed in the next major version. Use the built-in <c>Readonly</c> type in combination with the {@link TupleOf} type instead, like <c>Readonly&lt;TupleOf&lt;Length, Element&gt;&gt;</c>.</remarks>
 /// <remarks>@category Utilities</remarks>
-type ReadonlyTuple = obj[]
+[<Erase>]
+type ReadonlyTuple<'Element, 'Length> = private ReadonlyTuple__ of 'Element[]
 
 /// <remarks>@see {@link RemovePrefix}</remarks>
 [<Interface>]
@@ -7946,7 +7955,8 @@ type SetFieldTypeOptions =
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type SetFieldType = obj
+[<Erase>]
+type SetFieldType<'BaseType, 'Keys, 'NewType, 'Options> = private SetFieldType__ of obj
 
 /// <summary>
 /// Create a type that makes the specified keys non-nullable (removes <c>null</c> and <c>undefined</c>), supports deeply nested key paths, and leaves all other keys unchanged.
@@ -8547,7 +8557,8 @@ type SimplifyDeep<'Type, 'ExcludeType> = private SimplifyDeep__ of obj
 /// <remarks>@link https://github.com/microsoft/TypeScript/issues/15300</remarks>
 /// <remarks>@see {@link SimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
-type Simplify = obj
+[<Erase>]
+type Simplify<'T> = private Simplify__ of obj
 
 /// <summary>
 /// Create a type that only accepts an object with a single key.
@@ -8987,7 +8998,8 @@ type Spread<'FirstType, 'SecondType> = private Spread__ of obj
 /// </example>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
-type StringLength = obj
+[<Erase>]
+type StringLength<'S> = private StringLength__ of obj
 
 /// <summary>
 /// Returns a new string which contains the specified number of copies of a given string, just like <c>String#repeat()</c>.
@@ -9356,7 +9368,8 @@ type Sum<'A, 'B> = private Sum__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Utilities</remarks>
-type TaggedUnion = obj
+[<Erase>]
+type TaggedUnion<'TagKey, 'UnionMembers> = private TaggedUnion__ of obj
 
 /// <summary>
 /// Create a <a href="https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d">tagged type</a> that can support <a href="https://github.com/sindresorhus/type-fest/issues/665">multiple tags</a> and <a href="https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf">per-tag metadata</a>.
@@ -9451,7 +9464,8 @@ type Tagged<'Type, 'TagName, 'TagMetadata> = private Tagged__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-type GetTagMetadata = obj
+[<Erase>]
+type GetTagMetadata<'Type, 'TagName> = private GetTagMetadata__ of obj
 
 /// <summary>
 /// Get the untagged portion of a tagged type created with <c>Tagged</c>.
@@ -9930,7 +9944,8 @@ type UndefinedOnPartialDeep<'T> = private UndefinedOnPartialDeep__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-type UnionLength = obj
+[<Erase>]
+type UnionLength<'Union> = private UnionLength__ of obj
 
 /// <summary>
 /// Returns an arbitrary member of a union type.
@@ -10054,7 +10069,7 @@ type UnionToIntersection<'Union> = private UnionToIntersection__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type UnionToTuple<'Union> = private UnionToTuple__ of obj
+type UnionToTuple<'Union> = private UnionToTuple__ of UnknownArray
 
 /// <summary>
 /// Represents an array with <c>unknown</c> value.
@@ -10251,7 +10266,8 @@ type UnwrapRequired<'RequiredObjectType> = private UnwrapRequired__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type ValueOf<'ObjectType> = proptypelock<'ObjectType>
+[<Erase>]
+type ValueOf<'ObjectType, 'ValueType> = private ValueOf__ of proptypelock<'ObjectType>
 
 /// <summary>
 /// Words options.

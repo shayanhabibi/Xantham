@@ -214,6 +214,7 @@ let private emittingGroup (ctx: Context) (origin: PackageId) =
 let private secondaryAliasOrder =
     function
     | FsAbbrev decl -> decl.Order
+    | FsPhantom decl -> decl.Order
     | _ -> None
 
 /// The modules a run writes: the entry package's, plus one per shipped group a declaration

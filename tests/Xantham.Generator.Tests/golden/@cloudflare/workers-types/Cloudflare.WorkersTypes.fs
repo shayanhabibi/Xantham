@@ -11456,7 +11456,7 @@ type Ai_Cf_Deepgram_Aura_1_Input =
 /// <summary>
 /// The generated audio in MP3 format
 /// </summary>
-type Ai_Cf_Deepgram_Aura_1_Output = Ai_Cf_Leonardo_Phoenix_1_0_Output
+type Ai_Cf_Deepgram_Aura_1_Output = string
 
 [<Interface>]
 type Base_Ai_Cf_Deepgram_Aura_1 =
@@ -11993,7 +11993,7 @@ type Ai_Cf_Deepgram_Aura_2_En_Input =
 /// <summary>
 /// The generated audio in MP3 format
 /// </summary>
-type Ai_Cf_Deepgram_Aura_2_En_Output = Ai_Cf_Leonardo_Phoenix_1_0_Output
+type Ai_Cf_Deepgram_Aura_2_En_Output = string
 
 [<Interface>]
 type Base_Ai_Cf_Deepgram_Aura_2_En =
@@ -12034,7 +12034,7 @@ type Ai_Cf_Deepgram_Aura_2_Es_Input =
 /// <summary>
 /// The generated audio in MP3 format
 /// </summary>
-type Ai_Cf_Deepgram_Aura_2_Es_Output = Ai_Cf_Leonardo_Phoenix_1_0_Output
+type Ai_Cf_Deepgram_Aura_2_Es_Output = string
 
 [<Interface>]
 type Base_Ai_Cf_Deepgram_Aura_2_Es =
@@ -16561,7 +16561,7 @@ type D1SessionConstraint =
     | [<CompiledName("first-primary")>] FirstPrimary
     | [<CompiledName("first-unconstrained")>] FirstUnconstrained
 
-type D1SessionBookmark = Ai_Cf_Leonardo_Phoenix_1_0_Output
+type D1SessionBookmark = string
 
 [<Interface>]
 type D1Database =
@@ -19262,7 +19262,7 @@ type WorkflowDurationLabel =
 
 type WorkflowSleepDuration = Cloudflare.Workers.WorkflowSleepDuration
 
-type WorkflowRetentionDuration = WorkflowSleepDuration
+type WorkflowRetentionDuration = Cloudflare.Workers.WorkflowSleepDuration
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WorkflowInstanceLocationHint =
@@ -24920,7 +24920,7 @@ module Cloudflare =
 
         type WorkflowSleepDuration = U2<float, string>
 
-        type WorkflowDelayDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
+        type WorkflowDelayDuration = U2<float, string>
 
         [<Interface>]
         type WorkflowDynamicDelayContext =
@@ -24931,9 +24931,9 @@ module Cloudflare =
 
         type WorkflowDelayFunction = (Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowDynamicDelayContext -> U3<float, JS.Promise<Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration>, string>)
 
-        type WorkflowTimeoutDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
+        type WorkflowTimeoutDuration = U2<float, string>
 
-        type WorkflowRetentionDuration = Cloudflare.WorkersTypes.Cloudflare.Workers.WorkflowSleepDuration
+        type WorkflowRetentionDuration = U2<float, string>
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type WorkflowBackoff =

@@ -1,4 +1,4 @@
-﻿namespace Xantham.Generator
+namespace Xantham.Generator
 
 open System
 open System.ComponentModel.DataAnnotations
@@ -1379,6 +1379,8 @@ type ExportTypeIds =
     {
         Declared: int<typeId> option
         Value: int<typeId> option
+        /// Source alias parameters in declaration order, independent of shared checker types.
+        AliasParameters: int<typeId> list option
     }
 
 type ResolveModel =

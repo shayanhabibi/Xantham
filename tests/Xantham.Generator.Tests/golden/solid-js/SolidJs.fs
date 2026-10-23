@@ -155,7 +155,7 @@ type SignalOptions<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (?``internal``: bool, ?name: string, ?equals: U2<bool, SignalOptions.Equals<'T>>) : SignalOptions<'T> = jsNative
 
-type NoInfer = JS.NoInfer<obj>
+type NoInfer<'T> = JS.NoInfer<'T>
 
 [<Interface>]
 type EffectOptions =
@@ -300,7 +300,8 @@ type DeferredOptions<'T> =
 [<Erase>]
 type ReturnTypes<'T> = private ReturnTypes__ of obj
 
-type AccessorArray = obj[]
+[<Erase>]
+type AccessorArray<'T> = private AccessorArray__ of obj[]
 
 type OnEffectFunction<'S, 'Prev, 'Next> = delegate of input: 'S * prevInput: 'S option * prev: 'Prev -> 'Next
 
@@ -399,7 +400,8 @@ type Ref<'T> = U2<'T, ('T -> unit)>
 [<Erase>]
 type MergeProps<'T> = private MergeProps__ of obj
 
-type SplitProps = obj[]
+[<Erase>]
+type SplitProps<'T, 'K> = private SplitProps__ of obj[]
 
 [<Interface>]
 type MatchProps<'T> =
@@ -2831,7 +2833,7 @@ module Store =
 
     type NotWrappable = obj option
 
-    type Store = obj
+    type Store<'T> = 'T
 
     /// <remarks>@deprecated</remarks>
     [<Erase>]
