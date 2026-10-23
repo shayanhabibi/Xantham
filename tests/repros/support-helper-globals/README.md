@@ -2,7 +2,7 @@
 
 This opt-in repro references `src/Xantham.Fable.Core` directly. It needs the
 repository's .NET SDK and Node.js, with no CloudEdge checkout or npm dependencies.
-Its local tool manifest pins Fickl 0.5.3; Fable.Core is pinned to 5.5.0.
+Its local tool manifest pins Fickl 0.5.4; Fable.Core is pinned to 5.5.0.
 It is a small standalone companion to the support-helper checks in the default
 runtime gate.
 
