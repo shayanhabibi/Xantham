@@ -810,6 +810,11 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   checker has already merged: `getExportsOfModule`/`getMembersOfSymbol` on the *symbol* see
   the union. Generate from symbols, not from individual declaration nodes, and merging costs
   nothing. (This bit ts2fable hard; it falls out for free here.)
+- A function merged with a namespace that holds values is one hybrid value: the export binds as
+  the object (`Exports.stamp: Stamp`), its call through `Invoke` and its namespace values as
+  members (#158 follow-up F). A function with no namespace values stays a static method per
+  signature. A callable declaration has no `Create`: TypeScript accepts no object literal for it.
+  A global `declare var X: XConstructor` binds the same way, as the constructor object.
 - Re-exports / barrel files → follow `getAliasedSymbol` to the origin, emit once at the
   origin, alias elsewhere (F# module abbreviations / type abbreviations).
 - A required `function` declaration of a namespace object (`export * as ns`), of `globalThis`
@@ -857,6 +862,14 @@ Fable F# tuples *are* JS arrays — a happy exact match:
     separates them: the arms of an anonymous union, the parameters of two overloads of one
     member, and two exports of one name with no namespace between them.
     The corpus counts were carried in lane handovers retired on 2026-09-22.
+  - **Landed, #158 follow-up D.** TypeScript spells a merged export's value side only as
+    `typeof X`. It is named for its role beside the type side holding the export's name: an
+    enum's object `<Stem>Enum`, a namespace merged with a type `<Stem>Namespace`, and a variable
+    merged with a type `<Stem>Value`. This mirrors a class static side's `<Stem>Constructor`.
+    `SY.ValueSideNamed` reports each one, and a taken role name takes a number
+    (`ModeNamespace2`). An anonymous shape owned by a namespace's value nests under the
+    namespace's module (`Point.Defaults`), the spelling TypeScript reaches it by; it is numbered
+    only where that module already holds the name.
 - JSDoc → XML doc comments (`getDocumentationComment`, `getJsDocTags`); `@deprecated` →
   `[<Obsolete>]`; `@see`/`@example` carried into `<remarks>`/`<example>`. The tier
   annotation from §1 also lands here. JSDoc is markdown and XML docs are not, so a fenced

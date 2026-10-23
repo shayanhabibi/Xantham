@@ -95,6 +95,23 @@ let private moduleBodyOf (source: string) (name: string) =
             String.IsNullOrWhiteSpace line || line.Length - line.TrimStart().Length > indent)
         |> String.concat "\n"
 
+/// The body of a `type Name =` declaration: every non-blank line below the header more indented
+/// than it. Scopes an assertion to one declaration.
+let private declarationBodyOf (source: string) (name: string) =
+    let lines = source.Replace("\r\n", "\n").Split '\n'
+    let header = $"type {name} ="
+
+    match lines |> Array.tryFindIndex (fun line -> line.TrimStart().StartsWith header) with
+    | None -> failtest $"no declaration named {name} in the rendered source"
+    | Some start ->
+        let indent = lines[start].Length - lines[start].TrimStart().Length
+
+        lines
+        |> Array.skip (start + 1)
+        |> Array.takeWhile (fun line ->
+            not (String.IsNullOrWhiteSpace line) && line.Length - line.TrimStart().Length > indent)
+        |> String.concat "\n"
+
 /// The doc comment line immediately above a declaration line, trimmed.
 let private summaryBefore (source: string) (declaration: string) =
     let lines = source.Replace("\r\n", "\n").Split '\n'
@@ -1288,9 +1305,7 @@ let pipelineTests =
                             "abstract Invoke: string with get, set"
                             "the declared member keeps its name and type"
 
-                        let collidesStart = source.IndexOf "type Collides ="
-                        let collidesEnd = source.IndexOf("type Exports =", collidesStart)
-                        let collidesBlock = source.Substring(collidesStart, collidesEnd - collidesStart)
+                        let collidesBlock = declarationBodyOf source "Collides"
 
                         Expect.isFalse
                             (collidesBlock.Contains "[<Emit(\"$0($1...)\")>]")
@@ -1300,6 +1315,53 @@ let pipelineTests =
                             (rendered.Findings |> List.map (fun finding -> finding.Key, finding.Symbol))
                             ("SI001", "Collides")
                             "the residue is reported honestly, not silently dropped"
+
+                    testCase "a callable value carrying members binds whole, called through Invoke" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+                        let merged = declarationBodyOf source "MergedNamespace"
+
+                        Expect.stringContains source "static member stamp: Stamp = jsNative" "a function merged with a namespace"
+                        Expect.stringContains (declarationBodyOf source "Stamp") "abstract version: string" "keeps its namespace value"
+                        Expect.stringContains (declarationBodyOf source "Stamp") "abstract Invoke: s: string -> float" "and its call"
+                        Expect.stringContains source "static member Merged: MergedNamespace = jsNative" "the stem the interface holds takes the role name"
+                        Expect.stringContains merged "abstract Invoke: unit -> Merged" "the call returns the interface"
+                        Expect.stringContains merged "abstract version: string" "beside the namespace value"
+                        Expect.isFalse (source.Contains "type Merged2") "no collision number"
+                        Expect.stringContains source "static member trigger: Trigger = jsNative" "a callable const binds its declared hybrid"
+                        Expect.stringContains source "static member collides: Collides = jsNative" "a hybrid whose call is the SI001 loss binds the same"
+                        Expect.stringContains source "static member solo (x: string) : float = jsNative" "a function alone stays a method"
+                        Expect.stringContains source "static member Fn (value: float) : Fn = jsNative" "a function merged with a type alone stays a method"
+
+                        Expect.contains
+                            (rendered.Findings |> List.filter (fun f -> f.Key = "SY007") |> List.map _.Symbol)
+                            "MergedNamespace"
+                            "the role name is reported"
+
+                    testCase "a callable declaration has no Create" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        for name in [ "Trigger"; "Multi"; "Ambiguous"; "Identity"; "Collides"; "Stamp"; "MergedNamespace" ] do
+                            Expect.isFalse
+                                ((declarationBodyOf source name).Contains "static member Create")
+                                $"{name} is callable, which no object literal is"
+
+                            Expect.equal
+                                (rendered.Findings
+                                 |> List.filter (fun f -> f.Symbol = name && f.Key = "SP003")
+                                 |> List.map _.Message)
+                                [ "no ParamObject Create synthesized: the declaration is callable, which no object literal is" ]
+                                $"{name}'s refusal is reported"
+
+                        Expect.isFalse
+                            ((declarationBodyOf source "Boxed<'T>").Contains "static member Create")
+                            "a generic hybrid the same"
+
+                        Expect.stringContains
+                            (declarationBodyOf source "Widget")
+                            "static member Create (handler: Widget.Handler) : Widget = jsNative"
+                            "a declaration holding a callable member is not itself callable"
                 ])
 
         yield!
@@ -5328,26 +5390,20 @@ let pipelineTests =
         yield!
             fixtureTests "exclusive-arms-lab" (handFixture "exclusive-arms-lab") GeneratorConfig.Default (fun package ->
                 // Wave fourteen lane CN, batch two, item 4: the exclusive-arm fold itself.
-                // `SeparableOptions` and `AnchoredOptions` fold into one interface named after
-                // the union, `never` members off the surface entirely rather than left as
-                // `unit`; `DisagreeingOptions` is not this construct and is untouched.
-                // Both pairs fold into one interface named after the union, `SeparableOptions`
-                // through `AnchoredOptions`, ending each arm's own declaration. Only the fixture's
-                // third pair - `WidgetArm`/`GadgetArm`, which the fold declines - still declares
-                // its `never` members as `unit`, so a "no `unit` anywhere" check is scoped to
-                // between the two folded types, before that decline shows up.
+                // `SeparableOptions`, `AnchoredOptions` and `Contested` fold into one interface
+                // named after the union, `never` members off the folded surface rather than left
+                // as `unit`; `DisagreeingOptions` is not this construct and is untouched. A
+                // source-named arm stays declared beside the fold, with its own `never` members
+                // as `unit`, so each "no `unit`" check reads the folded declaration's own body.
                 [ testCase "both arms anchoring their own required member fold, TR060" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
-                    let foldStart = source.IndexOf "type SeparableOptions ="
-                    let foldEnd = source.IndexOf "type AnchoredOptions ="
-                    let foldedBlock = source.Substring(foldStart, foldEnd - foldStart)
+                    let foldedBlock = declarationBodyOf source "SeparableOptions"
 
-                    Expect.isGreaterThan foldStart -1 "the fold is named after the union"
-                    Expect.isFalse (source.Contains "type QueryArm =") "the query arm no longer mints its own name"
-                    Expect.isFalse (source.Contains "type MessagesArm =") "nor does the messages arm"
-                    Expect.stringContains source "abstract query: string option" "query kept optional, not unit"
-                    Expect.stringContains source "abstract messages: string[] option" "messages kept optional, not unit"
+                    Expect.stringContains source "type QueryArm =" "a source-named arm stays declared beside the fold"
+                    Expect.stringContains source "type MessagesArm =" "on both sides"
+                    Expect.stringContains foldedBlock "abstract query: string option" "query kept optional, not unit"
+                    Expect.stringContains foldedBlock "abstract messages: string[] option" "messages kept optional, not unit"
 
                     Expect.isFalse
                         (foldedBlock.Contains ": unit")
@@ -5356,22 +5412,46 @@ let pipelineTests =
                   testCase "one arm's own required member anchors the other's optional one, TR060" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
+                      let foldedBlock = declarationBodyOf source "AnchoredOptions"
 
-                      Expect.stringContains source "type AnchoredOptions =" "the fold is named after the union"
-                      Expect.isFalse (source.Contains "type ImageArm =") "the image arm no longer mints its own name"
-                      Expect.isFalse (source.Contains "type SnapshotArm =") "nor does the snapshot arm"
-
-                      // Both of the anchored pair's own distinguishers (`image`, `snapshot`) are
-                      // real members reaching the fold - the placeholder `unit` that
-                      // `ContainerLikeOptions` still carries is `Create`-overload plumbing this
-                      // fold's own arms never contribute, so this pair folds clean too.
-                      let foldStart = source.IndexOf "type AnchoredOptions ="
-                      let foldEnd = source.IndexOf "type WidgetArm ="
-                      let foldedBlock = source.Substring(foldStart, foldEnd - foldStart)
+                      Expect.stringContains source "type ImageArm =" "a source-named arm stays declared beside the fold"
+                      Expect.stringContains source "type SnapshotArm =" "on both sides"
 
                       Expect.isFalse
                           (foldedBlock.Contains ": unit")
                           "the anchored pair's own members are real on both sides, so no `unit` survives"
+
+                  testCase "a source-named arm of a fold is declared where it is read" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      let nested = moduleBodyOf source "Contested"
+                      let holder = declarationBodyOf source "ContestedHolder"
+
+                      Expect.stringContains
+                          (declarationBodyOf source "Contested")
+                          "abstract right: string[] option"
+                          "the union still folds"
+
+                      Expect.stringContains nested "type Left =" "`Contested.Left` is declared in its namespace's module"
+                      Expect.stringContains nested "abstract left: string with get, set" "with its own members"
+                      Expect.stringContains source "type Right =" "`Contested.Right` is declared under today's bare spelling (re-pinned by the companion plan)"
+                      Expect.stringContains holder "abstract left: Contested.Left with get, set" "an interface member reads the nested arm"
+                      Expect.stringContains holder "abstract right: Right with get, set" "and the bare one"
+
+                      Expect.stringContains
+                          source
+                          "type ContestedCallback = (Contested.Left -> unit)"
+                          "a callback reads the nested arm"
+
+                      Expect.stringContains
+                          (declarationBodyOf source "Elsewhere")
+                          "abstract read: arm: Right -> Contested.Left"
+                          "a function of another namespace reads both arms"
+
+                      Expect.stringContains
+                          source
+                          "static member pickLeft (left: Contested.Left) : Right = jsNative"
+                          "a top-level function reads both arms, unwidened"
 
                   testCase "a shared member disagreeing in type is not this construct" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -5385,8 +5465,66 @@ let pipelineTests =
                            |> List.filter (fun finding -> finding.Key = "TR060" || finding.Key = "TR061")
                            |> List.map _.Symbol
                            |> List.sort)
-                          [ "AnchoredOptions"; "SeparableOptions" ]
-                          "the disagreeing pair raises neither TR060 nor TR061" ])
+                          [ "AnchoredOptions"; "Contested"; "SeparableOptions" ]
+                          "the disagreeing pair raises neither TR060 nor TR061"
+
+                  testCase "a shared member readonly on one arm only keeps the union erased" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type ReadonlyFirst = U2<" "the readonly-first pair does not fold"
+                      Expect.stringContains source "type ReadonlySecond = U2<" "nor does the readonly-second pair" ])
+
+        yield!
+            fixtureTests "value-side-lab" (handFixture "value-side-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a merged export's value side is named for its role, SY007" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map (fun f -> f.Symbol, f.Message)
+                          |> List.sort
+
+                      Expect.stringContains source "static member Shape: ShapeNamespace = jsNative" "a namespace merged with a tagged union"
+                      Expect.isFalse (source.Contains "type Shape4") "no number left over from the dropped arms"
+                      Expect.stringContains source "static member Point: PointNamespace = jsNative" "a namespace merged with an interface"
+
+                      let pointValue = declarationBodyOf source "PointNamespace"
+                      let pointModule = moduleBodyOf source "Point"
+
+                      Expect.stringContains pointValue "abstract defaults: Point.Defaults" "a value-owned shape nests under the source namespace"
+                      Expect.isFalse (source.Contains "PointNamespace.") "nothing nests under the minted value interface"
+                      Expect.isFalse (source.Contains "Point2") "nor under a collision number"
+                      Expect.stringContains pointModule "type Defaults =" "it is declared in the namespace's module"
+                      Expect.stringContains pointValue "abstract pinned: Point.Anchor" "the namespace type keeps its spelling"
+                      Expect.stringContains pointValue "abstract anchor: Point.Anchor2" "the value-owned shape it collides with takes the number"
+                      Expect.stringContains pointModule "type Anchor2 =" "declared beside the namespace type"
+                      Expect.stringContains source "static member Level: LevelEnum = jsNative" "an enum's value side"
+                      Expect.stringContains source "static member Mode: ModeNamespace2 = jsNative" "a taken role name takes a number"
+
+                      Expect.stringContains
+                          (declarationBodyOf source "ModeNamespace")
+                          "abstract reserved: string with get, set"
+                          "and the exported type holding the role name is untouched"
+
+                      Expect.stringContains source "static member Config: Config = jsNative" "a namespace alone keeps its name"
+                      Expect.stringContains source "static member Token: TokenValue = jsNative" "a const merged with a type"
+
+                      Expect.stringContains
+                          (declarationBodyOf source "TokenValue")
+                          "abstract options: TokenValue.Options"
+                          "a variable has no source namespace; its value-owned shape nests under its own name"
+
+                      Expect.equal
+                          (messagesFor "SY007")
+                          [ "LevelEnum", "Level's value side declared as LevelEnum; Level is the type side"
+                            "ModeNamespace2", "Mode's value side declared as ModeNamespace2; Mode is the type side"
+                            "PointNamespace", "Point's value side declared as PointNamespace; Point is the type side"
+                            "ShapeNamespace", "Shape's value side declared as ShapeNamespace; Shape is the type side"
+                            "TokenValue", "Token's value side declared as TokenValue; Token is the type side" ]
+                          "each role-named value side is reported, and only those" ])
 
         yield!
             fixtureTests "frontier-width-lab" (handFixture "frontier-width-lab") GeneratorConfig.Default (fun package ->

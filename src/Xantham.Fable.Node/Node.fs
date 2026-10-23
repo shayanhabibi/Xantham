@@ -10257,19 +10257,347 @@ type Exec =
         command: string * ?options: ChildProcess.ExecOptions ->
             ChildProcess.PromiseWithChild<Exec.Promisify.Result.Item4>
 
+    /// <summary>
+    /// Spawns a shell then executes the <c>command</c> within that shell, buffering any
+    /// generated output. The <c>command</c> string passed to the exec function is processed
+    /// directly by the shell and special characters (vary based on <a href="https://en.wikipedia.org/wiki/List_of_command-line_interpreters">shell</a>)
+    /// need to be dealt with accordingly:
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    ///
+    /// exec('"/path/to/test file/test.sh" arg1 arg2');
+    /// // Double quotes are used so that the space in the path is not interpreted as
+    /// // a delimiter of multiple arguments.
+    ///
+    /// exec('echo "The \\$HOME variable is $HOME"');
+    /// // The $HOME variable is escaped in the first instance, but not in the second.
+    /// </code>
+    /// <br /><br />
+    /// <b>Never pass unsanitized user input to this function. Any input containing shell</b>
+    /// <b>metacharacters may be used to trigger arbitrary command execution.</b>
+    /// <br /><br />
+    /// If a <c>callback</c> function is provided, it is called with the arguments <c>(error, stdout, stderr)</c>. On success, <c>error</c> will be <c>null</c>. On error, <c>error</c> will be an instance of <c>Error</c>. The
+    /// <c>error.code</c> property will be
+    /// the exit code of the process. By convention, any exit code other than <c>0</c> indicates an error. <c>error.signal</c> will be the signal that terminated the
+    /// process.
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    /// exec('cat *.js missing_file | wc -l', (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     console.error(`exec error: ${error}`);
+    ///     return;
+    ///   }
+    ///   console.log(`stdout: ${stdout}`);
+    ///   console.error(`stderr: ${stderr}`);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If <c>timeout</c> is greater than <c>0</c>, the parent will send the signal
+    /// identified by the <c>killSignal</c> property (the default is <c>'SIGTERM'</c>) if the
+    /// child runs longer than <c>timeout</c> milliseconds.
+    /// <br /><br />
+    /// Unlike the <a href="http://man7.org/linux/man-pages/man3/exec.3.html"><c>exec(3)</c></a> POSIX system call, <c>child_process.exec()</c> does not replace
+    /// the existing process and uses a shell to execute the command.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const exec = util.promisify(child_process.exec);
+    ///
+    /// async function lsExample() {
+    ///   const { stdout, stderr } = await exec('ls');
+    ///   console.log('stdout:', stdout);
+    ///   console.error('stderr:', stderr);
+    /// }
+    /// lsExample();
+    /// </code>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = exec('grep ssh', { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
+    /// <param name="command">The command to run, with space-separated arguments.</param>
+    /// <param name="callback">called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: command: string * ?callback: Exec.Callback -> ChildProcess.ChildProcess
 
+    /// <summary>
+    /// Spawns a shell then executes the <c>command</c> within that shell, buffering any
+    /// generated output. The <c>command</c> string passed to the exec function is processed
+    /// directly by the shell and special characters (vary based on <a href="https://en.wikipedia.org/wiki/List_of_command-line_interpreters">shell</a>)
+    /// need to be dealt with accordingly:
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    ///
+    /// exec('"/path/to/test file/test.sh" arg1 arg2');
+    /// // Double quotes are used so that the space in the path is not interpreted as
+    /// // a delimiter of multiple arguments.
+    ///
+    /// exec('echo "The \\$HOME variable is $HOME"');
+    /// // The $HOME variable is escaped in the first instance, but not in the second.
+    /// </code>
+    /// <br /><br />
+    /// <b>Never pass unsanitized user input to this function. Any input containing shell</b>
+    /// <b>metacharacters may be used to trigger arbitrary command execution.</b>
+    /// <br /><br />
+    /// If a <c>callback</c> function is provided, it is called with the arguments <c>(error, stdout, stderr)</c>. On success, <c>error</c> will be <c>null</c>. On error, <c>error</c> will be an instance of <c>Error</c>. The
+    /// <c>error.code</c> property will be
+    /// the exit code of the process. By convention, any exit code other than <c>0</c> indicates an error. <c>error.signal</c> will be the signal that terminated the
+    /// process.
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    /// exec('cat *.js missing_file | wc -l', (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     console.error(`exec error: ${error}`);
+    ///     return;
+    ///   }
+    ///   console.log(`stdout: ${stdout}`);
+    ///   console.error(`stderr: ${stderr}`);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If <c>timeout</c> is greater than <c>0</c>, the parent will send the signal
+    /// identified by the <c>killSignal</c> property (the default is <c>'SIGTERM'</c>) if the
+    /// child runs longer than <c>timeout</c> milliseconds.
+    /// <br /><br />
+    /// Unlike the <a href="http://man7.org/linux/man-pages/man3/exec.3.html"><c>exec(3)</c></a> POSIX system call, <c>child_process.exec()</c> does not replace
+    /// the existing process and uses a shell to execute the command.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const exec = util.promisify(child_process.exec);
+    ///
+    /// async function lsExample() {
+    ///   const { stdout, stderr } = await exec('ls');
+    ///   console.log('stdout:', stdout);
+    ///   console.error('stderr:', stderr);
+    /// }
+    /// lsExample();
+    /// </code>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = exec('grep ssh', { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
+    /// <param name="command">The command to run, with space-separated arguments.</param>
+    /// <param name="callback">called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         command: string * options: ChildProcess.ExecOptionsWithBufferEncoding * ?callback: Exec.Callback2 ->
             ChildProcess.ChildProcess
 
+    /// <summary>
+    /// Spawns a shell then executes the <c>command</c> within that shell, buffering any
+    /// generated output. The <c>command</c> string passed to the exec function is processed
+    /// directly by the shell and special characters (vary based on <a href="https://en.wikipedia.org/wiki/List_of_command-line_interpreters">shell</a>)
+    /// need to be dealt with accordingly:
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    ///
+    /// exec('"/path/to/test file/test.sh" arg1 arg2');
+    /// // Double quotes are used so that the space in the path is not interpreted as
+    /// // a delimiter of multiple arguments.
+    ///
+    /// exec('echo "The \\$HOME variable is $HOME"');
+    /// // The $HOME variable is escaped in the first instance, but not in the second.
+    /// </code>
+    /// <br /><br />
+    /// <b>Never pass unsanitized user input to this function. Any input containing shell</b>
+    /// <b>metacharacters may be used to trigger arbitrary command execution.</b>
+    /// <br /><br />
+    /// If a <c>callback</c> function is provided, it is called with the arguments <c>(error, stdout, stderr)</c>. On success, <c>error</c> will be <c>null</c>. On error, <c>error</c> will be an instance of <c>Error</c>. The
+    /// <c>error.code</c> property will be
+    /// the exit code of the process. By convention, any exit code other than <c>0</c> indicates an error. <c>error.signal</c> will be the signal that terminated the
+    /// process.
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    /// exec('cat *.js missing_file | wc -l', (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     console.error(`exec error: ${error}`);
+    ///     return;
+    ///   }
+    ///   console.log(`stdout: ${stdout}`);
+    ///   console.error(`stderr: ${stderr}`);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If <c>timeout</c> is greater than <c>0</c>, the parent will send the signal
+    /// identified by the <c>killSignal</c> property (the default is <c>'SIGTERM'</c>) if the
+    /// child runs longer than <c>timeout</c> milliseconds.
+    /// <br /><br />
+    /// Unlike the <a href="http://man7.org/linux/man-pages/man3/exec.3.html"><c>exec(3)</c></a> POSIX system call, <c>child_process.exec()</c> does not replace
+    /// the existing process and uses a shell to execute the command.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const exec = util.promisify(child_process.exec);
+    ///
+    /// async function lsExample() {
+    ///   const { stdout, stderr } = await exec('ls');
+    ///   console.log('stdout:', stdout);
+    ///   console.error('stderr:', stderr);
+    /// }
+    /// lsExample();
+    /// </code>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = exec('grep ssh', { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
+    /// <param name="command">The command to run, with space-separated arguments.</param>
+    /// <param name="callback">called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         command: string * options: ChildProcess.ExecOptionsWithStringEncoding * ?callback: Exec.Callback3 ->
             ChildProcess.ChildProcess
 
+    /// <summary>
+    /// Spawns a shell then executes the <c>command</c> within that shell, buffering any
+    /// generated output. The <c>command</c> string passed to the exec function is processed
+    /// directly by the shell and special characters (vary based on <a href="https://en.wikipedia.org/wiki/List_of_command-line_interpreters">shell</a>)
+    /// need to be dealt with accordingly:
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    ///
+    /// exec('"/path/to/test file/test.sh" arg1 arg2');
+    /// // Double quotes are used so that the space in the path is not interpreted as
+    /// // a delimiter of multiple arguments.
+    ///
+    /// exec('echo "The \\$HOME variable is $HOME"');
+    /// // The $HOME variable is escaped in the first instance, but not in the second.
+    /// </code>
+    /// <br /><br />
+    /// <b>Never pass unsanitized user input to this function. Any input containing shell</b>
+    /// <b>metacharacters may be used to trigger arbitrary command execution.</b>
+    /// <br /><br />
+    /// If a <c>callback</c> function is provided, it is called with the arguments <c>(error, stdout, stderr)</c>. On success, <c>error</c> will be <c>null</c>. On error, <c>error</c> will be an instance of <c>Error</c>. The
+    /// <c>error.code</c> property will be
+    /// the exit code of the process. By convention, any exit code other than <c>0</c> indicates an error. <c>error.signal</c> will be the signal that terminated the
+    /// process.
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    /// exec('cat *.js missing_file | wc -l', (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     console.error(`exec error: ${error}`);
+    ///     return;
+    ///   }
+    ///   console.log(`stdout: ${stdout}`);
+    ///   console.error(`stderr: ${stderr}`);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If <c>timeout</c> is greater than <c>0</c>, the parent will send the signal
+    /// identified by the <c>killSignal</c> property (the default is <c>'SIGTERM'</c>) if the
+    /// child runs longer than <c>timeout</c> milliseconds.
+    /// <br /><br />
+    /// Unlike the <a href="http://man7.org/linux/man-pages/man3/exec.3.html"><c>exec(3)</c></a> POSIX system call, <c>child_process.exec()</c> does not replace
+    /// the existing process and uses a shell to execute the command.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const exec = util.promisify(child_process.exec);
+    ///
+    /// async function lsExample() {
+    ///   const { stdout, stderr } = await exec('ls');
+    ///   console.log('stdout:', stdout);
+    ///   console.error('stderr:', stderr);
+    /// }
+    /// lsExample();
+    /// </code>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { exec } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = exec('grep ssh', { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
+    /// <param name="command">The command to run, with space-separated arguments.</param>
+    /// <param name="callback">called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         command: string * ?options: ChildProcess.ExecOptions * ?callback: Exec.Callback4 -> ChildProcess.ChildProcess
@@ -10304,17 +10632,261 @@ type ExecFile =
         file: string * ?args: string[] * ?options: ChildProcess.ExecFileOptions ->
             ChildProcess.PromiseWithChild<ExecFile.Promisify.Result.Item8>
 
+    /// <summary>
+    /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
+    /// executable <c>file</c> is spawned directly as a new process making it slightly more
+    /// efficient than exec.
+    /// <br /><br />
+    /// The same options as exec are supported. Since a shell is
+    /// not spawned, behaviors such as I/O redirection and file globbing are not
+    /// supported.
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     throw error;
+    ///   }
+    ///   console.log(stdout);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const execFile = util.promisify(child_process.execFile);
+    /// async function getVersion() {
+    ///   const { stdout } = await execFile('node', ['--version']);
+    ///   console.log(stdout);
+    /// }
+    /// getVersion();
+    /// </code>
+    /// <br /><br />
+    /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
+    /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
+    /// <b>arbitrary command execution.</b>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.91</remarks>
+    /// <param name="file">The name or path of the executable file to run.</param>
+    /// <param name="args">List of string arguments.</param>
+    /// <param name="callback">Called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: file: string * ?callback: ExecFile.Callback -> ChildProcess.ChildProcess
 
+    /// <summary>
+    /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
+    /// executable <c>file</c> is spawned directly as a new process making it slightly more
+    /// efficient than exec.
+    /// <br /><br />
+    /// The same options as exec are supported. Since a shell is
+    /// not spawned, behaviors such as I/O redirection and file globbing are not
+    /// supported.
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     throw error;
+    ///   }
+    ///   console.log(stdout);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const execFile = util.promisify(child_process.execFile);
+    /// async function getVersion() {
+    ///   const { stdout } = await execFile('node', ['--version']);
+    ///   console.log(stdout);
+    /// }
+    /// getVersion();
+    /// </code>
+    /// <br /><br />
+    /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
+    /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
+    /// <b>arbitrary command execution.</b>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.91</remarks>
+    /// <param name="file">The name or path of the executable file to run.</param>
+    /// <param name="args">List of string arguments.</param>
+    /// <param name="callback">Called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: file: string * ?args: string[] * ?callback: ExecFile.Callback2 -> ChildProcess.ChildProcess
 
+    /// <summary>
+    /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
+    /// executable <c>file</c> is spawned directly as a new process making it slightly more
+    /// efficient than exec.
+    /// <br /><br />
+    /// The same options as exec are supported. Since a shell is
+    /// not spawned, behaviors such as I/O redirection and file globbing are not
+    /// supported.
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     throw error;
+    ///   }
+    ///   console.log(stdout);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const execFile = util.promisify(child_process.execFile);
+    /// async function getVersion() {
+    ///   const { stdout } = await execFile('node', ['--version']);
+    ///   console.log(stdout);
+    /// }
+    /// getVersion();
+    /// </code>
+    /// <br /><br />
+    /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
+    /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
+    /// <b>arbitrary command execution.</b>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.91</remarks>
+    /// <param name="file">The name or path of the executable file to run.</param>
+    /// <param name="args">List of string arguments.</param>
+    /// <param name="callback">Called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         file: string * options: ChildProcess.ExecFileOptionsWithBufferEncoding * ?callback: ExecFile.Callback3 ->
             ChildProcess.ChildProcess
 
+    /// <summary>
+    /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
+    /// executable <c>file</c> is spawned directly as a new process making it slightly more
+    /// efficient than exec.
+    /// <br /><br />
+    /// The same options as exec are supported. Since a shell is
+    /// not spawned, behaviors such as I/O redirection and file globbing are not
+    /// supported.
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     throw error;
+    ///   }
+    ///   console.log(stdout);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const execFile = util.promisify(child_process.execFile);
+    /// async function getVersion() {
+    ///   const { stdout } = await execFile('node', ['--version']);
+    ///   console.log(stdout);
+    /// }
+    /// getVersion();
+    /// </code>
+    /// <br /><br />
+    /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
+    /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
+    /// <b>arbitrary command execution.</b>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.91</remarks>
+    /// <param name="file">The name or path of the executable file to run.</param>
+    /// <param name="args">List of string arguments.</param>
+    /// <param name="callback">Called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         file: string *
@@ -10323,11 +10895,133 @@ type ExecFile =
         ?callback: ExecFile.Callback4 ->
             ChildProcess.ChildProcess
 
+    /// <summary>
+    /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
+    /// executable <c>file</c> is spawned directly as a new process making it slightly more
+    /// efficient than exec.
+    /// <br /><br />
+    /// The same options as exec are supported. Since a shell is
+    /// not spawned, behaviors such as I/O redirection and file globbing are not
+    /// supported.
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     throw error;
+    ///   }
+    ///   console.log(stdout);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const execFile = util.promisify(child_process.execFile);
+    /// async function getVersion() {
+    ///   const { stdout } = await execFile('node', ['--version']);
+    ///   console.log(stdout);
+    /// }
+    /// getVersion();
+    /// </code>
+    /// <br /><br />
+    /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
+    /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
+    /// <b>arbitrary command execution.</b>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.91</remarks>
+    /// <param name="file">The name or path of the executable file to run.</param>
+    /// <param name="args">List of string arguments.</param>
+    /// <param name="callback">Called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         file: string * options: ChildProcess.ExecFileOptionsWithStringEncoding * ?callback: ExecFile.Callback5 ->
             ChildProcess.ChildProcess
 
+    /// <summary>
+    /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
+    /// executable <c>file</c> is spawned directly as a new process making it slightly more
+    /// efficient than exec.
+    /// <br /><br />
+    /// The same options as exec are supported. Since a shell is
+    /// not spawned, behaviors such as I/O redirection and file globbing are not
+    /// supported.
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     throw error;
+    ///   }
+    ///   console.log(stdout);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const execFile = util.promisify(child_process.execFile);
+    /// async function getVersion() {
+    ///   const { stdout } = await execFile('node', ['--version']);
+    ///   console.log(stdout);
+    /// }
+    /// getVersion();
+    /// </code>
+    /// <br /><br />
+    /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
+    /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
+    /// <b>arbitrary command execution.</b>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.91</remarks>
+    /// <param name="file">The name or path of the executable file to run.</param>
+    /// <param name="args">List of string arguments.</param>
+    /// <param name="callback">Called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         file: string *
@@ -10336,11 +11030,133 @@ type ExecFile =
         ?callback: ExecFile.Callback6 ->
             ChildProcess.ChildProcess
 
+    /// <summary>
+    /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
+    /// executable <c>file</c> is spawned directly as a new process making it slightly more
+    /// efficient than exec.
+    /// <br /><br />
+    /// The same options as exec are supported. Since a shell is
+    /// not spawned, behaviors such as I/O redirection and file globbing are not
+    /// supported.
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     throw error;
+    ///   }
+    ///   console.log(stdout);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const execFile = util.promisify(child_process.execFile);
+    /// async function getVersion() {
+    ///   const { stdout } = await execFile('node', ['--version']);
+    ///   console.log(stdout);
+    /// }
+    /// getVersion();
+    /// </code>
+    /// <br /><br />
+    /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
+    /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
+    /// <b>arbitrary command execution.</b>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.91</remarks>
+    /// <param name="file">The name or path of the executable file to run.</param>
+    /// <param name="args">List of string arguments.</param>
+    /// <param name="callback">Called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         file: string * ?options: ChildProcess.ExecFileOptions * ?callback: ExecFile.Callback7 ->
             ChildProcess.ChildProcess
 
+    /// <summary>
+    /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
+    /// executable <c>file</c> is spawned directly as a new process making it slightly more
+    /// efficient than exec.
+    /// <br /><br />
+    /// The same options as exec are supported. Since a shell is
+    /// not spawned, behaviors such as I/O redirection and file globbing are not
+    /// supported.
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
+    ///   if (error) {
+    ///     throw error;
+    ///   }
+    ///   console.log(stdout);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
+    /// stdout and stderr output of the child process. By default, Node.js will decode
+    /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
+    /// can be used to specify the character encoding used to decode the stdout and
+    /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
+    /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
+    /// case of an error (including any error resulting in an exit code other than 0), a
+    /// rejected promise is returned, with the same <c>error</c> object given in the
+    /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
+    /// <code lang="js">
+    /// import util from 'node:util';
+    /// import child_process from 'node:child_process';
+    /// const execFile = util.promisify(child_process.execFile);
+    /// async function getVersion() {
+    ///   const { stdout } = await execFile('node', ['--version']);
+    ///   console.log(stdout);
+    /// }
+    /// getVersion();
+    /// </code>
+    /// <br /><br />
+    /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
+    /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
+    /// <b>arbitrary command execution.</b>
+    /// <br /><br />
+    /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
+    /// the error passed to the callback will be an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { execFile } from 'node:child_process';
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
+    ///   console.error(error); // an AbortError
+    /// });
+    /// controller.abort();
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.91</remarks>
+    /// <param name="file">The name or path of the executable file to run.</param>
+    /// <param name="args">List of string arguments.</param>
+    /// <param name="callback">Called with the output when process terminates.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         file: string * ?args: string[] * ?options: ChildProcess.ExecFileOptions * ?callback: ExecFile.Callback8 ->
@@ -11755,12 +12571,54 @@ type DuplexConstructor =
     [<EmitConstructor>]
     abstract Create: ?opts: Stream.DuplexOptions<Stream.Duplex> -> Stream.Duplex
 
-[<Interface>]
 type Finished =
     abstract __promisify__:
         stream: U3<ReadWriteStream, ReadableStream2, WritableStream2> * ?options: Stream.FinishedOptions ->
             JS.Promise<unit>
 
+    /// <summary>
+    /// A readable and/or writable stream/webstream.
+    /// <br /><br />
+    /// A function to get notified when a stream is no longer readable, writable
+    /// or has experienced an error or a premature close event.
+    /// <code lang="js">
+    /// import { finished } from 'node:stream';
+    /// import fs from 'node:fs';
+    ///
+    /// const rs = fs.createReadStream('archive.tar');
+    ///
+    /// finished(rs, (err) =&gt; {
+    ///   if (err) {
+    ///     console.error('Stream failed.', err);
+    ///   } else {
+    ///     console.log('Stream is done reading.');
+    ///   }
+    /// });
+    ///
+    /// rs.resume(); // Drain the stream.
+    /// </code>
+    /// <br /><br />
+    /// Especially useful in error handling scenarios where a stream is destroyed
+    /// prematurely (like an aborted HTTP request), and will not emit <c>'end'</c> or <c>'finish'</c>.
+    /// <br /><br />
+    /// The <c>finished</c> API provides <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streamfinishedstream-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.finished()</c> leaves dangling event listeners (in particular <c>'error'</c>, <c>'end'</c>, <c>'finish'</c> and <c>'close'</c>) after <c>callback</c> has been
+    /// invoked. The reason for this is so that unexpected <c>'error'</c> events (due to
+    /// incorrect stream implementations) do not cause unexpected crashes.
+    /// If this is unwanted behavior then the returned cleanup function needs to be
+    /// invoked in the callback:
+    /// <code lang="js">
+    /// const cleanup = finished(rs, (err) =&gt; {
+    ///   cleanup();
+    ///   // ...
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="stream">A readable and/or writable stream.</param>
+    /// <param name="callback">A callback function that takes an optional error argument.</param>
+    /// <returns>A cleanup function which removes all registered listeners.</returns>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         stream: U3<ReadWriteStream, ReadableStream2, WritableStream2> *
@@ -11768,17 +12626,53 @@ type Finished =
         callback: (ErrnoException option -> unit) ->
             (unit -> unit)
 
+    /// <summary>
+    /// A readable and/or writable stream/webstream.
+    /// <br /><br />
+    /// A function to get notified when a stream is no longer readable, writable
+    /// or has experienced an error or a premature close event.
+    /// <code lang="js">
+    /// import { finished } from 'node:stream';
+    /// import fs from 'node:fs';
+    ///
+    /// const rs = fs.createReadStream('archive.tar');
+    ///
+    /// finished(rs, (err) =&gt; {
+    ///   if (err) {
+    ///     console.error('Stream failed.', err);
+    ///   } else {
+    ///     console.log('Stream is done reading.');
+    ///   }
+    /// });
+    ///
+    /// rs.resume(); // Drain the stream.
+    /// </code>
+    /// <br /><br />
+    /// Especially useful in error handling scenarios where a stream is destroyed
+    /// prematurely (like an aborted HTTP request), and will not emit <c>'end'</c> or <c>'finish'</c>.
+    /// <br /><br />
+    /// The <c>finished</c> API provides <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streamfinishedstream-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.finished()</c> leaves dangling event listeners (in particular <c>'error'</c>, <c>'end'</c>, <c>'finish'</c> and <c>'close'</c>) after <c>callback</c> has been
+    /// invoked. The reason for this is so that unexpected <c>'error'</c> events (due to
+    /// incorrect stream implementations) do not cause unexpected crashes.
+    /// If this is unwanted behavior then the returned cleanup function needs to be
+    /// invoked in the callback:
+    /// <code lang="js">
+    /// const cleanup = finished(rs, (err) =&gt; {
+    ///   cleanup();
+    ///   // ...
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="stream">A readable and/or writable stream.</param>
+    /// <param name="callback">A callback function that takes an optional error argument.</param>
+    /// <returns>A cleanup function which removes all registered listeners.</returns>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         stream: U3<ReadWriteStream, ReadableStream2, WritableStream2> * callback: (ErrnoException option -> unit) ->
             (unit -> unit)
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__:
-            Func<U3<ReadWriteStream, ReadableStream2, WritableStream2>, Stream.FinishedOptions option, JS.Promise<unit>>)
-        : Finished =
-        jsNative
 
 type PassThroughConstructor =
     /// <summary>
@@ -12691,20 +13585,335 @@ type Pipeline =
         [<ParamArray>] streams: U3<Stream.PipelineOptions, ReadWriteStream, WritableStream2>[] ->
             JS.Promise<unit>
 
+    /// <summary>
+    /// A module method to pipe between streams and generators forwarding errors and
+    /// properly cleaning up and provide a callback when the pipeline is complete.
+    /// <code lang="js">
+    /// import { pipeline } from 'node:stream';
+    /// import fs from 'node:fs';
+    /// import zlib from 'node:zlib';
+    ///
+    /// // Use the pipeline API to easily pipe a series of streams
+    /// // together and get notified when the pipeline is fully done.
+    ///
+    /// // A pipeline to gzip a potentially huge tar file efficiently:
+    ///
+    /// pipeline(
+    ///   fs.createReadStream('archive.tar'),
+    ///   zlib.createGzip(),
+    ///   fs.createWriteStream('archive.tar.gz'),
+    ///   (err) =&gt; {
+    ///     if (err) {
+    ///       console.error('Pipeline failed.', err);
+    ///     } else {
+    ///       console.log('Pipeline succeeded.');
+    ///     }
+    ///   },
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
+    /// <br /><br />
+    /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
+    /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
+    /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
+    /// failure, this can cause event listener leaks and swallowed errors. If the last
+    /// stream is readable, dangling event listeners will be removed so that the last
+    /// stream can be consumed later.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
+    /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
+    /// once it would destroy the socket without sending the expected response.
+    /// See the example below:
+    /// <code lang="js">
+    /// import fs from 'node:fs';
+    /// import http from 'node:http';
+    /// import { pipeline } from 'node:stream';
+    ///
+    /// const server = http.createServer((req, res) =&gt; {
+    ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
+    ///   pipeline(fileStream, res, (err) =&gt; {
+    ///     if (err) {
+    ///       console.log(err); // No such file
+    ///       // this message can't be sent once `pipeline` already destroyed the socket
+    ///       return res.end('error!!!');
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="callback">Called when the pipeline is fully done.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'A, 'B> : source: 'A * destination: 'B * callback: obj -> obj
 
+    /// <summary>
+    /// A module method to pipe between streams and generators forwarding errors and
+    /// properly cleaning up and provide a callback when the pipeline is complete.
+    /// <code lang="js">
+    /// import { pipeline } from 'node:stream';
+    /// import fs from 'node:fs';
+    /// import zlib from 'node:zlib';
+    ///
+    /// // Use the pipeline API to easily pipe a series of streams
+    /// // together and get notified when the pipeline is fully done.
+    ///
+    /// // A pipeline to gzip a potentially huge tar file efficiently:
+    ///
+    /// pipeline(
+    ///   fs.createReadStream('archive.tar'),
+    ///   zlib.createGzip(),
+    ///   fs.createWriteStream('archive.tar.gz'),
+    ///   (err) =&gt; {
+    ///     if (err) {
+    ///       console.error('Pipeline failed.', err);
+    ///     } else {
+    ///       console.log('Pipeline succeeded.');
+    ///     }
+    ///   },
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
+    /// <br /><br />
+    /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
+    /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
+    /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
+    /// failure, this can cause event listener leaks and swallowed errors. If the last
+    /// stream is readable, dangling event listeners will be removed so that the last
+    /// stream can be consumed later.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
+    /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
+    /// once it would destroy the socket without sending the expected response.
+    /// See the example below:
+    /// <code lang="js">
+    /// import fs from 'node:fs';
+    /// import http from 'node:http';
+    /// import { pipeline } from 'node:stream';
+    ///
+    /// const server = http.createServer((req, res) =&gt; {
+    ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
+    ///   pipeline(fileStream, res, (err) =&gt; {
+    ///     if (err) {
+    ///       console.log(err); // No such file
+    ///       // this message can't be sent once `pipeline` already destroyed the socket
+    ///       return res.end('error!!!');
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="callback">Called when the pipeline is fully done.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'A, 'T1, 'B> : source: 'A * transform1: 'T1 * destination: 'B * callback: obj -> obj
 
+    /// <summary>
+    /// A module method to pipe between streams and generators forwarding errors and
+    /// properly cleaning up and provide a callback when the pipeline is complete.
+    /// <code lang="js">
+    /// import { pipeline } from 'node:stream';
+    /// import fs from 'node:fs';
+    /// import zlib from 'node:zlib';
+    ///
+    /// // Use the pipeline API to easily pipe a series of streams
+    /// // together and get notified when the pipeline is fully done.
+    ///
+    /// // A pipeline to gzip a potentially huge tar file efficiently:
+    ///
+    /// pipeline(
+    ///   fs.createReadStream('archive.tar'),
+    ///   zlib.createGzip(),
+    ///   fs.createWriteStream('archive.tar.gz'),
+    ///   (err) =&gt; {
+    ///     if (err) {
+    ///       console.error('Pipeline failed.', err);
+    ///     } else {
+    ///       console.log('Pipeline succeeded.');
+    ///     }
+    ///   },
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
+    /// <br /><br />
+    /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
+    /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
+    /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
+    /// failure, this can cause event listener leaks and swallowed errors. If the last
+    /// stream is readable, dangling event listeners will be removed so that the last
+    /// stream can be consumed later.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
+    /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
+    /// once it would destroy the socket without sending the expected response.
+    /// See the example below:
+    /// <code lang="js">
+    /// import fs from 'node:fs';
+    /// import http from 'node:http';
+    /// import { pipeline } from 'node:stream';
+    ///
+    /// const server = http.createServer((req, res) =&gt; {
+    ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
+    ///   pipeline(fileStream, res, (err) =&gt; {
+    ///     if (err) {
+    ///       console.log(err); // No such file
+    ///       // this message can't be sent once `pipeline` already destroyed the socket
+    ///       return res.end('error!!!');
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="callback">Called when the pipeline is fully done.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'A, 'T1, 'T2, 'B> :
         source: 'A * transform1: 'T1 * transform2: 'T2 * destination: 'B * callback: obj -> obj
 
+    /// <summary>
+    /// A module method to pipe between streams and generators forwarding errors and
+    /// properly cleaning up and provide a callback when the pipeline is complete.
+    /// <code lang="js">
+    /// import { pipeline } from 'node:stream';
+    /// import fs from 'node:fs';
+    /// import zlib from 'node:zlib';
+    ///
+    /// // Use the pipeline API to easily pipe a series of streams
+    /// // together and get notified when the pipeline is fully done.
+    ///
+    /// // A pipeline to gzip a potentially huge tar file efficiently:
+    ///
+    /// pipeline(
+    ///   fs.createReadStream('archive.tar'),
+    ///   zlib.createGzip(),
+    ///   fs.createWriteStream('archive.tar.gz'),
+    ///   (err) =&gt; {
+    ///     if (err) {
+    ///       console.error('Pipeline failed.', err);
+    ///     } else {
+    ///       console.log('Pipeline succeeded.');
+    ///     }
+    ///   },
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
+    /// <br /><br />
+    /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
+    /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
+    /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
+    /// failure, this can cause event listener leaks and swallowed errors. If the last
+    /// stream is readable, dangling event listeners will be removed so that the last
+    /// stream can be consumed later.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
+    /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
+    /// once it would destroy the socket without sending the expected response.
+    /// See the example below:
+    /// <code lang="js">
+    /// import fs from 'node:fs';
+    /// import http from 'node:http';
+    /// import { pipeline } from 'node:stream';
+    ///
+    /// const server = http.createServer((req, res) =&gt; {
+    ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
+    ///   pipeline(fileStream, res, (err) =&gt; {
+    ///     if (err) {
+    ///       console.log(err); // No such file
+    ///       // this message can't be sent once `pipeline` already destroyed the socket
+    ///       return res.end('error!!!');
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="callback">Called when the pipeline is fully done.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'A, 'T1, 'T2, 'T3, 'B> :
         source: 'A * transform1: 'T1 * transform2: 'T2 * transform3: 'T3 * destination: 'B * callback: obj -> obj
 
+    /// <summary>
+    /// A module method to pipe between streams and generators forwarding errors and
+    /// properly cleaning up and provide a callback when the pipeline is complete.
+    /// <code lang="js">
+    /// import { pipeline } from 'node:stream';
+    /// import fs from 'node:fs';
+    /// import zlib from 'node:zlib';
+    ///
+    /// // Use the pipeline API to easily pipe a series of streams
+    /// // together and get notified when the pipeline is fully done.
+    ///
+    /// // A pipeline to gzip a potentially huge tar file efficiently:
+    ///
+    /// pipeline(
+    ///   fs.createReadStream('archive.tar'),
+    ///   zlib.createGzip(),
+    ///   fs.createWriteStream('archive.tar.gz'),
+    ///   (err) =&gt; {
+    ///     if (err) {
+    ///       console.error('Pipeline failed.', err);
+    ///     } else {
+    ///       console.log('Pipeline succeeded.');
+    ///     }
+    ///   },
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
+    /// <br /><br />
+    /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
+    /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
+    /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
+    /// failure, this can cause event listener leaks and swallowed errors. If the last
+    /// stream is readable, dangling event listeners will be removed so that the last
+    /// stream can be consumed later.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
+    /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
+    /// once it would destroy the socket without sending the expected response.
+    /// See the example below:
+    /// <code lang="js">
+    /// import fs from 'node:fs';
+    /// import http from 'node:http';
+    /// import { pipeline } from 'node:stream';
+    ///
+    /// const server = http.createServer((req, res) =&gt; {
+    ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
+    ///   pipeline(fileStream, res, (err) =&gt; {
+    ///     if (err) {
+    ///       console.log(err); // No such file
+    ///       // this message can't be sent once `pipeline` already destroyed the socket
+    ///       return res.end('error!!!');
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="callback">Called when the pipeline is fully done.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'A, 'T1, 'T2, 'T3, 'T4, 'B> :
         source: 'A *
@@ -12716,11 +13925,137 @@ type Pipeline =
         callback: obj ->
             obj
 
+    /// <summary>
+    /// A module method to pipe between streams and generators forwarding errors and
+    /// properly cleaning up and provide a callback when the pipeline is complete.
+    /// <code lang="js">
+    /// import { pipeline } from 'node:stream';
+    /// import fs from 'node:fs';
+    /// import zlib from 'node:zlib';
+    ///
+    /// // Use the pipeline API to easily pipe a series of streams
+    /// // together and get notified when the pipeline is fully done.
+    ///
+    /// // A pipeline to gzip a potentially huge tar file efficiently:
+    ///
+    /// pipeline(
+    ///   fs.createReadStream('archive.tar'),
+    ///   zlib.createGzip(),
+    ///   fs.createWriteStream('archive.tar.gz'),
+    ///   (err) =&gt; {
+    ///     if (err) {
+    ///       console.error('Pipeline failed.', err);
+    ///     } else {
+    ///       console.log('Pipeline succeeded.');
+    ///     }
+    ///   },
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
+    /// <br /><br />
+    /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
+    /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
+    /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
+    /// failure, this can cause event listener leaks and swallowed errors. If the last
+    /// stream is readable, dangling event listeners will be removed so that the last
+    /// stream can be consumed later.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
+    /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
+    /// once it would destroy the socket without sending the expected response.
+    /// See the example below:
+    /// <code lang="js">
+    /// import fs from 'node:fs';
+    /// import http from 'node:http';
+    /// import { pipeline } from 'node:stream';
+    ///
+    /// const server = http.createServer((req, res) =&gt; {
+    ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
+    ///   pipeline(fileStream, res, (err) =&gt; {
+    ///     if (err) {
+    ///       console.log(err); // No such file
+    ///       // this message can't be sent once `pipeline` already destroyed the socket
+    ///       return res.end('error!!!');
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="callback">Called when the pipeline is fully done.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         streams: U3<ReadWriteStream, ReadableStream2, WritableStream2>[] * callback: (ErrnoException option -> unit) ->
             WritableStream2
 
+    /// <summary>
+    /// A module method to pipe between streams and generators forwarding errors and
+    /// properly cleaning up and provide a callback when the pipeline is complete.
+    /// <code lang="js">
+    /// import { pipeline } from 'node:stream';
+    /// import fs from 'node:fs';
+    /// import zlib from 'node:zlib';
+    ///
+    /// // Use the pipeline API to easily pipe a series of streams
+    /// // together and get notified when the pipeline is fully done.
+    ///
+    /// // A pipeline to gzip a potentially huge tar file efficiently:
+    ///
+    /// pipeline(
+    ///   fs.createReadStream('archive.tar'),
+    ///   zlib.createGzip(),
+    ///   fs.createWriteStream('archive.tar.gz'),
+    ///   (err) =&gt; {
+    ///     if (err) {
+    ///       console.error('Pipeline failed.', err);
+    ///     } else {
+    ///       console.log('Pipeline succeeded.');
+    ///     }
+    ///   },
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
+    /// <br /><br />
+    /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
+    /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
+    /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
+    /// failure, this can cause event listener leaks and swallowed errors. If the last
+    /// stream is readable, dangling event listeners will be removed so that the last
+    /// stream can be consumed later.
+    /// <br /><br />
+    /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
+    /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
+    /// once it would destroy the socket without sending the expected response.
+    /// See the example below:
+    /// <code lang="js">
+    /// import fs from 'node:fs';
+    /// import http from 'node:http';
+    /// import { pipeline } from 'node:stream';
+    ///
+    /// const server = http.createServer((req, res) =&gt; {
+    ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
+    ///   pipeline(fileStream, res, (err) =&gt; {
+    ///     if (err) {
+    ///       console.log(err); // No such file
+    ///       // this message can't be sent once `pipeline` already destroyed the socket
+    ///       return res.end('error!!!');
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v10.0.0</remarks>
+    /// <param name="callback">Called when the pipeline is fully done.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         stream1: ReadableStream2 *
@@ -16254,197 +17589,1717 @@ type GenerateKeyPair =
     abstract __promisify__X448:
         ?options: Crypto.X448KeyPairKeyObjectOptions -> JS.Promise<Crypto.KeyPairKeyObjectResult>
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback2 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback3 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback4 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAKeyPairKeyObjectOptions * callback: GenerateKeyPair.Callback5 -> unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAPSSKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback6 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAPSSKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback7 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAPSSKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback8 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAPSSKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback9 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.RSAPSSKeyPairKeyObjectOptions * callback: GenerateKeyPair.Callback10 -> unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.DSAKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback11 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.DSAKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback12 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.DSAKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback13 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.DSAKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback14 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.DSAKeyPairKeyObjectOptions * callback: GenerateKeyPair.Callback15 -> unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ECKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback16 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ECKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback17 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ECKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback18 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ECKeyPairOptions<string, string> * callback: GenerateKeyPair.Callback19 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ECKeyPairKeyObjectOptions * callback: GenerateKeyPair.Callback20 -> unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED25519KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback21 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED25519KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback22 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED25519KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback23 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED25519KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback24 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED25519KeyPairKeyObjectOptions option * callback: GenerateKeyPair.Callback25 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED448KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback26 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED448KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback27 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED448KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback28 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED448KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback29 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.ED448KeyPairKeyObjectOptions option * callback: GenerateKeyPair.Callback30 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X25519KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback31 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X25519KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback32 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X25519KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback33 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X25519KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback34 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X25519KeyPairKeyObjectOptions option * callback: GenerateKeyPair.Callback35 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X448KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback36 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X448KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback37 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X448KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback38 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X448KeyPairOptions<string, string> * callback: GenerateKeyPair.Callback39 ->
             unit
 
+    /// <summary>
+    /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
+    /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
+    /// <br /><br />
+    /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
+    /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
+    /// the respective part of the key is returned as a <c>KeyObject</c>.
+    /// <br /><br />
+    /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
+    /// <code lang="js">
+    /// const {
+    ///   generateKeyPair,
+    /// } = await import('node:crypto');
+    ///
+    /// generateKeyPair('rsa', {
+    ///   modulusLength: 4096,
+    ///   publicKeyEncoding: {
+    ///     type: 'spki',
+    ///     format: 'pem',
+    ///   },
+    ///   privateKeyEncoding: {
+    ///     type: 'pkcs8',
+    ///     format: 'pem',
+    ///     cipher: 'aes-256-cbc',
+    ///     passphrase: 'top secret',
+    ///   },
+    /// }, (err, publicKey, privateKey) =&gt; {
+    ///   // Handle errors and use the generated key pair.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
+    /// </summary>
+    /// <remarks>@since v10.12.0</remarks>
+    /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         ``type``: string * options: Crypto.X448KeyPairKeyObjectOptions option * callback: GenerateKeyPair.Callback40 ->
@@ -17294,7 +20149,6 @@ type Crypto =
         ) : Crypto =
         jsNative
 
-[<Interface>]
 type CryptoKeyConstructor =
     /// <remarks>TypeScript type: <c>0</c></remarks>
     abstract length: float
@@ -17304,9 +20158,6 @@ type CryptoKeyConstructor =
 
     [<Emit("$0($1...)")>]
     abstract Invoke: ``_``: CryptoKeyConstructor2 -> unit
-
-    [<ParamObject; Emit("({ length: 0, name: 'CryptoKey', ...$0 })")>]
-    static member Create(prototype: CryptoKey) : CryptoKeyConstructor = jsNative
 
 module CryptoKeyConstructor =
     /// <remarks>TypeScript type: <c>0</c></remarks>
@@ -17333,33 +20184,262 @@ type Lookup =
     abstract __promisify__:
         hostname: string * options: Dns.LookupOptions -> JS.Promise<U2<Dns.LookupAddress[], Dns.LookupAddress>>
 
+    /// <summary>
+    /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+    /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+    /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+    /// IPv4 and IPv6 addresses are both returned if found.
+    /// <br /><br />
+    /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+    /// properties <c>address</c> and <c>family</c>.
+    /// <br /><br />
+    /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+    /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+    /// the host name does not exist but also when the lookup fails in other ways
+    /// such as no available file descriptors.
+    /// <br /><br />
+    /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+    /// The implementation uses an operating system facility that can associate names
+    /// with addresses and vice versa. This implementation can have subtle but
+    /// important consequences on the behavior of any Node.js program. Please take some
+    /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+    /// before using <c>dns.lookup()</c>.
+    /// <br /><br />
+    /// Example usage:
+    /// <code lang="js">
+    /// import dns from 'node:dns';
+    /// const options = {
+    ///   family: 6,
+    ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+    /// };
+    /// dns.lookup('example.com', options, (err, address, family) =&gt;
+    ///   console.log('address: %j family: IPv%s', address, family));
+    /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+    ///
+    /// // When options.all is true, the result will be an Array.
+    /// options.all = true;
+    /// dns.lookup('example.com', options, (err, addresses) =&gt;
+    ///   console.log('addresses: %j', addresses));
+    /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+    /// </code>
+    /// <br /><br />
+    /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+    /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * family: float * callback: Lookup.Callback -> unit
 
+    /// <summary>
+    /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+    /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+    /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+    /// IPv4 and IPv6 addresses are both returned if found.
+    /// <br /><br />
+    /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+    /// properties <c>address</c> and <c>family</c>.
+    /// <br /><br />
+    /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+    /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+    /// the host name does not exist but also when the lookup fails in other ways
+    /// such as no available file descriptors.
+    /// <br /><br />
+    /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+    /// The implementation uses an operating system facility that can associate names
+    /// with addresses and vice versa. This implementation can have subtle but
+    /// important consequences on the behavior of any Node.js program. Please take some
+    /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+    /// before using <c>dns.lookup()</c>.
+    /// <br /><br />
+    /// Example usage:
+    /// <code lang="js">
+    /// import dns from 'node:dns';
+    /// const options = {
+    ///   family: 6,
+    ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+    /// };
+    /// dns.lookup('example.com', options, (err, address, family) =&gt;
+    ///   console.log('address: %j family: IPv%s', address, family));
+    /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+    ///
+    /// // When options.all is true, the result will be an Array.
+    /// options.all = true;
+    /// dns.lookup('example.com', options, (err, addresses) =&gt;
+    ///   console.log('addresses: %j', addresses));
+    /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+    /// </code>
+    /// <br /><br />
+    /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+    /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * options: Dns.LookupOneOptions * callback: Lookup.Callback2 -> unit
 
+    /// <summary>
+    /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+    /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+    /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+    /// IPv4 and IPv6 addresses are both returned if found.
+    /// <br /><br />
+    /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+    /// properties <c>address</c> and <c>family</c>.
+    /// <br /><br />
+    /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+    /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+    /// the host name does not exist but also when the lookup fails in other ways
+    /// such as no available file descriptors.
+    /// <br /><br />
+    /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+    /// The implementation uses an operating system facility that can associate names
+    /// with addresses and vice versa. This implementation can have subtle but
+    /// important consequences on the behavior of any Node.js program. Please take some
+    /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+    /// before using <c>dns.lookup()</c>.
+    /// <br /><br />
+    /// Example usage:
+    /// <code lang="js">
+    /// import dns from 'node:dns';
+    /// const options = {
+    ///   family: 6,
+    ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+    /// };
+    /// dns.lookup('example.com', options, (err, address, family) =&gt;
+    ///   console.log('address: %j family: IPv%s', address, family));
+    /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+    ///
+    /// // When options.all is true, the result will be an Array.
+    /// options.all = true;
+    /// dns.lookup('example.com', options, (err, addresses) =&gt;
+    ///   console.log('addresses: %j', addresses));
+    /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+    /// </code>
+    /// <br /><br />
+    /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+    /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * options: Dns.LookupAllOptions * callback: Lookup.Callback3 -> unit
 
+    /// <summary>
+    /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+    /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+    /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+    /// IPv4 and IPv6 addresses are both returned if found.
+    /// <br /><br />
+    /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+    /// properties <c>address</c> and <c>family</c>.
+    /// <br /><br />
+    /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+    /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+    /// the host name does not exist but also when the lookup fails in other ways
+    /// such as no available file descriptors.
+    /// <br /><br />
+    /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+    /// The implementation uses an operating system facility that can associate names
+    /// with addresses and vice versa. This implementation can have subtle but
+    /// important consequences on the behavior of any Node.js program. Please take some
+    /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+    /// before using <c>dns.lookup()</c>.
+    /// <br /><br />
+    /// Example usage:
+    /// <code lang="js">
+    /// import dns from 'node:dns';
+    /// const options = {
+    ///   family: 6,
+    ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+    /// };
+    /// dns.lookup('example.com', options, (err, address, family) =&gt;
+    ///   console.log('address: %j family: IPv%s', address, family));
+    /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+    ///
+    /// // When options.all is true, the result will be an Array.
+    /// options.all = true;
+    /// dns.lookup('example.com', options, (err, addresses) =&gt;
+    ///   console.log('addresses: %j', addresses));
+    /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+    /// </code>
+    /// <br /><br />
+    /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+    /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * options: Dns.LookupOptions * callback: Lookup.Callback4 -> unit
 
+    /// <summary>
+    /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
+    /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
+    /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
+    /// IPv4 and IPv6 addresses are both returned if found.
+    /// <br /><br />
+    /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
+    /// properties <c>address</c> and <c>family</c>.
+    /// <br /><br />
+    /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
+    /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
+    /// the host name does not exist but also when the lookup fails in other ways
+    /// such as no available file descriptors.
+    /// <br /><br />
+    /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
+    /// The implementation uses an operating system facility that can associate names
+    /// with addresses and vice versa. This implementation can have subtle but
+    /// important consequences on the behavior of any Node.js program. Please take some
+    /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
+    /// before using <c>dns.lookup()</c>.
+    /// <br /><br />
+    /// Example usage:
+    /// <code lang="js">
+    /// import dns from 'node:dns';
+    /// const options = {
+    ///   family: 6,
+    ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
+    /// };
+    /// dns.lookup('example.com', options, (err, address, family) =&gt;
+    ///   console.log('address: %j family: IPv%s', address, family));
+    /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
+    ///
+    /// // When options.all is true, the result will be an Array.
+    /// options.all = true;
+    /// dns.lookup('example.com', options, (err, addresses) =&gt;
+    ///   console.log('addresses: %j', addresses));
+    /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
+    /// </code>
+    /// <br /><br />
+    /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+    /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: Lookup.Callback5 -> unit
 
-[<Interface>]
 type LookupService =
     abstract __promisify__: address: string * port: float -> JS.Promise<LookupService.Promisify.Result.Item>
 
+    /// <summary>
+    /// Resolves the given <c>address</c> and <c>port</c> into a host name and service using
+    /// the operating system's underlying <c>getnameinfo</c> implementation.
+    /// <br /><br />
+    /// If <c>address</c> is not a valid IP address, a <c>TypeError</c> will be thrown.
+    /// The <c>port</c> will be coerced to a number. If it is not a legal port, a <c>TypeError</c> will be thrown.
+    /// <br /><br />
+    /// On an error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is the error code.
+    /// <code lang="js">
+    /// import dns from 'node:dns';
+    /// dns.lookupService('127.0.0.1', 22, (err, hostname, service) =&gt; {
+    ///   console.log(hostname, service);
+    ///   // Prints: localhost ssh
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
+    /// version, it returns a <c>Promise</c> for an <c>Object</c> with <c>hostname</c> and <c>service</c> properties.
+    /// </summary>
+    /// <remarks>@since v0.11.14</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: address: string * port: float * callback: LookupService.Callback -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<string, float, JS.Promise<LookupService.Promisify.Result.Item>>)
-        : LookupService =
-        jsNative
 
 type Resolve =
     abstract __promisify__: hostname: string * ?rrtype: Resolve.Promisify.Rrtype -> JS.Promise<string[]>
@@ -17444,36 +20524,179 @@ type Resolve =
                  >
              >
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: Resolve.Callback -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: Resolve.Promisify.Rrtype * callback: Resolve.Callback2 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback3 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback4 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback5 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback6 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback7 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback8 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback9 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback10 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
+    /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
+    /// records. The type and structure of individual results varies based on <c>rrtype</c>:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
+    /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
+    /// <param name="rrtype">Resource record type.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * rrtype: string * callback: Resolve.Callback11 -> unit
 
@@ -17484,12 +20707,30 @@ type Resolve4 =
     abstract __promisify__:
         hostname: string * ?options: Dns.ResolveOptions -> JS.Promise<U2<string[], Dns.RecordWithTtl[]>>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+    /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
+    /// </summary>
+    /// <remarks>@since v0.1.16</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: Resolve4.Callback -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+    /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
+    /// </summary>
+    /// <remarks>@since v0.1.16</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * options: Dns.ResolveWithTtlOptions * callback: Resolve4.Callback2 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+    /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
+    /// </summary>
+    /// <remarks>@since v0.1.16</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * options: Dns.ResolveOptions * callback: Resolve4.Callback3 -> unit
 
@@ -17500,124 +20741,244 @@ type Resolve6 =
     abstract __promisify__:
         hostname: string * ?options: Dns.ResolveOptions -> JS.Promise<U2<string[], Dns.RecordWithTtl[]>>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+    /// will contain an array of IPv6 addresses.
+    /// </summary>
+    /// <remarks>@since v0.1.16</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: Resolve6.Callback -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+    /// will contain an array of IPv6 addresses.
+    /// </summary>
+    /// <remarks>@since v0.1.16</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * options: Dns.ResolveWithTtlOptions * callback: Resolve6.Callback2 -> unit
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+    /// will contain an array of IPv6 addresses.
+    /// </summary>
+    /// <remarks>@since v0.1.16</remarks>
+    /// <param name="hostname">Host name to resolve.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * options: Dns.ResolveOptions * callback: Resolve6.Callback3 -> unit
 
-[<Interface>]
 type ResolveCname =
     abstract __promisify__: hostname: string -> JS.Promise<string[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve <c>CNAME</c> records for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+    /// will contain an array of canonical name records available for the <c>hostname</c> (e.g. <c>['bar.example.com']</c>).
+    /// </summary>
+    /// <remarks>@since v0.3.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveCname.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<string[]>)) : ResolveCname = jsNative
-
-[<Interface>]
 type ResolveCaa =
     abstract __promisify__: hostname: string -> JS.Promise<Dns.CaaRecord[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve <c>CAA</c> records for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
+    /// will contain an array of certification authority authorization records
+    /// available for the <c>hostname</c> (e.g. <c>[{critical: 0, iodef: 'mailto:pki@example.com'}, {critical: 128, issue: 'pki.example.com'}]</c>).
+    /// </summary>
+    /// <remarks>@since v15.0.0, v14.17.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveCaa.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<Dns.CaaRecord[]>)) : ResolveCaa = jsNative
-
-[<Interface>]
 type ResolveMx =
     abstract __promisify__: hostname: string -> JS.Promise<Dns.MxRecord[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve mail exchange records (<c>MX</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
+    /// contain an array of objects containing both a <c>priority</c> and <c>exchange</c> property (e.g. <c>[{priority: 10, exchange: 'mx.example.com'}, ...]</c>).
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveMx.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<Dns.MxRecord[]>)) : ResolveMx = jsNative
-
-[<Interface>]
 type ResolveNaptr =
     abstract __promisify__: hostname: string -> JS.Promise<Dns.NaptrRecord[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve regular expression-based records (<c>NAPTR</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will contain an array of
+    /// objects with the following properties:
+    /// <br /><br />
+    /// * <c>flags</c>
+    /// * <c>service</c>
+    /// * <c>regexp</c>
+    /// * <c>replacement</c>
+    /// * <c>order</c>
+    /// * <c>preference</c>
+    /// <code lang="js">
+    /// {
+    ///   flags: 's',
+    ///   service: 'SIP+D2U',
+    ///   regexp: '',
+    ///   replacement: '_sip._udp.example.com',
+    ///   order: 30,
+    ///   preference: 100
+    /// }
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.9.12</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveNaptr.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<Dns.NaptrRecord[]>)) : ResolveNaptr = jsNative
-
-[<Interface>]
 type ResolveNs =
     abstract __promisify__: hostname: string -> JS.Promise<string[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve name server records (<c>NS</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
+    /// contain an array of name server records available for <c>hostname</c> (e.g. <c>['ns1.example.com', 'ns2.example.com']</c>).
+    /// </summary>
+    /// <remarks>@since v0.1.90</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveNs.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<string[]>)) : ResolveNs = jsNative
-
-[<Interface>]
 type ResolvePtr =
     abstract __promisify__: hostname: string -> JS.Promise<string[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve pointer records (<c>PTR</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
+    /// be an array of strings containing the reply records.
+    /// </summary>
+    /// <remarks>@since v6.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolvePtr.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<string[]>)) : ResolvePtr = jsNative
-
-[<Interface>]
 type ResolveSoa =
     abstract __promisify__: hostname: string -> JS.Promise<Dns.SoaRecord>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve a start of authority record (<c>SOA</c> record) for
+    /// the <c>hostname</c>. The <c>address</c> argument passed to the <c>callback</c> function will
+    /// be an object with the following properties:
+    /// <br /><br />
+    /// * <c>nsname</c>
+    /// * <c>hostmaster</c>
+    /// * <c>serial</c>
+    /// * <c>refresh</c>
+    /// * <c>retry</c>
+    /// * <c>expire</c>
+    /// * <c>minttl</c>
+    /// <code lang="js">
+    /// {
+    ///   nsname: 'ns.example.com',
+    ///   hostmaster: 'root.example.com',
+    ///   serial: 2013101809,
+    ///   refresh: 10000,
+    ///   retry: 2400,
+    ///   expire: 604800,
+    ///   minttl: 3600
+    /// }
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.11.10</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveSoa.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<Dns.SoaRecord>)) : ResolveSoa = jsNative
-
-[<Interface>]
 type ResolveSrv =
     abstract __promisify__: hostname: string -> JS.Promise<Dns.SrvRecord[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve service records (<c>SRV</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
+    /// be an array of objects with the following properties:
+    /// <br /><br />
+    /// * <c>priority</c>
+    /// * <c>weight</c>
+    /// * <c>port</c>
+    /// * <c>name</c>
+    /// <code lang="js">
+    /// {
+    ///   priority: 10,
+    ///   weight: 5,
+    ///   port: 21223,
+    ///   name: 'service.example.com'
+    /// }
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveSrv.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<Dns.SrvRecord[]>)) : ResolveSrv = jsNative
-
-[<Interface>]
 type ResolveTlsa =
     abstract __promisify__: hostname: string -> JS.Promise<Dns.TlsaRecord[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve certificate associations (<c>TLSA</c> records) for
+    /// the <c>hostname</c>. The <c>records</c> argument passed to the <c>callback</c> function is an
+    /// array of objects with these properties:
+    /// <br /><br />
+    /// * <c>certUsage</c>
+    /// * <c>selector</c>
+    /// * <c>match</c>
+    /// * <c>data</c>
+    /// <code lang="js">
+    /// {
+    ///   certUsage: 3,
+    ///   selector: 1,
+    ///   match: 1,
+    ///   data: [ArrayBuffer]
+    /// }
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v22.15.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveTlsa.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<Dns.TlsaRecord[]>)) : ResolveTlsa = jsNative
-
-[<Interface>]
 type ResolveTxt =
     abstract __promisify__: hostname: string -> JS.Promise<string[][]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve text queries (<c>TXT</c> records) for the <c>hostname</c>. The <c>records</c> argument passed to the <c>callback</c> function is a
+    /// two-dimensional array of the text records available for <c>hostname</c> (e.g.<c>[ ['v=spf1 ip4:0.0.0.0 ', '~all' ] ]</c>). Each sub-array contains TXT chunks of
+    /// one record. Depending on the use case, these could be either joined together or
+    /// treated separately.
+    /// </summary>
+    /// <remarks>@since v0.1.27</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveTxt.Callback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<string[][]>)) : ResolveTxt = jsNative
-
-[<Interface>]
 type ResolveAny =
     abstract __promisify__: hostname: string -> JS.Promise<Dns.AnyRecord[]>
 
+    /// <summary>
+    /// Uses the DNS protocol to resolve all records (also known as <c>ANY</c> or <c>*</c> query).
+    /// The <c>ret</c> argument passed to the <c>callback</c> function will be an array containing
+    /// various types of records. Each object has a property <c>type</c> that indicates the
+    /// type of the current record. And depending on the <c>type</c>, additional properties
+    /// will be present on the object:
+    /// <br /><br />
+    /// &lt;omitted&gt;
+    /// <br /><br />
+    /// Here is an example of the <c>ret</c> object passed to the callback:
+    /// <code lang="js">
+    /// [ { type: 'A', address: '127.0.0.1', ttl: 299 },
+    ///   { type: 'CNAME', value: 'example.com' },
+    ///   { type: 'MX', exchange: 'alt4.aspmx.l.example.com', priority: 50 },
+    ///   { type: 'NS', value: 'ns1.example.com' },
+    ///   { type: 'TXT', entries: [ 'v=spf1 include:_spf.example.com ~all' ] },
+    ///   { type: 'SOA',
+    ///     nsname: 'ns1.example.com',
+    ///     hostmaster: 'admin.example.com',
+    ///     serial: 156696742,
+    ///     refresh: 900,
+    ///     retry: 900,
+    ///     expire: 1800,
+    ///     minttl: 60 } ]
+    /// </code>
+    /// <br /><br />
+    /// DNS server operators may choose not to respond to <c>ANY</c> queries. It may be better to call individual methods like resolve4, resolveMx, and so on. For more details, see
+    /// <a href="https://tools.ietf.org/html/rfc8482">RFC 8482</a>.
+    /// </summary>
     [<Emit("$0($1...)")>]
     abstract Invoke: hostname: string * callback: ResolveAny.Callback -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (string -> JS.Promise<Dns.AnyRecord[]>)) : ResolveAny = jsNative
 
 type ResolverConstructor =
     [<EmitConstructor>]
@@ -17641,7 +21002,6 @@ type Timer =
     [<Emit("$0[Symbol.toPrimitive]()")>]
     abstract SymbolToPrimitive: unit -> float
 
-[<Interface>]
 type Rename =
     /// <summary>
     /// Asynchronous rename(2) - Change the name or location of a file or directory.
@@ -17656,13 +21016,27 @@ type Rename =
     /// </param>
     abstract __promisify__: oldPath: Fs.PathLike * newPath: Fs.PathLike -> JS.Promise<unit>
 
+    /// <summary>
+    /// Asynchronously rename file at <c>oldPath</c> to the pathname provided
+    /// as <c>newPath</c>. In the case that <c>newPath</c> already exists, it will
+    /// be overwritten. If there is a directory at <c>newPath</c>, an error will
+    /// be raised instead. No arguments other than a possible exception are
+    /// given to the completion callback.
+    /// <br /><br />
+    /// See also: <a href="http://man7.org/linux/man-pages/man2/rename.2.html"><c>rename(2)</c></a>.
+    /// <code lang="js">
+    /// import { rename } from 'node:fs';
+    ///
+    /// rename('oldFile.txt', 'newFile.txt', (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('Rename complete!');
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: oldPath: Fs.PathLike * newPath: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.PathLike, JS.Promise<unit>>) : Rename = jsNative
-
-[<Interface>]
 type Truncate =
     /// <summary>
     /// Asynchronous truncate(2) - Truncate a file to a specified length.
@@ -17671,16 +21045,53 @@ type Truncate =
     /// <param name="len">If not specified, defaults to <c>0</c>.</param>
     abstract __promisify__: path: Fs.PathLike * ?len: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Truncates the file. No arguments other than a possible exception are
+    /// given to the completion callback. A file descriptor can also be passed as the
+    /// first argument. In this case, <c>fs.ftruncate()</c> is called.
+    /// <code lang="js">
+    /// import { truncate } from 'node:fs';
+    /// // Assuming that 'path/file.txt' is a regular file.
+    /// truncate('path/file.txt', (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('path/file.txt was truncated');
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Passing a file descriptor is deprecated and may result in an error being thrown
+    /// in the future.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/truncate.2.html"><c>truncate(2)</c></a> documentation for more details.
+    /// Asynchronous truncate(2) - Truncate a file to a specified length.
+    /// </summary>
+    /// <remarks>@since v0.8.6</remarks>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * len: float option * callback: Fs.NoParamCallback -> unit
 
+    /// <summary>
+    /// Truncates the file. No arguments other than a possible exception are
+    /// given to the completion callback. A file descriptor can also be passed as the
+    /// first argument. In this case, <c>fs.ftruncate()</c> is called.
+    /// <code lang="js">
+    /// import { truncate } from 'node:fs';
+    /// // Assuming that 'path/file.txt' is a regular file.
+    /// truncate('path/file.txt', (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('path/file.txt was truncated');
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Passing a file descriptor is deprecated and may result in an error being thrown
+    /// in the future.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/truncate.2.html"><c>truncate(2)</c></a> documentation for more details.
+    /// Asynchronous truncate(2) - Truncate a file to a specified length.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, float option, JS.Promise<unit>>) : Truncate = jsNative
-
-[<Interface>]
 type Ftruncate =
     /// <summary>
     /// Asynchronous ftruncate(2) - Truncate a file to a specified length.
@@ -17689,16 +21100,97 @@ type Ftruncate =
     /// <param name="len">If not specified, defaults to <c>0</c>.</param>
     abstract __promisify__: fd: float * ?len: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Truncates the file descriptor. No arguments other than a possible exception are
+    /// given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/ftruncate.2.html"><c>ftruncate(2)</c></a> documentation for more detail.
+    /// <br /><br />
+    /// If the file referred to by the file descriptor was larger than <c>len</c> bytes, only
+    /// the first <c>len</c> bytes will be retained in the file.
+    /// <br /><br />
+    /// For example, the following program retains only the first four bytes of the
+    /// file:
+    /// <code lang="js">
+    /// import { open, close, ftruncate } from 'node:fs';
+    ///
+    /// function closeFd(fd) {
+    ///   close(fd, (err) =&gt; {
+    ///     if (err) throw err;
+    ///   });
+    /// }
+    ///
+    /// open('temp.txt', 'r+', (err, fd) =&gt; {
+    ///   if (err) throw err;
+    ///
+    ///   try {
+    ///     ftruncate(fd, 4, (err) =&gt; {
+    ///       closeFd(fd);
+    ///       if (err) throw err;
+    ///     });
+    ///   } catch (err) {
+    ///     closeFd(fd);
+    ///     if (err) throw err;
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If the file previously was shorter than <c>len</c> bytes, it is extended, and the
+    /// extended part is filled with null bytes (<c>'\0'</c>):
+    /// <br /><br />
+    /// If <c>len</c> is negative then <c>0</c> will be used.
+    /// Asynchronous ftruncate(2) - Truncate a file to a specified length.
+    /// </summary>
+    /// <remarks>@since v0.8.6</remarks>
+    /// <param name="fd">A file descriptor.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * len: float option * callback: Fs.NoParamCallback -> unit
 
+    /// <summary>
+    /// Truncates the file descriptor. No arguments other than a possible exception are
+    /// given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/ftruncate.2.html"><c>ftruncate(2)</c></a> documentation for more detail.
+    /// <br /><br />
+    /// If the file referred to by the file descriptor was larger than <c>len</c> bytes, only
+    /// the first <c>len</c> bytes will be retained in the file.
+    /// <br /><br />
+    /// For example, the following program retains only the first four bytes of the
+    /// file:
+    /// <code lang="js">
+    /// import { open, close, ftruncate } from 'node:fs';
+    ///
+    /// function closeFd(fd) {
+    ///   close(fd, (err) =&gt; {
+    ///     if (err) throw err;
+    ///   });
+    /// }
+    ///
+    /// open('temp.txt', 'r+', (err, fd) =&gt; {
+    ///   if (err) throw err;
+    ///
+    ///   try {
+    ///     ftruncate(fd, 4, (err) =&gt; {
+    ///       closeFd(fd);
+    ///       if (err) throw err;
+    ///     });
+    ///   } catch (err) {
+    ///     closeFd(fd);
+    ///     if (err) throw err;
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If the file previously was shorter than <c>len</c> bytes, it is extended, and the
+    /// extended part is filled with null bytes (<c>'\0'</c>):
+    /// <br /><br />
+    /// If <c>len</c> is negative then <c>0</c> will be used.
+    /// Asynchronous ftruncate(2) - Truncate a file to a specified length.
+    /// </summary>
+    /// <param name="fd">A file descriptor.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<float, float option, JS.Promise<unit>>) : Ftruncate = jsNative
-
-[<Interface>]
 type Chown =
     /// <summary>
     /// Asynchronous chown(2) - Change ownership of a file.
@@ -17706,13 +21198,16 @@ type Chown =
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     abstract __promisify__: path: Fs.PathLike * uid: float * gid: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Asynchronously changes owner and group of a file. No arguments other than a
+    /// possible exception are given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/chown.2.html"><c>chown(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@since v0.1.97</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * uid: float * gid: float * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, float, float, JS.Promise<unit>>) : Chown = jsNative
-
-[<Interface>]
 type Fchown =
     /// <summary>
     /// Asynchronous fchown(2) - Change ownership of a file.
@@ -17720,13 +21215,16 @@ type Fchown =
     /// <param name="fd">A file descriptor.</param>
     abstract __promisify__: fd: float * uid: float * gid: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Sets the owner of the file. No arguments other than a possible exception are
+    /// given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fchown.2.html"><c>fchown(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@since v0.4.7</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * uid: float * gid: float * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<float, float, float, JS.Promise<unit>>) : Fchown = jsNative
-
-[<Interface>]
 type Lchown =
     /// <summary>
     /// Asynchronous lchown(2) - Change ownership of a file. Does not dereference symbolic links.
@@ -17734,13 +21232,15 @@ type Lchown =
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     abstract __promisify__: path: Fs.PathLike * uid: float * gid: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Set the owner of the symbolic link. No arguments other than a possible
+    /// exception are given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lchown.2.html"><c>lchown(2)</c></a> documentation for more detail.
+    /// </summary>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * uid: float * gid: float * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, float, float, JS.Promise<unit>>) : Lchown = jsNative
-
-[<Interface>]
 type Lutimes =
     /// <summary>
     /// Changes the access and modification times of a file in the same way as <c>fsPromises.utimes()</c>,
@@ -17752,14 +21252,18 @@ type Lutimes =
     /// <param name="mtime">The last modified time. If a string is provided, it will be coerced to number.</param>
     abstract __promisify__: path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
 
+    /// <summary>
+    /// Changes the access and modification times of a file in the same way as utimes, with the difference that if the path refers to a symbolic
+    /// link, then the link is not dereferenced: instead, the timestamps of the
+    /// symbolic link itself are changed.
+    /// <br /><br />
+    /// No arguments other than a possible exception are given to the completion
+    /// callback.
+    /// </summary>
+    /// <remarks>@since v14.5.0, v12.19.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.TimeLike, Fs.TimeLike, JS.Promise<unit>>) : Lutimes =
-        jsNative
-
-[<Interface>]
 type Chmod =
     /// <summary>
     /// Asynchronous chmod(2) - Change permissions of a file.
@@ -17768,13 +21272,24 @@ type Chmod =
     /// <param name="mode">A file mode. If a string is passed, it is parsed as an octal integer.</param>
     abstract __promisify__: path: Fs.PathLike * mode: Fs.Mode -> JS.Promise<unit>
 
+    /// <summary>
+    /// Asynchronously changes the permissions of a file. No arguments other than a
+    /// possible exception are given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/chmod.2.html"><c>chmod(2)</c></a> documentation for more detail.
+    /// <code lang="js">
+    /// import { chmod } from 'node:fs';
+    ///
+    /// chmod('my_file.txt', 0o775, (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('The permissions for file "my_file.txt" have been changed!');
+    /// });
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.1.30</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * mode: Fs.Mode * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.Mode, JS.Promise<unit>>) : Chmod = jsNative
-
-[<Interface>]
 type Fchmod =
     /// <summary>
     /// Asynchronous fchmod(2) - Change permissions of a file.
@@ -17783,13 +21298,16 @@ type Fchmod =
     /// <param name="mode">A file mode. If a string is passed, it is parsed as an octal integer.</param>
     abstract __promisify__: fd: float * mode: Fs.Mode -> JS.Promise<unit>
 
+    /// <summary>
+    /// Sets the permissions on the file. No arguments other than a possible exception
+    /// are given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fchmod.2.html"><c>fchmod(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@since v0.4.7</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * mode: Fs.Mode * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<float, Fs.Mode, JS.Promise<unit>>) : Fchmod = jsNative
-
-[<Interface>]
 type Lchmod =
     /// <summary>
     /// Asynchronous lchmod(2) - Change permissions of a file. Does not dereference symbolic links.
@@ -17798,11 +21316,18 @@ type Lchmod =
     /// <param name="mode">A file mode. If a string is passed, it is parsed as an octal integer.</param>
     abstract __promisify__: path: Fs.PathLike * mode: Fs.Mode -> JS.Promise<unit>
 
+    /// <summary>
+    /// Changes the permissions on a symbolic link. No arguments other than a possible
+    /// exception are given to the completion callback.
+    /// <br /><br />
+    /// This method is only implemented on macOS.
+    /// <br /><br />
+    /// See the POSIX <a href="https://www.freebsd.org/cgi/man.cgi?query=lchmod&amp;sektion=2"><c>lchmod(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@deprecated Since v0.4.7</remarks>
+    /// <remarks>@deprecated</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * mode: Fs.Mode * callback: Fs.NoParamCallback -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.Mode, JS.Promise<unit>>) : Lchmod = jsNative
 
 type Stat =
     /// <summary>
@@ -17821,15 +21346,343 @@ type Stat =
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     abstract __promisify__: path: Fs.PathLike * ?options: Fs.StatOptions -> JS.Promise<U2<Fs.BigIntStats, Fs.Stats>>
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/stat.2.html"><c>stat(2)</c></a>. The callback gets two arguments <c>(err, stats)</c> where<c>stats</c> is an <c>fs.Stats</c> object.
+    /// <br /><br />
+    /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
+    /// <br /><br />
+    /// stat follows symbolic links. Use lstat to look at the
+    /// links themselves.
+    /// <br /><br />
+    /// Using <c>fs.stat()</c> to check for the existence of a file before calling<c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c> is not recommended.
+    /// Instead, user code should open/read/write the file directly and handle the
+    /// error raised if the file is not available.
+    /// <br /><br />
+    /// To check if a file exists without manipulating it afterwards, access is recommended.
+    /// <br /><br />
+    /// For example, given the following directory structure:
+    /// <code lang="text">
+    /// - txtDir
+    /// -- file.txt
+    /// - app.js
+    /// </code>
+    /// <br /><br />
+    /// The next program will check for the stats of the given paths:
+    /// <code lang="js">
+    /// import { stat } from 'node:fs';
+    ///
+    /// const pathsToCheck = ['./txtDir', './txtDir/file.txt'];
+    ///
+    /// for (let i = 0; i &lt; pathsToCheck.length; i++) {
+    ///   stat(pathsToCheck[i], (err, stats) =&gt; {
+    ///     console.log(stats.isDirectory());
+    ///     console.log(stats);
+    ///   });
+    /// }
+    /// </code>
+    /// <br /><br />
+    /// The resulting output will resemble:
+    /// <code lang="console">
+    /// true
+    /// Stats {
+    ///   dev: 16777220,
+    ///   mode: 16877,
+    ///   nlink: 3,
+    ///   uid: 501,
+    ///   gid: 20,
+    ///   rdev: 0,
+    ///   blksize: 4096,
+    ///   ino: 14214262,
+    ///   size: 96,
+    ///   blocks: 0,
+    ///   atimeMs: 1561174653071.963,
+    ///   mtimeMs: 1561174614583.3518,
+    ///   ctimeMs: 1561174626623.5366,
+    ///   birthtimeMs: 1561174126937.2893,
+    ///   atime: 2019-06-22T03:37:33.072Z,
+    ///   mtime: 2019-06-22T03:36:54.583Z,
+    ///   ctime: 2019-06-22T03:37:06.624Z,
+    ///   birthtime: 2019-06-22T03:28:46.937Z
+    /// }
+    /// false
+    /// Stats {
+    ///   dev: 16777220,
+    ///   mode: 33188,
+    ///   nlink: 1,
+    ///   uid: 501,
+    ///   gid: 20,
+    ///   rdev: 0,
+    ///   blksize: 4096,
+    ///   ino: 14214074,
+    ///   size: 8,
+    ///   blocks: 8,
+    ///   atimeMs: 1561174616618.8555,
+    ///   mtimeMs: 1561174614584,
+    ///   ctimeMs: 1561174614583.8145,
+    ///   birthtimeMs: 1561174007710.7478,
+    ///   atime: 2019-06-22T03:36:56.619Z,
+    ///   mtime: 2019-06-22T03:36:54.584Z,
+    ///   ctime: 2019-06-22T03:36:54.584Z,
+    ///   birthtime: 2019-06-22T03:26:47.711Z
+    /// }
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Stat.Callback -> unit
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/stat.2.html"><c>stat(2)</c></a>. The callback gets two arguments <c>(err, stats)</c> where<c>stats</c> is an <c>fs.Stats</c> object.
+    /// <br /><br />
+    /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
+    /// <br /><br />
+    /// stat follows symbolic links. Use lstat to look at the
+    /// links themselves.
+    /// <br /><br />
+    /// Using <c>fs.stat()</c> to check for the existence of a file before calling<c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c> is not recommended.
+    /// Instead, user code should open/read/write the file directly and handle the
+    /// error raised if the file is not available.
+    /// <br /><br />
+    /// To check if a file exists without manipulating it afterwards, access is recommended.
+    /// <br /><br />
+    /// For example, given the following directory structure:
+    /// <code lang="text">
+    /// - txtDir
+    /// -- file.txt
+    /// - app.js
+    /// </code>
+    /// <br /><br />
+    /// The next program will check for the stats of the given paths:
+    /// <code lang="js">
+    /// import { stat } from 'node:fs';
+    ///
+    /// const pathsToCheck = ['./txtDir', './txtDir/file.txt'];
+    ///
+    /// for (let i = 0; i &lt; pathsToCheck.length; i++) {
+    ///   stat(pathsToCheck[i], (err, stats) =&gt; {
+    ///     console.log(stats.isDirectory());
+    ///     console.log(stats);
+    ///   });
+    /// }
+    /// </code>
+    /// <br /><br />
+    /// The resulting output will resemble:
+    /// <code lang="console">
+    /// true
+    /// Stats {
+    ///   dev: 16777220,
+    ///   mode: 16877,
+    ///   nlink: 3,
+    ///   uid: 501,
+    ///   gid: 20,
+    ///   rdev: 0,
+    ///   blksize: 4096,
+    ///   ino: 14214262,
+    ///   size: 96,
+    ///   blocks: 0,
+    ///   atimeMs: 1561174653071.963,
+    ///   mtimeMs: 1561174614583.3518,
+    ///   ctimeMs: 1561174626623.5366,
+    ///   birthtimeMs: 1561174126937.2893,
+    ///   atime: 2019-06-22T03:37:33.072Z,
+    ///   mtime: 2019-06-22T03:36:54.583Z,
+    ///   ctime: 2019-06-22T03:37:06.624Z,
+    ///   birthtime: 2019-06-22T03:28:46.937Z
+    /// }
+    /// false
+    /// Stats {
+    ///   dev: 16777220,
+    ///   mode: 33188,
+    ///   nlink: 1,
+    ///   uid: 501,
+    ///   gid: 20,
+    ///   rdev: 0,
+    ///   blksize: 4096,
+    ///   ino: 14214074,
+    ///   size: 8,
+    ///   blocks: 8,
+    ///   atimeMs: 1561174616618.8555,
+    ///   mtimeMs: 1561174614584,
+    ///   ctimeMs: 1561174614583.8145,
+    ///   birthtimeMs: 1561174007710.7478,
+    ///   atime: 2019-06-22T03:36:56.619Z,
+    ///   mtime: 2019-06-22T03:36:54.584Z,
+    ///   ctime: 2019-06-22T03:36:54.584Z,
+    ///   birthtime: 2019-06-22T03:26:47.711Z
+    /// }
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Stat.Options option * callback: Stat.Callback2 -> unit
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/stat.2.html"><c>stat(2)</c></a>. The callback gets two arguments <c>(err, stats)</c> where<c>stats</c> is an <c>fs.Stats</c> object.
+    /// <br /><br />
+    /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
+    /// <br /><br />
+    /// stat follows symbolic links. Use lstat to look at the
+    /// links themselves.
+    /// <br /><br />
+    /// Using <c>fs.stat()</c> to check for the existence of a file before calling<c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c> is not recommended.
+    /// Instead, user code should open/read/write the file directly and handle the
+    /// error raised if the file is not available.
+    /// <br /><br />
+    /// To check if a file exists without manipulating it afterwards, access is recommended.
+    /// <br /><br />
+    /// For example, given the following directory structure:
+    /// <code lang="text">
+    /// - txtDir
+    /// -- file.txt
+    /// - app.js
+    /// </code>
+    /// <br /><br />
+    /// The next program will check for the stats of the given paths:
+    /// <code lang="js">
+    /// import { stat } from 'node:fs';
+    ///
+    /// const pathsToCheck = ['./txtDir', './txtDir/file.txt'];
+    ///
+    /// for (let i = 0; i &lt; pathsToCheck.length; i++) {
+    ///   stat(pathsToCheck[i], (err, stats) =&gt; {
+    ///     console.log(stats.isDirectory());
+    ///     console.log(stats);
+    ///   });
+    /// }
+    /// </code>
+    /// <br /><br />
+    /// The resulting output will resemble:
+    /// <code lang="console">
+    /// true
+    /// Stats {
+    ///   dev: 16777220,
+    ///   mode: 16877,
+    ///   nlink: 3,
+    ///   uid: 501,
+    ///   gid: 20,
+    ///   rdev: 0,
+    ///   blksize: 4096,
+    ///   ino: 14214262,
+    ///   size: 96,
+    ///   blocks: 0,
+    ///   atimeMs: 1561174653071.963,
+    ///   mtimeMs: 1561174614583.3518,
+    ///   ctimeMs: 1561174626623.5366,
+    ///   birthtimeMs: 1561174126937.2893,
+    ///   atime: 2019-06-22T03:37:33.072Z,
+    ///   mtime: 2019-06-22T03:36:54.583Z,
+    ///   ctime: 2019-06-22T03:37:06.624Z,
+    ///   birthtime: 2019-06-22T03:28:46.937Z
+    /// }
+    /// false
+    /// Stats {
+    ///   dev: 16777220,
+    ///   mode: 33188,
+    ///   nlink: 1,
+    ///   uid: 501,
+    ///   gid: 20,
+    ///   rdev: 0,
+    ///   blksize: 4096,
+    ///   ino: 14214074,
+    ///   size: 8,
+    ///   blocks: 8,
+    ///   atimeMs: 1561174616618.8555,
+    ///   mtimeMs: 1561174614584,
+    ///   ctimeMs: 1561174614583.8145,
+    ///   birthtimeMs: 1561174007710.7478,
+    ///   atime: 2019-06-22T03:36:56.619Z,
+    ///   mtime: 2019-06-22T03:36:54.584Z,
+    ///   ctime: 2019-06-22T03:36:54.584Z,
+    ///   birthtime: 2019-06-22T03:26:47.711Z
+    /// }
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Stat.Options2 * callback: Stat.Callback3 -> unit
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/stat.2.html"><c>stat(2)</c></a>. The callback gets two arguments <c>(err, stats)</c> where<c>stats</c> is an <c>fs.Stats</c> object.
+    /// <br /><br />
+    /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
+    /// <br /><br />
+    /// stat follows symbolic links. Use lstat to look at the
+    /// links themselves.
+    /// <br /><br />
+    /// Using <c>fs.stat()</c> to check for the existence of a file before calling<c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c> is not recommended.
+    /// Instead, user code should open/read/write the file directly and handle the
+    /// error raised if the file is not available.
+    /// <br /><br />
+    /// To check if a file exists without manipulating it afterwards, access is recommended.
+    /// <br /><br />
+    /// For example, given the following directory structure:
+    /// <code lang="text">
+    /// - txtDir
+    /// -- file.txt
+    /// - app.js
+    /// </code>
+    /// <br /><br />
+    /// The next program will check for the stats of the given paths:
+    /// <code lang="js">
+    /// import { stat } from 'node:fs';
+    ///
+    /// const pathsToCheck = ['./txtDir', './txtDir/file.txt'];
+    ///
+    /// for (let i = 0; i &lt; pathsToCheck.length; i++) {
+    ///   stat(pathsToCheck[i], (err, stats) =&gt; {
+    ///     console.log(stats.isDirectory());
+    ///     console.log(stats);
+    ///   });
+    /// }
+    /// </code>
+    /// <br /><br />
+    /// The resulting output will resemble:
+    /// <code lang="console">
+    /// true
+    /// Stats {
+    ///   dev: 16777220,
+    ///   mode: 16877,
+    ///   nlink: 3,
+    ///   uid: 501,
+    ///   gid: 20,
+    ///   rdev: 0,
+    ///   blksize: 4096,
+    ///   ino: 14214262,
+    ///   size: 96,
+    ///   blocks: 0,
+    ///   atimeMs: 1561174653071.963,
+    ///   mtimeMs: 1561174614583.3518,
+    ///   ctimeMs: 1561174626623.5366,
+    ///   birthtimeMs: 1561174126937.2893,
+    ///   atime: 2019-06-22T03:37:33.072Z,
+    ///   mtime: 2019-06-22T03:36:54.583Z,
+    ///   ctime: 2019-06-22T03:37:06.624Z,
+    ///   birthtime: 2019-06-22T03:28:46.937Z
+    /// }
+    /// false
+    /// Stats {
+    ///   dev: 16777220,
+    ///   mode: 33188,
+    ///   nlink: 1,
+    ///   uid: 501,
+    ///   gid: 20,
+    ///   rdev: 0,
+    ///   blksize: 4096,
+    ///   ino: 14214074,
+    ///   size: 8,
+    ///   blocks: 8,
+    ///   atimeMs: 1561174616618.8555,
+    ///   mtimeMs: 1561174614584,
+    ///   ctimeMs: 1561174614583.8145,
+    ///   birthtimeMs: 1561174007710.7478,
+    ///   atime: 2019-06-22T03:36:56.619Z,
+    ///   mtime: 2019-06-22T03:36:54.584Z,
+    ///   ctime: 2019-06-22T03:36:54.584Z,
+    ///   birthtime: 2019-06-22T03:26:47.711Z
+    /// }
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.StatOptions option * callback: Stat.Callback4 -> unit
 
@@ -17850,15 +21703,39 @@ type Fstat =
     /// <param name="fd">A file descriptor.</param>
     abstract __promisify__: fd: float * ?options: Fs.StatOptions -> JS.Promise<U2<Fs.BigIntStats, Fs.Stats>>
 
+    /// <summary>
+    /// Invokes the callback with the <c>fs.Stats</c> for the file descriptor.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fstat.2.html"><c>fstat(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@since v0.1.95</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * callback: Fstat.Callback -> unit
 
+    /// <summary>
+    /// Invokes the callback with the <c>fs.Stats</c> for the file descriptor.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fstat.2.html"><c>fstat(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@since v0.1.95</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * options: Fstat.Options option * callback: Fstat.Callback2 -> unit
 
+    /// <summary>
+    /// Invokes the callback with the <c>fs.Stats</c> for the file descriptor.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fstat.2.html"><c>fstat(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@since v0.1.95</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * options: Fstat.Options2 * callback: Fstat.Callback3 -> unit
 
+    /// <summary>
+    /// Invokes the callback with the <c>fs.Stats</c> for the file descriptor.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fstat.2.html"><c>fstat(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@since v0.1.95</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * options: Fs.StatOptions option * callback: Fstat.Callback4 -> unit
 
@@ -17879,15 +21756,47 @@ type Lstat =
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     abstract __promisify__: path: Fs.PathLike * ?options: Fs.StatOptions -> JS.Promise<U2<Fs.BigIntStats, Fs.Stats>>
 
+    /// <summary>
+    /// Retrieves the <c>fs.Stats</c> for the symbolic link referred to by the path.
+    /// The callback gets two arguments <c>(err, stats)</c> where <c>stats</c> is a <c>fs.Stats</c> object. <c>lstat()</c> is identical to <c>stat()</c>, except that if <c>path</c> is a symbolic
+    /// link, then the link itself is stat-ed, not the file that it refers to.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lstat.2.html"><c>lstat(2)</c></a> documentation for more details.
+    /// </summary>
+    /// <remarks>@since v0.1.30</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Lstat.Callback -> unit
 
+    /// <summary>
+    /// Retrieves the <c>fs.Stats</c> for the symbolic link referred to by the path.
+    /// The callback gets two arguments <c>(err, stats)</c> where <c>stats</c> is a <c>fs.Stats</c> object. <c>lstat()</c> is identical to <c>stat()</c>, except that if <c>path</c> is a symbolic
+    /// link, then the link itself is stat-ed, not the file that it refers to.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lstat.2.html"><c>lstat(2)</c></a> documentation for more details.
+    /// </summary>
+    /// <remarks>@since v0.1.30</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Lstat.Options option * callback: Lstat.Callback2 -> unit
 
+    /// <summary>
+    /// Retrieves the <c>fs.Stats</c> for the symbolic link referred to by the path.
+    /// The callback gets two arguments <c>(err, stats)</c> where <c>stats</c> is a <c>fs.Stats</c> object. <c>lstat()</c> is identical to <c>stat()</c>, except that if <c>path</c> is a symbolic
+    /// link, then the link itself is stat-ed, not the file that it refers to.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lstat.2.html"><c>lstat(2)</c></a> documentation for more details.
+    /// </summary>
+    /// <remarks>@since v0.1.30</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Lstat.Options2 * callback: Lstat.Callback3 -> unit
 
+    /// <summary>
+    /// Retrieves the <c>fs.Stats</c> for the symbolic link referred to by the path.
+    /// The callback gets two arguments <c>(err, stats)</c> where <c>stats</c> is a <c>fs.Stats</c> object. <c>lstat()</c> is identical to <c>stat()</c>, except that if <c>path</c> is a symbolic
+    /// link, then the link itself is stat-ed, not the file that it refers to.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lstat.2.html"><c>lstat(2)</c></a> documentation for more details.
+    /// </summary>
+    /// <remarks>@since v0.1.30</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.StatOptions option * callback: Lstat.Callback4 -> unit
 
@@ -17910,19 +21819,50 @@ type Statfs =
     abstract __promisify__:
         path: Fs.PathLike * ?options: Fs.StatFsOptions -> JS.Promise<U2<Fs.BigIntStatsFs, Fs.StatsFs>>
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
+    /// contains <c>path</c>. The callback gets two arguments <c>(err, stats)</c> where <c>stats</c>is an <c>fs.StatFs</c> object.
+    /// <br /><br />
+    /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
+    /// </summary>
+    /// <remarks>@since v19.6.0, v18.15.0</remarks>
+    /// <param name="path">A path to an existing file or directory on the file system to be queried.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Statfs.Callback -> unit
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
+    /// contains <c>path</c>. The callback gets two arguments <c>(err, stats)</c> where <c>stats</c>is an <c>fs.StatFs</c> object.
+    /// <br /><br />
+    /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
+    /// </summary>
+    /// <remarks>@since v19.6.0, v18.15.0</remarks>
+    /// <param name="path">A path to an existing file or directory on the file system to be queried.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Statfs.Options option * callback: Statfs.Callback2 -> unit
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
+    /// contains <c>path</c>. The callback gets two arguments <c>(err, stats)</c> where <c>stats</c>is an <c>fs.StatFs</c> object.
+    /// <br /><br />
+    /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
+    /// </summary>
+    /// <remarks>@since v19.6.0, v18.15.0</remarks>
+    /// <param name="path">A path to an existing file or directory on the file system to be queried.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Statfs.Options2 * callback: Statfs.Callback3 -> unit
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
+    /// contains <c>path</c>. The callback gets two arguments <c>(err, stats)</c> where <c>stats</c>is an <c>fs.StatFs</c> object.
+    /// <br /><br />
+    /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
+    /// </summary>
+    /// <remarks>@since v19.6.0, v18.15.0</remarks>
+    /// <param name="path">A path to an existing file or directory on the file system to be queried.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.StatFsOptions option * callback: Statfs.Callback4 -> unit
 
-[<Interface>]
 type Link =
     /// <summary>
     /// Asynchronous link(2) - Create a new link (also known as a hard link) to an existing file.
@@ -17931,13 +21871,15 @@ type Link =
     /// <param name="newPath">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     abstract __promisify__: existingPath: Fs.PathLike * newPath: Fs.PathLike -> JS.Promise<unit>
 
+    /// <summary>
+    /// Creates a new link from the <c>existingPath</c> to the <c>newPath</c>. See the POSIX <a href="http://man7.org/linux/man-pages/man2/link.2.html"><c>link(2)</c></a> documentation for more detail. No arguments other than
+    /// a possible
+    /// exception are given to the completion callback.
+    /// </summary>
+    /// <remarks>@since v0.1.31</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: existingPath: Fs.PathLike * newPath: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.PathLike, JS.Promise<unit>>) : Link = jsNative
-
-[<Interface>]
 type Symlink =
     /// <summary>
     /// Asynchronous symlink(2) - Create a new symbolic link to an existing file.
@@ -17950,16 +21892,77 @@ type Symlink =
     /// </param>
     abstract __promisify__: target: Fs.PathLike * path: Fs.PathLike * ?``type``: string -> JS.Promise<unit>
 
+    /// <summary>
+    /// Creates the link called <c>path</c> pointing to <c>target</c>. No arguments other than a
+    /// possible exception are given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/symlink.2.html"><c>symlink(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The <c>type</c> argument is only available on Windows and ignored on other platforms.
+    /// It can be set to <c>'dir'</c>, <c>'file'</c>, or <c>'junction'</c>. If the <c>type</c> argument is
+    /// not a string, Node.js will autodetect <c>target</c> type and use <c>'file'</c> or <c>'dir'</c>.
+    /// If the <c>target</c> does not exist, <c>'file'</c> will be used. Windows junction points
+    /// require the destination path to be absolute. When using <c>'junction'</c>, the<c>target</c> argument will automatically be normalized to absolute path. Junction
+    /// points on NTFS volumes can only point to directories.
+    /// <br /><br />
+    /// Relative targets are relative to the link's parent directory.
+    /// <code lang="js">
+    /// import { symlink } from 'node:fs';
+    ///
+    /// symlink('./mew', './mewtwo', callback);
+    /// </code>
+    /// <br /><br />
+    /// The above example creates a symbolic link <c>mewtwo</c> which points to <c>mew</c> in the
+    /// same directory:
+    /// <code lang="bash">
+    /// $ tree .
+    /// .
+    /// ├── mew
+    /// └── mewtwo -&gt; ./mew
+    /// </code>
+    /// Asynchronous symlink(2) - Create a new symbolic link to an existing file.
+    /// </summary>
+    /// <remarks>@since v0.1.31</remarks>
+    /// <param name="target">A path to an existing file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="path">A path to the new symlink. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         target: Fs.PathLike * path: Fs.PathLike * ``type``: Symlink.Type option * callback: Fs.NoParamCallback -> unit
 
+    /// <summary>
+    /// Creates the link called <c>path</c> pointing to <c>target</c>. No arguments other than a
+    /// possible exception are given to the completion callback.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/symlink.2.html"><c>symlink(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The <c>type</c> argument is only available on Windows and ignored on other platforms.
+    /// It can be set to <c>'dir'</c>, <c>'file'</c>, or <c>'junction'</c>. If the <c>type</c> argument is
+    /// not a string, Node.js will autodetect <c>target</c> type and use <c>'file'</c> or <c>'dir'</c>.
+    /// If the <c>target</c> does not exist, <c>'file'</c> will be used. Windows junction points
+    /// require the destination path to be absolute. When using <c>'junction'</c>, the<c>target</c> argument will automatically be normalized to absolute path. Junction
+    /// points on NTFS volumes can only point to directories.
+    /// <br /><br />
+    /// Relative targets are relative to the link's parent directory.
+    /// <code lang="js">
+    /// import { symlink } from 'node:fs';
+    ///
+    /// symlink('./mew', './mewtwo', callback);
+    /// </code>
+    /// <br /><br />
+    /// The above example creates a symbolic link <c>mewtwo</c> which points to <c>mew</c> in the
+    /// same directory:
+    /// <code lang="bash">
+    /// $ tree .
+    /// .
+    /// ├── mew
+    /// └── mewtwo -&gt; ./mew
+    /// </code>
+    /// Asynchronous symlink(2) - Create a new symbolic link to an existing file.
+    /// </summary>
+    /// <param name="target">A path to an existing file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="path">A path to the new symlink. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: target: Fs.PathLike * path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.PathLike, string option, JS.Promise<unit>>) : Symlink =
-        jsNative
 
 type Readlink =
     /// <summary>
@@ -17983,15 +21986,79 @@ type Readlink =
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     abstract __promisify__: path: Fs.PathLike * options: Fs.BufferEncodingOption -> JS.Promise<NonSharedBuffer>
 
+    /// <summary>
+    /// Reads the contents of the symbolic link referred to by <c>path</c>. The callback gets
+    /// two arguments <c>(err, linkString)</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/readlink.2.html"><c>readlink(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the link path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the link path returned will be passed as a <c>Buffer</c> object.
+    /// Asynchronous readlink(2) - read value of a symbolic link.
+    /// </summary>
+    /// <remarks>@since v0.1.31</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.EncodingOption * callback: Readlink.Callback -> unit
 
+    /// <summary>
+    /// Reads the contents of the symbolic link referred to by <c>path</c>. The callback gets
+    /// two arguments <c>(err, linkString)</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/readlink.2.html"><c>readlink(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the link path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the link path returned will be passed as a <c>Buffer</c> object.
+    /// Asynchronous readlink(2) - read value of a symbolic link.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.BufferEncodingOption * callback: Readlink.Callback2 -> unit
 
+    /// <summary>
+    /// Reads the contents of the symbolic link referred to by <c>path</c>. The callback gets
+    /// two arguments <c>(err, linkString)</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/readlink.2.html"><c>readlink(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the link path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the link path returned will be passed as a <c>Buffer</c> object.
+    /// Asynchronous readlink(2) - read value of a symbolic link.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.EncodingOption * callback: Readlink.Callback3 -> unit
 
+    /// <summary>
+    /// Reads the contents of the symbolic link referred to by <c>path</c>. The callback gets
+    /// two arguments <c>(err, linkString)</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/readlink.2.html"><c>readlink(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the link path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the link path returned will be passed as a <c>Buffer</c> object.
+    /// Asynchronous readlink(2) - read value of a symbolic link.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Readlink.Callback4 -> unit
 
@@ -18089,15 +22156,135 @@ type Realpath =
     /// <remarks>@since v9.2.0</remarks>
     abstract native: path: Fs.PathLike * callback: Realpath.Native.Callback4 -> unit
 
+    /// <summary>
+    /// Asynchronously computes the canonical pathname by resolving <c>.</c>, <c>..</c>, and
+    /// symbolic links.
+    /// <br /><br />
+    /// A canonical pathname is not necessarily unique. Hard links and bind mounts can
+    /// expose a file system entity through many pathnames.
+    /// <br /><br />
+    /// This function behaves like <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>, with some exceptions:
+    /// <br /><br />
+    /// 1. No case conversion is performed on case-insensitive file systems.
+    /// 2. The maximum number of symbolic links is platform-independent and generally
+    /// (much) higher than what the native <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a> implementation supports.
+    /// <br /><br />
+    /// The <c>callback</c> gets two arguments <c>(err, resolvedPath)</c>. May use <c>process.cwd</c> to resolve relative paths.
+    /// <br /><br />
+    /// Only paths that can be converted to UTF8 strings are supported.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the path returned will be passed as a <c>Buffer</c> object.
+    /// <br /><br />
+    /// If <c>path</c> resolves to a socket or a pipe, the function will return a system
+    /// dependent name for that object.
+    /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
+    /// </summary>
+    /// <remarks>@since v0.1.31</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.EncodingOption * callback: Realpath.Callback -> unit
 
+    /// <summary>
+    /// Asynchronously computes the canonical pathname by resolving <c>.</c>, <c>..</c>, and
+    /// symbolic links.
+    /// <br /><br />
+    /// A canonical pathname is not necessarily unique. Hard links and bind mounts can
+    /// expose a file system entity through many pathnames.
+    /// <br /><br />
+    /// This function behaves like <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>, with some exceptions:
+    /// <br /><br />
+    /// 1. No case conversion is performed on case-insensitive file systems.
+    /// 2. The maximum number of symbolic links is platform-independent and generally
+    /// (much) higher than what the native <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a> implementation supports.
+    /// <br /><br />
+    /// The <c>callback</c> gets two arguments <c>(err, resolvedPath)</c>. May use <c>process.cwd</c> to resolve relative paths.
+    /// <br /><br />
+    /// Only paths that can be converted to UTF8 strings are supported.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the path returned will be passed as a <c>Buffer</c> object.
+    /// <br /><br />
+    /// If <c>path</c> resolves to a socket or a pipe, the function will return a system
+    /// dependent name for that object.
+    /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.BufferEncodingOption * callback: Realpath.Callback2 -> unit
 
+    /// <summary>
+    /// Asynchronously computes the canonical pathname by resolving <c>.</c>, <c>..</c>, and
+    /// symbolic links.
+    /// <br /><br />
+    /// A canonical pathname is not necessarily unique. Hard links and bind mounts can
+    /// expose a file system entity through many pathnames.
+    /// <br /><br />
+    /// This function behaves like <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>, with some exceptions:
+    /// <br /><br />
+    /// 1. No case conversion is performed on case-insensitive file systems.
+    /// 2. The maximum number of symbolic links is platform-independent and generally
+    /// (much) higher than what the native <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a> implementation supports.
+    /// <br /><br />
+    /// The <c>callback</c> gets two arguments <c>(err, resolvedPath)</c>. May use <c>process.cwd</c> to resolve relative paths.
+    /// <br /><br />
+    /// Only paths that can be converted to UTF8 strings are supported.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the path returned will be passed as a <c>Buffer</c> object.
+    /// <br /><br />
+    /// If <c>path</c> resolves to a socket or a pipe, the function will return a system
+    /// dependent name for that object.
+    /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.EncodingOption * callback: Realpath.Callback3 -> unit
 
+    /// <summary>
+    /// Asynchronously computes the canonical pathname by resolving <c>.</c>, <c>..</c>, and
+    /// symbolic links.
+    /// <br /><br />
+    /// A canonical pathname is not necessarily unique. Hard links and bind mounts can
+    /// expose a file system entity through many pathnames.
+    /// <br /><br />
+    /// This function behaves like <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>, with some exceptions:
+    /// <br /><br />
+    /// 1. No case conversion is performed on case-insensitive file systems.
+    /// 2. The maximum number of symbolic links is platform-independent and generally
+    /// (much) higher than what the native <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a> implementation supports.
+    /// <br /><br />
+    /// The <c>callback</c> gets two arguments <c>(err, resolvedPath)</c>. May use <c>process.cwd</c> to resolve relative paths.
+    /// <br /><br />
+    /// Only paths that can be converted to UTF8 strings are supported.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the path returned will be passed as a <c>Buffer</c> object.
+    /// <br /><br />
+    /// If <c>path</c> resolves to a socket or a pipe, the function will return a system
+    /// dependent name for that object.
+    /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Realpath.Callback4 -> unit
 
@@ -18105,13 +22292,31 @@ type RealpathSync =
     abstract native: path: Fs.PathLike * ?options: Fs.EncodingOption -> string
     abstract native: path: Fs.PathLike * options: Fs.BufferEncodingOption -> NonSharedBuffer
 
+    /// <summary>
+    /// Returns the resolved pathname.
+    /// <br /><br />
+    /// For detailed information, see the documentation of the asynchronous version of
+    /// this API: realpath.
+    /// Synchronous realpath(3) - return the canonicalized absolute pathname.
+    /// </summary>
+    /// <remarks>@since v0.1.31</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * ?options: Fs.EncodingOption -> string
 
+    /// <summary>
+    /// Returns the resolved pathname.
+    /// <br /><br />
+    /// For detailed information, see the documentation of the asynchronous version of
+    /// this API: realpath.
+    /// Synchronous realpath(3) - return the canonicalized absolute pathname.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.BufferEncodingOption -> NonSharedBuffer
 
-[<Interface>]
 type Unlink =
     /// <summary>
     /// Asynchronous unlink(2) - delete a name and possibly the file it refers to.
@@ -18119,13 +22324,27 @@ type Unlink =
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     abstract __promisify__: path: Fs.PathLike -> JS.Promise<unit>
 
+    /// <summary>
+    /// Asynchronously removes a file or symbolic link. No arguments other than a
+    /// possible exception are given to the completion callback.
+    /// <code lang="js">
+    /// import { unlink } from 'node:fs';
+    /// // Assuming that 'path/file.txt' is a regular file.
+    /// unlink('path/file.txt', (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('path/file.txt was deleted');
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <c>fs.unlink()</c> will not work on a directory, empty or otherwise. To remove a
+    /// directory, use rmdir.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/unlink.2.html"><c>unlink(2)</c></a> documentation for more details.
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (Fs.PathLike -> JS.Promise<unit>)) : Unlink = jsNative
-
-[<Interface>]
 type Rmdir =
     /// <summary>
     /// Asynchronous rmdir(2) - delete a directory.
@@ -18133,30 +22352,53 @@ type Rmdir =
     /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     abstract __promisify__: path: Fs.PathLike * ?options: Fs.RmDirOptions -> JS.Promise<unit>
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/rmdir.2.html"><c>rmdir(2)</c></a>. No arguments other than a possible exception are given
+    /// to the completion callback.
+    /// <br /><br />
+    /// Using <c>fs.rmdir()</c> on a file (not a directory) results in an <c>ENOENT</c> error on
+    /// Windows and an <c>ENOTDIR</c> error on POSIX.
+    /// <br /><br />
+    /// To get a behavior similar to the <c>rm -rf</c> Unix command, use rm with options <c>{ recursive: true, force: true }</c>.
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
+    /// <summary>
+    /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/rmdir.2.html"><c>rmdir(2)</c></a>. No arguments other than a possible exception are given
+    /// to the completion callback.
+    /// <br /><br />
+    /// Using <c>fs.rmdir()</c> on a file (not a directory) results in an <c>ENOENT</c> error on
+    /// Windows and an <c>ENOTDIR</c> error on POSIX.
+    /// <br /><br />
+    /// To get a behavior similar to the <c>rm -rf</c> Unix command, use rm with options <c>{ recursive: true, force: true }</c>.
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.RmDirOptions * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.RmDirOptions option, JS.Promise<unit>>) : Rmdir = jsNative
-
-[<Interface>]
 type Rm =
     /// <summary>
     /// Asynchronously removes files and directories (modeled on the standard POSIX <c>rm</c> utility).
     /// </summary>
     abstract __promisify__: path: Fs.PathLike * ?options: Fs.RmOptions -> JS.Promise<unit>
 
+    /// <summary>
+    /// Asynchronously removes files and directories (modeled on the standard POSIX <c>rm</c> utility). No arguments other than a possible exception are given to the
+    /// completion callback.
+    /// </summary>
+    /// <remarks>@since v14.14.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
+    /// <summary>
+    /// Asynchronously removes files and directories (modeled on the standard POSIX <c>rm</c> utility). No arguments other than a possible exception are given to the
+    /// completion callback.
+    /// </summary>
+    /// <remarks>@since v14.14.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.RmOptions * callback: Fs.NoParamCallback -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.RmOptions option, JS.Promise<unit>>) : Rm = jsNative
 
 type Mkdir =
     /// <summary>
@@ -18221,18 +22463,192 @@ type Mkdir =
     abstract __promisify__:
         path: Fs.PathLike * ?options: U3<string, float, Fs.MakeDirectoryOptions> -> JS.Promise<string option>
 
+    /// <summary>
+    /// Asynchronously creates a directory.
+    /// <br /><br />
+    /// The callback is given a possible exception and, if <c>recursive</c> is <c>true</c>, the
+    /// first directory path created, <c>(err[, path])</c>.<c>path</c> can still be <c>undefined</c> when <c>recursive</c> is <c>true</c>, if no directory was
+    /// created (for instance, if it was previously created).
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be an integer specifying <c>mode</c> (permission
+    /// and sticky bits), or an object with a <c>mode</c> property and a <c>recursive</c> property indicating whether parent directories should be created. Calling <c>fs.mkdir()</c> when <c>path</c> is a directory that
+    /// exists results in an error only
+    /// when <c>recursive</c> is false. If <c>recursive</c> is false and the directory exists,
+    /// an <c>EEXIST</c> error occurs.
+    /// <code lang="js">
+    /// import { mkdir } from 'node:fs';
+    ///
+    /// // Create ./tmp/a/apple, regardless of whether ./tmp and ./tmp/a exist.
+    /// mkdir('./tmp/a/apple', { recursive: true }, (err) =&gt; {
+    ///   if (err) throw err;
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On Windows, using <c>fs.mkdir()</c> on the root directory even with recursion will
+    /// result in an error:
+    /// <code lang="js">
+    /// import { mkdir } from 'node:fs';
+    ///
+    /// mkdir('/', { recursive: true }, (err) =&gt; {
+    ///   // =&gt; [Error: EPERM: operation not permitted, mkdir 'C:\']
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
+    /// Asynchronous mkdir(2) - create a directory.
+    /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
+    /// </summary>
+    /// <remarks>@since v0.1.8</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Mkdir.Options * callback: Mkdir.Callback -> unit
 
+    /// <summary>
+    /// Asynchronously creates a directory.
+    /// <br /><br />
+    /// The callback is given a possible exception and, if <c>recursive</c> is <c>true</c>, the
+    /// first directory path created, <c>(err[, path])</c>.<c>path</c> can still be <c>undefined</c> when <c>recursive</c> is <c>true</c>, if no directory was
+    /// created (for instance, if it was previously created).
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be an integer specifying <c>mode</c> (permission
+    /// and sticky bits), or an object with a <c>mode</c> property and a <c>recursive</c> property indicating whether parent directories should be created. Calling <c>fs.mkdir()</c> when <c>path</c> is a directory that
+    /// exists results in an error only
+    /// when <c>recursive</c> is false. If <c>recursive</c> is false and the directory exists,
+    /// an <c>EEXIST</c> error occurs.
+    /// <code lang="js">
+    /// import { mkdir } from 'node:fs';
+    ///
+    /// // Create ./tmp/a/apple, regardless of whether ./tmp and ./tmp/a exist.
+    /// mkdir('./tmp/a/apple', { recursive: true }, (err) =&gt; {
+    ///   if (err) throw err;
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On Windows, using <c>fs.mkdir()</c> on the root directory even with recursion will
+    /// result in an error:
+    /// <code lang="js">
+    /// import { mkdir } from 'node:fs';
+    ///
+    /// mkdir('/', { recursive: true }, (err) =&gt; {
+    ///   // =&gt; [Error: EPERM: operation not permitted, mkdir 'C:\']
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
+    /// Asynchronous mkdir(2) - create a directory.
+    /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">
+    /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
+    /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
+    /// </param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">
+    /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
+    /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
+    /// </param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathLike * options: U3<string, float, Mkdir.Options2> option * callback: Fs.NoParamCallback -> unit
 
+    /// <summary>
+    /// Asynchronously creates a directory.
+    /// <br /><br />
+    /// The callback is given a possible exception and, if <c>recursive</c> is <c>true</c>, the
+    /// first directory path created, <c>(err[, path])</c>.<c>path</c> can still be <c>undefined</c> when <c>recursive</c> is <c>true</c>, if no directory was
+    /// created (for instance, if it was previously created).
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be an integer specifying <c>mode</c> (permission
+    /// and sticky bits), or an object with a <c>mode</c> property and a <c>recursive</c> property indicating whether parent directories should be created. Calling <c>fs.mkdir()</c> when <c>path</c> is a directory that
+    /// exists results in an error only
+    /// when <c>recursive</c> is false. If <c>recursive</c> is false and the directory exists,
+    /// an <c>EEXIST</c> error occurs.
+    /// <code lang="js">
+    /// import { mkdir } from 'node:fs';
+    ///
+    /// // Create ./tmp/a/apple, regardless of whether ./tmp and ./tmp/a exist.
+    /// mkdir('./tmp/a/apple', { recursive: true }, (err) =&gt; {
+    ///   if (err) throw err;
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On Windows, using <c>fs.mkdir()</c> on the root directory even with recursion will
+    /// result in an error:
+    /// <code lang="js">
+    /// import { mkdir } from 'node:fs';
+    ///
+    /// mkdir('/', { recursive: true }, (err) =&gt; {
+    ///   // =&gt; [Error: EPERM: operation not permitted, mkdir 'C:\']
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
+    /// Asynchronous mkdir(2) - create a directory.
+    /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">
+    /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
+    /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
+    /// </param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">
+    /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
+    /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
+    /// </param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathLike * options: U3<string, float, Fs.MakeDirectoryOptions> option * callback: Mkdir.Callback2 ->
             unit
 
+    /// <summary>
+    /// Asynchronously creates a directory.
+    /// <br /><br />
+    /// The callback is given a possible exception and, if <c>recursive</c> is <c>true</c>, the
+    /// first directory path created, <c>(err[, path])</c>.<c>path</c> can still be <c>undefined</c> when <c>recursive</c> is <c>true</c>, if no directory was
+    /// created (for instance, if it was previously created).
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be an integer specifying <c>mode</c> (permission
+    /// and sticky bits), or an object with a <c>mode</c> property and a <c>recursive</c> property indicating whether parent directories should be created. Calling <c>fs.mkdir()</c> when <c>path</c> is a directory that
+    /// exists results in an error only
+    /// when <c>recursive</c> is false. If <c>recursive</c> is false and the directory exists,
+    /// an <c>EEXIST</c> error occurs.
+    /// <code lang="js">
+    /// import { mkdir } from 'node:fs';
+    ///
+    /// // Create ./tmp/a/apple, regardless of whether ./tmp and ./tmp/a exist.
+    /// mkdir('./tmp/a/apple', { recursive: true }, (err) =&gt; {
+    ///   if (err) throw err;
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// On Windows, using <c>fs.mkdir()</c> on the root directory even with recursion will
+    /// result in an error:
+    /// <code lang="js">
+    /// import { mkdir } from 'node:fs';
+    ///
+    /// mkdir('/', { recursive: true }, (err) =&gt; {
+    ///   // =&gt; [Error: EPERM: operation not permitted, mkdir 'C:\']
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
+    /// Asynchronous mkdir(2) - create a directory.
+    /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">
+    /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
+    /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
+    /// </param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">
+    /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
+    /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
+    /// </param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
@@ -18254,15 +22670,252 @@ type Mkdtemp =
     /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     abstract __promisify__: prefix: string * options: Fs.BufferEncodingOption -> JS.Promise<NonSharedBuffer>
 
+    /// <summary>
+    /// Creates a unique temporary directory.
+    /// <br /><br />
+    /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory. Due to platform
+    /// inconsistencies, avoid trailing <c>X</c> characters in <c>prefix</c>. Some platforms,
+    /// notably the BSDs, can return more than six random characters, and replace
+    /// trailing <c>X</c> characters in <c>prefix</c> with random characters.
+    /// <br /><br />
+    /// The created directory path is passed as a string to the callback's second
+    /// parameter.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use.
+    /// <code lang="js">
+    /// import { mkdtemp } from 'node:fs';
+    /// import { join } from 'node:path';
+    /// import { tmpdir } from 'node:os';
+    ///
+    /// mkdtemp(join(tmpdir(), 'foo-'), (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Prints: /tmp/foo-itXde2 or C:\Users\...\AppData\Local\Temp\foo-itXde2
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>fs.mkdtemp()</c> method will append the six randomly selected characters
+    /// directly to the <c>prefix</c> string. For instance, given a directory <c>/tmp</c>, if the
+    /// intention is to create a temporary directory _within_<c>/tmp</c>, the <c>prefix</c>must end with a trailing platform-specific path separator
+    /// (<c>import { sep } from 'node:path'</c>).
+    /// <code lang="js">
+    /// import { tmpdir } from 'node:os';
+    /// import { mkdtemp } from 'node:fs';
+    ///
+    /// // The parent directory for the new temporary directory
+    /// const tmpDir = tmpdir();
+    ///
+    /// // This method is *INCORRECT*:
+    /// mkdtemp(tmpDir, (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Will print something similar to `/tmpabc123`.
+    ///   // A new temporary directory is created at the file system root
+    ///   // rather than *within* the /tmp directory.
+    /// });
+    ///
+    /// // This method is *CORRECT*:
+    /// import { sep } from 'node:path';
+    /// mkdtemp(`${tmpDir}${sep}`, (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Will print something similar to `/tmp/abc123`.
+    ///   // A new temporary directory is created within
+    ///   // the /tmp directory.
+    /// });
+    /// </code>
+    /// Asynchronously creates a unique temporary directory.
+    /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
+    /// </summary>
+    /// <remarks>@since v5.10.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: prefix: string * options: Fs.EncodingOption * callback: Mkdtemp.Callback -> unit
 
+    /// <summary>
+    /// Creates a unique temporary directory.
+    /// <br /><br />
+    /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory. Due to platform
+    /// inconsistencies, avoid trailing <c>X</c> characters in <c>prefix</c>. Some platforms,
+    /// notably the BSDs, can return more than six random characters, and replace
+    /// trailing <c>X</c> characters in <c>prefix</c> with random characters.
+    /// <br /><br />
+    /// The created directory path is passed as a string to the callback's second
+    /// parameter.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use.
+    /// <code lang="js">
+    /// import { mkdtemp } from 'node:fs';
+    /// import { join } from 'node:path';
+    /// import { tmpdir } from 'node:os';
+    ///
+    /// mkdtemp(join(tmpdir(), 'foo-'), (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Prints: /tmp/foo-itXde2 or C:\Users\...\AppData\Local\Temp\foo-itXde2
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>fs.mkdtemp()</c> method will append the six randomly selected characters
+    /// directly to the <c>prefix</c> string. For instance, given a directory <c>/tmp</c>, if the
+    /// intention is to create a temporary directory _within_<c>/tmp</c>, the <c>prefix</c>must end with a trailing platform-specific path separator
+    /// (<c>import { sep } from 'node:path'</c>).
+    /// <code lang="js">
+    /// import { tmpdir } from 'node:os';
+    /// import { mkdtemp } from 'node:fs';
+    ///
+    /// // The parent directory for the new temporary directory
+    /// const tmpDir = tmpdir();
+    ///
+    /// // This method is *INCORRECT*:
+    /// mkdtemp(tmpDir, (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Will print something similar to `/tmpabc123`.
+    ///   // A new temporary directory is created at the file system root
+    ///   // rather than *within* the /tmp directory.
+    /// });
+    ///
+    /// // This method is *CORRECT*:
+    /// import { sep } from 'node:path';
+    /// mkdtemp(`${tmpDir}${sep}`, (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Will print something similar to `/tmp/abc123`.
+    ///   // A new temporary directory is created within
+    ///   // the /tmp directory.
+    /// });
+    /// </code>
+    /// Asynchronously creates a unique temporary directory.
+    /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
+    /// </summary>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: prefix: string * options: Fs.BufferEncodingOption * callback: Mkdtemp.Callback2 -> unit
 
+    /// <summary>
+    /// Creates a unique temporary directory.
+    /// <br /><br />
+    /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory. Due to platform
+    /// inconsistencies, avoid trailing <c>X</c> characters in <c>prefix</c>. Some platforms,
+    /// notably the BSDs, can return more than six random characters, and replace
+    /// trailing <c>X</c> characters in <c>prefix</c> with random characters.
+    /// <br /><br />
+    /// The created directory path is passed as a string to the callback's second
+    /// parameter.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use.
+    /// <code lang="js">
+    /// import { mkdtemp } from 'node:fs';
+    /// import { join } from 'node:path';
+    /// import { tmpdir } from 'node:os';
+    ///
+    /// mkdtemp(join(tmpdir(), 'foo-'), (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Prints: /tmp/foo-itXde2 or C:\Users\...\AppData\Local\Temp\foo-itXde2
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>fs.mkdtemp()</c> method will append the six randomly selected characters
+    /// directly to the <c>prefix</c> string. For instance, given a directory <c>/tmp</c>, if the
+    /// intention is to create a temporary directory _within_<c>/tmp</c>, the <c>prefix</c>must end with a trailing platform-specific path separator
+    /// (<c>import { sep } from 'node:path'</c>).
+    /// <code lang="js">
+    /// import { tmpdir } from 'node:os';
+    /// import { mkdtemp } from 'node:fs';
+    ///
+    /// // The parent directory for the new temporary directory
+    /// const tmpDir = tmpdir();
+    ///
+    /// // This method is *INCORRECT*:
+    /// mkdtemp(tmpDir, (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Will print something similar to `/tmpabc123`.
+    ///   // A new temporary directory is created at the file system root
+    ///   // rather than *within* the /tmp directory.
+    /// });
+    ///
+    /// // This method is *CORRECT*:
+    /// import { sep } from 'node:path';
+    /// mkdtemp(`${tmpDir}${sep}`, (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Will print something similar to `/tmp/abc123`.
+    ///   // A new temporary directory is created within
+    ///   // the /tmp directory.
+    /// });
+    /// </code>
+    /// Asynchronously creates a unique temporary directory.
+    /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
+    /// </summary>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: prefix: string * options: Fs.EncodingOption * callback: Mkdtemp.Callback3 -> unit
 
+    /// <summary>
+    /// Creates a unique temporary directory.
+    /// <br /><br />
+    /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory. Due to platform
+    /// inconsistencies, avoid trailing <c>X</c> characters in <c>prefix</c>. Some platforms,
+    /// notably the BSDs, can return more than six random characters, and replace
+    /// trailing <c>X</c> characters in <c>prefix</c> with random characters.
+    /// <br /><br />
+    /// The created directory path is passed as a string to the callback's second
+    /// parameter.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use.
+    /// <code lang="js">
+    /// import { mkdtemp } from 'node:fs';
+    /// import { join } from 'node:path';
+    /// import { tmpdir } from 'node:os';
+    ///
+    /// mkdtemp(join(tmpdir(), 'foo-'), (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Prints: /tmp/foo-itXde2 or C:\Users\...\AppData\Local\Temp\foo-itXde2
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>fs.mkdtemp()</c> method will append the six randomly selected characters
+    /// directly to the <c>prefix</c> string. For instance, given a directory <c>/tmp</c>, if the
+    /// intention is to create a temporary directory _within_<c>/tmp</c>, the <c>prefix</c>must end with a trailing platform-specific path separator
+    /// (<c>import { sep } from 'node:path'</c>).
+    /// <code lang="js">
+    /// import { tmpdir } from 'node:os';
+    /// import { mkdtemp } from 'node:fs';
+    ///
+    /// // The parent directory for the new temporary directory
+    /// const tmpDir = tmpdir();
+    ///
+    /// // This method is *INCORRECT*:
+    /// mkdtemp(tmpDir, (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Will print something similar to `/tmpabc123`.
+    ///   // A new temporary directory is created at the file system root
+    ///   // rather than *within* the /tmp directory.
+    /// });
+    ///
+    /// // This method is *CORRECT*:
+    /// import { sep } from 'node:path';
+    /// mkdtemp(`${tmpDir}${sep}`, (err, directory) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(directory);
+    ///   // Will print something similar to `/tmp/abc123`.
+    ///   // A new temporary directory is created within
+    ///   // the /tmp directory.
+    /// });
+    /// </code>
+    /// Asynchronously creates a unique temporary directory.
+    /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
+    /// </summary>
     [<Emit("$0($1...)")>]
     abstract Invoke: prefix: string * callback: Mkdtemp.Callback4 -> unit
 
@@ -18346,27 +22999,150 @@ type Readdir =
     abstract __promisify__:
         path: Fs.PathLike * options: Readdir.Promisify.Options5 -> JS.Promise<Fs.Dirent<NonSharedBuffer>[]>
 
+    /// <summary>
+    /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the filenames returned will be passed as <c>Buffer</c> objects.
+    /// <br /><br />
+    /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
+    /// Asynchronous readdir(3) - read a directory.
+    /// </summary>
+    /// <remarks>@since v0.1.8</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathLike * options: U2<string, Readdir.Options> option * callback: Readdir.Callback -> unit
 
+    /// <summary>
+    /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the filenames returned will be passed as <c>Buffer</c> objects.
+    /// <br /><br />
+    /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
+    /// Asynchronous readdir(3) - read a directory.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: U2<string, Readdir.Options2> * callback: Readdir.Callback2 -> unit
 
+    /// <summary>
+    /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the filenames returned will be passed as <c>Buffer</c> objects.
+    /// <br /><br />
+    /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
+    /// Asynchronous readdir(3) - read a directory.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathLike * options: U2<string, Readdir.Options3> option * callback: Readdir.Callback3 -> unit
 
+    /// <summary>
+    /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the filenames returned will be passed as <c>Buffer</c> objects.
+    /// <br /><br />
+    /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
+    /// Asynchronous readdir(3) - read a directory.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Readdir.Callback4 -> unit
 
+    /// <summary>
+    /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the filenames returned will be passed as <c>Buffer</c> objects.
+    /// <br /><br />
+    /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
+    /// Asynchronous readdir(3) - read a directory.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Readdir.Options4 * callback: Readdir.Callback5 -> unit
 
+    /// <summary>
+    /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
+    /// <br /><br />
+    /// The optional <c>options</c> argument can be a string specifying an encoding, or an
+    /// object with an <c>encoding</c> property specifying the character encoding to use for
+    /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
+    /// the filenames returned will be passed as <c>Buffer</c> objects.
+    /// <br /><br />
+    /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
+    /// Asynchronous readdir(3) - read a directory.
+    /// </summary>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Readdir.Options5 * callback: Readdir.Callback6 -> unit
 
-[<Interface>]
 type Close =
     /// <summary>
     /// Asynchronous close(2) - close a file descriptor.
@@ -18374,13 +23150,19 @@ type Close =
     /// <param name="fd">A file descriptor.</param>
     abstract __promisify__: fd: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Closes the file descriptor. No arguments other than a possible exception are
+    /// given to the completion callback.
+    /// <br /><br />
+    /// Calling <c>fs.close()</c> on any file descriptor (<c>fd</c>) that is currently in use
+    /// through any other <c>fs</c> operation may lead to undefined behavior.
+    /// <br /><br />
+    /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/close.2.html"><c>close(2)</c></a> documentation for more detail.
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * ?callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (float -> JS.Promise<unit>)) : Close = jsNative
-
-[<Interface>]
 type Open =
     /// <summary>
     /// Asynchronous open(2) - open and possibly create a file.
@@ -18389,21 +23171,74 @@ type Open =
     /// <param name="mode">A file mode. If a string is passed, it is parsed as an octal integer. If not supplied, defaults to <c>0o666</c>.</param>
     abstract __promisify__: path: Fs.PathLike * flags: Fs.OpenMode * ?mode: Fs.OpenMode -> JS.Promise<float>
 
+    /// <summary>
+    /// Asynchronous file open. See the POSIX <a href="http://man7.org/linux/man-pages/man2/open.2.html"><c>open(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// <c>mode</c> sets the file mode (permission and sticky bits), but only if the file was
+    /// created. On Windows, only the write permission can be manipulated; see chmod.
+    /// <br /><br />
+    /// The callback gets two arguments <c>(err, fd)</c>.
+    /// <br /><br />
+    /// Some characters (<c>&lt; &gt; : " / \ | ? *</c>) are reserved under Windows as documented
+    /// by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file">Naming Files, Paths, and Namespaces</a>. Under NTFS, if the filename contains
+    /// a colon, Node.js will open a file system stream, as described by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/using-streams">this MSDN page</a>.
+    /// <br /><br />
+    /// Functions based on <c>fs.open()</c> exhibit this behavior as well:<c>fs.writeFile()</c>, <c>fs.readFile()</c>, etc.
+    /// Asynchronous open(2) - open and possibly create a file. If the file is created, its mode will be <c>0o666</c>.
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
+    /// <param name="flags">See <c>support of file system </c>flags``.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="flags">See <c>support of file system </c>flags``.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathLike * flags: Fs.OpenMode option * mode: Fs.OpenMode option * callback: Open.Callback -> unit
 
+    /// <summary>
+    /// Asynchronous file open. See the POSIX <a href="http://man7.org/linux/man-pages/man2/open.2.html"><c>open(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// <c>mode</c> sets the file mode (permission and sticky bits), but only if the file was
+    /// created. On Windows, only the write permission can be manipulated; see chmod.
+    /// <br /><br />
+    /// The callback gets two arguments <c>(err, fd)</c>.
+    /// <br /><br />
+    /// Some characters (<c>&lt; &gt; : " / \ | ? *</c>) are reserved under Windows as documented
+    /// by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file">Naming Files, Paths, and Namespaces</a>. Under NTFS, if the filename contains
+    /// a colon, Node.js will open a file system stream, as described by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/using-streams">this MSDN page</a>.
+    /// <br /><br />
+    /// Functions based on <c>fs.open()</c> exhibit this behavior as well:<c>fs.writeFile()</c>, <c>fs.readFile()</c>, etc.
+    /// Asynchronous open(2) - open and possibly create a file. If the file is created, its mode will be <c>0o666</c>.
+    /// </summary>
+    /// <param name="flags">See <c>support of file system </c>flags``.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="flags">See <c>support of file system </c>flags``.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * flags: Fs.OpenMode option * callback: Open.Callback2 -> unit
 
+    /// <summary>
+    /// Asynchronous file open. See the POSIX <a href="http://man7.org/linux/man-pages/man2/open.2.html"><c>open(2)</c></a> documentation for more details.
+    /// <br /><br />
+    /// <c>mode</c> sets the file mode (permission and sticky bits), but only if the file was
+    /// created. On Windows, only the write permission can be manipulated; see chmod.
+    /// <br /><br />
+    /// The callback gets two arguments <c>(err, fd)</c>.
+    /// <br /><br />
+    /// Some characters (<c>&lt; &gt; : " / \ | ? *</c>) are reserved under Windows as documented
+    /// by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file">Naming Files, Paths, and Namespaces</a>. Under NTFS, if the filename contains
+    /// a colon, Node.js will open a file system stream, as described by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/using-streams">this MSDN page</a>.
+    /// <br /><br />
+    /// Functions based on <c>fs.open()</c> exhibit this behavior as well:<c>fs.writeFile()</c>, <c>fs.readFile()</c>, etc.
+    /// Asynchronous open(2) - open and possibly create a file. If the file is created, its mode will be <c>0o666</c>.
+    /// </summary>
+    /// <param name="flags">See <c>support of file system </c>flags``.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
+    /// <param name="flags">See <c>support of file system </c>flags``.</param>
+    /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Open.Callback3 -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.OpenMode, Fs.OpenMode option, JS.Promise<float>>) : Open =
-        jsNative
-
-[<Interface>]
 type Utimes =
     /// <summary>
     /// Asynchronously change file timestamps of the file referenced by the supplied path.
@@ -18413,14 +23248,18 @@ type Utimes =
     /// <param name="mtime">The last modified time. If a string is provided, it will be coerced to number.</param>
     abstract __promisify__: path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
 
+    /// <summary>
+    /// Change the file system timestamps of the object referenced by <c>path</c>.
+    /// <br /><br />
+    /// The <c>atime</c> and <c>mtime</c> arguments follow these rules:
+    /// <br /><br />
+    /// * Values can be either numbers representing Unix epoch time in seconds, <c>Date</c>s, or a numeric string like <c>'123456789.0'</c>.
+    /// * If the value can not be converted to a number, or is <c>NaN</c>, <c>Infinity</c>, or <c>-Infinity</c>, an <c>Error</c> will be thrown.
+    /// </summary>
+    /// <remarks>@since v0.4.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * atime: Fs.TimeLike * mtime: Fs.TimeLike * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.TimeLike, Fs.TimeLike, JS.Promise<unit>>) : Utimes =
-        jsNative
-
-[<Interface>]
 type Futimes =
     /// <summary>
     /// Asynchronously change file timestamps of the file referenced by the supplied file descriptor.
@@ -18430,13 +23269,14 @@ type Futimes =
     /// <param name="mtime">The last modified time. If a string is provided, it will be coerced to number.</param>
     abstract __promisify__: fd: float * atime: Fs.TimeLike * mtime: Fs.TimeLike -> JS.Promise<unit>
 
+    /// <summary>
+    /// Change the file system timestamps of the object referenced by the supplied file
+    /// descriptor. See utimes.
+    /// </summary>
+    /// <remarks>@since v0.4.2</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * atime: Fs.TimeLike * mtime: Fs.TimeLike * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<float, Fs.TimeLike, Fs.TimeLike, JS.Promise<unit>>) : Futimes = jsNative
-
-[<Interface>]
 type Fsync =
     /// <summary>
     /// Asynchronous fsync(2) - synchronize a file's in-core state with the underlying storage device.
@@ -18444,11 +23284,15 @@ type Fsync =
     /// <param name="fd">A file descriptor.</param>
     abstract __promisify__: fd: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Request that all data for the open file descriptor is flushed to the storage
+    /// device. The specific implementation is operating system and device specific.
+    /// Refer to the POSIX <a href="http://man7.org/linux/man-pages/man2/fsync.2.html"><c>fsync(2)</c></a> documentation for more detail. No arguments other
+    /// than a possible exception are given to the completion callback.
+    /// </summary>
+    /// <remarks>@since v0.1.96</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * callback: Fs.NoParamCallback -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (float -> JS.Promise<unit>)) : Fsync = jsNative
 
 type Write =
     /// <summary>
@@ -18519,6 +23363,54 @@ type Write =
         fd: float * string: string * ?position: float * ?encoding: BufferEncoding ->
             JS.Promise<Write.Promisify.Result.Item3>
 
+    /// <summary>
+    /// Write <c>buffer</c> to the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
+    /// an integer specifying the number of bytes to write.
+    /// <br /><br />
+    /// <c>position</c> refers to the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
+    /// <br /><br />
+    /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
+    /// for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
+    /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="options">
+    /// An object with the following properties:
+    /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
+    /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
+    /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
+    /// </param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="encoding">The expected string encoding.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> :
         fd: float *
@@ -18529,22 +23421,257 @@ type Write =
         callback: Write.Callback<'TBuffer> ->
             unit
 
+    /// <summary>
+    /// Write <c>buffer</c> to the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
+    /// an integer specifying the number of bytes to write.
+    /// <br /><br />
+    /// <c>position</c> refers to the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
+    /// <br /><br />
+    /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
+    /// for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
+    /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
+    /// </summary>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="options">
+    /// An object with the following properties:
+    /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
+    /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
+    /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
+    /// </param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="encoding">The expected string encoding.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> :
         fd: float * buffer: 'TBuffer * offset: float option * length: float option * callback: Write.Callback2<'TBuffer> ->
             unit
 
+    /// <summary>
+    /// Write <c>buffer</c> to the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
+    /// an integer specifying the number of bytes to write.
+    /// <br /><br />
+    /// <c>position</c> refers to the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
+    /// <br /><br />
+    /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
+    /// for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
+    /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
+    /// </summary>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="options">
+    /// An object with the following properties:
+    /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
+    /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
+    /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
+    /// </param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="encoding">The expected string encoding.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> :
         fd: float * buffer: 'TBuffer * offset: float option * callback: Write.Callback3<'TBuffer> -> unit
 
+    /// <summary>
+    /// Write <c>buffer</c> to the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
+    /// an integer specifying the number of bytes to write.
+    /// <br /><br />
+    /// <c>position</c> refers to the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
+    /// <br /><br />
+    /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
+    /// for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
+    /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
+    /// </summary>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="options">
+    /// An object with the following properties:
+    /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
+    /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
+    /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
+    /// </param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="encoding">The expected string encoding.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> : fd: float * buffer: 'TBuffer * callback: Write.Callback4<'TBuffer> -> unit
 
+    /// <summary>
+    /// Write <c>buffer</c> to the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
+    /// an integer specifying the number of bytes to write.
+    /// <br /><br />
+    /// <c>position</c> refers to the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
+    /// <br /><br />
+    /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
+    /// for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
+    /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
+    /// </summary>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="options">
+    /// An object with the following properties:
+    /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
+    /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
+    /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
+    /// </param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="encoding">The expected string encoding.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> :
         fd: float * buffer: 'TBuffer * options: Fs.WriteOptions * callback: Write.Callback5<'TBuffer> -> unit
 
+    /// <summary>
+    /// Write <c>buffer</c> to the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
+    /// an integer specifying the number of bytes to write.
+    /// <br /><br />
+    /// <c>position</c> refers to the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
+    /// <br /><br />
+    /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
+    /// for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
+    /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
+    /// </summary>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="options">
+    /// An object with the following properties:
+    /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
+    /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
+    /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
+    /// </param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="encoding">The expected string encoding.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         fd: float *
@@ -18554,9 +23681,103 @@ type Write =
         callback: Write.Callback6 ->
             unit
 
+    /// <summary>
+    /// Write <c>buffer</c> to the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
+    /// an integer specifying the number of bytes to write.
+    /// <br /><br />
+    /// <c>position</c> refers to the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
+    /// <br /><br />
+    /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
+    /// for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
+    /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
+    /// </summary>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="options">
+    /// An object with the following properties:
+    /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
+    /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
+    /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
+    /// </param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="encoding">The expected string encoding.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * string: string * position: float option * callback: Write.Callback7 -> unit
 
+    /// <summary>
+    /// Write <c>buffer</c> to the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
+    /// an integer specifying the number of bytes to write.
+    /// <br /><br />
+    /// <c>position</c> refers to the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
+    /// <br /><br />
+    /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
+    /// for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
+    /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
+    /// </summary>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="options">
+    /// An object with the following properties:
+    /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
+    /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
+    /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
+    /// </param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="encoding">The expected string encoding.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
+    /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
+    /// <param name="fd">A file descriptor.</param>
+    /// <param name="string">A string to write.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * string: string * callback: Write.Callback8 -> unit
 
@@ -18585,6 +23806,32 @@ type Read =
     /// <param name="position">The offset from the beginning of the file from which data should be read. If <c>null</c>, data will be read from the current position.</param>
     abstract __promisify__: fd: float -> JS.Promise<Read.Promisify.Result.Item3>
 
+    /// <summary>
+    /// Read data from the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
+    /// <br /><br />
+    /// If the file is not modified concurrently, the end-of-file is reached when the
+    /// number of bytes read is zero.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
+    /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
+    /// If not otherwise specified in an <c>options</c> object,
+    /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
+    /// <c>offset</c> defaults to <c>0</c>,
+    /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
+    /// <c>position</c> defaults to <c>null</c>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
+    /// <param name="buffer">The buffer that the data will be written to.</param>
+    /// <param name="offset">The position in <c>buffer</c> to write the data to.</param>
+    /// <param name="length">The number of bytes to read.</param>
+    /// <param name="position">
+    /// Specifies where to begin reading from in the file. If <c>position</c> is <c>null</c> or <c>-1 </c>, data will be read from the current file position, and the file position will be updated. If
+    /// <c>position</c> is an integer, the file position will be unchanged.
+    /// </param>
+    /// <remarks>@since v12.17.0, 13.11.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> :
         fd: float *
@@ -18595,17 +23842,114 @@ type Read =
         callback: Read.Callback<'TBuffer> ->
             unit
 
+    /// <summary>
+    /// Read data from the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
+    /// <br /><br />
+    /// If the file is not modified concurrently, the end-of-file is reached when the
+    /// number of bytes read is zero.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
+    /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
+    /// If not otherwise specified in an <c>options</c> object,
+    /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
+    /// <c>offset</c> defaults to <c>0</c>,
+    /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
+    /// <c>position</c> defaults to <c>null</c>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
+    /// <remarks>@since v12.17.0, 13.11.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> :
         fd: float * options: Fs.ReadOptionsWithBuffer<'TBuffer> * callback: Read.Callback2<'TBuffer> -> unit
 
+    /// <summary>
+    /// Read data from the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
+    /// <br /><br />
+    /// If the file is not modified concurrently, the end-of-file is reached when the
+    /// number of bytes read is zero.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
+    /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
+    /// If not otherwise specified in an <c>options</c> object,
+    /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
+    /// <c>offset</c> defaults to <c>0</c>,
+    /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
+    /// <c>position</c> defaults to <c>null</c>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
+    /// <param name="buffer">The buffer that the data will be written to.</param>
+    /// <param name="offset">The position in <c>buffer</c> to write the data to.</param>
+    /// <param name="length">The number of bytes to read.</param>
+    /// <param name="position">
+    /// Specifies where to begin reading from in the file. If <c>position</c> is <c>null</c> or <c>-1 </c>, data will be read from the current file position, and the file position will be updated. If
+    /// <c>position</c> is an integer, the file position will be unchanged.
+    /// </param>
+    /// <remarks>@since v12.17.0, 13.11.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> :
         fd: float * buffer: 'TBuffer * options: Fs.ReadOptions * callback: Read.Callback3<'TBuffer> -> unit
 
+    /// <summary>
+    /// Read data from the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
+    /// <br /><br />
+    /// If the file is not modified concurrently, the end-of-file is reached when the
+    /// number of bytes read is zero.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
+    /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
+    /// If not otherwise specified in an <c>options</c> object,
+    /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
+    /// <c>offset</c> defaults to <c>0</c>,
+    /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
+    /// <c>position</c> defaults to <c>null</c>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
+    /// <param name="buffer">The buffer that the data will be written to.</param>
+    /// <param name="offset">The position in <c>buffer</c> to write the data to.</param>
+    /// <param name="length">The number of bytes to read.</param>
+    /// <param name="position">
+    /// Specifies where to begin reading from in the file. If <c>position</c> is <c>null</c> or <c>-1 </c>, data will be read from the current file position, and the file position will be updated. If
+    /// <c>position</c> is an integer, the file position will be unchanged.
+    /// </param>
+    /// <remarks>@since v12.17.0, 13.11.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffer> : fd: float * buffer: 'TBuffer * callback: Read.Callback4<'TBuffer> -> unit
 
+    /// <summary>
+    /// Read data from the file specified by <c>fd</c>.
+    /// <br /><br />
+    /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
+    /// <br /><br />
+    /// If the file is not modified concurrently, the end-of-file is reached when the
+    /// number of bytes read is zero.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
+    /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
+    /// If not otherwise specified in an <c>options</c> object,
+    /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
+    /// <c>offset</c> defaults to <c>0</c>,
+    /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
+    /// <c>position</c> defaults to <c>null</c>
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
+    /// <param name="buffer">The buffer that the data will be written to.</param>
+    /// <param name="offset">The position in <c>buffer</c> to write the data to.</param>
+    /// <param name="length">The number of bytes to read.</param>
+    /// <param name="position">
+    /// Specifies where to begin reading from in the file. If <c>position</c> is <c>null</c> or <c>-1 </c>, data will be read from the current file position, and the file position will be updated. If
+    /// <c>position</c> is an integer, the file position will be unchanged.
+    /// </param>
+    /// <remarks>@since v12.17.0, 13.11.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * callback: Read.Callback5 -> unit
 
@@ -18707,23 +24051,351 @@ type ReadFile =
         path: Fs.PathOrFileDescriptor * ?options: U2<string, ReadFile.Promisify.Options3> ->
             JS.Promise<U2<string, NonSharedBuffer>>
 
+    /// <summary>
+    /// Asynchronously reads the entire contents of a file.
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// readFile('/etc/passwd', (err, data) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(data);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The callback is passed two arguments <c>(err, data)</c>, where <c>data</c> is the
+    /// contents of the file.
+    /// <br /><br />
+    /// If no encoding is specified, then the raw buffer is returned.
+    /// <br /><br />
+    /// If <c>options</c> is a string, then it specifies the encoding:
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// readFile('/etc/passwd', 'utf8', callback);
+    /// </code>
+    /// <br /><br />
+    /// When the path is a directory, the behavior of <c>fs.readFile()</c> and readFileSync is platform-specific. On macOS, Linux, and Windows, an
+    /// error will be returned. On FreeBSD, a representation of the directory's contents
+    /// will be returned.
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// // macOS, Linux, and Windows
+    /// readFile('&lt;directory&gt;', (err, data) =&gt; {
+    ///   // =&gt; [Error: EISDIR: illegal operation on a directory, read &lt;directory&gt;]
+    /// });
+    ///
+    /// //  FreeBSD
+    /// readFile('&lt;directory&gt;', (err, data) =&gt; {
+    ///   // =&gt; null, &lt;data&gt;
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// It is possible to abort an ongoing request using an <c>AbortSignal</c>. If a
+    /// request is aborted the callback is called with an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// const controller = new AbortController();
+    /// const signal = controller.signal;
+    /// readFile(fileInfo[0].name, { signal }, (err, buf) =&gt; {
+    ///   // ...
+    /// });
+    /// // When you want to abort the request
+    /// controller.abort();
+    /// </code>
+    /// <br /><br />
+    /// The <c>fs.readFile()</c> function buffers the entire file. To minimize memory costs,
+    /// when possible prefer streaming via <c>fs.createReadStream()</c>.
+    /// <br /><br />
+    /// Aborting an ongoing request does not abort individual operating
+    /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
+    /// Asynchronously reads the entire contents of a file.
+    /// </summary>
+    /// <remarks>@since v0.1.29</remarks>
+    /// <param name="path">filename or file descriptor</param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="options">
+    /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
+    /// If a flag is not provided, it defaults to <c>'r'</c>.
+    /// </param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="options">
+    /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
+    /// If a flag is not provided, it defaults to <c>'r'</c>.
+    /// </param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathOrFileDescriptor * options: ReadFile.Options option * callback: ReadFile.Callback -> unit
 
+    /// <summary>
+    /// Asynchronously reads the entire contents of a file.
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// readFile('/etc/passwd', (err, data) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(data);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The callback is passed two arguments <c>(err, data)</c>, where <c>data</c> is the
+    /// contents of the file.
+    /// <br /><br />
+    /// If no encoding is specified, then the raw buffer is returned.
+    /// <br /><br />
+    /// If <c>options</c> is a string, then it specifies the encoding:
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// readFile('/etc/passwd', 'utf8', callback);
+    /// </code>
+    /// <br /><br />
+    /// When the path is a directory, the behavior of <c>fs.readFile()</c> and readFileSync is platform-specific. On macOS, Linux, and Windows, an
+    /// error will be returned. On FreeBSD, a representation of the directory's contents
+    /// will be returned.
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// // macOS, Linux, and Windows
+    /// readFile('&lt;directory&gt;', (err, data) =&gt; {
+    ///   // =&gt; [Error: EISDIR: illegal operation on a directory, read &lt;directory&gt;]
+    /// });
+    ///
+    /// //  FreeBSD
+    /// readFile('&lt;directory&gt;', (err, data) =&gt; {
+    ///   // =&gt; null, &lt;data&gt;
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// It is possible to abort an ongoing request using an <c>AbortSignal</c>. If a
+    /// request is aborted the callback is called with an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// const controller = new AbortController();
+    /// const signal = controller.signal;
+    /// readFile(fileInfo[0].name, { signal }, (err, buf) =&gt; {
+    ///   // ...
+    /// });
+    /// // When you want to abort the request
+    /// controller.abort();
+    /// </code>
+    /// <br /><br />
+    /// The <c>fs.readFile()</c> function buffers the entire file. To minimize memory costs,
+    /// when possible prefer streaming via <c>fs.createReadStream()</c>.
+    /// <br /><br />
+    /// Aborting an ongoing request does not abort individual operating
+    /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
+    /// Asynchronously reads the entire contents of a file.
+    /// </summary>
+    /// <param name="path">filename or file descriptor</param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="options">
+    /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
+    /// If a flag is not provided, it defaults to <c>'r'</c>.
+    /// </param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="options">
+    /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
+    /// If a flag is not provided, it defaults to <c>'r'</c>.
+    /// </param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathOrFileDescriptor * options: U2<string, ReadFile.Options2> * callback: ReadFile.Callback2 -> unit
 
+    /// <summary>
+    /// Asynchronously reads the entire contents of a file.
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// readFile('/etc/passwd', (err, data) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(data);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The callback is passed two arguments <c>(err, data)</c>, where <c>data</c> is the
+    /// contents of the file.
+    /// <br /><br />
+    /// If no encoding is specified, then the raw buffer is returned.
+    /// <br /><br />
+    /// If <c>options</c> is a string, then it specifies the encoding:
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// readFile('/etc/passwd', 'utf8', callback);
+    /// </code>
+    /// <br /><br />
+    /// When the path is a directory, the behavior of <c>fs.readFile()</c> and readFileSync is platform-specific. On macOS, Linux, and Windows, an
+    /// error will be returned. On FreeBSD, a representation of the directory's contents
+    /// will be returned.
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// // macOS, Linux, and Windows
+    /// readFile('&lt;directory&gt;', (err, data) =&gt; {
+    ///   // =&gt; [Error: EISDIR: illegal operation on a directory, read &lt;directory&gt;]
+    /// });
+    ///
+    /// //  FreeBSD
+    /// readFile('&lt;directory&gt;', (err, data) =&gt; {
+    ///   // =&gt; null, &lt;data&gt;
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// It is possible to abort an ongoing request using an <c>AbortSignal</c>. If a
+    /// request is aborted the callback is called with an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// const controller = new AbortController();
+    /// const signal = controller.signal;
+    /// readFile(fileInfo[0].name, { signal }, (err, buf) =&gt; {
+    ///   // ...
+    /// });
+    /// // When you want to abort the request
+    /// controller.abort();
+    /// </code>
+    /// <br /><br />
+    /// The <c>fs.readFile()</c> function buffers the entire file. To minimize memory costs,
+    /// when possible prefer streaming via <c>fs.createReadStream()</c>.
+    /// <br /><br />
+    /// Aborting an ongoing request does not abort individual operating
+    /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
+    /// Asynchronously reads the entire contents of a file.
+    /// </summary>
+    /// <param name="path">filename or file descriptor</param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="options">
+    /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
+    /// If a flag is not provided, it defaults to <c>'r'</c>.
+    /// </param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="options">
+    /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
+    /// If a flag is not provided, it defaults to <c>'r'</c>.
+    /// </param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathOrFileDescriptor * options: U2<string, ReadFile.Options3> option * callback: ReadFile.Callback3 ->
             unit
 
+    /// <summary>
+    /// Asynchronously reads the entire contents of a file.
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// readFile('/etc/passwd', (err, data) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log(data);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The callback is passed two arguments <c>(err, data)</c>, where <c>data</c> is the
+    /// contents of the file.
+    /// <br /><br />
+    /// If no encoding is specified, then the raw buffer is returned.
+    /// <br /><br />
+    /// If <c>options</c> is a string, then it specifies the encoding:
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// readFile('/etc/passwd', 'utf8', callback);
+    /// </code>
+    /// <br /><br />
+    /// When the path is a directory, the behavior of <c>fs.readFile()</c> and readFileSync is platform-specific. On macOS, Linux, and Windows, an
+    /// error will be returned. On FreeBSD, a representation of the directory's contents
+    /// will be returned.
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// // macOS, Linux, and Windows
+    /// readFile('&lt;directory&gt;', (err, data) =&gt; {
+    ///   // =&gt; [Error: EISDIR: illegal operation on a directory, read &lt;directory&gt;]
+    /// });
+    ///
+    /// //  FreeBSD
+    /// readFile('&lt;directory&gt;', (err, data) =&gt; {
+    ///   // =&gt; null, &lt;data&gt;
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// It is possible to abort an ongoing request using an <c>AbortSignal</c>. If a
+    /// request is aborted the callback is called with an <c>AbortError</c>:
+    /// <code lang="js">
+    /// import { readFile } from 'node:fs';
+    ///
+    /// const controller = new AbortController();
+    /// const signal = controller.signal;
+    /// readFile(fileInfo[0].name, { signal }, (err, buf) =&gt; {
+    ///   // ...
+    /// });
+    /// // When you want to abort the request
+    /// controller.abort();
+    /// </code>
+    /// <br /><br />
+    /// The <c>fs.readFile()</c> function buffers the entire file. To minimize memory costs,
+    /// when possible prefer streaming via <c>fs.createReadStream()</c>.
+    /// <br /><br />
+    /// Aborting an ongoing request does not abort individual operating
+    /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
+    /// Asynchronously reads the entire contents of a file.
+    /// </summary>
+    /// <param name="path">filename or file descriptor</param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="options">
+    /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
+    /// If a flag is not provided, it defaults to <c>'r'</c>.
+    /// </param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="options">
+    /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
+    /// If a flag is not provided, it defaults to <c>'r'</c>.
+    /// </param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathOrFileDescriptor * callback: ReadFile.Callback4 -> unit
 
-[<Interface>]
 type WriteFile =
     /// <summary>
     /// Asynchronously writes data to a file, replacing the file if it already exists.
@@ -18745,6 +24417,70 @@ type WriteFile =
         path: Fs.PathOrFileDescriptor * data: Crypto.BinaryLike * ?options: U2<string, Fs.WriteFileOptions2> ->
             JS.Promise<unit>
 
+    /// <summary>
+    /// When <c>file</c> is a filename, asynchronously writes data to the file, replacing the
+    /// file if it already exists. <c>data</c> can be a string or a buffer.
+    /// <br /><br />
+    /// When <c>file</c> is a file descriptor, the behavior is similar to calling <c>fs.write()</c> directly (which is recommended). See the notes below on using
+    /// a file descriptor.
+    /// <br /><br />
+    /// The <c>encoding</c> option is ignored if <c>data</c> is a buffer.
+    /// <br /><br />
+    /// The <c>mode</c> option only affects the newly created file. See open for more details.
+    /// <code lang="js">
+    /// import { writeFile } from 'node:fs';
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// const data = new Uint8Array(Buffer.from('Hello Node.js'));
+    /// writeFile('message.txt', data, (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('The file has been saved!');
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If <c>options</c> is a string, then it specifies the encoding:
+    /// <code lang="js">
+    /// import { writeFile } from 'node:fs';
+    ///
+    /// writeFile('message.txt', 'Hello Node.js', 'utf8', callback);
+    /// </code>
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.writeFile()</c> multiple times on the same file without
+    /// waiting for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// Similarly to <c>fs.readFile</c> \- <c>fs.writeFile</c> is a convenience method that
+    /// performs multiple <c>write</c> calls internally to write the buffer passed to it.
+    /// For performance sensitive code consider using createWriteStream.
+    /// <br /><br />
+    /// It is possible to use an <c>AbortSignal</c> to cancel an <c>fs.writeFile()</c>.
+    /// Cancelation is "best effort", and some amount of data is likely still
+    /// to be written.
+    /// <code lang="js">
+    /// import { writeFile } from 'node:fs';
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const data = new Uint8Array(Buffer.from('Hello Node.js'));
+    /// writeFile('message.txt', data, { signal }, (err) =&gt; {
+    ///   // When a request is aborted - the callback is called with an AbortError
+    /// });
+    /// // When the request should be aborted
+    /// controller.abort();
+    /// </code>
+    /// <br /><br />
+    /// Aborting an ongoing request does not abort individual operating
+    /// system requests but rather the internal buffering <c>fs.writeFile</c> performs.
+    /// Asynchronously writes data to a file, replacing the file if it already exists.
+    /// </summary>
+    /// <remarks>@since v0.1.29</remarks>
+    /// <param name="file">filename or file descriptor</param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         file: Fs.PathOrFileDescriptor *
@@ -18753,17 +24489,72 @@ type WriteFile =
         callback: Fs.NoParamCallback ->
             unit
 
+    /// <summary>
+    /// When <c>file</c> is a filename, asynchronously writes data to the file, replacing the
+    /// file if it already exists. <c>data</c> can be a string or a buffer.
+    /// <br /><br />
+    /// When <c>file</c> is a file descriptor, the behavior is similar to calling <c>fs.write()</c> directly (which is recommended). See the notes below on using
+    /// a file descriptor.
+    /// <br /><br />
+    /// The <c>encoding</c> option is ignored if <c>data</c> is a buffer.
+    /// <br /><br />
+    /// The <c>mode</c> option only affects the newly created file. See open for more details.
+    /// <code lang="js">
+    /// import { writeFile } from 'node:fs';
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// const data = new Uint8Array(Buffer.from('Hello Node.js'));
+    /// writeFile('message.txt', data, (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('The file has been saved!');
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If <c>options</c> is a string, then it specifies the encoding:
+    /// <code lang="js">
+    /// import { writeFile } from 'node:fs';
+    ///
+    /// writeFile('message.txt', 'Hello Node.js', 'utf8', callback);
+    /// </code>
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.writeFile()</c> multiple times on the same file without
+    /// waiting for the callback. For this scenario, createWriteStream is
+    /// recommended.
+    /// <br /><br />
+    /// Similarly to <c>fs.readFile</c> \- <c>fs.writeFile</c> is a convenience method that
+    /// performs multiple <c>write</c> calls internally to write the buffer passed to it.
+    /// For performance sensitive code consider using createWriteStream.
+    /// <br /><br />
+    /// It is possible to use an <c>AbortSignal</c> to cancel an <c>fs.writeFile()</c>.
+    /// Cancelation is "best effort", and some amount of data is likely still
+    /// to be written.
+    /// <code lang="js">
+    /// import { writeFile } from 'node:fs';
+    /// import { Buffer } from 'node:buffer';
+    ///
+    /// const controller = new AbortController();
+    /// const { signal } = controller;
+    /// const data = new Uint8Array(Buffer.from('Hello Node.js'));
+    /// writeFile('message.txt', data, { signal }, (err) =&gt; {
+    ///   // When a request is aborted - the callback is called with an AbortError
+    /// });
+    /// // When the request should be aborted
+    /// controller.abort();
+    /// </code>
+    /// <br /><br />
+    /// Aborting an ongoing request does not abort individual operating
+    /// system requests but rather the internal buffering <c>fs.writeFile</c> performs.
+    /// Asynchronously writes data to a file, replacing the file if it already exists.
+    /// </summary>
+    /// <param name="file">filename or file descriptor</param>
+    /// <param name="path">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathOrFileDescriptor * data: Crypto.BinaryLike * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__:
-            Func<Fs.PathOrFileDescriptor, Crypto.BinaryLike, U2<string, Fs.WriteFileOptions2> option, JS.Promise<unit>>)
-        : WriteFile =
-        jsNative
-
-[<Interface>]
 type AppendFile =
     /// <summary>
     /// Asynchronously append data to a file, creating the file if it does not exist.
@@ -18787,6 +24578,62 @@ type AppendFile =
         ?options: U2<string, Fs.WriteFileOptions2> ->
             JS.Promise<unit>
 
+    /// <summary>
+    /// Asynchronously append data to a file, creating the file if it does not yet
+    /// exist. <c>data</c> can be a string or a <c>Buffer</c>.
+    /// <br /><br />
+    /// The <c>mode</c> option only affects the newly created file. See open for more details.
+    /// <code lang="js">
+    /// import { appendFile } from 'node:fs';
+    ///
+    /// appendFile('message.txt', 'data to append', (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('The "data to append" was appended to file!');
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If <c>options</c> is a string, then it specifies the encoding:
+    /// <code lang="js">
+    /// import { appendFile } from 'node:fs';
+    ///
+    /// appendFile('message.txt', 'data to append', 'utf8', callback);
+    /// </code>
+    /// <br /><br />
+    /// The <c>path</c> may be specified as a numeric file descriptor that has been opened
+    /// for appending (using <c>fs.open()</c> or <c>fs.openSync()</c>). The file descriptor will
+    /// not be closed automatically.
+    /// <code lang="js">
+    /// import { open, close, appendFile } from 'node:fs';
+    ///
+    /// function closeFd(fd) {
+    ///   close(fd, (err) =&gt; {
+    ///     if (err) throw err;
+    ///   });
+    /// }
+    ///
+    /// open('message.txt', 'a', (err, fd) =&gt; {
+    ///   if (err) throw err;
+    ///
+    ///   try {
+    ///     appendFile(fd, 'data to append', 'utf8', (err) =&gt; {
+    ///       closeFd(fd);
+    ///       if (err) throw err;
+    ///     });
+    ///   } catch (err) {
+    ///     closeFd(fd);
+    ///     throw err;
+    ///   }
+    /// });
+    /// </code>
+    /// Asynchronously append data to a file, creating the file if it does not exist.
+    /// </summary>
+    /// <remarks>@since v0.6.7</remarks>
+    /// <param name="path">filename or file descriptor</param>
+    /// <param name="file">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         path: Fs.PathOrFileDescriptor *
@@ -18795,6 +24642,61 @@ type AppendFile =
         callback: Fs.NoParamCallback ->
             unit
 
+    /// <summary>
+    /// Asynchronously append data to a file, creating the file if it does not yet
+    /// exist. <c>data</c> can be a string or a <c>Buffer</c>.
+    /// <br /><br />
+    /// The <c>mode</c> option only affects the newly created file. See open for more details.
+    /// <code lang="js">
+    /// import { appendFile } from 'node:fs';
+    ///
+    /// appendFile('message.txt', 'data to append', (err) =&gt; {
+    ///   if (err) throw err;
+    ///   console.log('The "data to append" was appended to file!');
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// If <c>options</c> is a string, then it specifies the encoding:
+    /// <code lang="js">
+    /// import { appendFile } from 'node:fs';
+    ///
+    /// appendFile('message.txt', 'data to append', 'utf8', callback);
+    /// </code>
+    /// <br /><br />
+    /// The <c>path</c> may be specified as a numeric file descriptor that has been opened
+    /// for appending (using <c>fs.open()</c> or <c>fs.openSync()</c>). The file descriptor will
+    /// not be closed automatically.
+    /// <code lang="js">
+    /// import { open, close, appendFile } from 'node:fs';
+    ///
+    /// function closeFd(fd) {
+    ///   close(fd, (err) =&gt; {
+    ///     if (err) throw err;
+    ///   });
+    /// }
+    ///
+    /// open('message.txt', 'a', (err, fd) =&gt; {
+    ///   if (err) throw err;
+    ///
+    ///   try {
+    ///     appendFile(fd, 'data to append', 'utf8', (err) =&gt; {
+    ///       closeFd(fd);
+    ///       if (err) throw err;
+    ///     });
+    ///   } catch (err) {
+    ///     closeFd(fd);
+    ///     throw err;
+    ///   }
+    /// });
+    /// </code>
+    /// Asynchronously append data to a file, creating the file if it does not exist.
+    /// </summary>
+    /// <param name="path">filename or file descriptor</param>
+    /// <param name="file">
+    /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
+    /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
+    /// </param>
+    /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke:
         file: Fs.PathOrFileDescriptor *
@@ -18802,19 +24704,6 @@ type AppendFile =
         callback: Fs.NoParamCallback ->
             unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__:
-            Func<
-                Fs.PathOrFileDescriptor,
-                U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
-                U2<string, Fs.WriteFileOptions2> option,
-                JS.Promise<unit>
-             >)
-        : AppendFile =
-        jsNative
-
-[<Interface>]
 type Exists =
     /// <param name="path">
     /// A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.
@@ -18822,11 +24711,133 @@ type Exists =
     /// </param>
     abstract __promisify__: path: Fs.PathLike -> JS.Promise<bool>
 
+    /// <summary>
+    /// Test whether or not the given path exists by checking with the file system.
+    /// Then call the <c>callback</c> argument with either true or false:
+    /// <code lang="js">
+    /// import { exists } from 'node:fs';
+    ///
+    /// exists('/etc/passwd', (e) =&gt; {
+    ///   console.log(e ? 'it exists' : 'no passwd!');
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>The parameters for this callback are not consistent with other Node.js</b>
+    /// <b>callbacks.</b> Normally, the first parameter to a Node.js callback is an <c>err</c> parameter, optionally followed by other parameters. The <c>fs.exists()</c> callback
+    /// has only one boolean parameter. This is one reason <c>fs.access()</c> is recommended
+    /// instead of <c>fs.exists()</c>.
+    /// <br /><br />
+    /// Using <c>fs.exists()</c> to check for the existence of a file before calling <c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c> is not recommended. Doing
+    /// so introduces a race condition, since other processes may change the file's
+    /// state between the two calls. Instead, user code should open/read/write the
+    /// file directly and handle the error raised if the file does not exist.
+    /// <br /><br />
+    /// <b>write (NOT RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { exists, open, close } from 'node:fs';
+    ///
+    /// exists('myfile', (e) =&gt; {
+    ///   if (e) {
+    ///     console.error('myfile already exists');
+    ///   } else {
+    ///     open('myfile', 'wx', (err, fd) =&gt; {
+    ///       if (err) throw err;
+    ///
+    ///       try {
+    ///         writeMyData(fd);
+    ///       } finally {
+    ///         close(fd, (err) =&gt; {
+    ///           if (err) throw err;
+    ///         });
+    ///       }
+    ///     });
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>write (RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { open, close } from 'node:fs';
+    /// open('myfile', 'wx', (err, fd) =&gt; {
+    ///   if (err) {
+    ///     if (err.code === 'EEXIST') {
+    ///       console.error('myfile already exists');
+    ///       return;
+    ///     }
+    ///
+    ///     throw err;
+    ///   }
+    ///
+    ///   try {
+    ///     writeMyData(fd);
+    ///   } finally {
+    ///     close(fd, (err) =&gt; {
+    ///       if (err) throw err;
+    ///     });
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>read (NOT RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { open, close, exists } from 'node:fs';
+    ///
+    /// exists('myfile', (e) =&gt; {
+    ///   if (e) {
+    ///     open('myfile', 'r', (err, fd) =&gt; {
+    ///       if (err) throw err;
+    ///
+    ///       try {
+    ///         readMyData(fd);
+    ///       } finally {
+    ///         close(fd, (err) =&gt; {
+    ///           if (err) throw err;
+    ///         });
+    ///       }
+    ///     });
+    ///   } else {
+    ///     console.error('myfile does not exist');
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>read (RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { open, close } from 'node:fs';
+    ///
+    /// open('myfile', 'r', (err, fd) =&gt; {
+    ///   if (err) {
+    ///     if (err.code === 'ENOENT') {
+    ///       console.error('myfile does not exist');
+    ///       return;
+    ///     }
+    ///
+    ///     throw err;
+    ///   }
+    ///
+    ///   try {
+    ///     readMyData(fd);
+    ///   } finally {
+    ///     close(fd, (err) =&gt; {
+    ///       if (err) throw err;
+    ///     });
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The "not recommended" examples above check for existence and then use the
+    /// file; the "recommended" examples are better because they use the file directly
+    /// and handle the error, if any.
+    /// <br /><br />
+    /// In general, check for the existence of a file only if the file won't be
+    /// used directly, for example when its existence is a signal from another
+    /// process.
+    /// </summary>
+    /// <remarks>@since v0.0.2</remarks>
+    /// <remarks>@deprecated Since v1.0.0 - Use {@link stat} or {@link access} instead.</remarks>
+    /// <remarks>@deprecated</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: (bool -> unit) -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (Fs.PathLike -> JS.Promise<bool>)) : Exists = jsNative
 
 type Constants2 =
     /// <summary>
@@ -19015,7 +25026,6 @@ type Constants2 =
     /// </summary>
     abstract UV_FS_O_FILEMAP: float
 
-[<Interface>]
 type Access =
     /// <summary>
     /// Asynchronously tests a user's permissions for the file specified by path.
@@ -19026,14 +25036,322 @@ type Access =
     /// </param>
     abstract __promisify__: path: Fs.PathLike * ?mode: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Tests a user's permissions for the file or directory specified by <c>path</c>.
+    /// The <c>mode</c> argument is an optional integer that specifies the accessibility
+    /// checks to be performed. <c>mode</c> should be either the value <c>fs.constants.F_OK</c> or a mask consisting of the bitwise OR of any of <c>fs.constants.R_OK</c>, <c>fs.constants.W_OK</c>, and <c>fs.constants.X_OK</c>
+    /// (e.g.<c>fs.constants.W_OK | fs.constants.R_OK</c>). Check <c>File access constants</c> for
+    /// possible values of <c>mode</c>.
+    /// <br /><br />
+    /// The final argument, <c>callback</c>, is a callback function that is invoked with
+    /// a possible error argument. If any of the accessibility checks fail, the error
+    /// argument will be an <c>Error</c> object. The following examples check if <c>package.json</c> exists, and if it is readable or writable.
+    /// <code lang="js">
+    /// import { access, constants } from 'node:fs';
+    ///
+    /// const file = 'package.json';
+    ///
+    /// // Check if the file exists in the current directory.
+    /// access(file, constants.F_OK, (err) =&gt; {
+    ///   console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
+    /// });
+    ///
+    /// // Check if the file is readable.
+    /// access(file, constants.R_OK, (err) =&gt; {
+    ///   console.log(`${file} ${err ? 'is not readable' : 'is readable'}`);
+    /// });
+    ///
+    /// // Check if the file is writable.
+    /// access(file, constants.W_OK, (err) =&gt; {
+    ///   console.log(`${file} ${err ? 'is not writable' : 'is writable'}`);
+    /// });
+    ///
+    /// // Check if the file is readable and writable.
+    /// access(file, constants.R_OK | constants.W_OK, (err) =&gt; {
+    ///   console.log(`${file} ${err ? 'is not' : 'is'} readable and writable`);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Do not use <c>fs.access()</c> to check for the accessibility of a file before calling <c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c>. Doing
+    /// so introduces a race condition, since other processes may change the file's
+    /// state between the two calls. Instead, user code should open/read/write the
+    /// file directly and handle the error raised if the file is not accessible.
+    /// <br /><br />
+    /// <b>write (NOT RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { access, open, close } from 'node:fs';
+    ///
+    /// access('myfile', (err) =&gt; {
+    ///   if (!err) {
+    ///     console.error('myfile already exists');
+    ///     return;
+    ///   }
+    ///
+    ///   open('myfile', 'wx', (err, fd) =&gt; {
+    ///     if (err) throw err;
+    ///
+    ///     try {
+    ///       writeMyData(fd);
+    ///     } finally {
+    ///       close(fd, (err) =&gt; {
+    ///         if (err) throw err;
+    ///       });
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>write (RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { open, close } from 'node:fs';
+    ///
+    /// open('myfile', 'wx', (err, fd) =&gt; {
+    ///   if (err) {
+    ///     if (err.code === 'EEXIST') {
+    ///       console.error('myfile already exists');
+    ///       return;
+    ///     }
+    ///
+    ///     throw err;
+    ///   }
+    ///
+    ///   try {
+    ///     writeMyData(fd);
+    ///   } finally {
+    ///     close(fd, (err) =&gt; {
+    ///       if (err) throw err;
+    ///     });
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>read (NOT RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { access, open, close } from 'node:fs';
+    /// access('myfile', (err) =&gt; {
+    ///   if (err) {
+    ///     if (err.code === 'ENOENT') {
+    ///       console.error('myfile does not exist');
+    ///       return;
+    ///     }
+    ///
+    ///     throw err;
+    ///   }
+    ///
+    ///   open('myfile', 'r', (err, fd) =&gt; {
+    ///     if (err) throw err;
+    ///
+    ///     try {
+    ///       readMyData(fd);
+    ///     } finally {
+    ///       close(fd, (err) =&gt; {
+    ///         if (err) throw err;
+    ///       });
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>read (RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { open, close } from 'node:fs';
+    ///
+    /// open('myfile', 'r', (err, fd) =&gt; {
+    ///   if (err) {
+    ///     if (err.code === 'ENOENT') {
+    ///       console.error('myfile does not exist');
+    ///       return;
+    ///     }
+    ///
+    ///     throw err;
+    ///   }
+    ///
+    ///   try {
+    ///     readMyData(fd);
+    ///   } finally {
+    ///     close(fd, (err) =&gt; {
+    ///       if (err) throw err;
+    ///     });
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The "not recommended" examples above check for accessibility and then use the
+    /// file; the "recommended" examples are better because they use the file directly
+    /// and handle the error, if any.
+    /// <br /><br />
+    /// In general, check for the accessibility of a file only if the file will not be
+    /// used directly, for example when its accessibility is a signal from another
+    /// process.
+    /// <br /><br />
+    /// On Windows, access-control policies (ACLs) on a directory may limit access to
+    /// a file or directory. The <c>fs.access()</c> function, however, does not check the
+    /// ACL and therefore may report that a path is accessible even if the ACL restricts
+    /// the user from reading or writing to it.
+    /// Asynchronously tests a user's permissions for the file specified by path.
+    /// </summary>
+    /// <remarks>@since v0.11.15</remarks>
+    /// <param name="path">A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * mode: float option * callback: Fs.NoParamCallback -> unit
 
+    /// <summary>
+    /// Tests a user's permissions for the file or directory specified by <c>path</c>.
+    /// The <c>mode</c> argument is an optional integer that specifies the accessibility
+    /// checks to be performed. <c>mode</c> should be either the value <c>fs.constants.F_OK</c> or a mask consisting of the bitwise OR of any of <c>fs.constants.R_OK</c>, <c>fs.constants.W_OK</c>, and <c>fs.constants.X_OK</c>
+    /// (e.g.<c>fs.constants.W_OK | fs.constants.R_OK</c>). Check <c>File access constants</c> for
+    /// possible values of <c>mode</c>.
+    /// <br /><br />
+    /// The final argument, <c>callback</c>, is a callback function that is invoked with
+    /// a possible error argument. If any of the accessibility checks fail, the error
+    /// argument will be an <c>Error</c> object. The following examples check if <c>package.json</c> exists, and if it is readable or writable.
+    /// <code lang="js">
+    /// import { access, constants } from 'node:fs';
+    ///
+    /// const file = 'package.json';
+    ///
+    /// // Check if the file exists in the current directory.
+    /// access(file, constants.F_OK, (err) =&gt; {
+    ///   console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
+    /// });
+    ///
+    /// // Check if the file is readable.
+    /// access(file, constants.R_OK, (err) =&gt; {
+    ///   console.log(`${file} ${err ? 'is not readable' : 'is readable'}`);
+    /// });
+    ///
+    /// // Check if the file is writable.
+    /// access(file, constants.W_OK, (err) =&gt; {
+    ///   console.log(`${file} ${err ? 'is not writable' : 'is writable'}`);
+    /// });
+    ///
+    /// // Check if the file is readable and writable.
+    /// access(file, constants.R_OK | constants.W_OK, (err) =&gt; {
+    ///   console.log(`${file} ${err ? 'is not' : 'is'} readable and writable`);
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Do not use <c>fs.access()</c> to check for the accessibility of a file before calling <c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c>. Doing
+    /// so introduces a race condition, since other processes may change the file's
+    /// state between the two calls. Instead, user code should open/read/write the
+    /// file directly and handle the error raised if the file is not accessible.
+    /// <br /><br />
+    /// <b>write (NOT RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { access, open, close } from 'node:fs';
+    ///
+    /// access('myfile', (err) =&gt; {
+    ///   if (!err) {
+    ///     console.error('myfile already exists');
+    ///     return;
+    ///   }
+    ///
+    ///   open('myfile', 'wx', (err, fd) =&gt; {
+    ///     if (err) throw err;
+    ///
+    ///     try {
+    ///       writeMyData(fd);
+    ///     } finally {
+    ///       close(fd, (err) =&gt; {
+    ///         if (err) throw err;
+    ///       });
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>write (RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { open, close } from 'node:fs';
+    ///
+    /// open('myfile', 'wx', (err, fd) =&gt; {
+    ///   if (err) {
+    ///     if (err.code === 'EEXIST') {
+    ///       console.error('myfile already exists');
+    ///       return;
+    ///     }
+    ///
+    ///     throw err;
+    ///   }
+    ///
+    ///   try {
+    ///     writeMyData(fd);
+    ///   } finally {
+    ///     close(fd, (err) =&gt; {
+    ///       if (err) throw err;
+    ///     });
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>read (NOT RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { access, open, close } from 'node:fs';
+    /// access('myfile', (err) =&gt; {
+    ///   if (err) {
+    ///     if (err.code === 'ENOENT') {
+    ///       console.error('myfile does not exist');
+    ///       return;
+    ///     }
+    ///
+    ///     throw err;
+    ///   }
+    ///
+    ///   open('myfile', 'r', (err, fd) =&gt; {
+    ///     if (err) throw err;
+    ///
+    ///     try {
+    ///       readMyData(fd);
+    ///     } finally {
+    ///       close(fd, (err) =&gt; {
+    ///         if (err) throw err;
+    ///       });
+    ///     }
+    ///   });
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// <b>read (RECOMMENDED)</b>
+    /// <code lang="js">
+    /// import { open, close } from 'node:fs';
+    ///
+    /// open('myfile', 'r', (err, fd) =&gt; {
+    ///   if (err) {
+    ///     if (err.code === 'ENOENT') {
+    ///       console.error('myfile does not exist');
+    ///       return;
+    ///     }
+    ///
+    ///     throw err;
+    ///   }
+    ///
+    ///   try {
+    ///     readMyData(fd);
+    ///   } finally {
+    ///     close(fd, (err) =&gt; {
+    ///       if (err) throw err;
+    ///     });
+    ///   }
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The "not recommended" examples above check for accessibility and then use the
+    /// file; the "recommended" examples are better because they use the file directly
+    /// and handle the error, if any.
+    /// <br /><br />
+    /// In general, check for the accessibility of a file only if the file will not be
+    /// used directly, for example when its accessibility is a signal from another
+    /// process.
+    /// <br /><br />
+    /// On Windows, access-control policies (ACLs) on a directory may limit access to
+    /// a file or directory. The <c>fs.access()</c> function, however, does not check the
+    /// ACL and therefore may report that a path is accessible even if the ACL restricts
+    /// the user from reading or writing to it.
+    /// Asynchronously tests a user's permissions for the file specified by path.
+    /// </summary>
+    /// <param name="path">A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * callback: Fs.NoParamCallback -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, float option, JS.Promise<unit>>) : Access = jsNative
 
 [<Interface>]
 type CreateReadStreamFSImplementation =
@@ -19139,7 +25457,6 @@ type WriteStreamOptions =
         ) : WriteStreamOptions =
         jsNative
 
-[<Interface>]
 type Fdatasync =
     /// <summary>
     /// Asynchronous fdatasync(2) - synchronize a file's in-core state with storage device.
@@ -19147,75 +25464,219 @@ type Fdatasync =
     /// <param name="fd">A file descriptor.</param>
     abstract __promisify__: fd: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Forces all currently queued I/O operations associated with the file to the
+    /// operating system's synchronized I/O completion state. Refer to the POSIX <a href="http://man7.org/linux/man-pages/man2/fdatasync.2.html"><c>fdatasync(2)</c></a> documentation for details. No arguments other
+    /// than a possible
+    /// exception are given to the completion callback.
+    /// </summary>
+    /// <remarks>@since v0.1.96</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fd: float * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: (float -> JS.Promise<unit>)) : Fdatasync = jsNative
-
-[<Interface>]
 type CopyFile =
     abstract __promisify__: src: Fs.PathLike * dst: Fs.PathLike * ?mode: float -> JS.Promise<unit>
 
+    /// <summary>
+    /// Asynchronously copies <c>src</c> to <c>dest</c>. By default, <c>dest</c> is overwritten if it
+    /// already exists. No arguments other than a possible exception are given to the
+    /// callback function. Node.js makes no guarantees about the atomicity of the copy
+    /// operation. If an error occurs after the destination file has been opened for
+    /// writing, Node.js will attempt to remove the destination.
+    /// <br /><br />
+    /// <c>mode</c> is an optional integer that specifies the behavior
+    /// of the copy operation. It is possible to create a mask consisting of the bitwise
+    /// OR of two or more values (e.g.<c>fs.constants.COPYFILE_EXCL | fs.constants.COPYFILE_FICLONE</c>).
+    /// <br /><br />
+    /// * <c>fs.constants.COPYFILE_EXCL</c>: The copy operation will fail if <c>dest</c> already
+    /// exists.
+    /// * <c>fs.constants.COPYFILE_FICLONE</c>: The copy operation will attempt to create a
+    /// copy-on-write reflink. If the platform does not support copy-on-write, then a
+    /// fallback copy mechanism is used.
+    /// * <c>fs.constants.COPYFILE_FICLONE_FORCE</c>: The copy operation will attempt to
+    /// create a copy-on-write reflink. If the platform does not support
+    /// copy-on-write, then the operation will fail.
+    /// <code lang="js">
+    /// import { copyFile, constants } from 'node:fs';
+    ///
+    /// function callback(err) {
+    ///   if (err) throw err;
+    ///   console.log('source.txt was copied to destination.txt');
+    /// }
+    ///
+    /// // destination.txt will be created or overwritten by default.
+    /// copyFile('source.txt', 'destination.txt', callback);
+    ///
+    /// // By using COPYFILE_EXCL, the operation will fail if destination.txt exists.
+    /// copyFile('source.txt', 'destination.txt', constants.COPYFILE_EXCL, callback);
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.5.0</remarks>
+    /// <param name="src">source filename to copy</param>
+    /// <param name="dest">destination filename of the copy operation</param>
+    /// <param name="mode">modifiers for copy operation.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: src: Fs.PathLike * dest: Fs.PathLike * callback: Fs.NoParamCallback -> unit
 
+    /// <summary>
+    /// Asynchronously copies <c>src</c> to <c>dest</c>. By default, <c>dest</c> is overwritten if it
+    /// already exists. No arguments other than a possible exception are given to the
+    /// callback function. Node.js makes no guarantees about the atomicity of the copy
+    /// operation. If an error occurs after the destination file has been opened for
+    /// writing, Node.js will attempt to remove the destination.
+    /// <br /><br />
+    /// <c>mode</c> is an optional integer that specifies the behavior
+    /// of the copy operation. It is possible to create a mask consisting of the bitwise
+    /// OR of two or more values (e.g.<c>fs.constants.COPYFILE_EXCL | fs.constants.COPYFILE_FICLONE</c>).
+    /// <br /><br />
+    /// * <c>fs.constants.COPYFILE_EXCL</c>: The copy operation will fail if <c>dest</c> already
+    /// exists.
+    /// * <c>fs.constants.COPYFILE_FICLONE</c>: The copy operation will attempt to create a
+    /// copy-on-write reflink. If the platform does not support copy-on-write, then a
+    /// fallback copy mechanism is used.
+    /// * <c>fs.constants.COPYFILE_FICLONE_FORCE</c>: The copy operation will attempt to
+    /// create a copy-on-write reflink. If the platform does not support
+    /// copy-on-write, then the operation will fail.
+    /// <code lang="js">
+    /// import { copyFile, constants } from 'node:fs';
+    ///
+    /// function callback(err) {
+    ///   if (err) throw err;
+    ///   console.log('source.txt was copied to destination.txt');
+    /// }
+    ///
+    /// // destination.txt will be created or overwritten by default.
+    /// copyFile('source.txt', 'destination.txt', callback);
+    ///
+    /// // By using COPYFILE_EXCL, the operation will fail if destination.txt exists.
+    /// copyFile('source.txt', 'destination.txt', constants.COPYFILE_EXCL, callback);
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.5.0</remarks>
+    /// <param name="src">source filename to copy</param>
+    /// <param name="dest">destination filename of the copy operation</param>
+    /// <param name="mode">modifiers for copy operation.</param>
     [<Emit("$0($1...)")>]
     abstract Invoke: src: Fs.PathLike * dest: Fs.PathLike * mode: float * callback: Fs.NoParamCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.PathLike, float option, JS.Promise<unit>>) : CopyFile =
-        jsNative
-
-[<Interface>]
 type Writev2 =
     abstract __promisify__<'TBuffers> :
         fd: float * buffers: 'TBuffers * ?position: float -> JS.Promise<Fs.WriteVResult<'TBuffers>>
 
+    /// <summary>
+    /// Write an array of <c>ArrayBufferView</c>s to the file specified by <c>fd</c> using <c>writev()</c>.
+    /// <br /><br />
+    /// <c>position</c> is the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position.
+    /// <br /><br />
+    /// The callback will be given three arguments: <c>err</c>, <c>bytesWritten</c>, and <c>buffers</c>. <c>bytesWritten</c> is how many bytes were written from <c>buffers</c>.
+    /// <br /><br />
+    /// If this method is <c>util.promisify()</c> ed, it returns a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffers</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.writev()</c> multiple times on the same file without
+    /// waiting for the callback. For this scenario, use createWriteStream.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// </summary>
+    /// <remarks>@since v12.9.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffers> : fd: float * buffers: 'TBuffers * cb: Writev2.Cb<'TBuffers> -> unit
 
+    /// <summary>
+    /// Write an array of <c>ArrayBufferView</c>s to the file specified by <c>fd</c> using <c>writev()</c>.
+    /// <br /><br />
+    /// <c>position</c> is the offset from the beginning of the file where this data
+    /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
+    /// at the current position.
+    /// <br /><br />
+    /// The callback will be given three arguments: <c>err</c>, <c>bytesWritten</c>, and <c>buffers</c>. <c>bytesWritten</c> is how many bytes were written from <c>buffers</c>.
+    /// <br /><br />
+    /// If this method is <c>util.promisify()</c> ed, it returns a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffers</c> properties.
+    /// <br /><br />
+    /// It is unsafe to use <c>fs.writev()</c> multiple times on the same file without
+    /// waiting for the callback. For this scenario, use createWriteStream.
+    /// <br /><br />
+    /// On Linux, positional writes don't work when the file is opened in append mode.
+    /// The kernel ignores the position argument and always appends the data to
+    /// the end of the file.
+    /// </summary>
+    /// <remarks>@since v12.9.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffers> :
         fd: float * buffers: 'TBuffers * position: float option * cb: Writev2.Cb2<'TBuffers> -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<float, 'TBuffers, float option, JS.Promise<Fs.WriteVResult<'TBuffers>>>)
-        : Writev2 =
-        jsNative
-
-[<Interface>]
 type Readv =
     abstract __promisify__<'TBuffers> :
         fd: float * buffers: 'TBuffers * ?position: float -> JS.Promise<Fs.ReadVResult<'TBuffers>>
 
+    /// <summary>
+    /// Read from a file specified by <c>fd</c> and write to an array of <c>ArrayBufferView</c>s
+    /// using <c>readv()</c>.
+    /// <br /><br />
+    /// <c>position</c> is the offset from the beginning of the file from where data
+    /// should be read. If <c>typeof position !== 'number'</c>, the data will be read
+    /// from the current position.
+    /// <br /><br />
+    /// The callback will be given three arguments: <c>err</c>, <c>bytesRead</c>, and <c>buffers</c>. <c>bytesRead</c> is how many bytes were read from the file.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffers</c> properties.
+    /// </summary>
+    /// <remarks>@since v13.13.0, v12.17.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffers> : fd: float * buffers: 'TBuffers * cb: Readv.Cb<'TBuffers> -> unit
 
+    /// <summary>
+    /// Read from a file specified by <c>fd</c> and write to an array of <c>ArrayBufferView</c>s
+    /// using <c>readv()</c>.
+    /// <br /><br />
+    /// <c>position</c> is the offset from the beginning of the file from where data
+    /// should be read. If <c>typeof position !== 'number'</c>, the data will be read
+    /// from the current position.
+    /// <br /><br />
+    /// The callback will be given three arguments: <c>err</c>, <c>bytesRead</c>, and <c>buffers</c>. <c>bytesRead</c> is how many bytes were read from the file.
+    /// <br /><br />
+    /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
+    /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffers</c> properties.
+    /// </summary>
+    /// <remarks>@since v13.13.0, v12.17.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TBuffers> :
         fd: float * buffers: 'TBuffers * position: float option * cb: Readv.Cb2<'TBuffers> -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<float, 'TBuffers, float option, JS.Promise<Fs.ReadVResult<'TBuffers>>>)
-        : Readv =
-        jsNative
-
-[<Interface>]
 type Opendir =
     abstract __promisify__: path: Fs.PathLike * ?options: Fs.OpenDirOptions -> JS.Promise<Fs.Dir>
 
+    /// <summary>
+    /// Asynchronously open a directory. See the POSIX <a href="http://man7.org/linux/man-pages/man3/opendir.3.html"><c>opendir(3)</c></a> documentation for
+    /// more details.
+    /// <br /><br />
+    /// Creates an <c>fs.Dir</c>, which contains all further functions for reading from
+    /// and cleaning up the directory.
+    /// <br /><br />
+    /// The <c>encoding</c> option sets the encoding for the <c>path</c> while opening the
+    /// directory and subsequent read operations.
+    /// </summary>
+    /// <remarks>@since v12.12.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * cb: Opendir.Cb -> unit
 
+    /// <summary>
+    /// Asynchronously open a directory. See the POSIX <a href="http://man7.org/linux/man-pages/man3/opendir.3.html"><c>opendir(3)</c></a> documentation for
+    /// more details.
+    /// <br /><br />
+    /// Creates an <c>fs.Dir</c>, which contains all further functions for reading from
+    /// and cleaning up the directory.
+    /// <br /><br />
+    /// The <c>encoding</c> option sets the encoding for the <c>path</c> while opening the
+    /// directory and subsequent read operations.
+    /// </summary>
+    /// <remarks>@since v12.12.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: path: Fs.PathLike * options: Fs.OpenDirOptions * cb: Opendir.Cb2 -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<Fs.PathLike, Fs.OpenDirOptions option, JS.Promise<Fs.Dir>>) : Opendir =
-        jsNative
 
 [<Interface>]
 type CopyOptionsBase =
@@ -19337,7 +25798,6 @@ type EmitWarningOptions =
 
 type Execve = delegate of file: string * args: string[] option * env: ProcessEnv option -> unit
 
-[<Interface>]
 type HRTime =
     /// <summary>
     /// The <c>bigint</c> version of the process.hrtime() method returning the current high-resolution real time in nanoseconds as a <c>bigint</c>.
@@ -19363,9 +25823,6 @@ type HRTime =
 
     [<Emit("$0($1...)")>]
     abstract Invoke: ?time: float * float -> float * float
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(bigint: (unit -> bigint)) : HRTime = jsNative
 
 [<Interface>]
 type MemoryUsage =
@@ -19396,7 +25853,6 @@ type MemoryUsage =
         : MemoryUsage =
         jsNative
 
-[<Interface>]
 type MemoryUsageFn =
     /// <summary>
     /// method returns an integer representing the Resident Set Size (RSS) in bytes.
@@ -19405,9 +25861,6 @@ type MemoryUsageFn =
 
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> MemoryUsage
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(rss: (unit -> float)) : MemoryUsageFn = jsNative
 
 [<Interface>]
 type Module =
@@ -29077,7 +35530,6 @@ type ModuleConstructor =
     [<EmitConstructor>]
     abstract Create: id: string * ?parent: Module.Module -> Module.Module
 
-[<Interface>]
 type Require =
     /// <summary>
     /// Modules are cached in this object when they are required. By deleting a key
@@ -29104,14 +35556,9 @@ type Require =
     /// <remarks>@since v0.3.0</remarks>
     abstract resolve: RequireResolve2 with get, set
 
+    /// <remarks>@since v0.1.13</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: id: string -> obj
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (cache: Dict<Module>, extensions: RequireExtensions, resolve: RequireResolve2, ?main: Module)
-        : Require =
-        jsNative
 
 type RequireExtensions =
     inherit Dict<RequireExtensions.Item>
@@ -29122,7 +35569,6 @@ type RequireExtensions =
     [<EmitIndexer>]
     abstract Item: string -> RequireExtensions.Item option with get, set
 
-[<Interface>]
 type RequireResolve2 =
     /// <summary>
     /// Returns an array containing the paths searched during resolution of <c>request</c> or
@@ -29135,9 +35581,6 @@ type RequireResolve2 =
 
     [<Emit("$0($1...)")>]
     abstract Invoke: request: string * ?options: RequireResolveOptions -> string
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(paths: (string -> string[] option)) : RequireResolve2 = jsNative
 
 [<Interface>]
 type RequireResolveOptions =
@@ -29183,23 +35626,12 @@ type NodeModule =
         jsNative
 
 /// <remarks>@deprecated Use <c>NodeJS.Require</c> instead.</remarks>
-[<Interface>]
 type NodeRequire =
     inherit Require
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (cache: Dict<Module>, extensions: RequireExtensions, resolve: RequireResolve2, ?main: Module)
-        : NodeRequire =
-        jsNative
-
 /// <remarks>@deprecated Use <c>NodeJS.RequireResolve</c> instead.</remarks>
-[<Interface>]
 type RequireResolve =
     inherit RequireResolve2
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(paths: (string -> string[] option)) : RequireResolve = jsNative
 
 [<Interface>]
 type Constants5 =
@@ -30771,15 +37203,59 @@ type Suite =
     /// <remarks>@since v20.13.0</remarks>
     abstract only: ?fn: Test.SuiteFn -> JS.Promise<unit>
 
+    /// <summary>
+    /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the suite, which is displayed when reporting test results.
+    /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
+    /// </param>
+    /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
+    /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
+    /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
+    /// <remarks>@since v20.13.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: ?name: string * ?options: Test.TestOptions * ?fn: Test.SuiteFn -> JS.Promise<unit>
 
+    /// <summary>
+    /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the suite, which is displayed when reporting test results.
+    /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
+    /// </param>
+    /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
+    /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
+    /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
+    /// <remarks>@since v20.13.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: ?name: string * ?fn: Test.SuiteFn -> JS.Promise<unit>
 
+    /// <summary>
+    /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the suite, which is displayed when reporting test results.
+    /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
+    /// </param>
+    /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
+    /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
+    /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
+    /// <remarks>@since v20.13.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: ?options: Test.TestOptions * ?fn: Test.SuiteFn -> JS.Promise<unit>
 
+    /// <summary>
+    /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the suite, which is displayed when reporting test results.
+    /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
+    /// </param>
+    /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
+    /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
+    /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
+    /// <remarks>@since v20.13.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: ?fn: Test.SuiteFn -> JS.Promise<unit>
 
@@ -30956,15 +37432,183 @@ type Test =
     /// <remarks>@since v22.3.0</remarks>
     abstract snapshot: Snapshot with get, set
 
+    /// <summary>
+    /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
+    /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
+    /// <br /><br />
+    /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
+    /// actions related to the current test. Examples include skipping the test, adding
+    /// additional diagnostic information, or creating subtests.
+    /// <br /><br />
+    /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
+    /// if <c>test()</c> is called within a suite, it fulfills immediately.
+    /// The return value can usually be discarded for top level tests.
+    /// However, the return value from subtests should be used to prevent the parent
+    /// test from finishing first and cancelling the subtest
+    /// as shown in the following example.
+    /// <code lang="js">
+    /// test('top level test', async (t) =&gt; {
+    ///   // The setTimeout() in the following subtest would cause it to outlive its
+    ///   // parent test if 'await' is removed on the next line. Once the parent test
+    ///   // completes, it will cancel any outstanding subtests.
+    ///   await t.test('longer running subtest', async (t) =&gt; {
+    ///     return new Promise((resolve, reject) =&gt; {
+    ///       setTimeout(resolve, 1000);
+    ///     });
+    ///   });
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
+    /// canceling tests because a running test might block the application thread and
+    /// thus prevent the scheduled cancellation.
+    /// </summary>
+    /// <remarks>@since v18.0.0, v16.17.0</remarks>
+    /// <param name="name">
+    /// The name of the test, which is displayed when reporting test results.
+    /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
+    /// </param>
+    /// <param name="options">Configuration options for the test.</param>
+    /// <param name="fn">
+    /// The function under test. The first argument to this function is a {@link TestContext} object.
+    /// If the test uses callbacks, the callback function is passed as the second argument.
+    /// </param>
+    /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
     [<Emit("$0($1...)")>]
     abstract Invoke: ?name: string * ?fn: Test.TestFn -> JS.Promise<unit>
 
+    /// <summary>
+    /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
+    /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
+    /// <br /><br />
+    /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
+    /// actions related to the current test. Examples include skipping the test, adding
+    /// additional diagnostic information, or creating subtests.
+    /// <br /><br />
+    /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
+    /// if <c>test()</c> is called within a suite, it fulfills immediately.
+    /// The return value can usually be discarded for top level tests.
+    /// However, the return value from subtests should be used to prevent the parent
+    /// test from finishing first and cancelling the subtest
+    /// as shown in the following example.
+    /// <code lang="js">
+    /// test('top level test', async (t) =&gt; {
+    ///   // The setTimeout() in the following subtest would cause it to outlive its
+    ///   // parent test if 'await' is removed on the next line. Once the parent test
+    ///   // completes, it will cancel any outstanding subtests.
+    ///   await t.test('longer running subtest', async (t) =&gt; {
+    ///     return new Promise((resolve, reject) =&gt; {
+    ///       setTimeout(resolve, 1000);
+    ///     });
+    ///   });
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
+    /// canceling tests because a running test might block the application thread and
+    /// thus prevent the scheduled cancellation.
+    /// </summary>
+    /// <remarks>@since v18.0.0, v16.17.0</remarks>
+    /// <param name="name">
+    /// The name of the test, which is displayed when reporting test results.
+    /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
+    /// </param>
+    /// <param name="options">Configuration options for the test.</param>
+    /// <param name="fn">
+    /// The function under test. The first argument to this function is a {@link TestContext} object.
+    /// If the test uses callbacks, the callback function is passed as the second argument.
+    /// </param>
+    /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
     [<Emit("$0($1...)")>]
     abstract Invoke: ?name: string * ?options: Test.TestOptions * ?fn: Test.TestFn -> JS.Promise<unit>
 
+    /// <summary>
+    /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
+    /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
+    /// <br /><br />
+    /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
+    /// actions related to the current test. Examples include skipping the test, adding
+    /// additional diagnostic information, or creating subtests.
+    /// <br /><br />
+    /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
+    /// if <c>test()</c> is called within a suite, it fulfills immediately.
+    /// The return value can usually be discarded for top level tests.
+    /// However, the return value from subtests should be used to prevent the parent
+    /// test from finishing first and cancelling the subtest
+    /// as shown in the following example.
+    /// <code lang="js">
+    /// test('top level test', async (t) =&gt; {
+    ///   // The setTimeout() in the following subtest would cause it to outlive its
+    ///   // parent test if 'await' is removed on the next line. Once the parent test
+    ///   // completes, it will cancel any outstanding subtests.
+    ///   await t.test('longer running subtest', async (t) =&gt; {
+    ///     return new Promise((resolve, reject) =&gt; {
+    ///       setTimeout(resolve, 1000);
+    ///     });
+    ///   });
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
+    /// canceling tests because a running test might block the application thread and
+    /// thus prevent the scheduled cancellation.
+    /// </summary>
+    /// <remarks>@since v18.0.0, v16.17.0</remarks>
+    /// <param name="name">
+    /// The name of the test, which is displayed when reporting test results.
+    /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
+    /// </param>
+    /// <param name="options">Configuration options for the test.</param>
+    /// <param name="fn">
+    /// The function under test. The first argument to this function is a {@link TestContext} object.
+    /// If the test uses callbacks, the callback function is passed as the second argument.
+    /// </param>
+    /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
     [<Emit("$0($1...)")>]
     abstract Invoke: ?options: Test.TestOptions * ?fn: Test.TestFn -> JS.Promise<unit>
 
+    /// <summary>
+    /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
+    /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
+    /// <br /><br />
+    /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
+    /// actions related to the current test. Examples include skipping the test, adding
+    /// additional diagnostic information, or creating subtests.
+    /// <br /><br />
+    /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
+    /// if <c>test()</c> is called within a suite, it fulfills immediately.
+    /// The return value can usually be discarded for top level tests.
+    /// However, the return value from subtests should be used to prevent the parent
+    /// test from finishing first and cancelling the subtest
+    /// as shown in the following example.
+    /// <code lang="js">
+    /// test('top level test', async (t) =&gt; {
+    ///   // The setTimeout() in the following subtest would cause it to outlive its
+    ///   // parent test if 'await' is removed on the next line. Once the parent test
+    ///   // completes, it will cancel any outstanding subtests.
+    ///   await t.test('longer running subtest', async (t) =&gt; {
+    ///     return new Promise((resolve, reject) =&gt; {
+    ///       setTimeout(resolve, 1000);
+    ///     });
+    ///   });
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
+    /// canceling tests because a running test might block the application thread and
+    /// thus prevent the scheduled cancellation.
+    /// </summary>
+    /// <remarks>@since v18.0.0, v16.17.0</remarks>
+    /// <param name="name">
+    /// The name of the test, which is displayed when reporting test results.
+    /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
+    /// </param>
+    /// <param name="options">Configuration options for the test.</param>
+    /// <param name="fn">
+    /// The function under test. The first argument to this function is a {@link TestContext} object.
+    /// If the test uses callbacks, the callback function is passed as the second argument.
+    /// </param>
+    /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
     [<Emit("$0($1...)")>]
     abstract Invoke: ?fn: Test.TestFn -> JS.Promise<unit>
 
@@ -31274,6 +37918,10 @@ type SpecConstructor =
     [<EmitConstructor>]
     abstract Create: unit -> SpecReporter
 
+    /// <summary>
+    /// The <c>spec</c> reporter outputs the test results in a human-readable format.
+    /// </summary>
+    /// <remarks>@since v20.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> SpecReporter
 
@@ -34170,19 +40818,58 @@ type Immediate =
         : Immediate =
         jsNative
 
-[<Interface>]
 type SetImmediate =
     abstract __promisify__<'T> : ?value: 'T * ?options: Timers.TimerOptions -> JS.Promise<'T>
 
+    /// <summary>
+    /// Schedules the "immediate" execution of the <c>callback</c> after I/O events'
+    /// callbacks.
+    /// <br /><br />
+    /// When multiple calls to <c>setImmediate()</c> are made, the <c>callback</c> functions are
+    /// queued for execution in the order in which they are created. The entire callback
+    /// queue is processed every event loop iteration. If an immediate timer is queued
+    /// from inside an executing callback, that timer will not be triggered until the
+    /// next event loop iteration.
+    /// <br /><br />
+    /// If <c>callback</c> is not a function, a <c>TypeError</c> will be thrown.
+    /// <br /><br />
+    /// This method has a custom variant for promises that is available using
+    /// <c>timersPromises.setImmediate()</c>.
+    /// </summary>
+    /// <remarks>@since v0.9.1</remarks>
+    /// <param name="callback">
+    /// The function to call at the end of this turn of
+    /// the Node.js <a href="https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/#setimmediate-vs-settimeout">Event Loop</a>
+    /// </param>
+    /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
+    /// <returns>for use with <c>clearImmediate()</c></returns>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TArgs> : callback: ('TArgs -> unit) * [<ParamArray>] args: 'TArgs -> Immediate
 
+    /// <summary>
+    /// Schedules the "immediate" execution of the <c>callback</c> after I/O events'
+    /// callbacks.
+    /// <br /><br />
+    /// When multiple calls to <c>setImmediate()</c> are made, the <c>callback</c> functions are
+    /// queued for execution in the order in which they are created. The entire callback
+    /// queue is processed every event loop iteration. If an immediate timer is queued
+    /// from inside an executing callback, that timer will not be triggered until the
+    /// next event loop iteration.
+    /// <br /><br />
+    /// If <c>callback</c> is not a function, a <c>TypeError</c> will be thrown.
+    /// <br /><br />
+    /// This method has a custom variant for promises that is available using
+    /// <c>timersPromises.setImmediate()</c>.
+    /// </summary>
+    /// <remarks>@since v0.9.1</remarks>
+    /// <param name="callback">
+    /// The function to call at the end of this turn of
+    /// the Node.js <a href="https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/#setimmediate-vs-settimeout">Event Loop</a>
+    /// </param>
+    /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
+    /// <returns>for use with <c>clearImmediate()</c></returns>
     [<Emit("$0($1...)")>]
     abstract Invoke: callback: (unit -> unit) -> Immediate
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(__promisify__: Func<'T option, Timers.TimerOptions option, JS.Promise<'T>>) : SetImmediate =
-        jsNative
 
 type Timeout =
     inherit RefCounted
@@ -34228,21 +40915,62 @@ type Timeout =
     abstract unref: unit -> Timeout
     abstract _onTimeout: [<ParamArray>] args: obj[] -> unit
 
-[<Interface>]
 type SetTimeout =
     abstract __promisify__<'T> : ?delay: float * ?value: 'T * ?options: Timers.TimerOptions -> JS.Promise<'T>
 
+    /// <summary>
+    /// Schedules execution of a one-time <c>callback</c> after <c>delay</c> milliseconds.
+    /// <br /><br />
+    /// The <c>callback</c> will likely not be invoked in precisely <c>delay</c> milliseconds.
+    /// Node.js makes no guarantees about the exact timing of when callbacks will fire,
+    /// nor of their ordering. The callback will be called as close as possible to the
+    /// time specified.
+    /// <br /><br />
+    /// When <c>delay</c> is larger than <c>2147483647</c> or less than <c>1</c> or <c>NaN</c>, the <c>delay</c>
+    /// will be set to <c>1</c>. Non-integer delays are truncated to an integer.
+    /// <br /><br />
+    /// If <c>callback</c> is not a function, a <c>TypeError</c> will be thrown.
+    /// <br /><br />
+    /// This method has a custom variant for promises that is available using
+    /// <c>timersPromises.setTimeout()</c>.
+    /// </summary>
+    /// <remarks>@since v0.0.1</remarks>
+    /// <param name="callback">The function to call when the timer elapses.</param>
+    /// <param name="delay">
+    /// The number of milliseconds to wait before calling the
+    /// <c>callback</c>. <b>Default:</b> <c>1</c>.
+    /// </param>
+    /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
+    /// <returns>for use with <c>clearTimeout()</c></returns>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TArgs> : callback: ('TArgs -> unit) * delay: float option * [<ParamArray>] args: 'TArgs -> Timeout
 
+    /// <summary>
+    /// Schedules execution of a one-time <c>callback</c> after <c>delay</c> milliseconds.
+    /// <br /><br />
+    /// The <c>callback</c> will likely not be invoked in precisely <c>delay</c> milliseconds.
+    /// Node.js makes no guarantees about the exact timing of when callbacks will fire,
+    /// nor of their ordering. The callback will be called as close as possible to the
+    /// time specified.
+    /// <br /><br />
+    /// When <c>delay</c> is larger than <c>2147483647</c> or less than <c>1</c> or <c>NaN</c>, the <c>delay</c>
+    /// will be set to <c>1</c>. Non-integer delays are truncated to an integer.
+    /// <br /><br />
+    /// If <c>callback</c> is not a function, a <c>TypeError</c> will be thrown.
+    /// <br /><br />
+    /// This method has a custom variant for promises that is available using
+    /// <c>timersPromises.setTimeout()</c>.
+    /// </summary>
+    /// <remarks>@since v0.0.1</remarks>
+    /// <param name="callback">The function to call when the timer elapses.</param>
+    /// <param name="delay">
+    /// The number of milliseconds to wait before calling the
+    /// <c>callback</c>. <b>Default:</b> <c>1</c>.
+    /// </param>
+    /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
+    /// <returns>for use with <c>clearTimeout()</c></returns>
     [<Emit("$0($1...)")>]
     abstract Invoke: callback: (unit -> unit) * ?delay: float -> Timeout
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<float option, 'T option, Timers.TimerOptions option, JS.Promise<'T>>)
-        : SetTimeout =
-        jsNative
 
 /// <summary>
 /// <c>URLSearchParams</c> class is a global reference for <c>import { URLSearchParams } from 'node:url'</c>
@@ -34404,7 +41132,6 @@ type AbortController2 =
     [<ParamObject; Emit("$0")>]
     static member Create(signal: AbortSignal2, abort: (obj option -> unit)) : AbortController2 = jsNative
 
-[<Interface>]
 type Inspect =
     abstract colors: Dict<(float * float)> with get, set
     abstract styles: Inspect.Styles with get, set
@@ -34418,79 +41145,1352 @@ type Inspect =
     /// </summary>
     abstract custom: obj
 
+    /// <summary>
+    /// The <c>util.inspect()</c> method returns a string representation of <c>object</c> that is
+    /// intended for debugging. The output of <c>util.inspect</c> may change at any time
+    /// and should not be depended upon programmatically. Additional <c>options</c> may be
+    /// passed that alter the result.
+    /// <c>util.inspect()</c> will use the constructor's name and/or <c>Symbol.toStringTag</c>
+    /// property to make an identifiable tag for an inspected value.
+    /// <code lang="js">
+    /// class Foo {
+    ///   get [Symbol.toStringTag]() {
+    ///     return 'bar';
+    ///   }
+    /// }
+    ///
+    /// class Bar {}
+    ///
+    /// const baz = Object.create(null, { [Symbol.toStringTag]: { value: 'foo' } });
+    ///
+    /// util.inspect(new Foo()); // 'Foo [bar] {}'
+    /// util.inspect(new Bar()); // 'Bar {}'
+    /// util.inspect(baz);       // '[foo] {}'
+    /// </code>
+    /// <br /><br />
+    /// Circular references point to their anchor by using a reference index:
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    ///
+    /// const obj = {};
+    /// obj.a = [obj];
+    /// obj.b = {};
+    /// obj.b.inner = obj.b;
+    /// obj.b.obj = obj;
+    ///
+    /// console.log(inspect(obj));
+    /// // &lt;ref *1&gt; {
+    /// //   a: [ [Circular *1] ],
+    /// //   b: &lt;ref *2&gt; { inner: [Circular *2], obj: [Circular *1] }
+    /// // }
+    /// </code>
+    /// <br /><br />
+    /// The following example inspects all properties of the <c>util</c> object:
+    /// <code lang="js">
+    /// import util from 'node:util';
+    ///
+    /// console.log(util.inspect(util, { showHidden: true, depth: null }));
+    /// </code>
+    /// <br /><br />
+    /// The following example highlights the effect of the <c>compact</c> option:
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    ///
+    /// const o = {
+    ///   a: [1, 2, [[
+    ///     'Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit, sed do ' +
+    ///       'eiusmod \ntempor incididunt ut labore et dolore magna aliqua.',
+    ///     'test',
+    ///     'foo']], 4],
+    ///   b: new Map([['za', 1], ['zb', 'test']]),
+    /// };
+    /// console.log(inspect(o, { compact: true, depth: 5, breakLength: 80 }));
+    ///
+    /// // { a:
+    /// //   [ 1,
+    /// //     2,
+    /// //     [ [ 'Lorem ipsum dolor sit amet,\nconsectetur [...]', // A long line
+    /// //           'test',
+    /// //           'foo' ] ],
+    /// //     4 ],
+    /// //   b: Map(2) { 'za' =&gt; 1, 'zb' =&gt; 'test' } }
+    ///
+    /// // Setting `compact` to false or an integer creates more reader friendly output.
+    /// console.log(inspect(o, { compact: false, depth: 5, breakLength: 80 }));
+    ///
+    /// // {
+    /// //   a: [
+    /// //     1,
+    /// //     2,
+    /// //     [
+    /// //       [
+    /// //         'Lorem ipsum dolor sit amet,\n' +
+    /// //           'consectetur adipiscing elit, sed do eiusmod \n' +
+    /// //           'tempor incididunt ut labore et dolore magna aliqua.',
+    /// //         'test',
+    /// //         'foo'
+    /// //       ]
+    /// //     ],
+    /// //     4
+    /// //   ],
+    /// //   b: Map(2) {
+    /// //     'za' =&gt; 1,
+    /// //     'zb' =&gt; 'test'
+    /// //   }
+    /// // }
+    ///
+    /// // Setting `breakLength` to e.g. 150 will print the "Lorem ipsum" text in a
+    /// // single line.
+    /// </code>
+    /// <br /><br />
+    /// The <c>showHidden</c> option allows <c>WeakMap</c> and <c>WeakSet</c> entries to be
+    /// inspected. If there are more entries than <c>maxArrayLength</c>, there is no
+    /// guarantee which entries are displayed. That means retrieving the same
+    /// <c>WeakSet</c> entries twice may result in different output. Furthermore, entries
+    /// with no remaining strong references may be garbage collected at any time.
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    ///
+    /// const obj = { a: 1 };
+    /// const obj2 = { b: 2 };
+    /// const weakSet = new WeakSet([obj, obj2]);
+    ///
+    /// console.log(inspect(weakSet, { showHidden: true }));
+    /// // WeakSet { { a: 1 }, { b: 2 } }
+    /// </code>
+    /// <br /><br />
+    /// The <c>sorted</c> option ensures that an object's property insertion order does not
+    /// impact the result of <c>util.inspect()</c>.
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    /// import assert from 'node:assert';
+    ///
+    /// const o1 = {
+    ///   b: [2, 3, 1],
+    ///   a: '`a` comes before `b`',
+    ///   c: new Set([2, 3, 1]),
+    /// };
+    /// console.log(inspect(o1, { sorted: true }));
+    /// // { a: '`a` comes before `b`', b: [ 2, 3, 1 ], c: Set(3) { 1, 2, 3 } }
+    /// console.log(inspect(o1, { sorted: (a, b) =&gt; b.localeCompare(a) }));
+    /// // { c: Set(3) { 3, 2, 1 }, b: [ 2, 3, 1 ], a: '`a` comes before `b`' }
+    ///
+    /// const o2 = {
+    ///   c: new Set([2, 1, 3]),
+    ///   a: '`a` comes before `b`',
+    ///   b: [2, 3, 1],
+    /// };
+    /// assert.strict.equal(
+    ///   inspect(o1, { sorted: true }),
+    ///   inspect(o2, { sorted: true }),
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>numericSeparator</c> option adds an underscore every three digits to all
+    /// numbers.
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    ///
+    /// const thousand = 1000;
+    /// const million = 1000000;
+    /// const bigNumber = 123456789n;
+    /// const bigDecimal = 1234.12345;
+    ///
+    /// console.log(inspect(thousand, { numericSeparator: true }));
+    /// // 1_000
+    /// console.log(inspect(million, { numericSeparator: true }));
+    /// // 1_000_000
+    /// console.log(inspect(bigNumber, { numericSeparator: true }));
+    /// // 123_456_789n
+    /// console.log(inspect(bigDecimal, { numericSeparator: true }));
+    /// // 1_234.123_45
+    /// </code>
+    /// <br /><br />
+    /// <c>util.inspect()</c> is a synchronous method intended for debugging. Its maximum
+    /// output length is approximately 128 MiB. Inputs that result in longer output will
+    /// be truncated.
+    /// </summary>
+    /// <remarks>@since v0.3.0</remarks>
+    /// <param name="object">Any JavaScript primitive or <c>Object</c>.</param>
+    /// <returns>The representation of <c>object</c>.</returns>
     [<Emit("$0($1...)")>]
     abstract Invoke: ``object``: obj * ?showHidden: bool * ?depth: float * ?color: bool -> string
 
+    /// <summary>
+    /// The <c>util.inspect()</c> method returns a string representation of <c>object</c> that is
+    /// intended for debugging. The output of <c>util.inspect</c> may change at any time
+    /// and should not be depended upon programmatically. Additional <c>options</c> may be
+    /// passed that alter the result.
+    /// <c>util.inspect()</c> will use the constructor's name and/or <c>Symbol.toStringTag</c>
+    /// property to make an identifiable tag for an inspected value.
+    /// <code lang="js">
+    /// class Foo {
+    ///   get [Symbol.toStringTag]() {
+    ///     return 'bar';
+    ///   }
+    /// }
+    ///
+    /// class Bar {}
+    ///
+    /// const baz = Object.create(null, { [Symbol.toStringTag]: { value: 'foo' } });
+    ///
+    /// util.inspect(new Foo()); // 'Foo [bar] {}'
+    /// util.inspect(new Bar()); // 'Bar {}'
+    /// util.inspect(baz);       // '[foo] {}'
+    /// </code>
+    /// <br /><br />
+    /// Circular references point to their anchor by using a reference index:
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    ///
+    /// const obj = {};
+    /// obj.a = [obj];
+    /// obj.b = {};
+    /// obj.b.inner = obj.b;
+    /// obj.b.obj = obj;
+    ///
+    /// console.log(inspect(obj));
+    /// // &lt;ref *1&gt; {
+    /// //   a: [ [Circular *1] ],
+    /// //   b: &lt;ref *2&gt; { inner: [Circular *2], obj: [Circular *1] }
+    /// // }
+    /// </code>
+    /// <br /><br />
+    /// The following example inspects all properties of the <c>util</c> object:
+    /// <code lang="js">
+    /// import util from 'node:util';
+    ///
+    /// console.log(util.inspect(util, { showHidden: true, depth: null }));
+    /// </code>
+    /// <br /><br />
+    /// The following example highlights the effect of the <c>compact</c> option:
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    ///
+    /// const o = {
+    ///   a: [1, 2, [[
+    ///     'Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit, sed do ' +
+    ///       'eiusmod \ntempor incididunt ut labore et dolore magna aliqua.',
+    ///     'test',
+    ///     'foo']], 4],
+    ///   b: new Map([['za', 1], ['zb', 'test']]),
+    /// };
+    /// console.log(inspect(o, { compact: true, depth: 5, breakLength: 80 }));
+    ///
+    /// // { a:
+    /// //   [ 1,
+    /// //     2,
+    /// //     [ [ 'Lorem ipsum dolor sit amet,\nconsectetur [...]', // A long line
+    /// //           'test',
+    /// //           'foo' ] ],
+    /// //     4 ],
+    /// //   b: Map(2) { 'za' =&gt; 1, 'zb' =&gt; 'test' } }
+    ///
+    /// // Setting `compact` to false or an integer creates more reader friendly output.
+    /// console.log(inspect(o, { compact: false, depth: 5, breakLength: 80 }));
+    ///
+    /// // {
+    /// //   a: [
+    /// //     1,
+    /// //     2,
+    /// //     [
+    /// //       [
+    /// //         'Lorem ipsum dolor sit amet,\n' +
+    /// //           'consectetur adipiscing elit, sed do eiusmod \n' +
+    /// //           'tempor incididunt ut labore et dolore magna aliqua.',
+    /// //         'test',
+    /// //         'foo'
+    /// //       ]
+    /// //     ],
+    /// //     4
+    /// //   ],
+    /// //   b: Map(2) {
+    /// //     'za' =&gt; 1,
+    /// //     'zb' =&gt; 'test'
+    /// //   }
+    /// // }
+    ///
+    /// // Setting `breakLength` to e.g. 150 will print the "Lorem ipsum" text in a
+    /// // single line.
+    /// </code>
+    /// <br /><br />
+    /// The <c>showHidden</c> option allows <c>WeakMap</c> and <c>WeakSet</c> entries to be
+    /// inspected. If there are more entries than <c>maxArrayLength</c>, there is no
+    /// guarantee which entries are displayed. That means retrieving the same
+    /// <c>WeakSet</c> entries twice may result in different output. Furthermore, entries
+    /// with no remaining strong references may be garbage collected at any time.
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    ///
+    /// const obj = { a: 1 };
+    /// const obj2 = { b: 2 };
+    /// const weakSet = new WeakSet([obj, obj2]);
+    ///
+    /// console.log(inspect(weakSet, { showHidden: true }));
+    /// // WeakSet { { a: 1 }, { b: 2 } }
+    /// </code>
+    /// <br /><br />
+    /// The <c>sorted</c> option ensures that an object's property insertion order does not
+    /// impact the result of <c>util.inspect()</c>.
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    /// import assert from 'node:assert';
+    ///
+    /// const o1 = {
+    ///   b: [2, 3, 1],
+    ///   a: '`a` comes before `b`',
+    ///   c: new Set([2, 3, 1]),
+    /// };
+    /// console.log(inspect(o1, { sorted: true }));
+    /// // { a: '`a` comes before `b`', b: [ 2, 3, 1 ], c: Set(3) { 1, 2, 3 } }
+    /// console.log(inspect(o1, { sorted: (a, b) =&gt; b.localeCompare(a) }));
+    /// // { c: Set(3) { 3, 2, 1 }, b: [ 2, 3, 1 ], a: '`a` comes before `b`' }
+    ///
+    /// const o2 = {
+    ///   c: new Set([2, 1, 3]),
+    ///   a: '`a` comes before `b`',
+    ///   b: [2, 3, 1],
+    /// };
+    /// assert.strict.equal(
+    ///   inspect(o1, { sorted: true }),
+    ///   inspect(o2, { sorted: true }),
+    /// );
+    /// </code>
+    /// <br /><br />
+    /// The <c>numericSeparator</c> option adds an underscore every three digits to all
+    /// numbers.
+    /// <code lang="js">
+    /// import { inspect } from 'node:util';
+    ///
+    /// const thousand = 1000;
+    /// const million = 1000000;
+    /// const bigNumber = 123456789n;
+    /// const bigDecimal = 1234.12345;
+    ///
+    /// console.log(inspect(thousand, { numericSeparator: true }));
+    /// // 1_000
+    /// console.log(inspect(million, { numericSeparator: true }));
+    /// // 1_000_000
+    /// console.log(inspect(bigNumber, { numericSeparator: true }));
+    /// // 123_456_789n
+    /// console.log(inspect(bigDecimal, { numericSeparator: true }));
+    /// // 1_234.123_45
+    /// </code>
+    /// <br /><br />
+    /// <c>util.inspect()</c> is a synchronous method intended for debugging. Its maximum
+    /// output length is approximately 128 MiB. Inputs that result in longer output will
+    /// be truncated.
+    /// </summary>
+    /// <remarks>@since v0.3.0</remarks>
+    /// <param name="object">Any JavaScript primitive or <c>Object</c>.</param>
+    /// <returns>The representation of <c>object</c>.</returns>
     [<Emit("$0($1...)")>]
     abstract Invoke: ``object``: obj * ?options: Util.InspectOptions -> string
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (
-            colors: Dict<(float * float)>,
-            styles: Inspect.Styles,
-            defaultOptions: Util.InspectOptions,
-            replDefaults: Util.InspectOptions,
-            custom: obj
-        ) : Inspect =
-        jsNative
-
-[<Interface>]
 type Promisify =
     /// <summary>
     /// That can be used to declare custom promisified variants of functions.
     /// </summary>
     abstract custom: obj
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TCustom> :
         fn: U2<Util.CustomPromisifyLegacy<'TCustom>, Util.CustomPromisifySymbol<'TCustom>> -> 'TCustom
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'TResult> : fn: (Promisify.Fn.Callback<'TResult> -> unit) -> (unit -> JS.Promise<'TResult>)
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fn: ((obj option -> unit) -> unit) -> (unit -> JS.Promise<unit>)
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'TResult> : fn: Promisify.Fn<'T1, 'TResult> -> ('T1 -> JS.Promise<'TResult>)
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1> : fn: Promisify.Fn2<'T1> -> ('T1 -> JS.Promise<unit>)
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'T2, 'TResult> : fn: Promisify.Fn3<'T1, 'T2, 'TResult> -> Promisify.Result<'T1, 'T2, 'TResult>
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'T2> : fn: Promisify.Fn4<'T1, 'T2> -> Promisify.Result2<'T1, 'T2>
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'T2, 'T3, 'TResult> :
         fn: Promisify.Fn5<'T1, 'T2, 'T3, 'TResult> -> Promisify.Result3<'T1, 'T2, 'T3, 'TResult>
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'T2, 'T3> : fn: Promisify.Fn6<'T1, 'T2, 'T3> -> Promisify.Result4<'T1, 'T2, 'T3>
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'T2, 'T3, 'T4, 'TResult> :
         fn: Promisify.Fn7<'T1, 'T2, 'T3, 'T4, 'TResult> -> Promisify.Result5<'T1, 'T2, 'T3, 'T4, 'TResult>
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'T2, 'T3, 'T4> : fn: Promisify.Fn8<'T1, 'T2, 'T3, 'T4> -> Promisify.Result6<'T1, 'T2, 'T3, 'T4>
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'T2, 'T3, 'T4, 'T5, 'TResult> :
         fn: Promisify.Fn9<'T1, 'T2, 'T3, 'T4, 'T5, 'TResult> -> Promisify.Result7<'T1, 'T2, 'T3, 'T4, 'T5, 'TResult>
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke<'T1, 'T2, 'T3, 'T4, 'T5> :
         fn: Promisify.Fn10<'T1, 'T2, 'T3, 'T4, 'T5> -> Promisify.Result8<'T1, 'T2, 'T3, 'T4, 'T5>
 
+    /// <summary>
+    /// Takes a function following the common error-first callback style, i.e. taking
+    /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
+    /// that returns promises.
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    /// promisifiedStat('.').then((stats) =&gt; {
+    ///   // Do something with `stats`
+    /// }).catch((error) =&gt; {
+    ///   // Handle the error.
+    /// });
+    /// </code>
+    /// <br /><br />
+    /// Or, equivalently using <c>async function</c>s:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    /// import { stat } from 'node:fs';
+    ///
+    /// const promisifiedStat = promisify(stat);
+    ///
+    /// async function callStat() {
+    ///   const stats = await promisifiedStat('.');
+    ///   console.log(`This directory is owned by ${stats.uid}`);
+    /// }
+    ///
+    /// callStat();
+    /// </code>
+    /// <br /><br />
+    /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
+    /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
+    /// <br /><br />
+    /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
+    /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
+    /// will throw an error. If <c>original</c> is a function but its last argument is not
+    /// an error-first callback, it will still be passed an error-first
+    /// callback as its last argument.
+    /// <br /><br />
+    /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
+    /// work as expected unless handled specially:
+    /// <code lang="js">
+    /// import { promisify } from 'node:util';
+    ///
+    /// class Foo {
+    ///   constructor() {
+    ///     this.a = 42;
+    ///   }
+    ///
+    ///   bar(callback) {
+    ///     callback(null, this.a);
+    ///   }
+    /// }
+    ///
+    /// const foo = new Foo();
+    ///
+    /// const naiveBar = promisify(foo.bar);
+    /// // TypeError: Cannot read properties of undefined (reading 'a')
+    /// // naiveBar().then(a =&gt; console.log(a));
+    ///
+    /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
+    ///
+    /// const bindBar = naiveBar.bind(foo);
+    /// bindBar().then((a) =&gt; console.log(a)); // '42'
+    /// </code>
+    /// </summary>
+    /// <remarks>@since v8.0.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: fn: Fable.Core.TS.Es.Function -> Fable.Core.TS.Es.Function
-
-    [<ParamObject; Emit("$0")>]
-    static member Create(custom: obj) : Promisify = jsNative
 
 type TextDecoderConstructor =
     [<EmitConstructor>]
@@ -35806,181 +43806,130 @@ type MessagePortConstructor =
     [<EmitConstructor>]
     abstract Create: unit -> WorkerThreads.MessagePort
 
-[<Interface>]
 type BrotliCompress =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.BrotliOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v11.7.0, v10.16.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.BrotliOptions * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v11.7.0, v10.16.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.BrotliOptions option, JS.Promise<NonSharedBuffer>>)
-        : BrotliCompress =
-        jsNative
-
-[<Interface>]
 type BrotliDecompress =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.BrotliOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v11.7.0, v10.16.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.BrotliOptions * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v11.7.0, v10.16.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.BrotliOptions option, JS.Promise<NonSharedBuffer>>)
-        : BrotliDecompress =
-        jsNative
-
-[<Interface>]
 type Deflate =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
-        : Deflate =
-        jsNative
-
-[<Interface>]
 type DeflateRaw =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
-        : DeflateRaw =
-        jsNative
-
-[<Interface>]
 type Gzip =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
-        : Gzip =
-        jsNative
-
-[<Interface>]
 type Gunzip =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
-        : Gunzip =
-        jsNative
-
-[<Interface>]
 type Inflate =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
-        : Inflate =
-        jsNative
-
-[<Interface>]
 type InflateRaw =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
-        : InflateRaw =
-        jsNative
-
-[<Interface>]
 type Unzip =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZlibOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v0.6.0</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZlibOptions * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZlibOptions option, JS.Promise<NonSharedBuffer>>)
-        : Unzip =
-        jsNative
-
-[<Interface>]
 type ZstdCompress =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZstdOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v22.15.0</remarks>
+    /// <remarks>@experimental</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v22.15.0</remarks>
+    /// <remarks>@experimental</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZstdOptions * callback: Zlib.CompressCallback -> unit
 
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZstdOptions option, JS.Promise<NonSharedBuffer>>)
-        : ZstdCompress =
-        jsNative
-
-[<Interface>]
 type ZstdDecompress =
     abstract __promisify__: buffer: Zlib.InputType * ?options: Zlib.ZstdOptions -> JS.Promise<NonSharedBuffer>
 
+    /// <remarks>@since v22.15.0</remarks>
+    /// <remarks>@experimental</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * callback: Zlib.CompressCallback -> unit
 
+    /// <remarks>@since v22.15.0</remarks>
+    /// <remarks>@experimental</remarks>
     [<Emit("$0($1...)")>]
     abstract Invoke: buf: Zlib.InputType * options: Zlib.ZstdOptions * callback: Zlib.CompressCallback -> unit
-
-    [<ParamObject; Emit("$0")>]
-    static member Create
-        (__promisify__: Func<Zlib.InputType, Zlib.ZstdOptions option, JS.Promise<NonSharedBuffer>>)
-        : ZstdDecompress =
-        jsNative
 
 type Constants9 =
     abstract BROTLI_DECODE: float
@@ -36334,8 +44283,9 @@ type Exports =
         and set (_: Module): unit = jsNative
 
     /// <remarks>@since v0.1.13</remarks>
-    [<Global("require")>]
-    static member require(id: string) : obj = jsNative
+    static member require
+        with get (): Require = jsNative
+        and set (_: Require): unit = jsNative
 
     /// <summary>
     /// <c>PerformanceEntry</c> is a global reference for <c>import { PerformanceEntry } from 'node:perf_hooks'</c>
@@ -36558,32 +44508,7 @@ type Exports =
     /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
     /// <returns>for use with <c>clearImmediate()</c></returns>
     [<Global("setImmediate")>]
-    static member setImmediate<'TArgs>(callback: ('TArgs -> unit), [<ParamArray>] args: 'TArgs) : Immediate = jsNative
-
-    /// <summary>
-    /// Schedules the "immediate" execution of the <c>callback</c> after I/O events'
-    /// callbacks.
-    /// <br /><br />
-    /// When multiple calls to <c>setImmediate()</c> are made, the <c>callback</c> functions are
-    /// queued for execution in the order in which they are created. The entire callback
-    /// queue is processed every event loop iteration. If an immediate timer is queued
-    /// from inside an executing callback, that timer will not be triggered until the
-    /// next event loop iteration.
-    /// <br /><br />
-    /// If <c>callback</c> is not a function, a <c>TypeError</c> will be thrown.
-    /// <br /><br />
-    /// This method has a custom variant for promises that is available using
-    /// <c>timersPromises.setImmediate()</c>.
-    /// </summary>
-    /// <remarks>@since v0.9.1</remarks>
-    /// <param name="callback">
-    /// The function to call at the end of this turn of
-    /// the Node.js <a href="https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/#setimmediate-vs-settimeout">Event Loop</a>
-    /// </param>
-    /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
-    /// <returns>for use with <c>clearImmediate()</c></returns>
-    [<Global("setImmediate")>]
-    static member setImmediate(callback: (unit -> unit)) : Immediate = jsNative
+    static member setImmediate: SetImmediate = jsNative
 
     /// <summary>
     /// Schedules repeated execution of <c>callback</c> every <c>delay</c> milliseconds.
@@ -36657,37 +44582,7 @@ type Exports =
     /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
     /// <returns>for use with <c>clearTimeout()</c></returns>
     [<Global("setTimeout")>]
-    static member setTimeout<'TArgs>
-        (callback: ('TArgs -> unit), delay: float option, [<ParamArray>] args: 'TArgs)
-        : Timeout =
-        jsNative
-
-    /// <summary>
-    /// Schedules execution of a one-time <c>callback</c> after <c>delay</c> milliseconds.
-    /// <br /><br />
-    /// The <c>callback</c> will likely not be invoked in precisely <c>delay</c> milliseconds.
-    /// Node.js makes no guarantees about the exact timing of when callbacks will fire,
-    /// nor of their ordering. The callback will be called as close as possible to the
-    /// time specified.
-    /// <br /><br />
-    /// When <c>delay</c> is larger than <c>2147483647</c> or less than <c>1</c> or <c>NaN</c>, the <c>delay</c>
-    /// will be set to <c>1</c>. Non-integer delays are truncated to an integer.
-    /// <br /><br />
-    /// If <c>callback</c> is not a function, a <c>TypeError</c> will be thrown.
-    /// <br /><br />
-    /// This method has a custom variant for promises that is available using
-    /// <c>timersPromises.setTimeout()</c>.
-    /// </summary>
-    /// <remarks>@since v0.0.1</remarks>
-    /// <param name="callback">The function to call when the timer elapses.</param>
-    /// <param name="delay">
-    /// The number of milliseconds to wait before calling the
-    /// <c>callback</c>. <b>Default:</b> <c>1</c>.
-    /// </param>
-    /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
-    /// <returns>for use with <c>clearTimeout()</c></returns>
-    [<Global("setTimeout")>]
-    static member setTimeout(callback: (unit -> unit), ?delay: float) : Timeout = jsNative
+    static member setTimeout: SetTimeout = jsNative
 
     /// <summary>
     /// Cancels an <c>Immediate</c> object created by <c>setImmediate()</c>.
@@ -38466,7 +46361,7 @@ module Assert =
         static member partialDeepStrictEqual(actual: obj, expected: obj, ?message: U2<string, exn>) : unit = jsNative
 
         [<Import("strict", "node:assert")>]
-        static member strict(value: obj, ?message: U2<string, exn>) : unit = jsNative
+        static member strict: Node.Strict = jsNative
 
     module Assert =
         type Base =
@@ -40804,7 +48699,7 @@ module Assert =
                 jsNative
 
             [<Import("strict", "node:assert/strict")>]
-            static member strict(value: obj, ?message: U2<string, exn>) : unit = jsNative
+            static member strict: Node.Strict = jsNative
 
 /// <summary>node:async_hooks</summary>
 module AsyncHooks =
@@ -48573,268 +56468,7 @@ module ChildProcess =
         /// <param name="command">The command to run, with space-separated arguments.</param>
         /// <param name="callback">called with the output when process terminates.</param>
         [<Import("exec", "node:child_process")>]
-        static member exec(command: string, ?callback: Exec.Callback) : ChildProcess = jsNative
-
-        /// <summary>
-        /// Spawns a shell then executes the <c>command</c> within that shell, buffering any
-        /// generated output. The <c>command</c> string passed to the exec function is processed
-        /// directly by the shell and special characters (vary based on <a href="https://en.wikipedia.org/wiki/List_of_command-line_interpreters">shell</a>)
-        /// need to be dealt with accordingly:
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        ///
-        /// exec('"/path/to/test file/test.sh" arg1 arg2');
-        /// // Double quotes are used so that the space in the path is not interpreted as
-        /// // a delimiter of multiple arguments.
-        ///
-        /// exec('echo "The \\$HOME variable is $HOME"');
-        /// // The $HOME variable is escaped in the first instance, but not in the second.
-        /// </code>
-        /// <br /><br />
-        /// <b>Never pass unsanitized user input to this function. Any input containing shell</b>
-        /// <b>metacharacters may be used to trigger arbitrary command execution.</b>
-        /// <br /><br />
-        /// If a <c>callback</c> function is provided, it is called with the arguments <c>(error, stdout, stderr)</c>. On success, <c>error</c> will be <c>null</c>. On error, <c>error</c> will be an instance of <c>Error</c>. The
-        /// <c>error.code</c> property will be
-        /// the exit code of the process. By convention, any exit code other than <c>0</c> indicates an error. <c>error.signal</c> will be the signal that terminated the
-        /// process.
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        /// exec('cat *.js missing_file | wc -l', (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     console.error(`exec error: ${error}`);
-        ///     return;
-        ///   }
-        ///   console.log(`stdout: ${stdout}`);
-        ///   console.error(`stderr: ${stderr}`);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// If <c>timeout</c> is greater than <c>0</c>, the parent will send the signal
-        /// identified by the <c>killSignal</c> property (the default is <c>'SIGTERM'</c>) if the
-        /// child runs longer than <c>timeout</c> milliseconds.
-        /// <br /><br />
-        /// Unlike the <a href="http://man7.org/linux/man-pages/man3/exec.3.html"><c>exec(3)</c></a> POSIX system call, <c>child_process.exec()</c> does not replace
-        /// the existing process and uses a shell to execute the command.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const exec = util.promisify(child_process.exec);
-        ///
-        /// async function lsExample() {
-        ///   const { stdout, stderr } = await exec('ls');
-        ///   console.log('stdout:', stdout);
-        ///   console.error('stderr:', stderr);
-        /// }
-        /// lsExample();
-        /// </code>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = exec('grep ssh', { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="command">The command to run, with space-separated arguments.</param>
-        /// <param name="callback">called with the output when process terminates.</param>
-        [<Import("exec", "node:child_process")>]
-        static member exec
-            (command: string, options: ExecOptionsWithBufferEncoding, ?callback: Exec.Callback2)
-            : ChildProcess =
-            jsNative
-
-        /// <summary>
-        /// Spawns a shell then executes the <c>command</c> within that shell, buffering any
-        /// generated output. The <c>command</c> string passed to the exec function is processed
-        /// directly by the shell and special characters (vary based on <a href="https://en.wikipedia.org/wiki/List_of_command-line_interpreters">shell</a>)
-        /// need to be dealt with accordingly:
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        ///
-        /// exec('"/path/to/test file/test.sh" arg1 arg2');
-        /// // Double quotes are used so that the space in the path is not interpreted as
-        /// // a delimiter of multiple arguments.
-        ///
-        /// exec('echo "The \\$HOME variable is $HOME"');
-        /// // The $HOME variable is escaped in the first instance, but not in the second.
-        /// </code>
-        /// <br /><br />
-        /// <b>Never pass unsanitized user input to this function. Any input containing shell</b>
-        /// <b>metacharacters may be used to trigger arbitrary command execution.</b>
-        /// <br /><br />
-        /// If a <c>callback</c> function is provided, it is called with the arguments <c>(error, stdout, stderr)</c>. On success, <c>error</c> will be <c>null</c>. On error, <c>error</c> will be an instance of <c>Error</c>. The
-        /// <c>error.code</c> property will be
-        /// the exit code of the process. By convention, any exit code other than <c>0</c> indicates an error. <c>error.signal</c> will be the signal that terminated the
-        /// process.
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        /// exec('cat *.js missing_file | wc -l', (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     console.error(`exec error: ${error}`);
-        ///     return;
-        ///   }
-        ///   console.log(`stdout: ${stdout}`);
-        ///   console.error(`stderr: ${stderr}`);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// If <c>timeout</c> is greater than <c>0</c>, the parent will send the signal
-        /// identified by the <c>killSignal</c> property (the default is <c>'SIGTERM'</c>) if the
-        /// child runs longer than <c>timeout</c> milliseconds.
-        /// <br /><br />
-        /// Unlike the <a href="http://man7.org/linux/man-pages/man3/exec.3.html"><c>exec(3)</c></a> POSIX system call, <c>child_process.exec()</c> does not replace
-        /// the existing process and uses a shell to execute the command.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const exec = util.promisify(child_process.exec);
-        ///
-        /// async function lsExample() {
-        ///   const { stdout, stderr } = await exec('ls');
-        ///   console.log('stdout:', stdout);
-        ///   console.error('stderr:', stderr);
-        /// }
-        /// lsExample();
-        /// </code>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = exec('grep ssh', { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="command">The command to run, with space-separated arguments.</param>
-        /// <param name="callback">called with the output when process terminates.</param>
-        [<Import("exec", "node:child_process")>]
-        static member exec
-            (command: string, options: ExecOptionsWithStringEncoding, ?callback: Exec.Callback3)
-            : ChildProcess =
-            jsNative
-
-        /// <summary>
-        /// Spawns a shell then executes the <c>command</c> within that shell, buffering any
-        /// generated output. The <c>command</c> string passed to the exec function is processed
-        /// directly by the shell and special characters (vary based on <a href="https://en.wikipedia.org/wiki/List_of_command-line_interpreters">shell</a>)
-        /// need to be dealt with accordingly:
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        ///
-        /// exec('"/path/to/test file/test.sh" arg1 arg2');
-        /// // Double quotes are used so that the space in the path is not interpreted as
-        /// // a delimiter of multiple arguments.
-        ///
-        /// exec('echo "The \\$HOME variable is $HOME"');
-        /// // The $HOME variable is escaped in the first instance, but not in the second.
-        /// </code>
-        /// <br /><br />
-        /// <b>Never pass unsanitized user input to this function. Any input containing shell</b>
-        /// <b>metacharacters may be used to trigger arbitrary command execution.</b>
-        /// <br /><br />
-        /// If a <c>callback</c> function is provided, it is called with the arguments <c>(error, stdout, stderr)</c>. On success, <c>error</c> will be <c>null</c>. On error, <c>error</c> will be an instance of <c>Error</c>. The
-        /// <c>error.code</c> property will be
-        /// the exit code of the process. By convention, any exit code other than <c>0</c> indicates an error. <c>error.signal</c> will be the signal that terminated the
-        /// process.
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        /// exec('cat *.js missing_file | wc -l', (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     console.error(`exec error: ${error}`);
-        ///     return;
-        ///   }
-        ///   console.log(`stdout: ${stdout}`);
-        ///   console.error(`stderr: ${stderr}`);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// If <c>timeout</c> is greater than <c>0</c>, the parent will send the signal
-        /// identified by the <c>killSignal</c> property (the default is <c>'SIGTERM'</c>) if the
-        /// child runs longer than <c>timeout</c> milliseconds.
-        /// <br /><br />
-        /// Unlike the <a href="http://man7.org/linux/man-pages/man3/exec.3.html"><c>exec(3)</c></a> POSIX system call, <c>child_process.exec()</c> does not replace
-        /// the existing process and uses a shell to execute the command.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const exec = util.promisify(child_process.exec);
-        ///
-        /// async function lsExample() {
-        ///   const { stdout, stderr } = await exec('ls');
-        ///   console.log('stdout:', stdout);
-        ///   console.error('stderr:', stderr);
-        /// }
-        /// lsExample();
-        /// </code>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { exec } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = exec('grep ssh', { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        /// <param name="command">The command to run, with space-separated arguments.</param>
-        /// <param name="callback">called with the output when process terminates.</param>
-        [<Import("exec", "node:child_process")>]
-        static member exec(command: string, ?options: ExecOptions, ?callback: Exec.Callback4) : ChildProcess = jsNative
+        static member exec: Exec = jsNative
 
         /// <summary>
         /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
@@ -48898,479 +56532,7 @@ module ChildProcess =
         /// <param name="args">List of string arguments.</param>
         /// <param name="callback">Called with the output when process terminates.</param>
         [<Import("execFile", "node:child_process")>]
-        static member execFile(file: string, ?callback: ExecFile.Callback) : ChildProcess = jsNative
-
-        /// <summary>
-        /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
-        /// executable <c>file</c> is spawned directly as a new process making it slightly more
-        /// efficient than exec.
-        /// <br /><br />
-        /// The same options as exec are supported. Since a shell is
-        /// not spawned, behaviors such as I/O redirection and file globbing are not
-        /// supported.
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     throw error;
-        ///   }
-        ///   console.log(stdout);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const execFile = util.promisify(child_process.execFile);
-        /// async function getVersion() {
-        ///   const { stdout } = await execFile('node', ['--version']);
-        ///   console.log(stdout);
-        /// }
-        /// getVersion();
-        /// </code>
-        /// <br /><br />
-        /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
-        /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
-        /// <b>arbitrary command execution.</b>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.91</remarks>
-        /// <param name="file">The name or path of the executable file to run.</param>
-        /// <param name="args">List of string arguments.</param>
-        /// <param name="callback">Called with the output when process terminates.</param>
-        [<Import("execFile", "node:child_process")>]
-        static member execFile(file: string, ?args: string[], ?callback: ExecFile.Callback2) : ChildProcess = jsNative
-
-        /// <summary>
-        /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
-        /// executable <c>file</c> is spawned directly as a new process making it slightly more
-        /// efficient than exec.
-        /// <br /><br />
-        /// The same options as exec are supported. Since a shell is
-        /// not spawned, behaviors such as I/O redirection and file globbing are not
-        /// supported.
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     throw error;
-        ///   }
-        ///   console.log(stdout);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const execFile = util.promisify(child_process.execFile);
-        /// async function getVersion() {
-        ///   const { stdout } = await execFile('node', ['--version']);
-        ///   console.log(stdout);
-        /// }
-        /// getVersion();
-        /// </code>
-        /// <br /><br />
-        /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
-        /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
-        /// <b>arbitrary command execution.</b>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.91</remarks>
-        /// <param name="file">The name or path of the executable file to run.</param>
-        /// <param name="args">List of string arguments.</param>
-        /// <param name="callback">Called with the output when process terminates.</param>
-        [<Import("execFile", "node:child_process")>]
-        static member execFile
-            (file: string, options: ExecFileOptionsWithBufferEncoding, ?callback: ExecFile.Callback3)
-            : ChildProcess =
-            jsNative
-
-        /// <summary>
-        /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
-        /// executable <c>file</c> is spawned directly as a new process making it slightly more
-        /// efficient than exec.
-        /// <br /><br />
-        /// The same options as exec are supported. Since a shell is
-        /// not spawned, behaviors such as I/O redirection and file globbing are not
-        /// supported.
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     throw error;
-        ///   }
-        ///   console.log(stdout);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const execFile = util.promisify(child_process.execFile);
-        /// async function getVersion() {
-        ///   const { stdout } = await execFile('node', ['--version']);
-        ///   console.log(stdout);
-        /// }
-        /// getVersion();
-        /// </code>
-        /// <br /><br />
-        /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
-        /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
-        /// <b>arbitrary command execution.</b>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.91</remarks>
-        /// <param name="file">The name or path of the executable file to run.</param>
-        /// <param name="args">List of string arguments.</param>
-        /// <param name="callback">Called with the output when process terminates.</param>
-        [<Import("execFile", "node:child_process")>]
-        static member execFile
-            (
-                file: string,
-                args: string[] option,
-                options: ExecFileOptionsWithBufferEncoding,
-                ?callback: ExecFile.Callback4
-            ) : ChildProcess =
-            jsNative
-
-        /// <summary>
-        /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
-        /// executable <c>file</c> is spawned directly as a new process making it slightly more
-        /// efficient than exec.
-        /// <br /><br />
-        /// The same options as exec are supported. Since a shell is
-        /// not spawned, behaviors such as I/O redirection and file globbing are not
-        /// supported.
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     throw error;
-        ///   }
-        ///   console.log(stdout);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const execFile = util.promisify(child_process.execFile);
-        /// async function getVersion() {
-        ///   const { stdout } = await execFile('node', ['--version']);
-        ///   console.log(stdout);
-        /// }
-        /// getVersion();
-        /// </code>
-        /// <br /><br />
-        /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
-        /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
-        /// <b>arbitrary command execution.</b>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.91</remarks>
-        /// <param name="file">The name or path of the executable file to run.</param>
-        /// <param name="args">List of string arguments.</param>
-        /// <param name="callback">Called with the output when process terminates.</param>
-        [<Import("execFile", "node:child_process")>]
-        static member execFile
-            (file: string, options: ExecFileOptionsWithStringEncoding, ?callback: ExecFile.Callback5)
-            : ChildProcess =
-            jsNative
-
-        /// <summary>
-        /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
-        /// executable <c>file</c> is spawned directly as a new process making it slightly more
-        /// efficient than exec.
-        /// <br /><br />
-        /// The same options as exec are supported. Since a shell is
-        /// not spawned, behaviors such as I/O redirection and file globbing are not
-        /// supported.
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     throw error;
-        ///   }
-        ///   console.log(stdout);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const execFile = util.promisify(child_process.execFile);
-        /// async function getVersion() {
-        ///   const { stdout } = await execFile('node', ['--version']);
-        ///   console.log(stdout);
-        /// }
-        /// getVersion();
-        /// </code>
-        /// <br /><br />
-        /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
-        /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
-        /// <b>arbitrary command execution.</b>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.91</remarks>
-        /// <param name="file">The name or path of the executable file to run.</param>
-        /// <param name="args">List of string arguments.</param>
-        /// <param name="callback">Called with the output when process terminates.</param>
-        [<Import("execFile", "node:child_process")>]
-        static member execFile
-            (
-                file: string,
-                args: string[] option,
-                options: ExecFileOptionsWithStringEncoding,
-                ?callback: ExecFile.Callback6
-            ) : ChildProcess =
-            jsNative
-
-        /// <summary>
-        /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
-        /// executable <c>file</c> is spawned directly as a new process making it slightly more
-        /// efficient than exec.
-        /// <br /><br />
-        /// The same options as exec are supported. Since a shell is
-        /// not spawned, behaviors such as I/O redirection and file globbing are not
-        /// supported.
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     throw error;
-        ///   }
-        ///   console.log(stdout);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const execFile = util.promisify(child_process.execFile);
-        /// async function getVersion() {
-        ///   const { stdout } = await execFile('node', ['--version']);
-        ///   console.log(stdout);
-        /// }
-        /// getVersion();
-        /// </code>
-        /// <br /><br />
-        /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
-        /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
-        /// <b>arbitrary command execution.</b>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.91</remarks>
-        /// <param name="file">The name or path of the executable file to run.</param>
-        /// <param name="args">List of string arguments.</param>
-        /// <param name="callback">Called with the output when process terminates.</param>
-        [<Import("execFile", "node:child_process")>]
-        static member execFile(file: string, ?options: ExecFileOptions, ?callback: ExecFile.Callback7) : ChildProcess =
-            jsNative
-
-        /// <summary>
-        /// The <c>child_process.execFile()</c> function is similar to exec except that it does not spawn a shell by default. Rather, the specified
-        /// executable <c>file</c> is spawned directly as a new process making it slightly more
-        /// efficient than exec.
-        /// <br /><br />
-        /// The same options as exec are supported. Since a shell is
-        /// not spawned, behaviors such as I/O redirection and file globbing are not
-        /// supported.
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {
-        ///   if (error) {
-        ///     throw error;
-        ///   }
-        ///   console.log(stdout);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>stdout</c> and <c>stderr</c> arguments passed to the callback will contain the
-        /// stdout and stderr output of the child process. By default, Node.js will decode
-        /// the output as UTF-8 and pass strings to the callback. The <c>encoding</c> option
-        /// can be used to specify the character encoding used to decode the stdout and
-        /// stderr output. If <c>encoding</c> is <c>'buffer'</c>, or an unrecognized character
-        /// encoding, <c>Buffer</c> objects will be passed to the callback instead.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>stdout</c> and <c>stderr</c> properties. The returned <c>ChildProcess</c> instance is attached to the <c>Promise</c> as a <c>child</c> property. In
-        /// case of an error (including any error resulting in an exit code other than 0), a
-        /// rejected promise is returned, with the same <c>error</c> object given in the
-        /// callback, but with two additional properties <c>stdout</c> and <c>stderr</c>.
-        /// <code lang="js">
-        /// import util from 'node:util';
-        /// import child_process from 'node:child_process';
-        /// const execFile = util.promisify(child_process.execFile);
-        /// async function getVersion() {
-        ///   const { stdout } = await execFile('node', ['--version']);
-        ///   console.log(stdout);
-        /// }
-        /// getVersion();
-        /// </code>
-        /// <br /><br />
-        /// <b>If the <c>shell</c> option is enabled, do not pass unsanitized user input to this</b>
-        /// <b>function. Any input containing shell metacharacters may be used to trigger</b>
-        /// <b>arbitrary command execution.</b>
-        /// <br /><br />
-        /// If the <c>signal</c> option is enabled, calling <c>.abort()</c> on the corresponding <c>AbortController</c> is similar to calling <c>.kill()</c> on the child process except
-        /// the error passed to the callback will be an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { execFile } from 'node:child_process';
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const child = execFile('node', ['--version'], { signal }, (error) =&gt; {
-        ///   console.error(error); // an AbortError
-        /// });
-        /// controller.abort();
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.91</remarks>
-        /// <param name="file">The name or path of the executable file to run.</param>
-        /// <param name="args">List of string arguments.</param>
-        /// <param name="callback">Called with the output when process terminates.</param>
-        [<Import("execFile", "node:child_process")>]
-        static member execFile
-            (file: string, ?args: string[], ?options: ExecFileOptions, ?callback: ExecFile.Callback8)
-            : ChildProcess =
-            jsNative
+        static member execFile: ExecFile = jsNative
 
         /// <summary>
         /// The <c>child_process.fork()</c> method is a special case of spawn used specifically to spawn new Node.js processes.
@@ -74002,6 +81164,28 @@ module Crypto =
         [<EmitConstructor>]
         abstract Create: name: string -> DiffieHellmanGroup
 
+        /// <summary>
+        /// The <c>DiffieHellmanGroup</c> class takes a well-known modp group as its argument.
+        /// It works the same as <c>DiffieHellman</c>, except that it does not allow changing its keys after creation.
+        /// In other words, it does not implement <c>setPublicKey()</c> or <c>setPrivateKey()</c> methods.
+        /// <code lang="js">
+        /// const { createDiffieHellmanGroup } = await import('node:crypto');
+        /// const dh = createDiffieHellmanGroup('modp1');
+        /// </code>
+        /// The name (e.g. <c>'modp1'</c>) is taken from <a href="https://www.rfc-editor.org/rfc/rfc2412.txt">RFC 2412</a> (modp1 and 2) and <a href="https://www.rfc-editor.org/rfc/rfc3526.txt">RFC 3526</a>:
+        /// <code lang="bash">
+        /// $ perl -ne 'print "$1\n" if /"(modp\d+)"/' src/node_crypto_groups.h
+        /// modp1  #  768 bits
+        /// modp2  # 1024 bits
+        /// modp5  # 1536 bits
+        /// modp14 # 2048 bits
+        /// modp15 # etc.
+        /// modp16
+        /// modp17
+        /// modp18
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v0.7.5</remarks>
         [<Emit("$0($1...)")>]
         abstract Invoke: name: string -> DiffieHellmanGroup
 
@@ -76414,7 +83598,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v0.7.5</remarks>
         [<Import("DiffieHellmanGroup", "node:crypto")>]
-        static member DiffieHellmanGroup(name: string) : DiffieHellmanGroup = jsNative
+        static member DiffieHellmanGroup: DiffieHellmanGroupConstructor = jsNative
 
         /// <summary>
         /// Creates a predefined <c>DiffieHellmanGroup</c> key exchange object. The
@@ -78155,1726 +85339,7 @@ module Crypto =
         /// <remarks>@since v10.12.0</remarks>
         /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
         [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback2)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback3)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback4)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAKeyPairKeyObjectOptions, callback: GenerateKeyPair.Callback5)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAPSSKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback6)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAPSSKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback7)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAPSSKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback8)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAPSSKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback9)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: RSAPSSKeyPairKeyObjectOptions, callback: GenerateKeyPair.Callback10)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: DSAKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback11)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: DSAKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback12)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: DSAKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback13)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: DSAKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback14)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: DSAKeyPairKeyObjectOptions, callback: GenerateKeyPair.Callback15)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ECKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback16)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ECKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback17)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ECKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback18)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ECKeyPairOptions<string, string>, callback: GenerateKeyPair.Callback19)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ECKeyPairKeyObjectOptions, callback: GenerateKeyPair.Callback20)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED25519KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback21)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED25519KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback22)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED25519KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback23)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED25519KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback24)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED25519KeyPairKeyObjectOptions option, callback: GenerateKeyPair.Callback25)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED448KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback26)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED448KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback27)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED448KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback28)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED448KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback29)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: ED448KeyPairKeyObjectOptions option, callback: GenerateKeyPair.Callback30)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X25519KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback31)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X25519KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback32)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X25519KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback33)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X25519KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback34)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X25519KeyPairKeyObjectOptions option, callback: GenerateKeyPair.Callback35)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X448KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback36)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X448KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback37)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X448KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback38)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X448KeyPairOptions<string, string>, callback: GenerateKeyPair.Callback39)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Generates a new asymmetric key pair of the given <c>type</c>. RSA, RSA-PSS, DSA, EC,
-        /// Ed25519, Ed448, X25519, X448, and DH are currently supported.
-        /// <br /><br />
-        /// If a <c>publicKeyEncoding</c> or <c>privateKeyEncoding</c> was specified, this function
-        /// behaves as if <c>keyObject.export()</c> had been called on its result. Otherwise,
-        /// the respective part of the key is returned as a <c>KeyObject</c>.
-        /// <br /><br />
-        /// It is recommended to encode public keys as <c>'spki'</c> and private keys as <c>'pkcs8'</c> with encryption for long-term storage:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPair,
-        /// } = await import('node:crypto');
-        ///
-        /// generateKeyPair('rsa', {
-        ///   modulusLength: 4096,
-        ///   publicKeyEncoding: {
-        ///     type: 'spki',
-        ///     format: 'pem',
-        ///   },
-        ///   privateKeyEncoding: {
-        ///     type: 'pkcs8',
-        ///     format: 'pem',
-        ///     cipher: 'aes-256-cbc',
-        ///     passphrase: 'top secret',
-        ///   },
-        /// }, (err, publicKey, privateKey) =&gt; {
-        ///   // Handle errors and use the generated key pair.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On completion, <c>callback</c> will be called with <c>err</c> set to <c>undefined</c> and <c>publicKey</c> / <c>privateKey</c> representing the generated key pair.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a <c>Promise</c> for an <c>Object</c> with <c>publicKey</c> and <c>privateKey</c> properties.
-        /// </summary>
-        /// <remarks>@since v10.12.0</remarks>
-        /// <param name="type">Must be <c>'rsa'</c>, <c>'rsa-pss'</c>, <c>'dsa'</c>, <c>'ec'</c>, <c>'ed25519'</c>, <c>'ed448'</c>, <c>'x25519'</c>, <c>'x448'</c>, or <c>'dh'</c>.</param>
-        [<Import("generateKeyPair", "node:crypto")>]
-        static member generateKeyPair
-            (``type``: string, options: X448KeyPairKeyObjectOptions option, callback: GenerateKeyPair.Callback40)
-            : unit =
-            jsNative
+        static member generateKeyPair: GenerateKeyPair = jsNative
 
         /// <summary>
         /// Calculates and returns the signature for <c>data</c> using the given private key and
@@ -87110,191 +92575,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.1.90</remarks>
         [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, family: float, callback: Lookup.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, options: LookupOneOptions, callback: Lookup.Callback2) : unit = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, options: LookupAllOptions, callback: Lookup.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, options: LookupOptions, callback: Lookup.Callback4) : unit = jsNative
-
-        /// <summary>
-        /// Resolves a host name (e.g. <c>'nodejs.org'</c>) into the first found A (IPv4) or
-        /// AAAA (IPv6) record. All <c>option</c> properties are optional. If <c>options</c> is an
-        /// integer, then it must be <c>4</c> or <c>6</c> – if <c>options</c> is <c>0</c> or not provided, then
-        /// IPv4 and IPv6 addresses are both returned if found.
-        /// <br /><br />
-        /// With the <c>all</c> option set to <c>true</c>, the arguments for <c>callback</c> change to <c>(err, addresses)</c>, with <c>addresses</c> being an array of objects with the
-        /// properties <c>address</c> and <c>family</c>.
-        /// <br /><br />
-        /// On error, <c>err</c> is an <c>Error</c> object, where <c>err.code</c> is the error code.
-        /// Keep in mind that <c>err.code</c> will be set to <c>'ENOTFOUND'</c> not only when
-        /// the host name does not exist but also when the lookup fails in other ways
-        /// such as no available file descriptors.
-        /// <br /><br />
-        /// <c>dns.lookup()</c> does not necessarily have anything to do with the DNS protocol.
-        /// The implementation uses an operating system facility that can associate names
-        /// with addresses and vice versa. This implementation can have subtle but
-        /// important consequences on the behavior of any Node.js program. Please take some
-        /// time to consult the <a href="https://nodejs.org/docs/latest-v22.x/api/dns.html#implementation-considerations">Implementation considerations section</a>
-        /// before using <c>dns.lookup()</c>.
-        /// <br /><br />
-        /// Example usage:
-        /// <code lang="js">
-        /// import dns from 'node:dns';
-        /// const options = {
-        ///   family: 6,
-        ///   hints: dns.ADDRCONFIG | dns.V4MAPPED,
-        /// };
-        /// dns.lookup('example.com', options, (err, address, family) =&gt;
-        ///   console.log('address: %j family: IPv%s', address, family));
-        /// // address: "2606:2800:220:1:248:1893:25c8:1946" family: IPv6
-        ///
-        /// // When options.all is true, the result will be an Array.
-        /// options.all = true;
-        /// dns.lookup('example.com', options, (err, addresses) =&gt;
-        ///   console.log('addresses: %j', addresses));
-        /// // addresses: [{"address":"2606:2800:220:1:248:1893:25c8:1946","family":6}]
-        /// </code>
-        /// <br /><br />
-        /// If this method is invoked as its <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#utilpromisifyoriginal">util.promisify()</a> ed
-        /// version, and <c>all</c> is not set to <c>true</c>, it returns a <c>Promise</c> for an <c>Object</c> with <c>address</c> and <c>family</c> properties.
-        /// </summary>
-        /// <remarks>@since v0.1.90</remarks>
-        [<Import("lookup", "node:dns")>]
-        static member lookup(hostname: string, callback: Lookup.Callback5) : unit = jsNative
+        static member lookup: Lookup = jsNative
 
         /// <summary>
         /// Resolves the given <c>address</c> and <c>port</c> into a host name and service using
@@ -87318,7 +92599,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.11.14</remarks>
         [<Import("lookupService", "node:dns")>]
-        static member lookupService(address: string, port: float, callback: LookupService.Callback) : unit = jsNative
+        static member lookupService: LookupService = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
@@ -87334,168 +92615,7 @@ module Dns =
         /// <param name="hostname">Host name to resolve.</param>
         /// <param name="rrtype">Resource record type.</param>
         [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, callback: Resolve.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: Resolve.Promisify.Rrtype, callback: Resolve.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback4) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback5) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback6) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback7) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback8) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback9) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback10) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a host name (e.g. <c>'nodejs.org'</c>) into an array
-        /// of the resource records. The <c>callback</c> function has arguments <c>(err, records)</c>. When successful, <c>records</c> will be an array of resource
-        /// records. The type and structure of individual results varies based on <c>rrtype</c>:
-        /// <br /><br />
-        /// &lt;omitted&gt;
-        /// <br /><br />
-        /// On error, <c>err</c> is an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error"><c>Error</c></a> object,
-        /// where <c>err.code</c> is one of the <c>DNS error codes</c>.
-        /// </summary>
-        /// <remarks>@since v0.1.27</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        /// <param name="rrtype">Resource record type.</param>
-        [<Import("resolve", "node:dns")>]
-        static member resolve(hostname: string, rrtype: string, callback: Resolve.Callback11) : unit = jsNative
+        static member resolve: Resolve = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
@@ -87504,27 +92624,7 @@ module Dns =
         /// <remarks>@since v0.1.16</remarks>
         /// <param name="hostname">Host name to resolve.</param>
         [<Import("resolve4", "node:dns")>]
-        static member resolve4(hostname: string, callback: Resolve4.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve4", "node:dns")>]
-        static member resolve4(hostname: string, options: ResolveWithTtlOptions, callback: Resolve4.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve a IPv4 addresses (<c>A</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv4 addresses (e.g.<c>['74.125.79.104', '74.125.79.105', '74.125.79.106']</c>).
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve4", "node:dns")>]
-        static member resolve4(hostname: string, options: ResolveOptions, callback: Resolve4.Callback3) : unit =
-            jsNative
+        static member resolve4: Resolve4 = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
@@ -87533,27 +92633,7 @@ module Dns =
         /// <remarks>@since v0.1.16</remarks>
         /// <param name="hostname">Host name to resolve.</param>
         [<Import("resolve6", "node:dns")>]
-        static member resolve6(hostname: string, callback: Resolve6.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv6 addresses.
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve6", "node:dns")>]
-        static member resolve6(hostname: string, options: ResolveWithTtlOptions, callback: Resolve6.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Uses the DNS protocol to resolve IPv6 addresses (<c>AAAA</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
-        /// will contain an array of IPv6 addresses.
-        /// </summary>
-        /// <remarks>@since v0.1.16</remarks>
-        /// <param name="hostname">Host name to resolve.</param>
-        [<Import("resolve6", "node:dns")>]
-        static member resolve6(hostname: string, options: ResolveOptions, callback: Resolve6.Callback3) : unit =
-            jsNative
+        static member resolve6: Resolve6 = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve <c>CNAME</c> records for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
@@ -87561,7 +92641,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.3.2</remarks>
         [<Import("resolveCname", "node:dns")>]
-        static member resolveCname(hostname: string, callback: ResolveCname.Callback) : unit = jsNative
+        static member resolveCname: ResolveCname = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve <c>CAA</c> records for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function
@@ -87570,7 +92650,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v15.0.0, v14.17.0</remarks>
         [<Import("resolveCaa", "node:dns")>]
-        static member resolveCaa(hostname: string, callback: ResolveCaa.Callback) : unit = jsNative
+        static member resolveCaa: ResolveCaa = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve mail exchange records (<c>MX</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
@@ -87578,7 +92658,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.1.27</remarks>
         [<Import("resolveMx", "node:dns")>]
-        static member resolveMx(hostname: string, callback: ResolveMx.Callback) : unit = jsNative
+        static member resolveMx: ResolveMx = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve regular expression-based records (<c>NAPTR</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will contain an array of
@@ -87603,7 +92683,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.9.12</remarks>
         [<Import("resolveNaptr", "node:dns")>]
-        static member resolveNaptr(hostname: string, callback: ResolveNaptr.Callback) : unit = jsNative
+        static member resolveNaptr: ResolveNaptr = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve name server records (<c>NS</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
@@ -87611,7 +92691,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.1.90</remarks>
         [<Import("resolveNs", "node:dns")>]
-        static member resolveNs(hostname: string, callback: ResolveNs.Callback) : unit = jsNative
+        static member resolveNs: ResolveNs = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve pointer records (<c>PTR</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
@@ -87619,7 +92699,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v6.0.0</remarks>
         [<Import("resolvePtr", "node:dns")>]
-        static member resolvePtr(hostname: string, callback: ResolvePtr.Callback) : unit = jsNative
+        static member resolvePtr: ResolvePtr = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve a start of authority record (<c>SOA</c> record) for
@@ -87647,7 +92727,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.11.10</remarks>
         [<Import("resolveSoa", "node:dns")>]
-        static member resolveSoa(hostname: string, callback: ResolveSoa.Callback) : unit = jsNative
+        static member resolveSoa: ResolveSoa = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve service records (<c>SRV</c> records) for the <c>hostname</c>. The <c>addresses</c> argument passed to the <c>callback</c> function will
@@ -87668,7 +92748,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.1.27</remarks>
         [<Import("resolveSrv", "node:dns")>]
-        static member resolveSrv(hostname: string, callback: ResolveSrv.Callback) : unit = jsNative
+        static member resolveSrv: ResolveSrv = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve certificate associations (<c>TLSA</c> records) for
@@ -87690,7 +92770,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v22.15.0</remarks>
         [<Import("resolveTlsa", "node:dns")>]
-        static member resolveTlsa(hostname: string, callback: ResolveTlsa.Callback) : unit = jsNative
+        static member resolveTlsa: ResolveTlsa = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve text queries (<c>TXT</c> records) for the <c>hostname</c>. The <c>records</c> argument passed to the <c>callback</c> function is a
@@ -87700,7 +92780,7 @@ module Dns =
         /// </summary>
         /// <remarks>@since v0.1.27</remarks>
         [<Import("resolveTxt", "node:dns")>]
-        static member resolveTxt(hostname: string, callback: ResolveTxt.Callback) : unit = jsNative
+        static member resolveTxt: ResolveTxt = jsNative
 
         /// <summary>
         /// Uses the DNS protocol to resolve all records (also known as <c>ANY</c> or <c>*</c> query).
@@ -87732,7 +92812,7 @@ module Dns =
         /// <a href="https://tools.ietf.org/html/rfc8482">RFC 8482</a>.
         /// </summary>
         [<Import("resolveAny", "node:dns")>]
-        static member resolveAny(hostname: string, callback: ResolveAny.Callback) : unit = jsNative
+        static member resolveAny: ResolveAny = jsNative
 
         /// <summary>
         /// Performs a reverse DNS query that resolves an IPv4 or IPv6 address to an
@@ -95837,24 +100917,52 @@ module Fs =
         [<Emit("$0[Symbol.hasInstance]($1...)")>]
         abstract SymbolHasInstance: value: obj -> bool
 
+        /// <summary>
+        /// Synchronous stat(2) - Get file status.
+        /// </summary>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * ?options: unit -> Stats
 
+        /// <summary>
+        /// Synchronous stat(2) - Get file status.
+        /// </summary>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * ?options: Fs.StatSyncFn.Options -> Stats option
 
+        /// <summary>
+        /// Synchronous stat(2) - Get file status.
+        /// </summary>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * options: Fs.StatSyncFn.Options2 -> BigIntStats option
 
+        /// <summary>
+        /// Synchronous stat(2) - Get file status.
+        /// </summary>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * ?options: Fs.StatSyncFn.Options3 -> Stats
 
+        /// <summary>
+        /// Synchronous stat(2) - Get file status.
+        /// </summary>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * options: Fs.StatSyncFn.Options4 -> BigIntStats
 
+        /// <summary>
+        /// Synchronous stat(2) - Get file status.
+        /// </summary>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * options: Fs.StatSyncFn.Options5 -> U2<BigIntStats, Stats>
 
+        /// <summary>
+        /// Synchronous stat(2) - Get file status.
+        /// </summary>
+        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Emit("$0($1...)")>]
         abstract Invoke: path: PathLike * ?options: StatSyncOptions -> U2<BigIntStats, Stats> option
 
@@ -97657,7 +102765,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.0.2</remarks>
         [<Import("rename", "node:fs")>]
-        static member rename(oldPath: PathLike, newPath: PathLike, callback: NoParamCallback) : unit = jsNative
+        static member rename: Rename = jsNative
 
         /// <summary>
         /// Renames the file from <c>oldPath</c> to <c>newPath</c>. Returns <c>undefined</c>.
@@ -97690,30 +102798,7 @@ module Fs =
         /// <remarks>@since v0.8.6</remarks>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("truncate", "node:fs")>]
-        static member truncate(path: PathLike, len: float option, callback: NoParamCallback) : unit = jsNative
-
-        /// <summary>
-        /// Truncates the file. No arguments other than a possible exception are
-        /// given to the completion callback. A file descriptor can also be passed as the
-        /// first argument. In this case, <c>fs.ftruncate()</c> is called.
-        /// <code lang="js">
-        /// import { truncate } from 'node:fs';
-        /// // Assuming that 'path/file.txt' is a regular file.
-        /// truncate('path/file.txt', (err) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log('path/file.txt was truncated');
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Passing a file descriptor is deprecated and may result in an error being thrown
-        /// in the future.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/truncate.2.html"><c>truncate(2)</c></a> documentation for more details.
-        /// Asynchronous truncate(2) - Truncate a file to a specified length.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("truncate", "node:fs")>]
-        static member truncate(path: PathLike, callback: NoParamCallback) : unit = jsNative
+        static member truncate: Truncate = jsNative
 
         /// <summary>
         /// Truncates the file. Returns <c>undefined</c>. A file descriptor can also be
@@ -97770,52 +102855,7 @@ module Fs =
         /// <remarks>@since v0.8.6</remarks>
         /// <param name="fd">A file descriptor.</param>
         [<Import("ftruncate", "node:fs")>]
-        static member ftruncate(fd: float, len: float option, callback: NoParamCallback) : unit = jsNative
-
-        /// <summary>
-        /// Truncates the file descriptor. No arguments other than a possible exception are
-        /// given to the completion callback.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/ftruncate.2.html"><c>ftruncate(2)</c></a> documentation for more detail.
-        /// <br /><br />
-        /// If the file referred to by the file descriptor was larger than <c>len</c> bytes, only
-        /// the first <c>len</c> bytes will be retained in the file.
-        /// <br /><br />
-        /// For example, the following program retains only the first four bytes of the
-        /// file:
-        /// <code lang="js">
-        /// import { open, close, ftruncate } from 'node:fs';
-        ///
-        /// function closeFd(fd) {
-        ///   close(fd, (err) =&gt; {
-        ///     if (err) throw err;
-        ///   });
-        /// }
-        ///
-        /// open('temp.txt', 'r+', (err, fd) =&gt; {
-        ///   if (err) throw err;
-        ///
-        ///   try {
-        ///     ftruncate(fd, 4, (err) =&gt; {
-        ///       closeFd(fd);
-        ///       if (err) throw err;
-        ///     });
-        ///   } catch (err) {
-        ///     closeFd(fd);
-        ///     if (err) throw err;
-        ///   }
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// If the file previously was shorter than <c>len</c> bytes, it is extended, and the
-        /// extended part is filled with null bytes (<c>'\0'</c>):
-        /// <br /><br />
-        /// If <c>len</c> is negative then <c>0</c> will be used.
-        /// Asynchronous ftruncate(2) - Truncate a file to a specified length.
-        /// </summary>
-        /// <param name="fd">A file descriptor.</param>
-        [<Import("ftruncate", "node:fs")>]
-        static member ftruncate(fd: float, callback: NoParamCallback) : unit = jsNative
+        static member ftruncate: Ftruncate = jsNative
 
         /// <summary>
         /// Truncates the file descriptor. Returns <c>undefined</c>.
@@ -97835,7 +102875,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.1.97</remarks>
         [<Import("chown", "node:fs")>]
-        static member chown(path: PathLike, uid: float, gid: float, callback: NoParamCallback) : unit = jsNative
+        static member chown: Chown = jsNative
 
         /// <summary>
         /// Synchronously changes owner and group of a file. Returns <c>undefined</c>.
@@ -97855,7 +102895,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.4.7</remarks>
         [<Import("fchown", "node:fs")>]
-        static member fchown(fd: float, uid: float, gid: float, callback: NoParamCallback) : unit = jsNative
+        static member fchown: Fchown = jsNative
 
         /// <summary>
         /// Sets the owner of the file. Returns <c>undefined</c>.
@@ -97875,7 +102915,7 @@ module Fs =
         /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lchown.2.html"><c>lchown(2)</c></a> documentation for more detail.
         /// </summary>
         [<Import("lchown", "node:fs")>]
-        static member lchown(path: PathLike, uid: float, gid: float, callback: NoParamCallback) : unit = jsNative
+        static member lchown: Lchown = jsNative
 
         /// <summary>
         /// Set the owner for the path. Returns <c>undefined</c>.
@@ -97897,8 +102937,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v14.5.0, v12.19.0</remarks>
         [<Import("lutimes", "node:fs")>]
-        static member lutimes(path: PathLike, atime: TimeLike, mtime: TimeLike, callback: NoParamCallback) : unit =
-            jsNative
+        static member lutimes: Lutimes = jsNative
 
         /// <summary>
         /// Change the file system timestamps of the symbolic link referenced by <c>path</c>.
@@ -97925,7 +102964,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.1.30</remarks>
         [<Import("chmod", "node:fs")>]
-        static member chmod(path: PathLike, mode: Mode, callback: NoParamCallback) : unit = jsNative
+        static member chmod: Chmod = jsNative
 
         /// <summary>
         /// For detailed information, see the documentation of the asynchronous version of
@@ -97945,7 +102984,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.4.7</remarks>
         [<Import("fchmod", "node:fs")>]
-        static member fchmod(fd: float, mode: Mode, callback: NoParamCallback) : unit = jsNative
+        static member fchmod: Fchmod = jsNative
 
         /// <summary>
         /// Sets the permissions on the file. Returns <c>undefined</c>.
@@ -97967,7 +103006,7 @@ module Fs =
         /// <remarks>@deprecated Since v0.4.7</remarks>
         /// <remarks>@deprecated</remarks>
         [<Import("lchmod", "node:fs")>]
-        static member lchmod(path: PathLike, mode: Mode, callback: NoParamCallback) : unit = jsNative
+        static member lchmod: Lchmod = jsNative
 
         /// <summary>
         /// Changes the permissions on a symbolic link. Returns <c>undefined</c>.
@@ -98063,311 +103102,14 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.0.2</remarks>
         [<Import("stat", "node:fs")>]
-        static member stat(path: PathLike, callback: Stat.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/stat.2.html"><c>stat(2)</c></a>. The callback gets two arguments <c>(err, stats)</c> where<c>stats</c> is an <c>fs.Stats</c> object.
-        /// <br /><br />
-        /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
-        /// <br /><br />
-        /// stat follows symbolic links. Use lstat to look at the
-        /// links themselves.
-        /// <br /><br />
-        /// Using <c>fs.stat()</c> to check for the existence of a file before calling<c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c> is not recommended.
-        /// Instead, user code should open/read/write the file directly and handle the
-        /// error raised if the file is not available.
-        /// <br /><br />
-        /// To check if a file exists without manipulating it afterwards, access is recommended.
-        /// <br /><br />
-        /// For example, given the following directory structure:
-        /// <code lang="text">
-        /// - txtDir
-        /// -- file.txt
-        /// - app.js
-        /// </code>
-        /// <br /><br />
-        /// The next program will check for the stats of the given paths:
-        /// <code lang="js">
-        /// import { stat } from 'node:fs';
-        ///
-        /// const pathsToCheck = ['./txtDir', './txtDir/file.txt'];
-        ///
-        /// for (let i = 0; i &lt; pathsToCheck.length; i++) {
-        ///   stat(pathsToCheck[i], (err, stats) =&gt; {
-        ///     console.log(stats.isDirectory());
-        ///     console.log(stats);
-        ///   });
-        /// }
-        /// </code>
-        /// <br /><br />
-        /// The resulting output will resemble:
-        /// <code lang="console">
-        /// true
-        /// Stats {
-        ///   dev: 16777220,
-        ///   mode: 16877,
-        ///   nlink: 3,
-        ///   uid: 501,
-        ///   gid: 20,
-        ///   rdev: 0,
-        ///   blksize: 4096,
-        ///   ino: 14214262,
-        ///   size: 96,
-        ///   blocks: 0,
-        ///   atimeMs: 1561174653071.963,
-        ///   mtimeMs: 1561174614583.3518,
-        ///   ctimeMs: 1561174626623.5366,
-        ///   birthtimeMs: 1561174126937.2893,
-        ///   atime: 2019-06-22T03:37:33.072Z,
-        ///   mtime: 2019-06-22T03:36:54.583Z,
-        ///   ctime: 2019-06-22T03:37:06.624Z,
-        ///   birthtime: 2019-06-22T03:28:46.937Z
-        /// }
-        /// false
-        /// Stats {
-        ///   dev: 16777220,
-        ///   mode: 33188,
-        ///   nlink: 1,
-        ///   uid: 501,
-        ///   gid: 20,
-        ///   rdev: 0,
-        ///   blksize: 4096,
-        ///   ino: 14214074,
-        ///   size: 8,
-        ///   blocks: 8,
-        ///   atimeMs: 1561174616618.8555,
-        ///   mtimeMs: 1561174614584,
-        ///   ctimeMs: 1561174614583.8145,
-        ///   birthtimeMs: 1561174007710.7478,
-        ///   atime: 2019-06-22T03:36:56.619Z,
-        ///   mtime: 2019-06-22T03:36:54.584Z,
-        ///   ctime: 2019-06-22T03:36:54.584Z,
-        ///   birthtime: 2019-06-22T03:26:47.711Z
-        /// }
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
-        [<Import("stat", "node:fs")>]
-        static member stat(path: PathLike, options: Stat.Options option, callback: Stat.Callback2) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/stat.2.html"><c>stat(2)</c></a>. The callback gets two arguments <c>(err, stats)</c> where<c>stats</c> is an <c>fs.Stats</c> object.
-        /// <br /><br />
-        /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
-        /// <br /><br />
-        /// stat follows symbolic links. Use lstat to look at the
-        /// links themselves.
-        /// <br /><br />
-        /// Using <c>fs.stat()</c> to check for the existence of a file before calling<c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c> is not recommended.
-        /// Instead, user code should open/read/write the file directly and handle the
-        /// error raised if the file is not available.
-        /// <br /><br />
-        /// To check if a file exists without manipulating it afterwards, access is recommended.
-        /// <br /><br />
-        /// For example, given the following directory structure:
-        /// <code lang="text">
-        /// - txtDir
-        /// -- file.txt
-        /// - app.js
-        /// </code>
-        /// <br /><br />
-        /// The next program will check for the stats of the given paths:
-        /// <code lang="js">
-        /// import { stat } from 'node:fs';
-        ///
-        /// const pathsToCheck = ['./txtDir', './txtDir/file.txt'];
-        ///
-        /// for (let i = 0; i &lt; pathsToCheck.length; i++) {
-        ///   stat(pathsToCheck[i], (err, stats) =&gt; {
-        ///     console.log(stats.isDirectory());
-        ///     console.log(stats);
-        ///   });
-        /// }
-        /// </code>
-        /// <br /><br />
-        /// The resulting output will resemble:
-        /// <code lang="console">
-        /// true
-        /// Stats {
-        ///   dev: 16777220,
-        ///   mode: 16877,
-        ///   nlink: 3,
-        ///   uid: 501,
-        ///   gid: 20,
-        ///   rdev: 0,
-        ///   blksize: 4096,
-        ///   ino: 14214262,
-        ///   size: 96,
-        ///   blocks: 0,
-        ///   atimeMs: 1561174653071.963,
-        ///   mtimeMs: 1561174614583.3518,
-        ///   ctimeMs: 1561174626623.5366,
-        ///   birthtimeMs: 1561174126937.2893,
-        ///   atime: 2019-06-22T03:37:33.072Z,
-        ///   mtime: 2019-06-22T03:36:54.583Z,
-        ///   ctime: 2019-06-22T03:37:06.624Z,
-        ///   birthtime: 2019-06-22T03:28:46.937Z
-        /// }
-        /// false
-        /// Stats {
-        ///   dev: 16777220,
-        ///   mode: 33188,
-        ///   nlink: 1,
-        ///   uid: 501,
-        ///   gid: 20,
-        ///   rdev: 0,
-        ///   blksize: 4096,
-        ///   ino: 14214074,
-        ///   size: 8,
-        ///   blocks: 8,
-        ///   atimeMs: 1561174616618.8555,
-        ///   mtimeMs: 1561174614584,
-        ///   ctimeMs: 1561174614583.8145,
-        ///   birthtimeMs: 1561174007710.7478,
-        ///   atime: 2019-06-22T03:36:56.619Z,
-        ///   mtime: 2019-06-22T03:36:54.584Z,
-        ///   ctime: 2019-06-22T03:36:54.584Z,
-        ///   birthtime: 2019-06-22T03:26:47.711Z
-        /// }
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
-        [<Import("stat", "node:fs")>]
-        static member stat(path: PathLike, options: Stat.Options2, callback: Stat.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/stat.2.html"><c>stat(2)</c></a>. The callback gets two arguments <c>(err, stats)</c> where<c>stats</c> is an <c>fs.Stats</c> object.
-        /// <br /><br />
-        /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
-        /// <br /><br />
-        /// stat follows symbolic links. Use lstat to look at the
-        /// links themselves.
-        /// <br /><br />
-        /// Using <c>fs.stat()</c> to check for the existence of a file before calling<c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c> is not recommended.
-        /// Instead, user code should open/read/write the file directly and handle the
-        /// error raised if the file is not available.
-        /// <br /><br />
-        /// To check if a file exists without manipulating it afterwards, access is recommended.
-        /// <br /><br />
-        /// For example, given the following directory structure:
-        /// <code lang="text">
-        /// - txtDir
-        /// -- file.txt
-        /// - app.js
-        /// </code>
-        /// <br /><br />
-        /// The next program will check for the stats of the given paths:
-        /// <code lang="js">
-        /// import { stat } from 'node:fs';
-        ///
-        /// const pathsToCheck = ['./txtDir', './txtDir/file.txt'];
-        ///
-        /// for (let i = 0; i &lt; pathsToCheck.length; i++) {
-        ///   stat(pathsToCheck[i], (err, stats) =&gt; {
-        ///     console.log(stats.isDirectory());
-        ///     console.log(stats);
-        ///   });
-        /// }
-        /// </code>
-        /// <br /><br />
-        /// The resulting output will resemble:
-        /// <code lang="console">
-        /// true
-        /// Stats {
-        ///   dev: 16777220,
-        ///   mode: 16877,
-        ///   nlink: 3,
-        ///   uid: 501,
-        ///   gid: 20,
-        ///   rdev: 0,
-        ///   blksize: 4096,
-        ///   ino: 14214262,
-        ///   size: 96,
-        ///   blocks: 0,
-        ///   atimeMs: 1561174653071.963,
-        ///   mtimeMs: 1561174614583.3518,
-        ///   ctimeMs: 1561174626623.5366,
-        ///   birthtimeMs: 1561174126937.2893,
-        ///   atime: 2019-06-22T03:37:33.072Z,
-        ///   mtime: 2019-06-22T03:36:54.583Z,
-        ///   ctime: 2019-06-22T03:37:06.624Z,
-        ///   birthtime: 2019-06-22T03:28:46.937Z
-        /// }
-        /// false
-        /// Stats {
-        ///   dev: 16777220,
-        ///   mode: 33188,
-        ///   nlink: 1,
-        ///   uid: 501,
-        ///   gid: 20,
-        ///   rdev: 0,
-        ///   blksize: 4096,
-        ///   ino: 14214074,
-        ///   size: 8,
-        ///   blocks: 8,
-        ///   atimeMs: 1561174616618.8555,
-        ///   mtimeMs: 1561174614584,
-        ///   ctimeMs: 1561174614583.8145,
-        ///   birthtimeMs: 1561174007710.7478,
-        ///   atime: 2019-06-22T03:36:56.619Z,
-        ///   mtime: 2019-06-22T03:36:54.584Z,
-        ///   ctime: 2019-06-22T03:36:54.584Z,
-        ///   birthtime: 2019-06-22T03:26:47.711Z
-        /// }
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
-        [<Import("stat", "node:fs")>]
-        static member stat(path: PathLike, options: StatOptions option, callback: Stat.Callback4) : unit = jsNative
+        static member stat: Stat = jsNative
 
         /// <summary>
         /// Synchronous stat(2) - Get file status.
         /// </summary>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("statSync", "node:fs")>]
-        static member statSync(path: PathLike, ?options: unit) : Stats = jsNative
-
-        /// <summary>
-        /// Synchronous stat(2) - Get file status.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("statSync", "node:fs")>]
-        static member statSync(path: PathLike, ?options: Fs.StatSyncFn.Options) : Stats option = jsNative
-
-        /// <summary>
-        /// Synchronous stat(2) - Get file status.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("statSync", "node:fs")>]
-        static member statSync(path: PathLike, options: Fs.StatSyncFn.Options2) : BigIntStats option = jsNative
-
-        /// <summary>
-        /// Synchronous stat(2) - Get file status.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("statSync", "node:fs")>]
-        static member statSync(path: PathLike, ?options: Fs.StatSyncFn.Options3) : Stats = jsNative
-
-        /// <summary>
-        /// Synchronous stat(2) - Get file status.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("statSync", "node:fs")>]
-        static member statSync(path: PathLike, options: Fs.StatSyncFn.Options4) : BigIntStats = jsNative
-
-        /// <summary>
-        /// Synchronous stat(2) - Get file status.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("statSync", "node:fs")>]
-        static member statSync(path: PathLike, options: Fs.StatSyncFn.Options5) : U2<BigIntStats, Stats> = jsNative
-
-        /// <summary>
-        /// Synchronous stat(2) - Get file status.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("statSync", "node:fs")>]
-        static member statSync(path: PathLike, ?options: StatSyncOptions) : U2<BigIntStats, Stats> option = jsNative
+        static member statSync: StatSyncFn = jsNative
 
         /// <summary>
         /// Invokes the callback with the <c>fs.Stats</c> for the file descriptor.
@@ -98376,34 +103118,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.1.95</remarks>
         [<Import("fstat", "node:fs")>]
-        static member fstat(fd: float, callback: Fstat.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Invokes the callback with the <c>fs.Stats</c> for the file descriptor.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fstat.2.html"><c>fstat(2)</c></a> documentation for more detail.
-        /// </summary>
-        /// <remarks>@since v0.1.95</remarks>
-        [<Import("fstat", "node:fs")>]
-        static member fstat(fd: float, options: Fstat.Options option, callback: Fstat.Callback2) : unit = jsNative
-
-        /// <summary>
-        /// Invokes the callback with the <c>fs.Stats</c> for the file descriptor.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fstat.2.html"><c>fstat(2)</c></a> documentation for more detail.
-        /// </summary>
-        /// <remarks>@since v0.1.95</remarks>
-        [<Import("fstat", "node:fs")>]
-        static member fstat(fd: float, options: Fstat.Options2, callback: Fstat.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Invokes the callback with the <c>fs.Stats</c> for the file descriptor.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/fstat.2.html"><c>fstat(2)</c></a> documentation for more detail.
-        /// </summary>
-        /// <remarks>@since v0.1.95</remarks>
-        [<Import("fstat", "node:fs")>]
-        static member fstat(fd: float, options: StatOptions option, callback: Fstat.Callback4) : unit = jsNative
+        static member fstat: Fstat = jsNative
 
         /// <summary>
         /// Retrieves the <c>fs.Stats</c> for the file descriptor.
@@ -98441,40 +103156,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.1.30</remarks>
         [<Import("lstat", "node:fs")>]
-        static member lstat(path: PathLike, callback: Lstat.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Retrieves the <c>fs.Stats</c> for the symbolic link referred to by the path.
-        /// The callback gets two arguments <c>(err, stats)</c> where <c>stats</c> is a <c>fs.Stats</c> object. <c>lstat()</c> is identical to <c>stat()</c>, except that if <c>path</c> is a symbolic
-        /// link, then the link itself is stat-ed, not the file that it refers to.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lstat.2.html"><c>lstat(2)</c></a> documentation for more details.
-        /// </summary>
-        /// <remarks>@since v0.1.30</remarks>
-        [<Import("lstat", "node:fs")>]
-        static member lstat(path: PathLike, options: Lstat.Options option, callback: Lstat.Callback2) : unit = jsNative
-
-        /// <summary>
-        /// Retrieves the <c>fs.Stats</c> for the symbolic link referred to by the path.
-        /// The callback gets two arguments <c>(err, stats)</c> where <c>stats</c> is a <c>fs.Stats</c> object. <c>lstat()</c> is identical to <c>stat()</c>, except that if <c>path</c> is a symbolic
-        /// link, then the link itself is stat-ed, not the file that it refers to.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lstat.2.html"><c>lstat(2)</c></a> documentation for more details.
-        /// </summary>
-        /// <remarks>@since v0.1.30</remarks>
-        [<Import("lstat", "node:fs")>]
-        static member lstat(path: PathLike, options: Lstat.Options2, callback: Lstat.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Retrieves the <c>fs.Stats</c> for the symbolic link referred to by the path.
-        /// The callback gets two arguments <c>(err, stats)</c> where <c>stats</c> is a <c>fs.Stats</c> object. <c>lstat()</c> is identical to <c>stat()</c>, except that if <c>path</c> is a symbolic
-        /// link, then the link itself is stat-ed, not the file that it refers to.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/lstat.2.html"><c>lstat(2)</c></a> documentation for more details.
-        /// </summary>
-        /// <remarks>@since v0.1.30</remarks>
-        [<Import("lstat", "node:fs")>]
-        static member lstat(path: PathLike, options: StatOptions option, callback: Lstat.Callback4) : unit = jsNative
+        static member lstat: Lstat = jsNative
 
         /// <summary>
         /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
@@ -98485,42 +103167,7 @@ module Fs =
         /// <remarks>@since v19.6.0, v18.15.0</remarks>
         /// <param name="path">A path to an existing file or directory on the file system to be queried.</param>
         [<Import("statfs", "node:fs")>]
-        static member statfs(path: PathLike, callback: Statfs.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
-        /// contains <c>path</c>. The callback gets two arguments <c>(err, stats)</c> where <c>stats</c>is an <c>fs.StatFs</c> object.
-        /// <br /><br />
-        /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
-        /// </summary>
-        /// <remarks>@since v19.6.0, v18.15.0</remarks>
-        /// <param name="path">A path to an existing file or directory on the file system to be queried.</param>
-        [<Import("statfs", "node:fs")>]
-        static member statfs(path: PathLike, options: Statfs.Options option, callback: Statfs.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
-        /// contains <c>path</c>. The callback gets two arguments <c>(err, stats)</c> where <c>stats</c>is an <c>fs.StatFs</c> object.
-        /// <br /><br />
-        /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
-        /// </summary>
-        /// <remarks>@since v19.6.0, v18.15.0</remarks>
-        /// <param name="path">A path to an existing file or directory on the file system to be queried.</param>
-        [<Import("statfs", "node:fs")>]
-        static member statfs(path: PathLike, options: Statfs.Options2, callback: Statfs.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
-        /// contains <c>path</c>. The callback gets two arguments <c>(err, stats)</c> where <c>stats</c>is an <c>fs.StatFs</c> object.
-        /// <br /><br />
-        /// In case of an error, the <c>err.code</c> will be one of <c>Common System Errors</c>.
-        /// </summary>
-        /// <remarks>@since v19.6.0, v18.15.0</remarks>
-        /// <param name="path">A path to an existing file or directory on the file system to be queried.</param>
-        [<Import("statfs", "node:fs")>]
-        static member statfs(path: PathLike, options: StatFsOptions option, callback: Statfs.Callback4) : unit =
-            jsNative
+        static member statfs: Statfs = jsNative
 
         /// <summary>
         /// Synchronous <a href="http://man7.org/linux/man-pages/man2/statfs.2.html"><c>statfs(2)</c></a>. Returns information about the mounted file system which
@@ -98560,49 +103207,7 @@ module Fs =
         /// </summary>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("lstatSync", "node:fs")>]
-        static member lstatSync(path: PathLike, ?options: unit) : Stats = jsNative
-
-        /// <summary>
-        /// Synchronous lstat(2) - Get file status. Does not dereference symbolic links.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("lstatSync", "node:fs")>]
-        static member lstatSync(path: PathLike, ?options: Fs.StatSyncFn.Options) : Stats option = jsNative
-
-        /// <summary>
-        /// Synchronous lstat(2) - Get file status. Does not dereference symbolic links.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("lstatSync", "node:fs")>]
-        static member lstatSync(path: PathLike, options: Fs.StatSyncFn.Options2) : BigIntStats option = jsNative
-
-        /// <summary>
-        /// Synchronous lstat(2) - Get file status. Does not dereference symbolic links.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("lstatSync", "node:fs")>]
-        static member lstatSync(path: PathLike, ?options: Fs.StatSyncFn.Options3) : Stats = jsNative
-
-        /// <summary>
-        /// Synchronous lstat(2) - Get file status. Does not dereference symbolic links.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("lstatSync", "node:fs")>]
-        static member lstatSync(path: PathLike, options: Fs.StatSyncFn.Options4) : BigIntStats = jsNative
-
-        /// <summary>
-        /// Synchronous lstat(2) - Get file status. Does not dereference symbolic links.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("lstatSync", "node:fs")>]
-        static member lstatSync(path: PathLike, options: Fs.StatSyncFn.Options5) : U2<BigIntStats, Stats> = jsNative
-
-        /// <summary>
-        /// Synchronous lstat(2) - Get file status. Does not dereference symbolic links.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("lstatSync", "node:fs")>]
-        static member lstatSync(path: PathLike, ?options: StatSyncOptions) : U2<BigIntStats, Stats> option = jsNative
+        static member lstatSync: StatSyncFn = jsNative
 
         /// <summary>
         /// Creates a new link from the <c>existingPath</c> to the <c>newPath</c>. See the POSIX <a href="http://man7.org/linux/man-pages/man2/link.2.html"><c>link(2)</c></a> documentation for more detail. No arguments other than
@@ -98611,7 +103216,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
         [<Import("link", "node:fs")>]
-        static member link(existingPath: PathLike, newPath: PathLike, callback: NoParamCallback) : unit = jsNative
+        static member link: Link = jsNative
 
         /// <summary>
         /// Creates a new link from the <c>existingPath</c> to the <c>newPath</c>. See the POSIX <a href="http://man7.org/linux/man-pages/man2/link.2.html"><c>link(2)</c></a> documentation for more detail. Returns <c>undefined</c>.
@@ -98654,45 +103259,7 @@ module Fs =
         /// <param name="target">A path to an existing file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="path">A path to the new symlink. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("symlink", "node:fs")>]
-        static member symlink
-            (target: PathLike, path: PathLike, ``type``: Symlink.Type option, callback: NoParamCallback)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Creates the link called <c>path</c> pointing to <c>target</c>. No arguments other than a
-        /// possible exception are given to the completion callback.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/symlink.2.html"><c>symlink(2)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The <c>type</c> argument is only available on Windows and ignored on other platforms.
-        /// It can be set to <c>'dir'</c>, <c>'file'</c>, or <c>'junction'</c>. If the <c>type</c> argument is
-        /// not a string, Node.js will autodetect <c>target</c> type and use <c>'file'</c> or <c>'dir'</c>.
-        /// If the <c>target</c> does not exist, <c>'file'</c> will be used. Windows junction points
-        /// require the destination path to be absolute. When using <c>'junction'</c>, the<c>target</c> argument will automatically be normalized to absolute path. Junction
-        /// points on NTFS volumes can only point to directories.
-        /// <br /><br />
-        /// Relative targets are relative to the link's parent directory.
-        /// <code lang="js">
-        /// import { symlink } from 'node:fs';
-        ///
-        /// symlink('./mew', './mewtwo', callback);
-        /// </code>
-        /// <br /><br />
-        /// The above example creates a symbolic link <c>mewtwo</c> which points to <c>mew</c> in the
-        /// same directory:
-        /// <code lang="bash">
-        /// $ tree .
-        /// .
-        /// ├── mew
-        /// └── mewtwo -&gt; ./mew
-        /// </code>
-        /// Asynchronous symlink(2) - Create a new symbolic link to an existing file.
-        /// </summary>
-        /// <param name="target">A path to an existing file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="path">A path to the new symlink. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("symlink", "node:fs")>]
-        static member symlink(target: PathLike, path: PathLike, callback: NoParamCallback) : unit = jsNative
+        static member symlink: Symlink = jsNative
 
         /// <summary>
         /// Returns <c>undefined</c>.
@@ -98717,69 +103284,13 @@ module Fs =
         /// Asynchronous readlink(2) - read value of a symbolic link.
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
-        [<Import("readlink", "node:fs")>]
-        static member readlink(path: PathLike, options: EncodingOption, callback: Readlink.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Reads the contents of the symbolic link referred to by <c>path</c>. The callback gets
-        /// two arguments <c>(err, linkString)</c>.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/readlink.2.html"><c>readlink(2)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the link path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the link path returned will be passed as a <c>Buffer</c> object.
-        /// Asynchronous readlink(2) - read value of a symbolic link.
-        /// </summary>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("readlink", "node:fs")>]
-        static member readlink(path: PathLike, options: BufferEncodingOption, callback: Readlink.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Reads the contents of the symbolic link referred to by <c>path</c>. The callback gets
-        /// two arguments <c>(err, linkString)</c>.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/readlink.2.html"><c>readlink(2)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the link path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the link path returned will be passed as a <c>Buffer</c> object.
-        /// Asynchronous readlink(2) - read value of a symbolic link.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("readlink", "node:fs")>]
-        static member readlink(path: PathLike, options: EncodingOption, callback: Readlink.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Reads the contents of the symbolic link referred to by <c>path</c>. The callback gets
-        /// two arguments <c>(err, linkString)</c>.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/readlink.2.html"><c>readlink(2)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the link path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the link path returned will be passed as a <c>Buffer</c> object.
-        /// Asynchronous readlink(2) - read value of a symbolic link.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("readlink", "node:fs")>]
-        static member readlink(path: PathLike, callback: Readlink.Callback4) : unit = jsNative
+        static member readlink: Readlink = jsNative
 
         /// <summary>
         /// Returns the symbolic link's string value.
@@ -98841,111 +103352,13 @@ module Fs =
         /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
-        [<Import("realpath", "node:fs")>]
-        static member realpath(path: PathLike, options: EncodingOption, callback: Realpath.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronously computes the canonical pathname by resolving <c>.</c>, <c>..</c>, and
-        /// symbolic links.
-        /// <br /><br />
-        /// A canonical pathname is not necessarily unique. Hard links and bind mounts can
-        /// expose a file system entity through many pathnames.
-        /// <br /><br />
-        /// This function behaves like <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>, with some exceptions:
-        /// <br /><br />
-        /// 1. No case conversion is performed on case-insensitive file systems.
-        /// 2. The maximum number of symbolic links is platform-independent and generally
-        /// (much) higher than what the native <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a> implementation supports.
-        /// <br /><br />
-        /// The <c>callback</c> gets two arguments <c>(err, resolvedPath)</c>. May use <c>process.cwd</c> to resolve relative paths.
-        /// <br /><br />
-        /// Only paths that can be converted to UTF8 strings are supported.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the path returned will be passed as a <c>Buffer</c> object.
-        /// <br /><br />
-        /// If <c>path</c> resolves to a socket or a pipe, the function will return a system
-        /// dependent name for that object.
-        /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
-        /// </summary>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("realpath", "node:fs")>]
-        static member realpath(path: PathLike, options: BufferEncodingOption, callback: Realpath.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronously computes the canonical pathname by resolving <c>.</c>, <c>..</c>, and
-        /// symbolic links.
-        /// <br /><br />
-        /// A canonical pathname is not necessarily unique. Hard links and bind mounts can
-        /// expose a file system entity through many pathnames.
-        /// <br /><br />
-        /// This function behaves like <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>, with some exceptions:
-        /// <br /><br />
-        /// 1. No case conversion is performed on case-insensitive file systems.
-        /// 2. The maximum number of symbolic links is platform-independent and generally
-        /// (much) higher than what the native <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a> implementation supports.
-        /// <br /><br />
-        /// The <c>callback</c> gets two arguments <c>(err, resolvedPath)</c>. May use <c>process.cwd</c> to resolve relative paths.
-        /// <br /><br />
-        /// Only paths that can be converted to UTF8 strings are supported.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the path returned will be passed as a <c>Buffer</c> object.
-        /// <br /><br />
-        /// If <c>path</c> resolves to a socket or a pipe, the function will return a system
-        /// dependent name for that object.
-        /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("realpath", "node:fs")>]
-        static member realpath(path: PathLike, options: EncodingOption, callback: Realpath.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronously computes the canonical pathname by resolving <c>.</c>, <c>..</c>, and
-        /// symbolic links.
-        /// <br /><br />
-        /// A canonical pathname is not necessarily unique. Hard links and bind mounts can
-        /// expose a file system entity through many pathnames.
-        /// <br /><br />
-        /// This function behaves like <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a>, with some exceptions:
-        /// <br /><br />
-        /// 1. No case conversion is performed on case-insensitive file systems.
-        /// 2. The maximum number of symbolic links is platform-independent and generally
-        /// (much) higher than what the native <a href="http://man7.org/linux/man-pages/man3/realpath.3.html"><c>realpath(3)</c></a> implementation supports.
-        /// <br /><br />
-        /// The <c>callback</c> gets two arguments <c>(err, resolvedPath)</c>. May use <c>process.cwd</c> to resolve relative paths.
-        /// <br /><br />
-        /// Only paths that can be converted to UTF8 strings are supported.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the path passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the path returned will be passed as a <c>Buffer</c> object.
-        /// <br /><br />
-        /// If <c>path</c> resolves to a socket or a pipe, the function will return a system
-        /// dependent name for that object.
-        /// Asynchronous realpath(3) - return the canonicalized absolute pathname.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("realpath", "node:fs")>]
-        static member realpath(path: PathLike, callback: Realpath.Callback4) : unit = jsNative
+        static member realpath: Realpath = jsNative
 
         /// <summary>
         /// Returns the resolved pathname.
@@ -98955,22 +103368,12 @@ module Fs =
         /// Synchronous realpath(3) - return the canonicalized absolute pathname.
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
-        [<Import("realpathSync", "node:fs")>]
-        static member realpathSync(path: PathLike, ?options: EncodingOption) : U2<string, NonSharedBuffer> = jsNative
-
-        /// <summary>
-        /// Returns the resolved pathname.
-        /// <br /><br />
-        /// For detailed information, see the documentation of the asynchronous version of
-        /// this API: realpath.
-        /// Synchronous realpath(3) - return the canonicalized absolute pathname.
-        /// </summary>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("realpathSync", "node:fs")>]
-        static member realpathSync(path: PathLike, options: BufferEncodingOption) : NonSharedBuffer = jsNative
+        static member realpathSync: RealpathSync = jsNative
 
         /// <summary>
         /// Asynchronously removes a file or symbolic link. No arguments other than a
@@ -98991,7 +103394,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.0.2</remarks>
         [<Import("unlink", "node:fs")>]
-        static member unlink(path: PathLike, callback: NoParamCallback) : unit = jsNative
+        static member unlink: Unlink = jsNative
 
         /// <summary>
         /// Synchronous <a href="http://man7.org/linux/man-pages/man2/unlink.2.html"><c>unlink(2)</c></a>. Returns <c>undefined</c>.
@@ -99011,20 +103414,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.0.2</remarks>
         [<Import("rmdir", "node:fs")>]
-        static member rmdir(path: PathLike, callback: NoParamCallback) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronous <a href="http://man7.org/linux/man-pages/man2/rmdir.2.html"><c>rmdir(2)</c></a>. No arguments other than a possible exception are given
-        /// to the completion callback.
-        /// <br /><br />
-        /// Using <c>fs.rmdir()</c> on a file (not a directory) results in an <c>ENOENT</c> error on
-        /// Windows and an <c>ENOTDIR</c> error on POSIX.
-        /// <br /><br />
-        /// To get a behavior similar to the <c>rm -rf</c> Unix command, use rm with options <c>{ recursive: true, force: true }</c>.
-        /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
-        [<Import("rmdir", "node:fs")>]
-        static member rmdir(path: PathLike, options: RmDirOptions, callback: NoParamCallback) : unit = jsNative
+        static member rmdir: Rmdir = jsNative
 
         /// <summary>
         /// Synchronous <a href="http://man7.org/linux/man-pages/man2/rmdir.2.html"><c>rmdir(2)</c></a>. Returns <c>undefined</c>.
@@ -99044,15 +103434,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v14.14.0</remarks>
         [<Import("rm", "node:fs")>]
-        static member rm(path: PathLike, callback: NoParamCallback) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronously removes files and directories (modeled on the standard POSIX <c>rm</c> utility). No arguments other than a possible exception are given to the
-        /// completion callback.
-        /// </summary>
-        /// <remarks>@since v14.14.0</remarks>
-        [<Import("rm", "node:fs")>]
-        static member rm(path: PathLike, options: RmOptions, callback: NoParamCallback) : unit = jsNative
+        static member rm: Rm = jsNative
 
         /// <summary>
         /// Synchronously removes files and directories (modeled on the standard POSIX <c>rm</c> utility). Returns <c>undefined</c>.
@@ -99097,44 +103479,6 @@ module Fs =
         /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
         /// </summary>
         /// <remarks>@since v0.1.8</remarks>
-        [<Import("mkdir", "node:fs")>]
-        static member mkdir(path: PathLike, options: Mkdir.Options, callback: Mkdir.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronously creates a directory.
-        /// <br /><br />
-        /// The callback is given a possible exception and, if <c>recursive</c> is <c>true</c>, the
-        /// first directory path created, <c>(err[, path])</c>.<c>path</c> can still be <c>undefined</c> when <c>recursive</c> is <c>true</c>, if no directory was
-        /// created (for instance, if it was previously created).
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be an integer specifying <c>mode</c> (permission
-        /// and sticky bits), or an object with a <c>mode</c> property and a <c>recursive</c> property indicating whether parent directories should be created. Calling <c>fs.mkdir()</c> when <c>path</c> is a directory that
-        /// exists results in an error only
-        /// when <c>recursive</c> is false. If <c>recursive</c> is false and the directory exists,
-        /// an <c>EEXIST</c> error occurs.
-        /// <code lang="js">
-        /// import { mkdir } from 'node:fs';
-        ///
-        /// // Create ./tmp/a/apple, regardless of whether ./tmp and ./tmp/a exist.
-        /// mkdir('./tmp/a/apple', { recursive: true }, (err) =&gt; {
-        ///   if (err) throw err;
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On Windows, using <c>fs.mkdir()</c> on the root directory even with recursion will
-        /// result in an error:
-        /// <code lang="js">
-        /// import { mkdir } from 'node:fs';
-        ///
-        /// mkdir('/', { recursive: true }, (err) =&gt; {
-        ///   // =&gt; [Error: EPERM: operation not permitted, mkdir 'C:\']
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
-        /// Asynchronous mkdir(2) - create a directory.
-        /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
-        /// </summary>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">
         /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
@@ -99147,111 +103491,7 @@ module Fs =
         /// </param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("mkdir", "node:fs")>]
-        static member mkdir
-            (path: PathLike, options: U3<string, float, Mkdir.Options2> option, callback: NoParamCallback)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronously creates a directory.
-        /// <br /><br />
-        /// The callback is given a possible exception and, if <c>recursive</c> is <c>true</c>, the
-        /// first directory path created, <c>(err[, path])</c>.<c>path</c> can still be <c>undefined</c> when <c>recursive</c> is <c>true</c>, if no directory was
-        /// created (for instance, if it was previously created).
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be an integer specifying <c>mode</c> (permission
-        /// and sticky bits), or an object with a <c>mode</c> property and a <c>recursive</c> property indicating whether parent directories should be created. Calling <c>fs.mkdir()</c> when <c>path</c> is a directory that
-        /// exists results in an error only
-        /// when <c>recursive</c> is false. If <c>recursive</c> is false and the directory exists,
-        /// an <c>EEXIST</c> error occurs.
-        /// <code lang="js">
-        /// import { mkdir } from 'node:fs';
-        ///
-        /// // Create ./tmp/a/apple, regardless of whether ./tmp and ./tmp/a exist.
-        /// mkdir('./tmp/a/apple', { recursive: true }, (err) =&gt; {
-        ///   if (err) throw err;
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On Windows, using <c>fs.mkdir()</c> on the root directory even with recursion will
-        /// result in an error:
-        /// <code lang="js">
-        /// import { mkdir } from 'node:fs';
-        ///
-        /// mkdir('/', { recursive: true }, (err) =&gt; {
-        ///   // =&gt; [Error: EPERM: operation not permitted, mkdir 'C:\']
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
-        /// Asynchronous mkdir(2) - create a directory.
-        /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("mkdir", "node:fs")>]
-        static member mkdir
-            (path: PathLike, options: U3<string, float, MakeDirectoryOptions> option, callback: Mkdir.Callback2)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronously creates a directory.
-        /// <br /><br />
-        /// The callback is given a possible exception and, if <c>recursive</c> is <c>true</c>, the
-        /// first directory path created, <c>(err[, path])</c>.<c>path</c> can still be <c>undefined</c> when <c>recursive</c> is <c>true</c>, if no directory was
-        /// created (for instance, if it was previously created).
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be an integer specifying <c>mode</c> (permission
-        /// and sticky bits), or an object with a <c>mode</c> property and a <c>recursive</c> property indicating whether parent directories should be created. Calling <c>fs.mkdir()</c> when <c>path</c> is a directory that
-        /// exists results in an error only
-        /// when <c>recursive</c> is false. If <c>recursive</c> is false and the directory exists,
-        /// an <c>EEXIST</c> error occurs.
-        /// <code lang="js">
-        /// import { mkdir } from 'node:fs';
-        ///
-        /// // Create ./tmp/a/apple, regardless of whether ./tmp and ./tmp/a exist.
-        /// mkdir('./tmp/a/apple', { recursive: true }, (err) =&gt; {
-        ///   if (err) throw err;
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// On Windows, using <c>fs.mkdir()</c> on the root directory even with recursion will
-        /// result in an error:
-        /// <code lang="js">
-        /// import { mkdir } from 'node:fs';
-        ///
-        /// mkdir('/', { recursive: true }, (err) =&gt; {
-        ///   // =&gt; [Error: EPERM: operation not permitted, mkdir 'C:\']
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man2/mkdir.2.html"><c>mkdir(2)</c></a> documentation for more details.
-        /// Asynchronous mkdir(2) - create a directory.
-        /// Asynchronous mkdir(2) - create a directory with a mode of <c>0o777</c>.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">
-        /// Either the file mode, or an object optionally specifying the file mode and whether parent folders
-        /// should be created. If a string is passed, it is parsed as an octal integer. If not specified, defaults to <c>0o777</c>.
-        /// </param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("mkdir", "node:fs")>]
-        static member mkdir(path: PathLike, callback: NoParamCallback) : unit = jsNative
+        static member mkdir: Mkdir = jsNative
 
         /// <summary>
         /// Synchronously creates a directory. Returns <c>undefined</c>, or if <c>recursive</c> is <c>true</c>, the first directory path created.
@@ -99364,196 +103604,10 @@ module Fs =
         /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
         /// </summary>
         /// <remarks>@since v5.10.0</remarks>
-        [<Import("mkdtemp", "node:fs")>]
-        static member mkdtemp(prefix: string, options: EncodingOption, callback: Mkdtemp.Callback) : unit = jsNative
-
-        /// <summary>
-        /// Creates a unique temporary directory.
-        /// <br /><br />
-        /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory. Due to platform
-        /// inconsistencies, avoid trailing <c>X</c> characters in <c>prefix</c>. Some platforms,
-        /// notably the BSDs, can return more than six random characters, and replace
-        /// trailing <c>X</c> characters in <c>prefix</c> with random characters.
-        /// <br /><br />
-        /// The created directory path is passed as a string to the callback's second
-        /// parameter.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use.
-        /// <code lang="js">
-        /// import { mkdtemp } from 'node:fs';
-        /// import { join } from 'node:path';
-        /// import { tmpdir } from 'node:os';
-        ///
-        /// mkdtemp(join(tmpdir(), 'foo-'), (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Prints: /tmp/foo-itXde2 or C:\Users\...\AppData\Local\Temp\foo-itXde2
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>fs.mkdtemp()</c> method will append the six randomly selected characters
-        /// directly to the <c>prefix</c> string. For instance, given a directory <c>/tmp</c>, if the
-        /// intention is to create a temporary directory _within_<c>/tmp</c>, the <c>prefix</c>must end with a trailing platform-specific path separator
-        /// (<c>import { sep } from 'node:path'</c>).
-        /// <code lang="js">
-        /// import { tmpdir } from 'node:os';
-        /// import { mkdtemp } from 'node:fs';
-        ///
-        /// // The parent directory for the new temporary directory
-        /// const tmpDir = tmpdir();
-        ///
-        /// // This method is *INCORRECT*:
-        /// mkdtemp(tmpDir, (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Will print something similar to `/tmpabc123`.
-        ///   // A new temporary directory is created at the file system root
-        ///   // rather than *within* the /tmp directory.
-        /// });
-        ///
-        /// // This method is *CORRECT*:
-        /// import { sep } from 'node:path';
-        /// mkdtemp(`${tmpDir}${sep}`, (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Will print something similar to `/tmp/abc123`.
-        ///   // A new temporary directory is created within
-        ///   // the /tmp directory.
-        /// });
-        /// </code>
-        /// Asynchronously creates a unique temporary directory.
-        /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
-        /// </summary>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         [<Import("mkdtemp", "node:fs")>]
-        static member mkdtemp(prefix: string, options: BufferEncodingOption, callback: Mkdtemp.Callback2) : unit =
-            jsNative
-
-        /// <summary>
-        /// Creates a unique temporary directory.
-        /// <br /><br />
-        /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory. Due to platform
-        /// inconsistencies, avoid trailing <c>X</c> characters in <c>prefix</c>. Some platforms,
-        /// notably the BSDs, can return more than six random characters, and replace
-        /// trailing <c>X</c> characters in <c>prefix</c> with random characters.
-        /// <br /><br />
-        /// The created directory path is passed as a string to the callback's second
-        /// parameter.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use.
-        /// <code lang="js">
-        /// import { mkdtemp } from 'node:fs';
-        /// import { join } from 'node:path';
-        /// import { tmpdir } from 'node:os';
-        ///
-        /// mkdtemp(join(tmpdir(), 'foo-'), (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Prints: /tmp/foo-itXde2 or C:\Users\...\AppData\Local\Temp\foo-itXde2
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>fs.mkdtemp()</c> method will append the six randomly selected characters
-        /// directly to the <c>prefix</c> string. For instance, given a directory <c>/tmp</c>, if the
-        /// intention is to create a temporary directory _within_<c>/tmp</c>, the <c>prefix</c>must end with a trailing platform-specific path separator
-        /// (<c>import { sep } from 'node:path'</c>).
-        /// <code lang="js">
-        /// import { tmpdir } from 'node:os';
-        /// import { mkdtemp } from 'node:fs';
-        ///
-        /// // The parent directory for the new temporary directory
-        /// const tmpDir = tmpdir();
-        ///
-        /// // This method is *INCORRECT*:
-        /// mkdtemp(tmpDir, (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Will print something similar to `/tmpabc123`.
-        ///   // A new temporary directory is created at the file system root
-        ///   // rather than *within* the /tmp directory.
-        /// });
-        ///
-        /// // This method is *CORRECT*:
-        /// import { sep } from 'node:path';
-        /// mkdtemp(`${tmpDir}${sep}`, (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Will print something similar to `/tmp/abc123`.
-        ///   // A new temporary directory is created within
-        ///   // the /tmp directory.
-        /// });
-        /// </code>
-        /// Asynchronously creates a unique temporary directory.
-        /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
-        /// </summary>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        [<Import("mkdtemp", "node:fs")>]
-        static member mkdtemp(prefix: string, options: EncodingOption, callback: Mkdtemp.Callback3) : unit = jsNative
-
-        /// <summary>
-        /// Creates a unique temporary directory.
-        /// <br /><br />
-        /// Generates six random characters to be appended behind a required <c>prefix</c> to create a unique temporary directory. Due to platform
-        /// inconsistencies, avoid trailing <c>X</c> characters in <c>prefix</c>. Some platforms,
-        /// notably the BSDs, can return more than six random characters, and replace
-        /// trailing <c>X</c> characters in <c>prefix</c> with random characters.
-        /// <br /><br />
-        /// The created directory path is passed as a string to the callback's second
-        /// parameter.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use.
-        /// <code lang="js">
-        /// import { mkdtemp } from 'node:fs';
-        /// import { join } from 'node:path';
-        /// import { tmpdir } from 'node:os';
-        ///
-        /// mkdtemp(join(tmpdir(), 'foo-'), (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Prints: /tmp/foo-itXde2 or C:\Users\...\AppData\Local\Temp\foo-itXde2
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>fs.mkdtemp()</c> method will append the six randomly selected characters
-        /// directly to the <c>prefix</c> string. For instance, given a directory <c>/tmp</c>, if the
-        /// intention is to create a temporary directory _within_<c>/tmp</c>, the <c>prefix</c>must end with a trailing platform-specific path separator
-        /// (<c>import { sep } from 'node:path'</c>).
-        /// <code lang="js">
-        /// import { tmpdir } from 'node:os';
-        /// import { mkdtemp } from 'node:fs';
-        ///
-        /// // The parent directory for the new temporary directory
-        /// const tmpDir = tmpdir();
-        ///
-        /// // This method is *INCORRECT*:
-        /// mkdtemp(tmpDir, (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Will print something similar to `/tmpabc123`.
-        ///   // A new temporary directory is created at the file system root
-        ///   // rather than *within* the /tmp directory.
-        /// });
-        ///
-        /// // This method is *CORRECT*:
-        /// import { sep } from 'node:path';
-        /// mkdtemp(`${tmpDir}${sep}`, (err, directory) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(directory);
-        ///   // Will print something similar to `/tmp/abc123`.
-        ///   // A new temporary directory is created within
-        ///   // the /tmp directory.
-        /// });
-        /// </code>
-        /// Asynchronously creates a unique temporary directory.
-        /// Generates six random characters to be appended behind a required prefix to create a unique temporary directory.
-        /// </summary>
-        [<Import("mkdtemp", "node:fs")>]
-        static member mkdtemp(prefix: string, callback: Mkdtemp.Callback4) : unit = jsNative
+        static member mkdtemp: Mkdtemp = jsNative
 
         /// <summary>
         /// Returns the created directory path.
@@ -99600,25 +103654,6 @@ module Fs =
         /// Asynchronous readdir(3) - read a directory.
         /// </summary>
         /// <remarks>@since v0.1.8</remarks>
-        [<Import("readdir", "node:fs")>]
-        static member readdir
-            (path: PathLike, options: U2<string, Readdir.Options> option, callback: Readdir.Callback)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the filenames returned will be passed as <c>Buffer</c> objects.
-        /// <br /><br />
-        /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
-        /// Asynchronous readdir(3) - read a directory.
-        /// </summary>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
@@ -99629,113 +103664,7 @@ module Fs =
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
         [<Import("readdir", "node:fs")>]
-        static member readdir
-            (path: PathLike, options: U2<string, Readdir.Options2>, callback: Readdir.Callback2)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the filenames returned will be passed as <c>Buffer</c> objects.
-        /// <br /><br />
-        /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
-        /// Asynchronous readdir(3) - read a directory.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
-        [<Import("readdir", "node:fs")>]
-        static member readdir
-            (path: PathLike, options: U2<string, Readdir.Options3> option, callback: Readdir.Callback3)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the filenames returned will be passed as <c>Buffer</c> objects.
-        /// <br /><br />
-        /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
-        /// Asynchronous readdir(3) - read a directory.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
-        [<Import("readdir", "node:fs")>]
-        static member readdir(path: PathLike, callback: Readdir.Callback4) : unit = jsNative
-
-        /// <summary>
-        /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the filenames returned will be passed as <c>Buffer</c> objects.
-        /// <br /><br />
-        /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
-        /// Asynchronous readdir(3) - read a directory.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
-        [<Import("readdir", "node:fs")>]
-        static member readdir(path: PathLike, options: Readdir.Options4, callback: Readdir.Callback5) : unit = jsNative
-
-        /// <summary>
-        /// Reads the contents of a directory. The callback gets two arguments <c>(err, files)</c> where <c>files</c> is an array of the names of the files in the directory excluding <c>'.'</c> and <c>'..'</c>.
-        /// <br /><br />
-        /// See the POSIX <a href="http://man7.org/linux/man-pages/man3/readdir.3.html"><c>readdir(3)</c></a> documentation for more details.
-        /// <br /><br />
-        /// The optional <c>options</c> argument can be a string specifying an encoding, or an
-        /// object with an <c>encoding</c> property specifying the character encoding to use for
-        /// the filenames passed to the callback. If the <c>encoding</c> is set to <c>'buffer'</c>,
-        /// the filenames returned will be passed as <c>Buffer</c> objects.
-        /// <br /><br />
-        /// If <c>options.withFileTypes</c> is set to <c>true</c>, the <c>files</c> array will contain <c>fs.Dirent</c> objects.
-        /// Asynchronous readdir(3) - read a directory.
-        /// </summary>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">The encoding (or an object specifying the encoding), used as the encoding of the result. If not provided, <c>'utf8'</c> is used.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">If called with <c>withFileTypes: true</c> the result data will be an array of Dirent.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="options">Must include <c>withFileTypes: true</c> and <c>encoding: 'buffer'</c>.</param>
-        [<Import("readdir", "node:fs")>]
-        static member readdir(path: PathLike, options: Readdir.Options5, callback: Readdir.Callback6) : unit = jsNative
+        static member readdir: Readdir = jsNative
 
         /// <summary>
         /// Reads the contents of the directory.
@@ -99866,7 +103795,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.0.2</remarks>
         [<Import("close", "node:fs")>]
-        static member close(fd: float, ?callback: NoParamCallback) : unit = jsNative
+        static member close: Close = jsNative
 
         /// <summary>
         /// Closes the file descriptor. Returns <c>undefined</c>.
@@ -99901,54 +103830,7 @@ module Fs =
         /// <param name="flags">See <c>support of file system </c>flags``.</param>
         /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("open", "node:fs")>]
-        static member ``open``
-            (path: PathLike, flags: OpenMode option, mode: OpenMode option, callback: Open.Callback)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronous file open. See the POSIX <a href="http://man7.org/linux/man-pages/man2/open.2.html"><c>open(2)</c></a> documentation for more details.
-        /// <br /><br />
-        /// <c>mode</c> sets the file mode (permission and sticky bits), but only if the file was
-        /// created. On Windows, only the write permission can be manipulated; see chmod.
-        /// <br /><br />
-        /// The callback gets two arguments <c>(err, fd)</c>.
-        /// <br /><br />
-        /// Some characters (<c>&lt; &gt; : " / \ | ? *</c>) are reserved under Windows as documented
-        /// by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file">Naming Files, Paths, and Namespaces</a>. Under NTFS, if the filename contains
-        /// a colon, Node.js will open a file system stream, as described by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/using-streams">this MSDN page</a>.
-        /// <br /><br />
-        /// Functions based on <c>fs.open()</c> exhibit this behavior as well:<c>fs.writeFile()</c>, <c>fs.readFile()</c>, etc.
-        /// Asynchronous open(2) - open and possibly create a file. If the file is created, its mode will be <c>0o666</c>.
-        /// </summary>
-        /// <param name="flags">See <c>support of file system </c>flags``.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="flags">See <c>support of file system </c>flags``.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("open", "node:fs")>]
-        static member ``open``(path: PathLike, flags: OpenMode option, callback: Open.Callback2) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronous file open. See the POSIX <a href="http://man7.org/linux/man-pages/man2/open.2.html"><c>open(2)</c></a> documentation for more details.
-        /// <br /><br />
-        /// <c>mode</c> sets the file mode (permission and sticky bits), but only if the file was
-        /// created. On Windows, only the write permission can be manipulated; see chmod.
-        /// <br /><br />
-        /// The callback gets two arguments <c>(err, fd)</c>.
-        /// <br /><br />
-        /// Some characters (<c>&lt; &gt; : " / \ | ? *</c>) are reserved under Windows as documented
-        /// by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file">Naming Files, Paths, and Namespaces</a>. Under NTFS, if the filename contains
-        /// a colon, Node.js will open a file system stream, as described by <a href="https://docs.microsoft.com/en-us/windows/desktop/FileIO/using-streams">this MSDN page</a>.
-        /// <br /><br />
-        /// Functions based on <c>fs.open()</c> exhibit this behavior as well:<c>fs.writeFile()</c>, <c>fs.readFile()</c>, etc.
-        /// Asynchronous open(2) - open and possibly create a file. If the file is created, its mode will be <c>0o666</c>.
-        /// </summary>
-        /// <param name="flags">See <c>support of file system </c>flags``.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        /// <param name="flags">See <c>support of file system </c>flags``.</param>
-        /// <param name="path">A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("open", "node:fs")>]
-        static member ``open``(path: PathLike, callback: Open.Callback3) : unit = jsNative
+        static member ``open``: Open = jsNative
 
         /// <summary>
         /// Returns an integer representing the file descriptor.
@@ -99970,8 +103852,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.4.2</remarks>
         [<Import("utimes", "node:fs")>]
-        static member utimes(path: PathLike, atime: TimeLike, mtime: TimeLike, callback: NoParamCallback) : unit =
-            jsNative
+        static member utimes: Utimes = jsNative
 
         /// <summary>
         /// Returns <c>undefined</c>.
@@ -99989,7 +103870,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.4.2</remarks>
         [<Import("futimes", "node:fs")>]
-        static member futimes(fd: float, atime: TimeLike, mtime: TimeLike, callback: NoParamCallback) : unit = jsNative
+        static member futimes: Futimes = jsNative
 
         /// <summary>
         /// Synchronous version of futimes. Returns <c>undefined</c>.
@@ -100006,7 +103887,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.1.96</remarks>
         [<Import("fsync", "node:fs")>]
-        static member fsync(fd: float, callback: NoParamCallback) : unit = jsNative
+        static member fsync: Fsync = jsNative
 
         /// <summary>
         /// Request that all data for the open file descriptor is flushed to the storage
@@ -100066,390 +103947,7 @@ module Fs =
         /// <param name="fd">A file descriptor.</param>
         /// <param name="string">A string to write.</param>
         [<Import("write", "node:fs")>]
-        static member write<'TBuffer>
-            (
-                fd: float,
-                buffer: 'TBuffer,
-                offset: float option,
-                length: float option,
-                position: float option,
-                callback: Write.Callback<'TBuffer>
-            ) : unit =
-            jsNative
-
-        /// <summary>
-        /// Write <c>buffer</c> to the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
-        /// an integer specifying the number of bytes to write.
-        /// <br /><br />
-        /// <c>position</c> refers to the offset from the beginning of the file where this data
-        /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
-        /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
-        /// <br /><br />
-        /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
-        /// for the callback. For this scenario, createWriteStream is
-        /// recommended.
-        /// <br /><br />
-        /// On Linux, positional writes don't work when the file is opened in append mode.
-        /// The kernel ignores the position argument and always appends the data to
-        /// the end of the file.
-        /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
-        /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
-        /// </summary>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="options">
-        /// An object with the following properties:
-        /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
-        /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
-        /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
-        /// </param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="encoding">The expected string encoding.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        [<Import("write", "node:fs")>]
-        static member write<'TBuffer>
-            (
-                fd: float,
-                buffer: 'TBuffer,
-                offset: float option,
-                length: float option,
-                callback: Write.Callback2<'TBuffer>
-            ) : unit =
-            jsNative
-
-        /// <summary>
-        /// Write <c>buffer</c> to the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
-        /// an integer specifying the number of bytes to write.
-        /// <br /><br />
-        /// <c>position</c> refers to the offset from the beginning of the file where this data
-        /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
-        /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
-        /// <br /><br />
-        /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
-        /// for the callback. For this scenario, createWriteStream is
-        /// recommended.
-        /// <br /><br />
-        /// On Linux, positional writes don't work when the file is opened in append mode.
-        /// The kernel ignores the position argument and always appends the data to
-        /// the end of the file.
-        /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
-        /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
-        /// </summary>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="options">
-        /// An object with the following properties:
-        /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
-        /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
-        /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
-        /// </param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="encoding">The expected string encoding.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        [<Import("write", "node:fs")>]
-        static member write<'TBuffer>
-            (fd: float, buffer: 'TBuffer, offset: float option, callback: Write.Callback3<'TBuffer>)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Write <c>buffer</c> to the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
-        /// an integer specifying the number of bytes to write.
-        /// <br /><br />
-        /// <c>position</c> refers to the offset from the beginning of the file where this data
-        /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
-        /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
-        /// <br /><br />
-        /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
-        /// for the callback. For this scenario, createWriteStream is
-        /// recommended.
-        /// <br /><br />
-        /// On Linux, positional writes don't work when the file is opened in append mode.
-        /// The kernel ignores the position argument and always appends the data to
-        /// the end of the file.
-        /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
-        /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
-        /// </summary>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="options">
-        /// An object with the following properties:
-        /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
-        /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
-        /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
-        /// </param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="encoding">The expected string encoding.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        [<Import("write", "node:fs")>]
-        static member write<'TBuffer>(fd: float, buffer: 'TBuffer, callback: Write.Callback4<'TBuffer>) : unit =
-            jsNative
-
-        /// <summary>
-        /// Write <c>buffer</c> to the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
-        /// an integer specifying the number of bytes to write.
-        /// <br /><br />
-        /// <c>position</c> refers to the offset from the beginning of the file where this data
-        /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
-        /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
-        /// <br /><br />
-        /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
-        /// for the callback. For this scenario, createWriteStream is
-        /// recommended.
-        /// <br /><br />
-        /// On Linux, positional writes don't work when the file is opened in append mode.
-        /// The kernel ignores the position argument and always appends the data to
-        /// the end of the file.
-        /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
-        /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
-        /// </summary>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="options">
-        /// An object with the following properties:
-        /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
-        /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
-        /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
-        /// </param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="encoding">The expected string encoding.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        [<Import("write", "node:fs")>]
-        static member write<'TBuffer>
-            (fd: float, buffer: 'TBuffer, options: WriteOptions, callback: Write.Callback5<'TBuffer>)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Write <c>buffer</c> to the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
-        /// an integer specifying the number of bytes to write.
-        /// <br /><br />
-        /// <c>position</c> refers to the offset from the beginning of the file where this data
-        /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
-        /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
-        /// <br /><br />
-        /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
-        /// for the callback. For this scenario, createWriteStream is
-        /// recommended.
-        /// <br /><br />
-        /// On Linux, positional writes don't work when the file is opened in append mode.
-        /// The kernel ignores the position argument and always appends the data to
-        /// the end of the file.
-        /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
-        /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
-        /// </summary>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="options">
-        /// An object with the following properties:
-        /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
-        /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
-        /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
-        /// </param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="encoding">The expected string encoding.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        [<Import("write", "node:fs")>]
-        static member write
-            (
-                fd: float,
-                string: string,
-                position: float option,
-                encoding: BufferEncoding option,
-                callback: Write.Callback6
-            ) : unit =
-            jsNative
-
-        /// <summary>
-        /// Write <c>buffer</c> to the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
-        /// an integer specifying the number of bytes to write.
-        /// <br /><br />
-        /// <c>position</c> refers to the offset from the beginning of the file where this data
-        /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
-        /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
-        /// <br /><br />
-        /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
-        /// for the callback. For this scenario, createWriteStream is
-        /// recommended.
-        /// <br /><br />
-        /// On Linux, positional writes don't work when the file is opened in append mode.
-        /// The kernel ignores the position argument and always appends the data to
-        /// the end of the file.
-        /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
-        /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
-        /// </summary>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="options">
-        /// An object with the following properties:
-        /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
-        /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
-        /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
-        /// </param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="encoding">The expected string encoding.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        [<Import("write", "node:fs")>]
-        static member write(fd: float, string: string, position: float option, callback: Write.Callback7) : unit =
-            jsNative
-
-        /// <summary>
-        /// Write <c>buffer</c> to the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// <c>offset</c> determines the part of the buffer to be written, and <c>length</c> is
-        /// an integer specifying the number of bytes to write.
-        /// <br /><br />
-        /// <c>position</c> refers to the offset from the beginning of the file where this data
-        /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
-        /// at the current position. See <a href="http://man7.org/linux/man-pages/man2/pwrite.2.html"><c>pwrite(2)</c></a>.
-        /// <br /><br />
-        /// The callback will be given three arguments <c>(err, bytesWritten, buffer)</c> where <c>bytesWritten</c> specifies how many _bytes_ were written from <c>buffer</c>.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffer</c> properties.
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.write()</c> multiple times on the same file without waiting
-        /// for the callback. For this scenario, createWriteStream is
-        /// recommended.
-        /// <br /><br />
-        /// On Linux, positional writes don't work when the file is opened in append mode.
-        /// The kernel ignores the position argument and always appends the data to
-        /// the end of the file.
-        /// Asynchronously writes <c>buffer</c> to the file referenced by the supplied file descriptor.
-        /// Asynchronously writes <c>string</c> to the file referenced by the supplied file descriptor.
-        /// </summary>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="length">The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="offset">The part of the buffer to be written. If not supplied, defaults to <c>0</c>.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="options">
-        /// An object with the following properties:
-        /// * <c>offset</c> The part of the buffer to be written. If not supplied, defaults to <c>0</c>.
-        /// * <c>length</c> The number of bytes to write. If not supplied, defaults to <c>buffer.length - offset</c>.
-        /// * <c>position</c> The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.
-        /// </param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="encoding">The expected string encoding.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        /// <param name="position">The offset from the beginning of the file where this data should be written. If not supplied, defaults to the current position.</param>
-        /// <param name="fd">A file descriptor.</param>
-        /// <param name="string">A string to write.</param>
-        [<Import("write", "node:fs")>]
-        static member write(fd: float, string: string, callback: Write.Callback8) : unit = jsNative
+        static member write: Write = jsNative
 
         /// <summary>
         /// For detailed information, see the documentation of the asynchronous version of
@@ -100527,131 +104025,7 @@ module Fs =
         /// </param>
         /// <remarks>@since v12.17.0, 13.11.0</remarks>
         [<Import("read", "node:fs")>]
-        static member read<'TBuffer>
-            (
-                fd: float,
-                buffer: 'TBuffer,
-                offset: float,
-                length: float,
-                position: ReadPosition option,
-                callback: Read.Callback<'TBuffer>
-            ) : unit =
-            jsNative
-
-        /// <summary>
-        /// Read data from the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
-        /// <br /><br />
-        /// If the file is not modified concurrently, the end-of-file is reached when the
-        /// number of bytes read is zero.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
-        /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
-        /// If not otherwise specified in an <c>options</c> object,
-        /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
-        /// <c>offset</c> defaults to <c>0</c>,
-        /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
-        /// <c>position</c> defaults to <c>null</c>
-        /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
-        /// <remarks>@since v12.17.0, 13.11.0</remarks>
-        [<Import("read", "node:fs")>]
-        static member read<'TBuffer>
-            (fd: float, options: ReadOptionsWithBuffer<'TBuffer>, callback: Read.Callback2<'TBuffer>)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Read data from the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
-        /// <br /><br />
-        /// If the file is not modified concurrently, the end-of-file is reached when the
-        /// number of bytes read is zero.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
-        /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
-        /// If not otherwise specified in an <c>options</c> object,
-        /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
-        /// <c>offset</c> defaults to <c>0</c>,
-        /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
-        /// <c>position</c> defaults to <c>null</c>
-        /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
-        /// <param name="buffer">The buffer that the data will be written to.</param>
-        /// <param name="offset">The position in <c>buffer</c> to write the data to.</param>
-        /// <param name="length">The number of bytes to read.</param>
-        /// <param name="position">
-        /// Specifies where to begin reading from in the file. If <c>position</c> is <c>null</c> or <c>-1 </c>, data will be read from the current file position, and the file position will be updated. If
-        /// <c>position</c> is an integer, the file position will be unchanged.
-        /// </param>
-        /// <remarks>@since v12.17.0, 13.11.0</remarks>
-        [<Import("read", "node:fs")>]
-        static member read<'TBuffer>
-            (fd: float, buffer: 'TBuffer, options: ReadOptions, callback: Read.Callback3<'TBuffer>)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Read data from the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
-        /// <br /><br />
-        /// If the file is not modified concurrently, the end-of-file is reached when the
-        /// number of bytes read is zero.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
-        /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
-        /// If not otherwise specified in an <c>options</c> object,
-        /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
-        /// <c>offset</c> defaults to <c>0</c>,
-        /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
-        /// <c>position</c> defaults to <c>null</c>
-        /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
-        /// <param name="buffer">The buffer that the data will be written to.</param>
-        /// <param name="offset">The position in <c>buffer</c> to write the data to.</param>
-        /// <param name="length">The number of bytes to read.</param>
-        /// <param name="position">
-        /// Specifies where to begin reading from in the file. If <c>position</c> is <c>null</c> or <c>-1 </c>, data will be read from the current file position, and the file position will be updated. If
-        /// <c>position</c> is an integer, the file position will be unchanged.
-        /// </param>
-        /// <remarks>@since v12.17.0, 13.11.0</remarks>
-        [<Import("read", "node:fs")>]
-        static member read<'TBuffer>(fd: float, buffer: 'TBuffer, callback: Read.Callback4<'TBuffer>) : unit = jsNative
-
-        /// <summary>
-        /// Read data from the file specified by <c>fd</c>.
-        /// <br /><br />
-        /// The callback is given the three arguments, <c>(err, bytesRead, buffer)</c>.
-        /// <br /><br />
-        /// If the file is not modified concurrently, the end-of-file is reached when the
-        /// number of bytes read is zero.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffer</c> properties.
-        /// Similar to the above <c>fs.read</c> function, this version takes an optional <c>options</c> object.
-        /// If not otherwise specified in an <c>options</c> object,
-        /// <c>buffer</c> defaults to <c>Buffer.alloc(16384)</c>,
-        /// <c>offset</c> defaults to <c>0</c>,
-        /// <c>length</c> defaults to <c>buffer.byteLength</c>, <c>- offset</c> as of Node 17.6.0
-        /// <c>position</c> defaults to <c>null</c>
-        /// </summary>
-        /// <remarks>@since v0.0.2</remarks>
-        /// <param name="buffer">The buffer that the data will be written to.</param>
-        /// <param name="offset">The position in <c>buffer</c> to write the data to.</param>
-        /// <param name="length">The number of bytes to read.</param>
-        /// <param name="position">
-        /// Specifies where to begin reading from in the file. If <c>position</c> is <c>null</c> or <c>-1 </c>, data will be read from the current file position, and the file position will be updated. If
-        /// <c>position</c> is an integer, the file position will be unchanged.
-        /// </param>
-        /// <remarks>@since v12.17.0, 13.11.0</remarks>
-        [<Import("read", "node:fs")>]
-        static member read(fd: float, callback: Read.Callback5) : unit = jsNative
+        static member read: Read = jsNative
 
         /// <summary>
         /// Returns the number of <c>bytesRead</c>.
@@ -100802,271 +104176,7 @@ module Fs =
         /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
         /// </param>
         [<Import("readFile", "node:fs")>]
-        static member readFile
-            (path: PathOrFileDescriptor, options: ReadFile.Options option, callback: ReadFile.Callback)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronously reads the entire contents of a file.
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// readFile('/etc/passwd', (err, data) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(data);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The callback is passed two arguments <c>(err, data)</c>, where <c>data</c> is the
-        /// contents of the file.
-        /// <br /><br />
-        /// If no encoding is specified, then the raw buffer is returned.
-        /// <br /><br />
-        /// If <c>options</c> is a string, then it specifies the encoding:
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// readFile('/etc/passwd', 'utf8', callback);
-        /// </code>
-        /// <br /><br />
-        /// When the path is a directory, the behavior of <c>fs.readFile()</c> and readFileSync is platform-specific. On macOS, Linux, and Windows, an
-        /// error will be returned. On FreeBSD, a representation of the directory's contents
-        /// will be returned.
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// // macOS, Linux, and Windows
-        /// readFile('&lt;directory&gt;', (err, data) =&gt; {
-        ///   // =&gt; [Error: EISDIR: illegal operation on a directory, read &lt;directory&gt;]
-        /// });
-        ///
-        /// //  FreeBSD
-        /// readFile('&lt;directory&gt;', (err, data) =&gt; {
-        ///   // =&gt; null, &lt;data&gt;
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// It is possible to abort an ongoing request using an <c>AbortSignal</c>. If a
-        /// request is aborted the callback is called with an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// const controller = new AbortController();
-        /// const signal = controller.signal;
-        /// readFile(fileInfo[0].name, { signal }, (err, buf) =&gt; {
-        ///   // ...
-        /// });
-        /// // When you want to abort the request
-        /// controller.abort();
-        /// </code>
-        /// <br /><br />
-        /// The <c>fs.readFile()</c> function buffers the entire file. To minimize memory costs,
-        /// when possible prefer streaming via <c>fs.createReadStream()</c>.
-        /// <br /><br />
-        /// Aborting an ongoing request does not abort individual operating
-        /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
-        /// Asynchronously reads the entire contents of a file.
-        /// </summary>
-        /// <param name="path">filename or file descriptor</param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        /// <param name="options">
-        /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
-        /// If a flag is not provided, it defaults to <c>'r'</c>.
-        /// </param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        /// <param name="options">
-        /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
-        /// If a flag is not provided, it defaults to <c>'r'</c>.
-        /// </param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        [<Import("readFile", "node:fs")>]
-        static member readFile
-            (path: PathOrFileDescriptor, options: U2<string, ReadFile.Options2>, callback: ReadFile.Callback2)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronously reads the entire contents of a file.
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// readFile('/etc/passwd', (err, data) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(data);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The callback is passed two arguments <c>(err, data)</c>, where <c>data</c> is the
-        /// contents of the file.
-        /// <br /><br />
-        /// If no encoding is specified, then the raw buffer is returned.
-        /// <br /><br />
-        /// If <c>options</c> is a string, then it specifies the encoding:
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// readFile('/etc/passwd', 'utf8', callback);
-        /// </code>
-        /// <br /><br />
-        /// When the path is a directory, the behavior of <c>fs.readFile()</c> and readFileSync is platform-specific. On macOS, Linux, and Windows, an
-        /// error will be returned. On FreeBSD, a representation of the directory's contents
-        /// will be returned.
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// // macOS, Linux, and Windows
-        /// readFile('&lt;directory&gt;', (err, data) =&gt; {
-        ///   // =&gt; [Error: EISDIR: illegal operation on a directory, read &lt;directory&gt;]
-        /// });
-        ///
-        /// //  FreeBSD
-        /// readFile('&lt;directory&gt;', (err, data) =&gt; {
-        ///   // =&gt; null, &lt;data&gt;
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// It is possible to abort an ongoing request using an <c>AbortSignal</c>. If a
-        /// request is aborted the callback is called with an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// const controller = new AbortController();
-        /// const signal = controller.signal;
-        /// readFile(fileInfo[0].name, { signal }, (err, buf) =&gt; {
-        ///   // ...
-        /// });
-        /// // When you want to abort the request
-        /// controller.abort();
-        /// </code>
-        /// <br /><br />
-        /// The <c>fs.readFile()</c> function buffers the entire file. To minimize memory costs,
-        /// when possible prefer streaming via <c>fs.createReadStream()</c>.
-        /// <br /><br />
-        /// Aborting an ongoing request does not abort individual operating
-        /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
-        /// Asynchronously reads the entire contents of a file.
-        /// </summary>
-        /// <param name="path">filename or file descriptor</param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        /// <param name="options">
-        /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
-        /// If a flag is not provided, it defaults to <c>'r'</c>.
-        /// </param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        /// <param name="options">
-        /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
-        /// If a flag is not provided, it defaults to <c>'r'</c>.
-        /// </param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        [<Import("readFile", "node:fs")>]
-        static member readFile
-            (path: PathOrFileDescriptor, options: U2<string, ReadFile.Options3> option, callback: ReadFile.Callback3)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronously reads the entire contents of a file.
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// readFile('/etc/passwd', (err, data) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log(data);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The callback is passed two arguments <c>(err, data)</c>, where <c>data</c> is the
-        /// contents of the file.
-        /// <br /><br />
-        /// If no encoding is specified, then the raw buffer is returned.
-        /// <br /><br />
-        /// If <c>options</c> is a string, then it specifies the encoding:
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// readFile('/etc/passwd', 'utf8', callback);
-        /// </code>
-        /// <br /><br />
-        /// When the path is a directory, the behavior of <c>fs.readFile()</c> and readFileSync is platform-specific. On macOS, Linux, and Windows, an
-        /// error will be returned. On FreeBSD, a representation of the directory's contents
-        /// will be returned.
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// // macOS, Linux, and Windows
-        /// readFile('&lt;directory&gt;', (err, data) =&gt; {
-        ///   // =&gt; [Error: EISDIR: illegal operation on a directory, read &lt;directory&gt;]
-        /// });
-        ///
-        /// //  FreeBSD
-        /// readFile('&lt;directory&gt;', (err, data) =&gt; {
-        ///   // =&gt; null, &lt;data&gt;
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// It is possible to abort an ongoing request using an <c>AbortSignal</c>. If a
-        /// request is aborted the callback is called with an <c>AbortError</c>:
-        /// <code lang="js">
-        /// import { readFile } from 'node:fs';
-        ///
-        /// const controller = new AbortController();
-        /// const signal = controller.signal;
-        /// readFile(fileInfo[0].name, { signal }, (err, buf) =&gt; {
-        ///   // ...
-        /// });
-        /// // When you want to abort the request
-        /// controller.abort();
-        /// </code>
-        /// <br /><br />
-        /// The <c>fs.readFile()</c> function buffers the entire file. To minimize memory costs,
-        /// when possible prefer streaming via <c>fs.createReadStream()</c>.
-        /// <br /><br />
-        /// Aborting an ongoing request does not abort individual operating
-        /// system requests but rather the internal buffering <c>fs.readFile</c> performs.
-        /// Asynchronously reads the entire contents of a file.
-        /// </summary>
-        /// <param name="path">filename or file descriptor</param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        /// <param name="options">
-        /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
-        /// If a flag is not provided, it defaults to <c>'r'</c>.
-        /// </param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        /// <param name="options">
-        /// Either the encoding for the result, or an object that contains the encoding and an optional flag.
-        /// If a flag is not provided, it defaults to <c>'r'</c>.
-        /// </param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        [<Import("readFile", "node:fs")>]
-        static member readFile(path: PathOrFileDescriptor, callback: ReadFile.Callback4) : unit = jsNative
+        static member readFile: ReadFile = jsNative
 
         /// <summary>
         /// Returns the contents of the <c>path</c>.
@@ -101265,77 +104375,7 @@ module Fs =
         /// </param>
         /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
         [<Import("writeFile", "node:fs")>]
-        static member writeFile
-            (file: PathOrFileDescriptor, data: Crypto.BinaryLike, options: WriteFileOptions, callback: NoParamCallback)
-            : unit =
-            jsNative
-
-        /// <summary>
-        /// When <c>file</c> is a filename, asynchronously writes data to the file, replacing the
-        /// file if it already exists. <c>data</c> can be a string or a buffer.
-        /// <br /><br />
-        /// When <c>file</c> is a file descriptor, the behavior is similar to calling <c>fs.write()</c> directly (which is recommended). See the notes below on using
-        /// a file descriptor.
-        /// <br /><br />
-        /// The <c>encoding</c> option is ignored if <c>data</c> is a buffer.
-        /// <br /><br />
-        /// The <c>mode</c> option only affects the newly created file. See open for more details.
-        /// <code lang="js">
-        /// import { writeFile } from 'node:fs';
-        /// import { Buffer } from 'node:buffer';
-        ///
-        /// const data = new Uint8Array(Buffer.from('Hello Node.js'));
-        /// writeFile('message.txt', data, (err) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log('The file has been saved!');
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// If <c>options</c> is a string, then it specifies the encoding:
-        /// <code lang="js">
-        /// import { writeFile } from 'node:fs';
-        ///
-        /// writeFile('message.txt', 'Hello Node.js', 'utf8', callback);
-        /// </code>
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.writeFile()</c> multiple times on the same file without
-        /// waiting for the callback. For this scenario, createWriteStream is
-        /// recommended.
-        /// <br /><br />
-        /// Similarly to <c>fs.readFile</c> \- <c>fs.writeFile</c> is a convenience method that
-        /// performs multiple <c>write</c> calls internally to write the buffer passed to it.
-        /// For performance sensitive code consider using createWriteStream.
-        /// <br /><br />
-        /// It is possible to use an <c>AbortSignal</c> to cancel an <c>fs.writeFile()</c>.
-        /// Cancelation is "best effort", and some amount of data is likely still
-        /// to be written.
-        /// <code lang="js">
-        /// import { writeFile } from 'node:fs';
-        /// import { Buffer } from 'node:buffer';
-        ///
-        /// const controller = new AbortController();
-        /// const { signal } = controller;
-        /// const data = new Uint8Array(Buffer.from('Hello Node.js'));
-        /// writeFile('message.txt', data, { signal }, (err) =&gt; {
-        ///   // When a request is aborted - the callback is called with an AbortError
-        /// });
-        /// // When the request should be aborted
-        /// controller.abort();
-        /// </code>
-        /// <br /><br />
-        /// Aborting an ongoing request does not abort individual operating
-        /// system requests but rather the internal buffering <c>fs.writeFile</c> performs.
-        /// Asynchronously writes data to a file, replacing the file if it already exists.
-        /// </summary>
-        /// <param name="file">filename or file descriptor</param>
-        /// <param name="path">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
-        [<Import("writeFile", "node:fs")>]
-        static member writeFile(path: PathOrFileDescriptor, data: Crypto.BinaryLike, callback: NoParamCallback) : unit =
-            jsNative
+        static member writeFile: WriteFile = jsNative
 
         /// <summary>
         /// Returns <c>undefined</c>.
@@ -101410,78 +104450,7 @@ module Fs =
         /// </param>
         /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
         [<Import("appendFile", "node:fs")>]
-        static member appendFile
-            (
-                path: PathOrFileDescriptor,
-                data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
-                options: WriteFileOptions,
-                callback: NoParamCallback
-            ) : unit =
-            jsNative
-
-        /// <summary>
-        /// Asynchronously append data to a file, creating the file if it does not yet
-        /// exist. <c>data</c> can be a string or a <c>Buffer</c>.
-        /// <br /><br />
-        /// The <c>mode</c> option only affects the newly created file. See open for more details.
-        /// <code lang="js">
-        /// import { appendFile } from 'node:fs';
-        ///
-        /// appendFile('message.txt', 'data to append', (err) =&gt; {
-        ///   if (err) throw err;
-        ///   console.log('The "data to append" was appended to file!');
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// If <c>options</c> is a string, then it specifies the encoding:
-        /// <code lang="js">
-        /// import { appendFile } from 'node:fs';
-        ///
-        /// appendFile('message.txt', 'data to append', 'utf8', callback);
-        /// </code>
-        /// <br /><br />
-        /// The <c>path</c> may be specified as a numeric file descriptor that has been opened
-        /// for appending (using <c>fs.open()</c> or <c>fs.openSync()</c>). The file descriptor will
-        /// not be closed automatically.
-        /// <code lang="js">
-        /// import { open, close, appendFile } from 'node:fs';
-        ///
-        /// function closeFd(fd) {
-        ///   close(fd, (err) =&gt; {
-        ///     if (err) throw err;
-        ///   });
-        /// }
-        ///
-        /// open('message.txt', 'a', (err, fd) =&gt; {
-        ///   if (err) throw err;
-        ///
-        ///   try {
-        ///     appendFile(fd, 'data to append', 'utf8', (err) =&gt; {
-        ///       closeFd(fd);
-        ///       if (err) throw err;
-        ///     });
-        ///   } catch (err) {
-        ///     closeFd(fd);
-        ///     throw err;
-        ///   }
-        /// });
-        /// </code>
-        /// Asynchronously append data to a file, creating the file if it does not exist.
-        /// </summary>
-        /// <param name="path">filename or file descriptor</param>
-        /// <param name="file">
-        /// A path to a file. If a URL is provided, it must use the <c>file:</c> protocol.
-        /// If a file descriptor is provided, the underlying file will _not_ be closed automatically.
-        /// </param>
-        /// <param name="data">The data to write. If something other than a Buffer or Uint8Array is provided, the value is coerced to a string.</param>
-        [<Import("appendFile", "node:fs")>]
-        static member appendFile
-            (
-                file: PathOrFileDescriptor,
-                data: U2<string, Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>,
-                callback: NoParamCallback
-            ) : unit =
-            jsNative
+        static member appendFile: AppendFile = jsNative
 
         /// <summary>
         /// Synchronously append data to a file, creating the file if it does not yet
@@ -101943,7 +104912,7 @@ module Fs =
         /// <remarks>@deprecated Since v1.0.0 - Use {@link stat} or {@link access} instead.</remarks>
         /// <remarks>@deprecated</remarks>
         [<Import("exists", "node:fs")>]
-        static member exists(path: PathLike, callback: (bool -> unit)) : unit = jsNative
+        static member exists: Exists = jsNative
 
         /// <summary>
         /// Returns <c>true</c> if the path exists, <c>false</c> otherwise.
@@ -102124,165 +105093,7 @@ module Fs =
         /// <remarks>@since v0.11.15</remarks>
         /// <param name="path">A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
         [<Import("access", "node:fs")>]
-        static member access(path: PathLike, mode: float option, callback: NoParamCallback) : unit = jsNative
-
-        /// <summary>
-        /// Tests a user's permissions for the file or directory specified by <c>path</c>.
-        /// The <c>mode</c> argument is an optional integer that specifies the accessibility
-        /// checks to be performed. <c>mode</c> should be either the value <c>fs.constants.F_OK</c> or a mask consisting of the bitwise OR of any of <c>fs.constants.R_OK</c>, <c>fs.constants.W_OK</c>, and <c>fs.constants.X_OK</c>
-        /// (e.g.<c>fs.constants.W_OK | fs.constants.R_OK</c>). Check <c>File access constants</c> for
-        /// possible values of <c>mode</c>.
-        /// <br /><br />
-        /// The final argument, <c>callback</c>, is a callback function that is invoked with
-        /// a possible error argument. If any of the accessibility checks fail, the error
-        /// argument will be an <c>Error</c> object. The following examples check if <c>package.json</c> exists, and if it is readable or writable.
-        /// <code lang="js">
-        /// import { access, constants } from 'node:fs';
-        ///
-        /// const file = 'package.json';
-        ///
-        /// // Check if the file exists in the current directory.
-        /// access(file, constants.F_OK, (err) =&gt; {
-        ///   console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
-        /// });
-        ///
-        /// // Check if the file is readable.
-        /// access(file, constants.R_OK, (err) =&gt; {
-        ///   console.log(`${file} ${err ? 'is not readable' : 'is readable'}`);
-        /// });
-        ///
-        /// // Check if the file is writable.
-        /// access(file, constants.W_OK, (err) =&gt; {
-        ///   console.log(`${file} ${err ? 'is not writable' : 'is writable'}`);
-        /// });
-        ///
-        /// // Check if the file is readable and writable.
-        /// access(file, constants.R_OK | constants.W_OK, (err) =&gt; {
-        ///   console.log(`${file} ${err ? 'is not' : 'is'} readable and writable`);
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Do not use <c>fs.access()</c> to check for the accessibility of a file before calling <c>fs.open()</c>, <c>fs.readFile()</c>, or <c>fs.writeFile()</c>. Doing
-        /// so introduces a race condition, since other processes may change the file's
-        /// state between the two calls. Instead, user code should open/read/write the
-        /// file directly and handle the error raised if the file is not accessible.
-        /// <br /><br />
-        /// <b>write (NOT RECOMMENDED)</b>
-        /// <code lang="js">
-        /// import { access, open, close } from 'node:fs';
-        ///
-        /// access('myfile', (err) =&gt; {
-        ///   if (!err) {
-        ///     console.error('myfile already exists');
-        ///     return;
-        ///   }
-        ///
-        ///   open('myfile', 'wx', (err, fd) =&gt; {
-        ///     if (err) throw err;
-        ///
-        ///     try {
-        ///       writeMyData(fd);
-        ///     } finally {
-        ///       close(fd, (err) =&gt; {
-        ///         if (err) throw err;
-        ///       });
-        ///     }
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// <b>write (RECOMMENDED)</b>
-        /// <code lang="js">
-        /// import { open, close } from 'node:fs';
-        ///
-        /// open('myfile', 'wx', (err, fd) =&gt; {
-        ///   if (err) {
-        ///     if (err.code === 'EEXIST') {
-        ///       console.error('myfile already exists');
-        ///       return;
-        ///     }
-        ///
-        ///     throw err;
-        ///   }
-        ///
-        ///   try {
-        ///     writeMyData(fd);
-        ///   } finally {
-        ///     close(fd, (err) =&gt; {
-        ///       if (err) throw err;
-        ///     });
-        ///   }
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// <b>read (NOT RECOMMENDED)</b>
-        /// <code lang="js">
-        /// import { access, open, close } from 'node:fs';
-        /// access('myfile', (err) =&gt; {
-        ///   if (err) {
-        ///     if (err.code === 'ENOENT') {
-        ///       console.error('myfile does not exist');
-        ///       return;
-        ///     }
-        ///
-        ///     throw err;
-        ///   }
-        ///
-        ///   open('myfile', 'r', (err, fd) =&gt; {
-        ///     if (err) throw err;
-        ///
-        ///     try {
-        ///       readMyData(fd);
-        ///     } finally {
-        ///       close(fd, (err) =&gt; {
-        ///         if (err) throw err;
-        ///       });
-        ///     }
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// <b>read (RECOMMENDED)</b>
-        /// <code lang="js">
-        /// import { open, close } from 'node:fs';
-        ///
-        /// open('myfile', 'r', (err, fd) =&gt; {
-        ///   if (err) {
-        ///     if (err.code === 'ENOENT') {
-        ///       console.error('myfile does not exist');
-        ///       return;
-        ///     }
-        ///
-        ///     throw err;
-        ///   }
-        ///
-        ///   try {
-        ///     readMyData(fd);
-        ///   } finally {
-        ///     close(fd, (err) =&gt; {
-        ///       if (err) throw err;
-        ///     });
-        ///   }
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The "not recommended" examples above check for accessibility and then use the
-        /// file; the "recommended" examples are better because they use the file directly
-        /// and handle the error, if any.
-        /// <br /><br />
-        /// In general, check for the accessibility of a file only if the file will not be
-        /// used directly, for example when its accessibility is a signal from another
-        /// process.
-        /// <br /><br />
-        /// On Windows, access-control policies (ACLs) on a directory may limit access to
-        /// a file or directory. The <c>fs.access()</c> function, however, does not check the
-        /// ACL and therefore may report that a path is accessible even if the ACL restricts
-        /// the user from reading or writing to it.
-        /// Asynchronously tests a user's permissions for the file specified by path.
-        /// </summary>
-        /// <param name="path">A path to a file or directory. If a URL is provided, it must use the <c>file:</c> protocol.</param>
-        [<Import("access", "node:fs")>]
-        static member access(path: PathLike, callback: NoParamCallback) : unit = jsNative
+        static member access: Access = jsNative
 
         /// <summary>
         /// Synchronously tests a user's permissions for the file or directory specified
@@ -102409,7 +105220,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.1.96</remarks>
         [<Import("fdatasync", "node:fs")>]
-        static member fdatasync(fd: float, callback: NoParamCallback) : unit = jsNative
+        static member fdatasync: Fdatasync = jsNative
 
         /// <summary>
         /// Forces all currently queued I/O operations associated with the file to the
@@ -102458,48 +105269,7 @@ module Fs =
         /// <param name="dest">destination filename of the copy operation</param>
         /// <param name="mode">modifiers for copy operation.</param>
         [<Import("copyFile", "node:fs")>]
-        static member copyFile(src: PathLike, dest: PathLike, callback: NoParamCallback) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronously copies <c>src</c> to <c>dest</c>. By default, <c>dest</c> is overwritten if it
-        /// already exists. No arguments other than a possible exception are given to the
-        /// callback function. Node.js makes no guarantees about the atomicity of the copy
-        /// operation. If an error occurs after the destination file has been opened for
-        /// writing, Node.js will attempt to remove the destination.
-        /// <br /><br />
-        /// <c>mode</c> is an optional integer that specifies the behavior
-        /// of the copy operation. It is possible to create a mask consisting of the bitwise
-        /// OR of two or more values (e.g.<c>fs.constants.COPYFILE_EXCL | fs.constants.COPYFILE_FICLONE</c>).
-        /// <br /><br />
-        /// * <c>fs.constants.COPYFILE_EXCL</c>: The copy operation will fail if <c>dest</c> already
-        /// exists.
-        /// * <c>fs.constants.COPYFILE_FICLONE</c>: The copy operation will attempt to create a
-        /// copy-on-write reflink. If the platform does not support copy-on-write, then a
-        /// fallback copy mechanism is used.
-        /// * <c>fs.constants.COPYFILE_FICLONE_FORCE</c>: The copy operation will attempt to
-        /// create a copy-on-write reflink. If the platform does not support
-        /// copy-on-write, then the operation will fail.
-        /// <code lang="js">
-        /// import { copyFile, constants } from 'node:fs';
-        ///
-        /// function callback(err) {
-        ///   if (err) throw err;
-        ///   console.log('source.txt was copied to destination.txt');
-        /// }
-        ///
-        /// // destination.txt will be created or overwritten by default.
-        /// copyFile('source.txt', 'destination.txt', callback);
-        ///
-        /// // By using COPYFILE_EXCL, the operation will fail if destination.txt exists.
-        /// copyFile('source.txt', 'destination.txt', constants.COPYFILE_EXCL, callback);
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.5.0</remarks>
-        /// <param name="src">source filename to copy</param>
-        /// <param name="dest">destination filename of the copy operation</param>
-        /// <param name="mode">modifiers for copy operation.</param>
-        [<Import("copyFile", "node:fs")>]
-        static member copyFile(src: PathLike, dest: PathLike, mode: float, callback: NoParamCallback) : unit = jsNative
+        static member copyFile: CopyFile = jsNative
 
         /// <summary>
         /// Synchronously copies <c>src</c> to <c>dest</c>. By default, <c>dest</c> is overwritten if it
@@ -102557,32 +105327,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v12.9.0</remarks>
         [<Import("writev", "node:fs")>]
-        static member writev<'TBuffers>(fd: float, buffers: 'TBuffers, cb: Writev2.Cb<'TBuffers>) : unit = jsNative
-
-        /// <summary>
-        /// Write an array of <c>ArrayBufferView</c>s to the file specified by <c>fd</c> using <c>writev()</c>.
-        /// <br /><br />
-        /// <c>position</c> is the offset from the beginning of the file where this data
-        /// should be written. If <c>typeof position !== 'number'</c>, the data will be written
-        /// at the current position.
-        /// <br /><br />
-        /// The callback will be given three arguments: <c>err</c>, <c>bytesWritten</c>, and <c>buffers</c>. <c>bytesWritten</c> is how many bytes were written from <c>buffers</c>.
-        /// <br /><br />
-        /// If this method is <c>util.promisify()</c> ed, it returns a promise for an <c>Object</c> with <c>bytesWritten</c> and <c>buffers</c> properties.
-        /// <br /><br />
-        /// It is unsafe to use <c>fs.writev()</c> multiple times on the same file without
-        /// waiting for the callback. For this scenario, use createWriteStream.
-        /// <br /><br />
-        /// On Linux, positional writes don't work when the file is opened in append mode.
-        /// The kernel ignores the position argument and always appends the data to
-        /// the end of the file.
-        /// </summary>
-        /// <remarks>@since v12.9.0</remarks>
-        [<Import("writev", "node:fs")>]
-        static member writev<'TBuffers>
-            (fd: float, buffers: 'TBuffers, position: float option, cb: Writev2.Cb2<'TBuffers>)
-            : unit =
-            jsNative
+        static member writev: Writev2 = jsNative
 
         /// <summary>
         /// For detailed information, see the documentation of the asynchronous version of
@@ -102628,27 +105373,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v13.13.0, v12.17.0</remarks>
         [<Import("readv", "node:fs")>]
-        static member readv<'TBuffers>(fd: float, buffers: 'TBuffers, cb: Readv.Cb<'TBuffers>) : unit = jsNative
-
-        /// <summary>
-        /// Read from a file specified by <c>fd</c> and write to an array of <c>ArrayBufferView</c>s
-        /// using <c>readv()</c>.
-        /// <br /><br />
-        /// <c>position</c> is the offset from the beginning of the file from where data
-        /// should be read. If <c>typeof position !== 'number'</c>, the data will be read
-        /// from the current position.
-        /// <br /><br />
-        /// The callback will be given three arguments: <c>err</c>, <c>bytesRead</c>, and <c>buffers</c>. <c>bytesRead</c> is how many bytes were read from the file.
-        /// <br /><br />
-        /// If this method is invoked as its <c>util.promisify()</c> ed version, it returns
-        /// a promise for an <c>Object</c> with <c>bytesRead</c> and <c>buffers</c> properties.
-        /// </summary>
-        /// <remarks>@since v13.13.0, v12.17.0</remarks>
-        [<Import("readv", "node:fs")>]
-        static member readv<'TBuffers>
-            (fd: float, buffers: 'TBuffers, position: float option, cb: Readv.Cb2<'TBuffers>)
-            : unit =
-            jsNative
+        static member readv: Readv = jsNative
 
         /// <summary>
         /// For detailed information, see the documentation of the asynchronous version of
@@ -102723,21 +105448,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v12.12.0</remarks>
         [<Import("opendir", "node:fs")>]
-        static member opendir(path: PathLike, cb: Opendir.Cb) : unit = jsNative
-
-        /// <summary>
-        /// Asynchronously open a directory. See the POSIX <a href="http://man7.org/linux/man-pages/man3/opendir.3.html"><c>opendir(3)</c></a> documentation for
-        /// more details.
-        /// <br /><br />
-        /// Creates an <c>fs.Dir</c>, which contains all further functions for reading from
-        /// and cleaning up the directory.
-        /// <br /><br />
-        /// The <c>encoding</c> option sets the encoding for the <c>path</c> while opening the
-        /// directory and subsequent read operations.
-        /// </summary>
-        /// <remarks>@since v12.12.0</remarks>
-        [<Import("opendir", "node:fs")>]
-        static member opendir(path: PathLike, options: OpenDirOptions, cb: Opendir.Cb2) : unit = jsNative
+        static member opendir: Opendir = jsNative
 
         /// <summary>
         /// Asynchronously copies the entire directory structure from <c>src</c> to <c>dest</c>,
@@ -160952,15 +163663,15 @@ module Repl =
 
     type REPLWriter = (obj -> string)
 
-    [<Interface>]
     type Writer =
         abstract options: Util.InspectOptions with get, set
 
+        /// <summary>
+        /// This is the default "writer" value, if none is passed in the REPL options,
+        /// and it can be overridden by custom print functions.
+        /// </summary>
         [<Emit("$0($1...)")>]
         abstract Invoke: obj: obj -> string
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(options: Util.InspectOptions) : Writer = jsNative
 
     type REPLCommandAction = (string -> unit)
 
@@ -162424,7 +165135,7 @@ module Repl =
         /// and it can be overridden by custom print functions.
         /// </summary>
         [<Import("writer", "node:repl")>]
-        static member writer(obj: obj) : string = jsNative
+        static member writer: Writer = jsNative
 
         /// <summary>
         /// Instances of <c>repl.REPLServer</c> are created using the start method
@@ -175232,62 +177943,7 @@ module Stream =
         /// <param name="callback">A callback function that takes an optional error argument.</param>
         /// <returns>A cleanup function which removes all registered listeners.</returns>
         [<Import("finished", "node:stream")>]
-        static member finished
-            (
-                stream: U3<ReadWriteStream, ReadableStream2, WritableStream2>,
-                options: FinishedOptions,
-                callback: (ErrnoException option -> unit)
-            ) : (unit -> unit) =
-            jsNative
-
-        /// <summary>
-        /// A readable and/or writable stream/webstream.
-        /// <br /><br />
-        /// A function to get notified when a stream is no longer readable, writable
-        /// or has experienced an error or a premature close event.
-        /// <code lang="js">
-        /// import { finished } from 'node:stream';
-        /// import fs from 'node:fs';
-        ///
-        /// const rs = fs.createReadStream('archive.tar');
-        ///
-        /// finished(rs, (err) =&gt; {
-        ///   if (err) {
-        ///     console.error('Stream failed.', err);
-        ///   } else {
-        ///     console.log('Stream is done reading.');
-        ///   }
-        /// });
-        ///
-        /// rs.resume(); // Drain the stream.
-        /// </code>
-        /// <br /><br />
-        /// Especially useful in error handling scenarios where a stream is destroyed
-        /// prematurely (like an aborted HTTP request), and will not emit <c>'end'</c> or <c>'finish'</c>.
-        /// <br /><br />
-        /// The <c>finished</c> API provides <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streamfinishedstream-options"><c>promise version</c></a>.
-        /// <br /><br />
-        /// <c>stream.finished()</c> leaves dangling event listeners (in particular <c>'error'</c>, <c>'end'</c>, <c>'finish'</c> and <c>'close'</c>) after <c>callback</c> has been
-        /// invoked. The reason for this is so that unexpected <c>'error'</c> events (due to
-        /// incorrect stream implementations) do not cause unexpected crashes.
-        /// If this is unwanted behavior then the returned cleanup function needs to be
-        /// invoked in the callback:
-        /// <code lang="js">
-        /// const cleanup = finished(rs, (err) =&gt; {
-        ///   cleanup();
-        ///   // ...
-        /// });
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <param name="stream">A readable and/or writable stream.</param>
-        /// <param name="callback">A callback function that takes an optional error argument.</param>
-        /// <returns>A cleanup function which removes all registered listeners.</returns>
-        [<Import("finished", "node:stream")>]
-        static member finished
-            (stream: U3<ReadWriteStream, ReadableStream2, WritableStream2>, callback: (ErrnoException option -> unit))
-            : (unit -> unit) =
-            jsNative
+        static member finished: Finished = jsNative
 
         /// <summary>
         /// A module method to pipe between streams and generators forwarding errors and
@@ -175353,428 +178009,7 @@ module Stream =
         /// <remarks>@since v10.0.0</remarks>
         /// <param name="callback">Called when the pipeline is fully done.</param>
         [<Import("pipeline", "node:stream")>]
-        static member pipeline<'A, 'B>(source: 'A, destination: 'B, callback: obj) : obj = jsNative
-
-        /// <summary>
-        /// A module method to pipe between streams and generators forwarding errors and
-        /// properly cleaning up and provide a callback when the pipeline is complete.
-        /// <code lang="js">
-        /// import { pipeline } from 'node:stream';
-        /// import fs from 'node:fs';
-        /// import zlib from 'node:zlib';
-        ///
-        /// // Use the pipeline API to easily pipe a series of streams
-        /// // together and get notified when the pipeline is fully done.
-        ///
-        /// // A pipeline to gzip a potentially huge tar file efficiently:
-        ///
-        /// pipeline(
-        ///   fs.createReadStream('archive.tar'),
-        ///   zlib.createGzip(),
-        ///   fs.createWriteStream('archive.tar.gz'),
-        ///   (err) =&gt; {
-        ///     if (err) {
-        ///       console.error('Pipeline failed.', err);
-        ///     } else {
-        ///       console.log('Pipeline succeeded.');
-        ///     }
-        ///   },
-        /// );
-        /// </code>
-        /// <br /><br />
-        /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
-        /// <br /><br />
-        /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
-        /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
-        /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
-        /// failure, this can cause event listener leaks and swallowed errors. If the last
-        /// stream is readable, dangling event listeners will be removed so that the last
-        /// stream can be consumed later.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
-        /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
-        /// once it would destroy the socket without sending the expected response.
-        /// See the example below:
-        /// <code lang="js">
-        /// import fs from 'node:fs';
-        /// import http from 'node:http';
-        /// import { pipeline } from 'node:stream';
-        ///
-        /// const server = http.createServer((req, res) =&gt; {
-        ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
-        ///   pipeline(fileStream, res, (err) =&gt; {
-        ///     if (err) {
-        ///       console.log(err); // No such file
-        ///       // this message can't be sent once `pipeline` already destroyed the socket
-        ///       return res.end('error!!!');
-        ///     }
-        ///   });
-        /// });
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <param name="callback">Called when the pipeline is fully done.</param>
-        [<Import("pipeline", "node:stream")>]
-        static member pipeline<'A, 'T1, 'B>(source: 'A, transform1: 'T1, destination: 'B, callback: obj) : obj =
-            jsNative
-
-        /// <summary>
-        /// A module method to pipe between streams and generators forwarding errors and
-        /// properly cleaning up and provide a callback when the pipeline is complete.
-        /// <code lang="js">
-        /// import { pipeline } from 'node:stream';
-        /// import fs from 'node:fs';
-        /// import zlib from 'node:zlib';
-        ///
-        /// // Use the pipeline API to easily pipe a series of streams
-        /// // together and get notified when the pipeline is fully done.
-        ///
-        /// // A pipeline to gzip a potentially huge tar file efficiently:
-        ///
-        /// pipeline(
-        ///   fs.createReadStream('archive.tar'),
-        ///   zlib.createGzip(),
-        ///   fs.createWriteStream('archive.tar.gz'),
-        ///   (err) =&gt; {
-        ///     if (err) {
-        ///       console.error('Pipeline failed.', err);
-        ///     } else {
-        ///       console.log('Pipeline succeeded.');
-        ///     }
-        ///   },
-        /// );
-        /// </code>
-        /// <br /><br />
-        /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
-        /// <br /><br />
-        /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
-        /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
-        /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
-        /// failure, this can cause event listener leaks and swallowed errors. If the last
-        /// stream is readable, dangling event listeners will be removed so that the last
-        /// stream can be consumed later.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
-        /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
-        /// once it would destroy the socket without sending the expected response.
-        /// See the example below:
-        /// <code lang="js">
-        /// import fs from 'node:fs';
-        /// import http from 'node:http';
-        /// import { pipeline } from 'node:stream';
-        ///
-        /// const server = http.createServer((req, res) =&gt; {
-        ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
-        ///   pipeline(fileStream, res, (err) =&gt; {
-        ///     if (err) {
-        ///       console.log(err); // No such file
-        ///       // this message can't be sent once `pipeline` already destroyed the socket
-        ///       return res.end('error!!!');
-        ///     }
-        ///   });
-        /// });
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <param name="callback">Called when the pipeline is fully done.</param>
-        [<Import("pipeline", "node:stream")>]
-        static member pipeline<'A, 'T1, 'T2, 'B>
-            (source: 'A, transform1: 'T1, transform2: 'T2, destination: 'B, callback: obj)
-            : obj =
-            jsNative
-
-        /// <summary>
-        /// A module method to pipe between streams and generators forwarding errors and
-        /// properly cleaning up and provide a callback when the pipeline is complete.
-        /// <code lang="js">
-        /// import { pipeline } from 'node:stream';
-        /// import fs from 'node:fs';
-        /// import zlib from 'node:zlib';
-        ///
-        /// // Use the pipeline API to easily pipe a series of streams
-        /// // together and get notified when the pipeline is fully done.
-        ///
-        /// // A pipeline to gzip a potentially huge tar file efficiently:
-        ///
-        /// pipeline(
-        ///   fs.createReadStream('archive.tar'),
-        ///   zlib.createGzip(),
-        ///   fs.createWriteStream('archive.tar.gz'),
-        ///   (err) =&gt; {
-        ///     if (err) {
-        ///       console.error('Pipeline failed.', err);
-        ///     } else {
-        ///       console.log('Pipeline succeeded.');
-        ///     }
-        ///   },
-        /// );
-        /// </code>
-        /// <br /><br />
-        /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
-        /// <br /><br />
-        /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
-        /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
-        /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
-        /// failure, this can cause event listener leaks and swallowed errors. If the last
-        /// stream is readable, dangling event listeners will be removed so that the last
-        /// stream can be consumed later.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
-        /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
-        /// once it would destroy the socket without sending the expected response.
-        /// See the example below:
-        /// <code lang="js">
-        /// import fs from 'node:fs';
-        /// import http from 'node:http';
-        /// import { pipeline } from 'node:stream';
-        ///
-        /// const server = http.createServer((req, res) =&gt; {
-        ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
-        ///   pipeline(fileStream, res, (err) =&gt; {
-        ///     if (err) {
-        ///       console.log(err); // No such file
-        ///       // this message can't be sent once `pipeline` already destroyed the socket
-        ///       return res.end('error!!!');
-        ///     }
-        ///   });
-        /// });
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <param name="callback">Called when the pipeline is fully done.</param>
-        [<Import("pipeline", "node:stream")>]
-        static member pipeline<'A, 'T1, 'T2, 'T3, 'B>
-            (source: 'A, transform1: 'T1, transform2: 'T2, transform3: 'T3, destination: 'B, callback: obj)
-            : obj =
-            jsNative
-
-        /// <summary>
-        /// A module method to pipe between streams and generators forwarding errors and
-        /// properly cleaning up and provide a callback when the pipeline is complete.
-        /// <code lang="js">
-        /// import { pipeline } from 'node:stream';
-        /// import fs from 'node:fs';
-        /// import zlib from 'node:zlib';
-        ///
-        /// // Use the pipeline API to easily pipe a series of streams
-        /// // together and get notified when the pipeline is fully done.
-        ///
-        /// // A pipeline to gzip a potentially huge tar file efficiently:
-        ///
-        /// pipeline(
-        ///   fs.createReadStream('archive.tar'),
-        ///   zlib.createGzip(),
-        ///   fs.createWriteStream('archive.tar.gz'),
-        ///   (err) =&gt; {
-        ///     if (err) {
-        ///       console.error('Pipeline failed.', err);
-        ///     } else {
-        ///       console.log('Pipeline succeeded.');
-        ///     }
-        ///   },
-        /// );
-        /// </code>
-        /// <br /><br />
-        /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
-        /// <br /><br />
-        /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
-        /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
-        /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
-        /// failure, this can cause event listener leaks and swallowed errors. If the last
-        /// stream is readable, dangling event listeners will be removed so that the last
-        /// stream can be consumed later.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
-        /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
-        /// once it would destroy the socket without sending the expected response.
-        /// See the example below:
-        /// <code lang="js">
-        /// import fs from 'node:fs';
-        /// import http from 'node:http';
-        /// import { pipeline } from 'node:stream';
-        ///
-        /// const server = http.createServer((req, res) =&gt; {
-        ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
-        ///   pipeline(fileStream, res, (err) =&gt; {
-        ///     if (err) {
-        ///       console.log(err); // No such file
-        ///       // this message can't be sent once `pipeline` already destroyed the socket
-        ///       return res.end('error!!!');
-        ///     }
-        ///   });
-        /// });
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <param name="callback">Called when the pipeline is fully done.</param>
-        [<Import("pipeline", "node:stream")>]
-        static member pipeline<'A, 'T1, 'T2, 'T3, 'T4, 'B>
-            (
-                source: 'A,
-                transform1: 'T1,
-                transform2: 'T2,
-                transform3: 'T3,
-                transform4: 'T4,
-                destination: 'B,
-                callback: obj
-            ) : obj =
-            jsNative
-
-        /// <summary>
-        /// A module method to pipe between streams and generators forwarding errors and
-        /// properly cleaning up and provide a callback when the pipeline is complete.
-        /// <code lang="js">
-        /// import { pipeline } from 'node:stream';
-        /// import fs from 'node:fs';
-        /// import zlib from 'node:zlib';
-        ///
-        /// // Use the pipeline API to easily pipe a series of streams
-        /// // together and get notified when the pipeline is fully done.
-        ///
-        /// // A pipeline to gzip a potentially huge tar file efficiently:
-        ///
-        /// pipeline(
-        ///   fs.createReadStream('archive.tar'),
-        ///   zlib.createGzip(),
-        ///   fs.createWriteStream('archive.tar.gz'),
-        ///   (err) =&gt; {
-        ///     if (err) {
-        ///       console.error('Pipeline failed.', err);
-        ///     } else {
-        ///       console.log('Pipeline succeeded.');
-        ///     }
-        ///   },
-        /// );
-        /// </code>
-        /// <br /><br />
-        /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
-        /// <br /><br />
-        /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
-        /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
-        /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
-        /// failure, this can cause event listener leaks and swallowed errors. If the last
-        /// stream is readable, dangling event listeners will be removed so that the last
-        /// stream can be consumed later.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
-        /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
-        /// once it would destroy the socket without sending the expected response.
-        /// See the example below:
-        /// <code lang="js">
-        /// import fs from 'node:fs';
-        /// import http from 'node:http';
-        /// import { pipeline } from 'node:stream';
-        ///
-        /// const server = http.createServer((req, res) =&gt; {
-        ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
-        ///   pipeline(fileStream, res, (err) =&gt; {
-        ///     if (err) {
-        ///       console.log(err); // No such file
-        ///       // this message can't be sent once `pipeline` already destroyed the socket
-        ///       return res.end('error!!!');
-        ///     }
-        ///   });
-        /// });
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <param name="callback">Called when the pipeline is fully done.</param>
-        [<Import("pipeline", "node:stream")>]
-        static member pipeline
-            (streams: U3<ReadWriteStream, ReadableStream2, WritableStream2>[], callback: (ErrnoException option -> unit)) : WritableStream2 =
-            jsNative
-
-        /// <summary>
-        /// A module method to pipe between streams and generators forwarding errors and
-        /// properly cleaning up and provide a callback when the pipeline is complete.
-        /// <code lang="js">
-        /// import { pipeline } from 'node:stream';
-        /// import fs from 'node:fs';
-        /// import zlib from 'node:zlib';
-        ///
-        /// // Use the pipeline API to easily pipe a series of streams
-        /// // together and get notified when the pipeline is fully done.
-        ///
-        /// // A pipeline to gzip a potentially huge tar file efficiently:
-        ///
-        /// pipeline(
-        ///   fs.createReadStream('archive.tar'),
-        ///   zlib.createGzip(),
-        ///   fs.createWriteStream('archive.tar.gz'),
-        ///   (err) =&gt; {
-        ///     if (err) {
-        ///       console.error('Pipeline failed.', err);
-        ///     } else {
-        ///       console.log('Pipeline succeeded.');
-        ///     }
-        ///   },
-        /// );
-        /// </code>
-        /// <br /><br />
-        /// The <c>pipeline</c> API provides a <a href="https://nodejs.org/docs/latest-v22.x/api/stream.html#streampipelinesource-transforms-destination-options"><c>promise version</c></a>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> will call <c>stream.destroy(err)</c> on all streams except:
-        /// <br /><br />
-        /// * <c>Readable</c> streams which have emitted <c>'end'</c> or <c>'close'</c>.
-        /// * <c>Writable</c> streams which have emitted <c>'finish'</c> or <c>'close'</c>.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> leaves dangling event listeners on the streams
-        /// after the <c>callback</c> has been invoked. In the case of reuse of streams after
-        /// failure, this can cause event listener leaks and swallowed errors. If the last
-        /// stream is readable, dangling event listeners will be removed so that the last
-        /// stream can be consumed later.
-        /// <br /><br />
-        /// <c>stream.pipeline()</c> closes all the streams when an error is raised.
-        /// The <c>IncomingRequest</c> usage with <c>pipeline</c> could lead to an unexpected behavior
-        /// once it would destroy the socket without sending the expected response.
-        /// See the example below:
-        /// <code lang="js">
-        /// import fs from 'node:fs';
-        /// import http from 'node:http';
-        /// import { pipeline } from 'node:stream';
-        ///
-        /// const server = http.createServer((req, res) =&gt; {
-        ///   const fileStream = fs.createReadStream('./fileNotExist.txt');
-        ///   pipeline(fileStream, res, (err) =&gt; {
-        ///     if (err) {
-        ///       console.log(err); // No such file
-        ///       // this message can't be sent once `pipeline` already destroyed the socket
-        ///       return res.end('error!!!');
-        ///     }
-        ///   });
-        /// });
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v10.0.0</remarks>
-        /// <param name="callback">Called when the pipeline is fully done.</param>
-        [<Import("pipeline", "node:stream")>]
-        static member pipeline
-            (
-                stream1: ReadableStream2,
-                stream2: U2<ReadWriteStream, WritableStream2>,
-                [<ParamArray>] streams: U3<ReadWriteStream, WritableStream2, (ErrnoException option -> unit)>[]
-            ) : WritableStream2 =
-            jsNative
+        static member pipeline: Pipeline = jsNative
 
         /// <summary>
         /// Returns whether the stream has encountered an error.
@@ -179392,142 +181627,7 @@ module Test =
         /// </param>
         /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
         [<Import("it", "node:test")>]
-        static member it(?name: string, ?fn: TestFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
-        /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
-        /// <br /><br />
-        /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
-        /// actions related to the current test. Examples include skipping the test, adding
-        /// additional diagnostic information, or creating subtests.
-        /// <br /><br />
-        /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
-        /// if <c>test()</c> is called within a suite, it fulfills immediately.
-        /// The return value can usually be discarded for top level tests.
-        /// However, the return value from subtests should be used to prevent the parent
-        /// test from finishing first and cancelling the subtest
-        /// as shown in the following example.
-        /// <code lang="js">
-        /// test('top level test', async (t) =&gt; {
-        ///   // The setTimeout() in the following subtest would cause it to outlive its
-        ///   // parent test if 'await' is removed on the next line. Once the parent test
-        ///   // completes, it will cancel any outstanding subtests.
-        ///   await t.test('longer running subtest', async (t) =&gt; {
-        ///     return new Promise((resolve, reject) =&gt; {
-        ///       setTimeout(resolve, 1000);
-        ///     });
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
-        /// canceling tests because a running test might block the application thread and
-        /// thus prevent the scheduled cancellation.
-        /// </summary>
-        /// <remarks>@since v18.0.0, v16.17.0</remarks>
-        /// <param name="name">
-        /// The name of the test, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the test.</param>
-        /// <param name="fn">
-        /// The function under test. The first argument to this function is a {@link TestContext} object.
-        /// If the test uses callbacks, the callback function is passed as the second argument.
-        /// </param>
-        /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
-        [<Import("it", "node:test")>]
-        static member it(?name: string, ?options: TestOptions, ?fn: TestFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
-        /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
-        /// <br /><br />
-        /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
-        /// actions related to the current test. Examples include skipping the test, adding
-        /// additional diagnostic information, or creating subtests.
-        /// <br /><br />
-        /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
-        /// if <c>test()</c> is called within a suite, it fulfills immediately.
-        /// The return value can usually be discarded for top level tests.
-        /// However, the return value from subtests should be used to prevent the parent
-        /// test from finishing first and cancelling the subtest
-        /// as shown in the following example.
-        /// <code lang="js">
-        /// test('top level test', async (t) =&gt; {
-        ///   // The setTimeout() in the following subtest would cause it to outlive its
-        ///   // parent test if 'await' is removed on the next line. Once the parent test
-        ///   // completes, it will cancel any outstanding subtests.
-        ///   await t.test('longer running subtest', async (t) =&gt; {
-        ///     return new Promise((resolve, reject) =&gt; {
-        ///       setTimeout(resolve, 1000);
-        ///     });
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
-        /// canceling tests because a running test might block the application thread and
-        /// thus prevent the scheduled cancellation.
-        /// </summary>
-        /// <remarks>@since v18.0.0, v16.17.0</remarks>
-        /// <param name="name">
-        /// The name of the test, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the test.</param>
-        /// <param name="fn">
-        /// The function under test. The first argument to this function is a {@link TestContext} object.
-        /// If the test uses callbacks, the callback function is passed as the second argument.
-        /// </param>
-        /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
-        [<Import("it", "node:test")>]
-        static member it(?options: TestOptions, ?fn: TestFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
-        /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
-        /// <br /><br />
-        /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
-        /// actions related to the current test. Examples include skipping the test, adding
-        /// additional diagnostic information, or creating subtests.
-        /// <br /><br />
-        /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
-        /// if <c>test()</c> is called within a suite, it fulfills immediately.
-        /// The return value can usually be discarded for top level tests.
-        /// However, the return value from subtests should be used to prevent the parent
-        /// test from finishing first and cancelling the subtest
-        /// as shown in the following example.
-        /// <code lang="js">
-        /// test('top level test', async (t) =&gt; {
-        ///   // The setTimeout() in the following subtest would cause it to outlive its
-        ///   // parent test if 'await' is removed on the next line. Once the parent test
-        ///   // completes, it will cancel any outstanding subtests.
-        ///   await t.test('longer running subtest', async (t) =&gt; {
-        ///     return new Promise((resolve, reject) =&gt; {
-        ///       setTimeout(resolve, 1000);
-        ///     });
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
-        /// canceling tests because a running test might block the application thread and
-        /// thus prevent the scheduled cancellation.
-        /// </summary>
-        /// <remarks>@since v18.0.0, v16.17.0</remarks>
-        /// <param name="name">
-        /// The name of the test, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the test.</param>
-        /// <param name="fn">
-        /// The function under test. The first argument to this function is a {@link TestContext} object.
-        /// If the test uses callbacks, the callback function is passed as the second argument.
-        /// </param>
-        /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
-        [<Import("it", "node:test")>]
-        static member it(?fn: TestFn) : JS.Promise<unit> = jsNative
+        static member it: Test = jsNative
 
         /// <summary>
         /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
@@ -179572,142 +181672,7 @@ module Test =
         /// </param>
         /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
         [<Import("test", "node:test")>]
-        static member test(?name: string, ?fn: TestFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
-        /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
-        /// <br /><br />
-        /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
-        /// actions related to the current test. Examples include skipping the test, adding
-        /// additional diagnostic information, or creating subtests.
-        /// <br /><br />
-        /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
-        /// if <c>test()</c> is called within a suite, it fulfills immediately.
-        /// The return value can usually be discarded for top level tests.
-        /// However, the return value from subtests should be used to prevent the parent
-        /// test from finishing first and cancelling the subtest
-        /// as shown in the following example.
-        /// <code lang="js">
-        /// test('top level test', async (t) =&gt; {
-        ///   // The setTimeout() in the following subtest would cause it to outlive its
-        ///   // parent test if 'await' is removed on the next line. Once the parent test
-        ///   // completes, it will cancel any outstanding subtests.
-        ///   await t.test('longer running subtest', async (t) =&gt; {
-        ///     return new Promise((resolve, reject) =&gt; {
-        ///       setTimeout(resolve, 1000);
-        ///     });
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
-        /// canceling tests because a running test might block the application thread and
-        /// thus prevent the scheduled cancellation.
-        /// </summary>
-        /// <remarks>@since v18.0.0, v16.17.0</remarks>
-        /// <param name="name">
-        /// The name of the test, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the test.</param>
-        /// <param name="fn">
-        /// The function under test. The first argument to this function is a {@link TestContext} object.
-        /// If the test uses callbacks, the callback function is passed as the second argument.
-        /// </param>
-        /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
-        [<Import("test", "node:test")>]
-        static member test(?name: string, ?options: TestOptions, ?fn: TestFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
-        /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
-        /// <br /><br />
-        /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
-        /// actions related to the current test. Examples include skipping the test, adding
-        /// additional diagnostic information, or creating subtests.
-        /// <br /><br />
-        /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
-        /// if <c>test()</c> is called within a suite, it fulfills immediately.
-        /// The return value can usually be discarded for top level tests.
-        /// However, the return value from subtests should be used to prevent the parent
-        /// test from finishing first and cancelling the subtest
-        /// as shown in the following example.
-        /// <code lang="js">
-        /// test('top level test', async (t) =&gt; {
-        ///   // The setTimeout() in the following subtest would cause it to outlive its
-        ///   // parent test if 'await' is removed on the next line. Once the parent test
-        ///   // completes, it will cancel any outstanding subtests.
-        ///   await t.test('longer running subtest', async (t) =&gt; {
-        ///     return new Promise((resolve, reject) =&gt; {
-        ///       setTimeout(resolve, 1000);
-        ///     });
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
-        /// canceling tests because a running test might block the application thread and
-        /// thus prevent the scheduled cancellation.
-        /// </summary>
-        /// <remarks>@since v18.0.0, v16.17.0</remarks>
-        /// <param name="name">
-        /// The name of the test, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the test.</param>
-        /// <param name="fn">
-        /// The function under test. The first argument to this function is a {@link TestContext} object.
-        /// If the test uses callbacks, the callback function is passed as the second argument.
-        /// </param>
-        /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
-        [<Import("test", "node:test")>]
-        static member test(?options: TestOptions, ?fn: TestFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>test()</c> function is the value imported from the <c>test</c> module. Each
-        /// invocation of this function results in reporting the test to the <c>TestsStream</c>.
-        /// <br /><br />
-        /// The <c>TestContext</c> object passed to the <c>fn</c> argument can be used to perform
-        /// actions related to the current test. Examples include skipping the test, adding
-        /// additional diagnostic information, or creating subtests.
-        /// <br /><br />
-        /// <c>test()</c> returns a <c>Promise</c> that fulfills once the test completes.
-        /// if <c>test()</c> is called within a suite, it fulfills immediately.
-        /// The return value can usually be discarded for top level tests.
-        /// However, the return value from subtests should be used to prevent the parent
-        /// test from finishing first and cancelling the subtest
-        /// as shown in the following example.
-        /// <code lang="js">
-        /// test('top level test', async (t) =&gt; {
-        ///   // The setTimeout() in the following subtest would cause it to outlive its
-        ///   // parent test if 'await' is removed on the next line. Once the parent test
-        ///   // completes, it will cancel any outstanding subtests.
-        ///   await t.test('longer running subtest', async (t) =&gt; {
-        ///     return new Promise((resolve, reject) =&gt; {
-        ///       setTimeout(resolve, 1000);
-        ///     });
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// The <c>timeout</c> option can be used to fail the test if it takes longer than <c>timeout</c> milliseconds to complete. However, it is not a reliable mechanism for
-        /// canceling tests because a running test might block the application thread and
-        /// thus prevent the scheduled cancellation.
-        /// </summary>
-        /// <remarks>@since v18.0.0, v16.17.0</remarks>
-        /// <param name="name">
-        /// The name of the test, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the test.</param>
-        /// <param name="fn">
-        /// The function under test. The first argument to this function is a {@link TestContext} object.
-        /// If the test uses callbacks, the callback function is passed as the second argument.
-        /// </param>
-        /// <returns>Fulfilled with <c>undefined</c> once the test completes, or immediately if the test runs within a suite.</returns>
-        [<Import("test", "node:test")>]
-        static member test(?fn: TestFn) : JS.Promise<unit> = jsNative
+        static member test: Test = jsNative
 
         /// <summary>
         /// <b>Note:</b> <c>shard</c> is used to horizontally parallelize test running across
@@ -179742,49 +181707,7 @@ module Test =
         /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
         /// <remarks>@since v20.13.0</remarks>
         [<Import("describe", "node:test")>]
-        static member describe(?name: string, ?options: TestOptions, ?fn: SuiteFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
-        /// </summary>
-        /// <param name="name">
-        /// The name of the suite, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
-        /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
-        /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
-        /// <remarks>@since v20.13.0</remarks>
-        [<Import("describe", "node:test")>]
-        static member describe(?name: string, ?fn: SuiteFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
-        /// </summary>
-        /// <param name="name">
-        /// The name of the suite, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
-        /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
-        /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
-        /// <remarks>@since v20.13.0</remarks>
-        [<Import("describe", "node:test")>]
-        static member describe(?options: TestOptions, ?fn: SuiteFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
-        /// </summary>
-        /// <param name="name">
-        /// The name of the suite, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
-        /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
-        /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
-        /// <remarks>@since v20.13.0</remarks>
-        [<Import("describe", "node:test")>]
-        static member describe(?fn: SuiteFn) : JS.Promise<unit> = jsNative
+        static member describe: Suite = jsNative
 
         /// <summary>
         /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
@@ -179798,49 +181721,7 @@ module Test =
         /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
         /// <remarks>@since v20.13.0</remarks>
         [<Import("suite", "node:test")>]
-        static member suite(?name: string, ?options: TestOptions, ?fn: SuiteFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
-        /// </summary>
-        /// <param name="name">
-        /// The name of the suite, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
-        /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
-        /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
-        /// <remarks>@since v20.13.0</remarks>
-        [<Import("suite", "node:test")>]
-        static member suite(?name: string, ?fn: SuiteFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
-        /// </summary>
-        /// <param name="name">
-        /// The name of the suite, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
-        /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
-        /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
-        /// <remarks>@since v20.13.0</remarks>
-        [<Import("suite", "node:test")>]
-        static member suite(?options: TestOptions, ?fn: SuiteFn) : JS.Promise<unit> = jsNative
-
-        /// <summary>
-        /// The <c>suite()</c> function is imported from the <c>node:test</c> module.
-        /// </summary>
-        /// <param name="name">
-        /// The name of the suite, which is displayed when reporting test results.
-        /// Defaults to the <c>name</c> property of <c>fn</c>, or <c>'&lt;anonymous&gt;'</c> if <c>fn</c> does not have a name.
-        /// </param>
-        /// <param name="options">Configuration options for the suite. This supports the same options as {@link test}.</param>
-        /// <param name="fn">The suite function declaring nested tests and suites. The first argument to this function is a {@link SuiteContext} object.</param>
-        /// <returns>Immediately fulfilled with <c>undefined</c>.</returns>
-        /// <remarks>@since v20.13.0</remarks>
-        [<Import("suite", "node:test")>]
-        static member suite(?fn: SuiteFn) : JS.Promise<unit> = jsNative
+        static member suite: Suite = jsNative
 
         /// <summary>
         /// Shorthand for skipping a test. This is the same as calling test with <c>options.skip</c> set to <c>true</c>.
@@ -180050,28 +181931,17 @@ module Test =
 
     module MockTracker =
         module Getter =
-            [<Interface>]
             type Result =
                 abstract mock: Test.MockFunctionContext<(unit -> obj)> with get, set
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: unit -> obj
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(mock: Test.MockFunctionContext<(unit -> obj)>) : Result = jsNative
-
-            [<Interface>]
             type Result2<'Implementation> =
                 abstract mock: Test.MockFunctionContext<U2<'Implementation, (unit -> obj)>> with get, set
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: unit -> obj
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (mock: Test.MockFunctionContext<U2<'Implementation, (unit -> obj)>>)
-                    : Result2<'Implementation> =
-                    jsNative
 
         module Method =
             type Result =
@@ -180119,28 +181989,17 @@ module Test =
                 abstract SymbolHasInstance: value: obj -> bool
 
         module Setter =
-            [<Interface>]
             type Result =
                 abstract mock: Test.MockFunctionContext<(obj -> unit)> with get, set
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: value: obj -> unit
 
-                [<ParamObject; Emit("$0")>]
-                static member Create(mock: Test.MockFunctionContext<(obj -> unit)>) : Result = jsNative
-
-            [<Interface>]
             type Result2<'Implementation> =
                 abstract mock: Test.MockFunctionContext<U2<'Implementation, (obj -> unit)>> with get, set
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: value: obj -> unit
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (mock: Test.MockFunctionContext<U2<'Implementation, (obj -> unit)>>)
-                    : Result2<'Implementation> =
-                    jsNative
 
     /// <summary>node:test/reporters</summary>
     module Reporters =
@@ -180190,7 +182049,7 @@ module Test =
             /// </summary>
             /// <remarks>@since v20.0.0</remarks>
             [<Import("spec", "node:test/reporters")>]
-            static member spec() : SpecReporter = jsNative
+            static member spec: SpecConstructor = jsNative
 
             /// <summary>
             /// The <c>junit</c> reporter outputs test results in a jUnit XML format.
@@ -180696,33 +182555,7 @@ module Timers =
         /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
         /// <returns>for use with <c>clearImmediate()</c></returns>
         [<Import("setImmediate", "node:timers")>]
-        static member setImmediate<'TArgs>(callback: ('TArgs -> unit), [<ParamArray>] args: 'TArgs) : Immediate =
-            jsNative
-
-        /// <summary>
-        /// Schedules the "immediate" execution of the <c>callback</c> after I/O events'
-        /// callbacks.
-        /// <br /><br />
-        /// When multiple calls to <c>setImmediate()</c> are made, the <c>callback</c> functions are
-        /// queued for execution in the order in which they are created. The entire callback
-        /// queue is processed every event loop iteration. If an immediate timer is queued
-        /// from inside an executing callback, that timer will not be triggered until the
-        /// next event loop iteration.
-        /// <br /><br />
-        /// If <c>callback</c> is not a function, a <c>TypeError</c> will be thrown.
-        /// <br /><br />
-        /// This method has a custom variant for promises that is available using
-        /// <c>timersPromises.setImmediate()</c>.
-        /// </summary>
-        /// <remarks>@since v0.9.1</remarks>
-        /// <param name="callback">
-        /// The function to call at the end of this turn of
-        /// the Node.js <a href="https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/#setimmediate-vs-settimeout">Event Loop</a>
-        /// </param>
-        /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
-        /// <returns>for use with <c>clearImmediate()</c></returns>
-        [<Import("setImmediate", "node:timers")>]
-        static member setImmediate(callback: (unit -> unit)) : Immediate = jsNative
+        static member setImmediate: SetImmediate = jsNative
 
         /// <summary>
         /// Schedules repeated execution of <c>callback</c> every <c>delay</c> milliseconds.
@@ -180796,37 +182629,7 @@ module Timers =
         /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
         /// <returns>for use with <c>clearTimeout()</c></returns>
         [<Import("setTimeout", "node:timers")>]
-        static member setTimeout<'TArgs>
-            (callback: ('TArgs -> unit), delay: float option, [<ParamArray>] args: 'TArgs)
-            : Timeout =
-            jsNative
-
-        /// <summary>
-        /// Schedules execution of a one-time <c>callback</c> after <c>delay</c> milliseconds.
-        /// <br /><br />
-        /// The <c>callback</c> will likely not be invoked in precisely <c>delay</c> milliseconds.
-        /// Node.js makes no guarantees about the exact timing of when callbacks will fire,
-        /// nor of their ordering. The callback will be called as close as possible to the
-        /// time specified.
-        /// <br /><br />
-        /// When <c>delay</c> is larger than <c>2147483647</c> or less than <c>1</c> or <c>NaN</c>, the <c>delay</c>
-        /// will be set to <c>1</c>. Non-integer delays are truncated to an integer.
-        /// <br /><br />
-        /// If <c>callback</c> is not a function, a <c>TypeError</c> will be thrown.
-        /// <br /><br />
-        /// This method has a custom variant for promises that is available using
-        /// <c>timersPromises.setTimeout()</c>.
-        /// </summary>
-        /// <remarks>@since v0.0.1</remarks>
-        /// <param name="callback">The function to call when the timer elapses.</param>
-        /// <param name="delay">
-        /// The number of milliseconds to wait before calling the
-        /// <c>callback</c>. <b>Default:</b> <c>1</c>.
-        /// </param>
-        /// <param name="args">Optional arguments to pass when the <c>callback</c> is called.</param>
-        /// <returns>for use with <c>clearTimeout()</c></returns>
-        [<Import("setTimeout", "node:timers")>]
-        static member setTimeout(callback: (unit -> unit), ?delay: float) : Timeout = jsNative
+        static member setTimeout: SetTimeout = jsNative
 
         /// <summary>
         /// Cancels an <c>Immediate</c> object created by <c>setImmediate()</c>.
@@ -191774,7 +193577,6 @@ module Util =
 
     type DebugLoggerFunction = delegate of msg: string * param: obj[] -> unit
 
-    [<Interface>]
     type DebugLogger =
         /// <summary>
         /// The <c>util.debuglog().enabled</c> getter is used to create a test that can be used
@@ -191800,9 +193602,6 @@ module Util =
 
         [<Emit("$0($1...)")>]
         abstract Invoke: msg: string * [<ParamArray>] param: obj[] -> unit
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(enabled: bool) : DebugLogger = jsNative
 
     type CustomPromisifyLegacy<'TCustom> =
         abstract __promisify__: 'TCustom with get, set
@@ -193369,178 +195168,7 @@ module Util =
         /// <param name="object">Any JavaScript primitive or <c>Object</c>.</param>
         /// <returns>The representation of <c>object</c>.</returns>
         [<Import("inspect", "node:util")>]
-        static member inspect(``object``: obj, ?showHidden: bool, ?depth: float, ?color: bool) : string = jsNative
-
-        /// <summary>
-        /// The <c>util.inspect()</c> method returns a string representation of <c>object</c> that is
-        /// intended for debugging. The output of <c>util.inspect</c> may change at any time
-        /// and should not be depended upon programmatically. Additional <c>options</c> may be
-        /// passed that alter the result.
-        /// <c>util.inspect()</c> will use the constructor's name and/or <c>Symbol.toStringTag</c>
-        /// property to make an identifiable tag for an inspected value.
-        /// <code lang="js">
-        /// class Foo {
-        ///   get [Symbol.toStringTag]() {
-        ///     return 'bar';
-        ///   }
-        /// }
-        ///
-        /// class Bar {}
-        ///
-        /// const baz = Object.create(null, { [Symbol.toStringTag]: { value: 'foo' } });
-        ///
-        /// util.inspect(new Foo()); // 'Foo [bar] {}'
-        /// util.inspect(new Bar()); // 'Bar {}'
-        /// util.inspect(baz);       // '[foo] {}'
-        /// </code>
-        /// <br /><br />
-        /// Circular references point to their anchor by using a reference index:
-        /// <code lang="js">
-        /// import { inspect } from 'node:util';
-        ///
-        /// const obj = {};
-        /// obj.a = [obj];
-        /// obj.b = {};
-        /// obj.b.inner = obj.b;
-        /// obj.b.obj = obj;
-        ///
-        /// console.log(inspect(obj));
-        /// // &lt;ref *1&gt; {
-        /// //   a: [ [Circular *1] ],
-        /// //   b: &lt;ref *2&gt; { inner: [Circular *2], obj: [Circular *1] }
-        /// // }
-        /// </code>
-        /// <br /><br />
-        /// The following example inspects all properties of the <c>util</c> object:
-        /// <code lang="js">
-        /// import util from 'node:util';
-        ///
-        /// console.log(util.inspect(util, { showHidden: true, depth: null }));
-        /// </code>
-        /// <br /><br />
-        /// The following example highlights the effect of the <c>compact</c> option:
-        /// <code lang="js">
-        /// import { inspect } from 'node:util';
-        ///
-        /// const o = {
-        ///   a: [1, 2, [[
-        ///     'Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit, sed do ' +
-        ///       'eiusmod \ntempor incididunt ut labore et dolore magna aliqua.',
-        ///     'test',
-        ///     'foo']], 4],
-        ///   b: new Map([['za', 1], ['zb', 'test']]),
-        /// };
-        /// console.log(inspect(o, { compact: true, depth: 5, breakLength: 80 }));
-        ///
-        /// // { a:
-        /// //   [ 1,
-        /// //     2,
-        /// //     [ [ 'Lorem ipsum dolor sit amet,\nconsectetur [...]', // A long line
-        /// //           'test',
-        /// //           'foo' ] ],
-        /// //     4 ],
-        /// //   b: Map(2) { 'za' =&gt; 1, 'zb' =&gt; 'test' } }
-        ///
-        /// // Setting `compact` to false or an integer creates more reader friendly output.
-        /// console.log(inspect(o, { compact: false, depth: 5, breakLength: 80 }));
-        ///
-        /// // {
-        /// //   a: [
-        /// //     1,
-        /// //     2,
-        /// //     [
-        /// //       [
-        /// //         'Lorem ipsum dolor sit amet,\n' +
-        /// //           'consectetur adipiscing elit, sed do eiusmod \n' +
-        /// //           'tempor incididunt ut labore et dolore magna aliqua.',
-        /// //         'test',
-        /// //         'foo'
-        /// //       ]
-        /// //     ],
-        /// //     4
-        /// //   ],
-        /// //   b: Map(2) {
-        /// //     'za' =&gt; 1,
-        /// //     'zb' =&gt; 'test'
-        /// //   }
-        /// // }
-        ///
-        /// // Setting `breakLength` to e.g. 150 will print the "Lorem ipsum" text in a
-        /// // single line.
-        /// </code>
-        /// <br /><br />
-        /// The <c>showHidden</c> option allows <c>WeakMap</c> and <c>WeakSet</c> entries to be
-        /// inspected. If there are more entries than <c>maxArrayLength</c>, there is no
-        /// guarantee which entries are displayed. That means retrieving the same
-        /// <c>WeakSet</c> entries twice may result in different output. Furthermore, entries
-        /// with no remaining strong references may be garbage collected at any time.
-        /// <code lang="js">
-        /// import { inspect } from 'node:util';
-        ///
-        /// const obj = { a: 1 };
-        /// const obj2 = { b: 2 };
-        /// const weakSet = new WeakSet([obj, obj2]);
-        ///
-        /// console.log(inspect(weakSet, { showHidden: true }));
-        /// // WeakSet { { a: 1 }, { b: 2 } }
-        /// </code>
-        /// <br /><br />
-        /// The <c>sorted</c> option ensures that an object's property insertion order does not
-        /// impact the result of <c>util.inspect()</c>.
-        /// <code lang="js">
-        /// import { inspect } from 'node:util';
-        /// import assert from 'node:assert';
-        ///
-        /// const o1 = {
-        ///   b: [2, 3, 1],
-        ///   a: '`a` comes before `b`',
-        ///   c: new Set([2, 3, 1]),
-        /// };
-        /// console.log(inspect(o1, { sorted: true }));
-        /// // { a: '`a` comes before `b`', b: [ 2, 3, 1 ], c: Set(3) { 1, 2, 3 } }
-        /// console.log(inspect(o1, { sorted: (a, b) =&gt; b.localeCompare(a) }));
-        /// // { c: Set(3) { 3, 2, 1 }, b: [ 2, 3, 1 ], a: '`a` comes before `b`' }
-        ///
-        /// const o2 = {
-        ///   c: new Set([2, 1, 3]),
-        ///   a: '`a` comes before `b`',
-        ///   b: [2, 3, 1],
-        /// };
-        /// assert.strict.equal(
-        ///   inspect(o1, { sorted: true }),
-        ///   inspect(o2, { sorted: true }),
-        /// );
-        /// </code>
-        /// <br /><br />
-        /// The <c>numericSeparator</c> option adds an underscore every three digits to all
-        /// numbers.
-        /// <code lang="js">
-        /// import { inspect } from 'node:util';
-        ///
-        /// const thousand = 1000;
-        /// const million = 1000000;
-        /// const bigNumber = 123456789n;
-        /// const bigDecimal = 1234.12345;
-        ///
-        /// console.log(inspect(thousand, { numericSeparator: true }));
-        /// // 1_000
-        /// console.log(inspect(million, { numericSeparator: true }));
-        /// // 1_000_000
-        /// console.log(inspect(bigNumber, { numericSeparator: true }));
-        /// // 123_456_789n
-        /// console.log(inspect(bigDecimal, { numericSeparator: true }));
-        /// // 1_234.123_45
-        /// </code>
-        /// <br /><br />
-        /// <c>util.inspect()</c> is a synchronous method intended for debugging. Its maximum
-        /// output length is approximately 128 MiB. Inputs that result in longer output will
-        /// be truncated.
-        /// </summary>
-        /// <remarks>@since v0.3.0</remarks>
-        /// <param name="object">Any JavaScript primitive or <c>Object</c>.</param>
-        /// <returns>The representation of <c>object</c>.</returns>
-        [<Import("inspect", "node:util")>]
-        static member inspect(``object``: obj, ?options: InspectOptions) : string = jsNative
+        static member inspect: Inspect = jsNative
 
         /// <summary>
         /// Alias for <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray"><c>Array.isArray()</c></a>.
@@ -194943,956 +196571,7 @@ module Util =
         /// </summary>
         /// <remarks>@since v8.0.0</remarks>
         [<Import("promisify", "node:util")>]
-        static member promisify<'TCustom>
-            (fn: U2<CustomPromisifyLegacy<'TCustom>, CustomPromisifySymbol<'TCustom>>)
-            : 'TCustom =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'TResult>
-            (fn: (Promisify.Fn.Callback<'TResult> -> unit))
-            : (unit -> JS.Promise<'TResult>) =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify(fn: ((obj option -> unit) -> unit)) : (unit -> JS.Promise<unit>) = jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'TResult>(fn: Promisify.Fn<'T1, 'TResult>) : ('T1 -> JS.Promise<'TResult>) =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1>(fn: Promisify.Fn2<'T1>) : ('T1 -> JS.Promise<unit>) = jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'T2, 'TResult>
-            (fn: Promisify.Fn3<'T1, 'T2, 'TResult>)
-            : Promisify.Result<'T1, 'T2, 'TResult> =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'T2>(fn: Promisify.Fn4<'T1, 'T2>) : Promisify.Result2<'T1, 'T2> = jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'T2, 'T3, 'TResult>
-            (fn: Promisify.Fn5<'T1, 'T2, 'T3, 'TResult>)
-            : Promisify.Result3<'T1, 'T2, 'T3, 'TResult> =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'T2, 'T3>(fn: Promisify.Fn6<'T1, 'T2, 'T3>) : Promisify.Result4<'T1, 'T2, 'T3> =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'T2, 'T3, 'T4, 'TResult>
-            (fn: Promisify.Fn7<'T1, 'T2, 'T3, 'T4, 'TResult>)
-            : Promisify.Result5<'T1, 'T2, 'T3, 'T4, 'TResult> =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'T2, 'T3, 'T4>
-            (fn: Promisify.Fn8<'T1, 'T2, 'T3, 'T4>)
-            : Promisify.Result6<'T1, 'T2, 'T3, 'T4> =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'T2, 'T3, 'T4, 'T5, 'TResult>
-            (fn: Promisify.Fn9<'T1, 'T2, 'T3, 'T4, 'T5, 'TResult>)
-            : Promisify.Result7<'T1, 'T2, 'T3, 'T4, 'T5, 'TResult> =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify<'T1, 'T2, 'T3, 'T4, 'T5>
-            (fn: Promisify.Fn10<'T1, 'T2, 'T3, 'T4, 'T5>)
-            : Promisify.Result8<'T1, 'T2, 'T3, 'T4, 'T5> =
-            jsNative
-
-        /// <summary>
-        /// Takes a function following the common error-first callback style, i.e. taking
-        /// an <c>(err, value) =&gt; ...</c> callback as the last argument, and returns a version
-        /// that returns promises.
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        /// promisifiedStat('.').then((stats) =&gt; {
-        ///   // Do something with `stats`
-        /// }).catch((error) =&gt; {
-        ///   // Handle the error.
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Or, equivalently using <c>async function</c>s:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        /// import { stat } from 'node:fs';
-        ///
-        /// const promisifiedStat = promisify(stat);
-        ///
-        /// async function callStat() {
-        ///   const stats = await promisifiedStat('.');
-        ///   console.log(`This directory is owned by ${stats.uid}`);
-        /// }
-        ///
-        /// callStat();
-        /// </code>
-        /// <br /><br />
-        /// If there is an <c>original[util.promisify.custom]</c> property present, <c>promisify</c>
-        /// will return its value, see <a href="https://nodejs.org/docs/latest-v22.x/api/util.html#custom-promisified-functions">Custom promisified functions</a>.
-        /// <br /><br />
-        /// <c>promisify()</c> assumes that <c>original</c> is a function taking a callback as its
-        /// final argument in all cases. If <c>original</c> is not a function, <c>promisify()</c>
-        /// will throw an error. If <c>original</c> is a function but its last argument is not
-        /// an error-first callback, it will still be passed an error-first
-        /// callback as its last argument.
-        /// <br /><br />
-        /// Using <c>promisify()</c> on class methods or other methods that use <c>this</c> may not
-        /// work as expected unless handled specially:
-        /// <code lang="js">
-        /// import { promisify } from 'node:util';
-        ///
-        /// class Foo {
-        ///   constructor() {
-        ///     this.a = 42;
-        ///   }
-        ///
-        ///   bar(callback) {
-        ///     callback(null, this.a);
-        ///   }
-        /// }
-        ///
-        /// const foo = new Foo();
-        ///
-        /// const naiveBar = promisify(foo.bar);
-        /// // TypeError: Cannot read properties of undefined (reading 'a')
-        /// // naiveBar().then(a =&gt; console.log(a));
-        ///
-        /// naiveBar.call(foo).then((a) =&gt; console.log(a)); // '42'
-        ///
-        /// const bindBar = naiveBar.bind(foo);
-        /// bindBar().then((a) =&gt; console.log(a)); // '42'
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v8.0.0</remarks>
-        [<Import("promisify", "node:util")>]
-        static member promisify(fn: Fable.Core.TS.Es.Function) : Fable.Core.TS.Es.Function = jsNative
+        static member promisify: Promisify = jsNative
 
         /// <summary>
         /// Stability: 1.1 - Active development
@@ -224195,12 +224874,7 @@ module Zlib =
 
         /// <remarks>@since v11.7.0, v10.16.0</remarks>
         [<Import("brotliCompress", "node:zlib")>]
-        static member brotliCompress(buf: InputType, options: BrotliOptions, callback: CompressCallback) : unit =
-            jsNative
-
-        /// <remarks>@since v11.7.0, v10.16.0</remarks>
-        [<Import("brotliCompress", "node:zlib")>]
-        static member brotliCompress(buf: InputType, callback: CompressCallback) : unit = jsNative
+        static member brotliCompress: Node.BrotliCompress = jsNative
 
         /// <summary>
         /// Compress a chunk of data with <c>BrotliCompress</c>.
@@ -224211,12 +224885,7 @@ module Zlib =
 
         /// <remarks>@since v11.7.0, v10.16.0</remarks>
         [<Import("brotliDecompress", "node:zlib")>]
-        static member brotliDecompress(buf: InputType, options: BrotliOptions, callback: CompressCallback) : unit =
-            jsNative
-
-        /// <remarks>@since v11.7.0, v10.16.0</remarks>
-        [<Import("brotliDecompress", "node:zlib")>]
-        static member brotliDecompress(buf: InputType, callback: CompressCallback) : unit = jsNative
+        static member brotliDecompress: Node.BrotliDecompress = jsNative
 
         /// <summary>
         /// Decompress a chunk of data with <c>BrotliDecompress</c>.
@@ -224227,11 +224896,7 @@ module Zlib =
 
         /// <remarks>@since v0.6.0</remarks>
         [<Import("deflate", "node:zlib")>]
-        static member deflate(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v0.6.0</remarks>
-        [<Import("deflate", "node:zlib")>]
-        static member deflate(buf: InputType, options: ZlibOptions, callback: CompressCallback) : unit = jsNative
+        static member deflate: Node.Deflate = jsNative
 
         /// <summary>
         /// Compress a chunk of data with <c>Deflate</c>.
@@ -224242,11 +224907,7 @@ module Zlib =
 
         /// <remarks>@since v0.6.0</remarks>
         [<Import("deflateRaw", "node:zlib")>]
-        static member deflateRaw(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v0.6.0</remarks>
-        [<Import("deflateRaw", "node:zlib")>]
-        static member deflateRaw(buf: InputType, options: ZlibOptions, callback: CompressCallback) : unit = jsNative
+        static member deflateRaw: Node.DeflateRaw = jsNative
 
         /// <summary>
         /// Compress a chunk of data with <c>DeflateRaw</c>.
@@ -224257,11 +224918,7 @@ module Zlib =
 
         /// <remarks>@since v0.6.0</remarks>
         [<Import("gzip", "node:zlib")>]
-        static member gzip(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v0.6.0</remarks>
-        [<Import("gzip", "node:zlib")>]
-        static member gzip(buf: InputType, options: ZlibOptions, callback: CompressCallback) : unit = jsNative
+        static member gzip: Node.Gzip = jsNative
 
         /// <summary>
         /// Compress a chunk of data with <c>Gzip</c>.
@@ -224272,11 +224929,7 @@ module Zlib =
 
         /// <remarks>@since v0.6.0</remarks>
         [<Import("gunzip", "node:zlib")>]
-        static member gunzip(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v0.6.0</remarks>
-        [<Import("gunzip", "node:zlib")>]
-        static member gunzip(buf: InputType, options: ZlibOptions, callback: CompressCallback) : unit = jsNative
+        static member gunzip: Node.Gunzip = jsNative
 
         /// <summary>
         /// Decompress a chunk of data with <c>Gunzip</c>.
@@ -224287,11 +224940,7 @@ module Zlib =
 
         /// <remarks>@since v0.6.0</remarks>
         [<Import("inflate", "node:zlib")>]
-        static member inflate(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v0.6.0</remarks>
-        [<Import("inflate", "node:zlib")>]
-        static member inflate(buf: InputType, options: ZlibOptions, callback: CompressCallback) : unit = jsNative
+        static member inflate: Node.Inflate = jsNative
 
         /// <summary>
         /// Decompress a chunk of data with <c>Inflate</c>.
@@ -224302,11 +224951,7 @@ module Zlib =
 
         /// <remarks>@since v0.6.0</remarks>
         [<Import("inflateRaw", "node:zlib")>]
-        static member inflateRaw(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v0.6.0</remarks>
-        [<Import("inflateRaw", "node:zlib")>]
-        static member inflateRaw(buf: InputType, options: ZlibOptions, callback: CompressCallback) : unit = jsNative
+        static member inflateRaw: Node.InflateRaw = jsNative
 
         /// <summary>
         /// Decompress a chunk of data with <c>InflateRaw</c>.
@@ -224317,11 +224962,7 @@ module Zlib =
 
         /// <remarks>@since v0.6.0</remarks>
         [<Import("unzip", "node:zlib")>]
-        static member unzip(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v0.6.0</remarks>
-        [<Import("unzip", "node:zlib")>]
-        static member unzip(buf: InputType, options: ZlibOptions, callback: CompressCallback) : unit = jsNative
+        static member unzip: Node.Unzip = jsNative
 
         /// <summary>
         /// Decompress a chunk of data with <c>Unzip</c>.
@@ -224333,12 +224974,7 @@ module Zlib =
         /// <remarks>@since v22.15.0</remarks>
         /// <remarks>@experimental</remarks>
         [<Import("zstdCompress", "node:zlib")>]
-        static member zstdCompress(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v22.15.0</remarks>
-        /// <remarks>@experimental</remarks>
-        [<Import("zstdCompress", "node:zlib")>]
-        static member zstdCompress(buf: InputType, options: ZstdOptions, callback: CompressCallback) : unit = jsNative
+        static member zstdCompress: Node.ZstdCompress = jsNative
 
         /// <summary>
         /// Compress a chunk of data with <c>ZstdCompress</c>.
@@ -224351,12 +224987,7 @@ module Zlib =
         /// <remarks>@since v22.15.0</remarks>
         /// <remarks>@experimental</remarks>
         [<Import("zstdDecompress", "node:zlib")>]
-        static member zstdDecompress(buf: InputType, callback: CompressCallback) : unit = jsNative
-
-        /// <remarks>@since v22.15.0</remarks>
-        /// <remarks>@experimental</remarks>
-        [<Import("zstdDecompress", "node:zlib")>]
-        static member zstdDecompress(buf: InputType, options: ZstdOptions, callback: CompressCallback) : unit = jsNative
+        static member zstdDecompress: Node.ZstdDecompress = jsNative
 
         /// <summary>
         /// Decompress a chunk of data with <c>ZstdDecompress</c>.

@@ -70,3 +70,24 @@ export interface Collides {
 }
 
 export declare const collides: Collides;
+
+// ---------------------------------------------------------------------------
+// A function merged with a namespace that holds a value is a hybrid: the export is that object,
+// called through Invoke. A function standing alone, or merged with a type alone, stays a method.
+// ---------------------------------------------------------------------------
+
+export function stamp(s: string): number;
+export namespace stamp {
+    const version: string;
+}
+
+export interface Merged { m: string }
+export function Merged(): Merged;
+export namespace Merged {
+    const version: string;
+}
+
+export function solo(x: string): number;
+
+export type Fn = { value: number };
+export function Fn(value: number): Fn;

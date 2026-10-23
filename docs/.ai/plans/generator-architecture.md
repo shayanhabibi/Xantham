@@ -3038,3 +3038,51 @@ golden-tooling tests passed.
 
 Full validation passed: 1,497 generator tests and 105 Wire tests (one ignored in each suite),
 579 runtime checks, and the Partas JSX, source/DLL and Vitest gates.
+## Exclusive-arm fold arms and signatures, value-side names (2026-10-15, #158 follow-up)
+
+`shape-interfaces` removes only an exclusive fold's anonymous arms (`Spec.isAnonymousArm`) from
+`DeclNames`. A source-named arm stays declared, under the name `name-exports` gives every
+namespace member at this point (`Contested.Left` beside a top-level `Left`, bare `Right`
+otherwise). The fold no longer leaves references to an undeclared arm (FS0039), and no longer
+widens a parameter typed by one (TR023). `exclusive-arms-lab` declares `QueryArm`, `MessagesArm`,
+`ImageArm` and `SnapshotArm` again; no other golden moved. The namespace-member harvest plan
+(`2026-10-15-namespace-member-harvest.md`, R1) later nests every namespace member, which re-pins
+pair four to `Contested.Right`.
+
+The exclusive fold also requires every arm to agree on a shared member's readonly; otherwise the
+union stays `U2`, so the folded member's setter cannot depend on which arm comes first.
+
+Where the bare name is taken, `synthesize-anonymous` names an enum's value side `<Stem>Enum`, a
+namespace merged with a type `<Stem>Namespace`, and a variable merged with a type `<Stem>Value`
+(`SY007`), instead of the first free number. The number had also counted arms that
+`drop-orphan-delegates` later prunes (`Shape4` beside a DU whose `Shape2`/`Shape3` were
+dropped). The shapes an enum's or namespace's values own nest under the source namespace
+(`nestBases[value] = root`): `Point.Defaults`, or `Point.Anchor2` where the namespace type
+`Point.Anchor` holds the name. Renamed in the goldens: `case-sanitise-lab` `KindEnum`,
+`CollideEnum`, `PlainEnum`; `literal-member-lab` `LevelEnum`. This change leaves Core.TS and Node
+unchanged.
+
+`shape-exports` binds a callable value export as a method only where its value type carries
+call signatures alone. A function merged with a namespace holding values, or a callable `const`
+carrying properties, binds as that hybrid object (`static member stamp: Stamp`) and is called
+through `Invoke`. Its value side is role-named like any merged value side (`MergedNamespace`,
+`SY007`; Task D's rule now excludes classes only). `synthesize-paramobjects` refuses `Create` on
+any declaration whose type is callable (SP003 "the declaration is callable…"), including one
+whose call is the SI001 loss: no object literal is callable. Node: ~76 function+namespace
+exports move to the property form, and 64 callable hybrids lose `Create`; Core.TS loses 2.
+
+## PR #161 resync onto #160 (2026-10-22)
+
+The official gh stack extension restacks this slice onto #160 at 3f860134.
+It inherits TypeScript 7.1.0-beta, public Fable.Core 5.5.0 and Fickl 0.5.3.
+The source-named arms, readonly agreement, role-named value sides and callable hybrids
+are retained. Generated catalogue conflicts are resolved by regeneration.
+
+Against the previous #161 head, Core.TS tiers move 1318/2677/277/5 to 1340/2726/291/5
+through the beta library additions. Node stays 815/2158/595/5 with identical bindings.
+Type-fest moves 27/66/202/2 to 27/66/204/0; other fixture tier counts are unchanged.
+All 137 golden-writing tests passed without further fixture changes.
+
+Full validation passed: 1,504 generator tests and 105 Wire tests (one ignored in each suite),
+586 runtime checks, and the Partas JSX, source/DLL and Vitest gates. Resync reviews found
+no introduced spec or standards issues.

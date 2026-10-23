@@ -64,6 +64,18 @@ let shapeInterfaces: Pass<ShapeModel> =
                             |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
                         |> Map.ofList
 
+                    // The JSDoc of the export whose value a declaration is: a function merged
+                    // with a namespace documents its call signatures, which the hybrid's
+                    // `Invoke` carries.
+                    let valueDocs =
+                        model.Harvest.Exports
+                        |> List.choose (fun export ->
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                            |> Option.bind _.Value
+                            |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
+                        |> List.distinctBy fst
+                        |> Map.ofList
+
                     // A union whose arms agree on every member except which ones they declare
                     // `never` (wave fourteen item 4): folded into one interface named after the
                     // union itself, with the exclusive members optional and one `Create`
@@ -81,11 +93,16 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 | ExclusiveArmsDecline arms -> Some(typeId, name, Choice2Of2 arms)
                             | _ -> None)
 
+                    // The fold replaces only the arms the checker named: a source-named arm is a
+                    // declaration in its own right and stays, nesting under its namespace.
                     let foldedArmIds =
                         exclusiveUnions
                         |> List.collect (fun (_, _, outcome) ->
                             match outcome with
-                            | Choice1Of2(_, arms) -> arms |> List.map (fun a -> a.Facts.Response.TypeId)
+                            | Choice1Of2(_, arms) ->
+                                arms
+                                |> List.filter (fun a -> isAnonymousArm a.Facts)
+                                |> List.map (fun a -> a.Facts.Response.TypeId)
                             | Choice2Of2 _ -> [])
                         |> Set.ofList
 
@@ -323,10 +340,13 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                             findings <- findings @ signatureFindings
 
+                                            let docs, tags =
+                                                Map.tryFind typeId valueDocs |> Option.defaultValue ("", [])
+
                                             FsInvoke
                                                 {
-                                                    Docs = ""
-                                                    Tags = []
+                                                    Docs = docs
+                                                    Tags = signatureTags tags signature
                                                     TypeParameters = typeParameters
                                                     Parameters = parameters
                                                     Return = returns

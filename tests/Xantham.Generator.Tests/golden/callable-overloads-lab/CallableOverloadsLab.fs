@@ -31,13 +31,10 @@ type Multiplex = (float -> float)
 /// Negative: a member beside the call signature routes through the existing hybrid path (§4.4),
 /// regardless of the call signature's own shape.
 /// </summary>
-[<Interface>]
 type Ledger =
     abstract count: float with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: id: float -> string
-    [<ParamObject; Emit("$0")>]
-    static member Create (count: float) : Ledger = jsNative
 
 /// <summary>
 /// <c>Coalesce</c> at a member position: both call signatures recover as separable overloads under
@@ -68,6 +65,6 @@ type Exports =
     [<Import("multiplex", "callable-overloads-lab")>]
     static member multiplex (value: float, extra: float) : float = jsNative
     [<Import("ledger", "callable-overloads-lab")>]
-    static member ledger (id: float) : string = jsNative
+    static member ledger: Ledger = jsNative
     [<Import("holder", "callable-overloads-lab")>]
     static member holder: Holder = jsNative
