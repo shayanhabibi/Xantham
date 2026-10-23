@@ -84606,6 +84606,7 @@ module Dns =
         [<ParamObject; Emit("$0")>]
         static member Create(address: string, ttl: float) : RecordWithTtl = jsNative
 
+    /// <remarks>@deprecated Use <c>AnyARecord</c> or <c>AnyAaaaRecord</c> instead.</remarks>
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type AnyRecordWithTtl =
         | A of address: string * ttl: float
@@ -84927,6 +84928,18 @@ module Dns =
         | SRV of priority: float * weight: float * port: float * name: string
         | TLSA of certUsage: float * selector: float * ``match``: float * data: Fable.Core.TS.Es.ArrayBuffer
         | TXT of entries: string[]
+
+        [<ParamObject; Emit("({ type: 'CAA', ...$0 })")>]
+        static member CreateCAA
+            (
+                critical: float,
+                ?issue: string,
+                ?issuewild: string,
+                ?iodef: string,
+                ?contactemail: string,
+                ?contactphone: string
+            ) : AnyRecord =
+            jsNative
 
     [<Interface>]
     type ResolverOptions =
@@ -149352,6 +149365,18 @@ module Os =
             ``internal``: bool *
             cidr: string option
 
+        [<ParamObject; Emit("({ family: 'IPv4', ...$0 })")>]
+        static member CreateIPv4
+            (address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string, ?scopeid: float)
+            : NetworkInterfaceInfo =
+            jsNative
+
+        [<ParamObject; Emit("({ family: 'IPv6', ...$0 })")>]
+        static member CreateIPv6
+            (scopeid: float, address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string)
+            : NetworkInterfaceInfo =
+            jsNative
+
     [<Interface>]
     type UserInfoOptions =
         abstract encoding: ChildProcess.SpawnSyncOptions.Encoding option with get, set
@@ -180134,188 +180159,6 @@ module Test =
             | [<CompiledName("test:stdout")>] TestStdout of data: TestStdout
             | [<CompiledName("test:summary")>] TestSummary of data: TestSummary
             | [<CompiledName("test:watch:drained")>] TestWatchDrained of data: unit
-
-        [<Interface>]
-        type TestEvent10 =
-            /// <remarks>TypeScript type: <c>"test:start"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestStart with get, set
-
-            [<ParamObject; Emit("({ type: 'test:start', ...$0 })")>]
-            static member Create(data: TestStart) : TestEvent10 = jsNative
-
-        module TestEvent10 =
-            /// <remarks>TypeScript type: <c>"test:start"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:start"
-
-        [<Interface>]
-        type TestEvent11 =
-            /// <remarks>TypeScript type: <c>"test:stderr"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestStderr with get, set
-
-            [<ParamObject; Emit("({ type: 'test:stderr', ...$0 })")>]
-            static member Create(data: TestStderr) : TestEvent11 = jsNative
-
-        module TestEvent11 =
-            /// <remarks>TypeScript type: <c>"test:stderr"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:stderr"
-
-        [<Interface>]
-        type TestEvent12 =
-            /// <remarks>TypeScript type: <c>"test:stdout"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestStdout with get, set
-
-            [<ParamObject; Emit("({ type: 'test:stdout', ...$0 })")>]
-            static member Create(data: TestStdout) : TestEvent12 = jsNative
-
-        module TestEvent12 =
-            /// <remarks>TypeScript type: <c>"test:stdout"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:stdout"
-
-        [<Interface>]
-        type TestEvent13 =
-            /// <remarks>TypeScript type: <c>"test:summary"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestSummary with get, set
-
-            [<ParamObject; Emit("({ type: 'test:summary', ...$0 })")>]
-            static member Create(data: TestSummary) : TestEvent13 = jsNative
-
-        module TestEvent13 =
-            /// <remarks>TypeScript type: <c>"test:summary"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:summary"
-
-        [<Interface>]
-        type TestEvent14 =
-            /// <remarks>TypeScript type: <c>"test:watch:drained"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: unit
-
-            [<Emit("({ type: 'test:watch:drained' })")>]
-            static member Create() : TestEvent14 = jsNative
-
-        module TestEvent14 =
-            /// <remarks>TypeScript type: <c>"test:watch:drained"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:watch:drained"
-
-        [<Interface>]
-        type TestEvent2 =
-            /// <remarks>TypeScript type: <c>"test:coverage"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestCoverage with get, set
-
-            [<ParamObject; Emit("({ type: 'test:coverage', ...$0 })")>]
-            static member Create(data: TestCoverage) : TestEvent2 = jsNative
-
-        module TestEvent2 =
-            /// <remarks>TypeScript type: <c>"test:coverage"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:coverage"
-
-        [<Interface>]
-        type TestEvent3 =
-            /// <remarks>TypeScript type: <c>"test:complete"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestComplete with get, set
-
-            [<ParamObject; Emit("({ type: 'test:complete', ...$0 })")>]
-            static member Create(data: TestComplete) : TestEvent3 = jsNative
-
-        module TestEvent3 =
-            /// <remarks>TypeScript type: <c>"test:complete"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:complete"
-
-        [<Interface>]
-        type TestEvent4 =
-            /// <remarks>TypeScript type: <c>"test:dequeue"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestDequeue with get, set
-
-            [<ParamObject; Emit("({ type: 'test:dequeue', ...$0 })")>]
-            static member Create(data: TestDequeue) : TestEvent4 = jsNative
-
-        module TestEvent4 =
-            /// <remarks>TypeScript type: <c>"test:dequeue"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:dequeue"
-
-        [<Interface>]
-        type TestEvent5 =
-            /// <remarks>TypeScript type: <c>"test:diagnostic"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestDiagnostic with get, set
-
-            [<ParamObject; Emit("({ type: 'test:diagnostic', ...$0 })")>]
-            static member Create(data: TestDiagnostic) : TestEvent5 = jsNative
-
-        module TestEvent5 =
-            /// <remarks>TypeScript type: <c>"test:diagnostic"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:diagnostic"
-
-        [<Interface>]
-        type TestEvent6 =
-            /// <remarks>TypeScript type: <c>"test:enqueue"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestEnqueue with get, set
-
-            [<ParamObject; Emit("({ type: 'test:enqueue', ...$0 })")>]
-            static member Create(data: TestEnqueue) : TestEvent6 = jsNative
-
-        module TestEvent6 =
-            /// <remarks>TypeScript type: <c>"test:enqueue"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:enqueue"
-
-        [<Interface>]
-        type TestEvent7 =
-            /// <remarks>TypeScript type: <c>"test:fail"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestFail with get, set
-
-            [<ParamObject; Emit("({ type: 'test:fail', ...$0 })")>]
-            static member Create(data: TestFail) : TestEvent7 = jsNative
-
-        module TestEvent7 =
-            /// <remarks>TypeScript type: <c>"test:fail"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:fail"
-
-        [<Interface>]
-        type TestEvent8 =
-            /// <remarks>TypeScript type: <c>"test:pass"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestPass with get, set
-
-            [<ParamObject; Emit("({ type: 'test:pass', ...$0 })")>]
-            static member Create(data: TestPass) : TestEvent8 = jsNative
-
-        module TestEvent8 =
-            /// <remarks>TypeScript type: <c>"test:pass"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:pass"
-
-        [<Interface>]
-        type TestEvent9 =
-            /// <remarks>TypeScript type: <c>"test:plan"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract data: TestPlan with get, set
-
-            [<ParamObject; Emit("({ type: 'test:plan', ...$0 })")>]
-            static member Create(data: TestPlan) : TestEvent9 = jsNative
-
-        module TestEvent9 =
-            /// <remarks>TypeScript type: <c>"test:plan"</c></remarks>
-            [<Literal>]
-            let ``type`` = "test:plan"
 
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]

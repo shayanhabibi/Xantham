@@ -25,11 +25,13 @@ paid for.
 
 ## Compile-gate dependency pin
 
-A compile gate is only evidence if it compiles against what a consumer will: `Fable.Core` 5.2.0
+A compile gate is only evidence if it compiles against what a consumer will: `Fable.Core`
 (`src/Xantham.Fable.Core`, `tests/Xantham.Generator.CompileGate`), `Xantham.Fable.Core.TS`
 (generated from the root compiler pin, referenced by every consumer compile gate), and the
 `typescript` 7.x pin in `package.json`, which supplies both the producer's `lib.*.d.ts` and the
 live `tsc --api` server.
+
+`Fable.Core` 5.5.0 supplies `CaseTest` from nuget.org.
 
 JavaScript runtime gates use Fickl, pinned in `.config/dotnet-tools.json`. Restore with
 `dotnet tool restore` and compile with `dotnet fickl`; `build.fsx -- test --run-gate`

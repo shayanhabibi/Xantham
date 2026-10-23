@@ -240,7 +240,7 @@ Selected signatures cannot introduce type variables absent from the replacement'
 `Replacement.raw source ["BindingName"] dependencies` is an explicit source escape for a
 non-generic interface. It requires `Pipeline.generateValidatedWith compiler extensions config
 input`, where `Compiler.dotnet scratchDirectory assemblyReferences` runs an actual .NET build
-against Fable.Core 5.2.0 and the supplied consumer DLLs. Include the current Xantham support DLLs
+against Fable.Core 5.5.0 and the supplied consumer DLLs. Include the current Xantham support DLLs
 and any referenced producer assemblies. Validation checks the complete output and a witness for
 the declared export before returning it. Raw replacements are rejected for catalog production.
 The validation directory is caller-owned scratch space; repository tests use `tests/.scratch`.

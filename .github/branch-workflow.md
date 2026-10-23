@@ -3,6 +3,30 @@
 Feature and dependency pull requests target `develop`. Release pull requests normally
 merge `develop` into `master` using a merge commit, preserving shared branch history.
 
+## Stacked feature pull requests
+
+Use the official `github/gh-stack` extension for dependent feature work. The bottom PR targets
+`develop`; each later PR targets the branch immediately below it. Adopt existing branches with
+`gh stack init --base develop <bottom> <next> ...`, then use `gh stack submit` to push and link
+their PRs on GitHub. Existing remote PRs can be linked with `gh stack link --base develop <PR> ...`.
+
+Use `gh stack view` to inspect the stack and `gh stack rebase` to propagate parent changes.
+After a layer lands, `gh stack sync` reconciles the remaining layers with the updated trunk and
+pushes with leases. Run these operations with the affected worktrees clean; the extension shares
+its stack metadata across worktrees and never stashes user edits automatically. Resolve conflicts
+and verify the resulting layers before publishing them. Review each layer against its immediate
+parent, and merge from the bottom upward.
+
+Work one slice at a time, starting at the bottom. Judge readiness from that slice's checks;
+once it passes, move attention to the next slice. Restacking, pushing and updating PR metadata
+are maintenance work and do not require waiting for every other layer's CI. A whole-stack
+green result is not a prerequisite for working on or reviewing the active slice.
+
+Test, catalogue-portability and title checks cover PRs targeting feature branches as well as
+`develop` and `master`. Release and publication workflows retain their protected-branch scope.
+
+## Branch protection and releases
+
 Both branches block deletion and force pushes, including for maintainers. Pull requests
 require successful GitHub Actions checks, an up-to-date branch, and resolved review
 conversations. No additional approving reviewer is required. Auto-merge is available.

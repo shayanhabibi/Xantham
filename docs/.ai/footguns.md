@@ -277,6 +277,29 @@ kind in `FindingCatalogue` is enough to compile and enough for the pass to run; 
 only throws at manifest render, from `Finding.get_Key`, which reads as a render bug rather than a
 missing table row.
 
+- **Inline object literals never share a type id.** Two arms spelling `owner: { name: string }`
+  identically carry two ids, so comparing member type ids calls them different. Compare with
+  `Spec.sameShape` wherever "the same type" means "reads as one F# type".
+- **A union case's XML doc documents all of its fields or none.** FS3390 checks `<param name>`
+  on union cases against field names and requires every field once one is documented; an empty
+  `<param>` satisfies it. A static member named like a case of its union is FS0023, which is why
+  case helpers are `Create<Case>`.
+- **A submodule spelled like a union case is unreachable from expressions.** With
+  `type Recovery = | Aborted …` and `module Recovery = module Aborted = type Type`,
+  `Recovery.Aborted.Type.User` resolves `Recovery.Aborted` to the case: FS0039, and FS1127 in a
+  pattern. Type annotations still resolve, so a compile gate over declarations alone misses it.
+  Case declarations nest under `Recovery.Cases.Aborted` instead.
+- **Two `TypeScriptTaggedUnion` cases sharing a `CompiledName` need a `CaseTest`.** Without one,
+  Fable compiles them with no warning and the later case owns the tag's `switch` slot: the first
+  is unreachable, and a value of its arm matches the second (spike S1(e),
+  `docs/.ai/plans/2026-10-15-pre158-findings.md`). `Spec.separateArms` gives every case of a
+  shared tag value its test, or `detect-tagged-unions` declines the DU (`DT003`). Each test must
+  be exclusive within its group, because a `match` checks cases in the order its clauses list
+  them. The attribute exists only in the Fable fork's `Fable.Core` (`tools/fable-fork/fork.json`).
+- **An arm interface drops only where its case carries the arm whole** (`Spec.caseCarriesArmWhole`):
+  a symbol-keyed member or an index signature is no case field, so such an arm keeps its
+  interface as the typed path to it.
+
 ## Fable runtime type tests
 
 Measured against Fable 5.13.0 on 2026-09-22 while designing erased-DU mapping for mixed
@@ -454,6 +477,10 @@ published stable support version satisfies its prerelease range, then fail with 
 the next Core.TS bump. Downloaded-package verification still restores real published dependencies.
 
 ## Fickl must be last in the tool manifest
+
+After a Fable/Fickl run, restore the solution before a quick .NET build: compilation can leave
+the multi-targeted support project's assets restored for netstandard2.1 only. Run
+`dotnet restore Xantham.slnx -v q` to restore every solution target.
 
 With SDK 10.0.402, a cold Linux `dotnet tool restore` fails if another tool follows Fickl:
 fsdocs-tool and Fantomas are reported as containing only the `fickl` command. The SDK's

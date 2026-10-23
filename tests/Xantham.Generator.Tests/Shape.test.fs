@@ -4584,7 +4584,7 @@ let shapePassTests =
                                 Order = None
                                 TypeParameters = [ { Name = "T"; Constraint = None } ]
                                 Tag = "kind"
-                                Cases = [ { Name = "Once"; CompiledName = Some "once"; Fields = [ { Name = "payload"; Type = FsTypeVar "T" } ] } ] }
+                                Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]; Create = None } ] }
                           FsInterface
                               { Name = "Holder"
                                 Docs = ""

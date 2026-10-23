@@ -4,7 +4,7 @@
   "module": "Node",
   "counts": {
     "exact": 775,
-    "ergonomic": 2198,
+    "ergonomic": 2185,
     "widened": 608,
     "escape": 5
   },
@@ -27,8 +27,8 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 12,
-      "exact": 4,
+      "total": 15,
+      "exact": 7,
       "ergonomic": 8
     },
     {
@@ -97,8 +97,8 @@
     },
     {
       "pass": "DD - drop-orphan-delegates",
-      "total": 2,
-      "exact": 2
+      "total": 15,
+      "exact": 15
     },
     {
       "pass": "AC - audit-coverage",

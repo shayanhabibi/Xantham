@@ -1842,22 +1842,91 @@ let private generatedDelegateForms () =
             DelegateNameLab.CallNesting.Outer(fun seed -> (fun x -> $"one:{seed}:{x}"))
         ))
 
-/// A case folded from arms sharing a tag value agrees on the tag alone, so it carries no field.
-/// What the fold claims is that the tag still reaches JavaScript from a payload-free case.
-let private foldedTaggedCases () =
+/// Arms sharing a tag value are cases of their own, told apart by each case's `CaseTest`. What
+/// the cases claim is both directions: each case writes its own arm, and a JavaScript-built
+/// object of either arm reaches its own case, whichever order the match lists them in.
+let private separatedTaggedCases () =
     equal
-        "a folded case carrying no field still erases to the tagged object"
-        """{"state":"done"}"""
-        (json SharedTagLab.Terminal.Done)
+        "a case separated by presence writes its own arm"
+        """{"state":"done","error":"boom"}"""
+        (json (SharedTagLab.Terminal.Done2 "boom"))
+
+    let describeTerminal (terminal: SharedTagLab.Terminal) =
+        match terminal with
+        | SharedTagLab.Terminal.Done2 error -> $"error:{error}"
+        | SharedTagLab.Terminal.Done value -> $"value:{value}"
+        | SharedTagLab.Terminal.Pending -> "pending"
 
     equal
-        "and a sibling case the fold left alone carries its own tag"
-        """{"state":"pending"}"""
-        (json SharedTagLab.Terminal.Pending)
+        "a value arm reaches its case by presence"
+        "value:1"
+        (describeTerminal (emitJsExpr () """({ state: "done", value: 1 })"""))
 
-    match SharedTagLab.Terminal.Done with
-    | SharedTagLab.Terminal.Done -> check "a folded case matches itself on the tag" true
-    | SharedTagLab.Terminal.Pending -> check "a folded case matched Pending" false
+    equal
+        "an error arm reaches its case by presence"
+        "error:boom"
+        (describeTerminal (emitJsExpr () """({ state: "done", error: "boom" })"""))
+
+    equal "a distinct arm still matches on the tag" "pending" (describeTerminal SharedTagLab.Terminal.Pending)
+
+    let describeOnset (onset: SharedTagLab.Onset) =
+        match onset with
+        | SharedTagLab.Onset.Log2(_, message, _) -> $"truncated:{message}"
+        | SharedTagLab.Onset.Log(_, _, _) -> "whole"
+
+    equal
+        "an optional literal arm matches when the literal is absent"
+        "whole"
+        (describeOnset (emitJsExpr () """({ type: "log", level: "info", message: {} })"""))
+
+    equal
+        "and when it is written"
+        "whole"
+        (describeOnset (emitJsExpr () """({ type: "log", level: "info", message: {}, truncated: false })"""))
+
+    equal
+        "the required literal arm matches its own literal"
+        "truncated:cut"
+        (describeOnset (emitJsExpr () """({ type: "log", level: "info", message: "cut", truncated: true })"""))
+
+    equal
+        "a case separated by a literal writes the literal from its Create"
+        """{"state":"done","ok":false,"owner":{"name":"n","tags":[]},"note":{"text":2}}"""
+        (json (
+            TaggedArmLab.Task.CreateDone2(
+                emitJsExpr () """({ name: "n", tags: [] })""",
+                emitJsExpr () """({ text: 2 })"""
+            )
+        ))
+
+    let describeJob (job: TaggedArmLab.Job) =
+        match job with
+        | TaggedArmLab.Job.Done _ -> "plain"
+        | TaggedArmLab.Job.Done2(_, code) -> $"code:{code}"
+        | TaggedArmLab.Job.Queued -> "queued"
+
+    equal
+        "an arm without a member of its own matches by lacking the other's"
+        "plain"
+        (describeJob (emitJsExpr () """({ state: "done", level: "info" })"""))
+
+    equal
+        "and the arm carrying it matches by presence"
+        "code:3"
+        (describeJob (emitJsExpr () """({ state: "done", level: "warn", code: 3 })"""))
+
+    let describeMixed (mixed: TaggedArmLab.Mixed) =
+        match mixed with
+        | TaggedArmLab.Mixed.Done2 payload -> $"number:{payload}"
+        | TaggedArmLab.Mixed.Done payload -> $"string:{payload}"
+        | TaggedArmLab.Mixed.Queued -> "queued"
+
+    equal
+        "arms sharing every member name match by the member's typeof"
+        "string:a"
+        (describeMixed (emitJsExpr () """({ state: "done", payload: "a" })"""))
+
+    equal "for either class" "number:4" (describeMixed (emitJsExpr () """({ state: "done", payload: 4 })"""))
 
 /// A union written inline at a member position, declared under a name of its own. What the mint
 /// claims is the read: `workarounds` item 1 measures an erased union over interface arms
@@ -1911,6 +1980,39 @@ let private genericTaggedCases () =
     | SharedTagLab.Scheduled.Repeat(payload, Some previous) ->
         equal "a JavaScript-built object reaches its case with both payloads" "1:0" $"{payload}:{previous}"
     | _ -> check "a JavaScript-built repeat reached another case" false
+
+/// A case `Create` builds the object its case builds, absent optional fields omitted and literal
+/// fields written, and the result matches the case its tag names.
+let private taggedCaseCreates () =
+    equal
+        "a case Create with no argument writes the tag alone"
+        """{"status":"completed"}"""
+        (json (TaggedArmLab.Recovery.CreateCompleted()))
+
+    equal
+        "a case Create and its case build the same object"
+        (json (TaggedArmLab.Recovery.Completed(Some(box 1), None)))
+        (json (TaggedArmLab.Recovery.CreateCompleted(snapshot = 1)))
+
+    equal
+        "a case Create writes a literal field"
+        """{"verb":"start","channel":"bus","at":2}"""
+        (json (TaggedArmLab.Signal.CreateStart 2.0))
+
+    match TaggedArmLab.Recovery.CreateAborted(TaggedArmLab.Recovery.Cases.Aborted.Type.User, reason = "r") with
+    | TaggedArmLab.Recovery.Aborted(reason, _) ->
+        equal "a case Create with an escaped field matches its case" "r" (Option.defaultValue "" reason)
+    | _ -> check "a case Create reached another case" false
+
+    equal
+        "an escaped field is written under its JS key"
+        """{"status":"aborted","type":"user"}"""
+        (json (TaggedArmLab.Recovery.CreateAborted TaggedArmLab.Recovery.Cases.Aborted.Type.User))
+
+    equal
+        "a generic case Create writes its payload"
+        """{"kind":"repeat","payload":1}"""
+        (json (SharedTagLab.Scheduled.CreateRepeat 1.0))
 
 /// §4.10's pure index signatures, resolved to `Record`/`ReadonlyRecord`
 /// rather than a minted interface. Every property below is one of those types; reading and
@@ -2298,9 +2400,10 @@ let main _ =
     constructorObjects ()
     heritage ()
     taggedUnions ()
-    foldedTaggedCases ()
+    separatedTaggedCases ()
     mintedTaggedCases ()
     genericTaggedCases ()
+    taggedCaseCreates ()
     nestedNames ()
     optionalHooks ()
     renamedStatics ()

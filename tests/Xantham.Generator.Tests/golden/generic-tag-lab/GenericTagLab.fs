@@ -22,106 +22,15 @@ type Pair<'T, 'U> =
     | [<CompiledName("right")>] Right of value: 'U
     | [<CompiledName("both")>] Both of left: 'T * right: 'U
 
-[<Interface>]
-type Pair2<'T> =
-    /// <remarks>TypeScript type: <c>"left"</c></remarks>
-    abstract kind: string
-    abstract value: 'T
-    [<ParamObject; Emit("({ kind: 'left', ...$0 })")>]
-    static member Create (value: 'T) : Pair2<'T> = jsNative
-
-module Pair2 =
-    /// <remarks>TypeScript type: <c>"left"</c></remarks>
-    [<Literal>]
-    let kind = "left"
-
-[<Interface>]
-type Pair3<'U> =
-    /// <remarks>TypeScript type: <c>"right"</c></remarks>
-    abstract kind: string
-    abstract value: 'U
-    [<ParamObject; Emit("({ kind: 'right', ...$0 })")>]
-    static member Create (value: 'U) : Pair3<'U> = jsNative
-
-module Pair3 =
-    /// <remarks>TypeScript type: <c>"right"</c></remarks>
-    [<Literal>]
-    let kind = "right"
-
-[<Interface>]
-type Pair4<'T, 'U> =
-    /// <remarks>TypeScript type: <c>"both"</c></remarks>
-    abstract kind: string
-    abstract left: 'T
-    abstract right: 'U
-    [<ParamObject; Emit("({ kind: 'both', ...$0 })")>]
-    static member Create (left: 'T, right: 'U) : Pair4<'T, 'U> = jsNative
-
-module Pair4 =
-    /// <remarks>TypeScript type: <c>"both"</c></remarks>
-    [<Literal>]
-    let kind = "both"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Batch<'T> =
     | [<CompiledName("many")>] Many of items: 'T[]
     | [<CompiledName("later")>] Later of pending: JS.Promise<'T>
 
-[<Interface>]
-type Batch2<'T> =
-    /// <remarks>TypeScript type: <c>"many"</c></remarks>
-    abstract kind: string
-    abstract items: 'T[]
-    [<ParamObject; Emit("({ kind: 'many', ...$0 })")>]
-    static member Create (items: 'T[]) : Batch2<'T> = jsNative
-
-module Batch2 =
-    /// <remarks>TypeScript type: <c>"many"</c></remarks>
-    [<Literal>]
-    let kind = "many"
-
-[<Interface>]
-type Batch3<'T> =
-    /// <remarks>TypeScript type: <c>"later"</c></remarks>
-    abstract kind: string
-    abstract pending: JS.Promise<'T>
-    [<ParamObject; Emit("({ kind: 'later', ...$0 })")>]
-    static member Create (pending: JS.Promise<'T>) : Batch3<'T> = jsNative
-
-module Batch3 =
-    /// <remarks>TypeScript type: <c>"later"</c></remarks>
-    [<Literal>]
-    let kind = "later"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Owned<'T when 'T :> Base> =
     | [<CompiledName("owned")>] Owned of owner: 'T
     | [<CompiledName("orphan")>] Orphan
-
-[<Interface>]
-type Owned2<'T when 'T :> Base> =
-    /// <remarks>TypeScript type: <c>"owned"</c></remarks>
-    abstract kind: string
-    abstract owner: 'T
-    [<ParamObject; Emit("({ kind: 'owned', ...$0 })")>]
-    static member Create (owner: 'T) : Owned2<'T> = jsNative
-
-module Owned2 =
-    /// <remarks>TypeScript type: <c>"owned"</c></remarks>
-    [<Literal>]
-    let kind = "owned"
-
-[<Interface>]
-type Owned3 =
-    /// <remarks>TypeScript type: <c>"orphan"</c></remarks>
-    abstract kind: string
-    [<Emit("({ kind: 'orphan' })")>]
-    static member Create () : Owned3 = jsNative
-
-module Owned3 =
-    /// <remarks>TypeScript type: <c>"orphan"</c></remarks>
-    [<Literal>]
-    let kind = "orphan"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Marker<'T> =
@@ -156,32 +65,6 @@ module Marker3 =
 type Tree<'T> =
     | [<CompiledName("leaf")>] Leaf of value: 'T
     | [<CompiledName("node")>] Node of children: Tree<'T>[]
-
-[<Interface>]
-type Tree2<'T> =
-    /// <remarks>TypeScript type: <c>"leaf"</c></remarks>
-    abstract kind: string
-    abstract value: 'T
-    [<ParamObject; Emit("({ kind: 'leaf', ...$0 })")>]
-    static member Create (value: 'T) : Tree2<'T> = jsNative
-
-module Tree2 =
-    /// <remarks>TypeScript type: <c>"leaf"</c></remarks>
-    [<Literal>]
-    let kind = "leaf"
-
-[<Interface>]
-type Tree3<'T> =
-    /// <remarks>TypeScript type: <c>"node"</c></remarks>
-    abstract kind: string
-    abstract children: Tree<'T>[]
-    [<ParamObject; Emit("({ kind: 'node', ...$0 })")>]
-    static member Create (children: Tree<'T>[]) : Tree3<'T> = jsNative
-
-module Tree3 =
-    /// <remarks>TypeScript type: <c>"node"</c></remarks>
-    [<Literal>]
-    let kind = "node"
 
 [<Interface>]
 type Fulfilled<'T> =
@@ -219,36 +102,6 @@ type Job<'T> =
     | [<CompiledName("once")>] Once of id: string * payload: 'T * at: float
     | [<CompiledName("every")>] Every of id: string * payload: 'T * seconds: float
 
-[<Interface>]
-type Job2<'T> =
-    abstract id: string
-    abstract payload: 'T
-    /// <remarks>TypeScript type: <c>"once"</c></remarks>
-    abstract ``type``: string
-    abstract at: float
-    [<ParamObject; Emit("({ type: 'once', ...$0 })")>]
-    static member Create (id: string, payload: 'T, at: float) : Job2<'T> = jsNative
-
-module Job2 =
-    /// <remarks>TypeScript type: <c>"once"</c></remarks>
-    [<Literal>]
-    let ``type`` = "once"
-
-[<Interface>]
-type Job3<'T> =
-    abstract id: string
-    abstract payload: 'T
-    /// <remarks>TypeScript type: <c>"every"</c></remarks>
-    abstract ``type``: string
-    abstract seconds: float
-    [<ParamObject; Emit("({ type: 'every', ...$0 })")>]
-    static member Create (id: string, payload: 'T, seconds: float) : Job3<'T> = jsNative
-
-module Job3 =
-    /// <remarks>TypeScript type: <c>"every"</c></remarks>
-    [<Literal>]
-    let ``type`` = "every"
-
 type Task<'T> = Job<'T>
 
 type MaybeJob<'T> = Job<'T> option
@@ -258,66 +111,10 @@ type JobAlias<'T> =
     | [<CompiledName("once")>] Once of id: string * payload: 'T * at: float
     | [<CompiledName("every")>] Every of id: string * payload: 'T * seconds: float
 
-[<Interface>]
-type JobAlias2<'T> =
-    abstract id: string
-    abstract payload: 'T
-    /// <remarks>TypeScript type: <c>"once"</c></remarks>
-    abstract ``type``: string
-    abstract at: float
-    [<ParamObject; Emit("({ type: 'once', ...$0 })")>]
-    static member Create (id: string, payload: 'T, at: float) : JobAlias2<'T> = jsNative
-
-module JobAlias2 =
-    /// <remarks>TypeScript type: <c>"once"</c></remarks>
-    [<Literal>]
-    let ``type`` = "once"
-
-[<Interface>]
-type JobAlias3<'T> =
-    abstract id: string
-    abstract payload: 'T
-    /// <remarks>TypeScript type: <c>"every"</c></remarks>
-    abstract ``type``: string
-    abstract seconds: float
-    [<ParamObject; Emit("({ type: 'every', ...$0 })")>]
-    static member Create (id: string, payload: 'T, seconds: float) : JobAlias3<'T> = jsNative
-
-module JobAlias3 =
-    /// <remarks>TypeScript type: <c>"every"</c></remarks>
-    [<Literal>]
-    let ``type`` = "every"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type Sided<'T, 'U> =
     | [<CompiledName("left")>] Left of value: 'T
     | [<CompiledName("right")>] Right of value: 'U
-
-[<Interface>]
-type Sided2<'T> =
-    /// <remarks>TypeScript type: <c>"left"</c></remarks>
-    abstract kind: string
-    abstract value: 'T
-    [<ParamObject; Emit("({ kind: 'left', ...$0 })")>]
-    static member Create (value: 'T) : Sided2<'T> = jsNative
-
-module Sided2 =
-    /// <remarks>TypeScript type: <c>"left"</c></remarks>
-    [<Literal>]
-    let kind = "left"
-
-[<Interface>]
-type Sided3<'U> =
-    /// <remarks>TypeScript type: <c>"right"</c></remarks>
-    abstract kind: string
-    abstract value: 'U
-    [<ParamObject; Emit("({ kind: 'right', ...$0 })")>]
-    static member Create (value: 'U) : Sided3<'U> = jsNative
-
-module Sided3 =
-    /// <remarks>TypeScript type: <c>"right"</c></remarks>
-    [<Literal>]
-    let kind = "right"
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type Mode =
@@ -361,59 +158,9 @@ module Accept =
         | [<CompiledName("a")>] A of value: 'T
         | [<CompiledName("b")>] B
 
-    [<Interface>]
-    type Input2<'T> =
-        /// <remarks>TypeScript type: <c>"a"</c></remarks>
-        abstract kind: string
-        abstract value: 'T
-        [<ParamObject; Emit("({ kind: 'a', ...$0 })")>]
-        static member Create (value: 'T) : Input2<'T> = jsNative
-
-    module Input2 =
-        /// <remarks>TypeScript type: <c>"a"</c></remarks>
-        [<Literal>]
-        let kind = "a"
-
-    [<Interface>]
-    type Input3 =
-        /// <remarks>TypeScript type: <c>"b"</c></remarks>
-        abstract kind: string
-        [<Emit("({ kind: 'b' })")>]
-        static member Create () : Input3 = jsNative
-
-    module Input3 =
-        /// <remarks>TypeScript type: <c>"b"</c></remarks>
-        [<Literal>]
-        let kind = "b"
-
 module Queue =
     module State =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
         type Result<'T> =
             | [<CompiledName("idle")>] Idle
             | [<CompiledName("busy")>] Busy of job: Job<'T>
-
-        [<Interface>]
-        type Result2 =
-            /// <remarks>TypeScript type: <c>"idle"</c></remarks>
-            abstract kind: string
-            [<Emit("({ kind: 'idle' })")>]
-            static member Create () : Result2 = jsNative
-
-        module Result2 =
-            /// <remarks>TypeScript type: <c>"idle"</c></remarks>
-            [<Literal>]
-            let kind = "idle"
-
-        [<Interface>]
-        type Result3<'T> =
-            /// <remarks>TypeScript type: <c>"busy"</c></remarks>
-            abstract kind: string
-            abstract job: Job<'T>
-            [<ParamObject; Emit("({ kind: 'busy', ...$0 })")>]
-            static member Create (job: Job<'T>) : Result3<'T> = jsNative
-
-        module Result3 =
-            /// <remarks>TypeScript type: <c>"busy"</c></remarks>
-            [<Literal>]
-            let kind = "busy"

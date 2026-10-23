@@ -87,6 +87,8 @@ module Input =
     type Item =
         | [<CompiledName("image")>] Image of data: string * mimeType: string
         | [<CompiledName("text")>] Text of text: string * textSignature: string option
+        [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+        static member CreateText (text: string, ?textSignature: string) : Item = jsNative
 
 module OtherSession =
     module Submit =

@@ -1128,6 +1128,8 @@ module Onset =
         | [<CompiledName("queue")>] Queue of queueName: string * batchSize: float
         | [<CompiledName("scheduled")>] Scheduled of scheduledTime: Fable.Core.TS.Es.Date * cron: string
         | [<CompiledName("trace")>] Trace of traces: string option[]
+        [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
+        static member CreateFetch (``method``: string, url: string, headers: Header[], ?cfJson: obj) : Info = jsNative
 
 [<Interface>]
 type Outcome =
@@ -1277,38 +1279,6 @@ type ExportedHandlerScheduledHandler<'Env, 'Props> = delegate of controller: Sch
 type ExportedHandlerQueueHandler<'Env, 'Message, 'Props> = delegate of batch: MessageBatch<'Message> * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
 type ExportedHandlerTestHandler<'Env, 'Props> = delegate of controller: TestController * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
-
-[<Interface>]
-type EmailAttachment2 =
-    /// <remarks>TypeScript type: <c>"inline"</c></remarks>
-    abstract disposition: string with get, set
-    abstract contentId: string with get, set
-    abstract filename: string with get, set
-    abstract ``type``: string with get, set
-    abstract content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    [<ParamObject; Emit("({ disposition: 'inline', ...$0 })")>]
-    static member Create (contentId: string, filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>) : EmailAttachment2 = jsNative
-
-module EmailAttachment2 =
-    /// <remarks>TypeScript type: <c>"inline"</c></remarks>
-    [<Literal>]
-    let disposition = "inline"
-
-[<Interface>]
-type EmailAttachment3 =
-    /// <remarks>TypeScript type: <c>"attachment"</c></remarks>
-    abstract disposition: string with get, set
-    abstract contentId: unit option with get, set
-    abstract filename: string with get, set
-    abstract ``type``: string with get, set
-    abstract content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    [<ParamObject; Emit("({ disposition: 'attachment', ...$0 })")>]
-    static member Create (filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?contentId: unit) : EmailAttachment3 = jsNative
-
-module EmailAttachment3 =
-    /// <remarks>TypeScript type: <c>"attachment"</c></remarks>
-    [<Literal>]
-    let disposition = "attachment"
 
 [<Interface>]
 type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
@@ -7931,6 +7901,14 @@ type ChatCompletionMessageParam =
     | [<CompiledName("system")>] System of content: U2<string, SystemMessage.Content.Item[]> * name: string option
     | [<CompiledName("tool")>] Tool of content: U2<string, ToolMessage.Content.Item[]> * tool_call_id: string
     | [<CompiledName("user")>] User of content: U2<string, UserMessageContentPart[]> * name: string option
+    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+    static member CreateAssistant (?content: U2<string, AssistantMessageContentPart[]>, ?refusal: string, ?name: string, ?audio: AssistantMessage.Audio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: AssistantMessage.FunctionCall) : ChatCompletionMessageParam = jsNative
+    [<ParamObject; Emit("({ role: 'developer', ...$0 })")>]
+    static member CreateDeveloper (content: U2<string, DeveloperMessage.Content.Item[]>, ?name: string) : ChatCompletionMessageParam = jsNative
+    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
+    static member CreateSystem (content: U2<string, SystemMessage.Content.Item[]>, ?name: string) : ChatCompletionMessageParam = jsNative
+    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
+    static member CreateUser (content: U2<string, UserMessageContentPart[]>, ?name: string) : ChatCompletionMessageParam = jsNative
 
 [<Interface>]
 type ChatCompletionsResponseFormatText =
@@ -8350,10 +8328,16 @@ type Reasoning =
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseContent =
     | [<CompiledName("reasoning_text")>] ReasoningText of text: string
+    /// <param name="detail"></param>
+    /// <param name="image_url">Base64 encoded image</param>
     | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail * image_url: string option
     | [<CompiledName("input_text")>] InputText of text: string
     | [<CompiledName("refusal")>] Refusal of refusal: string
     | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
+    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
+    static member CreateInputImage (detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseContent = jsNative
+    [<ParamObject; Emit("({ type: 'output_text', ...$0 })")>]
+    static member CreateOutputText (text: string, ?logprobs: Logprob[]) : ResponseContent = jsNative
 
 [<Interface>]
 type ResponseContentReasoningText =
@@ -8469,6 +8453,8 @@ type ResponseFormatTextConfig =
     | [<CompiledName("json_object")>] JsonObject
     | [<CompiledName("text")>] Text
     | [<CompiledName("json_schema")>] JsonSchema of name: string * schema: JS.Record<string, obj> * description: string option * strict: bool option
+    [<ParamObject; Emit("({ type: 'json_schema', ...$0 })")>]
+    static member CreateJsonSchema (name: string, schema: JS.Record<string, obj>, ?description: string, ?strict: bool) : ResponseFormatTextConfig = jsNative
 
 [<Interface>]
 type ResponseFormatTextJSONSchemaConfig =
@@ -8521,8 +8507,12 @@ module ResponseFunctionCallArgumentsDoneEvent =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFunctionCallOutputItem =
+    /// <param name="detail"></param>
+    /// <param name="image_url">Base64 encoded image</param>
     | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail option * image_url: string option
     | [<CompiledName("input_text")>] InputText of text: string
+    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
+    static member CreateInputImage (?detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseFunctionCallOutputItem = jsNative
 
 type ResponseFunctionCallOutputItemList = ResponseFunctionCallOutputItem[]
 
@@ -8595,8 +8585,12 @@ type ResponseInput = ResponseInputItem[]
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseInputContent =
+    /// <param name="detail"></param>
+    /// <param name="image_url">Base64 encoded image</param>
     | [<CompiledName("input_image")>] InputImage of detail: ChatCompletionContentPartImage.ImageUrl.Detail * image_url: string option
     | [<CompiledName("input_text")>] InputText of text: string
+    [<ParamObject; Emit("({ type: 'input_image', ...$0 })")>]
+    static member CreateInputImage (detail: ChatCompletionContentPartImage.ImageUrl.Detail, ?image_url: string) : ResponseInputContent = jsNative
 
 [<Interface>]
 type ResponseInputImage =
@@ -8702,8 +8696,18 @@ type ResponseItem = U4<ResponseFunctionToolCallItem, ResponseFunctionToolCallOut
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseOutputItem =
     | [<CompiledName("function_call")>] FunctionCall of arguments: string * call_id: string * name: string * id: string option * status: ResponseFunctionToolCall.Status option
+    /// <param name="id"></param>
+    /// <param name="content"></param>
+    /// <param name="role">TypeScript type: <c>"assistant"</c></param>
+    /// <param name="status"></param>
     | [<CompiledName("message")>] Message of id: string * content: ResponseOutputMessage.Content.Item[] * role: string * status: ResponseFunctionToolCall.Status
     | [<CompiledName("reasoning")>] Reasoning of id: string * summary: ResponseReasoningSummaryItem[] * content: ResponseReasoningContentItem[] option * encrypted_content: string option * status: ResponseFunctionToolCall.Status option
+    [<ParamObject; Emit("({ type: 'function_call', ...$0 })")>]
+    static member CreateFunctionCall (arguments: string, call_id: string, name: string, ?id: string, ?status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
+    [<ParamObject; Emit("({ type: 'message', role: 'assistant', ...$0 })")>]
+    static member CreateMessage (id: string, content: ResponseOutputMessage.Content.Item[], status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
+    [<ParamObject; Emit("({ type: 'reasoning', ...$0 })")>]
+    static member CreateReasoning (id: string, summary: ResponseReasoningSummaryItem[], ?content: ResponseReasoningContentItem[], ?encrypted_content: string, ?status: ResponseFunctionToolCall.Status) : ResponseOutputItem = jsNative
 
 [<Interface>]
 type ResponseOutputItemAddedEvent =
@@ -8760,6 +8764,8 @@ module ResponseOutputMessage =
         type Item =
             | [<CompiledName("refusal")>] Refusal of refusal: string
             | [<CompiledName("output_text")>] OutputText of text: string * logprobs: Logprob[] option
+            [<ParamObject; Emit("({ type: 'output_text', ...$0 })")>]
+            static member CreateOutputText (text: string, ?logprobs: Logprob[]) : Item = jsNative
 
 [<Interface>]
 type ResponseOutputRefusal =
@@ -8925,6 +8931,8 @@ type ResponseStreamEvent =
     | [<CompiledName("response.refusal.done")>] ResponseRefusalDone of content_index: float * item_id: string * output_index: float * refusal: string * sequence_number: float
     | [<CompiledName("response.output_text.delta")>] ResponseOutputTextDelta of content_index: float * delta: string * item_id: string * logprobs: Logprob[] * output_index: float * sequence_number: float
     | [<CompiledName("response.output_text.done")>] ResponseOutputTextDone of content_index: float * item_id: string * logprobs: Logprob[] * output_index: float * sequence_number: float * text: string
+    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+    static member CreateError (message: string, sequence_number: float, ?code: string, ?param: string) : ResponseStreamEvent = jsNative
 
 [<Interface>]
 type ResponseCompletedEvent =
@@ -16712,10 +16720,15 @@ type ForwardableEmailMessage =
     /// <returns>A promise that resolves when the email message is replied.</returns>
     abstract reply: builder: EmailReplyMessageBuilder -> JS.Promise<EmailSendResult>
 
+/// <summary>
+/// A file attachment for an email message
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("disposition", CaseRules.None)>]
 type EmailAttachment =
     | [<CompiledName("inline")>] Inline of contentId: string * filename: string * ``type``: string * content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     | [<CompiledName("attachment")>] Attachment of contentId: unit option * filename: string * ``type``: string * content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
+    [<ParamObject; Emit("({ disposition: 'attachment', ...$0 })")>]
+    static member CreateAttachment (filename: string, ``type``: string, content: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?contentId: unit) : EmailAttachment = jsNative
 
 /// <summary>
 /// An Email Address
@@ -25686,11 +25699,11 @@ module ExportedHandlerTailStreamHandler =
             abstract spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option) option with get, set
             abstract diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option) option with get, set
             abstract ``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option) option with get, set
-            abstract log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option) option with get, set
+            abstract log: (TailStream.TailEvent<Cloudflare.WorkersTypes.ExportedHandlerTailStreamHandler.Result.Item.Log.Event.Item> -> JS.Promise<unit> option) option with get, set
             abstract ``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option) option with get, set
             abstract attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option) option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<U2<ExportedHandlerTailStreamHandler.Result.Item.Event.Item2, ExportedHandlerTailStreamHandler.Result.Item.Event.Item3>> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
+            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<Cloudflare.WorkersTypes.ExportedHandlerTailStreamHandler.Result.Item.Log.Event.Item> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
 
         module Item =
             module Event =
@@ -25705,47 +25718,50 @@ module ExportedHandlerTailStreamHandler =
                     | [<CompiledName("spanClose")>] SpanClose of outcome: Outcome.Outcome
                     | [<CompiledName("spanOpen")>] SpanOpen of name: string * spanId: string * info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
                     | [<CompiledName("streamDiagnostic")>] StreamDiagnostic of diagnostic: DroppedEventsDiagnostic
-                    | [<CompiledName("log")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level * errorInfo: TailStreamErrorInfo option[] option
-
-                [<Interface>]
-                type Item2 =
-                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-                    abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
-                    abstract errorInfo: TailStreamErrorInfo option[] option
-                    abstract message: obj
-                    abstract truncated: bool option
+                    | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: obj * truncated: bool option
+                    /// <param name="level"></param>
+                    /// <param name="errorInfo"></param>
+                    /// <param name="message"></param>
+                    /// <param name="truncated">TypeScript type: <c>true</c></param>
+                    | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: string * truncated: bool
+                    [<ParamObject; Emit("({ type: 'exception', ...$0 })")>]
+                    static member CreateException (name: string, message: string, ?stack: string) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'onset', ...$0 })")>]
+                    static member CreateOnset (attributes: Attribute[], spanId: string, executionModel: string, info: Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'return', ...$0 })")>]
+                    static member CreateReturn (?info: FetchResponseInfo) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'spanOpen', ...$0 })")>]
+                    static member CreateSpanOpen (name: string, spanId: string, ?info: U3<Attributes, FetchEventInfo, JsRpcEventInfo>) : Item = jsNative
                     [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-                    static member Create (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item2 = jsNative
+                    static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+                    static member CreateLog2 (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: string, ?errorInfo: TailStreamErrorInfo option[]) : Item = jsNative
 
-                module Item2 =
-                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "log"
+                module Item =
+                    module Cases =
+                        module Log =
+                            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                            type Level =
+                                | [<CompiledName("debug")>] Debug
+                                | [<CompiledName("error")>] Error
+                                | [<CompiledName("info")>] Info
+                                | [<CompiledName("log")>] Log
+                                | [<CompiledName("warn")>] Warn
 
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Level =
-                        | [<CompiledName("debug")>] Debug
-                        | [<CompiledName("error")>] Error
-                        | [<CompiledName("info")>] Info
-                        | [<CompiledName("log")>] Log
-                        | [<CompiledName("warn")>] Warn
-
-                [<Interface>]
-                type Item3 =
-                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-                    abstract ``type``: string
-                    abstract level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level
-                    abstract errorInfo: TailStreamErrorInfo option[] option
-                    abstract message: string
-                    abstract truncated: bool
-                    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-                    static member Create (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item2.Level, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : Item3 = jsNative
-
-                module Item3 =
-                    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "log"
+            module Log =
+                module Event =
+                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                    type Item =
+                        | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: obj * truncated: bool option
+                        /// <param name="level"></param>
+                        /// <param name="errorInfo"></param>
+                        /// <param name="message"></param>
+                        /// <param name="truncated">TypeScript type: <c>true</c></param>
+                        | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: string * truncated: bool
+                        [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+                        static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item = jsNative
+                        [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+                        static member CreateLog2 (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: string, ?errorInfo: TailStreamErrorInfo option[]) : Item = jsNative
 
 module FormData =
     module ForEach =

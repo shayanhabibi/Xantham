@@ -1,4 +1,4 @@
-﻿/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
+/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
 /// the committed goldens, plus the run-twice determinism property.
 ///
 /// The npm fixture packages are installed and therefore untracked: a linked worktree carries
@@ -4411,7 +4411,7 @@ let pipelineTests =
         // discriminant where they do not.
         yield!
             fixtureTests "shared-tag-lab" (handFixture "shared-tag-lab") GeneratorConfig.Default (fun package ->
-                [ testCase "arms sharing a tag value fold into one case, or refuse under a name" <| fun _ ->
+                [ testCase "arms sharing a tag value are cases told apart by a CaseTest" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
@@ -4431,26 +4431,40 @@ let pipelineTests =
                           "`channel` collides, `verb` discriminates, and `verb` is the tag chosen"
 
                       Expect.equal (messagesFor "Signal" "DT003") [] "a candidate rejected on a collision raises nothing"
-                      Expect.equal (messagesFor "Signal" "DT004") [] "and nothing folds"
+                      Expect.equal (messagesFor "Signal" "DT008") [] "and nothing is separated"
 
-                      // The fold, reported once, naming the tag and the shared value. The two
-                      // `done` arms agree on the tag alone, so the case carries no field.
-                      Expect.stringContains source "| [<CompiledName(\"done\")>] Done" "the two done arms fold into one case"
-                      Expect.stringContains source "| [<CompiledName(\"pending\")>] Pending" "and the union keeps two cases"
-
-                      Expect.equal
-                          (messagesFor "Terminal" "DT004")
-                          [ "arms sharing 'state' = 'done' merged into one case, carrying the members they agree on" ]
-                          "the fold names the tag and the value it folded on"
-
-                      // The refusal. Both arms carry `type: "log"`, so the fold leaves one case
-                      // and the union stays erased - loudly.
-                      Expect.stringContains source "type Onset = U2<Onset2, Onset3>" "a fold to a single case is not a union"
+                      // The two `done` arms are two cases, each carrying its own member and told
+                      // apart by it.
+                      Expect.stringContains
+                          source
+                          "| [<CompiledName(\"done\"); CaseTest(\"'value' in $0\")>] Done of value: float"
+                          "the value arm is a case of its own"
+                      Expect.stringContains
+                          source
+                          "| [<CompiledName(\"done\"); CaseTest(\"'error' in $0\")>] Done2 of error: string"
+                          "and so is the error arm"
+                      Expect.stringContains source "| [<CompiledName(\"pending\")>] Pending" "the distinct arm carries no test"
 
                       Expect.equal
-                          (messagesFor "Onset" "DT003")
-                          [ "discriminated by 'type', but two arms carry 'log'; left as an erased union" ]
-                          "the refusal names the candidate that came closest"
+                          (messagesFor "Terminal" "DT008")
+                          [ "arms sharing 'state' = 'done' are separate cases, each matched by a CaseTest" ]
+                          "the separation names the tag and the shared value"
+
+                      // Every arm is carried whole by its case, so every arm interface is dropped.
+                      for gone in [ "Terminal2"; "Terminal3"; "Terminal4" ] do
+                          Expect.isFalse (source.Contains $"type {gone} =") $"{gone}: an arm its case carries is dropped"
+
+                      // Every arm carries `type: "log"`; the literal `truncated` separates them, and
+                      // the optional `false` arm also matches an absent `truncated`.
+                      Expect.stringContains
+                          source
+                          "| [<CompiledName(\"log\"); CaseTest(\"($0.truncated === false || $0.truncated === undefined)\")>] Log of level: string * message: obj * truncated: bool option"
+                          "Onset's optional arm matches false or absent"
+                      Expect.stringContains
+                          source
+                          "| [<CompiledName(\"log\"); CaseTest(\"$0.truncated === true\")>] Log2 of level: string * message: string * truncated: bool"
+                          "and its required arm matches true"
+                      Expect.equal (messagesFor "Onset" "DT003") [] "a union whose arms all share one value is separated, not refused"
 
                       // `Loose` is still a negative: `kind` is a bare string on one arm, so no
                       // candidate is uniform and the union is never considered a tagged one.
@@ -4460,16 +4474,19 @@ let pipelineTests =
                           []
                           "Loose is not considered a tagged union at all"
 
-                      // `Log` writes the same collision as an intersection over a union. The
-                      // checker distributes the intersection into arms flagged `Intersection`,
-                      // and those now reach the discriminant test the same way `Onset`'s flat
-                      // spelling does - the fold is refused for the same reason.
+                      // `Log` writes the same arms as an intersection over a union. The checker
+                      // distributes the intersection into arms flagged `Intersection`, and those
+                      // are separated the way `Onset`'s flat arms are.
                       Expect.equal
-                          (messagesFor "Log" "DT003")
-                          [ "discriminated by 'type', but two arms carry 'log'; left as an erased union" ]
-                          "Log's intersection arms reach the same refusal Onset's flat arms do"
+                          (messagesFor "Log" "DT008")
+                          [ "arms sharing 'type' = 'log' are separate cases, each matched by a CaseTest" ]
+                          "Log's intersection arms are separated as Onset's flat arms are"
 
-                      Expect.stringContains source "type Log = U2<Log2, Log3>" "and Log stays an erased union"
+                      for gone in [ "Distinct2"; "Distinct3"; "Distinct4"; "Signal2"; "Signal3"; "Onset2"; "Onset3"; "Log2"; "Log3"; "Scheduled2"; "Scheduled3"; "Result2"; "Result3" ] do
+                          Expect.isFalse (source.Contains $"type {gone}") $"{gone}: an unread tagged arm is dropped"
+
+                      for kept in [ "Loose2"; "Loose3"; "FetchInfo" ] do
+                          Expect.stringContains source $"type {kept} =" $"{kept}: an arm an erased union or name holds stays"
 
                   testCase "a union written inline is named under its owner and claimed from there"
                   <| fun _ ->
@@ -4509,11 +4526,14 @@ let pipelineTests =
                       Expect.isFalse (source.Contains "Alias.Event") "and mints nothing of its own"
 
                       // The `TailStream.EventType` spelling: nine arms discriminate cleanly and
-                      // the `Log` intersection's two arms fold into the tenth, the same fold
-                      // `Terminal` and `Onset` exercise on flat arms.
-                      Expect.stringContains source "type OnEvent = (OnEvent.Event -> unit)" "the intersection arm no longer blocks the fold"
-                      Expect.stringContains source "| [<CompiledName(\"log\")>] Log of level: string" "the two Log arms fold into one case"
-                      Expect.equal (keysFor "OnEvent.Event") [ "DT002"; "DT004"; "SY004" ] "discriminated, folded once, and named under its owner"
+                      // the `Log` intersection's two arms are the tenth and eleventh cases, told
+                      // apart as `Onset`'s flat arms are.
+                      Expect.stringContains source "type OnEvent = (OnEvent.Event -> unit)" "the intersection arm no longer blocks the DU"
+                      Expect.stringContains
+                          source
+                          "| [<CompiledName(\"log\"); CaseTest(\"$0.truncated === true\")>] Log2 of level: string * message: string * truncated: bool"
+                          "the two Log arms are cases of their own"
+                      Expect.equal (keysFor "OnEvent.Event") [ "DT002"; "DT008"; "SY004" ] "discriminated, separated once, and named under its owner"
 
                   testCase "generic tagged payloads preserve declaration and method type parameters" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -4543,6 +4563,242 @@ let pipelineTests =
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> List.contains f.Key [ "TP006"; "RA003"; "RA004"; "SY002" ]))
                           "no parameter is erased and no reference widens for want of arguments" ])
+
+        yield!
+            fixtureTests "tagged-arm-lab" (handFixture "tagged-arm-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "arms sharing a tag value are cases of their own, each with its test" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\"); CaseTest(\"$0.ok === true\")>] Done of owner: Task.Cases.Done.Owner * ok: bool * note: Task.Cases.Done.Note"
+                          "a second literal discriminant separates the arms"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"({ state: 'done', ok: false, ...$0 })\")>]"
+                          "and the case's Create writes the boolean literal"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\"); CaseTest(\"'failure' in $0\")>] Done2 of failure: Run.Cases.Done2.Failure"
+                          "a member one arm carries alone separates by presence"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\"); CaseTest(\"!('code' in $0)\")>] Done of level: Job.Cases.Done.Level"
+                          "an arm without a member of its own is separated by lacking the other's"
+
+                      Expect.stringContains
+                          source
+                          "    | [<CompiledName(\"done\"); CaseTest(\"typeof $0.payload === 'number'\")>] Done2 of payload: float"
+                          "arms sharing every member name are separated by a member's typeof"
+
+                      Expect.stringContains source "type Mirror = U3<Mirror2, Mirror3, Mirror4>" "arms nothing separates stay an erased union"
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Symbol = "Mirror" && f.Key = "DT003")
+                           |> List.map _.Message)
+                          [ "discriminated by 'state', but no member test separates the arms carrying 'done'; left as an erased union" ]
+                          "and the refusal names the shared value"
+
+                      Expect.stringContains source "type W = U2<W2, W3>" "the exclusive fold compares a shared union both ways"
+                      Expect.stringContains source "type Y = U2<Y2, Y3>" "in either arm order"
+
+                      Expect.isFalse (source.Contains "type Choice = U2<") "an exclusive fold over an inline shared object fires"
+                      Expect.stringContains source "    abstract meta: Choice.Meta" "and reads the first arm's declaration"
+                      Expect.stringContains source "    static member Create (meta: Choice.Meta, a: float) : Choice = jsNative" "one Create per arm"
+                      Expect.stringContains source "    static member Create (meta: Choice.Meta, b: string) : Choice = jsNative" "for both arms"
+
+                  testCase "object payloads do not prove a single typeof class" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      for name in [ "BroadPayload"; "StructuralPayload" ] do
+                          Expect.stringContains source $"type {name} = U2<" "callable payloads must remain representable"
+                          Expect.isTrue
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol = name && f.Key = "DT003"))
+                              "an unproved runtime partition is refused"
+
+                  testCase "a tagged union carries the documentation its arms carried" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "/// The outcome of recovering a fiber." "the alias's comment reaches the DU"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"snapshot\">The state captured when the fiber finished.</param>"
+                          "a field comment reaches its case"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"metadata\">@deprecated Read <c>snapshot</c> instead.</param>"
+                          "a field tag reaches its case"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"type\">Which party aborted it.</param>"
+                          "an escaped field is documented under its JS key"
+
+                      Expect.stringContains
+                          source
+                          "    /// <param name=\"channel\">TypeScript type: <c>"
+                          "a literal field records its literal"
+
+                      Expect.stringContains source "    /// <param name=\"at\"></param>" "and its undocumented sibling is written empty"
+
+                  testCase "a case with an optional or literal field has a Create" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor symbol key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && f.Key = key)
+                          |> List.map _.Message
+
+                      Expect.stringContains
+                          source
+                          "    static member CreateCompleted (?snapshot: obj, ?metadata: JS.Record<string, obj>) : Recovery = jsNative"
+                          "optional fields are omittable"
+
+                      Expect.stringContains source "    static member CreateAborted (" "a case mixing both has one"
+                      Expect.stringContains source "?reason: string) : Recovery = jsNative" "with its optional field last"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"({ verb: 'start', channel: 'bus', ...$0 })\")>]"
+                          "a literal field is written by the Emit"
+
+                      Expect.stringContains source "    static member CreateStart (at: float) : Signal = jsNative" "and binds no parameter"
+                      Expect.stringContains source "    static member CreatePong (?at: float) : Message = jsNative" "named arms' cases too"
+
+                      for absent in [ "CreatePending"; "CreateCircle"; "CreateSquare"; "CreateOpen"; "CreatePing" ] do
+                          Expect.isFalse (source.Contains absent) $"{absent}: the case constructor already builds it"
+
+                      Expect.isFalse (source.Contains "static member CreateX") "a helper name that is a case is not declared"
+
+                      Expect.equal
+                          (messagesFor "Clash.X" "DT006")
+                          [ "no case Create: 'CreateX' is already a case of the union" ]
+                          "and the collision is reported"
+
+                      Expect.equal
+                          (messagesFor "Recovery.Completed" "DT005")
+                          [ "case Create 'CreateCompleted': optional fields omittable, literal fields written" ]
+                          "a synthesized helper is reported once"
+
+                      // Every case of a shared tag value builds its own arm.
+                      Expect.stringContains source "    static member CreateDone (value: float, ?note: string) : Report = jsNative" "Report.Done builds the value arm"
+                      Expect.stringContains source "    static member CreateDone2 (error: string, ?note: string) : Report = jsNative" "and Report.Done2 the error arm"
+
+                      Expect.stringContains
+                          source
+                          "    static member CreateDone2 (value: float, error: string, ?note: string) : Outcome = jsNative"
+                          "Outcome.Done2 builds the arm extending the first"
+
+                      Expect.isFalse (source.Contains "type Outcome2 =") "an arm its case carries whole is dropped"
+                      Expect.isFalse (source.Contains "type Outcome3 =") "for every arm"
+
+                  testCase "an anonymous arm's declarations nest under its case" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "Aborted of reason: string option * ``type``: Recovery.Cases.Aborted.Type"
+                          "the case field reads the declaration under its case"
+
+                      Expect.isFalse (source.Contains "Recovery3.Type") "and not under the arm's numbered name"
+                      Expect.stringContains source "Done2 of level: Job.Cases.Done.Level * code: float" "arms sharing one member type read one declaration"
+                      Expect.stringContains source "Shelf2.Size" "a union with a case named Cases keeps the arm path"
+                      Expect.stringContains source "Shelf3.Size" "for every arm"
+
+                      Expect.stringContains
+                          source
+                          "Done2 of owner: Task.Cases.Done2.Owner * ok: bool * note: Task.Cases.Done2.Note"
+                          "each case's members read declarations under that case"
+
+                      Expect.stringContains
+                          source
+                          "    abstract meta: Choice.Meta"
+                          "an exclusive fold's shared member nests under the folded interface"
+
+                      Expect.isFalse (source.Contains "Choice2.Meta") "not under an arm the fold removed"
+
+                  testCase "an arm interface nothing reads is dropped" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let messagesFor symbol key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol && f.Key = key)
+                          |> List.map _.Message
+
+                      for gone in [ "Recovery2"; "Recovery3"; "Recovery4"; "Shape2"; "Shape3"; "Signal2"; "Signal3"; "Event3"; "Clash2"; "Clash3"; "Task4"; "Run4" ] do
+                          Expect.isFalse (source.Contains $"type {gone} =") $"{gone} is dropped"
+
+                      // An arm a case carries whole is dropped, shared tag value or not.
+                      for gone in [ "Task2"; "Task3"; "Run2"; "Run3"; "Job2"; "Job3"; "Report2"; "Report3"; "Outcome2"; "Outcome3" ] do
+                          Expect.isFalse (source.Contains $"type {gone} =") $"{gone}: its case carries it whole"
+
+                      Expect.equal
+                          (messagesFor "Job3" "DD002")
+                          [ "arm interface dropped: the tagged union carries its fields and nothing else reads it" ]
+                          "and is reported dropped"
+
+                      // An arm with a symbol-keyed member or an index signature is more than its
+                      // case's fields, so its interface stays.
+                      Expect.stringContains source "type F2 =" "a symbol-keyed member keeps the arm"
+                      Expect.stringContains source "    abstract SymbolToStringTag: F.Cases.A.SymbolToStringTag with get" "with that member"
+                      Expect.stringContains source "type G2 =" "an index signature keeps the arm"
+                      Expect.stringContains source "    abstract Item: string -> obj with get, set" "with its indexer"
+                      Expect.equal (messagesFor "F2" "DD002") [] "neither is reported dropped"
+                      Expect.equal (messagesFor "G2" "DD002") [] "for either"
+
+                      Expect.stringContains source "Done of result: Run.Cases.Done.Result" "a case's nested declaration stays"
+
+                      // What only a dropped arm read goes with it, transitively.
+                      for gone in [ "Meta2" ] do
+                          Expect.isFalse (source.Contains $"type {gone} =") $"{gone}: read by no declaration left"
+
+                      for kept in [ "Result"; "Failure"; "Owner" ] do
+                          Expect.stringContains source $"type {kept} =" $"{kept}: a case reads it"
+
+                      Expect.stringContains source "type Meta =" "and the one the exclusive-folded interface reads"
+
+                      Expect.stringContains source "type Event2 =" "an arm read through Extract stays"
+                      Expect.stringContains source "type Ping =" "a named arm stays"
+                      Expect.stringContains source "type Pong =" "a named arm stays when nothing reads it"
+                      Expect.isFalse (source.Contains "Recovery3") "a dropped arm leaves no module behind"
+                      Expect.stringContains source "module Recovery =" "its nested declarations live under the union"
+                      Expect.isFalse (source.Contains "type Shelf2 =") "a Cases-collision union's arms are dropped as well"
+
+                      Expect.stringContains
+                          source
+                          "Cases of size: Shelf2.Size"
+                          "and their nested declarations keep the arm path, the one remaining residue"
+
+                      Expect.equal
+                          (messagesFor "Recovery2" "DD002")
+                          [ "arm interface dropped: the tagged union carries its fields and nothing else reads it" ]
+                          "each dropped arm is reported"
+
+                      Expect.equal (messagesFor "Event2" "DD002") [] "a read arm is not"
+                      Expect.stringContains source "type Hello =" "an alias-named arm stays"
+                      Expect.stringContains source "Hello.Meta" "with its nested declaration under its own name"
+
+                      for nested in [ "T1.Extra"; "T2.Idx" ] do
+                          Expect.equal (messagesFor nested "DD003") [] $"{nested}: a namespace member under an exclusive fold is not pruned"
+
+                      Expect.stringContains source "abstract note: string" "and is declared"
+
+                      Expect.equal
+                          (messagesFor "Pick.Meta2" "DD003")
+                          [ "declaration dropped: only declarations already dropped read it" ]
+                          "while the fold's minted orphan is" ])
 
         // The checker's error type is reported apart from the intrinsic `any`: an unresolved
         // import, an undeclared name, a qualified name, an element position and a union reduced

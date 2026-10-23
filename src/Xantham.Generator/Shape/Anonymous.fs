@@ -91,13 +91,15 @@ let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: 
             arm.Response.ObjectFlags
             |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Reference)
 
-        let corresponds (declaredArm: TypeFacts, value: string) (instanceArm: TypeFacts) =
+        let corresponds (case: TaggedArm) (instanceArm: TypeFacts) =
+            let declaredArm = case.Facts
+
             declaredArm.Response.TypeId = instanceArm.Response.TypeId
             || (isReference declaredArm
                 && isReference instanceArm
                 && declaredArm.Response.TargetTypeId.IsSome
                 && declaredArm.Response.TargetTypeId = instanceArm.Response.TargetTypeId)
-            || (taggedArmValue model tag instanceArm = Some value
+            || (taggedArmValue model tag instanceArm = Some case.Value
                 && fields instanceArm = fields declaredArm)
 
         instanceArms.Length = cases.Length
@@ -301,6 +303,11 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let mutable findings = []
     let mutable taken = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
     let mutable visited = Set.empty
+
+    /// The module an anonymous arm's own declarations nest under, where it differs from the
+    /// arm's name: `Recovery.Cases.Aborted` for an arm of a union declared as a DU, `Choice` for
+    /// an arm of a union the exclusive-arm fold declares as one interface.
+    let mutable nestBases: Map<int<Measure.typeId>, string> = Map.empty
 
     let recoveredAliases =
         model.Types
@@ -641,7 +648,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 let named = Map.tryFind typeId names
 
                 let into segment =
-                    nestUnder (named |> Option.defaultValue path) segment
+                    nestUnder (Map.tryFind typeId nestBases |> Option.orElse named |> Option.defaultValue path) segment
 
                 // An instantiation of a named declaration reads only its arguments: its
                 // members are the declaration's, substituted, and shaping happens there.
@@ -694,7 +701,36 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                         |> Option.exists (fun application -> Map.containsKey application names)
 
                     if not readsApplication then
+                        let caseModules =
+                            match named with
+                            | Some unionName ->
+                                let caseNames = taggedCaseNames model facts
+
+                                if not caseNames.IsEmpty then
+                                    // A case named `Cases` would take the module path the case
+                                    // modules open under, so that union keeps the arm-name path.
+                                    if caseNames |> Map.exists (fun _ caseName -> caseName = "Cases") then
+                                        Map.empty
+                                    else
+                                        caseNames
+                                        |> Map.map (fun _ caseName -> nestUnder (nestUnder unionName "Cases") caseName)
+                                else
+                                    // The exclusive-arm fold declares the union as one interface
+                                    // under its own name, and its arms' declarations nest there.
+                                    match exclusiveArmShape model facts with
+                                    | ExclusiveArmsFold _ ->
+                                        facts.UnionMembers |> List.map (fun armId -> armId, unionName) |> Map.ofList
+                                    | NotExclusiveArms
+                                    | ExclusiveArmsDecline _ -> Map.empty
+                            | None -> Map.empty
+
                         for memberId in facts.UnionMembers do
+                            let anonymous = Map.tryFind memberId model.Types |> Option.exists isAnonymousArm
+
+                            match Map.tryFind memberId caseModules with
+                            | Some caseModule when anonymous -> nestBases <- Map.add memberId caseModule nestBases
+                            | _ -> ()
+
                             walk (named |> Option.defaultValue path) order memberId
 
                     for argument in facts.TypeArguments do

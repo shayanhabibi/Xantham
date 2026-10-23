@@ -11,7 +11,7 @@ order: 3
 In your Fable project directory:
 
 ```bash frame=terminal
-dotnet add package Fable.Core --version 5.2.0
+dotnet add package Fable.Core --version 5.5.0
 dotnet add package Xantham.Fable.Core
 dotnet add package Xantham.Fable.Core.TS
 ```

@@ -1,4 +1,4 @@
-﻿#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
+#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
 #r "nuget: Partas.Build, 0.8.0"
 #r "nuget: Partas.Build.Baked, 0.2.0"
 #r "nuget: Partas.Build.EasyBuild.ShipIt, 0.1.0"

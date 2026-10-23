@@ -1682,7 +1682,39 @@ type FsDelegateParam = { Name: string; Type: FsTypeRef }
 /// One field of a tagged-union case. The name is the JS property key verbatim: Fable emits the
 /// field under its F# name, and backtick escaping is transparent there (`` ``type`` `` reaches
 /// JS as `type`), so no separate compiled name is needed.
-type FsTaggedField = { Name: string; Type: FsTypeRef }
+type FsTaggedField =
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Type: FsTypeRef
+        /// The value of a literal field: a required property typed by one string or numeric
+        /// literal. `Type` is the literal's primitive.
+        Literal: FsLiteral option
+    }
+
+/// The JavaScript `typeof` class of a value.
+type FsTypeofClass =
+    | TypeofString
+    | TypeofNumber
+    | TypeofBoolean
+    | TypeofBigInt
+    | TypeofSymbol
+    | TypeofFunction
+    | TypeofObject
+
+/// A test on the tested object separating one arm from the others sharing its tag value, in the
+/// order TypeScript narrows by.
+type FsCaseTest =
+    /// The property holds the literal. With `orAbsent`, the property may also be missing or
+    /// `undefined`.
+    | LiteralEquals of name: string * value: FsLiteral * orAbsent: bool
+    /// The object carries the property.
+    | HasProperty of name: string
+    /// The object carries none of the properties.
+    | LacksProperties of names: string list
+    /// The property's value is of the `typeof` class.
+    | TypeofIs of name: string * typeofClass: FsTypeofClass
 
 /// One case of a `[<TypeScriptTaggedUnion>]` DU: the case name, the tag literal when it does
 /// not spell the case name, and the arm's own properties as case fields.
@@ -1697,7 +1729,13 @@ type FsTaggedCase =
     {
         Name: string
         CompiledName: string option
+        /// The test separating the case from other cases sharing its tag value, checked after
+        /// the tag matches. Rendered as the case's `[<CaseTest>]`.
+        CaseTest: FsCaseTest option
         Fields: FsTaggedField list
+        /// The name of the case's `Create` static member, which builds the case with its optional
+        /// fields omittable and its literal fields written.
+        Create: string option
     }
 
 /// A discriminated union the checker proved is tagged (D4, §4.5(2)): every member is an object

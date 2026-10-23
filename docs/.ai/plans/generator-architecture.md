@@ -2901,6 +2901,85 @@ Tiers, table size and wall time did not move. Core.TS and Node are not regenerat
 neither configuration sets the flag. Enabling it for Node is the recommendation, left to
 integration.
 
+## Tagged-union arms (2026-10-15, #158)
+
+Both folds compare members with `Spec.sameShape`: one id, or plain anonymous objects, unions and
+applications of one target that pair structurally. The checker gives every inline object literal
+its own id, so the earlier id comparison dropped `owner: { name: string }` from a tagged fold and
+refused the exclusive-arm fold over a shared inline `meta`. An exclusive-folded union's arm
+declarations nest under the folded interface (`Choice.Meta`).
+
+`detect-tagged-unions` writes the alias's JSDoc on the DU and each arm member's JSDoc, tags and
+literal value on its case field; render writes them as one `<param>` per field, empty where a
+field has no text (FS3390 rejects a case documenting some fields). A case with an optional or a
+literal field has a `Create<Case>` static member, the arm interface's `Create` moved onto the DU:
+an Emit writing the tag and literal fields, the remaining fields bound as parameters (`DT005`);
+where `Create<Case>` is a case of the same union, the case has none (`DT006`). A same-named
+member is FS0023. An anonymous arm's own declarations nest under `<Union>.Cases.<Case>`
+(`synthesize-anonymous` reads the case names from `Spec.taggedCaseNames`, the source
+`detect-tagged-unions` names cases from); a submodule spelled like the case itself is
+unreachable from expressions (FS0039), and a union with a case named `Cases` keeps the arm-name
+path. `drop-orphan-delegates` then prunes each unread interface named for an
+anonymous arm the DU carries whole (`DD002`); an arm of a folded case with a field the case
+omits stays declared (`DT007`), and such a case has `Create<Case>` only where its fields alone
+build one of its arms. It then prunes every unread generator-minted declaration under
+an arm root - a DU's `Cases` module, a dropped arm's path, an exclusive-folded interface -
+transitively (`DD003`); named arms, erased fallbacks, arms read elsewhere and author-written
+declarations under an arm root (a namespace member merged by name, `T1.Extra`) stay. The
+catalogue API hash is unchanged: no `CatalogCompatibility.current` bump. A tagged union's API
+hash covers exactly its tag, cases and field types; docs and `Create<Case>` members sit outside
+it. Catalogue identity keys come from roles, declaration handles and
+arguments, and a declaration's F# name enters a key only through the `generated:` fallback for a
+declaration without a type identity. The declarations nested under `<Union>.Cases.<Case>` all
+carry `type` or `literal-union` roles, so the rename leaves `identityVersion` unchanged. A newer
+producer owns fewer declarations, as orphan delegates already do, and a consumer takes every
+name from the catalogue of the producer it read. Core.TS regenerated with an unchanged semantic
+catalogue.
+
+Measured over the corpus (findings against the pre-wave baseline): `DD002` 2 in
+`@cloudflare/workers-types`, 2 in `catalog-alias-api-lab`, 2 in `catalog-recursive-json-lab`,
+19 in `generic-tag-lab`, 10 in `shared-tag-lab` and 20 in `tagged-arm-lab`; `DD003` 2 and
+`DT006` 1, both in `tagged-arm-lab`; `DT005` 20 in `@cloudflare/workers-types`, 1 in
+`catalog-alias-api-lab`, 1 in `projection-lab`, 4 in `shared-tag-lab` and 7 in `tagged-arm-lab`;
+`DT007` 1 in `@cloudflare/workers-types` (`TailStream` `Event.Item.Log`, whose `CreateLog` built
+no arm), 2 in `shared-tag-lab` and 5 in `tagged-arm-lab`. Ergonomic
+tiers fall by the dropped nested arms. `catalog-recursive-json-lab`'s shipped group held only its
+two arm interfaces and is no longer written (`GE001` → `GE002`). Node drops 13 anonymous
+`TestEvent` arms (`DD002` 13) and gains 3 `Create<Case>` members; Core.TS's binding is unchanged.
+
+## Shared tag values as case tests (2026-10-20, D1, #158)
+
+Supersedes the fold above. Every arm of a tagged union is a case of its own, and arms sharing a
+tag value carry a `[<CaseTest>]` from the Fable fork's `Fable.Core`
+(`tools/fable-fork/fork.json`): Fable matches the tag, then the test. `Spec.separateArms` picks one
+test form per shared value, in TypeScript's narrowing order: a second literal discriminant
+(`$0.ok === true`; an optional arm also matches an absent property), a required member no other
+arm of the value declares (`'value' in $0`, with at most one arm matching by lacking the others'),
+or a member's `typeof` class. Arms no form separates leave the union an erased union (`DT003`,
+reworded); a union whose arms all share one value is a DU once they separate (`Onset`, workers
+`TailStream` `Log`). Each separated value is reported once (`DT008`). `DT004` retires (row kept);
+`DT007` is removed before release. Case names keep `uniqueCaseNames` (`Done`, `Done2`).
+
+The `typeof` strategy requires positive evidence for one runtime class. TypeScript `object`
+and structural object types without call signatures still admit callable values, so neither
+proves `typeof === "object"`. They retain the erased-union fallback unless another strategy
+separates the arms. `tagged-arm-lab` pins both refusals alongside the string/number separation.
+
+A required boolean-literal case field is now a literal field, written by `Create<Case>` like a
+string or number one, since it can be what separates two arms (`Task.CreateDone2` writes
+`ok: false`). Interface `Create` keeps its string and number literals only. An arm interface
+drops only where its case carries it whole (`Spec.caseCarriesArmWhole`): a symbol-keyed member or
+an index signature keeps it declared (I4). A delegate read only by dropped declarations other than
+delegates grades `DD003`, not `DD001`. `Spec.sameShape` compares unions by mutual inclusion, so
+the exclusive-arm fold no longer depends on arm order (I1).
+
+Measured over the goldens against the #158 head: `DT004` 8 → 0 and `DT007` 8 → 0 (1 each in
+`@cloudflare/workers-types`); `DT008` 0 → 12 (`shared-tag-lab` 4, `tagged-arm-lab` 6,
+`@cloudflare/workers-types` 2); `DT003` 2 → 1 (`Onset` and `Log` separate; the new `Mirror`
+negative refuses); `DT002` 56 → 62; `DT005` 33 → 48; `DD002` 55 → 76 as every separated arm drops.
+`catalog-recursive-json-lab` ships its group again (`GE001`, one declaration, `Payload`).
+Core.TS's binding and Node are unchanged.
+
 ## TypeScript 7.1.0-beta (2026-10-21)
 
 The compiler pin moves to `typescript` 7.1.0-beta (`3e9236361fa9`), binary AST protocol 9. Two
@@ -2941,3 +3020,21 @@ support-helper manifests. The build and Partas gates invoke `dotnet fickl`; Fabl
 5.2.0. All 1,489 generator tests and 105 Wire tests passed across the validation runs. The new
 compiler passed 564 runtime checks, Partas JSX and source/DLL acceptance, its Vitest check,
 and all five standalone support-helper Node tests. Build-command verification also passed.
+
+## PR #160 resync with develop (2026-10-22)
+
+Merged develop through `74308014`, retaining the tagged-arm and shared-tag CaseTest behavior.
+The compiler tool is Fickl 0.5.3 and Fable.Core is public 5.5.0, which supplies CaseTest.
+The private fork pin, build helper and publication blocker are removed. InlineInterface belongs
+to the later branch and is not introduced into this PR. Core.TS, Node and fixture goldens are
+regenerated against this branch and TypeScript 7.1.0-beta.
+
+Core.TS exact/ergonomic/widened/escape counts move 1302/2688/290/5 to 1324/2737/304/5;
+Node remains 775/2185/608/5 with no generated binding changes. Type-fest moves 27/66/202/2
+to 27/66/204/0 through the beta's non-finite literal support. Other fixture tier counts are
+unchanged. All 136 golden-writing tests passed. The official `gh stack` extension tracks the
+dependent PRs, and validation workflows now include feature-base PRs. All 48 CI-policy and
+golden-tooling tests passed.
+
+Full validation passed: 1,497 generator tests and 105 Wire tests (one ignored in each suite),
+579 runtime checks, and the Partas JSX, source/DLL and Vitest gates.

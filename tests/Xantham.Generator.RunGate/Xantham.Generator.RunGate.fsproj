@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <!-- The Fable *run* gate of docs/plans/generator-architecture.md §5: where the compile gate
          proves the goldens type-check, this one proves the erased idioms they lean on *behave* -
@@ -44,6 +44,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\union-arm-overload-lab\UnionArmOverloadLab.fs" Link="union-arm-overload-lab\UnionArmOverloadLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\delegate-name-lab\DelegateNameLab.fs" Link="delegate-name-lab\DelegateNameLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\shared-tag-lab\SharedTagLab.fs" Link="shared-tag-lab\SharedTagLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\tagged-arm-lab\TaggedArmLab.fs" Link="tagged-arm-lab\TaggedArmLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\record-index-lab\RecordIndexLab.fs" Link="record-index-lab\RecordIndexLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\callable-hybrid-lab\CallableHybridLab.fs" Link="callable-hybrid-lab\CallableHybridLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\callable-overloads-lab\CallableOverloadsLab.fs" Link="callable-overloads-lab\CallableOverloadsLab.fs" />
@@ -73,7 +74,7 @@
 
     <ItemGroup>
         <!-- One Fable.Core across the support package, the compile gate and this gate. -->
-        <PackageReference Include="Fable.Core" Version="5.2.0" />
+        <PackageReference Include="Fable.Core" Version="5.5.0" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core.TS\Xantham.Fable.Core.TS.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
     </ItemGroup>
