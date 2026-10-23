@@ -109,6 +109,25 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
             { d with
                 Primitive = reference d.Primitive
             }
+    | FsErasedObjectUnion d ->
+        FsErasedObjectUnion
+            { d with
+                TypeParameters = d.TypeParameters |> List.map typeParam
+                Cases =
+                    d.Cases
+                    |> List.map (fun case ->
+                        { case with
+                            Payload = reference case.Payload
+                        })
+                Invokes =
+                    d.Invokes
+                    |> List.map (fun invoke ->
+                        { invoke with
+                            TypeParameters = invoke.TypeParameters |> List.map typeParam
+                            Parameters = invoke.Parameters |> List.map parameter
+                            Return = reference invoke.Return
+                        })
+            }
     | FsTaggedUnion d ->
         FsTaggedUnion
             { d with
@@ -156,6 +175,7 @@ let private declName =
     | FsPhantom d -> Some d.Name
     | FsMeasure d -> Some d.Name
     | FsTaggedUnion d -> Some d.Name
+    | FsErasedObjectUnion d -> Some d.Name
     | FsStringEnum d -> Some d.Name
     | FsEnum d -> Some d.Name
     | FsExports _ -> None
@@ -198,6 +218,7 @@ let private repaired (model: ShapeModel) =
         | FsDelegateType d -> Some d.TypeParameters
         | FsPhantom d -> Some d.TypeParameters
         | FsTaggedUnion d -> Some d.TypeParameters
+        | FsErasedObjectUnion d -> Some d.TypeParameters
         | _ -> None
 
     let unwritableHead decl =
@@ -260,6 +281,7 @@ let private repaired (model: ShapeModel) =
             | FsDelegateType d -> Some(d.Name, d.TypeParameters.Length)
             | FsPhantom d -> Some(d.Name, d.TypeParameters.Length)
             | FsTaggedUnion d -> Some(d.Name, d.TypeParameters.Length)
+            | FsErasedObjectUnion d -> Some(d.Name, d.TypeParameters.Length)
             | _ -> None)
         |> Map.ofList
 

@@ -60,6 +60,7 @@ let shapeAliases: Pass<ShapeModel> =
                             | FsInterface decl -> [ decl.Name ]
                             | FsStringEnum decl -> [ decl.Name ]
                             | FsTaggedUnion decl -> [ decl.Name ]
+                            | FsErasedObjectUnion decl -> [ decl.Name ]
                             | FsEnum decl -> [ decl.Name ]
                             | FsAbbrev decl -> [ decl.Name ]
                             | FsDelegateType decl -> [ decl.Name ]
@@ -92,6 +93,7 @@ let shapeAliases: Pass<ShapeModel> =
                             | FsDelegateType decl -> Some(decl.Name, decl.TypeParameters)
                             | FsPhantom decl -> Some(decl.Name, decl.TypeParameters)
                             | FsTaggedUnion decl -> Some(decl.Name, decl.TypeParameters)
+                            | FsErasedObjectUnion decl -> Some(decl.Name, decl.TypeParameters)
                             | _ -> None)
                         |> Map.ofList
 

@@ -137,6 +137,7 @@ order — each row cites its mapping-doc section:
 | `hoist-nullability` | strip `null`/`undefined` union members → `option` flag (per-symbol overrides applied) | §4.3, D1 |
 | `classify-literal-unions` | StringEnum / enum / CompiledValue mixed cases | §4.2, D12 |
 | `detect-tagged-unions` | common literal tag ⇒ `TypeScriptTaggedUnion` shape | §4.5, D4 |
+| `detect-erased-object-unions` | callable/constructable exclusive arms ⇒ typed erased cases with defined-value predicates; shared calls require equivalent source signatures | §4.5, October 23 D2 |
 | `classify-unions-by-position` | input: overloads/erased ctors; output: tagged/test-helpers; `U_n ≤ 4` | §4.5, D4 |
 | `detect-brands` | primitive ∩ phantom-object ⇒ measure-tagged primitive | §4.6 |
 | `flatten-intersections` | apparent-members flattening + interface inheritance where nominal | §4.6 |
@@ -3192,3 +3193,35 @@ Core.TS and Node regeneration reproduced their binding code and tier counts. Cor
 metadata refreshes the generator binary fingerprint and one session-assigned symbol id in
 a Date finding. All 31 selected workflow, golden-provenance and catalogue-portability tests
 passed. The unchanged generator/runtime suites were not repeated for this workflow-only sync.
+
+## Typed erased exclusive arms (2026-10-23)
+
+The approved D2 representation carries existing typed arms in an erased DU, preserving callable,
+constructor and object identity. `detect-erased-object-unions` follows tagged-union detection,
+before the data-interface fold. A required property that provably excludes `undefined`
+distinguishes an arm only when all other arms explicitly declare it optional-never/undefined.
+`Fickl.Core.CaseTest` emits a defined-value predicate; property presence alone is insufficient.
+An intersection proves this only through a constituent that excludes undefined. Literal-only
+callable discrimination remains a separate increment. Ambiguous callable/constructable unions
+retain the ordinary union fallback and cannot enter the plain-data fold.
+
+Each payload retains its arm declaration. Shared `Invoke` members require matching source
+signatures, including alpha-equivalent generic constraints; the usual overload pass removes
+collisions after shaping. Naming recovers generic alias applications, and declaration traversals
+retain payload and call references through arity repair, ordering, orphan pruning and catalogue
+qualification. `EO001` records the representation. The catalogue API remains version 8: affected
+per-declaration hashes change and always authenticate reuse, so old interface/alias forms fail
+individually without requiring global Core.TS regeneration.
+
+The prerequisite #165 adopted released Fickl/Fickl.Core 0.5.4 and merged after all CI checks
+passed. The generator change is #166. The surgical `erased-exclusive-lab` covers explicit
+undefined, shared/different calls, constructors, generic applications and methods, escaped
+property names, ambiguous fallback, identity, and a compiled catalogue consumer. Independent
+reviews found overload and generic-equivalence gaps, which the final tests cover.
+
+Full validation passed 1,520 generator and 105 Wire tests (one ignored in each suite), 617
+runtime checks and the Partas gate. The final intersection and catalogue compilation checks
+passed in all nine targeted tests, in both write and check phases. All 140 golden regeneration
+tests passed. Among existing fixtures, only `tagged-arm-lab` changes: its `T1` retains the
+previously dropped callable arm. Exact/ergonomic/widened/escape counts move 16/88/5/0 to
+17/89/5/0 as both arm declarations survive. No existing large golden changes.

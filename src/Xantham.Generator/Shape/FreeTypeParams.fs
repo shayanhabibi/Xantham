@@ -247,7 +247,7 @@ let bindFreeTypeParams: Pass<ShapeModel> =
                      && (arrayElement model facts).IsNone
                      && not (isTuple facts))
                     || isFlattenable model facts
-                    || (isTaggedDeclaration model facts
+                    || (isObjectUnionDeclaration model facts
                         && not (Map.containsKey typeId model.AliasApplications))
                     ->
                     let own = declParamIds facts

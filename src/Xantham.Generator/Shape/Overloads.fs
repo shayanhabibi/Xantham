@@ -167,6 +167,17 @@ let dedupeOverloads: Pass<ShapeModel> =
                     let decls =
                         model.Decls
                         |> List.map (function
+                            | FsErasedObjectUnion decl ->
+                                FsErasedObjectUnion
+                                    { decl with
+                                        Invokes =
+                                            decl.Invokes
+                                            |> List.map FsInvoke
+                                            |> dedupeMethods decl.Name
+                                            |> List.choose (function
+                                                | FsInvoke invoke -> Some invoke
+                                                | _ -> None)
+                                    }
                             | FsInterface decl ->
                                 FsInterface
                                     { decl with

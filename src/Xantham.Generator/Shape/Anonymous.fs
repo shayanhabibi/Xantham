@@ -45,7 +45,7 @@ let private isAliasIntersectionForm (model: ShapeModel) (facts: TypeFacts) =
 /// A generic alias over a tagged union, in a form that binds parameters of its own: every
 /// argument it carries is a distinct type parameter (§4.9, §4.5(2)).
 let private isAliasTaggedForm (model: ShapeModel) (facts: TypeFacts) =
-    isTaggedDeclaration model facts
+    isObjectUnionDeclaration model facts
     && (match facts.Response.AliasArgumentTypeIds with
         | ValueSome arguments ->
             arguments.Length > 0
@@ -108,7 +108,22 @@ let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: 
            |> List.forall (fun case -> (instanceArms |> List.filter (corresponds case)).Length = 1)
         && instanceArms
            |> List.forall (fun arm -> (cases |> List.filter (fun case -> corresponds case arm)).Length = 1)
-    | _ -> false
+    | _ ->
+        match erasedObjectUnionShape model declared, erasedObjectUnionShape model instance with
+        | Some declaredArms, Some instanceArms ->
+            let corresponds ((left: TypeFacts), leftTest) ((right: TypeFacts), rightTest) =
+                leftTest = rightTest
+                && (left.Response.TypeId = right.Response.TypeId
+                    || (left.Response.TargetTypeId.IsSome
+                        && left.Response.TargetTypeId = right.Response.TargetTypeId))
+
+            declaredArms.Length = instanceArms.Length
+            && declaredArms
+               |> List.forall (fun arm -> (instanceArms |> List.filter (corresponds arm)).Length = 1)
+            && instanceArms
+               |> List.forall (fun arm ->
+                   (declaredArms |> List.filter (fun declaredArm -> corresponds declaredArm arm)).Length = 1)
+        | _ -> false
 
 /// The consistent parameter bindings recoverable from two compiler-identified forms of one
 /// alias. Transformed fragments contribute no bindings; conflicting bindings reject the result.
@@ -424,7 +439,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let becomesTaggedUnion (facts: TypeFacts) =
         let _, remaining = splitNullish model facts
 
-        isTaggedDeclaration model facts
+        isObjectUnionDeclaration model facts
         && (namedUnionByMembers ctx { model with DeclNames = names } remaining).IsNone
 
     /// The type ids a declaration reads through call signatures rather than through a reference

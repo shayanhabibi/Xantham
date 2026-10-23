@@ -159,6 +159,7 @@ let findingsTests =
                     "DT.CaseCreateNameTaken DT006 ergonomic"
                     "DT.ArmsSeparatedByCaseTest DT008 exact"
                     "DT.CaseInlinesInterface DT009 exact"
+                    "EO.TypedArms EO001 exact"
                     "SY.InstantiationNamedOnce SY001 exact"
                     "SY.HoistArgumentsNotRecovered SY002 widened"
                     "SY.IntersectionOperandNotHoisted SY003 widened"
@@ -245,7 +246,7 @@ let findingsTests =
               Expect.equal (FindingCatalogue.passLabel "name-exports") "NE - name-exports" "a pass with a union"
 
               let passes = FindingCatalogue.passPrefixes |> Map.toList |> List.map fst
-              Expect.equal passes.Length 18 "every per-pass union names its pass"
+              Expect.equal passes.Length 19 "every per-pass union names its pass"
 
           testCase "a finding derives name, key, tier, payload and message from its kind" <| fun _ ->
               let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(10, 9))

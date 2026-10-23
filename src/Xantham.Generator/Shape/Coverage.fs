@@ -20,6 +20,7 @@ let auditCoverage: Pass<ShapeModel> =
                             | FsInterface decl -> [ decl.Name ]
                             | FsStringEnum decl -> [ decl.Name ]
                             | FsTaggedUnion decl -> [ decl.Name ]
+                            | FsErasedObjectUnion decl -> [ decl.Name ]
                             | FsEnum decl -> [ decl.Name ]
                             | FsAbbrev decl -> [ decl.Name ]
                             | FsDelegateType decl -> [ decl.Name ]

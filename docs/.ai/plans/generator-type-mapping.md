@@ -318,6 +318,20 @@ application and is written as the constraint instead (`TR044`).
 
 ### 4.5 Unions (non-literal)
 
+**October 23 D2 — callable exclusive arms.** A union containing a call or construct signature
+keeps whole typed arms in a named `[<Erase>]` DU when every arm has a required property whose
+type excludes `undefined`, and every other arm declares that property as optional
+`never`/`undefined`. Each case uses `Fickl.Core.CaseTest("$0.property !== undefined")`; presence
+alone is insufficient because an optional-never property can explicitly hold `undefined`.
+Construction and extraction preserve the original function, constructor or object identity.
+Every arm retains its own members. The union exposes `Invoke` only for call signatures shared
+by every arm, comparing source types and alpha-equivalent generic constraints before shaping;
+overloads that collide after shaping are deduplicated with the usual finding. Generic alias
+applications reuse the declared union. This representation records `EO001` and requires released
+Fickl/Fickl.Core 0.5.4. Callable or constructable alternatives never enter the plain-data
+exclusive fold; those without a proven discriminator retain the existing `U_n` fallback.
+Literal-only discrimination for callable unions remains outside this increment.
+
 Order of preference, decided per union after §4.2's categorization:
 
 1. All-literal → StringEnum/enum (Exact).

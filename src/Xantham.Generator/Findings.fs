@@ -267,6 +267,7 @@ module FindingCodes =
             "CU.InteropReplaced", "CU004"
             "CU.DeclarationReplaced", "CU005"
             "CU.ProjectionEmitted", "CU006"
+            "EO.TypedArms", "EO001"
         ]
 
     let private byName = Map.ofList table
@@ -895,6 +896,16 @@ type DetectTaggedUnions =
                 $"arms sharing '{tag}' = '{value}' are separate cases, each matched by a CaseTest"
             | CaseInlinesInterface arm -> $"case carries the arm interface '{arm}' whole (InlineInterface)"
 
+/// `detect-erased-object-unions`.
+[<Prefix("EO", "detect-erased-object-unions")>]
+type DetectErasedObjectUnions =
+    | [<Exact>] TypedArms of arms: int
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | TypedArms arms -> $"{arms} typed arms preserve identity and match through CaseTest predicates"
+
 /// `name-exports`.
 [<Prefix("NE", "name-exports")>]
 type NameExports =
@@ -1341,6 +1352,7 @@ module FindingCatalogue =
             typeof<ResolveTypeTable>
             typeof<ClassifyLiteralUnions>
             typeof<DetectTaggedUnions>
+            typeof<DetectErasedObjectUnions>
             typeof<SynthesizeAnonymous>
             typeof<ShapeInterfaces>
             typeof<ShapeAliases>

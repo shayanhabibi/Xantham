@@ -6977,3 +6977,44 @@ let inlineArmFixtureTests =
                           "    | [<CompiledName(\"token\")>] Token of value: string"
                           "a class arm keeps its fields" ])
     ]
+
+[<Tests>]
+let erasedExclusiveFixtureTests =
+    testList "erased exclusive fixture" [
+        yield! fixtureTests "erased-exclusive-lab" (handFixture "erased-exclusive-lab") GeneratorConfig.Default (fun package -> [
+            testCase "callable exclusive arms retain typed payloads and safe predicates" <| fun _ ->
+                let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "[<RequireQualifiedAccess; Erase>]" "the original value is the union representation"
+                Expect.stringContains source "| [<Fickl.Core.CaseTest(\"$0.left !== undefined\")>] LeftCall of LeftCall" "an optional never property may be present with undefined"
+                Expect.stringContains source "| [<Fickl.Core.CaseTest(\"$0.right !== undefined\")>] RightCall of RightCall" "each case has a positive runtime discriminator"
+                Expect.stringContains source "type Generic<'T> =" "the union retains its own type parameter"
+                Expect.stringContains source "LeftGeneric of LeftGeneric<'T>" "payloads apply the union's type parameter"
+                Expect.stringContains source "static member generic () : Generic<string>" "a concrete application reuses the generic declaration"
+                Expect.stringContains source "type Ambiguous = U2<" "optional own properties cannot prove exclusive cases"
+                Expect.stringContains source "type UndefinedRequired = U2<" "undefined cannot distinguish an absent-only alternative"
+            testCase "catalogue reuse preserves erased union and arm ownership" <| fun _ ->
+                use scratch = Scratch.directory "erased-exclusive-catalog"
+                let producer = Path.Combine(scratch.Path, "producer")
+                let config = { GeneratorConfig.Default with DeclarationCatalog = true; ModuleName = Some "ErasedOwner" }
+                Pipeline.run config package producer |> Async.RunSynchronously |> ignore
+                let consumer = Path.Combine(scratch.Path, "consumer")
+                Directory.CreateDirectory consumer |> ignore
+                File.WriteAllText(Path.Combine(consumer, "package.json"), """{"name":"erased-consumer-lab","version":"1.0.0","types":"index.d.ts"}""")
+                let source = Path.Combine(package, "index").Replace('\\', '/')
+                File.WriteAllText(Path.Combine(consumer, "index.d.ts"),
+                    $"import type {{ Calls, Generic }} from '{source}';\nexport function accept(value: Calls): Generic<string>;\n")
+                let references = { config with ModuleName = Some "ErasedConsumer"; DeclarationReferences = [ Path.Combine(producer, "declarations.json") ] }
+                let output = Path.Combine(scratch.Path, "consumer-out")
+                Pipeline.run references consumer output |> Async.RunSynchronously |> ignore
+                let code = File.ReadAllText(Path.Combine(output, "ErasedConsumer.fs"))
+                Expect.stringContains code "ErasedOwner.Calls" "the consumer references the producer union"
+                Expect.stringContains code "ErasedOwner.Generic<string>" "generic ownership survives reference qualification"
+                Expect.isFalse (code.Contains "type Calls =") "the union is not redeclared in the consumer"
+                let exitCode, diagnostics =
+                    DeclarationCatalogTests.compileConsumer scratch.Path
+                        [ "producer/ErasedOwner.fs"; "consumer-out/ErasedConsumer.fs" ]
+                        "module Check\nlet accept (value: ErasedOwner.Calls) : ErasedOwner.Generic<string> = ErasedConsumer.Exports.accept value\n"
+                Expect.equal exitCode 0 diagnostics
+        ])
+    ]

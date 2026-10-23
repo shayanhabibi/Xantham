@@ -1719,6 +1719,8 @@ type FsCaseTest =
     | LacksProperties of names: string list
     /// The property's value is of the `typeof` class.
     | TypeofIs of name: string * typeofClass: FsTypeofClass
+    /// The property's value differs from the undefined value admitted by every other arm.
+    | IsDefined of name: string
 
 /// One case of a `[<TypeScriptTaggedUnion>]` DU: the case name, the tag literal when it does
 /// not spell the case name, and the arm's own properties as case fields.
@@ -1761,6 +1763,26 @@ type FsTaggedUnionDecl =
         /// The discriminant property's name, as TypeScript spells it.
         Tag: string
         Cases: FsTaggedCase list
+    }
+
+/// An identity-preserving case carrying an existing object, function or constructor.
+type FsErasedObjectCase =
+    {
+        Name: string
+        Payload: FsTypeRef
+        Test: FsCaseTest
+    }
+
+/// A union of typed object arms distinguished by runtime predicates.
+type FsErasedObjectUnionDecl =
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        TypeParameters: FsTypeParam list
+        Cases: FsErasedObjectCase list
+        Invokes: FsConstructorMember list
     }
 
 /// A numeric TS enum as an F# enum - `type E = A = 1` (§4.7).
@@ -1846,6 +1868,7 @@ type FsDecl =
     | FsPhantom of FsPhantomDecl
     | FsMeasure of FsMeasureDecl
     | FsTaggedUnion of FsTaggedUnionDecl
+    | FsErasedObjectUnion of FsErasedObjectUnionDecl
     | FsEnum of FsEnumDecl
     | FsAbbrev of FsAbbrevDecl
     | FsDelegateType of FsDelegateDecl

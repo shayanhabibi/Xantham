@@ -272,6 +272,7 @@ let internal caseTestSource (test: FsCaseTest) =
     | LiteralEquals(name, value, false) -> $"{access name} === {jsLiteral value}"
     | LiteralEquals(name, value, true) -> $"({access name} === {jsLiteral value} || {access name} === undefined)"
     | HasProperty name -> $"{jsString name} in $0"
+    | IsDefined name -> $"{access name} !== undefined"
     | LacksProperties names ->
         names
         |> List.map (fun name -> $"!({jsString name} in $0)")
@@ -1179,6 +1180,20 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
             | None -> ()
     ]
 
+let private renderErasedObjectUnion (decl: FsErasedObjectUnionDecl) =
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield "[<RequireQualifiedAccess; Erase>]"
+        yield $"type {declHead decl.Name decl.TypeParameters} ="
+        for case in decl.Cases do
+            yield
+                $"    | [<Fickl.Core.CaseTest({stringLit (caseTestSource case.Test)})>] {ident case.Name} of {printTypeIn true case.Payload}"
+        for invoke in decl.Invokes do
+            yield "    [<Emit(\"$0($1...)\")>]"
+            let head = declHead "Invoke" invoke.TypeParameters
+            yield $"    member _.{head} {renderParamList invoke.Parameters} : {printType invoke.Return} = jsNative"
+    ]
+
 let private renderEnum (decl: FsEnumDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
@@ -1319,6 +1334,7 @@ let declName =
     | FsInterface decl -> decl.Name
     | FsStringEnum decl -> decl.Name
     | FsTaggedUnion decl -> decl.Name
+    | FsErasedObjectUnion decl -> decl.Name
     | FsEnum decl -> decl.Name
     | FsAbbrev decl -> decl.Name
     | FsDelegateType decl -> decl.Name
@@ -1338,6 +1354,7 @@ let private underLeaf (name: string) =
     | FsInterface decl -> FsInterface { decl with Name = name }
     | FsStringEnum decl -> FsStringEnum { decl with Name = name }
     | FsTaggedUnion decl -> FsTaggedUnion { decl with Name = name }
+    | FsErasedObjectUnion decl -> FsErasedObjectUnion { decl with Name = name }
     | FsEnum decl -> FsEnum { decl with Name = name }
     | FsAbbrev decl -> FsAbbrev { decl with Name = name }
     | FsDelegateType decl -> FsDelegateType { decl with Name = name }
@@ -1505,6 +1522,25 @@ let internal qualifyDecl foreign =
                         })
                 Statics = decl.Statics |> List.map (qualifyBound foreign)
             }
+    | FsErasedObjectUnion decl ->
+        FsErasedObjectUnion
+            { decl with
+                TypeParameters = qualifyTypeParams foreign decl.TypeParameters
+                Cases =
+                    decl.Cases
+                    |> List.map (fun case ->
+                        { case with
+                            Payload = qualifyRef foreign case.Payload
+                        })
+                Invokes =
+                    decl.Invokes
+                    |> List.map (fun invoke ->
+                        { invoke with
+                            TypeParameters = qualifyTypeParams foreign invoke.TypeParameters
+                            Parameters = invoke.Parameters |> List.map (qualifyParam foreign)
+                            Return = qualifyRef foreign invoke.Return
+                        })
+            }
     | FsTaggedUnion decl ->
         FsTaggedUnion
             { decl with
@@ -1643,6 +1679,10 @@ let private declErasedArities (decl: FsDecl) : int list =
         (d.TypeParameters |> List.collect ofTypeParam)
         @ (d.Cases
            |> List.collect (fun case -> case.Fields |> List.collect (fun f -> erasedArities f.Type)))
+    | FsErasedObjectUnion d ->
+        (d.TypeParameters |> List.collect ofTypeParam)
+        @ (d.Cases |> List.collect (fun case -> erasedArities case.Payload))
+        @ (d.Invokes |> List.collect (FsInvoke >> ofMember))
     | FsExports container -> container.Members |> List.collect (fun owned -> ofExportMember owned.Member)
     | FsStringEnum _
     | FsEnum _ -> []
@@ -1845,6 +1885,7 @@ let private renderBody
                 | None -> renderInterface attributes group.RuntimePackage decl
         | FsStringEnum decl -> renderStringEnum decl
         | FsTaggedUnion decl -> renderTaggedUnion decl
+        | FsErasedObjectUnion decl -> renderErasedObjectUnion decl
         | FsEnum decl -> renderEnum decl
         | FsAbbrev decl -> renderAbbrev group.RuntimePackage decl
         | FsDelegateType decl -> renderDelegate decl
@@ -2253,6 +2294,7 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsInterface decl -> [ decl.Name ]
             | FsStringEnum decl -> [ decl.Name ]
             | FsTaggedUnion decl -> [ decl.Name ]
+            | FsErasedObjectUnion decl -> [ decl.Name ]
             | FsEnum decl -> [ decl.Name ]
             | FsAbbrev decl -> [ decl.Name ]
             | FsDelegateType decl -> [ decl.Name ]
@@ -2440,6 +2482,7 @@ let private declFiles (model: RenderModel) : Map<string, string> =
         | FsInterface decl -> Some(decl.Name, decl.Order)
         | FsStringEnum decl -> Some(decl.Name, decl.Order)
         | FsTaggedUnion decl -> Some(decl.Name, decl.Order)
+        | FsErasedObjectUnion decl -> Some(decl.Name, decl.Order)
         | FsEnum decl -> Some(decl.Name, decl.Order)
         | FsAbbrev decl -> Some(decl.Name, decl.Order)
         | FsDelegateType decl -> Some(decl.Name, decl.Order)
