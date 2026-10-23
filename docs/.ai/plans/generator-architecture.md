@@ -3251,3 +3251,29 @@ Transformer and UnderlyingSink catalogue API hashes change with their nominal de
 The full gate passed 1,526 generator tests and 105 Wire tests (one ignored in each suite),
 620 runtime checks and the Partas gate. The generated Core.TS diff received an additional
 independent review with no actionable findings.
+
+## Alias declaration binders (2026-10-24)
+
+Resolve reads exported type-alias parameters from the typed declaration AST before walking
+the type table. ExportTypeIds.AliasParameters retains their ordered IDs on the owning symbol;
+parameter responses enter the ordinary resolver frontier. The checker may erase this binder
+list from the alias body, so it must not be attached to a shared TypeFacts record. ShapeAliases
+uses each alias export's binders, including secondary aliases of already-shaped declarations.
+Merged value/type symbols select the actual TypeAliasDeclaration handle. Missing declaration
+metadata reports the existing unresolved-facet finding.
+
+Unused binders retain the existing phantom representation and its reported limitation, with
+the known carrier preserved instead of needlessly becoming obj. The identity-alias lab covers
+identity and NoInfer aliases, shared literal bodies in both declaration orders, an interface
+carrier, merged declarations and reordered tuple binders. Three focused tests pass, including
+direct source and catalogue-consumer compilation. Secondary phantom aliases use their export's
+source order for module ownership, as abbreviations already do; their carrier cannot determine
+where the alias belongs. Direct pass tests cover binder ownership and compiler-library placement.
+All 142 golden regeneration tests pass. The full gate passes 1,533 generator tests and 105 Wire
+tests (one ignored in each suite), 620 runtime checks and the Partas gate using released Fickl.
+Core.TS was regenerated to reflect the restored alias arities and narrower phantom carriers;
+its catalogue and source changes passed independent review. SolidJS moves from 71/189/81/1 to
+72/190/79/1 exact/ergonomic/widened/escape. Type-fest's widened count rises by one because retaining
+ValueOf's second parameter now exposes the existing phantom limitation instead of silently
+discarding that parameter. Deferred computations remain lossy; this change preserves their
+binders and known carriers without claiming to implement TypeScript's type-level evaluation.

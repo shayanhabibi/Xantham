@@ -281,6 +281,7 @@ let resolveExportTypes: Pass<ResolveModel> =
                                     {
                                         Declared = answered declared |> Option.map _.TypeId
                                         Value = answered value |> Option.map _.TypeId
+                                        AliasParameters = None
                                     }
                                     map)
                             model.ExportTypes
@@ -2595,8 +2596,133 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                 }
     }
 
+/// Retains alias binders on the exported declaration rather than its possibly shared body type.
+let private resolveAliasParameters: Pass<ResolveModel> =
+    {
+        Name = "resolve-alias-parameters"
+        Run =
+            fun ctx model ->
+                async {
+                    let mutable exports = model.ExportTypes
+                    let mutable types = model.Types
+                    let mutable findings = []
+
+                    for export in model.Harvest.Exports do
+                        if export.Symbol.Flags.HasFlag SymbolFlags.TypeAlias then
+                            let! parameters =
+                                attempt (
+                                    async {
+                                        let! candidates =
+                                            export.Symbol.Declarations
+                                            |> ValueOption.defaultValue [||]
+                                            |> Array.map (fun declaration ->
+                                                async {
+                                                    match NodeHandle.parse declaration with
+                                                    | ValueNone -> return Some declaration
+                                                    | ValueSome handle ->
+                                                        let! source = sourceFile ctx handle.Path
+
+                                                        match source with
+                                                        | ValueNone -> return Some declaration
+                                                        | ValueSome source ->
+                                                            let node = Node.ofIndex<AnyNode> source handle.Index
+
+                                                            return
+                                                                if node.Kind = SyntaxKind.TypeAliasDeclaration then
+                                                                    Some declaration
+                                                                else
+                                                                    None
+                                                })
+                                            |> Async.Sequential
+
+                                        let handles = candidates |> Array.choose id |> Array.distinct
+
+                                        if handles.Length <> 1 then
+                                            return Error "Expected one type alias declaration"
+                                        else
+                                            match NodeHandle.parse handles[0] with
+                                            | ValueNone -> return Error "Malformed type alias declaration handle"
+                                            | ValueSome handle ->
+                                                let! source = sourceFile ctx handle.Path
+
+                                                match source with
+                                                | ValueNone -> return Error "Type alias source is unavailable"
+                                                | ValueSome source ->
+                                                    let node = Node.ofIndex<AnyNode> source handle.Index
+
+                                                    if node.Kind <> SyntaxKind.TypeAliasDeclaration then
+                                                        return Error "Expected a type alias declaration node"
+                                                    else
+                                                        let parameters =
+                                                            Node.retag<AnyNode, TypeAliasDeclaration> node
+                                                            |> TypeAliasDeclaration.typeParameters
+                                                            |> Seq.toList
+
+                                                        let! responses =
+                                                            parameters
+                                                            |> List.map (fun parameter ->
+                                                                ctx.Session.getTypeAtLocation (
+                                                                    NodeHandle.format
+                                                                        {
+                                                                            Index = Node.index parameter
+                                                                            Kind = parameter.Kind
+                                                                            Path = handle.Path
+                                                                        }
+                                                                ))
+                                                            |> Async.Sequential
+
+                                                        return Ok(Array.toList responses)
+                                    }
+                                )
+
+                            match Result.bind id parameters with
+                            | Error reason ->
+                                findings <-
+                                    findings
+                                    @ [
+                                        Finding.make
+                                            export.ExportName
+                                            (ResolveExportTypes.FacetNotResolved("alias parameters", reason))
+                                    ]
+                            | Ok parameters ->
+                                exports <-
+                                    exports
+                                    |> Map.change
+                                        export.Symbol.SymbolId
+                                        (Option.map (fun ids ->
+                                            { ids with
+                                                AliasParameters =
+                                                    Some(
+                                                        parameters
+                                                        |> List.map (fun (parameter: TypeResponse) -> parameter.TypeId)
+                                                    )
+                                            }))
+
+                                for parameter in parameters do
+                                    if not (Map.containsKey parameter.TypeId types) then
+                                        types <- Map.add parameter.TypeId (TypeFacts.shallow parameter) types
+
+                    let model =
+                        { model with
+                            ExportTypes = exports
+                            Types = types
+                        }
+
+                    return
+                        if findings.IsEmpty then
+                            Advanced model
+                        else
+                            Degraded(model, findings)
+                }
+    }
+
 let passes: Pass<ResolveModel> list =
-    [ resolveExportTypes; resolveTypeTable; resolveDeclarationIdentities ]
+    [
+        resolveExportTypes
+        resolveAliasParameters
+        resolveTypeTable
+        resolveDeclarationIdentities
+    ]
 
 let internal customizationFacts (ctx: Context) (facts: TypeFacts) =
     async {

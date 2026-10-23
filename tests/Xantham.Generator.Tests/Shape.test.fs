@@ -1,4 +1,4 @@
-﻿/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
+/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
 /// the output model and its findings. No wire, no fixtures.
 module Xantham.Generator.Tests.ShapeTests
 
@@ -465,7 +465,7 @@ let private conditionalAliasModel (declaredOperands: int list) (appliedOperands:
                     Namespaces = Map.empty
                     ShadowedByLib = 0
                   }
-        ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 60<typeId> } ]
+        ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 60<typeId>; AliasParameters = None } ]
         DeclNames = Map.ofList [ 50<typeId>, "Node" ] }
 
 [<Tests>]
@@ -1610,8 +1610,8 @@ let private ansiRegexShaped () =
             }
         ExportTypes =
             Map.ofList
-                [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None }
-                  (Build.symbolKey 200), { Declared = None; Value = Some 30<typeId> } ] }
+                [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None; AliasParameters = None }
+                  (Build.symbolKey 200), { Declared = None; Value = Some 30<typeId>; AliasParameters = None } ] }
 
 [<Tests>]
 let shapePassTests =
@@ -1662,7 +1662,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1697,7 +1697,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1729,7 +1729,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1780,7 +1780,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 41<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 41<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -1801,7 +1801,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -1836,7 +1836,7 @@ let shapePassTests =
                           Namespaces = Map.ofList [ (Build.symbolKey 900), ((fun value -> value * uom<symbolName>) "TailStream") ]
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 42<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 42<typeId>; AliasParameters = None } ] }
 
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -1874,7 +1874,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 42<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 42<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -1908,8 +1908,8 @@ let shapePassTests =
                         }
                     ExportTypes =
                         Map.ofList
-                            [ (Build.symbolKey 100), { Declared = Some 40<typeId>; Value = None }
-                              (Build.symbolKey 101), { Declared = Some 41<typeId>; Value = None } ] }
+                            [ (Build.symbolKey 100), { Declared = Some 40<typeId>; Value = None; AliasParameters = None }
+                              (Build.symbolKey 101), { Declared = Some 41<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, findings = Build.runPass ExportNames.nameExports model
 
@@ -1940,8 +1940,8 @@ let shapePassTests =
                         }
                     ExportTypes =
                         Map.ofList
-                            [ (Build.symbolKey 100), { Declared = Some 40<typeId>; Value = None }
-                              (Build.symbolKey 101), { Declared = Some 41<typeId>; Value = None } ] }
+                            [ (Build.symbolKey 100), { Declared = Some 40<typeId>; Value = None; AliasParameters = None }
+                              (Build.symbolKey 101), { Declared = Some 41<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, findings = Build.runPass ExportNames.nameExports model
 
@@ -1979,7 +1979,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 31<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 31<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -3241,7 +3241,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 800), { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 800), { Declared = Some 80<typeId>; Value = Some 81<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 80<typeId>, "Timer" ] }
 
             let shaped, findings = Build.runPass Classes.shapeClasses model
@@ -3318,7 +3318,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 810), { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 810), { Declared = Some 80<typeId>; Value = Some 81<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 80<typeId>, "Clash" ]
                     Decls = [ declared ] }
 
@@ -3392,7 +3392,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 600), { Declared = Some 60<typeId>; Value = Some 61<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 600), { Declared = Some 60<typeId>; Value = Some 61<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 60<typeId>, "Gauge" ] }
 
             let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
@@ -3411,7 +3411,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 600), { Declared = None; Value = Some 61<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 600), { Declared = None; Value = Some 61<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 60<typeId>, "Gauge" ] }
 
             let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
@@ -3516,7 +3516,7 @@ let shapePassTests =
                     { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
                         Origin = origin }
 
-                [ instance; static' ], declaration, export, (Build.symbolKey (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)) })
+                [ instance; static' ], declaration, export, (Build.symbolKey (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)); AliasParameters = None })
 
             let cases =
                 [ entrypoint "Derived" 80 true [] (ExportOrigin.StringFromAmbientModule "lab:tools")
@@ -3606,7 +3606,7 @@ let shapePassTests =
                     { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
                         Origin = ExportOrigin.StringFromAmbientModule "lab:faults" }
 
-                [ instance; static' ], declaration, export, (Build.symbolKey (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)) })
+                [ instance; static' ], declaration, export, (Build.symbolKey (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)); AliasParameters = None })
 
             let cases = [ entrypoint "Fault" 80 70; entrypoint "Tick" 90 71 ]
 
@@ -3682,7 +3682,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 800), { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 800), { Declared = Some 80<typeId>; Value = Some 81<typeId>; AliasParameters = None } ]
                     Decls = [ declaration ] }
 
             let shaped, findings = Build.runPass Classes.shapeClasses model
@@ -3738,7 +3738,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 810), { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 810), { Declared = Some 80<typeId>; Value = Some 81<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 80<typeId>, "DOMException" ]
                     Decls = [ declared ] }
 
@@ -4053,7 +4053,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 110), { Declared = Some 20<typeId>; Value = None } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 110), { Declared = Some 20<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces named
@@ -4660,7 +4660,7 @@ let shapePassTests =
                           AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0 }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -4823,7 +4823,7 @@ let shapePassTests =
                           AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0 }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -4869,7 +4869,7 @@ let shapePassTests =
                           AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0 }
-                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -5036,6 +5036,29 @@ let shapePassTests =
                 "and no abbreviation competing for the name"
 
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the idiom is recorded once, at the declaration"
+
+        testCase "shape-aliases reads secondary binders from their owning declaration" <| fun _ ->
+            let primary = Build.export "Existing" (Build.symbol 100 "Existing" SymbolFlags.Interface)
+            let alias = Build.export "Alias" (Build.symbol 101 "Alias" SymbolFlags.TypeAlias)
+            let carrier = Build.facts (Build.typeResponse 10 TypeFlags.Object)
+            let declaration =
+                FsInterface
+                    { Name = "Existing"; Docs = ""; Tags = []; Order = None; TypeParameters = []
+                      Inherits = []; Members = []; Entrypoint = None; CreateOverloads = []; Statics = [] }
+            for owned, expected in [ None, []; Some [], []; Some [ 20<typeId> ], [ "T" ] ] do
+                let model =
+                    { Build.shapeModel (carrier :: typeParam 20 "T" :: Build.primitives) with
+                        Harvest = { HarvestModel.Empty with Exports = [ primary; alias ] }
+                        ExportTypes =
+                            Map.ofList
+                                [ primary.Symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = None }
+                                  alias.Symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = owned } ]
+                        DeclNames = Map.ofList [ 10<typeId>, "Existing" ]
+                        Decls = [ declaration ] }
+                let shaped, _ = Build.runPass Aliases.shapeAliases model
+                let result = shaped.Decls |> List.pick (function FsAbbrev d when d.Name = "Alias" -> Some d | _ -> None)
+                Expect.equal (result.TypeParameters |> List.map _.Name) expected "the alias owns its binders independently of its carrier"
+                Expect.equal result.Target (FsNamed "Existing") "the named carrier remains intact"
 
         testCase "shape-aliases emits a phantom for a computation that names none of its parameters" <| fun _ ->
             // `type Unwrap<T> = T extends Array<infer E> ? E : T`: a conditional the checker
@@ -5539,7 +5562,7 @@ let private constraintParameters expected used =
             Harvest =
                 { HarvestModel.Empty with
                     Exports = [ Build.export "use" (Build.symbol 400 "use" SymbolFlags.Function) ] }
-            ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId> } ] }
+            ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
     let shaped, findings = Build.runPass Exports.shapeExports model
     let parameters = shaped.ExportMembers |> List.exactlyOne |> _.Member.TypeParameters

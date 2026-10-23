@@ -153,6 +153,28 @@ let shapeAliases: Pass<ShapeModel> =
                                             else
                                                 FsApp(primary, typeParameters |> List.map (_.Name >> FsTypeVar))
 
+                                        let typeParameters, target =
+                                            let owned =
+                                                Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                                                |> Option.bind _.AliasParameters
+
+                                            match owned, Map.tryFind typeId model.Types with
+                                            | Some ids, Some facts ->
+                                                let parameters, scope, parameterFindings =
+                                                    typeParamsOf ctx model name ids
+
+                                                let target, refFindings =
+                                                    let scoped = { model with TypeVars = scope }
+
+                                                    if Set.contains primary declaredNames then
+                                                        typeRef ctx scoped None name typeId
+                                                    else
+                                                        typeRefIgnoringSelf ctx scoped name facts
+
+                                                findings <- findings @ parameterFindings @ refFindings
+                                                parameters, target
+                                            | _ -> typeParameters, target
+
                                         // An abbreviation of a shared Any intrinsic (`Lowercase =
                                         // Uppercase`) carries the widening its claimant reports.
                                         match Map.tryFind typeId model.Types with
@@ -219,8 +241,18 @@ let shapeAliases: Pass<ShapeModel> =
 
                                         // Binds the operand a `T[keyof T]` body reads (W8, #139).
                                         let typeParameters, scope, parameterFindings =
-                                            match valueOfOperand model facts with
-                                            | Some objectId when
+                                            let declarationParameters =
+                                                Map.tryFind typeId definingExports
+                                                |> Option.bind (fun export ->
+                                                    Map.tryFind export.Symbol.SymbolId model.ExportTypes)
+                                                |> Option.bind _.AliasParameters
+
+                                            match declarationParameters, valueOfOperand model facts with
+                                            | Some parameters, _ ->
+                                                parameters @ freeParamsOf model facts.Response.TypeId
+                                                |> List.distinct
+                                                |> typeParamsOf ctx model name
+                                            | None, Some objectId when
                                                 (declParamIds facts @ freeParamsOf model facts.Response.TypeId).IsEmpty
                                                 ->
                                                 typeParamsOf ctx model name [ objectId ]
@@ -288,7 +320,7 @@ let shapeAliases: Pass<ShapeModel> =
                                                             then
                                                                 FsString
                                                             else
-                                                                FsObj
+                                                                reference
                                                     }
                                             )
                                         else

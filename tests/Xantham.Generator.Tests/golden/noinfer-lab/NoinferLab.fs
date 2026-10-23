@@ -10,7 +10,7 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-type NoInfer = obj
+type NoInfer<'T> = 'T
 
 [<Interface>]
 type Options<'T> =
@@ -18,7 +18,8 @@ type Options<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (value: 'T) : Options<'T> = jsNative
 
-type FirstOf = obj
+[<Erase>]
+type FirstOf<'T> = private FirstOf__ of obj
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

@@ -3,9 +3,9 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 427,
+    "exact": 424,
     "ergonomic": 1251,
-    "widened": 282,
+    "widened": 285,
     "escape": 1
   },
   "passes": [
@@ -47,9 +47,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 51,
+      "total": 54,
       "ergonomic": 22,
-      "widened": 29
+      "widened": 32
     },
     {
       "pass": "SC - shape-classes",

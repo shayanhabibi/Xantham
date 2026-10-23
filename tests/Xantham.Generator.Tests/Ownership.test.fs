@@ -17,6 +17,29 @@ let private abbreviation name order target =
           TypeParameters = []
           Target = target }
 
+[<Tests>]
+let secondaryPhantomOwnershipTests =
+    testCase "secondary phantom aliases retain compiler module ownership" <| fun _ ->
+        let ctx =
+            { context with
+                PackageDir = "/packages/ownership" * Measure.uom<Measure.dirPath>
+                Config =
+                    { GeneratorConfig.Default with
+                        Groups = Map.ofList [ "typescript/lib" * Measure.uom<Measure.npmDependency>, Ship ] } }
+        let names = [ "Lowercase"; "Capitalize"; "Uncapitalize"; "NoInfer" ]
+        let declarations =
+            names |> List.map (fun name ->
+                FsPhantom
+                    { Name = name; Docs = ""; Tags = []; Order = coreOrder
+                      TypeParameters = [ { Name = "T"; Constraint = None } ]; Carrier = FsObj })
+        let groups = Pipeline.groupModules ctx { shapeModel [] with Decls = declarations }
+        let placements =
+            groups |> List.collect (fun group ->
+                group.Decls |> List.map (fun decl -> Render.declName decl, (group.Module, group.IsEntry)))
+        Expect.equal (Map.ofList placements)
+            (names |> List.map (fun name -> name, ("TypeScript.Lib.Es", false)) |> Map.ofList)
+            "ownership follows alias declaration order even when its type-table name is shared"
+
 let private placement expected exportedNames names declarations facts =
     let ctx =
         { context with
@@ -42,7 +65,7 @@ let private placement expected exportedNames names declarations facts =
     let model =
         { shapeModel facts with
             Harvest = { HarvestModel.Empty with Exports = exported |> List.map snd }
-            ExportTypes = exported |> List.map (fun (typeId, export) -> export.Symbol.SymbolId, { Declared = Some (typeId * Measure.uom<Measure.typeId>); Value = None }) |> Map.ofList
+            ExportTypes = exported |> List.map (fun (typeId, export) -> export.Symbol.SymbolId, { Declared = Some (typeId * Measure.uom<Measure.typeId>); Value = None; AliasParameters = None }) |> Map.ofList
             DeclNames = names |> List.map (fun (id, name) -> id * Measure.uom<Measure.typeId>, name) |> Map.ofList
             Decls = declarations }
 
@@ -81,8 +104,8 @@ let private sharedName expected definingFile =
                           { export "SharedType" definition with Order = definingOrder } ] }
             ExportTypes =
                 Map.ofList
-                    [ (Build.symbolKey 100), { Declared = Some 10<Measure.typeId>; Value = None }
-                      (Build.symbolKey 101), { Declared = Some 10<Measure.typeId>; Value = None } ] }
+                    [ (Build.symbolKey 100), { Declared = Some 10<Measure.typeId>; Value = None; AliasParameters = None }
+                      (Build.symbolKey 101), { Declared = Some 10<Measure.typeId>; Value = None; AliasParameters = None } ] }
 
     let named, _ =
         Pipeline.runTier ctx [ Shape.ExportNames.nameExports ] model |> Async.RunSynchronously
@@ -282,7 +305,7 @@ let groupedCompilerAliasTests =
                         { HarvestModel.Empty with
                             Exports = if exported then [ export "RequestCache" exportedSymbol ] else [] }
                     ExportTypes =
-                        if exported then Map.ofList [ (Build.symbolKey 100), { Declared = Some 10<Measure.typeId>; Value = None } ]
+                        if exported then Map.ofList [ (Build.symbolKey 100), { Declared = Some 10<Measure.typeId>; Value = None; AliasParameters = None } ]
                         else Map.empty
                     DeclNames =
                         (10<Measure.typeId>, "RequestCache") :: (reads |> List.map (fun (id, name, _) -> id * Measure.uom<Measure.typeId>, name)) |> Map.ofList
