@@ -3225,3 +3225,29 @@ passed in all nine targeted tests, in both write and check phases. All 140 golde
 tests passed. Among existing fixtures, only `tagged-arm-lab` changes: its `T1` retains the
 previously dropped callable arm. Exact/ergonomic/widened/escape counts move 16/88/5/0 to
 17/89/5/0 as both arm declarations survive. No existing large golden changes.
+
+## Named generic callable references (2026-10-24)
+
+`objectRef` enters the pure-callback fallback only when no existing named instantiation is
+available. A named application follows `appliedRefTo`, retaining declaration constraints and
+arity checks. This preserves delegate/interface identity and the source type arguments without
+introducing a new callback representation. Array and tuple precedence and unnamed callbacks
+retain their existing handling.
+
+The generic-callable-reference lab proves transfers through a tuple, return and input, plus
+consumer-created callbacks and a compiled catalogue consumer. The unit test first reproduced
+the incorrect fresh delegate; the live lab reproduced a separate `Func` at every use.
+Five focused tests and 620 runtime checks passed, along with the Partas gate. All 141 golden
+regeneration tests passed. Independent spec and standards reviews found no issues.
+
+Only SolidJS changes among existing goldens: `StoreReturn<'T>` carries `SetStoreFunction<'T>`
+instead of `Action<obj, obj, obj, obj, obj, obj, obj, obj>`. Exact/ergonomic/widened/escape counts
+move 70/189/82/1 to 71/189/81/1. TR013 falls 15→7, TR031 13→12, TR020 70→60, TR035 35→27,
+and TR045 56→53 because the tuple no longer re-expands and widens the callable's generic
+overloads. Animejs and every other existing golden remain unchanged.
+
+Regenerated Core.TS stream interfaces also retain their named callback references; the
+Transformer and UnderlyingSink catalogue API hashes change with their nominal delegate types.
+The full gate passed 1,526 generator tests and 105 Wire tests (one ignored in each suite),
+620 runtime checks and the Partas gate. The generated Core.TS diff received an additional
+independent review with no actionable findings.

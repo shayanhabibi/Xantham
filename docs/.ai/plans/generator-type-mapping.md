@@ -469,6 +469,12 @@ always was.
 
 ### 4.8 Functions, callbacks, overloads
 
+A reference to an existing named generic callback applies that declaration before considering
+anonymous callback expansion. `PairCallback<string>` remains `PairCallback<string>` at inputs,
+returns and inside tuples; it must not become a separately named `System.Func` while the source
+declaration is emitted as a named delegate or callable interface. The ordinary declaration
+constraint and arity checks still apply. An unnamed callback retains the callback rules below.
+
 - Top-level exported functions → `[<Import>]`-bound members on an `Exports` erased type
   (Glutinum convention) — keeps the module surface in one place.
 - **Callbacks** → the arity problem: what crosses the Fable boundary has to be a JavaScript

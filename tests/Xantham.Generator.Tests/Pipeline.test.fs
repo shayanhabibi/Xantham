@@ -7018,3 +7018,33 @@ let erasedExclusiveFixtureTests =
                 Expect.equal exitCode 0 diagnostics
         ])
     ]
+
+[<Tests>]
+let genericCallableReferenceFixtureTests =
+    testList "generic callable references" [
+        yield! fixtureTests "generic-callable-reference-lab" (handFixture "generic-callable-reference-lab") GeneratorConfig.Default (fun package -> [
+            testCase "tuple and export references reuse the declared generic callback" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type Pair<'T> = 'T * PairCallback<'T>" "the tuple retains the callback declaration and its type parameter"
+                Expect.stringContains source "static member callback () : PairCallback<string>" "a return applies the existing declaration"
+                Expect.stringContains source "value: PairCallback<string>" "inputs use the same callback type"
+            testCase "catalogue consumers retain the producer's generic callback" <| fun _ ->
+                use scratch = Scratch.directory "generic-callable-catalog"
+                let producer = Path.Combine(scratch.Path, "producer")
+                let config = { GeneratorConfig.Default with DeclarationCatalog = true; ModuleName = Some "CallbackOwner" }
+                Pipeline.run config package producer |> Async.RunSynchronously |> ignore
+                let consumer = Path.Combine(scratch.Path, "consumer")
+                Directory.CreateDirectory consumer |> ignore
+                File.WriteAllText(Path.Combine(consumer, "package.json"), """{"name":"callback-consumer-lab","version":"1.0.0","types":"index.d.ts"}""")
+                let source = Path.Combine(package, "index").Replace('\\', '/')
+                File.WriteAllText(Path.Combine(consumer, "index.d.ts"), $"import type {{ PairCallback }} from '{source}';\nexport function accept(value: PairCallback<string>): string;\n")
+                let references = { config with ModuleName = Some "CallbackConsumer"; DeclarationReferences = [ Path.Combine(producer, "declarations.json") ] }
+                Pipeline.run references consumer (Path.Combine(scratch.Path, "consumer-out")) |> Async.RunSynchronously |> ignore
+                let exitCode, diagnostics =
+                    DeclarationCatalogTests.compileConsumer scratch.Path
+                        [ "producer/CallbackOwner.fs"; "consumer-out/CallbackConsumer.fs" ]
+                        "module Check\nlet accept (value: CallbackOwner.PairCallback<string>) = CallbackConsumer.Exports.accept value\n"
+                Expect.equal exitCode 0 diagnostics
+        ])
+    ]

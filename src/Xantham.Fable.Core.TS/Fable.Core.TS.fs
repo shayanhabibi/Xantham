@@ -29132,10 +29132,10 @@ module Dom =
     [<Interface>]
     type QueuingStrategy<'T> =
         abstract highWaterMark: float option with get, set
-        abstract size: ('T -> float) option with get, set
+        abstract size: QueuingStrategySize<'T> option with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(?highWaterMark: float, ?size: ('T -> float)) : QueuingStrategy<'T> = jsNative
+        static member Create(?highWaterMark: float, ?size: QueuingStrategySize<'T>) : QueuingStrategy<'T> = jsNative
 
     [<Interface>]
     type QueuingStrategyInit =
@@ -30776,19 +30776,19 @@ module Dom =
 
     [<Interface>]
     type Transformer<'I, 'O> =
-        abstract flush: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option) option with get, set
+        abstract flush: TransformerFlushCallback<'O> option with get, set
         abstract readableType: unit option with get, set
-        abstract start: (TransformStreamDefaultController<'O> -> obj) option with get, set
-        abstract transform: Func<'I, TransformStreamDefaultController<'O>, JS.Promise<unit> option> option with get, set
+        abstract start: TransformerStartCallback<'O> option with get, set
+        abstract transform: TransformerTransformCallback<'I, 'O> option with get, set
         abstract writableType: unit option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                ?flush: (TransformStreamDefaultController<'O> -> JS.Promise<unit> option),
+                ?flush: TransformerFlushCallback<'O>,
                 ?readableType: unit,
-                ?start: (TransformStreamDefaultController<'O> -> obj),
-                ?transform: Func<'I, TransformStreamDefaultController<'O>, JS.Promise<unit> option>,
+                ?start: TransformerStartCallback<'O>,
+                ?transform: TransformerTransformCallback<'I, 'O>,
                 ?writableType: unit
             ) : Transformer<'I, 'O> =
             jsNative
@@ -30953,7 +30953,7 @@ module Dom =
         abstract close: UnderlyingSinkCloseCallback option with get, set
         abstract start: UnderlyingSinkStartCallback option with get, set
         abstract ``type``: unit option with get, set
-        abstract write: Func<'W, WritableStreamDefaultController, JS.Promise<unit> option> option with get, set
+        abstract write: UnderlyingSinkWriteCallback<'W> option with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -30962,7 +30962,7 @@ module Dom =
                 ?close: UnderlyingSinkCloseCallback,
                 ?start: UnderlyingSinkStartCallback,
                 ?``type``: unit,
-                ?write: Func<'W, WritableStreamDefaultController, JS.Promise<unit> option>
+                ?write: UnderlyingSinkWriteCallback<'W>
             ) : UnderlyingSink<'W> =
             jsNative
 
@@ -30970,11 +30970,8 @@ module Dom =
     type UnderlyingSource<'R> =
         abstract autoAllocateChunkSize: float option with get, set
         abstract cancel: UnderlyingSourceCancelCallback option with get, set
-
-        abstract pull:
-            (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> JS.Promise<unit> option) option with get, set
-
-        abstract start: (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> obj) option with get, set
+        abstract pull: UnderlyingSourcePullCallback<'R> option with get, set
+        abstract start: UnderlyingSourceStartCallback<'R> option with get, set
         abstract ``type``: string option with get, set
 
         [<ParamObject; Emit("$0")>]
@@ -30982,9 +30979,8 @@ module Dom =
             (
                 ?autoAllocateChunkSize: float,
                 ?cancel: UnderlyingSourceCancelCallback,
-                ?pull:
-                    (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> JS.Promise<unit> option),
-                ?start: (U2<ReadableByteStreamController, ReadableStreamDefaultController<'R>> -> obj),
+                ?pull: UnderlyingSourcePullCallback<'R>,
+                ?start: UnderlyingSourceStartCallback<'R>,
                 ?``type``: string
             ) : UnderlyingSource<'R> =
             jsNative

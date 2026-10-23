@@ -72,6 +72,8 @@
         <Compile Include="ErasedCases.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\erased-exclusive-lab\ErasedExclusiveLab.fs" Link="erased-exclusive-lab\ErasedExclusiveLab.fs" />
         <Compile Include="GeneratedErasedCases.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\generic-callable-reference-lab\GenericCallableReferenceLab.fs" Link="generic-callable-reference-lab\GenericCallableReferenceLab.fs" />
+        <Compile Include="GenericCallableReferences.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>

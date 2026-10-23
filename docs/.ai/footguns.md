@@ -229,6 +229,13 @@ does: a candidate drops only where a harvested export stays represented without 
 admits) and `shapeCallbacks` (`Shape/Callbacks.fs`, skips). Changing either sign alone mints a
 duplicate or an unnamed type.
 
+**A declared callable application must precede callback expansion.** `objectRef` uses the
+existing named instantiation and its checked arguments before `delegateRef`. Re-expanding
+`SetStoreFunction<T>` inside `StoreReturn<T>` discarded its overload binders and emitted an
+eight-argument `Action<obj, ...>` while direct uses referred to the existing interface. The
+generic-callable-reference lab compiles and runs transfers through inputs, returns and tuples,
+including a catalogue consumer; unnamed callbacks retain the ordinary fallback.
+
 **A return position widens on a concrete application, not on a type parameter.** Applying a
 declaration's own free parameter keeps the name; `Coalesce<string>` renders `obj -> obj` under
 `TR031`/`TR013` where `Coalesce<'T>` does not.
@@ -412,12 +419,6 @@ Carried from lanes that closed without finishing these.
 - **Union arm overloads: implemented 2026-09-22, shipped disabled** behind
   `unionArmOverloads.enabled` in `xantham.json`: `plans/2026-09-22-union-arm-overloads.md`.
 
-- **`objectRef` ordering.** `Shape/Spec.fs`'s pure-callback branch sits ahead of its
-  named-instantiation lookup, so `type StoreReturn<'T> = 'T * Action<obj, …>` while
-  `createStore<'T>` returns `SetStoreFunction<'T>` from the same declaration. The candidate fix
-  orders the named-instantiation lookup first. It reaches every reference to a pure callable in
-  the corpus (`TR031` stood at 36), so it needs its own lab and a before/after `findings`
-  measurement per `.claude/rules/generator-fixtures.md`.
 - **`Exports` has no stable declaration parent role.** 22 of 38 catalog cases errored on this
   across the declaration-catalog, callable-signature, source-closure and anonymous-literal-union
   lists. Four cases stay disabled behind a TODO.

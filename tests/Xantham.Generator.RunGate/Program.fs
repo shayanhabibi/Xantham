@@ -2429,6 +2429,7 @@ let main _ =
     SupportHelpers.run check
     ErasedCases.run check
     GeneratedErasedCases.run check
+    GenericCallableReferences.run check
     ExportProvenance.run check
     bindingExtensions ()
     globals ()
