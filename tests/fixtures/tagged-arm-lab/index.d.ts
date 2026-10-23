@@ -150,3 +150,11 @@ export type Mixed =
     | { state: "done"; payload: string }
     | { state: "done"; payload: number }
     | { state: "queued" };
+
+// Both object types admit callable values, so neither proves typeof === "object".
+export type BroadPayload =
+    | { state: "done"; payload: object }
+    | { state: "done"; payload: string };
+export type StructuralPayload =
+    | { state: "done"; payload: { name: string } }
+    | { state: "done"; payload: string };

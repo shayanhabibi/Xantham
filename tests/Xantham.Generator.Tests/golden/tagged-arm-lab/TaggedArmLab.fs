@@ -385,6 +385,68 @@ type Mixed =
     | [<CompiledName("done"); CaseTest("typeof $0.payload === 'number'")>] Done2 of payload: float
     | [<CompiledName("queued")>] Queued
 
+type BroadPayload = U2<BroadPayload2, BroadPayload3>
+
+[<Interface>]
+type BroadPayload2 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    abstract state: string with get, set
+    abstract payload: obj with get, set
+    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
+    static member Create (payload: obj) : BroadPayload2 = jsNative
+
+module BroadPayload2 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    [<Literal>]
+    let state = "done"
+
+[<Interface>]
+type BroadPayload3 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    abstract state: string with get, set
+    abstract payload: string with get, set
+    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
+    static member Create (payload: string) : BroadPayload3 = jsNative
+
+module BroadPayload3 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    [<Literal>]
+    let state = "done"
+
+type StructuralPayload = U2<StructuralPayload2, StructuralPayload3>
+
+[<Interface>]
+type StructuralPayload2 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    abstract state: string with get, set
+    abstract payload: StructuralPayload2.Payload with get, set
+    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
+    static member Create (payload: StructuralPayload2.Payload) : StructuralPayload2 = jsNative
+
+module StructuralPayload2 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    [<Literal>]
+    let state = "done"
+
+    [<Interface>]
+    type Payload =
+        abstract name: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string) : Payload = jsNative
+
+[<Interface>]
+type StructuralPayload3 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    abstract state: string with get, set
+    abstract payload: string with get, set
+    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
+    static member Create (payload: string) : StructuralPayload3 = jsNative
+
+module StructuralPayload3 =
+    /// <remarks>TypeScript type: <c>"done"</c></remarks>
+    [<Literal>]
+    let state = "done"
+
 module Choice =
     [<Interface>]
     type Meta =

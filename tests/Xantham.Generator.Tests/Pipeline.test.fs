@@ -4612,6 +4612,16 @@ let pipelineTests =
                       Expect.stringContains source "    static member Create (meta: Choice.Meta, a: float) : Choice = jsNative" "one Create per arm"
                       Expect.stringContains source "    static member Create (meta: Choice.Meta, b: string) : Choice = jsNative" "for both arms"
 
+                  testCase "object payloads do not prove a single typeof class" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      for name in [ "BroadPayload"; "StructuralPayload" ] do
+                          Expect.stringContains source $"type {name} = U2<" "callable payloads must remain representable"
+                          Expect.isTrue
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol = name && f.Key = "DT003"))
+                              "an unproved runtime partition is refused"
+
                   testCase "a tagged union carries the documentation its arms carried" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
