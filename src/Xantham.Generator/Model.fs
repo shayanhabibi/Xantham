@@ -1,4 +1,4 @@
-﻿namespace Xantham.Generator
+namespace Xantham.Generator
 
 open System
 open System.ComponentModel.DataAnnotations
