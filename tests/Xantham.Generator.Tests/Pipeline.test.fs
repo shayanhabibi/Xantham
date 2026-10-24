@@ -2902,8 +2902,8 @@ let pipelineTests =
                       Expect.stringContains source "abstract optional: unit -> unit" "no parameter at all"
                       Expect.stringContains
                           source
-                          "abstract setter<'U>: args: U2<'U, (string -> 'U)> -> 'U"
-                          "and one for a one-element tuple"
+                          "abstract setter<'U>: value: U2<'U, (string -> 'U)> -> 'U"
+                          "and one for a one-element tuple, named by its label"
 
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "TR029"))
