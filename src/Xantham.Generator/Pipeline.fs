@@ -98,6 +98,7 @@ let toShape (runtimePackage: string<importSpecifier>) (resolve: ResolveModel) : 
         DeclOrders = Map.empty
         DeclParams = Map.empty
         AliasApplications = Map.empty
+        MintedNames = Set.empty
         ExportMembers = []
         TypeVars = Map.empty
         KeyVars = Map.empty

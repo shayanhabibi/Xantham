@@ -22,7 +22,12 @@ let nameConstructorObjects: Pass<ShapeModel> =
                     else
                         match Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Value with
                         | Some typeId when not (Map.containsKey typeId found) ->
-                            Map.add typeId (fsName fallback export) found
+                            let name =
+                                underNamespace
+                                    (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                                    (fsName fallback export)
+
+                            Map.add typeId name found
                         | _ -> found)
                 Map.empty
 
@@ -61,16 +66,22 @@ let nameConstructorObjects: Pass<ShapeModel> =
                             | ValueNone -> None
                         | None -> None))
 
-            // `pascalSegment` splits on dots, so only a source name passes through it. An
-            // instance side's name and the path are F# names already, and dotted where the
-            // shape nests under its owner.
+            // Preserve each namespace segment while admitting its declaration spelling.
+            let pascalPath (name: string) =
+                name.Split '.'
+                |> Array.map (Naming.pascalSegment >> Naming.typeNameSegment)
+                |> String.concat "."
+
             let stem =
                 Map.tryFind facts.Response.TypeId exportNames
+                |> Option.map pascalPath
                 |> Option.orElseWith (fun () ->
                     facts.SymbolName
                     |> Option.filter (isSyntheticName >> not)
-                    |> Option.map (fun value -> value / uom<symbolName>))
-                |> Option.map (Naming.pascalSegment >> Naming.typeNameSegment)
+                    |> Option.map (fun value ->
+                        underNamespace
+                            (namespacePath model.Harvest.Namespaces facts.SymbolParent)
+                            (Naming.typeNameSegment (Naming.pascalSegment (value / uom<symbolName>)))))
                 |> Option.orElseWith instanceName
                 |> Option.defaultValue path
 
@@ -140,7 +151,10 @@ let nameConstructorObjects: Pass<ShapeModel> =
             match Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Value with
             | None -> ()
             | Some typeId ->
-                let path = Naming.typeNameSegment (Naming.pascalSegment (fsName fallback export))
+                let path =
+                    underNamespace
+                        (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                        (Naming.typeNameSegment (Naming.pascalSegment (fsName fallback export)))
 
                 if hasAny SymbolFlags.Class export.Symbol.Flags then
                     // A class's own static side stays `shape-classes`'s, but a static *of type*

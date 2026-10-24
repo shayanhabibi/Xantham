@@ -1,6 +1,6 @@
 /// Tier 1 - Harvest: the Wire-driven inventory of what the author exported. No mapping
-/// decisions live here; the tier's invariant is that every export of the entry module appears
-/// exactly once, aliases followed to their origin.
+/// decisions live here; every entry-module export and exported type member of a harvested
+/// namespace appears once per public origin and name, aliases followed to their origin.
 module Xantham.Generator.Harvest
 
 open Xantham.Generator.Measure
@@ -93,6 +93,7 @@ let private harvestPublicPath
                             {
                                 ExportName = name
                                 Symbol = symbol
+                                DeclaringNamespace = None
                                 HasValueExport = hasValueExport
                                 Docs = ""
                                 Tags = []
@@ -222,6 +223,7 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
                                 {
                                     ExportName = name
                                     Symbol = origin
+                                    DeclaringNamespace = None
                                     HasValueExport = hasValueExport
                                     Docs = ""
                                     Tags = []
@@ -457,7 +459,26 @@ let harvestGlobals: Pass<HarvestModel> =
                                         {
                                             ExportName = symbol.Name
                                             Symbol = symbol
+                                            DeclaringNamespace = None
                                             HasValueExport = hasAny SymbolFlags.Value symbol.Flags
+                                            Docs = ""
+                                            Tags = []
+                                            Origin = FromGlobal
+                                            Order = Grouping.declOrder symbol.Declarations
+                                        }
+
+                                for symbol in declared do
+                                    if
+                                        admits (Grouping.classify ctx.PackageDir (ValueSome symbol))
+                                        && Naming.isWritableTypeName symbol.Name
+                                        && not (hasAny (SymbolFlags.Type ||| SymbolFlags.Value) symbol.Flags)
+                                        && not (Set.contains symbol.SymbolId moduleBodies)
+                                    then
+                                        {
+                                            ExportName = symbol.Name
+                                            Symbol = symbol
+                                            DeclaringNamespace = None
+                                            HasValueExport = false
                                             Docs = ""
                                             Tags = []
                                             Origin = FromGlobal
@@ -507,6 +528,207 @@ let harvestGlobals: Pass<HarvestModel> =
                                     Advanced model
                                 else
                                     Degraded(model, findings)
+                }
+    }
+
+/// The exported interfaces, aliases, classes and enums of every harvested namespace, nested
+/// namespaces included, each harvested under its namespace's origin. A member carries no value
+/// export of its own: its value binds through the namespace object. Every walked namespace joins
+/// `Namespaces`, a nested one under its dotted path (`Pool.Inner`). A module package's global
+/// namespaces (`declare global { namespace X }`) are harvested as global exports first. Only
+/// namespaces and members whose group ships are walked.
+let harvestNamespaceMembers: Pass<HarvestModel> =
+    {
+        Name = "harvest-namespace-members"
+        Run =
+            fun ctx model ->
+                async {
+                    let ships (symbol: SymbolResponse) =
+                        GeneratorConfig.disposition ctx.Config (Grouping.classify ctx.PackageDir (ValueSome symbol)) =
+                            Ship
+
+                    let isNamespace (symbol: SymbolResponse) =
+                        hasAny SymbolFlags.Module symbol.Flags && Naming.isWritableTypeName symbol.Name
+
+                    let memberKinds =
+                        SymbolFlags.Interface
+                        ||| SymbolFlags.TypeAlias
+                        ||| SymbolFlags.Class
+                        ||| SymbolFlags.Enum
+
+                    // A module's local scope can shadow globals, and `declare global` members
+                    // have the augmentation symbol as their parent. Read the explicit global
+                    // blocks instead of inferring global ownership from an absent parent.
+                    let harvestedIds = model.Exports |> List.map _.Symbol.SymbolId |> Set.ofList
+                    let! files = ctx.Session.getSourceFileNames ()
+
+                    let! globalNamespaces =
+                        files
+                        |> Array.filter (fun file ->
+                            not ((underPackage (ctx.PackageDir / uom<dirPath>) file).StartsWith ".."))
+                        |> Array.map (fun file ->
+                            async {
+                                let! source = ctx.Session.getSourceFile (DocumentIdentifier.FileName file)
+
+                                let declarations =
+                                    source
+                                    |> ValueOption.toOption
+                                    |> Option.map (fun source ->
+                                        Ast.moduleAugmentations source
+                                        |> Seq.map (Node.ofIndex<AnyNode> source)
+                                        |> Seq.filter (fun name ->
+                                            name.Kind = SyntaxKind.Identifier && name.Text = ValueSome "global")
+                                        |> Seq.choose (Node.parent >> ValueOption.toOption)
+                                        |> Seq.filter (fun node -> node.Kind = SyntaxKind.ModuleDeclaration)
+                                        |> Seq.map Node.retag<AnyNode, ModuleDeclaration>
+                                        |> Seq.collect (fun node ->
+                                            match ModuleDeclaration.body node with
+                                            | ValueSome body when body.Kind = SyntaxKind.ModuleBlock ->
+                                                ModuleBlock.statements (Node.retag<ModuleBody, ModuleBlock> body)
+                                            | _ -> Seq.empty)
+                                        |> Seq.filter (fun node -> node.Kind = SyntaxKind.ModuleDeclaration)
+                                        |> Seq.choose (fun node ->
+                                            ModuleDeclaration.name (Node.retag<Statement, ModuleDeclaration> node)
+                                            |> ValueOption.toOption)
+                                        |> Seq.toArray)
+                                    |> Option.defaultValue [||]
+
+                                let! symbols =
+                                    declarations
+                                    |> Array.map (fun node ->
+                                        ctx.Session.getSymbolAtLocation (
+                                            NodeHandle.format
+                                                {
+                                                    Index = Node.index node
+                                                    Kind = node.Kind
+                                                    Path = Ast.path (Node.file node)
+                                                }
+                                        ))
+                                    |> Async.Sequential
+
+                                return symbols |> Array.choose ValueOption.toOption
+                            })
+                        |> Async.Sequential
+
+                    let packageGlobals =
+                        globalNamespaces
+                        |> Array.collect id
+                        |> Array.filter (fun symbol ->
+                            isNamespace symbol
+                            && Grouping.classify ctx.PackageDir (ValueSome symbol) = EntryPackage
+                            && not (Set.contains symbol.SymbolId harvestedIds))
+                        |> Array.distinctBy _.SymbolId
+                        |> Array.sortBy _.Name
+                        |> Array.map (fun symbol ->
+                            {
+                                ExportName = symbol.Name
+                                Symbol = symbol
+                                DeclaringNamespace = None
+                                HasValueExport = hasAny SymbolFlags.Value symbol.Flags
+                                Docs = ""
+                                Tags = []
+                                Origin = FromGlobal
+                                Order = Grouping.declOrder symbol.Declarations
+                            })
+                        |> Array.toList
+
+                    let rec walk visited (path: string) (origin: ExportOrigin) (ns: SymbolResponse) =
+                        async {
+                            let! exports = ctx.Session.getExportsOfModule ns.Reference
+
+                            let! resolved =
+                                exports
+                                |> ValueOption.defaultValue [||]
+                                |> Array.map (followAlias ctx)
+                                |> Async.Parallel
+
+                            let candidates =
+                                resolved |> Array.sortBy fst |> Array.filter (snd >> ships) |> Array.toList
+
+                            let members =
+                                candidates
+                                |> List.filter (fun (_, symbol) -> hasAny memberKinds symbol.Flags)
+                                |> List.map (fun (name, symbol) ->
+                                    {
+                                        ExportName = name
+                                        Symbol = symbol
+                                        DeclaringNamespace = Some ns.SymbolId
+                                        HasValueExport = false
+                                        Docs = ""
+                                        Tags = []
+                                        Origin = origin
+                                        Order = Grouping.declOrder symbol.Declarations
+                                    })
+
+                            let rec descend visited found named pending =
+                                async {
+                                    match pending with
+                                    | [] -> return visited, found, named
+                                    | (_, (symbol: SymbolResponse)) :: rest when
+                                        isNamespace symbol && not (Set.contains symbol.SymbolId visited)
+                                        ->
+                                        let nested = $"{path}.{symbol.Name}"
+
+                                        let! visited, inner, innerNamed =
+                                            walk (Set.add symbol.SymbolId visited) nested origin symbol
+
+                                        return!
+                                            descend
+                                                visited
+                                                (found @ inner)
+                                                (named @ [ symbol.SymbolId, nested * uom<symbolName> ] @ innerNamed)
+                                                rest
+                                    | _ :: rest -> return! descend visited found named rest
+                                }
+
+                            return! descend visited members [] candidates
+                        }
+
+                    let exports = model.Exports @ packageGlobals
+
+                    let seeds =
+                        exports
+                        |> List.filter (fun export -> isNamespace export.Symbol && ships export.Symbol)
+                        |> List.distinctBy _.Symbol.SymbolId
+
+                    let pathOf (seed: HarvestedExport) =
+                        Map.tryFind seed.Symbol.SymbolId model.Namespaces
+                        |> Option.map (fun name -> name / uom<symbolName>)
+                        |> Option.defaultValue seed.Symbol.Name
+
+                    let! _, harvested, named =
+                        seeds
+                        |> List.fold
+                            (fun state (seed: HarvestedExport) ->
+                                async {
+                                    let! visited, found, named = state
+                                    let path = pathOf seed
+                                    let! visited, inner, innerNamed = walk visited path seed.Origin seed.Symbol
+
+                                    return
+                                        visited,
+                                        found @ inner,
+                                        named @ [ seed.Symbol.SymbolId, path * uom<symbolName> ] @ innerNamed
+                                })
+                            (async.Return(seeds |> List.map _.Symbol.SymbolId |> Set.ofList, [], []))
+
+                    return
+                        Advanced
+                            { model with
+                                Exports =
+                                    exports @ harvested
+                                    |> List.distinctBy (fun export ->
+                                        export.Origin, export.DeclaringNamespace, export.ExportName, export.Symbol.SymbolId)
+                                Namespaces =
+                                    named
+                                    |> List.fold
+                                        (fun names (id, name) ->
+                                            if Map.containsKey id names then
+                                                names
+                                            else
+                                                Map.add id name names)
+                                        model.Namespaces
+                            }
                 }
     }
 
@@ -604,6 +826,7 @@ let passes: Pass<HarvestModel> list =
     [
         harvestExports
         harvestGlobals
+        harvestNamespaceMembers
         harvestAmbientClasses
         harvestDocs
         orderExports

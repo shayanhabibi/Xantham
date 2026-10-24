@@ -9,6 +9,16 @@ reproducible from this checkout and were dropped rather than carried.
 
 ## Compiler API
 
+**A global namespace can have a parent.** At TypeScript 7.1, a namespace inside `declare global`
+is parented by the augmentation's `__global` symbol. A parentless-symbol test misses it and can
+mistake module locals or an `export =` body for globals. `Ast.moduleAugmentations` identifies
+augmentation **name nodes**, not module declarations: select the identifier `global`, then read
+its parent module and body. The module's keyword is `ModuleKeyword`, not `GlobalKeyword`.
+
+**An export alias has its own namespace.** `getAliasedSymbol` returns the target's parent.
+Keep the harvested occurrence's `DeclaringNamespace` separately: `Pool.Depth = Pool.Inner.Deep`
+declares `Depth` in `Pool` without changing the `Deep` symbol's identity or defining namespace.
+
 **A symbol id alone does not identify a symbol.** At TypeScript 7.1 a symbol is a reference. A
 file-owned one, which a declaration's symbol, a module's and its exports are, carries its source
 file and an id unique within that file. A snapshot-owned one, a transient or merged symbol, carries

@@ -112,6 +112,7 @@ let export (name: string) (sym: SymbolResponse) : HarvestedExport =
     {
         ExportName = name
         Symbol = sym
+        DeclaringNamespace = sym.ParentSymbolId |> ValueOption.toOption
         HasValueExport = uint32 (sym.Flags &&& SymbolFlags.Value) <> 0u
         Docs = ""
         Tags = []
@@ -133,6 +134,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         DeclOrders = Map.empty
         DeclParams = Map.empty
         AliasApplications = Map.empty
+        MintedNames = Set.empty
         ExportMembers = []
         TypeVars = Map.empty
         KeyVars = Map.empty

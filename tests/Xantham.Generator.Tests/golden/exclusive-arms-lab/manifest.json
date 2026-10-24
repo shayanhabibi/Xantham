@@ -4,25 +4,30 @@
   "module": "ExclusiveArmsLab",
   "counts": {
     "exact": 11,
-    "ergonomic": 18,
+    "ergonomic": 25,
     "widened": 0,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 1,
-      "exact": 1
+      "total": 4,
+      "exact": 4
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 19,
-      "ergonomic": 19
+      "total": 21,
+      "ergonomic": 21
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 16,
-      "ergonomic": 16
+      "total": 23,
+      "ergonomic": 23
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 2,
+      "exact": 2
     }
   ]
 }

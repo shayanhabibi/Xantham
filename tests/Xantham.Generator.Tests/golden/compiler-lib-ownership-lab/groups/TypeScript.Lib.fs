@@ -11,146 +11,12 @@ open Fable.Core.JS
 
 module Es =
     [<Interface>]
-    type DateTimeFormatOptions =
-        abstract localeMatcher: DateTimeFormatOptions.LocaleMatcher option with get, set
-        abstract weekday: DateTimeFormatOptions.Weekday option with get, set
-        abstract era: DateTimeFormatOptions.Weekday option with get, set
-        abstract year: DateTimeFormatOptions.Year option with get, set
-        abstract month: DateTimeFormatOptions.Month option with get, set
-        abstract day: DateTimeFormatOptions.Year option with get, set
-        abstract hour: DateTimeFormatOptions.Year option with get, set
-        abstract minute: DateTimeFormatOptions.Year option with get, set
-        abstract second: DateTimeFormatOptions.Year option with get, set
-        abstract timeZoneName: DateTimeFormatOptions.TimeZoneName option with get, set
-        abstract formatMatcher: DateTimeFormatOptions.FormatMatcher option with get, set
-        abstract hour12: bool option with get, set
-        abstract timeZone: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?localeMatcher: DateTimeFormatOptions.LocaleMatcher, ?weekday: DateTimeFormatOptions.Weekday, ?era: DateTimeFormatOptions.Weekday, ?year: DateTimeFormatOptions.Year, ?month: DateTimeFormatOptions.Month, ?day: DateTimeFormatOptions.Year, ?hour: DateTimeFormatOptions.Year, ?minute: DateTimeFormatOptions.Year, ?second: DateTimeFormatOptions.Year, ?timeZoneName: DateTimeFormatOptions.TimeZoneName, ?formatMatcher: DateTimeFormatOptions.FormatMatcher, ?hour12: bool, ?timeZone: string) : DateTimeFormatOptions = jsNative
-
-    [<Interface>]
-    type Collator =
-        abstract compare: x: string * y: string -> float
-        abstract resolvedOptions: unit -> ResolvedCollatorOptions
-        [<ParamObject; Emit("$0")>]
-        static member Create (compare: Func<string, string, float>, resolvedOptions: (unit -> ResolvedCollatorOptions)) : Collator = jsNative
-
-    type CollatorConstructor =
-        abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: CollatorOptions -> string[]
-        [<EmitConstructor>]
-        abstract Create: ?locales: U2<string, string[]> * ?options: CollatorOptions -> Collator
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: U2<string, string[]> * ?options: CollatorOptions -> Collator
-
-    [<Interface>]
-    type CollatorOptions =
-        abstract usage: CollatorOptions.Usage option with get, set
-        abstract localeMatcher: DateTimeFormatOptions.LocaleMatcher option with get, set
-        abstract numeric: bool option with get, set
-        abstract caseFirst: CollatorOptions.CaseFirst option with get, set
-        abstract sensitivity: CollatorOptions.Sensitivity option with get, set
-        abstract collation: CollatorOptions.Collation option with get, set
-        abstract ignorePunctuation: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?usage: CollatorOptions.Usage, ?localeMatcher: DateTimeFormatOptions.LocaleMatcher, ?numeric: bool, ?caseFirst: CollatorOptions.CaseFirst, ?sensitivity: CollatorOptions.Sensitivity, ?collation: CollatorOptions.Collation, ?ignorePunctuation: bool) : CollatorOptions = jsNative
-
-    [<Interface>]
-    type DateTimeFormat =
-        abstract format: ?date: U2<float, Date> -> string
-        abstract resolvedOptions: unit -> ResolvedDateTimeFormatOptions
-        [<ParamObject; Emit("$0")>]
-        static member Create (format: (U2<float, Date> option -> string), resolvedOptions: (unit -> ResolvedDateTimeFormatOptions)) : DateTimeFormat = jsNative
-
-    type DateTimeFormatConstructor =
-        abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string[]
-        [<EmitConstructor>]
-        abstract Create: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> DateTimeFormat
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> DateTimeFormat
-
-    [<Interface>]
     type Intl =
-        abstract Collator: CollatorConstructor with get, set
-        abstract NumberFormat: NumberFormatConstructor with get, set
-        abstract DateTimeFormat: DateTimeFormatConstructor with get, set
+        abstract Collator: Intl.CollatorConstructor with get, set
+        abstract NumberFormat: Intl.NumberFormatConstructor with get, set
+        abstract DateTimeFormat: Intl.DateTimeFormatConstructor with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (Collator: CollatorConstructor, NumberFormat: NumberFormatConstructor, DateTimeFormat: DateTimeFormatConstructor) : Intl = jsNative
-
-    [<Interface>]
-    type NumberFormat =
-        abstract format: value: float -> string
-        abstract resolvedOptions: unit -> ResolvedNumberFormatOptions
-        [<ParamObject; Emit("$0")>]
-        static member Create (format: (float -> string), resolvedOptions: (unit -> ResolvedNumberFormatOptions)) : NumberFormat = jsNative
-
-    type NumberFormatConstructor =
-        abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string[]
-        [<EmitConstructor>]
-        abstract Create: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> NumberFormat
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> NumberFormat
-
-    [<Interface>]
-    type NumberFormatOptions =
-        abstract localeMatcher: DateTimeFormatOptions.LocaleMatcher option with get, set
-        abstract style: NumberFormatOptions.Style option with get, set
-        abstract currency: string option with get, set
-        abstract currencyDisplay: NumberFormatOptions.CurrencyDisplay option with get, set
-        abstract useGrouping: bool option with get, set
-        abstract minimumIntegerDigits: float option with get, set
-        abstract minimumFractionDigits: float option with get, set
-        abstract maximumFractionDigits: float option with get, set
-        abstract minimumSignificantDigits: float option with get, set
-        abstract maximumSignificantDigits: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?localeMatcher: DateTimeFormatOptions.LocaleMatcher, ?style: NumberFormatOptions.Style, ?currency: string, ?currencyDisplay: NumberFormatOptions.CurrencyDisplay, ?useGrouping: bool, ?minimumIntegerDigits: float, ?minimumFractionDigits: float, ?maximumFractionDigits: float, ?minimumSignificantDigits: float, ?maximumSignificantDigits: float) : NumberFormatOptions = jsNative
-
-    [<Interface>]
-    type ResolvedCollatorOptions =
-        abstract locale: string with get, set
-        abstract usage: string with get, set
-        abstract sensitivity: string with get, set
-        abstract ignorePunctuation: bool with get, set
-        abstract collation: string with get, set
-        abstract caseFirst: string with get, set
-        abstract numeric: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (locale: string, usage: string, sensitivity: string, ignorePunctuation: bool, collation: string, caseFirst: string, numeric: bool) : ResolvedCollatorOptions = jsNative
-
-    [<Interface>]
-    type ResolvedDateTimeFormatOptions =
-        abstract locale: string with get, set
-        abstract calendar: string with get, set
-        abstract numberingSystem: string with get, set
-        abstract timeZone: string with get, set
-        abstract hour12: bool option with get, set
-        abstract weekday: string option with get, set
-        abstract era: string option with get, set
-        abstract year: string option with get, set
-        abstract month: string option with get, set
-        abstract day: string option with get, set
-        abstract hour: string option with get, set
-        abstract minute: string option with get, set
-        abstract second: string option with get, set
-        abstract timeZoneName: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (locale: string, calendar: string, numberingSystem: string, timeZone: string, ?hour12: bool, ?weekday: string, ?era: string, ?year: string, ?month: string, ?day: string, ?hour: string, ?minute: string, ?second: string, ?timeZoneName: string) : ResolvedDateTimeFormatOptions = jsNative
-
-    [<Interface>]
-    type ResolvedNumberFormatOptions =
-        abstract locale: string with get, set
-        abstract numberingSystem: string with get, set
-        abstract style: NumberFormatOptions.Style with get, set
-        abstract currency: string option with get, set
-        abstract currencyDisplay: NumberFormatOptions.CurrencyDisplay option with get, set
-        abstract minimumIntegerDigits: float with get, set
-        abstract minimumFractionDigits: float option with get, set
-        abstract maximumFractionDigits: float option with get, set
-        abstract minimumSignificantDigits: float option with get, set
-        abstract maximumSignificantDigits: float option with get, set
-        abstract useGrouping: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (locale: string, numberingSystem: string, style: NumberFormatOptions.Style, minimumIntegerDigits: float, useGrouping: bool, ?currency: string, ?currencyDisplay: NumberFormatOptions.CurrencyDisplay, ?minimumFractionDigits: float, ?maximumFractionDigits: float, ?minimumSignificantDigits: float, ?maximumSignificantDigits: float) : ResolvedNumberFormatOptions = jsNative
+        static member Create (Collator: Intl.CollatorConstructor, NumberFormat: Intl.NumberFormatConstructor, DateTimeFormat: Intl.DateTimeFormatConstructor) : Intl = jsNative
 
     /// <summary>
     /// The decorator context types provided to class element decorators.
@@ -1003,7 +869,7 @@ module Es =
         /// <param name="that">String to compare to target string</param>
         /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        abstract localeCompare: that: string * ?locales: U2<string, string[]> * ?options: CollatorOptions -> float
+        abstract localeCompare: that: string * ?locales: U2<string, string[]> * ?options: Intl.CollatorOptions -> float
         /// <summary>
         /// Matches a string with a regular expression, and returns an array containing the results of that search.
         /// </summary>
@@ -1151,9 +1017,9 @@ module Es =
         /// </summary>
         /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         [<ParamObject; Emit("$0")>]
-        static member Create (toString: (float option -> string), toFixed: (float option -> string), toExponential: (float option -> string), toPrecision: (float option -> string), valueOf: (unit -> float), toLocaleString: Func<U2<string, string[]> option, NumberFormatOptions option, string>) : Number = jsNative
+        static member Create (toString: (float option -> string), toFixed: (float option -> string), toExponential: (float option -> string), toPrecision: (float option -> string), valueOf: (unit -> float), toLocaleString: Func<U2<string, string[]> option, Intl.NumberFormatOptions option, string>) : Number = jsNative
 
     type NumberConstructor =
         /// <summary>
@@ -1382,7 +1248,7 @@ module Es =
         /// </summary>
         /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a date as a string value appropriate to the host environment's current locale.
         /// Converts a date to a string by using the current or specified locale.
@@ -1394,7 +1260,7 @@ module Es =
         /// </summary>
         /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleDateString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleDateString: ?locales: U2<string, string[]> * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a time as a string value appropriate to the host environment's current locale.
         /// Converts a time to a string by using the current or specified locale.
@@ -1406,7 +1272,7 @@ module Es =
         /// </summary>
         /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleTimeString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleTimeString: ?locales: U2<string, string[]> * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns the stored time value in milliseconds since midnight, January 1, 1970 UTC.
         /// </summary>
@@ -5813,85 +5679,6 @@ module Es =
         [<EmitConstructor>]
         abstract Create: array: U2<ArrayBuffer, ArrayLike<float>> -> Float64Array<ArrayBuffer>
 
-    module CollatorOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CaseFirst =
-            | [<CompiledName("false")>] False
-            | [<CompiledName("lower")>] Lower
-            | [<CompiledName("upper")>] Upper
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Collation =
-            | [<CompiledName("big5han")>] Big5han
-            | [<CompiledName("compat")>] Compat
-            | [<CompiledName("default")>] Default
-            | [<CompiledName("dict")>] Dict
-            | [<CompiledName("direct")>] Direct
-            | [<CompiledName("ducet")>] Ducet
-            | [<CompiledName("emoji")>] Emoji
-            | [<CompiledName("eor")>] Eor
-            | [<CompiledName("gb2312")>] Gb2312
-            | [<CompiledName("phonebk")>] Phonebk
-            | [<CompiledName("phonetic")>] Phonetic
-            | [<CompiledName("pinyin")>] Pinyin
-            | [<CompiledName("reformed")>] Reformed
-            | [<CompiledName("searchjl")>] Searchjl
-            | [<CompiledName("stroke")>] Stroke
-            | [<CompiledName("trad")>] Trad
-            | [<CompiledName("unihan")>] Unihan
-            | [<CompiledName("zhuyin")>] Zhuyin
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Sensitivity =
-            | [<CompiledName("accent")>] Accent
-            | [<CompiledName("base")>] Base
-            | [<CompiledName("case")>] Case
-            | [<CompiledName("variant")>] Variant
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Usage =
-            | [<CompiledName("search")>] Search
-            | [<CompiledName("sort")>] Sort
-
-    module DateTimeFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FormatMatcher =
-            | [<CompiledName("basic")>] Basic
-            | [<CompiledName("best fit")>] BestFit
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type LocaleMatcher =
-            | [<CompiledName("best fit")>] BestFit
-            | [<CompiledName("lookup")>] Lookup
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Month =
-            | [<CompiledName("2-digit")>] N2Digit
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("numeric")>] Numeric
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type TimeZoneName =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("longGeneric")>] LongGeneric
-            | [<CompiledName("longOffset")>] LongOffset
-            | [<CompiledName("short")>] Short
-            | [<CompiledName("shortGeneric")>] ShortGeneric
-            | [<CompiledName("shortOffset")>] ShortOffset
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Weekday =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Year =
-            | [<CompiledName("2-digit")>] N2Digit
-            | [<CompiledName("numeric")>] Numeric
-
     module DecoratorContext =
         type ItemConstructor =
             [<EmitConstructor>]
@@ -6112,6 +5899,254 @@ module Es =
         module From =
             type Mapfn<'T> = delegate of v: 'T * k: float -> float
 
+    module Intl =
+        [<Interface>]
+        type CollatorOptions =
+            abstract usage: Intl.CollatorOptions.Usage option with get, set
+            abstract localeMatcher: Intl.DateTimeFormatOptions.LocaleMatcher option with get, set
+            abstract numeric: bool option with get, set
+            abstract caseFirst: Intl.CollatorOptions.CaseFirst option with get, set
+            abstract sensitivity: Intl.CollatorOptions.Sensitivity option with get, set
+            abstract collation: Intl.CollatorOptions.Collation option with get, set
+            abstract ignorePunctuation: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?usage: Intl.CollatorOptions.Usage, ?localeMatcher: Intl.DateTimeFormatOptions.LocaleMatcher, ?numeric: bool, ?caseFirst: Intl.CollatorOptions.CaseFirst, ?sensitivity: Intl.CollatorOptions.Sensitivity, ?collation: Intl.CollatorOptions.Collation, ?ignorePunctuation: bool) : CollatorOptions = jsNative
+
+        [<Interface>]
+        type ResolvedCollatorOptions =
+            abstract locale: string with get, set
+            abstract usage: string with get, set
+            abstract sensitivity: string with get, set
+            abstract ignorePunctuation: bool with get, set
+            abstract collation: string with get, set
+            abstract caseFirst: string with get, set
+            abstract numeric: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (locale: string, usage: string, sensitivity: string, ignorePunctuation: bool, collation: string, caseFirst: string, numeric: bool) : ResolvedCollatorOptions = jsNative
+
+        [<Interface>]
+        type Collator =
+            abstract compare: x: string * y: string -> float
+            abstract resolvedOptions: unit -> TypeScript.Lib.Es.Intl.ResolvedCollatorOptions
+            [<ParamObject; Emit("$0")>]
+            static member Create (compare: Func<string, string, float>, resolvedOptions: (unit -> TypeScript.Lib.Es.Intl.ResolvedCollatorOptions)) : Collator = jsNative
+
+        type CollatorConstructor =
+            abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.CollatorOptions -> string[]
+            [<EmitConstructor>]
+            abstract Create: ?locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.CollatorOptions -> TypeScript.Lib.Es.Intl.Collator
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.CollatorOptions -> TypeScript.Lib.Es.Intl.Collator
+
+        [<Interface>]
+        type NumberFormatOptionsStyleRegistry =
+            abstract decimal: unit
+            abstract percent: unit
+            abstract currency: unit
+            [<ParamObject; Emit("$0")>]
+            static member Create () : NumberFormatOptionsStyleRegistry = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type NumberFormatOptionsStyle =
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("decimal")>] Decimal
+            | [<CompiledName("percent")>] Percent
+
+        [<Interface>]
+        type NumberFormatOptionsCurrencyDisplayRegistry =
+            abstract code: unit
+            abstract symbol: unit
+            abstract name: unit
+            [<ParamObject; Emit("$0")>]
+            static member Create () : NumberFormatOptionsCurrencyDisplayRegistry = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type NumberFormatOptionsCurrencyDisplay =
+            | [<CompiledName("code")>] Code
+            | [<CompiledName("name")>] Name
+            | [<CompiledName("symbol")>] Symbol
+
+        type NumberFormatOptionsUseGroupingRegistry = obj
+
+        type NumberFormatOptionsUseGrouping = bool
+
+        type ResolvedNumberFormatOptionsUseGrouping = bool
+
+        [<Interface>]
+        type NumberFormatOptions =
+            abstract localeMatcher: Intl.DateTimeFormatOptions.LocaleMatcher option with get, set
+            abstract style: TypeScript.Lib.Es.Intl.NumberFormatOptionsStyle option with get, set
+            abstract currency: string option with get, set
+            abstract currencyDisplay: TypeScript.Lib.Es.Intl.NumberFormatOptionsCurrencyDisplay option with get, set
+            abstract useGrouping: bool option with get, set
+            abstract minimumIntegerDigits: float option with get, set
+            abstract minimumFractionDigits: float option with get, set
+            abstract maximumFractionDigits: float option with get, set
+            abstract minimumSignificantDigits: float option with get, set
+            abstract maximumSignificantDigits: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?localeMatcher: Intl.DateTimeFormatOptions.LocaleMatcher, ?style: TypeScript.Lib.Es.Intl.NumberFormatOptionsStyle, ?currency: string, ?currencyDisplay: TypeScript.Lib.Es.Intl.NumberFormatOptionsCurrencyDisplay, ?useGrouping: bool, ?minimumIntegerDigits: float, ?minimumFractionDigits: float, ?maximumFractionDigits: float, ?minimumSignificantDigits: float, ?maximumSignificantDigits: float) : NumberFormatOptions = jsNative
+
+        [<Interface>]
+        type ResolvedNumberFormatOptions =
+            abstract locale: string with get, set
+            abstract numberingSystem: string with get, set
+            abstract style: TypeScript.Lib.Es.Intl.NumberFormatOptionsStyle with get, set
+            abstract currency: string option with get, set
+            abstract currencyDisplay: TypeScript.Lib.Es.Intl.NumberFormatOptionsCurrencyDisplay option with get, set
+            abstract minimumIntegerDigits: float with get, set
+            abstract minimumFractionDigits: float option with get, set
+            abstract maximumFractionDigits: float option with get, set
+            abstract minimumSignificantDigits: float option with get, set
+            abstract maximumSignificantDigits: float option with get, set
+            abstract useGrouping: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (locale: string, numberingSystem: string, style: TypeScript.Lib.Es.Intl.NumberFormatOptionsStyle, minimumIntegerDigits: float, useGrouping: bool, ?currency: string, ?currencyDisplay: TypeScript.Lib.Es.Intl.NumberFormatOptionsCurrencyDisplay, ?minimumFractionDigits: float, ?maximumFractionDigits: float, ?minimumSignificantDigits: float, ?maximumSignificantDigits: float) : ResolvedNumberFormatOptions = jsNative
+
+        [<Interface>]
+        type NumberFormat =
+            abstract format: value: float -> string
+            abstract resolvedOptions: unit -> TypeScript.Lib.Es.Intl.ResolvedNumberFormatOptions
+            [<ParamObject; Emit("$0")>]
+            static member Create (format: (float -> string), resolvedOptions: (unit -> TypeScript.Lib.Es.Intl.ResolvedNumberFormatOptions)) : NumberFormat = jsNative
+
+        type NumberFormatConstructor =
+            abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.NumberFormatOptions -> string[]
+            [<EmitConstructor>]
+            abstract Create: ?locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.NumberFormatOptions -> TypeScript.Lib.Es.Intl.NumberFormat
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.NumberFormatOptions -> TypeScript.Lib.Es.Intl.NumberFormat
+
+        [<Interface>]
+        type DateTimeFormatOptions =
+            abstract localeMatcher: Intl.DateTimeFormatOptions.LocaleMatcher option with get, set
+            abstract weekday: Intl.DateTimeFormatOptions.Weekday option with get, set
+            abstract era: Intl.DateTimeFormatOptions.Weekday option with get, set
+            abstract year: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract month: Intl.DateTimeFormatOptions.Month option with get, set
+            abstract day: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract hour: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract minute: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract second: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract timeZoneName: Intl.DateTimeFormatOptions.TimeZoneName option with get, set
+            abstract formatMatcher: Intl.DateTimeFormatOptions.FormatMatcher option with get, set
+            abstract hour12: bool option with get, set
+            abstract timeZone: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?localeMatcher: Intl.DateTimeFormatOptions.LocaleMatcher, ?weekday: Intl.DateTimeFormatOptions.Weekday, ?era: Intl.DateTimeFormatOptions.Weekday, ?year: Intl.DateTimeFormatOptions.Year, ?month: Intl.DateTimeFormatOptions.Month, ?day: Intl.DateTimeFormatOptions.Year, ?hour: Intl.DateTimeFormatOptions.Year, ?minute: Intl.DateTimeFormatOptions.Year, ?second: Intl.DateTimeFormatOptions.Year, ?timeZoneName: Intl.DateTimeFormatOptions.TimeZoneName, ?formatMatcher: Intl.DateTimeFormatOptions.FormatMatcher, ?hour12: bool, ?timeZone: string) : DateTimeFormatOptions = jsNative
+
+        [<Interface>]
+        type ResolvedDateTimeFormatOptions =
+            abstract locale: string with get, set
+            abstract calendar: string with get, set
+            abstract numberingSystem: string with get, set
+            abstract timeZone: string with get, set
+            abstract hour12: bool option with get, set
+            abstract weekday: string option with get, set
+            abstract era: string option with get, set
+            abstract year: string option with get, set
+            abstract month: string option with get, set
+            abstract day: string option with get, set
+            abstract hour: string option with get, set
+            abstract minute: string option with get, set
+            abstract second: string option with get, set
+            abstract timeZoneName: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (locale: string, calendar: string, numberingSystem: string, timeZone: string, ?hour12: bool, ?weekday: string, ?era: string, ?year: string, ?month: string, ?day: string, ?hour: string, ?minute: string, ?second: string, ?timeZoneName: string) : ResolvedDateTimeFormatOptions = jsNative
+
+        [<Interface>]
+        type DateTimeFormat =
+            abstract format: ?date: U2<float, Date> -> string
+            abstract resolvedOptions: unit -> TypeScript.Lib.Es.Intl.ResolvedDateTimeFormatOptions
+            [<ParamObject; Emit("$0")>]
+            static member Create (format: (U2<float, Date> option -> string), resolvedOptions: (unit -> TypeScript.Lib.Es.Intl.ResolvedDateTimeFormatOptions)) : DateTimeFormat = jsNative
+
+        type DateTimeFormatConstructor =
+            abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.DateTimeFormatOptions -> string[]
+            [<EmitConstructor>]
+            abstract Create: ?locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.DateTimeFormatOptions -> TypeScript.Lib.Es.Intl.DateTimeFormat
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?locales: U2<string, string[]> * ?options: TypeScript.Lib.Es.Intl.DateTimeFormatOptions -> TypeScript.Lib.Es.Intl.DateTimeFormat
+
+        module CollatorOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type CaseFirst =
+                | [<CompiledName("false")>] False
+                | [<CompiledName("lower")>] Lower
+                | [<CompiledName("upper")>] Upper
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Collation =
+                | [<CompiledName("big5han")>] Big5han
+                | [<CompiledName("compat")>] Compat
+                | [<CompiledName("default")>] Default
+                | [<CompiledName("dict")>] Dict
+                | [<CompiledName("direct")>] Direct
+                | [<CompiledName("ducet")>] Ducet
+                | [<CompiledName("emoji")>] Emoji
+                | [<CompiledName("eor")>] Eor
+                | [<CompiledName("gb2312")>] Gb2312
+                | [<CompiledName("phonebk")>] Phonebk
+                | [<CompiledName("phonetic")>] Phonetic
+                | [<CompiledName("pinyin")>] Pinyin
+                | [<CompiledName("reformed")>] Reformed
+                | [<CompiledName("searchjl")>] Searchjl
+                | [<CompiledName("stroke")>] Stroke
+                | [<CompiledName("trad")>] Trad
+                | [<CompiledName("unihan")>] Unihan
+                | [<CompiledName("zhuyin")>] Zhuyin
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Sensitivity =
+                | [<CompiledName("accent")>] Accent
+                | [<CompiledName("base")>] Base
+                | [<CompiledName("case")>] Case
+                | [<CompiledName("variant")>] Variant
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Usage =
+                | [<CompiledName("search")>] Search
+                | [<CompiledName("sort")>] Sort
+
+        module DateTimeFormatOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type FormatMatcher =
+                | [<CompiledName("basic")>] Basic
+                | [<CompiledName("best fit")>] BestFit
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type LocaleMatcher =
+                | [<CompiledName("best fit")>] BestFit
+                | [<CompiledName("lookup")>] Lookup
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Month =
+                | [<CompiledName("2-digit")>] N2Digit
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("narrow")>] Narrow
+                | [<CompiledName("numeric")>] Numeric
+                | [<CompiledName("short")>] Short
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type TimeZoneName =
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("longGeneric")>] LongGeneric
+                | [<CompiledName("longOffset")>] LongOffset
+                | [<CompiledName("short")>] Short
+                | [<CompiledName("shortGeneric")>] ShortGeneric
+                | [<CompiledName("shortOffset")>] ShortOffset
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Weekday =
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("narrow")>] Narrow
+                | [<CompiledName("short")>] Short
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Year =
+                | [<CompiledName("2-digit")>] N2Digit
+                | [<CompiledName("numeric")>] Numeric
+
     module JSON =
         module Parse =
             type Reviver = delegate of key: string * value: obj -> obj
@@ -6124,19 +6159,6 @@ module Es =
             type ResultConstructor<'B, 'R> =
                 [<EmitConstructor>]
                 abstract Create: [<ParamArray>] args: 'B -> 'R
-
-    module NumberFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CurrencyDisplay =
-            | [<CompiledName("code")>] Code
-            | [<CompiledName("name")>] Name
-            | [<CompiledName("symbol")>] Symbol
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Style =
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("percent")>] Percent
 
     module ObjectConstructor =
         module Create =

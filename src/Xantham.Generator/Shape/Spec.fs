@@ -55,6 +55,26 @@ let nestUnder (owner: string) (segment: string) =
     else
         owner + segment
 
+/// The source namespace's dotted F# module path, keyed by the owning symbol reference.
+let internal namespacePath namespaces parent =
+    parent
+    |> Option.bind (fun id -> Map.tryFind id namespaces)
+    |> Option.map (fun (value: string<symbolName>) ->
+        (value / uom<symbolName>).Split '.'
+        |> Array.map Naming.pascalSegment
+        |> String.concat ".")
+
+/// Places a declaration inside its source namespace, when it has one.
+let internal underNamespace path name =
+    match path with
+    | Some ns -> nestUnder ns name
+    | None -> name
+
+/// The declaration's source namespace path followed by its name.
+let internal namespaceQualified (facts: TypeFacts) name =
+    (facts.NamespacePath |> List.map Naming.pascalSegment) @ [ name ]
+    |> String.concat "."
+
 // ---------------------------------------------------------------------------------------------
 // Facts the passes repeatedly ask of a type.
 // ---------------------------------------------------------------------------------------------
@@ -264,10 +284,44 @@ let hasIncompatibleOverloadedTypeParameters (model: ShapeModel) (facts: TypeFact
         |> List.countBy fst
         |> List.exists (fun (_, count) -> count > 1)
 
-/// Call signatures represented as interface methods with invocation-owned type parameters.
+/// Whether a callback's signature closes a cycle through abbreviation bodies. Object members
+/// belong to nominal declarations and terminate this traversal.
+let private hasRecursiveCallbackSignature (model: ShapeModel) (facts: TypeFacts) =
+    let signatureTypes (signature: ResolvedSignature) =
+        signature.ReturnTypeId :: (signature.Parameters |> List.map _.TypeId)
+
+    let visited = System.Collections.Generic.HashSet<int<typeId>>()
+
+    let rec reaches id =
+        id = facts.Response.TypeId
+        || (visited.Add id
+            && match Map.tryFind id model.Types with
+               | None -> false
+               | Some current ->
+                   let callbackTypes =
+                       if isPureCallback current && current.IndexInfos.IsEmpty then
+                           match List.distinct current.CallSignatures with
+                           | [ signature ] when signature.TypeParameters.IsEmpty && signature.Parameters.Length <= 1 ->
+                               signatureTypes signature
+                           | _ -> []
+                       else
+                           []
+
+                   current.UnionMembers @ current.TypeArguments @ callbackTypes
+                   |> List.exists reaches)
+
+    isPureCallback facts
+    && facts.IndexInfos.IsEmpty
+    && match List.distinct facts.CallSignatures with
+       | [ signature ] when signature.Parameters.Length <= 1 -> signatureTypes signature |> List.exists reaches
+       | _ -> false
+
+/// Call signatures requiring invocation-owned type parameters or a nominal recursive type.
 let internal hasInterfaceCallSignatures (model: ShapeModel) (facts: TypeFacts) =
     match List.distinct facts.CallSignatures with
-    | [ signature ] -> not signature.TypeParameters.IsEmpty
+    | [ signature ] ->
+        not signature.TypeParameters.IsEmpty
+        || hasRecursiveCallbackSignature model facts
     | _ -> hasIncompatibleOverloadedTypeParameters model facts
 
 /// Callable values retain their interface rather than exposing only an exported method.
@@ -2500,14 +2554,19 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
     match facts.Origin, (facts.SymbolName |> Option.map (fun value -> value / uom<symbolName>)) with
     | CompilerLib, Some name when
         GeneratorConfig.disposition ctx.Config CompilerLib <> Ship
-        || Naming.LibBindings.bindsWhenShipped name
+        || (facts.NamespacePath.IsEmpty && Naming.LibBindings.bindsWhenShipped name)
         ->
         let arguments = facts.TypeArguments
 
         // (F# name, arity it takes, the loss the mapping itself costs). A DOM binding costs
         // nothing beyond the arity rule below, so its loss list is always empty.
         let bound =
-            match Naming.LibBindings.tryFind name with
+            match
+                (if facts.NamespacePath.IsEmpty then
+                     Naming.LibBindings.tryFind name
+                 else
+                     None)
+            with
             | Some(fsharpName, arity, loss) ->
                 if arguments.Length < arity then
                     None
@@ -2516,7 +2575,7 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
             | None ->
                 match facts.DeclFile |> Option.map (fun value -> value / uom<declFile>) with
                 | Some file when Grouping.libFamily file = "Dom" ->
-                    Some($"Fable.Core.TS.Dom.{name}", arguments.Length, [])
+                    Some($"Fable.Core.TS.Dom.{namespaceQualified facts name}", arguments.Length, [])
                 | Some file when
                     Grouping.isLibFile file
                     && name <> "globalThis"
@@ -2524,7 +2583,7 @@ and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option)
                     && (GeneratorConfig.disposition ctx.Config CompilerLib = Widen
                         || Naming.LibBindings.isPinnedToCoreTs name)
                     ->
-                    Some($"Fable.Core.TS.Es.{name}", arguments.Length, [])
+                    Some($"Fable.Core.TS.Es.{namespaceQualified facts name}", arguments.Length, [])
                 | _ -> None
 
         match bound with
@@ -2611,7 +2670,7 @@ and internal referencedRef
         | CompilerLib, None -> Naming.CompilerLibEsModule
         | origin, _ -> Naming.groupModule ctx.Config ctx.PackageName origin
 
-    let name = $"{moduleName}.{typeName}"
+    let name = $"{moduleName}.{namespaceQualified facts typeName}"
 
     match facts.TypeArguments with
     | [] -> FsNamed name, []
@@ -4373,12 +4432,12 @@ module CompiledSignature =
 
         normalize abbrevs Set.empty (renameTypeVars rename reference)
 
-    /// The compiled parameter signature: generic arity, plus optionality, rest and type per
-    /// position.
+    /// The compiled parameter signature: generic arity, optionality and type per position.
+    /// ParamArray is call-site metadata and contributes nothing to overload identity.
     let parameterKey (abbrevs: Map<string, FsTypeRef>) (typeParameters: FsTypeParam list) (parameters: FsParam list) =
         typeParameters.Length,
         parameters
-        |> List.map (fun p -> p.Optional, p.Rest, compiled abbrevs typeParameters p.Type)
+        |> List.map (fun p -> p.Optional, compiled abbrevs typeParameters p.Type)
 
     /// The parameter's type as written in its slot: an optional parameter renders `?name: T`
     /// for a `T option` reference.

@@ -120,7 +120,12 @@ let shapeAliases: Pass<ShapeModel> =
                                 let name =
                                     String.concat
                                         "."
-                                        (exportPath export @ [ Naming.typeNameSegment (fsName fallback export) ])
+                                        (exportPath export
+                                         @ [
+                                             underNamespace
+                                                 (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                                                 (Naming.typeNameSegment (fsName fallback export))
+                                         ])
 
                                 let definingOwner typeId =
                                     Map.tryFind typeId definingExports
@@ -129,12 +134,17 @@ let shapeAliases: Pass<ShapeModel> =
 
                                 let owner = ExportLayout.ownerOf model.RuntimePackage export.Origin
 
+                                let declaresOwnAlias typeId =
+                                    hasAny SymbolFlags.TypeAlias export.Symbol.Flags
+                                    && (Map.tryFind typeId definingExports
+                                        |> Option.exists (fun defining -> defining.Symbol.SymbolId <> export.Symbol.SymbolId))
+
                                 match
                                     Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared
                                 with
                                 | Some typeId ->
                                     match Map.tryFind typeId model.DeclNames with
-                                    | Some _ when definingOwner typeId <> Some owner -> None
+                                    | Some _ when definingOwner typeId <> Some owner && not (declaresOwnAlias typeId) -> None
                                     | Some primary when primary = name -> None
                                     | Some _ when Map.tryFind typeId definingExports = Some export -> None
                                     | Some primary when Set.contains name claimed ->

@@ -164,6 +164,14 @@ rewrites could fuse — do not fuse them; the seam is the test point.
   A namespace is represented through its harvested descendants, including declarations under
   `Globals` or a subpath module. If all harvested children are absent, the namespace and its
   missing children each receive `AC001`; an empty type-only namespace remains excused.
+  `synthesize-anonymous` records position-derived names in `ShapeModel.MintedNames` at their
+  claim sites. Orphan pruning uses that provenance for unused declarations under folded-arm
+  roots; source-written namespace aliases and export roots remain outside that set. Alias
+  identity alone does not establish whether a declaration was generated from a position.
+  Reference-only type facts retain the declaration's namespace ancestry, so library and
+  dependency references use the producer's nested spelling. When an object is named through
+  its alias, the reference carries every alias application argument, including concrete types;
+  the parameter-only list used to bind declaration variables is insufficient for a reference.
 
 ### Tier 4 — Render
 
@@ -1350,8 +1358,8 @@ Under the default `widen` disposition of `typescript/lib`, a compiler-lib ECMASc
 that `Naming.LibBindings` does not bind is written as `Fable.Core.TS.Es.{name}` with all of its
 checker type arguments, as the DOM half above already is. The table still answers first
 for its three remaining rows (below). Checker placeholders (`__type`) and `globalThis` keep the
-existing widening. Namespace members take their bare name, which is the name Core.TS flattens
-them to (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`).
+existing widening. Namespace members retain their namespace path
+(`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.Intl.NumberFormatOptions`).
 
 - **`widen` only.** A `map` disposition keeps its own table (group-map-lab maps `RegExp` to
   `System.Text.RegularExpressions.Regex`), and `reference` keeps the O7 template
@@ -3302,3 +3310,26 @@ The full public-feed .NET run passes 1,543 generator tests and 105 Wire tests, i
 Core.TS package consumers. All 143 golden regeneration tests pass. Core.TS and corpus changes
 received independent review. The corrected callable-overload, setter and type-scope assertions
 verify invocation-owned binders and first-class callable values.
+
+## Namespace member contracts (2026-10-24)
+
+Harvest includes type members exported by namespaces, including unreached declarations and
+package-owned global namespaces. Each occurrence retains its declaring namespace separately
+from the resolved target symbol. Declaration names and references use the namespace path;
+position-derived names retain separate provenance for orphan pruning. Catalogue API contract
+9 requires regenerated producers and consumers for these changed public names.
+
+Single-signature callbacks that recur through abbreviation bodies use Fickl callable
+interfaces. Their signature edges, union members and type arguments determine recursion;
+ordinary object members terminate the traversal at a nominal boundary. Each reachable type
+is visited once per classification. Source binders remain on the callable interface and its
+recursive references. The nested-name lab covers recursive and generic callbacks, ordinary
+callbacks and recursion through object members.
+
+Compiled overload identity excludes ParamArray metadata. Overloads with identical compiled
+parameter types share a .NET signature even when only one is a rest overload; deduplication
+retains the first and reports the existing DO001 finding for the dropped contract.
+
+Harvest deduplication includes the declaring namespace, preserving a same-named re-export
+beside its root export. Distinct source type-alias symbols retain their declarations across
+module owners even when the checker shares their type ID, including primitive aliases.

@@ -1909,7 +1909,7 @@ let shapePassTests =
             Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Event") "the first claimant keeps the bare name"
             Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "TailStream.Event") "the second nests under its namespace"
 
-            Expect.contains (findings |> List.map _.Key) "SY004" "and the nesting is reported like any other"
+            Expect.isFalse (findings |> List.exists (fun f -> f.Key = "SY004")) "source namespace spelling is exact"
 
         testCase "synthesize-anonymous keeps the number where no namespace names the second" <| fun _ ->
             // The fallback is still the fallback: a namespace this run has no module name for
@@ -1981,7 +1981,85 @@ let shapePassTests =
 
             Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "TailStream.Event") "the namespaced export nests"
             Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "Event") "and the global one keeps the bare name"
-            Expect.equal (findings |> List.map _.Key) [ "SY004" ] "the nesting is reported once"
+            Expect.isEmpty findings "source namespace spelling raises no finding"
+
+        testCase "a lib namespace member retains its Core.TS namespace path" <| fun _ ->
+            let options =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some("NumberFormatOptions" * uom<symbolName>)
+                    DeclFile = Some("/ts/lib/lib.es5.d.ts" * uom<declFile>)
+                    NamespacePath = [ "Intl" ] }
+
+            let reference, _ = Spec.typeRef Build.context (Build.shapeModel (options :: Build.primitives)) None "Holder.options" 50<typeId>
+            Expect.equal reference (FsNamed "Fable.Core.TS.Es.Intl.NumberFormatOptions") "the consumer names the producer's nested declaration"
+
+        testCase "a namespaced lib type does not take a global special binding" <| fun _ ->
+            let promise =
+                { Build.facts (Build.typeResponse 52 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some("Promise" * uom<symbolName>)
+                    DeclFile = Some("/ts/lib/lib.es5.d.ts" * uom<declFile>)
+                    NamespacePath = [ "Vendor" ]
+                    TypeArguments = [ 1<typeId> ] }
+
+            let reference, _ = Spec.typeRef Build.context (Build.shapeModel (promise :: Build.primitives)) None "Holder.promise" 52<typeId>
+            Expect.equal reference (FsApp("Fable.Core.TS.Es.Vendor.Promise", [ FsString ])) "only the global Promise maps to Fable's promise binding"
+
+        testCase "a referenced namespace member retains its dependency namespace path" <| fun _ ->
+            let env =
+                { Build.facts (Build.typeResponse 51 TypeFlags.Object) with
+                    Origin = Dependency("ns-owner-lab" * uom<npmDependency>)
+                    SymbolName = Some("ProcessEnv" * uom<symbolName>)
+                    NamespacePath = [ "NodeJS" ] }
+
+            let ctx =
+                { Build.context with
+                    Config =
+                        { GeneratorConfig.Default with
+                            Groups = Map.ofList [ "ns-owner-lab" * uom<npmDependency>, Reference ] } }
+
+            let reference, _ = Spec.typeRef ctx (Build.shapeModel (env :: Build.primitives)) None "Exports.env" 51<typeId>
+            Expect.equal reference (FsNamed "NsOwnerLab.NodeJS.ProcessEnv") "the namespace belongs between the dependency module and member"
+
+        testCase "name-exports nests an uncontested namespace member along its full path" <| fun _ ->
+            let memberSymbol =
+                { Build.symbol 100 "Lonely" SymbolFlags.Interface with
+                    Parent = ValueSome(Build.compact 900) }
+
+            let model =
+                { Build.shapeModel Build.primitives with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports = [ Build.export "Lonely" memberSymbol ]
+                            Namespaces = Map.ofList [ Build.symbolKey 900, "Pool.Inner" * uom<symbolName> ] }
+                    ExportTypes =
+                        Map.ofList [ Build.symbolKey 100, { Declared = Some 40<typeId>; Value = None; AliasParameters = None } ] }
+
+            let named, findings = Build.runPass ExportNames.nameExports model
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Pool.Inner.Lonely") "no collision is needed to retain the namespace"
+            Expect.isEmpty findings "the source path is exact"
+
+        testCase "synthesize-anonymous keeps a reached namespace member outside minted names" <| fun _ ->
+            let memberType =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some("Lonely" * uom<symbolName>)
+                    SymbolParent = Some(Build.symbolKey 900)
+                    Members = [ Build.resolvedMember (Build.symbol 401 "value" SymbolFlags.Property) 2 ] }
+
+            let model =
+                { Build.shapeModel (memberType :: Build.primitives) with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports = [ Build.export "current" (Build.symbol 100 "current" SymbolFlags.BlockScopedVariable) ]
+                            Namespaces = Map.ofList [ Build.symbolKey 900, "Pool.Inner" * uom<symbolName> ] }
+                    ExportTypes =
+                        Map.ofList [ Build.symbolKey 100, { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
+
+            let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Pool.Inner.Lonely") "a reached member keeps its source path"
+            Expect.isEmpty named.MintedNames "a source name is not derived from the value's position"
+            Expect.isFalse (findings |> List.exists (fun f -> f.Key = "SY004")) "the source path is exact"
 
         testCase "name-exports suffixes the second declaration under a name the first already claimed" <| fun _ ->
             // Neither declaration is namespaced, so `claim` cannot resolve the clash by nesting
@@ -6644,6 +6722,35 @@ let typeParametersInScopeTests =
 
             Expect.equal structural (FsApp("ListOf", [ FsNamed "Node" ])) "EntryLike inherits nothing"
             Expect.equal (structuralFindings |> List.map _.Key) [ "TR027" ] "written as the bound"
+
+        testCase "compiled overload signatures ignore ParamArray metadata" <| fun _ ->
+            let parameter = { Name = "values"; Optional = false; Rest = true; Type = FsArray FsString }
+            let key rest = Spec.CompiledSignature.parameterKey Map.empty [] [ { parameter with Rest = rest } ]
+            Expect.equal (key true) (key false) "attributes do not distinguish .NET overloads"
+
+        testCase "recursive callback classification follows abbreviations and stops at object members" <| fun _ ->
+            let callback =
+                { named 40 "Thunk" with CallSignatures = [ Build.signature [] 41 ] }
+            let union =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Union) with
+                    UnionMembers = [ 1<typeId>; 40<typeId> ] }
+            let model = Build.shapeModel (callback :: union :: Build.primitives)
+
+            Expect.isTrue (Spec.hasInterfaceCallSignatures model callback) "the union closes an abbreviation cycle"
+
+            let record =
+                { named 41 "Record" with
+                    Members = [ Build.resolvedMember (Build.symbol 410 "next" SymbolFlags.Property) 40 ] }
+            let throughRecord = { model with Types = Map.add 41<typeId> record model.Types }
+            Expect.isFalse (Spec.hasInterfaceCallSignatures throughRecord callback) "object members provide a nominal boundary"
+
+            let ordinary = { callback with CallSignatures = [ Build.signature [] 1 ] }
+            Expect.isFalse (Spec.hasInterfaceCallSignatures model ordinary) "a nonrecursive callback remains a function"
+
+            let delegateCallback =
+                { callback with
+                    CallSignatures = [ Build.signature [ parameterMember 411 "left" 1; parameterMember 412 "right" 1 ] 41 ] }
+            Expect.isFalse (Spec.hasInterfaceCallSignatures model delegateCallback) "a multiargument callback already has a nominal delegate"
 
         testCase "a function declaration is a method and a function-typed constant a property" <| fun _ ->
             let identity =

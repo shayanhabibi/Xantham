@@ -44,8 +44,13 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 7, 8, 3, 1)
-                "identity 7 keys an alias over an instantiated mapped type by its own declaration; API 8 emits literal-keyed methods; inference 3 preserves source contracts at the width cutoff"
+                (1, 7, 9, 3, 1)
+                "identity 7 keys mapped aliases by their own declaration; API 9 nests namespace members; inference 3 preserves source contracts at the width cutoff"
+
+        testCase "the API contract rejects catalogues built before namespace member nesting" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 8 }))
 
         testCase "the API contract rejects catalogues built before literal-keyed methods" <| fun _ ->
             rejects "API version" (fun () ->

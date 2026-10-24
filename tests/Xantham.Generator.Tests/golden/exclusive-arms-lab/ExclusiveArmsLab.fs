@@ -91,14 +91,6 @@ type Contested =
     static member Create (tag: float, right: string[]) : Contested = jsNative
 
 [<Interface>]
-type Right =
-    abstract left: unit option with get, set
-    abstract right: string[] with get, set
-    abstract tag: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (right: string[], tag: float, ?left: unit) : Right = jsNative
-
-[<Interface>]
 type Left =
     abstract other: bool with get, set
     [<ParamObject; Emit("$0")>]
@@ -107,18 +99,18 @@ type Left =
 [<Interface>]
 type ContestedHolder =
     abstract left: Contested.Left with get, set
-    abstract right: Right with get, set
+    abstract right: Contested.Right with get, set
     abstract top: Left with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (left: Contested.Left, right: Right, top: Left) : ContestedHolder = jsNative
+    static member Create (left: Contested.Left, right: Contested.Right, top: Left) : ContestedHolder = jsNative
 
 type ContestedCallback = (Contested.Left -> unit)
 
 [<Interface>]
 type Elsewhere =
-    abstract read: arm: Right -> Contested.Left
+    abstract read: arm: Contested.Right -> Contested.Left
     [<ParamObject; Emit("$0")>]
-    static member Create (read: (Right -> Contested.Left)) : Elsewhere = jsNative
+    static member Create (read: (Contested.Right -> Contested.Left)) : Elsewhere = jsNative
 
 type ReadonlyFirst = U2<ReadonlyFirst2, ReadonlyFirst3>
 
@@ -156,6 +148,31 @@ type ReadonlySecond3 =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, b: string, ?a: unit) : ReadonlySecond3 = jsNative
 
+[<Interface>]
+type Wrap<'T> =
+    abstract value: 'T with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: 'T) : Wrap<'T> = jsNative
+
+[<Interface>]
+type F1 =
+    abstract w: F1.W with get, set
+    abstract a: float option with get, set
+    abstract b: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (w: F1.W, a: float) : F1 = jsNative
+    [<ParamObject; Emit("$0")>]
+    static member Create (w: F1.W, b: string) : F1 = jsNative
+
+[<Interface>]
+type FW =
+    abstract left: float option with get, set
+    abstract right: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (left: float) : FW = jsNative
+    [<ParamObject; Emit("$0")>]
+    static member Create (right: string) : FW = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -170,7 +187,7 @@ type Exports =
     [<Import("contest", "exclusive-arms-lab")>]
     static member contest (options: Contested, callback: ContestedCallback, holder: ContestedHolder) : unit = jsNative
     [<Import("pickLeft", "exclusive-arms-lab")>]
-    static member pickLeft (left: Contested.Left) : Right = jsNative
+    static member pickLeft (left: Contested.Left) : Contested.Right = jsNative
     [<Import("readonlyPairs", "exclusive-arms-lab")>]
     static member readonlyPairs (first: ReadonlyFirst, second: ReadonlySecond) : unit = jsNative
 
@@ -182,3 +199,38 @@ module Contested =
         abstract tag: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (left: string, tag: float, ?right: unit) : Left = jsNative
+
+    [<Interface>]
+    type Right =
+        abstract left: unit option with get, set
+        abstract right: string[] with get, set
+        abstract tag: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (right: string[], tag: float, ?left: unit) : Right = jsNative
+
+module F1 =
+    [<Interface>]
+    type W =
+        abstract value: F1.W.Value with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (value: F1.W.Value) : W = jsNative
+
+    module W =
+        [<Interface>]
+        type Value =
+            abstract n: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (n: float) : Value = jsNative
+
+module FW =
+    [<Interface>]
+    type Box<'T> =
+        abstract boxed: 'T with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (boxed: 'T) : Box<'T> = jsNative
+
+    [<Interface>]
+    type Applied =
+        abstract boxed: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (boxed: string) : Applied = jsNative

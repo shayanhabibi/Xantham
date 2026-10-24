@@ -723,7 +723,20 @@ let pipelineTests =
 
         yield!
             fixtureTests "ambient-module-lab" (handFixture "ambient-module-lab") GeneratorConfig.Default (fun package ->
-                [ testCase "an ambient module's exports bind to its specifier" <| fun _ ->
+                [ testCase "primitive namespace aliases remain declared across ambient owners" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    let identifiers = moduleBodyOf (moduleBodyOf source "Sockets") "Identifiers"
+                    Expect.stringContains identifiers "type RequestId =" "sharing the string intrinsic does not transfer declaration ownership"
+                    Expect.stringContains (moduleBodyOf source "Tools") "type ToolId =" "the other module keeps its independently declared alias too"
+
+                  testCase "a merged class namespace re-export qualifies its outer class" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    let inner = moduleBodyOf (moduleBodyOf source "Mirror") "Mirror"
+                    Expect.stringContains inner "type Mirror = AmbientModuleLab.Mirror.Mirror" "the RHS cannot resolve through its own abbreviation"
+
+                  testCase "an ambient module's exports bind to its specifier" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
@@ -1986,7 +1999,7 @@ let pipelineTests =
                             ": Fable.Core.TS.Es.ArrayIterator<float>"
                             "(pattern: Fable.Core.TS.Es.RegExp)"
                             "Fable.Core.TS.Es.AsyncGeneratorFunction"
-                            "(options: Fable.Core.TS.Es.NumberFormatOptions)" ] do
+                            "(options: Fable.Core.TS.Es.Intl.NumberFormatOptions)" ] do
                           Expect.stringContains source fragment fragment
 
                   // Core.TS declares `ArrayBufferLike` as this same abbreviation, so a value typed
@@ -3307,7 +3320,177 @@ let pipelineTests =
                               "static member joinCluster (node: Cluster.Node) : Node"
                               "each reference reaches the declaration it named"
 
-                          Expect.isFalse (source.Contains "Node2") "so neither takes a numeric suffix" ])
+                          Expect.isFalse (source.Contains "Node2") "so neither takes a numeric suffix"
+
+                      testCase "an exported namespace's members are declared under it whether or not a signature reads them"
+                      <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          let declaredIn (owner: string) (name: string) =
+                              let body = moduleBodyOf source owner
+
+                              body.Contains($"\n    type {name} =") || body.Contains($"\n    and {name} =")
+
+                          for owner, name in
+                              [ "Pool", "Idle"; "Shapes", "Lonely"; "Pick", "Extra"; "Markup", "Fragment"
+                                "Markup", "Slot"; "Queue", "Unread" ] do
+                              Expect.isTrue (declaredIn owner name) $"{owner}.{name} is declared inside module {owner}"
+
+                          Expect.stringContains source "    module Inner =" "a nested namespace opens a module inside its parent's"
+                          Expect.stringContains source "        type Deep =" "and declares its members there"
+                          Expect.stringContains source "    type Depth = Pool.Inner.Deep\n" "a second name abbreviates the first, in its own namespace"
+
+                          Expect.isEmpty
+                              (rendered.Findings |> List.filter (fun f -> f.Key = "AC001") |> List.map _.Symbol)
+                              "nothing is reported missing"
+
+                      testCase "a namespace member nests without a finding" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          let namespaceNests =
+                              [ "Pool.Idle"; "Pool.Inner.Deep"; "Pool.Inner.Node"; "Shapes.Node"; "Shapes.Exports"; "Cluster.Node" ]
+
+                          for name in namespaceNests do
+                              Expect.isFalse
+                                  (rendered.Findings |> List.exists (fun f -> f.Symbol = name && f.Key = "SY004"))
+                                  $"{name} is the source's own spelling, not a nesting the generator chose"
+
+                          Expect.stringContains source "[<Erase>]\ntype Exports =" "the value container keeps its name"
+                          Expect.isFalse (source.Contains "Exports_") "and takes no digest"
+                          Expect.isFalse (source.Contains "Node2") "no Node takes a numeric suffix"
+
+                      testCase "a namespace member a signature reads is declared once, nested" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          let count (text: string) = source.Split(text).Length - 1
+
+                          for name in [ "Reached"; "Conn"; "Element"; "Attributes"; "Item" ] do
+                              Expect.equal
+                                  (count $"\n    type {name} =" + count $"\n    and {name} =")
+                                  1
+                                  $"{name} has one declaration, inside its namespace's module"
+
+                              Expect.isFalse
+                                  (source.Contains($"\ntype {name} =") || source.Contains($"\nand {name} ="))
+                                  $"and none at the root"
+
+                          Expect.stringContains source "static member widen (r: Shapes.Reached) : unit" "its reader writes the nested name"
+
+                          Expect.stringContains
+                              source
+                              "static member mount (host: Fable.Core.TS.Dom.Element) : Markup.Element"
+                              "the DOM name stays qualified beside the member of that name"
+
+                          Expect.stringContains source "Pool.ConnConstructor" "a class member's constructor nests with it"
+                          Expect.isFalse (source.Contains "static member Conn:") "and binds through its namespace object"
+                          Expect.stringContains source "static member Pool: Pool" "the namespace's value side keeps its binding"
+
+                      testCase "a class merged with a namespace declares the namespace's members under it" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "\ntype Queue =" "the class keeps its instance side"
+                          Expect.stringContains source "\nmodule Queue =" "and its namespace opens a module beside it"
+                          Expect.stringContains source "Queue.Item" "the class's member reads the nested name"
+                          Expect.isFalse (source.Contains "static member Unread") "a type member binds nothing"
+
+                      testCase "a tagged union's namespace arms nest beside its cases" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "TypeScriptTaggedUnion(\"kind\"" "the union is a DU"
+                          Expect.stringContains source "\nmodule Signal =" "its namespace opens a module"
+                          Expect.stringContains source "    type Start =" "holding the arm interfaces"
+
+                      testCase "a recursive namespace callback retains a callable interface" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+                          let body = moduleBodyOf source "Recursive"
+
+                          Expect.stringContains body "CallableInterface" "a nominal callable declaration breaks the abbreviation cycle"
+                          Expect.stringContains (declarationBodyOf body "Thunk") "abstract Invoke:" "the source invocation contract remains callable"
+                          Expect.isFalse (body.Contains "type Thunk = (unit ->") "the source interface is not reduced to a cyclic function alias"
+
+                          let generic = declarationBodyOf body "GenericThunk<'T>"
+                          Expect.stringContains generic "U2<'T, GenericThunk<'T>>" "recursive references retain the declaration's type argument"
+                          Expect.stringContains generic "abstract Invoke:" "generic recursive callbacks remain nominal"
+                          Expect.stringContains body "type Reader = (unit -> Record)" "recursion through an object member already has a nominal boundary"
+                          Expect.stringContains body "type Plain = (unit -> string)" "nonrecursive callbacks retain function ergonomics"
+
+                      testCase "a namespace preserves a same-name re-export of a root alias" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+                          let body = moduleBodyOf source "Reexports"
+                          Expect.stringContains body "type SharedCode =" "the namespace occurrence survives beside its root declaration"
+
+                      testCase "reached members retain private nested namespace ancestry" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+                          let inner = moduleBodyOf (moduleBodyOf source "Cluster") "Inner"
+                          Expect.stringContains inner "type PrivateItem =" "source namespace ancestry survives without a namespace export"
+                          Expect.stringContains source "static member clusterItem () : Cluster.Inner.PrivateItem" "the signature uses the same declaration path"
+
+                      testCase "namespace overloads differing only by rest metadata share a compiled signature" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+                          let body = declarationBodyOf (moduleBodyOf source "Recursive") "RestOverloads"
+                          let methods = body.Split('\n') |> Array.filter (fun line -> line.Contains "abstract apply:")
+                          Expect.equal methods.Length 1 "ParamArray does not distinguish .NET method signatures"
+                          Expect.stringContains body "[<ParamArray>] values: string[]" "the rest overload remains callable with an argument list"
+                          Expect.isTrue
+                              (rendered.Findings |> List.exists (fun finding -> finding.Symbol.EndsWith "RestOverloads.apply" && finding.Key = "DO001"))
+                              "the unrepresentable duplicate is reported"
+
+                      testCase "a module package's type-only global namespace retains its module" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          let ownNamespace = moduleBodyOf source "NestedNameLabGlobal"
+                          Expect.stringContains ownNamespace "type Unreached =" "the type-only global namespace declares its member at the global declaration path"
+
+                          Expect.isEmpty
+                              (rendered.Findings
+                               |> List.filter (fun f -> f.Symbol = "NestedNameLabGlobal.Unreached" && f.Key <> "SP001"))
+                              "only its ParamObject helper is reported" ])
+
+        // Package-owned global namespaces ship here; foreign augmentations stay with their owner.
+        yield!
+            fixtureTests
+                "foreign-namespace-lab"
+                (handFixture "foreign-namespace-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "referenced namespace types retain nested paths and generic arguments" <| fun _ ->
+                          let config =
+                              { GeneratorConfig.Default with
+                                  Groups = Map.ofList [ "ns-owner-lab" * uom<npmDependency>, Reference ] }
+                          let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "NsOwnerLab.NodeJS.ProcessEnv" "the dependency namespace is retained"
+                          Expect.stringContains source "NsOwnerLab.NodeJS.Deep.Box<string>" "an alias uses its own namespace and argument"
+                          Expect.stringContains source "NsOwnerLab.NodeJS.Deep.Shape<float>" "an interface uses its own namespace and argument"
+
+                      testCase "a namespace a dependency declares first stays its owner's" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.isFalse (source.Contains "module NodeJS =") "the dependency's namespace is not re-homed"
+                          Expect.isFalse (source.Contains "type ProcessEnv =") "nor its member copied as the package's"
+                          Expect.isFalse (source.Contains "type PkgAdded =") "augmentation belongs to the owner's namespace"
+
+                          Expect.isFalse
+                              (rendered.Findings |> List.exists (fun f -> f.Symbol.StartsWith "NodeJS" && f.Key = "AC001"))
+                              "the owner's namespace is not harvested as this package's API"
+
+                      testCase "a namespace the package declares first is its own" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains (moduleBodyOf source "PkgNs") "type Inner =" "declared in its own module" ])
 
         // Wave seven lane AI's fixture. A member key is written verbatim at the member position
         // and reduced to the identifier shape at the declaration position.
@@ -5395,7 +5578,28 @@ let pipelineTests =
                 // as `unit`; `DisagreeingOptions` is not this construct and is untouched. A
                 // source-named arm stays declared beside the fold, with its own `never` members
                 // as `unit`, so each "no `unit`" check reads the folded declaration's own body.
-                [ testCase "both arms anchoring their own required member fold, TR060" <| fun _ ->
+                [ testCase "an unread position copy under a fold is dropped by provenance" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains (moduleBodyOf source "F1") "type W =" "the folded member's copy stays"
+                      Expect.isFalse (source.Contains "type W2") "the unread second arm's copy is dropped"
+                      Expect.isTrue
+                          (rendered.Findings |> List.exists (fun f -> f.Symbol = "F1.W2" && f.Key = "DD003"))
+                          "the drop is reported"
+
+                  testCase "a namespace member under a fold root is never pruned" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+                      let body = moduleBodyOf source "FW"
+
+                      Expect.stringContains body "type Box<'T> =" "the source-written generic alias is declared"
+                      Expect.stringContains body "type Applied =" "its application is declared too"
+                      Expect.isFalse
+                          (rendered.Findings |> List.exists (fun f -> f.Symbol.StartsWith "FW." && f.Key = "DD003"))
+                          "source-written namespace members are not orphan copies"
+
+                  testCase "both arms anchoring their own required member fold, TR060" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
                     let foldedBlock = declarationBodyOf source "SeparableOptions"
@@ -5434,9 +5638,9 @@ let pipelineTests =
 
                       Expect.stringContains nested "type Left =" "`Contested.Left` is declared in its namespace's module"
                       Expect.stringContains nested "abstract left: string with get, set" "with its own members"
-                      Expect.stringContains source "type Right =" "`Contested.Right` is declared under today's bare spelling (re-pinned by the companion plan)"
+                      Expect.stringContains nested "type Right =" "`Contested.Right` is declared inside its source namespace"
                       Expect.stringContains holder "abstract left: Contested.Left with get, set" "an interface member reads the nested arm"
-                      Expect.stringContains holder "abstract right: Right with get, set" "and the bare one"
+                      Expect.stringContains holder "abstract right: Contested.Right with get, set" "the other arm retains its namespace too"
 
                       Expect.stringContains
                           source
@@ -5445,12 +5649,12 @@ let pipelineTests =
 
                       Expect.stringContains
                           (declarationBodyOf source "Elsewhere")
-                          "abstract read: arm: Right -> Contested.Left"
+                          "abstract read: arm: Contested.Right -> Contested.Left"
                           "a function of another namespace reads both arms"
 
                       Expect.stringContains
                           source
-                          "static member pickLeft (left: Contested.Left) : Right = jsNative"
+                          "static member pickLeft (left: Contested.Left) : Contested.Right = jsNative"
                           "a top-level function reads both arms, unwidened"
 
                   testCase "a shared member disagreeing in type is not this construct" <| fun _ ->
@@ -5465,7 +5669,7 @@ let pipelineTests =
                            |> List.filter (fun finding -> finding.Key = "TR060" || finding.Key = "TR061")
                            |> List.map _.Symbol
                            |> List.sort)
-                          [ "AnchoredOptions"; "Contested"; "SeparableOptions" ]
+                          [ "AnchoredOptions"; "Contested"; "F1"; "FW"; "SeparableOptions" ]
                           "the disagreeing pair raises neither TR060 nor TR061"
 
                   testCase "a shared member readonly on one arm only keeps the union erased" <| fun _ ->

@@ -2501,6 +2501,7 @@ let main _ =
         (ExclusiveSignatureLab.Exports.render (U2.Case1(ExclusiveSignatureLab.HtmlPage.Create "<p>test</p>")))
 
     GenericCallableInterfaces.run check
+    RecursiveCallbacks.run check
     Projections.run check
 
     match failures with

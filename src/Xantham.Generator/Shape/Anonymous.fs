@@ -315,6 +315,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let mutable orders = model.DeclOrders
     let mutable declParams = model.DeclParams
     let mutable aliasApplications = model.AliasApplications
+    let mutable minted = model.MintedNames
+    let mutable exportRoots = Set.empty
     let mutable findings = []
     let mutable taken = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
     let mutable visited = Set.empty
@@ -346,9 +348,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     /// The module name a type nests under, where its own symbol is written inside a namespace
     /// this run names.
     let namespaceOf (facts: TypeFacts) =
-        facts.SymbolParent
-        |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
-        |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
+        namespacePath model.Harvest.Namespaces facts.SymbolParent
 
     /// The specifier module path of the export whose types are being walked, dotted; empty at
     /// the root.
@@ -375,10 +375,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         // A name TypeScript separates by the namespace it is written in separates the same way
         // here, rather than by number: `TailStream`'s `TailEvent` reads `TailStream.TailEvent`
         // beside the global class of that name.
-        let wanted =
-            match owner with
-            | Some ns when Set.contains (underPrefix admitted) taken -> underPrefix (nestUnder ns admitted)
-            | _ -> underPrefix admitted
+        let wanted = underPrefix (underNamespace owner admitted)
 
         let unique =
             if not (Set.contains wanted taken) then
@@ -398,10 +395,19 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     Finding.make unique (SynthesizeAnonymous.NameSanitisedForIdentifier(preferred, unique))
                 ]
 
-        if (withoutPrefix unique).Contains "." then
+        if owner.IsNone && (withoutPrefix unique).Contains "." then
             findings <-
                 findings
                 @ [ Finding.make unique (SynthesizeAnonymous.NameNestedUnderOwner unique) ]
+
+        unique
+
+    /// Records position-derived names at the claim site, excluding source export roots.
+    let claimDerived typeId order path =
+        let unique = claim None path typeId order
+
+        if not (Set.contains path exportRoots) then
+            minted <- Set.add unique minted
 
         unique
 
@@ -611,7 +617,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             if flag TypeFlags.Union declaredFacts then
                                 walk path order declared
                         | Some declaredFacts when hasConditionalOperand model declaredFacts ->
-                            claim None path declared order |> ignore
+                            claimDerived declared order path |> ignore
                         | Some _ -> walk path order declared
                         | None -> ()
                     | _ -> ()
@@ -620,22 +626,28 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 if needsName facts then
                     // A path-derived name already carries its owner, so only a name taken from
                     // the type's own symbol has a namespace left to fall back on.
-                    let preferred, owner =
+                    let preferred, owner, derived =
                         match facts.SymbolName with
                         | Some name when not (isSyntheticName name) ->
-                            Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts
-                        | _ -> path, None
+                            Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts, false
+                        | _ -> path, None, true
+
+                    let claimName () =
+                        if derived then
+                            claimDerived typeId order preferred
+                        else
+                            claim owner preferred typeId order
 
                     let claimed =
                         // A named type exported directly from no public path stays at the root
                         // (decision 10), homed by its own name and namespace rather than by the
                         // export the walk reaches it through.
                         if Set.contains typeId publiclyExportedTypeIds then
-                            claim owner preferred typeId order
+                            claimName ()
                         else
                             let referencingPrefix = modulePrefix
                             modulePrefix <- ""
-                            let result = claim owner preferred typeId order
+                            let result = claimName ()
                             modulePrefix <- referencingPrefix
                             result
 
@@ -808,9 +820,26 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let fallback = defaultExportName ctx
     let pathOf = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
+    exportRoots <-
+        model.Harvest.Exports
+        |> List.map (fun export ->
+            pathOf export
+            @ [
+                underNamespace
+                    (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                    (Naming.pascalSegment (fsName fallback export))
+            ]
+            |> String.concat ".")
+        |> Set.ofList
+
     for export in model.Harvest.Exports do
         modulePrefix <- pathOf export |> String.concat "."
-        let stem = Naming.pascalSegment (fsName fallback export)
+
+        let stem =
+            underNamespace
+                (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                (Naming.pascalSegment (fsName fallback export))
+
         let root = underPrefix stem
 
         match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
@@ -849,6 +878,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         DeclOrders = orders
         DeclParams = declParams
         AliasApplications = aliasApplications
+        MintedNames = minted
     },
     findings
 

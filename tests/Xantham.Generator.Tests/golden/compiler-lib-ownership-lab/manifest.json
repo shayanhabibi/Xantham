@@ -3,16 +3,16 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 66,
-    "ergonomic": 217,
-    "widened": 62,
+    "exact": 68,
+    "ergonomic": 219,
+    "widened": 63,
     "escape": 5
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 300,
-      "exact": 300
+      "total": 298,
+      "exact": 298
     },
     {
       "pass": "DT - detect-tagged-unions",
@@ -36,9 +36,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 53,
+      "total": 54,
       "ergonomic": 14,
-      "widened": 30,
+      "widened": 31,
       "escape": 9
     },
     {
@@ -48,9 +48,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 183,
+      "total": 185,
       "exact": 6,
-      "ergonomic": 174,
+      "ergonomic": 176,
       "widened": 3
     },
     {
@@ -60,8 +60,8 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 7,
-      "ergonomic": 1,
+      "total": 13,
+      "ergonomic": 7,
       "widened": 6
     },
     {

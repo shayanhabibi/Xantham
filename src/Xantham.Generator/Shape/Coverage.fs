@@ -45,9 +45,7 @@ let auditCoverage: Pass<ShapeModel> =
                     let membersOf =
                         model.Harvest.Exports
                         |> List.choose (fun export ->
-                            export.Symbol.ParentSymbolId
-                            |> ValueOption.toOption
-                            |> Option.map (fun parent -> parent, export))
+                            export.DeclaringNamespace |> Option.map (fun parent -> parent, export))
                         |> List.groupBy fst
                         |> List.map (fun (parent, members) -> parent, List.map snd members)
                         |> Map.ofList

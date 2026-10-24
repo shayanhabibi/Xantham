@@ -75,6 +75,46 @@ type Node =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string) : Node = jsNative
 
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type SharedCode =
+    | [<CompiledName("closed")>] Closed
+    | [<CompiledName("ready")>] Ready
+
+[<Interface>]
+type Pool =
+    /// <summary>
+    /// A class member: the namespace object reads its constructor.
+    /// </summary>
+    abstract Conn: Pool.ConnConstructor with get, set
+    abstract size: unit -> float
+    [<ParamObject; Emit("$0")>]
+    static member Create (Conn: Pool.ConnConstructor, size: (unit -> float)) : Pool = jsNative
+
+/// <summary>
+/// An alias merged with a namespace.
+/// </summary>
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+type Pick =
+    | [<CompiledName("a")>] A
+    | [<CompiledName("b")>] B
+
+/// <summary>
+/// A tagged union whose arms are its namespace's members.
+/// </summary>
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+type Signal =
+    | [<CompiledName("start"); Fickl.Core.InlineInterface>] Start of Signal.Start
+    | [<CompiledName("stop"); Fickl.Core.InlineInterface>] Stop of Signal.Stop
+
+/// <summary>
+/// A class merged with a namespace of types.
+/// </summary>
+[<Interface>]
+type Queue =
+    abstract push: item: Queue.Item -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (push: (Queue.Item -> unit)) : Queue = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -98,6 +138,28 @@ type Exports =
     /// </summary>
     [<Import("joinCluster", "nested-name-lab")>]
     static member joinCluster (node: Cluster.Node) : Node = jsNative
+    /// <summary>
+    /// A namespace with a value beside its types.
+    /// </summary>
+    [<Import("Pool", "nested-name-lab")>]
+    static member Pool: Pool = jsNative
+    /// <summary>
+    /// Reads a namespace member that is harvested too.
+    /// </summary>
+    [<Import("widen", "nested-name-lab")>]
+    static member widen (r: Shapes.Reached) : unit = jsNative
+    [<Import("send", "nested-name-lab")>]
+    static member send (signal: Signal) : unit = jsNative
+    /// <summary>
+    /// Reads the DOM <c>Element</c> beside a namespace member of that name.
+    /// </summary>
+    [<Import("mount", "nested-name-lab")>]
+    static member mount (host: Fable.Core.TS.Dom.Element) : Markup.Element = jsNative
+    /// <summary>
+    /// A class merged with a namespace of types.
+    /// </summary>
+    [<Import("Queue", "nested-name-lab"); EmitConstructor>]
+    static member Queue () : Queue = jsNative
 
 module Choice =
     [<Interface>]
@@ -115,6 +177,9 @@ module Choice =
         static member Create (right: string, rightAt: float) : Either2 = jsNative
 
 module Cluster =
+    /// <summary>
+    /// Nests as <c>Cluster.Node</c>.
+    /// </summary>
     [<Interface>]
     type Node =
         abstract peers: float with get, set
@@ -140,6 +205,196 @@ module Gadget =
         abstract serial: string with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (serial: string) : Options = jsNative
+
+module Markup =
+    [<Interface>]
+    type Element =
+        abstract children: Element[] with get, set
+        abstract attributes: Attributes with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (children: Element[], attributes: Attributes) : Element = jsNative
+
+    [<Interface>]
+    type Attributes =
+        abstract parent: Element option with get, set
+        abstract ref: (Element -> unit) option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?parent: Element, ?ref: (Element -> unit)) : Attributes = jsNative
+
+    [<Interface>]
+    type Fragment =
+        abstract items: Fragment[] with get, set
+        abstract slot: Slot option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (items: Fragment[], ?slot: Slot) : Fragment = jsNative
+
+    [<Interface>]
+    type Slot =
+        abstract fill: Fragment with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (fill: Fragment) : Slot = jsNative
+
+module NestedNameLabGlobal =
+    [<Interface>]
+    type Unreached =
+        abstract u: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (u: float) : Unreached = jsNative
+
+module Pick =
+    [<Interface>]
+    type Extra =
+        abstract e: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (e: float) : Extra = jsNative
+
+module Pool =
+    type ConnConstructor =
+        [<EmitConstructor>]
+        abstract Create: unit -> Conn
+
+    /// <summary>
+    /// Declared though no signature reads it.
+    /// </summary>
+    [<Interface>]
+    type Idle =
+        abstract since: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (since: float) : Idle = jsNative
+
+    /// <summary>
+    /// A class member: the namespace object reads its constructor.
+    /// </summary>
+    [<Interface>]
+    type Conn =
+        abstract close: unit -> unit
+        [<ParamObject; Emit("$0")>]
+        static member Create (close: (unit -> unit)) : Conn = jsNative
+
+    /// <summary>
+    /// Declared two namespaces deep.
+    /// </summary>
+    type Depth = Pool.Inner.Deep
+
+    module Inner =
+        /// <summary>
+        /// Declared two namespaces deep.
+        /// </summary>
+        [<Interface>]
+        type Deep =
+            abstract depth: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (depth: float) : Deep = jsNative
+
+        /// <summary>
+        /// Shares a name with the exported <c>Node</c> and with <c>Shapes.Node</c>.
+        /// </summary>
+        [<Interface>]
+        type Node =
+            abstract inner: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (inner: bool) : Node = jsNative
+
+module Queue =
+    [<Interface>]
+    type Item =
+        abstract id: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: string) : Item = jsNative
+
+    [<Interface>]
+    type Unread =
+        abstract pending: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (pending: float) : Unread = jsNative
+
+module Recursive =
+    [<Fickl.Core.CallableInterface>]
+    type Thunk =
+        [<Emit("$0($1...)")>]
+        abstract Invoke: unit -> Value
+
+    type Value = U2<string, Thunk>
+
+    [<Fickl.Core.CallableInterface>]
+    type GenericThunk<'T> =
+        [<Emit("$0($1...)")>]
+        abstract Invoke: unit -> U2<'T, GenericThunk<'T>>
+
+    type GenericValue<'T> = U2<'T, GenericThunk<'T>>
+
+    type Reader = (unit -> Record)
+
+    [<Interface>]
+    type Record =
+        abstract next: Reader with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (next: Reader) : Record = jsNative
+
+    type Plain = (unit -> string)
+
+    type RestOverloads =
+        abstract apply: [<ParamArray>] values: string[] -> unit
+
+module Reexports =
+    type SharedCode = NestedNameLab.SharedCode
+
+module Shapes =
+    [<Interface>]
+    type Lonely =
+        abstract d: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (d: float) : Lonely = jsNative
+
+    /// <summary>
+    /// Read by <c>widen</c> as well as harvested: declared once.
+    /// </summary>
+    [<Interface>]
+    type Reached =
+        abstract r: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (r: string) : Reached = jsNative
+
+    [<Interface>]
+    type Node =
+        abstract shape: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (shape: string) : Node = jsNative
+
+    /// <summary>
+    /// Named like the value container, which keeps its name.
+    /// </summary>
+    [<Interface>]
+    type Exports =
+        abstract e: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (e: float) : Exports = jsNative
+
+module Signal =
+    [<Interface>]
+    type Start =
+        /// <remarks>TypeScript type: <c>"start"</c></remarks>
+        abstract kind: string with get, set
+        abstract at: float with get, set
+        [<ParamObject; Emit("({ kind: 'start', ...$0 })")>]
+        static member Create (at: float) : Start = jsNative
+
+    module Start =
+        /// <remarks>TypeScript type: <c>"start"</c></remarks>
+        [<Literal>]
+        let kind = "start"
+
+    [<Interface>]
+    type Stop =
+        /// <remarks>TypeScript type: <c>"stop"</c></remarks>
+        abstract kind: string with get, set
+        [<Emit("({ kind: 'stop' })")>]
+        static member Create () : Stop = jsNative
+
+    module Stop =
+        /// <remarks>TypeScript type: <c>"stop"</c></remarks>
+        [<Literal>]
+        let kind = "stop"
 
 module Widget =
     [<Interface>]
