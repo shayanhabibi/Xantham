@@ -57,9 +57,12 @@ dotnet fsi build.fsx -- test --quick --update --filter "<suite>"
   step, is opt-in through `--run-gate`.
 - `--filter` narrows to one suite by name, where you know which one you are moving.
 
-Every one of those flags removes something that is real safety on the way out and pure latency on
-the way in. **Drop them all and run `dotnet fsi build.fsx -- test` before you commit.** A branch
-handed over having only ever run the fast loop has not been gated.
+A work item is verified by focused checks: the filtered suites it touches, regenerated goldens,
+the per-symbol tier audit and the compile gate (`dotnet build Xantham.slnx`). The full suite and
+the run gate (`dotnet fsi build.fsx -- test --run-gate`) run **once per integrated batch**, on the
+branch that carries the merged items, before its pull request leaves draft. Never run them per
+item: most of the gate is unaffected by any one change, and a batch run catches the interactions
+a per-item run cannot.
 
 **Exception — widening and escape work items (W1–W9, issues #131–#140).** These never run the
 full corpus. Each proves its change on a lab fixture, then regenerates only its two selected
@@ -73,7 +76,7 @@ golden selection table are in §5 of
 ## Large fixtures: regenerate, gate, measure - do not load
 
 The npm rungs (`@cloudflare/workers-types`, `animejs`, `type-fest`, `solid-js`, and any rung added
-later) are **still regenerated and still gated on every change**. Nothing here relaxes that:
+later) are **still regenerated on every change and gated on every batch**:
 
 - `dotnet build Xantham.slnx` - the compile gate compiles the committed goldens against
   Fable.Core and `Xantham.Fable.Core.TS`. This is what decides whether a generated binding is
