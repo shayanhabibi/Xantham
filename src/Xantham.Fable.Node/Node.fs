@@ -33344,7 +33344,7 @@ module Assert =
 
         type CallTrackerReportInformation = Node.Assert.CallTrackerReportInformation
 
-        type AssertPredicate = obj
+        type AssertPredicate = Node.Assert.AssertPredicate
 
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -45338,41 +45338,6 @@ module Console =
             | [<CompiledValue(true)>] True
 
 module Constants =
-    [<Interface>]
-    type CompileCacheStatus =
-        /// <summary>
-        /// Node.js has enabled the compile cache successfully. The directory used to store the
-        /// compile cache will be returned in the <c>directory</c> field in the
-        /// returned object.
-        /// </summary>
-        abstract ENABLED: float
-        /// <summary>
-        /// The compile cache has already been enabled before, either by a previous call to
-        /// enableCompileCache, or by the <c>NODE_COMPILE_CACHE=dir</c>
-        /// environment variable. The directory used to store the
-        /// compile cache will be returned in the <c>directory</c> field in the
-        /// returned object.
-        /// </summary>
-        abstract ALREADY_ENABLED: float
-        /// <summary>
-        /// Node.js fails to enable the compile cache. This can be caused by the lack of
-        /// permission to use the specified directory, or various kinds of file system errors.
-        /// The detail of the failure will be returned in the <c>message</c> field in the
-        /// returned object.
-        /// </summary>
-        abstract FAILED: float
-        /// <summary>
-        /// Node.js cannot enable the compile cache because the environment variable
-        /// <c>NODE_DISABLE_COMPILE_CACHE=1</c> has been set.
-        /// </summary>
-        abstract DISABLED: float
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (ENABLED: float, ALREADY_ENABLED: float, FAILED: float, DISABLED: float)
-            : CompileCacheStatus =
-            jsNative
-
     [<Interface>]
     type Dlopen =
         abstract RTLD_LAZY: float
@@ -135140,6 +135105,87 @@ module Inspector =
             [<Import("Session", "node:inspector/promises"); EmitConstructor>]
             static member Session() : Session = jsNative
 
+        module Debugger =
+            /// <summary>
+            /// Breakpoint identifier.
+            /// </summary>
+            type BreakpointId = string
+
+            /// <summary>
+            /// Call frame identifier.
+            /// </summary>
+            type CallFrameId = string
+
+        module HeapProfiler =
+            /// <summary>
+            /// Heap snapshot object id.
+            /// </summary>
+            type HeapSnapshotObjectId = string
+
+        module IO =
+            type StreamHandle = string
+
+        module Network =
+            /// <summary>
+            /// Resource type as it was perceived by the rendering engine.
+            /// </summary>
+            type ResourceType = string
+
+            /// <summary>
+            /// Unique request identifier.
+            /// </summary>
+            type RequestId = string
+
+            /// <summary>
+            /// UTC time in seconds, counted from January 1, 1970.
+            /// </summary>
+            type TimeSinceEpoch = float
+
+            /// <summary>
+            /// Monotonically increasing time in seconds since an arbitrary point in the past.
+            /// </summary>
+            type MonotonicTime = float
+
+        module NodeWorker =
+            type WorkerID = string
+
+            /// <summary>
+            /// Unique identifier of attached debugging session.
+            /// </summary>
+            type SessionID = string
+
+        module Runtime =
+            /// <summary>
+            /// Unique script identifier.
+            /// </summary>
+            type ScriptId = string
+
+            /// <summary>
+            /// Unique object identifier.
+            /// </summary>
+            type RemoteObjectId = string
+
+            /// <summary>
+            /// Primitive value which cannot be JSON-stringified.
+            /// </summary>
+            type UnserializableValue = string
+
+            /// <summary>
+            /// Number of milliseconds since epoch.
+            /// </summary>
+            type Timestamp = float
+
+            /// <summary>
+            /// Unique identifier of current debugger.
+            /// </summary>
+            /// <remarks>@experimental</remarks>
+            type UniqueDebuggerId = string
+
+        module Target =
+            type SessionID = string
+
+            type TargetID = string
+
     module Runtime =
         /// <summary>
         /// Unique script identifier.
@@ -136648,10 +136694,10 @@ module Module =
         /// <a href="https://nodejs.org/docs/latest-v22.x/api/module.html#module-compile-cache">module compile cache</a>.
         /// </summary>
         /// <remarks>@since v22.8.0</remarks>
-        abstract compileCacheStatus: Constants.CompileCacheStatus with get, set
+        abstract compileCacheStatus: Module.Constants.CompileCacheStatus with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(compileCacheStatus: Constants.CompileCacheStatus) : Constants = jsNative
+        static member Create(compileCacheStatus: Module.Constants.CompileCacheStatus) : Constants = jsNative
 
     [<Interface>]
     [<Import("Module", "node:module")>]
@@ -137738,6 +137784,42 @@ module Module =
         [<Import("prototype", "node:module")>]
         static member prototype: Module = jsNative
 
+    module Constants =
+        [<Interface>]
+        type CompileCacheStatus =
+            /// <summary>
+            /// Node.js has enabled the compile cache successfully. The directory used to store the
+            /// compile cache will be returned in the <c>directory</c> field in the
+            /// returned object.
+            /// </summary>
+            abstract ENABLED: float
+            /// <summary>
+            /// The compile cache has already been enabled before, either by a previous call to
+            /// enableCompileCache, or by the <c>NODE_COMPILE_CACHE=dir</c>
+            /// environment variable. The directory used to store the
+            /// compile cache will be returned in the <c>directory</c> field in the
+            /// returned object.
+            /// </summary>
+            abstract ALREADY_ENABLED: float
+            /// <summary>
+            /// Node.js fails to enable the compile cache. This can be caused by the lack of
+            /// permission to use the specified directory, or various kinds of file system errors.
+            /// The detail of the failure will be returned in the <c>message</c> field in the
+            /// returned object.
+            /// </summary>
+            abstract FAILED: float
+            /// <summary>
+            /// Node.js cannot enable the compile cache because the environment variable
+            /// <c>NODE_DISABLE_COMPILE_CACHE=1</c> has been set.
+            /// </summary>
+            abstract DISABLED: float
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (ENABLED: float, ALREADY_ENABLED: float, FAILED: float, DISABLED: float)
+                : CompileCacheStatus =
+                jsNative
+
     module LoadHook =
         type NextLoad =
             delegate of
@@ -137787,22 +137869,7 @@ module Module =
 
         type ModuleFormat = Node.Module.ModuleFormat
 
-        type ModuleSource =
-            U13<
-                string,
-                Fable.Core.TS.Es.ArrayBuffer,
-                BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>,
-                Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>
-             >
+        type ModuleSource = Node.Module.ModuleSource
 
         /// <summary>
         /// The <c>initialize</c> hook provides a way to define a custom function that runs in
@@ -177961,47 +178028,21 @@ module Stream =
 
         type PipelineSourceFunction<'T> = Node.Stream.PipelineSourceFunction<'T>
 
-        type PipelineSource<'T> =
-            U4<
-                Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
-                Fable.Core.TS.Es.Iterable<'T, obj, obj>,
-                (unit -> U2<Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, Fable.Core.TS.Es.Iterable<'T, obj, obj>>),
-                NodeJS.ReadableStream
-             >
+        type PipelineSource<'T> = Node.Stream.PipelineSource<'T>
 
-        [<Erase>]
-        type PipelineTransform<'S, 'U> =
-            private | PipelineTransform__ of
-                U2<NodeJS.ReadWriteStream, (obj -> Fable.Core.TS.Es.AsyncIterable<'U, obj, obj>)>
+        type PipelineTransform<'S, 'U> = Node.Stream.PipelineTransform<'S, 'U>
 
-        type PipelineTransformSource<'T> =
-            U6<
-                Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>,
-                Fable.Core.TS.Es.Iterable<'T, obj, obj>,
-                (unit -> U2<Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, Fable.Core.TS.Es.Iterable<'T, obj, obj>>),
-                NodeJS.ReadWriteStream,
-                NodeJS.ReadableStream,
-                (obj -> Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>)
-             >
+        type PipelineTransformSource<'T> = Node.Stream.PipelineTransformSource<'T>
 
         type PipelineDestinationIterableFunction<'T> = Node.Stream.PipelineDestinationIterableFunction<'T>
 
         type PipelineDestinationPromiseFunction<'T, 'P> = Node.Stream.PipelineDestinationPromiseFunction<'T, 'P>
 
-        [<Erase>]
-        type PipelineDestination<'S, 'P> =
-            private | PipelineDestination__ of
-                U3<
-                    (Fable.Core.TS.Es.AsyncIterable<obj, obj, obj> -> Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>),
-                    (Fable.Core.TS.Es.AsyncIterable<obj, obj, obj> -> JS.Promise<'P>),
-                    NodeJS.WritableStream
-                 >
+        type PipelineDestination<'S, 'P> = Node.Stream.PipelineDestination<'S, 'P>
 
-        [<Erase>]
-        type PipelineCallback<'S> = private PipelineCallback__ of obj
+        type PipelineCallback<'S> = Node.Stream.PipelineCallback<'S>
 
-        [<Erase>]
-        type PipelinePromise<'S> = private PipelinePromise__ of obj
+        type PipelinePromise<'S> = Node.Stream.PipelinePromise<'S>
 
         type PipelineOptions = Node.Stream.PipelineOptions
 
@@ -182487,6 +182528,152 @@ module Test =
                     ) : Counts =
                     jsNative
 
+    module It =
+        /// <summary>
+        /// The type of a function passed to test. The first argument to this function is a TestContext object.
+        /// If the test uses callbacks, the callback function is passed as the second argument.
+        /// </summary>
+        type TestFn = Node.Test.TestFn
+
+        /// <summary>
+        /// The type of a suite test function. The argument to this function is a SuiteContext object.
+        /// </summary>
+        type SuiteFn = Node.Test.SuiteFn
+
+        type TestShard = Node.Test.TestShard
+
+        type RunOptions = Node.Test.RunOptions
+
+        /// <summary>
+        /// A successful call to <c>run()</c> will return a new <c>TestsStream</c> object, streaming a series of events representing the execution of the tests.
+        /// <br /><br />
+        /// Some of the events are guaranteed to be emitted in the same order as the tests are defined, while others are emitted in the order that the tests execute.
+        /// </summary>
+        /// <remarks>@since v18.9.0, v16.19.0</remarks>
+        type TestsStream = Node.Test.TestsStream
+
+        /// <summary>
+        /// An instance of <c>TestContext</c> is passed to each test function in order to
+        /// interact with the test runner. However, the <c>TestContext</c> constructor is not
+        /// exposed as part of the API.
+        /// </summary>
+        /// <remarks>@since v18.0.0, v16.17.0</remarks>
+        type TestContext = Node.Test.TestContext
+
+        type TestContextAssert = Node.Test.TestContextAssert
+
+        type AssertSnapshotOptions = Node.Test.AssertSnapshotOptions
+
+        type TestContextPlanOptions = Node.Test.TestContextPlanOptions
+
+        type TestContextWaitForOptions = Node.Test.TestContextWaitForOptions
+
+        /// <summary>
+        /// An instance of <c>SuiteContext</c> is passed to each suite function in order to
+        /// interact with the test runner. However, the <c>SuiteContext</c> constructor is not
+        /// exposed as part of the API.
+        /// </summary>
+        /// <remarks>@since v18.7.0, v16.17.0</remarks>
+        type SuiteContext = Node.Test.SuiteContext
+
+        type TestOptions = Node.Test.TestOptions
+
+        /// <summary>
+        /// The hook function. The first argument is the context in which the hook is called.
+        /// If the hook uses callbacks, the callback function is passed as the second argument.
+        /// </summary>
+        type HookFn = Node.Test.HookFn
+
+        /// <summary>
+        /// The hook function. The first argument is a <c>TestContext</c> object.
+        /// If the hook uses callbacks, the callback function is passed as the second argument.
+        /// </summary>
+        type TestContextHookFn = Node.Test.TestContextHookFn
+
+        /// <summary>
+        /// Configuration options for hooks.
+        /// </summary>
+        /// <remarks>@since v18.8.0</remarks>
+        type HookOptions = Node.Test.HookOptions
+
+        type MockFunctionOptions = Node.Test.MockFunctionOptions
+
+        type MockMethodOptions = Node.Test.MockMethodOptions
+
+        type Mock<'F> = Node.Test.Mock<'F>
+
+        type MockModuleOptions = Node.Test.MockModuleOptions
+
+        /// <summary>
+        /// The <c>MockTracker</c> class is used to manage mocking functionality. The test runner
+        /// module provides a top level <c>mock</c> export which is a <c>MockTracker</c> instance.
+        /// Each test also provides its own <c>MockTracker</c> instance via the test context's <c>mock</c> property.
+        /// </summary>
+        /// <remarks>@since v19.1.0, v18.13.0</remarks>
+        type MockTracker = Node.Test.MockTracker
+
+        type MockFunctionCall<'F, 'ReturnType, 'Args> = Node.Test.MockFunctionCall<'F, 'ReturnType, 'Args>
+
+        /// <summary>
+        /// The <c>MockFunctionContext</c> class is used to inspect or manipulate the behavior of
+        /// mocks created via the <c>MockTracker</c> APIs.
+        /// </summary>
+        /// <remarks>@since v19.1.0, v18.13.0</remarks>
+        type MockFunctionContext<'F> = Node.Test.MockFunctionContext<'F>
+
+        /// <remarks>@since v22.3.0</remarks>
+        /// <remarks>@experimental</remarks>
+        type MockModuleContext = Node.Test.MockModuleContext
+
+        /// <remarks>@since v22.20.0</remarks>
+        type MockPropertyContext<'PropertyType> = Node.Test.MockPropertyContext<'PropertyType>
+
+        type MockTimersOptions = Node.Test.MockTimersOptions
+
+        /// <summary>
+        /// Mocking timers is a technique commonly used in software testing to simulate and
+        /// control the behavior of timers, such as <c>setInterval</c> and <c>setTimeout</c>,
+        /// without actually waiting for the specified time intervals.
+        /// <br /><br />
+        /// The MockTimers API also allows for mocking of the <c>Date</c> constructor and
+        /// <c>setImmediate</c>/<c>clearImmediate</c> functions.
+        /// <br /><br />
+        /// The <c>MockTracker</c> provides a top-level <c>timers</c> export
+        /// which is a <c>MockTimers</c> instance.
+        /// </summary>
+        /// <remarks>@since v20.4.0</remarks>
+        /// <remarks>@experimental</remarks>
+        type MockTimers = Node.Test.MockTimers
+
+        module EventData =
+            type Error = Node.Test.EventData.Error
+
+            type LocationInfo = Node.Test.EventData.LocationInfo
+
+            type TestDiagnostic = Node.Test.EventData.TestDiagnostic
+
+            type TestCoverage = Node.Test.EventData.TestCoverage
+
+            type TestComplete = Node.Test.EventData.TestComplete
+
+            type TestDequeue = Node.Test.EventData.TestDequeue
+
+            type TestEnqueue = Node.Test.EventData.TestEnqueue
+
+            type TestFail = Node.Test.EventData.TestFail
+
+            type TestPass = Node.Test.EventData.TestPass
+
+            type TestPlan = Node.Test.EventData.TestPlan
+
+            type TestStart = Node.Test.EventData.TestStart
+
+            type TestStderr = Node.Test.EventData.TestStderr
+
+            type TestStdout = Node.Test.EventData.TestStdout
+
+            type TestSummary = Node.Test.EventData.TestSummary
+
     module MockPropertyContext =
         module Accesses =
             [<Interface>]
@@ -182742,8 +182929,7 @@ module Test =
 
         type MockMethodOptions = Node.Test.MockMethodOptions
 
-        [<Erase>]
-        type Mock<'F> = private Mock__ of obj
+        type Mock<'F> = Node.Test.Mock<'F>
 
         type MockModuleOptions = Node.Test.MockModuleOptions
 
@@ -182787,6 +182973,35 @@ module Test =
         /// <remarks>@since v20.4.0</remarks>
         /// <remarks>@experimental</remarks>
         type MockTimers = Node.Test.MockTimers
+
+        module EventData =
+            type Error = Node.Test.EventData.Error
+
+            type LocationInfo = Node.Test.EventData.LocationInfo
+
+            type TestDiagnostic = Node.Test.EventData.TestDiagnostic
+
+            type TestCoverage = Node.Test.EventData.TestCoverage
+
+            type TestComplete = Node.Test.EventData.TestComplete
+
+            type TestDequeue = Node.Test.EventData.TestDequeue
+
+            type TestEnqueue = Node.Test.EventData.TestEnqueue
+
+            type TestFail = Node.Test.EventData.TestFail
+
+            type TestPass = Node.Test.EventData.TestPass
+
+            type TestPlan = Node.Test.EventData.TestPlan
+
+            type TestStart = Node.Test.EventData.TestStart
+
+            type TestStderr = Node.Test.EventData.TestStderr
+
+            type TestStdout = Node.Test.EventData.TestStdout
+
+            type TestSummary = Node.Test.EventData.TestSummary
 
     module TestsStream =
         module Compose =
