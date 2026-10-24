@@ -1931,11 +1931,11 @@ module H =
             [<Interface>]
             type CustomAttributes<'T> =
                 abstract ref: U2<'T, ('T -> unit)> option with get, set
-                abstract children: FunctionMaybe<Element> option with get, set
+                abstract children: U7<float, bool, Element[], FunctionElement, Fable.Core.TS.Dom.Node, (unit -> Element), string> option with get, set
                 abstract classList: ClassList option with get, set
                 abstract ``$ServerOnly``: bool option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?ref: U2<'T, ('T -> unit)>, ?children: FunctionMaybe<Element>, ?classList: ClassList, ?``$ServerOnly``: bool) : CustomAttributes<'T> = jsNative
+                static member Create (?ref: U2<'T, ('T -> unit)>, ?children: U7<float, bool, Element[], FunctionElement, Fable.Core.TS.Dom.Node, (unit -> Element), string>, ?classList: ClassList, ?``$ServerOnly``: bool) : CustomAttributes<'T> = jsNative
 
             type Accessor<'T> = (unit -> 'T)
 
@@ -2405,16 +2405,16 @@ module H =
                 inherit CustomEventHandlersNamespaced<'T>
                 inherit AriaAttributes
                 abstract innerHTML: FunctionMaybe<string> option with get, set
-                abstract textContent: FunctionMaybe<U2<string, float>> option with get, set
+                abstract textContent: U3<string, float, (unit -> U2<string, float>)> option with get, set
                 abstract autofocus: FunctionMaybe<bool option> option with get, set
                 abstract ``class``: FunctionMaybe<string option> option with get, set
                 abstract elementtiming: FunctionMaybe<string option> option with get, set
                 abstract id: FunctionMaybe<string option> option with get, set
                 abstract nonce: FunctionMaybe<string option> option with get, set
                 abstract slot: FunctionMaybe<string option> option with get, set
-                abstract style: FunctionMaybe<U2<string, CSSProperties> option> option with get, set
-                abstract tabindex: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract tabIndex: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract style: U3<string, CSSProperties, (unit -> U2<string, CSSProperties> option)> option with get, set
+                abstract tabindex: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract tabIndex: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type CSSProperties =
                 /// <summary>
@@ -11647,25 +11647,25 @@ module H =
                 /// Defines the total number of columns in a table, grid, or treegrid.
                 /// </summary>
                 /// <remarks>@see aria-colindex.</remarks>
-                abstract ``aria-colcount``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-colcount``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines an element's column index or position with respect to the total number of columns
                 /// within a table, grid, or treegrid.
                 /// </summary>
                 /// <remarks>@see aria-colcount</remarks>
                 /// <remarks>@see aria-colspan.</remarks>
-                abstract ``aria-colindex``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-colindex``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines a human-readable text alternative of the numeric aria-colindex.
                 /// </summary>
-                abstract ``aria-colindextext``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-colindextext``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines the number of columns spanned by a cell or gridcell within a table, grid, or
                 /// treegrid.
                 /// </summary>
                 /// <remarks>@see aria-colindex</remarks>
                 /// <remarks>@see aria-rowspan.</remarks>
-                abstract ``aria-colspan``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-colspan``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Identifies the element (or elements) whose contents or presence are controlled by the current
                 /// element.
@@ -11760,7 +11760,7 @@ module H =
                 /// <summary>
                 /// Defines the hierarchical level of an element within a structure.
                 /// </summary>
-                abstract ``aria-level``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-level``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Indicates that an element will be updated, and describes the types of updates the user
                 /// agents, assistive technologies, and user can expect from the live region.
@@ -11801,7 +11801,7 @@ module H =
                 /// required if all elements in the set are present in the DOM.
                 /// </summary>
                 /// <remarks>@see aria-setsize.</remarks>
-                abstract ``aria-posinset``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-posinset``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Indicates the current "pressed" state of toggle buttons.
                 /// </summary>
@@ -11831,24 +11831,24 @@ module H =
                 /// Defines the total number of rows in a table, grid, or treegrid.
                 /// </summary>
                 /// <remarks>@see aria-rowindex.</remarks>
-                abstract ``aria-rowcount``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-rowcount``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines an element's row index or position with respect to the total number of rows within a
                 /// table, grid, or treegrid.
                 /// </summary>
                 /// <remarks>@see aria-rowcount</remarks>
                 /// <remarks>@see aria-rowspan.</remarks>
-                abstract ``aria-rowindex``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-rowindex``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines a human-readable text alternative of aria-rowindex.
                 /// </summary>
-                abstract ``aria-rowindextext``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-rowindextext``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
                 /// </summary>
                 /// <remarks>@see aria-rowindex</remarks>
                 /// <remarks>@see aria-colspan.</remarks>
-                abstract ``aria-rowspan``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-rowspan``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Indicates the current "selected" state of various widgets.
                 /// </summary>
@@ -11860,7 +11860,7 @@ module H =
                 /// elements in the set are present in the DOM.
                 /// </summary>
                 /// <remarks>@see aria-posinset.</remarks>
-                abstract ``aria-setsize``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-setsize``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Indicates if items in a table or grid are sorted in ascending or descending order.
                 /// </summary>
@@ -11868,16 +11868,16 @@ module H =
                 /// <summary>
                 /// Defines the maximum allowed value for a range widget.
                 /// </summary>
-                abstract ``aria-valuemax``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-valuemax``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines the minimum allowed value for a range widget.
                 /// </summary>
-                abstract ``aria-valuemin``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-valuemin``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines the current value for a range widget.
                 /// </summary>
                 /// <remarks>@see aria-valuetext.</remarks>
-                abstract ``aria-valuenow``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``aria-valuenow``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <summary>
                 /// Defines the human readable text alternative of aria-valuenow for a range widget.
                 /// </summary>
@@ -11889,7 +11889,7 @@ module H =
             /// </summary>
             type HTMLAttributes<'T> =
                 inherit DOMAttributes<'T>
-                abstract innerText: FunctionMaybe<U2<string, float>> option with get, set
+                abstract innerText: U3<string, float, (unit -> U2<string, float>)> option with get, set
                 abstract accesskey: FunctionMaybe<string option> option with get, set
                 abstract autocapitalize: FunctionMaybe<HTMLAutocapitalize option> option with get, set
                 abstract autocorrect: FunctionMaybe<H.JsxDevRuntime.JSX.HTMLAttributes.Autocorrect.Result option> option with get, set
@@ -12001,7 +12001,7 @@ module H =
                 inherit HTMLAttributes<'T>
                 abstract disabled: FunctionMaybe<bool option> option with get, set
                 abstract form: FunctionMaybe<string option> option with get, set
-                abstract formaction: FunctionMaybe<U2<string, SerializableAttributeValue> option> option with get, set
+                abstract formaction: U3<string, SerializableAttributeValue, (unit -> U2<string, SerializableAttributeValue> option)> option with get, set
                 abstract formenctype: FunctionMaybe<HTMLFormEncType option> option with get, set
                 abstract formmethod: FunctionMaybe<HTMLFormMethod option> option with get, set
                 abstract formnovalidate: FunctionMaybe<bool option> option with get, set
@@ -12015,7 +12015,7 @@ module H =
                 abstract command: FunctionMaybe<string option> option with get, set
                 /// <remarks>@experimental</remarks>
                 abstract commandfor: FunctionMaybe<string option> option with get, set
-                abstract formAction: FunctionMaybe<U2<string, SerializableAttributeValue> option> option with get, set
+                abstract formAction: U3<string, SerializableAttributeValue, (unit -> U2<string, SerializableAttributeValue> option)> option with get, set
                 abstract formEnctype: FunctionMaybe<HTMLFormEncType option> option with get, set
                 abstract formMethod: FunctionMaybe<HTMLFormMethod option> option with get, set
                 abstract formNoValidate: FunctionMaybe<bool option> option with get, set
@@ -12025,8 +12025,8 @@ module H =
 
             type CanvasHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 /// <remarks>@non-standard</remarks>
                 abstract ``moz-opaque``: FunctionMaybe<bool option> option with get, set
@@ -12038,7 +12038,7 @@ module H =
 
             type ColHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract span: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract span: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract align: FunctionMaybe<H.JsxDevRuntime.JSX.ColHTMLAttributes.Align.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -12050,11 +12050,11 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract valign: FunctionMaybe<H.JsxDevRuntime.JSX.ColHTMLAttributes.Valign.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type ColgroupHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract span: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract span: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract align: FunctionMaybe<H.JsxDevRuntime.JSX.ColHTMLAttributes.Align.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -12066,11 +12066,11 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract valign: FunctionMaybe<H.JsxDevRuntime.JSX.ColHTMLAttributes.Valign.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type DataHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract value: FunctionMaybe<U3<string, float, string[]> option> option with get, set
+                abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set
 
             type DetailsHtmlAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12092,10 +12092,10 @@ module H =
 
             type EmbedHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract src: FunctionMaybe<string option> option with get, set
                 abstract ``type``: FunctionMaybe<string option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract align: FunctionMaybe<H.JsxDevRuntime.JSX.EmbedHTMLAttributes.Align.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -12110,7 +12110,7 @@ module H =
             type FormHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
                 abstract ``accept-charset``: FunctionMaybe<string option> option with get, set
-                abstract action: FunctionMaybe<U2<string, SerializableAttributeValue> option> option with get, set
+                abstract action: U3<string, SerializableAttributeValue, (unit -> U2<string, SerializableAttributeValue> option)> option with get, set
                 abstract autocomplete: FunctionMaybe<H.JsxDevRuntime.JSX.HTMLAttributes.Autocorrect.Result option> option with get, set
                 abstract encoding: FunctionMaybe<HTMLFormEncType option> option with get, set
                 abstract enctype: FunctionMaybe<HTMLFormEncType option> option with get, set
@@ -12127,14 +12127,14 @@ module H =
                 inherit HTMLAttributes<'T>
                 abstract allow: FunctionMaybe<string option> option with get, set
                 abstract allowfullscreen: FunctionMaybe<bool option> option with get, set
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract loading: FunctionMaybe<H.JsxDevRuntime.JSX.IframeHTMLAttributes.Loading.Result option> option with get, set
                 abstract name: FunctionMaybe<string option> option with get, set
                 abstract referrerpolicy: FunctionMaybe<HTMLReferrerPolicy option> option with get, set
                 abstract sandbox: FunctionMaybe<string option> option with get, set
                 abstract src: FunctionMaybe<string option> option with get, set
                 abstract srcdoc: FunctionMaybe<string option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract referrerPolicy: FunctionMaybe<HTMLReferrerPolicy option> option with get, set
                 /// <remarks>@experimental</remarks>
                 abstract adauctionheaders: FunctionMaybe<bool option> option with get, set
@@ -12157,13 +12157,13 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract allowtransparency: FunctionMaybe<bool option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract frameborder: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract frameborder: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract longdesc: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract marginheight: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract marginheight: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract marginwidth: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract marginwidth: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract scrolling: FunctionMaybe<H.JsxDevRuntime.JSX.IframeHTMLAttributes.Scrolling.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -12175,7 +12175,7 @@ module H =
                 abstract crossorigin: FunctionMaybe<HTMLCrossorigin option> option with get, set
                 abstract decoding: FunctionMaybe<H.JsxDevRuntime.JSX.ImgHTMLAttributes.Decoding.Result option> option with get, set
                 abstract fetchpriority: FunctionMaybe<H.JsxDevRuntime.JSX.ImgHTMLAttributes.Fetchpriority.Result option> option with get, set
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ismap: FunctionMaybe<bool option> option with get, set
                 abstract loading: FunctionMaybe<H.JsxDevRuntime.JSX.IframeHTMLAttributes.Loading.Result option> option with get, set
                 abstract referrerpolicy: FunctionMaybe<HTMLReferrerPolicy option> option with get, set
@@ -12183,7 +12183,7 @@ module H =
                 abstract src: FunctionMaybe<string option> option with get, set
                 abstract srcset: FunctionMaybe<string option> option with get, set
                 abstract usemap: FunctionMaybe<string option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@experimental</remarks>
                 abstract attributionsrc: FunctionMaybe<string option> option with get, set
                 /// <remarks>@experimental</remarks>
@@ -12198,7 +12198,7 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract border: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract hspace: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract hspace: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract intrinsicsize: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -12208,7 +12208,7 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract name: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract vspace: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract vspace: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type InputHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12222,17 +12222,17 @@ module H =
                 abstract dirname: FunctionMaybe<string option> option with get, set
                 abstract disabled: FunctionMaybe<bool option> option with get, set
                 abstract form: FunctionMaybe<string option> option with get, set
-                abstract formaction: FunctionMaybe<U2<string, SerializableAttributeValue> option> option with get, set
+                abstract formaction: U3<string, SerializableAttributeValue, (unit -> U2<string, SerializableAttributeValue> option)> option with get, set
                 abstract formenctype: FunctionMaybe<HTMLFormEncType option> option with get, set
                 abstract formmethod: FunctionMaybe<HTMLFormMethod option> option with get, set
                 abstract formnovalidate: FunctionMaybe<bool option> option with get, set
                 abstract formtarget: FunctionMaybe<string option> option with get, set
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract list: FunctionMaybe<string option> option with get, set
-                abstract max: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract maxlength: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract min: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract minlength: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract max: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract maxlength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract min: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract minlength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract multiple: FunctionMaybe<bool option> option with get, set
                 abstract name: FunctionMaybe<string option> option with get, set
                 abstract pattern: FunctionMaybe<string option> option with get, set
@@ -12242,21 +12242,21 @@ module H =
                 abstract readonly: FunctionMaybe<bool option> option with get, set
                 abstract required: FunctionMaybe<bool option> option with get, set
                 abstract results: FunctionMaybe<float option> option with get, set
-                abstract size: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract size: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract src: FunctionMaybe<string option> option with get, set
-                abstract step: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract step: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``type``: FunctionMaybe<string option> option with get, set
-                abstract value: FunctionMaybe<U3<string, float, string[]> option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@non-standard</remarks>
                 abstract incremental: FunctionMaybe<bool option> option with get, set
-                abstract formAction: FunctionMaybe<U2<string, SerializableAttributeValue> option> option with get, set
+                abstract formAction: U3<string, SerializableAttributeValue, (unit -> U2<string, SerializableAttributeValue> option)> option with get, set
                 abstract formEnctype: FunctionMaybe<HTMLFormEncType option> option with get, set
                 abstract formMethod: FunctionMaybe<HTMLFormMethod option> option with get, set
                 abstract formNoValidate: FunctionMaybe<bool option> option with get, set
                 abstract formTarget: FunctionMaybe<string option> option with get, set
-                abstract maxLength: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract minLength: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract maxLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract minLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract readOnly: FunctionMaybe<bool option> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract align: FunctionMaybe<string option> option with get, set
@@ -12290,7 +12290,7 @@ module H =
 
             type LiHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract value: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract value: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract ``type``: FunctionMaybe<H.JsxDevRuntime.JSX.LiHTMLAttributes.Type.Result option> option with get, set
 
@@ -12369,12 +12369,12 @@ module H =
             type MeterHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
                 abstract form: FunctionMaybe<string option> option with get, set
-                abstract high: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract low: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract max: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract min: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract optimum: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract value: FunctionMaybe<U3<string, float, string[]> option> option with get, set
+                abstract high: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract low: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract max: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract min: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract optimum: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set
 
             type QuoteHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12384,10 +12384,10 @@ module H =
                 inherit HTMLAttributes<'T>
                 abstract data: FunctionMaybe<string option> option with get, set
                 abstract form: FunctionMaybe<string option> option with get, set
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract name: FunctionMaybe<string option> option with get, set
                 abstract ``type``: FunctionMaybe<string option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract useMap: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract align: FunctionMaybe<string option> option with get, set
@@ -12406,20 +12406,20 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract declare: FunctionMaybe<bool option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract hspace: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract hspace: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract standby: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract usemap: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract vspace: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract vspace: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract typemustmatch: FunctionMaybe<bool option> option with get, set
 
             type OlHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
                 abstract reversed: FunctionMaybe<bool option> option with get, set
-                abstract start: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract start: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``type``: FunctionMaybe<H.JsxDevRuntime.JSX.LiHTMLAttributes.Type.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
                 /// <remarks>@non-standard</remarks>
@@ -12435,7 +12435,7 @@ module H =
                 abstract disabled: FunctionMaybe<bool option> option with get, set
                 abstract label: FunctionMaybe<string option> option with get, set
                 abstract selected: FunctionMaybe<bool option> option with get, set
-                abstract value: FunctionMaybe<U3<string, float, string[]> option> option with get, set
+                abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set
 
             type OutputHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12450,14 +12450,14 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract ``type``: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract value: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract value: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract valuetype: FunctionMaybe<H.JsxDevRuntime.JSX.ParamHTMLAttributes.Valuetype.Result option> option with get, set
 
             type ProgressHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract max: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract value: FunctionMaybe<U3<string, float, string[]> option> option with get, set
+                abstract max: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set
 
             type ScriptHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12491,8 +12491,8 @@ module H =
                 abstract multiple: FunctionMaybe<bool option> option with get, set
                 abstract name: FunctionMaybe<string option> option with get, set
                 abstract required: FunctionMaybe<bool option> option with get, set
-                abstract size: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract value: FunctionMaybe<U3<string, float, string[]> option> option with get, set
+                abstract size: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set
 
             type HTMLSlotElementAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12500,13 +12500,13 @@ module H =
 
             type SourceHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract media: FunctionMaybe<string option> option with get, set
                 abstract sizes: FunctionMaybe<string option> option with get, set
                 abstract src: FunctionMaybe<string option> option with get, set
                 abstract srcset: FunctionMaybe<string option> option with get, set
                 abstract ``type``: FunctionMaybe<string option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type StyleHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12519,11 +12519,11 @@ module H =
 
             type TdHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
-                abstract colspan: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract colspan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract headers: FunctionMaybe<string option> option with get, set
-                abstract rowspan: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract colSpan: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract rowSpan: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract rowspan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract colSpan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract rowSpan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract abbr: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -12537,7 +12537,7 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract charoff: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract nowrap: FunctionMaybe<bool option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -12545,7 +12545,7 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract valign: FunctionMaybe<H.JsxDevRuntime.JSX.ColHTMLAttributes.Valign.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type TemplateHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12559,32 +12559,32 @@ module H =
             type TextareaHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
                 abstract autocomplete: FunctionMaybe<HTMLAutocomplete option> option with get, set
-                abstract cols: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract cols: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract dirname: FunctionMaybe<string option> option with get, set
                 abstract disabled: FunctionMaybe<bool option> option with get, set
                 abstract form: FunctionMaybe<string option> option with get, set
-                abstract maxlength: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract minlength: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract maxlength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract minlength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract name: FunctionMaybe<string option> option with get, set
                 abstract placeholder: FunctionMaybe<string option> option with get, set
                 abstract readonly: FunctionMaybe<bool option> option with get, set
                 abstract required: FunctionMaybe<bool option> option with get, set
-                abstract rows: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract value: FunctionMaybe<U3<string, float, string[]> option> option with get, set
+                abstract rows: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set
                 abstract wrap: FunctionMaybe<H.JsxDevRuntime.JSX.TextareaHTMLAttributes.Wrap.Result option> option with get, set
-                abstract maxLength: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract minLength: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract maxLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract minLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract readOnly: FunctionMaybe<bool option> option with get, set
 
             type ThHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
                 abstract abbr: FunctionMaybe<string option> option with get, set
-                abstract colspan: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract colspan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract headers: FunctionMaybe<string option> option with get, set
-                abstract rowspan: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract rowspan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract scope: FunctionMaybe<H.JsxDevRuntime.JSX.TdHTMLAttributes.Scope.Result option> option with get, set
-                abstract colSpan: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract rowSpan: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract colSpan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract rowSpan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract align: FunctionMaybe<H.JsxDevRuntime.JSX.ColHTMLAttributes.Align.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -12602,7 +12602,7 @@ module H =
                 /// <remarks>@deprecated</remarks>
                 abstract valign: FunctionMaybe<H.JsxDevRuntime.JSX.ColHTMLAttributes.Valign.Result option> option with get, set
                 /// <remarks>@deprecated</remarks>
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type TimeHTMLAttributes<'T> =
                 inherit HTMLAttributes<'T>
@@ -12623,10 +12623,10 @@ module H =
             type VideoHTMLAttributes<'T> =
                 inherit MediaHTMLAttributes<'T>
                 abstract disablepictureinpicture: FunctionMaybe<bool option> option with get, set
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract playsinline: FunctionMaybe<bool option> option with get, set
                 abstract poster: FunctionMaybe<string option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract onEnterPictureInPicture: U2<BoundEventHandler<'T, Fable.Core.TS.Dom.PictureInPictureEvent, EventHandler<'T, Fable.Core.TS.Dom.PictureInPictureEvent>>, EventHandler<'T, Fable.Core.TS.Dom.PictureInPictureEvent>> option with get, set
                 abstract ``on:enterpictureinpicture``: U2<EventHandler<'T, Fable.Core.TS.Dom.PictureInPictureEvent>, EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PictureInPictureEvent, EventHandler<'T, Fable.Core.TS.Dom.PictureInPictureEvent>>> option with get, set
                 abstract onenterpictureinpicture: U2<BoundEventHandler<'T, Fable.Core.TS.Dom.PictureInPictureEvent, EventHandler<'T, Fable.Core.TS.Dom.PictureInPictureEvent>>, EventHandler<'T, Fable.Core.TS.Dom.PictureInPictureEvent>> option with get, set
@@ -12764,9 +12764,9 @@ module H =
             [<Interface>]
             type StylableSVGAttributes =
                 abstract ``class``: FunctionMaybe<string option> option with get, set
-                abstract style: FunctionMaybe<U2<string, CSSProperties> option> option with get, set
+                abstract style: U3<string, CSSProperties, (unit -> U2<string, CSSProperties> option)> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?``class``: FunctionMaybe<string option>, ?style: FunctionMaybe<U2<string, CSSProperties> option>) : StylableSVGAttributes = jsNative
+                static member Create (?``class``: FunctionMaybe<string option>, ?style: U3<string, CSSProperties, (unit -> U2<string, CSSProperties> option)>) : StylableSVGAttributes = jsNative
 
             [<Interface>]
             type TransformableSVGAttributes =
@@ -12796,23 +12796,23 @@ module H =
                 abstract fill: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationTimingSVGAttributes.Fill.Result option> option with get, set
                 abstract max: FunctionMaybe<string option> option with get, set
                 abstract min: FunctionMaybe<string option> option with get, set
-                abstract repeatCount: FunctionMaybe<U2<float, string> option> option with get, set
+                abstract repeatCount: U3<float, string, (unit -> U2<float, string> option)> option with get, set
                 abstract repeatDur: FunctionMaybe<string option> option with get, set
                 abstract restart: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationTimingSVGAttributes.Restart.Result option> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?``begin``: FunctionMaybe<string option>, ?dur: FunctionMaybe<string option>, ?``end``: FunctionMaybe<string option>, ?fill: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationTimingSVGAttributes.Fill.Result option>, ?max: FunctionMaybe<string option>, ?min: FunctionMaybe<string option>, ?repeatCount: FunctionMaybe<U2<float, string> option>, ?repeatDur: FunctionMaybe<string option>, ?restart: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationTimingSVGAttributes.Restart.Result option>) : AnimationTimingSVGAttributes = jsNative
+                static member Create (?``begin``: FunctionMaybe<string option>, ?dur: FunctionMaybe<string option>, ?``end``: FunctionMaybe<string option>, ?fill: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationTimingSVGAttributes.Fill.Result option>, ?max: FunctionMaybe<string option>, ?min: FunctionMaybe<string option>, ?repeatCount: U3<float, string, (unit -> U2<float, string> option)>, ?repeatDur: FunctionMaybe<string option>, ?restart: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationTimingSVGAttributes.Restart.Result option>) : AnimationTimingSVGAttributes = jsNative
 
             [<Interface>]
             type AnimationValueSVGAttributes =
-                abstract by: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract by: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract calcMode: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationValueSVGAttributes.CalcMode.Result option> option with get, set
-                abstract from: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract from: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract keySplines: FunctionMaybe<string option> option with get, set
                 abstract keyTimes: FunctionMaybe<string option> option with get, set
-                abstract ``to``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``to``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract values: FunctionMaybe<string option> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?by: FunctionMaybe<U2<string, float> option>, ?calcMode: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationValueSVGAttributes.CalcMode.Result option>, ?from: FunctionMaybe<U2<string, float> option>, ?keySplines: FunctionMaybe<string option>, ?keyTimes: FunctionMaybe<string option>, ?``to``: FunctionMaybe<U2<string, float> option>, ?values: FunctionMaybe<string option>) : AnimationValueSVGAttributes = jsNative
+                static member Create (?by: U3<string, float, (unit -> U2<string, float> option)>, ?calcMode: FunctionMaybe<H.JsxDevRuntime.JSX.AnimationValueSVGAttributes.CalcMode.Result option>, ?from: U3<string, float, (unit -> U2<string, float> option)>, ?keySplines: FunctionMaybe<string option>, ?keyTimes: FunctionMaybe<string option>, ?``to``: U3<string, float, (unit -> U2<string, float> option)>, ?values: FunctionMaybe<string option>) : AnimationValueSVGAttributes = jsNative
 
             [<Interface>]
             type AnimationAdditionSVGAttributes =
@@ -12831,7 +12831,7 @@ module H =
 
             type PresentationSVGAttributes =
                 abstract ``alignment-baseline``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.AlignmentBaseline.Result option> option with get, set
-                abstract ``baseline-shift``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``baseline-shift``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``clip-path``: FunctionMaybe<string option> option with get, set
                 abstract ``clip-rule``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option> option with get, set
                 abstract ``color-interpolation``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option> option with get, set
@@ -12840,21 +12840,21 @@ module H =
                 abstract ``color-rendering``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result option> option with get, set
                 abstract ``dominant-baseline``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.DominantBaseline.Result option> option with get, set
                 abstract ``enable-background``: FunctionMaybe<string option> option with get, set
-                abstract ``fill-opacity``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``fill-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``fill-rule``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option> option with get, set
                 abstract ``flood-color``: FunctionMaybe<string option> option with get, set
-                abstract ``flood-opacity``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``flood-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``font-family``: FunctionMaybe<string option> option with get, set
                 abstract ``font-size``: FunctionMaybe<string option> option with get, set
-                abstract ``font-size-adjust``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``font-size-adjust``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``font-stretch``: FunctionMaybe<string option> option with get, set
                 abstract ``font-style``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.FontStyle.Result option> option with get, set
                 abstract ``font-variant``: FunctionMaybe<string option> option with get, set
-                abstract ``font-weight``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``font-weight``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``glyph-orientation-horizontal``: FunctionMaybe<string option> option with get, set
                 abstract ``glyph-orientation-vertical``: FunctionMaybe<string option> option with get, set
                 abstract ``image-rendering``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result option> option with get, set
-                abstract ``letter-spacing``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``letter-spacing``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``lighting-color``: FunctionMaybe<string option> option with get, set
                 abstract ``marker-end``: FunctionMaybe<string option> option with get, set
                 abstract ``marker-mid``: FunctionMaybe<string option> option with get, set
@@ -12862,19 +12862,19 @@ module H =
                 abstract ``pointer-events``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.PointerEvents.Result option> option with get, set
                 abstract ``shape-rendering``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ShapeRendering.Result option> option with get, set
                 abstract ``stop-color``: FunctionMaybe<string option> option with get, set
-                abstract ``stop-opacity``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``stop-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``stroke-dasharray``: FunctionMaybe<string option> option with get, set
-                abstract ``stroke-dashoffset``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``stroke-dashoffset``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``stroke-linecap``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinecap.Result option> option with get, set
                 abstract ``stroke-linejoin``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinejoin.Result option> option with get, set
-                abstract ``stroke-miterlimit``: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract ``stroke-opacity``: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract ``stroke-width``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``stroke-miterlimit``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract ``stroke-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract ``stroke-width``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``text-anchor``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.TextAnchor.Result option> option with get, set
                 abstract ``text-decoration``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.TextDecoration.Result option> option with get, set
                 abstract ``text-rendering``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.TextRendering.Result option> option with get, set
                 abstract ``unicode-bidi``: FunctionMaybe<string option> option with get, set
-                abstract ``word-spacing``: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract ``word-spacing``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract ``writing-mode``: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.WritingMode.Result option> option with get, set
                 abstract clip: FunctionMaybe<string option> option with get, set
                 abstract color: FunctionMaybe<string option> option with get, set
@@ -12885,9 +12885,9 @@ module H =
                 abstract filter: FunctionMaybe<string option> option with get, set
                 abstract kerning: FunctionMaybe<string option> option with get, set
                 abstract mask: FunctionMaybe<string option> option with get, set
-                abstract opacity: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract opacity: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract overflow: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Overflow.Result option> option with get, set
-                abstract pathLength: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract pathLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract stroke: FunctionMaybe<string option> option with get, set
                 abstract visibility: FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Visibility.Result option> option with get, set
 
@@ -12913,11 +12913,11 @@ module H =
             type FilterPrimitiveElementSVGAttributes<'T> =
                 inherit CoreSVGAttributes<'T>
                 inherit H.JsxDevRuntime.JSX.FilterPrimitiveElementSVGAttributes.Base
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract result: FunctionMaybe<string option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             [<Interface>]
             type SingleInputFilterSVGAttributes =
@@ -12992,7 +12992,7 @@ module H =
                 abstract keyPoints: FunctionMaybe<string option> option with get, set
                 abstract origin: FunctionMaybe<string option> option with get, set
                 abstract path: FunctionMaybe<string option> option with get, set
-                abstract rotate: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract rotate: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type AnimateTransformSVGAttributes<'T> =
                 inherit AnimationElementSVGAttributes<'T>
@@ -13009,9 +13009,9 @@ module H =
                 inherit StylableSVGAttributes
                 inherit TransformableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.CircleSVGAttributes.Base
-                abstract cx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract cy: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract r: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract cx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract cy: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract r: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type ClipPathSVGAttributes<'T> =
                 inherit CoreSVGAttributes<'T>
@@ -13041,10 +13041,10 @@ module H =
                 inherit StylableSVGAttributes
                 inherit TransformableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.CircleSVGAttributes.Base
-                abstract cx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract cy: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract rx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract ry: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract cx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract cy: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract rx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract ry: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeBlendSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
@@ -13068,56 +13068,56 @@ module H =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit DoubleInputFilterSVGAttributes
                 inherit StylableSVGAttributes
-                abstract k1: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract k2: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract k3: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract k4: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract k1: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract k2: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract k3: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract k4: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract operator: FunctionMaybe<H.JsxDevRuntime.JSX.FeCompositeSVGAttributes.Operator.Result option> option with get, set
 
             type FeConvolveMatrixSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit SingleInputFilterSVGAttributes
                 inherit StylableSVGAttributes
-                abstract bias: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract divisor: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract bias: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract divisor: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract edgeMode: FunctionMaybe<H.JsxDevRuntime.JSX.FeConvolveMatrixSVGAttributes.EdgeMode.Result option> option with get, set
                 abstract kernelMatrix: FunctionMaybe<string option> option with get, set
-                abstract kernelUnitLength: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract order: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract kernelUnitLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract order: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract preserveAlpha: FunctionMaybe<H.JsxDevRuntime.JSX.ExternalResourceSVGAttributes.ExternalResourcesRequired.Result option> option with get, set
-                abstract targetX: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract targetY: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract targetX: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract targetY: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeDiffuseLightingSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit SingleInputFilterSVGAttributes
                 inherit StylableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.FeDiffuseLightingSVGAttributes.Base
-                abstract diffuseConstant: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract kernelUnitLength: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract surfaceScale: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract diffuseConstant: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract kernelUnitLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract surfaceScale: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeDisplacementMapSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit DoubleInputFilterSVGAttributes
                 inherit StylableSVGAttributes
-                abstract scale: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract scale: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract xChannelSelector: FunctionMaybe<H.JsxDevRuntime.JSX.FeDisplacementMapSVGAttributes.XChannelSelector.Result option> option with get, set
                 abstract yChannelSelector: FunctionMaybe<H.JsxDevRuntime.JSX.FeDisplacementMapSVGAttributes.XChannelSelector.Result option> option with get, set
 
             type FeDistantLightSVGAttributes<'T> =
                 inherit LightSourceElementSVGAttributes<'T>
-                abstract azimuth: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract elevation: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract azimuth: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract elevation: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeDropShadowSVGAttributes<'T> =
                 inherit CoreSVGAttributes<'T>
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit StylableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.FeDropShadowSVGAttributes.Base
-                abstract dx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract dy: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract stdDeviation: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract dx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract dy: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract stdDeviation: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeFloodSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
@@ -13126,11 +13126,11 @@ module H =
 
             type FeFuncSVGAttributes<'T> =
                 inherit CoreSVGAttributes<'T>
-                abstract amplitude: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract exponent: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract intercept: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract offset: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract slope: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract amplitude: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract exponent: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract intercept: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract offset: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract slope: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract tableValues: FunctionMaybe<string option> option with get, set
                 abstract ``type``: FunctionMaybe<H.JsxDevRuntime.JSX.FeFuncSVGAttributes.Type.Result option> option with get, set
 
@@ -13138,7 +13138,7 @@ module H =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit SingleInputFilterSVGAttributes
                 inherit StylableSVGAttributes
-                abstract stdDeviation: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract stdDeviation: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeImageSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
@@ -13160,41 +13160,41 @@ module H =
                 inherit SingleInputFilterSVGAttributes
                 inherit StylableSVGAttributes
                 abstract operator: FunctionMaybe<H.JsxDevRuntime.JSX.FeMorphologySVGAttributes.Operator.Result option> option with get, set
-                abstract radius: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract radius: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeOffsetSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit SingleInputFilterSVGAttributes
                 inherit StylableSVGAttributes
-                abstract dx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract dy: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract dx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract dy: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FePointLightSVGAttributes<'T> =
                 inherit LightSourceElementSVGAttributes<'T>
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract z: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract z: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeSpecularLightingSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit SingleInputFilterSVGAttributes
                 inherit StylableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.FeDiffuseLightingSVGAttributes.Base
-                abstract kernelUnitLength: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract kernelUnitLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract specularConstant: FunctionMaybe<string option> option with get, set
                 abstract specularExponent: FunctionMaybe<string option> option with get, set
                 abstract surfaceScale: FunctionMaybe<string option> option with get, set
 
             type FeSpotLightSVGAttributes<'T> =
                 inherit LightSourceElementSVGAttributes<'T>
-                abstract limitingConeAngle: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract pointsAtX: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract pointsAtY: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract pointsAtZ: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract specularExponent: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract z: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract limitingConeAngle: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract pointsAtX: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract pointsAtY: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract pointsAtZ: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract specularExponent: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract z: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type FeTileSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
@@ -13204,9 +13204,9 @@ module H =
             type FeTurbulanceSVGAttributes<'T> =
                 inherit FilterPrimitiveElementSVGAttributes<'T>
                 inherit StylableSVGAttributes
-                abstract baseFrequency: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract numOctaves: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract seed: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract baseFrequency: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract numOctaves: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract seed: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract stitchTiles: FunctionMaybe<H.JsxDevRuntime.JSX.FeTurbulanceSVGAttributes.StitchTiles.Result option> option with get, set
                 abstract ``type``: FunctionMaybe<H.JsxDevRuntime.JSX.FeTurbulanceSVGAttributes.Type.Result option> option with get, set
 
@@ -13214,13 +13214,13 @@ module H =
                 inherit CoreSVGAttributes<'T>
                 inherit ExternalResourceSVGAttributes
                 inherit StylableSVGAttributes
-                abstract filterRes: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract filterRes: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract filterUnits: FunctionMaybe<SVGUnits option> option with get, set
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract primitiveUnits: FunctionMaybe<SVGUnits option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type ForeignObjectSVGAttributes<'T> =
                 inherit NewViewportSVGAttributes<'T>
@@ -13229,10 +13229,10 @@ module H =
                 inherit StylableSVGAttributes
                 inherit TransformableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.ForeignObjectSVGAttributes.Base
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type GSVGAttributes<'T> =
                 inherit ContainerElementSVGAttributes<'T>
@@ -13249,12 +13249,12 @@ module H =
                 inherit StylableSVGAttributes
                 inherit TransformableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.ImageSVGAttributes.Base
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract href: FunctionMaybe<string option> option with get, set
                 abstract preserveAspectRatio: FunctionMaybe<ImagePreserveAspectRatio option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type LineSVGAttributes<'T> =
                 inherit GraphicsElementSVGAttributes<'T>
@@ -13264,17 +13264,17 @@ module H =
                 inherit StylableSVGAttributes
                 inherit TransformableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.LineSVGAttributes.Base
-                abstract x1: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x2: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y1: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y2: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract x1: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x2: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y1: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y2: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type LinearGradientSVGAttributes<'T> =
                 inherit GradientElementSVGAttributes<'T>
-                abstract x1: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x2: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y1: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y2: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract x1: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x2: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y1: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y2: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type MarkerSVGAttributes<'T> =
                 inherit ContainerElementSVGAttributes<'T>
@@ -13282,12 +13282,12 @@ module H =
                 inherit StylableSVGAttributes
                 inherit FitToViewBoxSVGAttributes
                 inherit H.JsxDevRuntime.JSX.MarkerSVGAttributes.Base
-                abstract markerHeight: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract markerHeight: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract markerUnits: FunctionMaybe<H.JsxDevRuntime.JSX.MarkerSVGAttributes.MarkerUnits.Result option> option with get, set
-                abstract markerWidth: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract markerWidth: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract orient: FunctionMaybe<string option> option with get, set
-                abstract refX: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract refY: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract refX: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract refY: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type MaskSVGAttributes<'T> =
                 inherit H.JsxDevRuntime.JSX.MaskSVGAttributes.Base<'T>
@@ -13295,12 +13295,12 @@ module H =
                 inherit ExternalResourceSVGAttributes
                 inherit StylableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.CircleSVGAttributes.Base
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract maskContentUnits: FunctionMaybe<SVGUnits option> option with get, set
                 abstract maskUnits: FunctionMaybe<SVGUnits option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type MetadataSVGAttributes<'T> =
                 inherit CoreSVGAttributes<'T>
@@ -13325,14 +13325,14 @@ module H =
                 inherit StylableSVGAttributes
                 inherit FitToViewBoxSVGAttributes
                 inherit H.JsxDevRuntime.JSX.MarkerSVGAttributes.Base
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract href: FunctionMaybe<string option> option with get, set
                 abstract patternContentUnits: FunctionMaybe<SVGUnits option> option with get, set
                 abstract patternTransform: FunctionMaybe<string option> option with get, set
                 abstract patternUnits: FunctionMaybe<SVGUnits option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type PolygonSVGAttributes<'T> =
                 inherit GraphicsElementSVGAttributes<'T>
@@ -13356,11 +13356,11 @@ module H =
 
             type RadialGradientSVGAttributes<'T> =
                 inherit GradientElementSVGAttributes<'T>
-                abstract cx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract cy: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract fx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract fy: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract r: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract cx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract cy: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract fx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract fy: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract r: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type RectSVGAttributes<'T> =
                 inherit GraphicsElementSVGAttributes<'T>
@@ -13370,12 +13370,12 @@ module H =
                 inherit StylableSVGAttributes
                 inherit TransformableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.CircleSVGAttributes.Base
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract rx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract ry: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract rx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract ry: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type SetSVGAttributes<'T> =
                 inherit AnimationElementSVGAttributes<'T>
@@ -13386,7 +13386,7 @@ module H =
                 inherit CoreSVGAttributes<'T>
                 inherit StylableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.StopSVGAttributes.Base
-                abstract offset: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract offset: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type SvgSVGAttributes<'T> =
                 inherit ContainerElementSVGAttributes<'T>
@@ -13401,10 +13401,10 @@ module H =
                 abstract ``xmlns:xlink``: FunctionMaybe<string option> option with get, set
                 abstract contentScriptType: FunctionMaybe<string option> option with get, set
                 abstract contentStyleType: FunctionMaybe<string option> option with get, set
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@deprecated</remarks>
                 abstract baseProfile: FunctionMaybe<string option> option with get, set
                 /// <remarks>@deprecated</remarks>
@@ -13425,12 +13425,12 @@ module H =
                 inherit StylableSVGAttributes
                 inherit FitToViewBoxSVGAttributes
                 inherit H.JsxDevRuntime.JSX.CircleSVGAttributes.Base
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract refX: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract refY: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract refX: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract refY: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type TextSVGAttributes<'T> =
                 inherit TextContentElementSVGAttributes<'T>
@@ -13440,13 +13440,13 @@ module H =
                 inherit StylableSVGAttributes
                 inherit TransformableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.TextSVGAttributes.Base
-                abstract dx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract dy: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract dx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract dy: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract lengthAdjust: FunctionMaybe<H.JsxDevRuntime.JSX.TextSVGAttributes.LengthAdjust.Result option> option with get, set
-                abstract rotate: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract textLength: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract rotate: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract textLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type TextPathSVGAttributes<'T> =
                 inherit TextContentElementSVGAttributes<'T>
@@ -13457,7 +13457,7 @@ module H =
                 abstract href: FunctionMaybe<string option> option with get, set
                 abstract ``method``: FunctionMaybe<H.JsxDevRuntime.JSX.TextPathSVGAttributes.Method.Result option> option with get, set
                 abstract spacing: FunctionMaybe<H.JsxDevRuntime.JSX.TextPathSVGAttributes.Spacing.Result option> option with get, set
-                abstract startOffset: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract startOffset: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type TSpanSVGAttributes<'T> =
                 inherit TextContentElementSVGAttributes<'T>
@@ -13465,13 +13465,13 @@ module H =
                 inherit ExternalResourceSVGAttributes
                 inherit StylableSVGAttributes
                 inherit H.JsxDevRuntime.JSX.TextPathSVGAttributes.Base
-                abstract dx: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract dy: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract dx: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract dy: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract lengthAdjust: FunctionMaybe<H.JsxDevRuntime.JSX.TextSVGAttributes.LengthAdjust.Result option> option with get, set
-                abstract rotate: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract textLength: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract rotate: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract textLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             /// <remarks>@see https://developer.mozilla.org/en-US/docs/Web/SVG/Element/use</remarks>
             type UseSVGAttributes<'T> =
@@ -13482,11 +13482,11 @@ module H =
                 inherit PresentationSVGAttributes
                 inherit ExternalResourceSVGAttributes
                 inherit TransformableSVGAttributes
-                abstract height: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract height: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 abstract href: FunctionMaybe<string option> option with get, set
-                abstract width: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract x: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract y: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract width: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract x: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract y: U3<string, float, (unit -> U2<string, float> option)> option with get, set
 
             type ViewSVGAttributes<'T> =
                 inherit CoreSVGAttributes<'T>
@@ -13691,8 +13691,8 @@ module H =
 
             type MathMLMtdElementAttributes<'T> =
                 inherit MathMLAttributes<'T>
-                abstract columnspan: FunctionMaybe<U2<string, float> option> option with get, set
-                abstract rowspan: FunctionMaybe<U2<string, float> option> option with get, set
+                abstract columnspan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                abstract rowspan: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                 /// <remarks>@non-standard</remarks>
                 abstract columnalign: FunctionMaybe<H.JsxDevRuntime.JSX.CaptionHTMLAttributes.Align.Result option> option with get, set
                 /// <remarks>@non-standard</remarks>
@@ -16322,9 +16322,9 @@ module H =
                     abstract cursor: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract filter: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract mask: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract opacity: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract opacity: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?``clip-path``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?``color-interpolation``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option>, ?``color-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result option>, ?``enable-background``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?cursor: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?filter: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?mask: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?opacity: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>) : Base = jsNative
+                    static member Create (?``clip-path``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?``color-interpolation``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option>, ?``color-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result option>, ?``enable-background``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?cursor: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?filter: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?mask: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?opacity: U3<string, float, (unit -> U2<string, float> option)>) : Base = jsNative
 
             module DOMAttributes =
                 module AriaAtomic =
@@ -16593,10 +16593,10 @@ module H =
                 [<Interface>]
                 type Base =
                     abstract ``flood-color``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``flood-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``flood-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?``flood-color``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?``flood-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>) : Base = jsNative
+                    static member Create (?``flood-color``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?``flood-opacity``: U3<string, float, (unit -> U2<string, float> option)>, ?color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>) : Base = jsNative
 
             module FeFuncSVGAttributes =
                 module Type =
@@ -16671,10 +16671,10 @@ module H =
                     abstract display: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract filter: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract mask: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract opacity: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract opacity: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract visibility: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Visibility.Result option> option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?``clip-rule``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option>, ?``color-interpolation``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option>, ?``color-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result option>, ?``pointer-events``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.PointerEvents.Result option>, ?cursor: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?display: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?filter: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?mask: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?opacity: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?visibility: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Visibility.Result option>) : Base = jsNative
+                    static member Create (?``clip-rule``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option>, ?``color-interpolation``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option>, ?``color-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result option>, ?``pointer-events``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.PointerEvents.Result option>, ?cursor: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?display: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?filter: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?mask: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?opacity: U3<string, float, (unit -> U2<string, float> option)>, ?visibility: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Visibility.Result option>) : Base = jsNative
 
             module HTMLAttributes =
                 module Autocorrect =
@@ -16838,7 +16838,7 @@ module H =
             module MaskSVGAttributes =
                 type Base<'T> =
                     abstract ref: U2<'T, ('T -> unit)> option with get, set
-                    abstract children: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<SolidJs.H.JsxDevRuntime.JSX.Element> option with get, set
+                    abstract children: U7<float, bool, SolidJs.H.JsxDevRuntime.JSX.Element[], SolidJs.H.JsxDevRuntime.JSX.FunctionElement, Fable.Core.TS.Dom.Node, (unit -> SolidJs.H.JsxDevRuntime.JSX.Element), string> option with get, set
                     abstract classList: SolidJs.H.JsxDevRuntime.JSX.ClassList option with get, set
                     abstract ``$ServerOnly``: bool option with get, set
                     abstract onAbort: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
@@ -17178,14 +17178,14 @@ module H =
                     abstract ``on:waiting``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
                     abstract ``on:wheel``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.WheelEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>>> option with get, set
                     abstract innerHTML: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string> option with get, set
-                    abstract textContent: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float>> option with get, set
+                    abstract textContent: U3<string, float, (unit -> U2<string, float>)> option with get, set
                     abstract autofocus: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<bool option> option with get, set
                     abstract ``class``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract elementtiming: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract id: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract nonce: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract slot: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract style: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, SolidJs.H.JsxDevRuntime.JSX.CSSProperties> option> option with get, set
+                    abstract style: U3<string, SolidJs.H.JsxDevRuntime.JSX.CSSProperties, (unit -> U2<string, SolidJs.H.JsxDevRuntime.JSX.CSSProperties> option)> option with get, set
                     /// <summary>
                     /// Identifies the currently active element when DOM focus is on a composite widget, textbox,
                     /// group, or application.
@@ -17236,25 +17236,25 @@ module H =
                     /// Defines the total number of columns in a table, grid, or treegrid.
                     /// </summary>
                     /// <remarks>@see aria-colindex.</remarks>
-                    abstract ``aria-colcount``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-colcount``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines an element's column index or position with respect to the total number of columns
                     /// within a table, grid, or treegrid.
                     /// </summary>
                     /// <remarks>@see aria-colcount</remarks>
                     /// <remarks>@see aria-colspan.</remarks>
-                    abstract ``aria-colindex``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-colindex``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines a human-readable text alternative of the numeric aria-colindex.
                     /// </summary>
-                    abstract ``aria-colindextext``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-colindextext``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines the number of columns spanned by a cell or gridcell within a table, grid, or
                     /// treegrid.
                     /// </summary>
                     /// <remarks>@see aria-colindex</remarks>
                     /// <remarks>@see aria-rowspan.</remarks>
-                    abstract ``aria-colspan``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-colspan``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Identifies the element (or elements) whose contents or presence are controlled by the current
                     /// element.
@@ -17349,7 +17349,7 @@ module H =
                     /// <summary>
                     /// Defines the hierarchical level of an element within a structure.
                     /// </summary>
-                    abstract ``aria-level``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-level``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Indicates that an element will be updated, and describes the types of updates the user
                     /// agents, assistive technologies, and user can expect from the live region.
@@ -17390,7 +17390,7 @@ module H =
                     /// required if all elements in the set are present in the DOM.
                     /// </summary>
                     /// <remarks>@see aria-setsize.</remarks>
-                    abstract ``aria-posinset``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-posinset``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Indicates the current "pressed" state of toggle buttons.
                     /// </summary>
@@ -17420,24 +17420,24 @@ module H =
                     /// Defines the total number of rows in a table, grid, or treegrid.
                     /// </summary>
                     /// <remarks>@see aria-rowindex.</remarks>
-                    abstract ``aria-rowcount``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-rowcount``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines an element's row index or position with respect to the total number of rows within a
                     /// table, grid, or treegrid.
                     /// </summary>
                     /// <remarks>@see aria-rowcount</remarks>
                     /// <remarks>@see aria-rowspan.</remarks>
-                    abstract ``aria-rowindex``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-rowindex``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines a human-readable text alternative of aria-rowindex.
                     /// </summary>
-                    abstract ``aria-rowindextext``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-rowindextext``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
                     /// </summary>
                     /// <remarks>@see aria-rowindex</remarks>
                     /// <remarks>@see aria-colspan.</remarks>
-                    abstract ``aria-rowspan``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-rowspan``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Indicates the current "selected" state of various widgets.
                     /// </summary>
@@ -17449,7 +17449,7 @@ module H =
                     /// elements in the set are present in the DOM.
                     /// </summary>
                     /// <remarks>@see aria-posinset.</remarks>
-                    abstract ``aria-setsize``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-setsize``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Indicates if items in a table or grid are sorted in ascending or descending order.
                     /// </summary>
@@ -17457,44 +17457,44 @@ module H =
                     /// <summary>
                     /// Defines the maximum allowed value for a range widget.
                     /// </summary>
-                    abstract ``aria-valuemax``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-valuemax``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines the minimum allowed value for a range widget.
                     /// </summary>
-                    abstract ``aria-valuemin``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-valuemin``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines the current value for a range widget.
                     /// </summary>
                     /// <remarks>@see aria-valuetext.</remarks>
-                    abstract ``aria-valuenow``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``aria-valuenow``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     /// <summary>
                     /// Defines the human readable text alternative of aria-valuenow for a range widget.
                     /// </summary>
                     abstract ``aria-valuetext``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract role: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.DOMAttributes.Role.Result option> option with get, set
                     abstract lang: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract tabindex: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract tabindex: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract xmlns: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract tabIndex: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract tabIndex: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``clip-path``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract ``color-interpolation``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option> option with get, set
                     abstract ``color-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result option> option with get, set
                     abstract ``enable-background``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``fill-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``fill-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``fill-rule``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option> option with get, set
                     abstract ``shape-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ShapeRendering.Result option> option with get, set
                     abstract ``stroke-dasharray``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``stroke-dashoffset``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``stroke-dashoffset``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``stroke-linecap``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinecap.Result option> option with get, set
                     abstract ``stroke-linejoin``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinejoin.Result option> option with get, set
-                    abstract ``stroke-miterlimit``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
-                    abstract ``stroke-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
-                    abstract ``stroke-width``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``stroke-miterlimit``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                    abstract ``stroke-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                    abstract ``stroke-width``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract cursor: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract fill: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract mask: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract pathLength: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract pathLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract stroke: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
 
             module MathMLMactionElementAttributes =
@@ -17748,31 +17748,31 @@ module H =
             module ShapeElementSVGAttributes =
                 [<Interface>]
                 type Base =
-                    abstract ``fill-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``fill-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``fill-rule``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option> option with get, set
                     abstract ``shape-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ShapeRendering.Result option> option with get, set
                     abstract ``stroke-dasharray``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``stroke-dashoffset``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``stroke-dashoffset``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``stroke-linecap``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinecap.Result option> option with get, set
                     abstract ``stroke-linejoin``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinejoin.Result option> option with get, set
-                    abstract ``stroke-miterlimit``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
-                    abstract ``stroke-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
-                    abstract ``stroke-width``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``stroke-miterlimit``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                    abstract ``stroke-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                    abstract ``stroke-width``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract fill: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract pathLength: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract pathLength: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract stroke: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?``fill-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?``fill-rule``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option>, ?``shape-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ShapeRendering.Result option>, ?``stroke-dasharray``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?``stroke-dashoffset``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?``stroke-linecap``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinecap.Result option>, ?``stroke-linejoin``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinejoin.Result option>, ?``stroke-miterlimit``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?``stroke-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?``stroke-width``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?fill: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?pathLength: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?stroke: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>) : Base = jsNative
+                    static member Create (?``fill-opacity``: U3<string, float, (unit -> U2<string, float> option)>, ?``fill-rule``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option>, ?``shape-rendering``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ShapeRendering.Result option>, ?``stroke-dasharray``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?``stroke-dashoffset``: U3<string, float, (unit -> U2<string, float> option)>, ?``stroke-linecap``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinecap.Result option>, ?``stroke-linejoin``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinejoin.Result option>, ?``stroke-miterlimit``: U3<string, float, (unit -> U2<string, float> option)>, ?``stroke-opacity``: U3<string, float, (unit -> U2<string, float> option)>, ?``stroke-width``: U3<string, float, (unit -> U2<string, float> option)>, ?color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?fill: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?pathLength: U3<string, float, (unit -> U2<string, float> option)>, ?stroke: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>) : Base = jsNative
 
             module StopSVGAttributes =
                 [<Interface>]
                 type Base =
                     abstract ``stop-color``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``stop-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``stop-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?``stop-color``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?``stop-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>) : Base = jsNative
+                    static member Create (?``stop-color``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?``stop-opacity``: U3<string, float, (unit -> U2<string, float> option)>, ?color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>) : Base = jsNative
 
             module TdHTMLAttributes =
                 module Scope =
@@ -17793,29 +17793,29 @@ module H =
             module TextContentElementSVGAttributes =
                 type Base =
                     abstract ``dominant-baseline``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.DominantBaseline.Result option> option with get, set
-                    abstract ``fill-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``fill-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``fill-rule``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ClipRule.Result option> option with get, set
                     abstract ``font-family``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract ``font-size``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``font-size-adjust``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``font-size-adjust``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``font-stretch``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract ``font-style``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.FontStyle.Result option> option with get, set
                     abstract ``font-variant``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``font-weight``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``font-weight``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``glyph-orientation-horizontal``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract ``glyph-orientation-vertical``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``letter-spacing``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``letter-spacing``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``stroke-dasharray``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``stroke-dashoffset``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``stroke-dashoffset``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``stroke-linecap``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinecap.Result option> option with get, set
                     abstract ``stroke-linejoin``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.StrokeLinejoin.Result option> option with get, set
-                    abstract ``stroke-miterlimit``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
-                    abstract ``stroke-opacity``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
-                    abstract ``stroke-width``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``stroke-miterlimit``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                    abstract ``stroke-opacity``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
+                    abstract ``stroke-width``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract ``text-anchor``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.TextAnchor.Result option> option with get, set
                     abstract ``text-decoration``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.TextDecoration.Result option> option with get, set
                     abstract ``unicode-bidi``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
-                    abstract ``word-spacing``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``word-spacing``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract color: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract direction: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Direction.Result option> option with get, set
                     abstract fill: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
@@ -17826,11 +17826,11 @@ module H =
                 [<Interface>]
                 type Base =
                     abstract ``alignment-baseline``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.AlignmentBaseline.Result option> option with get, set
-                    abstract ``baseline-shift``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option> option with get, set
+                    abstract ``baseline-shift``: U3<string, float, (unit -> U2<string, float> option)> option with get, set
                     abstract display: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option> option with get, set
                     abstract visibility: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Visibility.Result option> option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?``alignment-baseline``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.AlignmentBaseline.Result option>, ?``baseline-shift``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<U2<string, float> option>, ?display: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?visibility: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Visibility.Result option>) : Base = jsNative
+                    static member Create (?``alignment-baseline``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.AlignmentBaseline.Result option>, ?``baseline-shift``: U3<string, float, (unit -> U2<string, float> option)>, ?display: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<string option>, ?visibility: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.Visibility.Result option>) : Base = jsNative
 
                 module Method =
                     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

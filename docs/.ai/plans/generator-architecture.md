@@ -636,7 +636,8 @@ Phases — each ends with the compile gate green on its fixtures:
       already did. Since 2026-10-24 an application of such an alias is written over its
       arguments (`erasedAliasApplication`, `union-alias-application-lab`): `FunctionMaybe<Live>`
       rather than `U2<string, (unit -> Live)>`, the declared form found by alias symbol and the
-      site matched arm for arm. `solid-js` widened 327 -> 169 and `TR006` 6,348 -> 1,342;
+      site matched arm for arm; an argument rendering as an erased union keeps the flattened
+      form. `solid-js` widened 327 -> 169 and `TR006` 6,348 -> 1,347;
       `ResourceSource<'S>` and `GenericValue<'T>` are now written by name.
     - *An anonymous object type hoisted out of a generic scope.* `each<T, U>(props: {
       items: T[]; render: (item: T) => U })` names `EachProps` for the parameter, and

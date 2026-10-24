@@ -356,7 +356,11 @@ Order of preference, decided per union after §4.2's categorization:
    arms the argument carries stay inside it (`FunctionMaybe<float option>`); optionality the
    site adds wraps the application (`x?: FunctionMaybe<number>` reads `FunctionMaybe<float>
    option`, through `NonNullableApplication`). An argument that widens to `obj` keeps the
-   flattened form, so the `U_n`-with-`obj` collapse is unchanged, and a transformed union over
+   flattened form, so the `U_n`-with-`obj` collapse is unchanged. So does an argument rendering
+   as an erased union, directly or through a named abbreviation (`FunctionMaybe<string |
+   number>` reads `U3<string, float, (unit -> U2<string, float>)>`): the nested `U2<U2<string,
+   float>, _>` admits no single `!^` cast from `string`. An enum or union declaration argument
+   casts as its own type and is applied. A transformed union over
    another arm set (`NonNullable<FunctionMaybe<"x" | null>>`) is its own union.
 
    **Nine is a ceiling, not a preference.** Generating `U10`-`U100` into `Xantham.Fable.Core`
