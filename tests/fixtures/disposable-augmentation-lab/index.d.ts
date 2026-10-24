@@ -35,3 +35,12 @@ export interface Keyed {
 
 export declare const handle: Handle;
 export declare const stream: Stream;
+
+/** Keyed through a namespace-local `Symbol` whose `asyncDispose` is the namespace's own unique symbol. */
+export declare namespace Shadowed {
+    const Symbol: { readonly asyncDispose: unique symbol };
+
+    interface Resource {
+        [Symbol.asyncDispose](): Promise<void>;
+    }
+}

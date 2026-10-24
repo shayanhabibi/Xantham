@@ -2496,20 +2496,29 @@ declarations whose escape is `TR008`.
 program's own lib declaration as the first proof. A key declared only outside the program's lib
 falls back to a second program, one per connection and created on first use: lib `esnext`,
 rooted at the lib file that declares the program's global `Symbol`. The key is well-known when
-that program's `Symbol` has the property declared by a `lib.*.d.ts` file. `Symbol.observable`
-has no such declaration and stays `MB002`. The program needs a root file: with none,
+that program's `Symbol` has the property declared by a `lib.*.d.ts` file. The fallback applies
+only to a key whose receiver resolves to the program's global `Symbol` and whose symbol is the
+property `getPropertyOfType` returns on the global `SymbolConstructor`; a namespace-local
+`Symbol` keyed `[Symbol.asyncDispose]` stays `MB002`. `Symbol.observable` has no such
+declaration and stays `MB002`. The program needs a root file: with none,
 `resolveName` returns no global `Symbol`.
 
 Lab `disposable-augmentation-lab` (`lib: ["es2020"]`): the global `Disposable` reads
 `SymbolDispose` and `Stream` reads `SymbolAsyncDispose` (`MB009`), `Handle` inherits
 `Disposable` and loses its `Create` (`SP003`), and `MB002` remains on `Keyed.__@own` and
-`Stream.__@observable`. Node, measured against its regeneration at the base generator:
+`Stream.__@observable`, and `Shadowed.Resource.__@asyncDispose` (a namespace-local `Symbol`).
+Node, measured against its regeneration at the base generator:
 `MB002` 161 → 92 (`dispose` 12 and `asyncDispose` 57 to 0, `captureRejectionSymbol` 89
 unchanged), `MB009` 30 → 43, `SP003` 290 → 293, `SP001` 1057 → 1054, `SP002` 546 → 536, tiers
-ergonomic/widened 2179/598 → 2187/590, 81 Emit members for the two keys, and no symbol is
+ergonomic/widened 2179/598 → 2187/590, 13 Emit members for the two keys, and no symbol is
 worse. Under lib `esnext` every well-known key has a program lib declaration, so Core.TS
 keeps its `MB002`/`MB008`/`MB009` counts (2/61/75), and every test golden other than the lab
-is unchanged. `CatalogCompatibility.ApiVersion` stays: the canonical API text is unchanged.
+is unchanged. Emitted ABI changes for a producer whose lib omits a key that a package augments
+onto `SymbolConstructor`: the declaration gains a required Emit member and can lose `Create`
+(`SP003`), so a catalog from an earlier producer of that shape disagrees with the current
+reading. Core.TS, the only shipped catalog, is not such a producer (lib `esnext`). The
+`CatalogCompatibility.ApiVersion` bump to 10 that rejects such producers is left to the
+integrated batch.
 
 ## Literal overloads as methods (2026-10-13, W5 #136)
 

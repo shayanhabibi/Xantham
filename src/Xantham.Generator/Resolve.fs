@@ -1094,9 +1094,11 @@ let private compilerLibDeclaresSymbol (ctx: Context) (key: string) : Async<bool>
 /// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
 /// `lib.*.d.ts` file of the program, or, when a package's augmentation is the program's only
 /// declaration (`Symbol.asyncDispose` under `lib: ["es2020"]`), by the compiler's complete
-/// ECMAScript lib. A key referencing a package's own `unique symbol` reads `None`, including one
-/// escaped as `__@iterator@<id>`, as does a `SymbolConstructor` property absent from the
-/// compiler's lib (`Symbol.observable`).
+/// ECMAScript lib; the key then resolves to a property of the program's global
+/// `SymbolConstructor` through the global `Symbol`. A key referencing a package's own
+/// `unique symbol` reads `None`, including one escaped as `__@iterator@<id>` or keyed through a
+/// namespace-local `Symbol`, as does a `SymbolConstructor` property absent from the compiler's lib
+/// (`Symbol.observable`).
 let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<string option> =
     async {
         match
@@ -1151,15 +1153,16 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
                                 ->
                                 key.Text
                                 |> ValueOption.toOption
-                                |> Option.map (fun text -> text, Node.index key, key.Kind)
+                                |> Option.map (fun text ->
+                                    text, (Node.index key, key.Kind), (Node.index receiver, receiver.Kind))
                             | _ -> None
                         | _ -> None
                     | _ -> None
 
             match candidate with
             | None -> return None
-            | Some(text, index, kind) ->
-                let! symbol =
+            | Some(text, (keyIndex, keyKind), (receiverIndex, receiverKind)) ->
+                let symbolAt index kind =
                     ctx.Session.getSymbolAtLocation (
                         NodeHandle.format
                             {
@@ -1168,6 +1171,8 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
                                 Path = handle.Path
                             }
                     )
+
+                let! symbol = symbolAt keyIndex keyKind
 
                 let declarations =
                     symbol |> ValueOption.bind _.Declarations |> ValueOption.defaultValue [||]
@@ -1178,7 +1183,23 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
                     elif Array.isEmpty declarations then
                         async.Return false
                     else
-                        compilerLibDeclaresSymbol ctx text
+                        async {
+                            let! receiver = symbolAt receiverIndex receiverKind
+                            let! globalSymbol = ctx.Session.resolveName ("Symbol", SymbolFlags.Value)
+
+                            match receiver, globalSymbol, symbol with
+                            | ValueSome receiver, ValueSome globalSymbol, ValueSome symbol when
+                                receiver.SymbolId = globalSymbol.SymbolId
+                                ->
+                                let! constructor = ctx.Session.getTypeOfSymbol globalSymbol.Reference
+                                let! property = ctx.Session.getPropertyOfType (constructor.Id, text)
+
+                                match property with
+                                | ValueSome property when property.SymbolId = symbol.SymbolId ->
+                                    return! compilerLibDeclaresSymbol ctx text
+                                | _ -> return false
+                            | _ -> return false
+                        }
 
                 return if declaredByLib then Some text else None
     }

@@ -6155,8 +6155,8 @@ let pipelineTests =
 
                       Expect.equal
                           (symbolsOf "MB002")
-                          [ "Keyed.__@own"; "Stream.__@observable" ]
-                          "a package-owned unique symbol and an augmented key the compiler's lib lacks stay dropped"
+                          [ "Keyed.__@own"; "Shadowed.Resource.__@asyncDispose"; "Stream.__@observable" ]
+                          "a package-owned unique symbol, a key through a namespace-local Symbol, and an augmented key the compiler's lib lacks stay dropped"
 
                       Expect.equal
                           (symbolsOf "MB009")

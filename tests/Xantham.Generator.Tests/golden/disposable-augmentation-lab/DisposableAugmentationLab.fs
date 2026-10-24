@@ -34,6 +34,12 @@ type Stream =
 type Keyed =
     interface end
 
+[<Interface>]
+type Shadowed =
+    abstract Symbol: Shadowed.Symbol
+    [<ParamObject; Emit("$0")>]
+    static member Create (Symbol: Shadowed.Symbol) : Shadowed = jsNative
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -43,3 +49,18 @@ type Exports =
     static member handle: Handle = jsNative
     [<Import("stream", "disposable-augmentation-lab")>]
     static member stream: Stream = jsNative
+    /// <summary>
+    /// Keyed through a namespace-local <c>Symbol</c> whose <c>asyncDispose</c> is the namespace's own unique symbol.
+    /// </summary>
+    [<Import("Shadowed", "disposable-augmentation-lab")>]
+    static member Shadowed: Shadowed = jsNative
+
+module Shadowed =
+    [<Interface>]
+    type Symbol =
+        abstract asyncDispose: obj
+        [<ParamObject; Emit("$0")>]
+        static member Create (asyncDispose: obj) : Symbol = jsNative
+
+    type Resource =
+        interface end

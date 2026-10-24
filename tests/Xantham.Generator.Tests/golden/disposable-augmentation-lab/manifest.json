@@ -3,17 +3,22 @@
   "package": "disposable-augmentation-lab",
   "module": "DisposableAugmentationLab",
   "counts": {
-    "exact": 2,
-    "ergonomic": 2,
-    "widened": 3,
+    "exact": 3,
+    "ergonomic": 3,
+    "widened": 5,
     "escape": 0
   },
   "passes": [
     {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "exact": 1
+    },
+    {
       "pass": "SI - shape-interfaces",
-      "total": 3,
+      "total": 5,
       "exact": 1,
-      "widened": 2
+      "widened": 4
     },
     {
       "pass": "SE - shape-exports",
@@ -22,8 +27,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 4,
-      "ergonomic": 4
+      "total": 7,
+      "ergonomic": 7
     },
     {
       "pass": "settle-symbol-members",
