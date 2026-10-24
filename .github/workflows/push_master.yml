@@ -2,6 +2,7 @@ name: Publish
 on:
   pull_request:
     branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   push:
     branches: [master]
     paths:
@@ -38,7 +39,7 @@ jobs:
   package:
     outputs:
       full: ${{ steps.scope.outputs.full }}
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop')
+    if: (github.event_name == 'pull_request' && !github.event.pull_request.draft) || github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
