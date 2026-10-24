@@ -165,7 +165,16 @@ let nameConstructorObjects: Pass<ShapeModel> =
 
         let exportRoots = claimed
 
-        let mutable queue = (model.DeclNames |> Map.toList |> List.sortBy fst) @ exportRoots
+        // Roots descend in source order, then by name. The first root to reach a constructor
+        // object fixes its name and placement, so that root will be the same in every run.
+        let sourceOrder (typeId, name) =
+            (match Map.tryFind typeId orders |> Option.flatten with
+             | Some order -> Grouping.sourceOrderKey ctx.PackageDir (order.File / uom<node>), order.NodeIndex
+             | None -> (2, "", ""), (System.Int32.MaxValue * uom<nodeId>)),
+            name
+
+        let mutable queue =
+            (model.DeclNames |> Map.toList |> List.sortBy sourceOrder) @ exportRoots
 
         while not queue.IsEmpty do
             claimed <- []

@@ -75,10 +75,10 @@ outside that traversal. Successful derivation removes both pending and `NotFollo
 contract walk must stay linear in the table: memoise per type, never per path. Path-keyed
 memoisation enumerates every path through an interface diamond, and declaration ancestry alone
 admits one instantiation per permutation of mutually wrapping generic aliases. Moving a batch of
-checker queries changes the order checker type ids are assigned in, and Shape's naming reads that
-order: deferring the canonical-seed-alias lookups to the first oversized frontier moved Core.TS's
-namespace constructor objects under `GlobalThis` at equal tiers. Regenerate Core.TS after
-reordering session queries, and diff its symbol names, not only its tiers.
+checker queries changes the order checker type ids are assigned in; Shape naming must not read
+that order (see "A name, owner or placement must never depend on checker type-id order" under
+Generator passes). Regenerate Core.TS after reordering session queries, and diff its symbol
+names, not only its tiers.
 
 ## Declaration catalogs
 
@@ -216,6 +216,19 @@ the corresponding lab under `tests/fixtures/` is the reducer.
 ambient modules are harvested alphabetically. "The declaring module wins" is unimplementable;
 `Shape/Classes.fs` uses the class's own binding specifier instead, falling back to the first
 harvested occurrence, and reports `SC010` per dropped member.
+
+**A name, owner or placement must never depend on checker type-id order or scope enumeration
+order.** Type ids follow the order of session queries, and `getSymbolsInScope` enumerates the
+checker's symbol tables in an order that varies between runs, so `Intl.Locale` and
+`globalThis.Intl.Locale` reach `harvest-order` in either order with an equal source position and
+export name. A first-wins choice over `Map.toList` of a type-id map, or over harvest order with
+an unbroken tie, moved sixteen `Intl.*Constructor` and `WebAssembly.*Constructor` declarations
+under `GlobalThis` between identical runs. `orderExports` therefore breaks ties by the
+declaring namespace's own path first, then ordinal path, leaving occurrences from different
+origins in harvest-pass order (an origin-string key moves solid-js's `For.Props` under `Web`); and `name-constructor-objects`
+descends its roots in source order, then by name. Order every root list that decides a claim by
+`DeclOrders` and name; prove a change deterministic by regenerating compiler-lib three times and
+comparing the `symbols.jsonl` hashes.
 
 **`__@<name>@<id>` does not identify a well-known symbol.** A package's own `declare const
 iterator: unique symbol` escapes to the same `__@iterator@<id>` as `[Symbol.iterator]`. Resolve

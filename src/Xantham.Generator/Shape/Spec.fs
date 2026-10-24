@@ -1762,7 +1762,19 @@ let private literalOverloadSets (model: ShapeModel) : LiteralOverloadSet list =
 
                     Some
                         {
-                            Member = $"{owner}.{Naming.memberName memberName}"
+                            // A well-known symbol's escaped name ends in a session-specific
+                            // checker id (`__@toPrimitive@1085`); the label omits it.
+                            Member =
+                                let at = memberName.LastIndexOf '@'
+
+                                if
+                                    isSymbolKeyed memberName
+                                    && at > 2
+                                    && memberName.Substring(at + 1) |> Seq.forall System.Char.IsDigit
+                                then
+                                    $"{owner}.{memberName.Substring(0, at)}"
+                                else
+                                    $"{owner}.{Naming.memberName memberName}"
                             Parameter = (separating |> List.head |> fst).Symbol.Name
                             Sites = sites @ returnSites
                             Declared =

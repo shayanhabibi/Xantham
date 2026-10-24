@@ -800,9 +800,21 @@ let harvestDocs: Pass<HarvestModel> =
     }
 
 /// Entry declarations first, then package-relative dependency and compiler sources.
-/// Node index and export name break ties; exports without declarations sort last.
+/// Node index and export name break ties; exports without declarations sort last. Occurrences
+/// of one declaration then order by public path: the declaring namespace's own path before an
+/// alias path such as `globalThis.Intl`, then by ordinal path. Occurrences that still tie keep
+/// harvest-pass order, entry module first. The order will be identical across runs whatever
+/// order the checker enumerates scopes in.
 let orderExports: Pass<HarvestModel> =
     Pass.pure' "harvest-order" (fun ctx model ->
+        let aliasPath (export: HarvestedExport) =
+            match export.NamespacePath with
+            | None -> false
+            | Some path ->
+                export.DeclaringNamespace
+                |> Option.bind (fun id -> Map.tryFind id model.Namespaces)
+                |> Option.forall (fun source -> source / uom<symbolName> <> path)
+
         { model with
             Exports =
                 model.Exports
@@ -810,7 +822,9 @@ let orderExports: Pass<HarvestModel> =
                     (match export.Order with
                      | Some order -> Grouping.sourceOrderKey ctx.PackageDir (order.File / uom<node>), order.NodeIndex
                      | None -> (2, "", ""), (System.Int32.MaxValue * uom<Measure.nodeId>)),
-                    export.ExportName)
+                    export.ExportName,
+                    aliasPath export,
+                    export.NamespacePath |> Option.defaultValue "")
         })
 
 /// Runtime ambient class exports available to declarations reached through dependencies.

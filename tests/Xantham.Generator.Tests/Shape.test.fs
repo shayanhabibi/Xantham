@@ -3562,6 +3562,31 @@ let shapePassTests =
 
             Expect.equal (Map.tryFind 61<typeId> named.DeclNames) (Some "WidgetsConstructor") "named after the export"
 
+        testCase "name-constructor-objects names a shared constructor object from the first root in source order" <| fun _ ->
+            // `interface Zed { Make: { new (): string } }` declared after `interface Alpha` with
+            // the same member, while the checker gave `Zed` the smaller type id.
+            let maker =
+                { Build.facts (Build.typeResponse 81 TypeFlags.Object) with
+                    SymbolName = Some ("__type" * uom<Measure.symbolName>)
+                    ConstructSignatures = [ Build.signature [] 1 ] }
+
+            let holder id =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol (id + 100) "Make" SymbolFlags.Property) 81 ] }
+
+            let at index : DeclOrder option =
+                Some { File = "/packages/lab/index.d.ts" * uom<Measure.declFile>; NodeIndex = index * uom<Measure.nodeId> }
+
+            let model =
+                { Build.shapeModel (maker :: holder 70 :: holder 71 :: Build.primitives) with
+                    DeclNames = Map.ofList [ 70<typeId>, "Zed"; 71<typeId>, "Alpha" ]
+                    DeclOrders = Map.ofList [ 70<typeId>, at 20; 71<typeId>, at 10 ] }
+
+            let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
+
+            Expect.equal (Map.tryFind 81<typeId> named.DeclNames) (Some "Alpha.MakeConstructor") "named under the earlier declaration"
+            Expect.equal (Map.tryFind 81<typeId> named.DeclOrders) (Some(at 10)) "placed with the earlier declaration"
+
         testCase "shape-interfaces reads construct signatures as EmitConstructor Create members" <| fun _ ->
             let model =
                 { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "Gauge") :: Build.primitives) with
