@@ -99,6 +99,12 @@ A binding is rooted in a generated F# module.
   methods: `MyPackage.Exports.utils.clamp(5., 0., 1.)`. TypeScript does not allow
   assigning to them, so the binding has no setter; reassigning one needs dynamic access
   (`?` or `!!`).
+- **Intersections over a type parameter**, such as `P & { children?: JSX.Element }`, read as
+  `JS.Intersect<'P, ParentProps.Members>`. Read either side through `props.Left` (the `'P`
+  side) or `props.Right` (the added members); both compile to the value itself. Build one
+  with `Intersect.unsafeCast props`, an unchecked cast, or with
+  `Intersect.assign props (ParentProps.Members.Create(...))`, which copies the members onto
+  `props` in place (`Object.assign`) and returns the same object.
 - **A type parameter used only in a return**, such as `querySelectorAll<'E>`, is inferred
   from how the result is used inside a function. A module-level binding states it:
   `let items: NodeListOf<HTMLElement> = document.querySelectorAll "li"`.
