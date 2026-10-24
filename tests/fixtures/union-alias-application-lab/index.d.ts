@@ -11,6 +11,13 @@ export interface Attrs {
   hint: FunctionMaybe<"a" | "b" | string>;
   /** A boolean mixed with literals keeps its current form. */
   flag: FunctionMaybe<boolean | "true" | "false">;
+  /** A union argument keeps the flattened form, so each constituent casts with one `!^`. */
+  text: FunctionMaybe<string | number>;
+  /** A nullable union argument keeps the flattened form. */
+  value?: FunctionMaybe<string | number | string[] | undefined>;
+  /** A named erased-union argument keeps the flattened form. */
+  pair: FunctionMaybe<Pair>;
 }
+export type Pair = string | boolean;
 /** A transformed union keeps the alias symbol over a different arm set and is not an application. */
 export type Plain = NonNullable<FunctionMaybe<"x" | "y" | null>>;

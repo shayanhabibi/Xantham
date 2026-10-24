@@ -3,7 +3,7 @@
   "package": "union-alias-application-lab",
   "module": "UnionAliasApplicationLab",
   "counts": {
-    "exact": 4,
+    "exact": 5,
     "ergonomic": 1,
     "widened": 1,
     "escape": 0
@@ -21,8 +21,8 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 6,
-      "ergonomic": 6
+      "total": 9,
+      "ergonomic": 9
     },
     {
       "pass": "SA - shape-aliases",

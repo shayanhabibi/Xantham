@@ -7504,6 +7504,10 @@ let unionAliasApplicationFixtureTests =
                 Expect.stringContains source "abstract hint: FunctionMaybe<string> with get, set" "a literal absorbed by string applies string"
                 Expect.stringContains source "abstract flag: FunctionMaybe<Attrs.Flag.Result> with get, set" "a boolean-literal argument applies the enum its accessor returns"
                 Expect.stringContains source "type Plain = U2<string, (unit -> Plain.Result option)>" "a transformed union with another arm set is not an application"
+                Expect.stringContains source "abstract text: U3<string, float, (unit -> U2<string, float>)> with get, set" "a union argument stays flattened"
+                Expect.stringContains source "abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set" "a nullable union argument stays flattened"
+                Expect.stringContains source "abstract pair: U3<string, bool, (unit -> Pair)> with get, set" "a named erased-union argument stays flattened"
+                Expect.isFalse (source.Contains "FunctionMaybe<U") "no application nests an erased union"
                 Expect.isFalse (source.Contains "U2<string, (unit -> Live") "no literal arm widens to string beside its accessor"
                 Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR006" && finding.Symbol.StartsWith "Attrs")) "no literal arm of an application widens"
         ])

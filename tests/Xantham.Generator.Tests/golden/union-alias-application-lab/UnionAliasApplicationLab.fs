@@ -36,8 +36,22 @@ type Attrs =
     /// A boolean mixed with literals keeps its current form.
     /// </summary>
     abstract flag: FunctionMaybe<Attrs.Flag.Result> with get, set
+    /// <summary>
+    /// A union argument keeps the flattened form, so each constituent casts with one <c>!^</c>.
+    /// </summary>
+    abstract text: U3<string, float, (unit -> U2<string, float>)> with get, set
+    /// <summary>
+    /// A nullable union argument keeps the flattened form.
+    /// </summary>
+    abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set
+    /// <summary>
+    /// A named erased-union argument keeps the flattened form.
+    /// </summary>
+    abstract pair: U3<string, bool, (unit -> Pair)> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (mode: FunctionMaybe<Live>, label: FunctionMaybe<string>, hint: FunctionMaybe<string>, flag: FunctionMaybe<Attrs.Flag.Result>, ?``aria-live``: FunctionMaybe<Live option>, ?count: FunctionMaybe<float option>, ?size: FunctionMaybe<float>) : Attrs = jsNative
+    static member Create (mode: FunctionMaybe<Live>, label: FunctionMaybe<string>, hint: FunctionMaybe<string>, flag: FunctionMaybe<Attrs.Flag.Result>, text: U3<string, float, (unit -> U2<string, float>)>, pair: U3<string, bool, (unit -> Pair)>, ?``aria-live``: FunctionMaybe<Live option>, ?count: FunctionMaybe<float option>, ?size: FunctionMaybe<float>, ?value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)>) : Attrs = jsNative
+
+type Pair = U2<string, bool>
 
 /// <summary>
 /// A transformed union keeps the alias symbol over a different arm set and is not an application.

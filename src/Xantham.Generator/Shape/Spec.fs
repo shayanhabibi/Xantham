@@ -3206,6 +3206,65 @@ and internal unionRef
             | None ->
                 // An erased-union alias application is written over its arguments. Nullish arms
                 // an argument carries stay inside it; optionality added at the site wraps it.
+                // An argument rendering as an erased union, directly or through a named
+                // abbreviation, keeps the flattened form: a nested `U2<U2<_, _>, _>` admits no
+                // single `!^` cast from a constituent.
+                let rec erased reference =
+                    match reference with
+                    | FsOption inner -> erased inner
+                    | FsErasedUnion _ -> true
+                    | _ -> false
+
+                let nestsErasedUnion (argument: int<Measure.typeId>) =
+                    match Map.tryFind argument model.Types with
+                    | None -> false
+                    | Some argumentFacts ->
+                        let reference = fst (typeRef ctx model self owner argument)
+
+                        // An enum or a union declaration casts as its own type; any other
+                        // named union is an abbreviation of its arms.
+                        let declaredUnion name =
+                            model.Decls
+                            |> List.exists (function
+                                | FsStringEnum decl -> decl.Name = name
+                                | FsEnum decl -> decl.Name = name
+                                | FsTaggedUnion decl -> decl.Name = name
+                                | FsErasedObjectUnion decl -> decl.Name = name
+                                | _ -> false)
+
+                        let named () =
+                            match reference with
+                            | FsNamed name
+                            | FsOption(FsNamed name) when
+                                flag TypeFlags.Union argumentFacts
+                                && not (flag TypeFlags.Boolean argumentFacts)
+                                && not (declaredUnion name)
+                                ->
+                                let wanted = nonNullishMemberSet model argumentFacts
+
+                                let twins =
+                                    model.DeclNames
+                                    |> Map.filter (fun typeId _ ->
+                                        match Map.tryFind typeId model.Types with
+                                        | Some candidate when
+                                            flag TypeFlags.Union candidate && not (flag TypeFlags.Boolean candidate)
+                                            ->
+                                            typeId = argument || nonNullishMemberSet model candidate = wanted
+                                        | _ -> false)
+
+                                not twins.IsEmpty
+                                && (let unnamed =
+                                        { model with
+                                            DeclNames = model.DeclNames |> Map.filter (fun id _ -> not (twins.ContainsKey id))
+                                        }
+
+                                    erased (fst (typeRef ctx unnamed self owner argument)))
+                            | _ -> false
+
+                        erased reference
+                        || (erasedAliasApplication model argumentFacts).IsSome
+                        || named ()
+
                 let aliasApplication =
                     [
                         Some(facts, false)
@@ -3218,7 +3277,9 @@ and internal unionRef
                         erasedAliasApplication model site
                         |> Option.filter (fun (_, _, arguments) ->
                             arguments
-                            |> List.forall (fun argument -> fst (typeRef ctx model self owner argument) <> FsObj))
+                            |> List.forall (fun argument ->
+                                fst (typeRef ctx model self owner argument) <> FsObj
+                                && not (nestsErasedUnion argument)))
                         |> Option.map (fun application -> application, wrapped))
 
                 match aliasApplication with
