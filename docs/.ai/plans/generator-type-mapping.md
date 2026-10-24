@@ -623,8 +623,9 @@ absence under the live compiler.
   signature's type parameters. Anonymous occurrences receive path-derived interface names;
   enclosing type parameters remain on the interface head. `generic-callable-interface-lab`
   pins named applications, anonymous inputs/results and catalogue consumer type checking.
-  Fickl callable construction and inherited callable contracts remain under validation in
-  `2026-10-24-fidelity-loop.md`; this representation is not ready to ship without those gates.
+  Published Fickl 0.6.0 preserves function identity for imported values and object-expression
+  construction, including inherited callable contracts. The permanent runtime gate covers 28
+  callable checks; public-package and full-suite evidence is in `2026-10-24-fidelity-loop.md`.
 - A hoisted declaration (a delegate, an options object) binds the owner's parameters it reads,
   including through the owner's own declared form (`grid: Grid<T>` inside `Grid<T>`) and
   through `NoInfer<T>`: `BigInt64Array.Every.Predicate<'TArrayBuffer>`. It repeats a constraint
