@@ -9354,9 +9354,13 @@ type ExecFile =
         file: string * ?args: string[] * ?options: ChildProcess.ExecFileOptions * ?callback: ExecFile.Callback8 ->
             ChildProcess.ChildProcess
 
-type Disposable = interface end
+type Disposable =
+    [<Emit("$0[Symbol.dispose]()")>]
+    abstract SymbolDispose: unit -> unit
 
-type AsyncDisposable = interface end
+type AsyncDisposable =
+    [<Emit("$0[Symbol.asyncDispose]()")>]
+    abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
 
 [<Interface>]
 type RelativeIndexable<'T> =
@@ -36992,6 +36996,13 @@ module ChildProcess =
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
         abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Calls ChildProcess.kill with <c>'SIGTERM'</c>.
+        /// </summary>
+        /// <remarks>@since v20.5.0</remarks>
+        [<Emit("$0[Symbol.dispose]()")>]
+        abstract SymbolDispose: unit -> unit
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -75494,6 +75505,13 @@ module Dgram =
         abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
         /// <summary>
+        /// Calls <c>socket.close()</c> and returns a promise that fulfills when the socket has closed.
+        /// </summary>
+        /// <remarks>@since v20.5.0</remarks>
+        [<Emit("$0[Symbol.asyncDispose]()")>]
+        abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
+
+        /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
         /// event or that is rejected if the <c>EventEmitter</c> emits <c>'error'</c> while waiting.
         /// The <c>Promise</c> will resolve with an array of all the arguments emitted to the
@@ -84776,6 +84794,24 @@ module Fs =
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> NodeJS.AsyncIterator<Dirent<string>, obj, obj>
 
+        /// <summary>
+        /// Calls <c>dir.close()</c> if the directory handle is open, and returns a promise that
+        /// fulfills when disposal is complete.
+        /// </summary>
+        /// <remarks>@since v22.17.0</remarks>
+        /// <remarks>@experimental</remarks>
+        [<Emit("$0[Symbol.asyncDispose]()")>]
+        abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
+
+        /// <summary>
+        /// Calls <c>dir.closeSync()</c> if the directory handle is open, and returns
+        /// <c>undefined</c>.
+        /// </summary>
+        /// <remarks>@since v22.17.0</remarks>
+        /// <remarks>@experimental</remarks>
+        [<Emit("$0[Symbol.dispose]()")>]
+        abstract SymbolDispose: unit -> unit
+
     /// <summary>
     /// Class: fs.StatWatcher
     /// </summary>
@@ -93606,6 +93642,14 @@ module Fs =
             /// <remarks>@since v10.0.0</remarks>
             /// <returns>Fulfills with <c>undefined</c> upon success.</returns>
             abstract close: unit -> JS.Promise<unit>
+
+            /// <summary>
+            /// Calls <c>filehandle.close()</c> and returns a promise that fulfills when the
+            /// filehandle is closed.
+            /// </summary>
+            /// <remarks>@since v20.4.0</remarks>
+            [<Emit("$0[Symbol.asyncDispose]()")>]
+            abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
 
         [<Interface>]
         type WatchOptions =
@@ -141493,6 +141537,13 @@ module Net =
         abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
 
         /// <summary>
+        /// Calls Server.close() and returns a promise that fulfills when the server has closed.
+        /// </summary>
+        /// <remarks>@since v20.5.0</remarks>
+        [<Emit("$0[Symbol.asyncDispose]()")>]
+        abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
+
+        /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
         /// event or that is rejected if the <c>EventEmitter</c> emits <c>'error'</c> while waiting.
         /// The <c>Promise</c> will resolve with an array of all the arguments emitted to the
@@ -149344,7 +149395,6 @@ module NodeJS =
     /// <c>setImmediate()</c> exports both <c>immediate.ref()</c> and <c>immediate.unref()</c>
     /// functions that can be used to control this default behavior.
     /// </summary>
-    [<Interface>]
     type Immediate =
         inherit RefCounted
         inherit Disposable
@@ -149374,11 +149424,6 @@ module NodeJS =
         /// <returns>a reference to <c>immediate</c></returns>
         abstract unref: unit -> Immediate
         abstract _onImmediate: [<ParamArray>] args: obj[] -> unit
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (hasRef: (unit -> bool), ref: (unit -> Immediate), unref: (unit -> Immediate), _onImmediate: (obj[] -> unit)) : Immediate =
-            jsNative
 
     /// <remarks>@deprecated Use <c>NodeJS.Timeout</c> instead.</remarks>
     type Timer =
@@ -155717,6 +155762,13 @@ module Readline =
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
         abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Alias for <c>rl.close()</c>.
+        /// </summary>
+        /// <remarks>@since v22.15.0</remarks>
+        [<Emit("$0[Symbol.dispose]()")>]
+        abstract SymbolDispose: unit -> unit
 
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> NodeJS.AsyncIterator<string, obj, obj>
@@ -168495,6 +168547,13 @@ module Stream =
 
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> NodeJS.AsyncIterator<obj, obj, obj>
+
+        /// <summary>
+        /// Calls <c>readable.destroy()</c> with an <c>AbortError</c> and returns a promise that fulfills when the stream is finished.
+        /// </summary>
+        /// <remarks>@since v20.4.0</remarks>
+        [<Emit("$0[Symbol.asyncDispose]()")>]
+        abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -181297,7 +181356,6 @@ module Test =
     /// </summary>
     /// <remarks>@since v20.4.0</remarks>
     /// <remarks>@experimental</remarks>
-    [<Interface>]
     type MockTimers =
         /// <summary>
         /// Enables timer mocking for the specified timers.
@@ -181489,16 +181547,11 @@ module Test =
         /// <remarks>@since v20.4.0</remarks>
         abstract runAll: unit -> unit
 
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                enable: (MockTimersOptions option -> unit),
-                setTime: (float -> unit),
-                reset: (unit -> unit),
-                tick: (float -> unit),
-                runAll: (unit -> unit)
-            ) : MockTimers =
-            jsNative
+        /// <summary>
+        /// Calls MockTimers.reset().
+        /// </summary>
+        [<Emit("$0[Symbol.dispose]()")>]
+        abstract SymbolDispose: unit -> unit
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -201716,12 +201769,11 @@ module WorkerThreads =
             ) : ResourceLimits =
             jsNative
 
-    [<Interface>]
     type CPUProfileHandle =
         abstract stop: unit -> JS.Promise<string>
 
-        [<ParamObject; Emit("$0")>]
-        static member Create(stop: (unit -> JS.Promise<string>)) : CPUProfileHandle = jsNative
+        [<Emit("$0[Symbol.asyncDispose]()")>]
+        abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
 
     /// <summary>
     /// The <c>Worker</c> class represents an independent JavaScript execution thread.
@@ -202513,6 +202565,19 @@ module WorkerThreads =
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
         abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Calls <c>worker.terminate()</c> when the dispose scope is exited.
+        /// <code lang="js">
+        /// async function example() {
+        ///   await using worker = new Worker('for (;;) {}', { eval: true });
+        ///   // Worker is automatically terminate when the scope is exited.
+        /// }
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v22.18.0</remarks>
+        [<Emit("$0[Symbol.asyncDispose]()")>]
+        abstract SymbolAsyncDispose: unit -> JS.Promise<unit>
 
         /// <summary>
         /// Listens once to the <c>abort</c> event on the provided <c>signal</c>.

@@ -6122,6 +6122,47 @@ let pipelineTests =
                            |> List.forall (fun f -> f.Tier = Ergonomic))
                           "TR069 is ergonomic" ])
 
+        // W3: a package's `SymbolConstructor` augmentation of a key the compiler's lib declares
+        // reads as that well-known key even when the program's lib omits it.
+        let disposableAugmentationLab = handFixture "disposable-augmentation-lab"
+        let disposableAugmentationConfig = handConfig disposableAugmentationLab
+
+        yield!
+            fixtureTests "disposable-augmentation-lab" disposableAugmentationLab disposableAugmentationConfig (fun package ->
+                let generate () =
+                    Async.RunSynchronously(Pipeline.generate disposableAugmentationConfig package)
+
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                [ testCase "disposable-augmentation-lab: augmented lib keys are Emit members" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.asyncDispose]()\")>]" "the call reaches the symbol key"
+                      Expect.stringContains source "abstract SymbolAsyncDispose: unit -> JS.Promise<unit>" "Stream keeps its own key"
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.dispose]()\")>]" "the augmented global reaches its key"
+                      Expect.isFalse (source.Contains "type Disposable =\n    interface end") "Disposable is not empty"
+                      Expect.isFalse (source.Contains "Symbol.observable") "Symbol.observable is undefined without a polyfill"
+
+                  testCase "disposable-augmentation-lab: findings name each mapping and each drop" <| fun _ ->
+                      let rendered = generate ()
+
+                      let symbolsOf key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      Expect.equal
+                          (symbolsOf "MB002")
+                          [ "Keyed.__@own"; "Stream.__@observable" ]
+                          "a package-owned unique symbol and an augmented key the compiler's lib lacks stay dropped"
+
+                      Expect.equal
+                          (symbolsOf "MB009")
+                          [ "Disposable.[Symbol.dispose]"; "Stream.[Symbol.asyncDispose]" ]
+                          "one Emit member per augmented lib key" ])
+
         // W5 (#136): an overload keyed by a string literal reads as a method of its own under
         // `[<Emit>]`, and the generic overload stays.
         let literalMethodLab = handFixture "literal-method-lab"

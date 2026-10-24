@@ -248,7 +248,11 @@ reads the declaration's computed name `Symbol.<name>` into `ResolvedMember.WellK
 pass that decides on the escaped name alone emits the impostor as `[Symbol.iterator]`. The
 spelling `Symbol.<name>` is not proof either: a package's `declare global` augmentation of
 `SymbolConstructor` (`Symbol.observable`) names a key that is `undefined` at runtime, so Resolve
-also requires a `lib.*.d.ts` declaration of the property.
+also requires a `lib.*.d.ts` declaration of the property. The program's own lib files are not
+enough either: `@types/node` augments `Symbol.asyncDispose` because its `lib` omits
+`esnext.disposable`, so a key declared only by a package falls back to a second program over the
+compiler's `esnext` lib. That program must have a root file; with none, `resolveName` finds no
+global `Symbol`.
 
 **F# admits one `seq` instantiation per interface.** `NodeListOf<'TNode>` inheriting
 `NodeList`'s `seq<Node>` beside its own `seq<'TNode>` is FS3360 ("may unify"). Only

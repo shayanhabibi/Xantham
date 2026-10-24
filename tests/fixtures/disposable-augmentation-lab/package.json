@@ -1,0 +1,6 @@
+{
+    "name": "disposable-augmentation-lab",
+    "version": "1.0.0",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for well-known symbol keys a package augments onto SymbolConstructor when the program's lib omits them (W3). [Symbol.dispose] and [Symbol.asyncDispose] are declared by the compiler's lib and read as Emit members; [Symbol.observable] is not and stays dropped (MB002), as does a package-owned unique symbol. Tracked in git, no npm install."
+}

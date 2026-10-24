@@ -295,12 +295,15 @@ Policy question with a recommended default:
   (a call adds `()` or `($1...)`, a writable property adds a setter Emit; `MB009`, Ergonomic).
   An interface whose base already iterates keeps the base's `seq` alone, because F# admits one
   `seq` instantiation per interface (FS3360); a narrowed iterator stays an Emit member. A key
-  naming the package's own `unique symbol`, a key declared solely by a package's
-  `SymbolConstructor` augmentation (`Symbol.observable`), an optional member, a member whose
+  naming the package's own `unique symbol`, a key the compiler's complete ECMAScript lib does
+  not declare (a package's `Symbol.observable` augmentation), an optional member, a member whose
   `Symbol<Name>` is already declared by another member, a class static, a member of an
   `[<AbstractClass>]` entrypoint and a narrowed iterator `drop-inherited` removed stay dropped
   (`MB002`, Widened). A declaration with a required symbol member or a `seq` inherit, its own
   or a base's, carries no `Create` (`SP003`): a ParamObject literal cannot write a symbol key.
+  A key a package augments onto `SymbolConstructor` because the program's `lib` omits it
+  (`@types/node`'s `Symbol.dispose` and `Symbol.asyncDispose` under `lib: ["node"]`) is
+  well-known when the compiler's `esnext` lib declares it (W3, 2026-10-24).
 
 *Landed (2026-09-02, phase E).* Bases and intersection operands go through one gate: a base is
 inherited exactly when its reference resolves to a name this run declares as an interface, and

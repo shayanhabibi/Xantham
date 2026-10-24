@@ -1014,11 +1014,89 @@ let private declaredByInfer (ctx: Context) (parameter: TypeResponse) : Async<boo
                        |> ValueOption.exists (fun parent -> parent.Kind = SyntaxKind.InferType)
     }
 
+let private isLibFile (declaration: string) =
+    match NodeHandle.parse declaration with
+    | ValueSome declaration ->
+        let file = System.IO.Path.GetFileName declaration.Path
+
+        file.StartsWith("lib.", System.StringComparison.Ordinal)
+        && file.EndsWith(".d.ts", System.StringComparison.Ordinal)
+    | ValueNone -> false
+
+/// A program over the compiler's complete ECMAScript lib (`esnext`), rooted at the lib file
+/// declaring the program's global `Symbol`, one per connection and created on first use. `None`
+/// when the program declares no lib `Symbol` to root it at.
+let private compilerLibPrograms =
+    System.Runtime.CompilerServices.ConditionalWeakTable<
+        TscMailbox,
+        Lazy<System.Threading.Tasks.Task<Session<TscMailbox> option>>
+     >()
+
+let private compilerLibProgram (ctx: Context) : Async<Session<TscMailbox> option> =
+    compilerLibPrograms
+        .GetValue(
+            ctx.Session.Transport,
+            fun mailbox ->
+                lazy
+                    (async {
+                        let! symbol = ctx.Session.resolveName ("Symbol", SymbolFlags.Value)
+
+                        let root =
+                            symbol
+                            |> ValueOption.bind _.Declarations
+                            |> ValueOption.defaultValue [||]
+                            |> Array.tryFind isLibFile
+                            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+
+                        match root with
+                        | None -> return None
+                        | Some root ->
+                            let! snapshot =
+                                mailbox.createSnapshot (
+                                    createPrograms =
+                                        [|
+                                            { CreateSnapshotProgramParams.Default with
+                                                RootFiles = ValueSome [| DocumentIdentifier.FileName root.Path |]
+                                                CompilerOptions =
+                                                    { RawCompilerOptions.Default with
+                                                        Lib = ValueSome [| "esnext" |]
+                                                    }
+                                            }
+                                        |]
+                                )
+
+                            return Some(mailbox.Session snapshot)
+                     }
+                     |> Async.StartAsTask)
+        )
+        .Value
+    |> Async.AwaitTask
+
+/// Whether the compiler's complete ECMAScript lib declares `Symbol.<key>`, independent of the
+/// program's `lib` option.
+let private compilerLibDeclaresSymbol (ctx: Context) (key: string) : Async<bool> =
+    async {
+        match! compilerLibProgram ctx with
+        | None -> return false
+        | Some session ->
+            match! session.resolveName ("Symbol", SymbolFlags.Value) with
+            | ValueNone -> return false
+            | ValueSome symbol ->
+                let! constructor = session.getTypeOfSymbol symbol.Reference
+
+                match! session.getPropertyOfType (constructor.Id, key) with
+                | ValueNone -> return false
+                | ValueSome property ->
+                    return property.Declarations |> ValueOption.defaultValue [||] |> Array.exists isLibFile
+    }
+
 /// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
 /// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
-/// `lib.*.d.ts` file. A key referencing a package's own `unique symbol` reads `None`, including
-/// one escaped as `__@iterator@<id>`, as does a `SymbolConstructor` property declared solely by a
-/// package's augmentation (`Symbol.observable`).
+/// `lib.*.d.ts` file of the program, or, when a package's augmentation is the program's only
+/// declaration (`Symbol.asyncDispose` under `lib: ["es2020"]`), by the compiler's complete
+/// ECMAScript lib. A key referencing a package's own `unique symbol` reads `None`, including one
+/// escaped as `__@iterator@<id>`, as does a `SymbolConstructor` property absent from the
+/// compiler's lib (`Symbol.observable`).
 let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<string option> =
     async {
         match
@@ -1091,18 +1169,16 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
                             }
                     )
 
-                let declaredByLib =
-                    symbol
-                    |> ValueOption.bind _.Declarations
-                    |> ValueOption.defaultValue [||]
-                    |> Array.exists (fun declaration ->
-                        match NodeHandle.parse declaration with
-                        | ValueSome declaration ->
-                            let file = System.IO.Path.GetFileName declaration.Path
+                let declarations =
+                    symbol |> ValueOption.bind _.Declarations |> ValueOption.defaultValue [||]
 
-                            file.StartsWith("lib.", System.StringComparison.Ordinal)
-                            && file.EndsWith(".d.ts", System.StringComparison.Ordinal)
-                        | ValueNone -> false)
+                let! declaredByLib =
+                    if Array.exists isLibFile declarations then
+                        async.Return true
+                    elif Array.isEmpty declarations then
+                        async.Return false
+                    else
+                        compilerLibDeclaresSymbol ctx text
 
                 return if declaredByLib then Some text else None
     }

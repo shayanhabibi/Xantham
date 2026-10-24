@@ -2488,6 +2488,29 @@ regenerated: it compiles against the regenerated Core.TS. Core.TS's three new es
 (`SegmentIterator` and two `[Symbol.replace]` replacer delegates) are newly reached
 declarations whose escape is `TR008`.
 
+### Augmented well-known keys (2026-10-24, W3)
+
+`@types/node` runs under `lib: ["node"]`, which loads no `esnext.disposable`, so its
+`compatibility/disposable.d.ts` augmentation is the program's only declaration of
+`Symbol.dispose` and `Symbol.asyncDispose`, and both read as `MB002`. Resolve keeps the
+program's own lib declaration as the first proof. A key declared only outside the program's lib
+falls back to a second program, one per connection and created on first use: lib `esnext`,
+rooted at the lib file that declares the program's global `Symbol`. The key is well-known when
+that program's `Symbol` has the property declared by a `lib.*.d.ts` file. `Symbol.observable`
+has no such declaration and stays `MB002`. The program needs a root file: with none,
+`resolveName` returns no global `Symbol`.
+
+Lab `disposable-augmentation-lab` (`lib: ["es2020"]`): the global `Disposable` reads
+`SymbolDispose` and `Stream` reads `SymbolAsyncDispose` (`MB009`), `Handle` inherits
+`Disposable` and loses its `Create` (`SP003`), and `MB002` remains on `Keyed.__@own` and
+`Stream.__@observable`. Node, measured against its regeneration at the base generator:
+`MB002` 161 → 92 (`dispose` 12 and `asyncDispose` 57 to 0, `captureRejectionSymbol` 89
+unchanged), `MB009` 30 → 43, `SP003` 290 → 293, `SP001` 1057 → 1054, `SP002` 546 → 536, tiers
+ergonomic/widened 2179/598 → 2187/590, 81 Emit members for the two keys, and no symbol is
+worse. Under lib `esnext` every well-known key has a program lib declaration, so Core.TS
+keeps its `MB002`/`MB008`/`MB009` counts (2/61/75), and every test golden other than the lab
+is unchanged. `CatalogCompatibility.ApiVersion` stays: the canonical API text is unchanged.
+
 ## Literal overloads as methods (2026-10-13, W5 #136)
 
 An overload keyed by a string literal is a method of its own. The draft pass
