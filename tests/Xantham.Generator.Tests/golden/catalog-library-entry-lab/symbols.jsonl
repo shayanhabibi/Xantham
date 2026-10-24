@@ -15,6 +15,19 @@
 {"name":"GlobalThis","tier":"ergonomic","findings":[{"name":"RA.ReadWithoutWrite","key":"RA005","pass":"repair-arity","tier":"ergonomic","symbol":"GlobalThis","fields":{"name":"undefined"},"message":"undefined reads but does not write: its type holds no value, and F# has no setter of type unit"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"GlobalThis","message":"ParamObject Create synthesized (D3)"}]}
 {"name":"Exports.accept","tier":"exact","findings":[]}
 {"name":"EnumeratorConstructor.Collection","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"ergonomic","findings":[{"name":"TR.AnyToObj","key":"TR008","pass":"shape-interfaces","tier":"ergonomic","symbol":"EnumeratorConstructor.Collection.Item(index)","message":"any maps to obj"},{"name":"SY.NameNestedUnderOwner","key":"SY004","pass":"synthesize-anonymous","tier":"exact","symbol":"EnumeratorConstructor.Collection","fields":{"nestedAs":"EnumeratorConstructor.Collection"},"message":"anonymous shape named EnumeratorConstructor.Collection under the declaration that owns it"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"EnumeratorConstructor.Collection","message":"ParamObject Create synthesized (D3)"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"EnumeratorConstructor.Collection.Item","message":"method member reads as a function-typed Create parameter; the delegate receives no this"}]}
+{"name":"GlobalThis.ActiveXObject","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.ITextWriter","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.TextStreamBase","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.TextStreamWriter","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.TextStreamReader","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.SafeArray","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.Enumerator","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.EnumeratorConstructor","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.VBArray","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.VBArrayConstructor","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.VarDate","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.DateConstructor","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
+{"name":"GlobalThis.Date","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"exact","findings":[]}
 {"name":"Globals.Exports.ActiveXObject","tier":"exact","findings":[]}
 {"name":"Globals.Exports.WScript","tier":"exact","findings":[]}
 {"name":"Globals.Exports.WSH","tier":"exact","findings":[]}
@@ -24,4 +37,4 @@
 {"name":"Globals.Exports.VarDate","tier":"exact","findings":[]}
 {"name":"Globals.Exports.globalThis","tier":"exact","findings":[]}
 {"name":"WScript.Arguments","file":"node_modules/typescript/lib/lib.scripthost.d.ts","tier":"ergonomic","findings":[{"name":"SY.NameNestedUnderOwner","key":"SY004","pass":"synthesize-anonymous","tier":"exact","symbol":"WScript.Arguments","fields":{"nestedAs":"WScript.Arguments"},"message":"anonymous shape named WScript.Arguments under the declaration that owns it"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WScript.Arguments","message":"ParamObject Create synthesized (D3)"},{"name":"SP.MethodMemberAsCreateParameter","key":"SP002","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"WScript.Arguments.Item","message":"method member reads as a function-typed Create parameter; the delegate receives no this"}]}
-{"name":"typescript/lib","tier":"exact","findings":[{"name":"GE.GroupShipped","key":"GE001","pass":"render-source","tier":"exact","symbol":"typescript/lib","fields":{"group":"typescript/lib","declarations":16},"message":"typescript/lib is shipped as its own module, carrying 16 declarations"}]}
+{"name":"typescript/lib","tier":"exact","findings":[{"name":"GE.GroupShipped","key":"GE001","pass":"render-source","tier":"exact","symbol":"typescript/lib","fields":{"group":"typescript/lib","declarations":29},"message":"typescript/lib is shipped as its own module, carrying 29 declarations"}]}

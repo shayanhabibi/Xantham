@@ -2194,20 +2194,40 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                     let declarationTypes =
                         ConcurrentDictionary<string, Lazy<System.Threading.Tasks.Task<int>>>()
 
+                    let sourceDeclarations =
+                        ConcurrentDictionary<int, Lazy<System.Threading.Tasks.Task<string list>>>()
+
+                    let sourceDeclarationHandles (ty: TypeResponse) =
+                        sourceDeclarations
+                            .GetOrAdd(
+                                ty.Id,
+                                fun _ ->
+                                    lazy
+                                        (async {
+                                            let! symbols =
+                                                [
+                                                    ctx.Session.getSymbolOfType ty.Id
+                                                    ctx.Session.getAliasSymbolOfType ty.Id
+                                                ]
+                                                |> Async.Parallel
+
+                                            return
+                                                symbols
+                                                |> Array.collect (
+                                                    ValueOption.bind _.Declarations >> ValueOption.defaultValue [||]
+                                                )
+                                                |> Array.distinct
+                                                |> Array.sort
+                                                |> Array.toList
+                                         }
+                                         |> Async.StartAsTask)
+                            )
+                            .Value
+                        |> Async.AwaitTask
+
                     let canonicalSourceType (ty: TypeResponse) =
                         async {
-                            let! symbol = ctx.Session.getSymbolOfType ty.Id
-
-                            let! symbol =
-                                match symbol with
-                                | ValueSome _ -> async.Return symbol
-                                | ValueNone -> ctx.Session.getAliasSymbolOfType ty.Id
-
-                            let handles =
-                                symbol
-                                |> ValueOption.bind _.Declarations
-                                |> ValueOption.defaultValue [||]
-                                |> Array.sort
+                            let! handles = sourceDeclarationHandles ty
 
                             let mutable canonical = false
 
@@ -2235,78 +2255,131 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                             return canonical
                         }
 
+                    let! canonicalSeedAliases =
+                        model.Types
+                        |> Map.toList
+                        |> List.filter (fun (_, facts) ->
+                            facts.Response.AliasTypeArguments |> ValueOption.exists (Array.isEmpty >> not))
+                        |> List.map (fun (id, facts) ->
+                            async {
+                                let! canonical = canonicalSourceType facts.Response
+                                return id, canonical
+                            })
+                        |> Async.Parallel
+
+                    let canonicalSeedAliases =
+                        canonicalSeedAliases
+                        |> Array.choose (fun (id, canonical) -> if canonical then Some id else None)
+                        |> Set.ofArray
+
                     let sourceContractIds (table: Map<int<typeId>, TypeFacts>) =
-                        let nominalDeclaration (facts: TypeFacts) =
-                            facts.Response.ObjectFlags
-                            |> ValueOption.exists (fun flags ->
-                                (flags.HasFlag ObjectFlags.Class || flags.HasFlag ObjectFlags.Interface)
-                                && not (flags.HasFlag ObjectFlags.Instantiated))
-                            && facts.Response.Target |> ValueOption.forall ((=) facts.Response.Id)
-                            && facts.Response.IsTupleType <> ValueSome true
+                        async {
+                            let nominalDeclaration (facts: TypeFacts) =
+                                facts.Response.ObjectFlags
+                                |> ValueOption.exists (fun flags ->
+                                    (flags.HasFlag ObjectFlags.Class || flags.HasFlag ObjectFlags.Interface)
+                                    && not (flags.HasFlag ObjectFlags.Instantiated))
+                                && facts.Response.Target |> ValueOption.forall ((=) facts.Response.Id)
+                                && facts.Response.IsTupleType <> ValueSome true
 
-                        // These are edges of declarations already read, not a second compiler
-                        // walk. Keep nested source contracts when an unrelated instantiation
-                        // burst fills the frontier. Applications contribute their arguments,
-                        // never another recursively substituted copy of their members.
-                        let contracts = System.Collections.Generic.HashSet<int<typeId>>()
-                        let traversed = System.Collections.Generic.HashSet<int<typeId>>()
+                            // Protect edges already derived from source roots. Declaration ancestry
+                            // allows finite substituted callbacks while stopping another expansion
+                            // of the same declaration with fresh arguments. Siblings retain their
+                            // own ancestry; catalogue metadata is populated only in a later pass.
+                            let contracts = System.Collections.Generic.HashSet<int<typeId>>()
 
-                        let rec includeContract expandMembers id =
-                            let first = contracts.Add id
+                            let traversed =
+                                System.Collections.Generic.Dictionary<int<typeId> * bool, Set<string> list>()
 
-                            if first || (expandMembers && not (traversed.Contains id)) then
-                                if expandMembers then
-                                    traversed.Add id |> ignore
+                            let firstTraversal id expandMembers ancestry =
+                                let key = id, expandMembers
 
-                                match Map.tryFind id table with
-                                | None -> ()
-                                | Some facts ->
-                                    let response = facts.Response
+                                let prior =
+                                    match traversed.TryGetValue key with
+                                    | true, paths -> paths
+                                    | _ -> []
 
-                                    let application =
-                                        response.Target |> ValueOption.exists ((<>) response.Id)
-                                        || response.AliasTypeArguments |> ValueOption.exists (Array.isEmpty >> not)
+                                if prior |> List.exists (fun path -> Set.isSubset path ancestry) then
+                                    false
+                                else
+                                    traversed[key] <-
+                                        ancestry
+                                        :: (prior |> List.filter (fun path -> not (Set.isSubset ancestry path)))
 
-                                    for argument in facts.TypeArguments @ facts.AliasTypeArguments do
-                                        includeContract false argument
-                                    // Reading the operands of an application is finite, but opening
-                                    // their substituted members would bypass the application boundary.
-                                    for operand in facts.UnionMembers @ facts.IntersectionMembers do
-                                        includeContract (expandMembers && not application) operand
+                                    true
 
-                                    if expandMembers && not application then
-                                        for bound in Option.toList facts.Constraint @ Option.toList facts.Default do
-                                            includeContract true bound
+                            let rec includeContract ancestry expandMembers id =
+                                async {
+                                    contracts.Add id |> ignore
 
-                                        let mapped =
-                                            response.ObjectFlags
-                                            |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Mapped)
+                                    if firstTraversal id expandMembers ancestry then
+                                        match Map.tryFind id table with
+                                        | None -> ()
+                                        | Some facts ->
+                                            let response = facts.Response
 
-                                        if not mapped then
-                                            for member_ in facts.Members do
-                                                includeContract true member_.TypeId
+                                            let application =
+                                                response.Target |> ValueOption.exists ((<>) response.Id)
+                                                || (response.AliasTypeArguments
+                                                    |> ValueOption.exists (Array.isEmpty >> not)
+                                                    && not (Set.contains id canonicalSeedAliases))
 
-                                            for signature in facts.CallSignatures @ facts.ConstructSignatures do
-                                                includeContract true signature.ReturnTypeId
+                                            let! declarations = sourceDeclarationHandles response
+                                            let declarations = Set.ofList declarations
+                                            let repeated = not (Set.isEmpty (Set.intersect ancestry declarations))
 
-                                                for parameter in signature.Parameters do
-                                                    includeContract true parameter.TypeId
+                                            let expand =
+                                                expandMembers
+                                                && not repeated
+                                                && (not application || not (Set.isEmpty declarations))
 
-                                                for parameter in signature.TypeParameters do
-                                                    includeContract true parameter
+                                            let ancestry = Set.union ancestry declarations
 
-                        for KeyValue(id, facts) in table do
-                            if nominalDeclaration facts then
-                                includeContract true id
+                                            for argument in facts.TypeArguments @ facts.AliasTypeArguments do
+                                                do! includeContract ancestry false argument
+                                            // Preserve transparent union/intersection edges without
+                                            // resetting ancestry at anonymous operands.
+                                            for operand in facts.UnionMembers @ facts.IntersectionMembers do
+                                                do! includeContract ancestry expand operand
 
-                        contracts
+                                            if expand then
+                                                for bound in
+                                                    Option.toList facts.Constraint @ Option.toList facts.Default do
+                                                    do! includeContract ancestry true bound
+
+                                                let mapped =
+                                                    response.ObjectFlags
+                                                    |> ValueOption.exists (fun flags ->
+                                                        flags.HasFlag ObjectFlags.Mapped)
+
+                                                if not mapped then
+                                                    for member_ in facts.Members do
+                                                        do! includeContract ancestry true member_.TypeId
+
+                                                    for signature in facts.CallSignatures @ facts.ConstructSignatures do
+                                                        if not application || List.isEmpty signature.TypeParameters then
+                                                            do! includeContract ancestry true signature.ReturnTypeId
+
+                                                            for parameter in signature.Parameters do
+                                                                do! includeContract ancestry true parameter.TypeId
+
+                                                            for parameter in signature.TypeParameters do
+                                                                do! includeContract ancestry true parameter
+                                }
+
+                            for KeyValue(id, facts) in table do
+                                if nominalDeclaration facts || Map.containsKey id model.Types then
+                                    do! includeContract Set.empty true id
+
+                            return contracts
+                        }
 
                     let deferredTypes =
                         System.Collections.Generic.Dictionary<int<typeId>, TypeResponse>()
 
                     let boundedFrontier table fresh =
                         async {
-                            let sourceContracts = sourceContractIds table
+                            let! sourceContracts = sourceContractIds table
 
                             let! admitted =
                                 fresh
@@ -2374,15 +2447,18 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                         async {
                             // A source owner can arrive after the burst that deferred its member.
                             // Retry only newly proven contract edges, not the discarded expansion.
-                            let resumed =
+                            let! resumed =
                                 if deferredTypes.Count = 0 || depth > FollowDepth then
-                                    []
+                                    async.Return []
                                 else
-                                    let contracts = sourceContractIds table
+                                    async {
+                                        let! contracts = sourceContractIds table
 
-                                    deferredTypes.Values
-                                    |> Seq.filter (fun ty -> contracts.Contains ty.TypeId)
-                                    |> Seq.toList
+                                        return
+                                            deferredTypes.Values
+                                            |> Seq.filter (fun ty -> contracts.Contains ty.TypeId)
+                                            |> Seq.toList
+                                    }
 
                             for ty in resumed do
                                 deferredTypes.Remove ty.TypeId |> ignore

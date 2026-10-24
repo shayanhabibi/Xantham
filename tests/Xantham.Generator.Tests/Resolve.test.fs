@@ -213,6 +213,17 @@ export interface Expanding<T> { next:Expanding<T[]>; run<U>(value:U):Expanding<U
 export const first:Expanding<string>;
 type Tree<S extends string> = {left:Tree<`${S}l`>;right:Tree<`${S}r`>} & {value:S};
 export interface Root {tree:Tree<"">}
+type Shared = { registry: { [key:string]: { value:string } } };
+export declare const shared: Shared;
+type MemoOptions<T> = { equals?: (previous:T, next:T) => boolean };
+export declare function memo<T>(read:()=>T, options?:MemoOptions<T>):()=>T;
+export type Fetcher<T> = (info: { value:T }) => T | Promise<T>;
+export type Options<T> = { onHydrated?: (key:string, details:{value:T}) => void };
+export declare function hydrate<T>(options:Options<T | undefined>):void;
+type Calls<S extends string> = (() => Calls<`${S}l`>) | ((x:S) => Calls<`${S}r`>);
+export declare const calls:Calls<"">;
+type Inputs<S extends string> = (left:Inputs<`${S}l`>, right:Inputs<`${S}r`>) => void;
+export declare const inputs:Inputs<"">;
 """
         System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "index.d.ts"), declaration)
         let configFile = System.IO.Path.Combine(directory, "xantham.json")
@@ -239,4 +250,34 @@ export interface Root {tree:Tree<"">}
         Expect.equal result.Value.UnionMembers.Length 2 "both return arms survive"
         let payload = result.Value.UnionMembers |> List.map (fun id -> resolved.Types[id]) |> List.collect _.Members |> List.find (fun member_ -> member_.Symbol.Name = "value")
         Expect.equal payload.TypeId signature.TypeParameters.Head "the nested payload retains the method type parameter"
+        let shared = resolved.Types |> Map.toList |> List.map snd |> List.find (fun facts -> facts.Members |> List.exists (fun member_ -> member_.Symbol.Name = "registry"))
+        let registry = shared.Members |> List.find (fun member_ -> member_.Symbol.Name = "registry")
+        Expect.isTrue (Map.containsKey registry.TypeId resolved.Types) "an exported anonymous object's member survives the width cutoff"
+        Expect.isFalse (Map.containsKey registry.TypeId resolved.NotFollowed) "the exported object's contract is not deferred"
+        let memo = resolved.Types |> Map.toList |> List.map snd |> List.find (fun facts -> facts.SymbolName |> Option.exists (fun name -> string name = "memo"))
+        let options = memo.CallSignatures.Head.Parameters |> List.find (fun parameter -> parameter.Symbol.Name = "options")
+        let optionType = resolved.Types[options.TypeId]
+        for operand in optionType.UnionMembers do
+            Expect.isTrue (Map.containsKey operand resolved.Types) "an exported generic function's options survive the width cutoff"
+        let fetcher = resolved.Types |> Map.toList |> List.map snd |> List.find (fun facts -> facts.CallSignatures |> List.exists (fun signature -> signature.Parameters |> List.exists (fun parameter -> parameter.Symbol.Name = "info")))
+        let fetchSignature = fetcher.CallSignatures.Head
+        Expect.isTrue (Map.containsKey fetchSignature.Parameters.Head.TypeId resolved.Types) "an exported generic callback alias retains its parameter contract"
+        let fetchResult = resolved.Types[fetchSignature.ReturnTypeId]
+        for operand in fetchResult.UnionMembers do
+            Expect.isTrue (Map.containsKey operand resolved.Types) "an exported generic callback alias retains its return operands"
+        let hydratedCallbacks = resolved.Types |> Map.toList |> List.map snd |> List.collect _.CallSignatures |> List.collect _.Parameters |> List.filter (fun parameter -> parameter.Symbol.Name = "details")
+        Expect.isNonEmpty hydratedCallbacks "the nested hydration callback is reached"
+        for parameter in hydratedCallbacks do
+            Expect.isTrue (Map.containsKey parameter.TypeId resolved.Types) "a substituted non-generic callback retains its nested parameter contract"
+        let hydrate = resolved.Types |> Map.toList |> List.map snd |> List.find (fun facts -> facts.SymbolName |> Option.exists (fun name -> string name = "hydrate"))
+        let hydratedOptions = resolved.Types[hydrate.CallSignatures.Head.Parameters.Head.TypeId]
+        let onHydrated = hydratedOptions.Members |> List.find (fun member_ -> member_.Symbol.Name = "onHydrated")
+        Expect.isTrue (Map.containsKey onHydrated.TypeId resolved.Types) "the substituted callback property is resolved"
+        let callbackUnion = resolved.Types[onHydrated.TypeId]
+        for operand in callbackUnion.UnionMembers do
+            Expect.isTrue (Map.containsKey operand resolved.Types) "the substituted callback union operand is resolved"
+        let hydratedSignature = callbackUnion.UnionMembers |> List.map (fun id -> resolved.Types[id]) |> List.collect _.CallSignatures |> List.exactlyOne
+        let details = resolved.Types[hydratedSignature.Parameters[1].TypeId]
+        let hydratedValue = details.Members |> List.find (fun member_ -> member_.Symbol.Name = "value")
+        Expect.contains resolved.Types[hydratedValue.TypeId].UnionMembers hydrate.CallSignatures.Head.TypeParameters.Head "the substituted callback keeps the enclosing function type parameter"
         Expect.isLessThan resolved.Types.Count 1000 "generic expansion terminates under the bounded frontier"

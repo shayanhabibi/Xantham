@@ -284,14 +284,22 @@ type InitializedResourceOptions<'T, 'S> =
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
-    abstract storage: obj option with get, set
-    abstract onHydrated: obj option with get, set
+    abstract storage: ('T option -> ((unit -> 'T option) * (obj -> obj))) option with get, set
+    abstract onHydrated: InitializedResourceOptions.OnHydrated<'S, 'T> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (initialValue: 'T, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: obj, ?onHydrated: obj) : InitializedResourceOptions<'T, 'S> = jsNative
+    static member Create (initialValue: 'T, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: ('T option -> ((unit -> 'T option) * (obj -> obj))), ?onHydrated: InitializedResourceOptions.OnHydrated<'S, 'T>) : InitializedResourceOptions<'T, 'S> = jsNative
 
-type ResourceReturn<'T, 'R> = U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * ResourceReturn.Item<'R>
+type ResourceReturn<'T, 'R> = U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * ResourceReturn.Item<'R, 'T>
 
 type InitializedResourceReturn<'T, 'R> = U3<Errored, Ready<'T>, Refreshing<'T>> * InitializedResourceReturn.Item<'T, 'R>
+
+[<Interface>]
+type DeferredOptions<'T> =
+    abstract equals: U2<bool, DeferredOptions.Equals<'T>> option with get, set
+    abstract name: string option with get, set
+    abstract timeoutMs: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?equals: U2<bool, DeferredOptions.Equals<'T>>, ?name: string, ?timeoutMs: float) : DeferredOptions<'T> = jsNative
 
 /// <remarks>@deprecated</remarks>
 [<Erase>]
@@ -313,10 +321,10 @@ type ContextProviderComponent<'T> = (ContextProviderComponent.Props<'T> -> JSXEl
 [<Interface>]
 type Context<'T> =
     abstract id: obj with get, set
-    abstract Provider: (obj -> JSXElement) with get, set
+    abstract Provider: (Context.Provider.Props<'T> -> JSXElement) with get, set
     abstract defaultValue: 'T with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: obj, Provider: (obj -> JSXElement), defaultValue: 'T) : Context<'T> = jsNative
+    static member Create (id: obj, Provider: (Context.Provider.Props<'T> -> JSXElement), defaultValue: 'T) : Context<'T> = jsNative
 
 type ResolvedJSXElement = U4<float, bool, Fable.Core.TS.Dom.Node, string> option
 
@@ -415,14 +423,14 @@ type SharedConfig =
     abstract load: (string -> obj) option with get, set
     abstract has: (string -> bool) option with get, set
     abstract gather: (string -> unit) option with get, set
-    abstract registry: obj option with get, set
+    abstract registry: Fable.Core.TS.Es.Map<string, JsxDevRuntime.DOMElement> option with get, set
     abstract ``done``: bool option with get, set
     abstract count: float option with get, set
     abstract effects: Computation<obj, obj>[] option with get, set
     abstract getContextId: unit -> string
     abstract getNextContextId: unit -> string
     [<ParamObject; Emit("$0")>]
-    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: JS.Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: obj, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
+    static member Create (getContextId: (unit -> string), getNextContextId: (unit -> string), ?context: SharedConfig.Context, ?resources: JS.Record<string, obj>, ?load: (string -> obj), ?has: (string -> bool), ?gather: (string -> unit), ?registry: Fable.Core.TS.Es.Map<string, JsxDevRuntime.DOMElement>, ?``done``: bool, ?count: float, ?effects: Computation<obj, obj>[]) : SharedConfig = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -444,7 +452,7 @@ type Exports =
     /// </summary>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/index-array</remarks>
     [<Import("indexArray", "solid-js")>]
-    static member indexArray<'T, 'U> (list: (unit -> U2<bool, 'T[]> option), mapFn: IndexArray.MapFn<'U>, ?options: IndexArray.Options) : (unit -> 'U[]) = jsNative
+    static member indexArray<'T, 'U> (list: (unit -> U2<bool, 'T[]> option), mapFn: IndexArray.MapFn<'T, 'U>, ?options: IndexArray.Options) : (unit -> 'U[]) = jsNative
     /// <summary>
     /// Creates a simple observable from a signal's accessor to be used with the <c>from</c> operator of observable libraries like e.g. rxjs
     /// <code lang="typescript">
@@ -458,9 +466,9 @@ type Exports =
     [<Import("observable", "solid-js")>]
     static member observable<'T> (input: (unit -> 'T)) : Observable<'T> = jsNative
     [<Import("from", "solid-js")>]
-    static member from<'T> (producer: obj, initalValue: 'T) : (unit -> 'T) = jsNative
+    static member from<'T> (producer: U2<From.Producer<'T>, From.Producer2<'T>>, initalValue: 'T) : (unit -> 'T) = jsNative
     [<Import("from", "solid-js")>]
-    static member from<'T> (producer: obj) : (unit -> 'T option) = jsNative
+    static member from<'T> (producer: U2<From.Producer3<'T>, From.Producer4<'T>>) : (unit -> 'T option) = jsNative
     [<Import("requestCallback", "solid-js")>]
     static member requestCallback (fn: (unit -> unit), ?options: RequestCallback.Options) : Task = jsNative
     [<Import("cancelCallback", "solid-js")>]
@@ -531,7 +539,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-signal</remarks>
     [<Import("createSignal", "solid-js")>]
-    static member createSignal<'T> (value: 'T, ?options: obj) : (unit -> 'T) * (obj -> obj) = jsNative
+    static member createSignal<'T> (value: 'T, ?options: SignalOptions<'T>) : (unit -> 'T) * (obj -> obj) = jsNative
     /// <summary>
     /// Creates a reactive computation that runs immediately before render, mainly used to write to other reactive primitives
     /// <code lang="typescript">
@@ -627,7 +635,7 @@ type Exports =
     /// <param name="options">allows to set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-effect</remarks>
     [<Import("createEffect", "solid-js")>]
-    static member createEffect<'Next, 'Init> (fn: (U2<'Init, 'Next> -> 'Next), value: 'Init, ?options: obj) : unit = jsNative
+    static member createEffect<'Next, 'Init> (fn: (U2<'Init, 'Next> -> 'Next), value: 'Init, ?options: CreateEffect.Options) : unit = jsNative
     /// <summary>
     /// Creates a reactive computation that runs after the render phase with flexible tracking
     /// <code lang="typescript">
@@ -673,7 +681,7 @@ type Exports =
     /// <param name="options">allows to set a name in dev mode for debugging purposes and use a custom comparison function in equals</param>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-memo</remarks>
     [<Import("createMemo", "solid-js")>]
-    static member createMemo<'Next, 'Init, 'Prev> (fn: (U2<'Init, 'Prev> -> 'Next), value: 'Init, ?options: obj) : (unit -> 'Next) = jsNative
+    static member createMemo<'Next, 'Init, 'Prev> (fn: (U2<'Init, 'Prev> -> 'Next), value: 'Init, ?options: MemoOptions<'Next>) : (unit -> 'Next) = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -705,7 +713,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'R, 'I> (fetcher: CreateResource.Fetcher<'T>, options: CreateResource.Options<'I, 'T>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item<'R, 'I, 'T> = jsNative
+    static member createResource<'T, 'R, 'I> (fetcher: CreateResource.Fetcher<'I, 'T, 'R>, options: CreateResource.Options<'I, 'T>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item<'R, 'I, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -737,7 +745,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'R> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, ?options: obj) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item2<'R, 'T> = jsNative
+    static member createResource<'T, 'R> (fetcher: Func<bool, CreateResource.Fetcher.Info2<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options2<'T>) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item2<'R, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -769,7 +777,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S, 'R, 'I> (source: obj option, fetcher: CreateResource.Fetcher2<'S, 'T>, options: CreateResource.Options2<'I, 'T, 'S>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item3<'R, 'I, 'T> = jsNative
+    static member createResource<'T, 'S, 'R, 'I> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: CreateResource.Fetcher2<'S, 'I, 'T, 'R>, options: CreateResource.Options3<'I, 'T, 'S>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * CreateResource.Result.Item3<'R, 'I, 'T> = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -801,7 +809,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S, 'R> (source: obj option, fetcher: Func<'S, obj, U2<'T, JS.Promise<'T>>>, ?options: obj) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item4<'R, 'T> = jsNative
+    static member createResource<'T, 'S, 'R> (source: U3<bool, 'S, (unit -> U2<bool, 'S> option)> option, fetcher: Func<'S, CreateResource.Fetcher.Info3<'T, 'R>, U2<'T, JS.Promise<'T>>>, ?options: CreateResource.Options4<'S, 'T>) : U5<Errored, Pending, Ready<'T>, Refreshing<'T>, Unresolved> * CreateResource.Result.Item4<'R, 'T> = jsNative
     /// <summary>
     /// Creates a reactive computation that only runs and notifies the reactive context when the browser is idle
     /// <code lang="typescript">
@@ -815,7 +823,7 @@ type Exports =
     /// <param name="options">allows to set the timeout in milliseconds, use a custom comparison function and set a name in dev mode for debugging purposes</param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-deferred</remarks>
     [<Import("createDeferred", "solid-js")>]
-    static member createDeferred<'T> (source: (unit -> 'T), ?options: obj) : (unit -> 'T) = jsNative
+    static member createDeferred<'T> (source: (unit -> 'T), ?options: DeferredOptions<'T>) : (unit -> 'T) = jsNative
     /// <summary>
     /// Creates a conditional signal that only notifies subscribers when entering or exiting their key matching the value
     /// <code lang="typescript">
@@ -840,7 +848,7 @@ type Exports =
     /// </param>
     /// <remarks>@description https://docs.solidjs.com/reference/secondary-primitives/create-selector</remarks>
     [<Import("createSelector", "solid-js")>]
-    static member createSelector<'T, 'U> (source: (unit -> 'T), ?fn: obj, ?options: BaseOptions) : ('U -> bool) = jsNative
+    static member createSelector<'T, 'U> (source: (unit -> 'T), ?fn: Func<'U, 'T, bool>, ?options: BaseOptions) : ('U -> bool) = jsNative
     /// <summary>
     /// Holds changes inside the block before the reactive context is updated
     /// </summary>
@@ -884,7 +892,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/on-util</remarks>
     [<Import("on", "solid-js")>]
-    static member on<'S, 'Next, 'Prev> (deps: obj, fn: Func<'S, 'S option, JS.NoInfer<'Prev> option, 'Next>, ?options: obj) : (JS.NoInfer<'Next> option -> JS.NoInfer<'Next>) = jsNative
+    static member on<'S, 'Next, 'Prev> (deps: U2<(unit -> 'S), obj[]>, fn: Func<'S, 'S option, JS.NoInfer<'Prev> option, 'Next>, ?options: On.Options) : (JS.NoInfer<'Next> option -> JS.NoInfer<'Next>) = jsNative
     /// <summary>
     /// Makes dependencies of a computation explicit
     /// <code lang="typescript">
@@ -912,7 +920,7 @@ type Exports =
     /// </returns>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/on-util</remarks>
     [<Import("on", "solid-js")>]
-    static member on<'S, 'Next, 'Prev> (deps: obj, fn: Func<'S, 'S option, JS.NoInfer<'Prev> option, 'Next>, options: U2<OnOptions, On.Options>) : (JS.NoInfer<'Next> option -> JS.NoInfer<'Next> option) = jsNative
+    static member on<'S, 'Next, 'Prev> (deps: U2<(unit -> 'S), obj[]>, fn: Func<'S, 'S option, JS.NoInfer<'Prev> option, 'Next>, options: U2<OnOptions, On.Options2>) : (JS.NoInfer<'Next> option -> JS.NoInfer<'Next> option) = jsNative
     /// <summary>
     /// Runs an effect only after initial render on mount
     /// </summary>
@@ -1185,6 +1193,15 @@ module Computation =
         [<ParamObject; Emit("$0")>]
         static member Create (?increment: (unit -> unit), ?decrement: (unit -> unit), ?inFallback: (unit -> bool), ?effects: Computation<obj, obj>[], ?resolved: bool) : Suspense = jsNative
 
+module Context =
+    module Provider =
+        [<Interface>]
+        type Props<'T> =
+            abstract value: 'T with get, set
+            abstract children: JSXElement with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (value: 'T, children: JSXElement) : Props<'T> = jsNative
+
 module ContextProviderComponent =
     [<Interface>]
     type Props<'T> =
@@ -1193,10 +1210,18 @@ module ContextProviderComponent =
         [<ParamObject; Emit("$0")>]
         static member Create (value: 'T, children: JSXElement) : Props<'T> = jsNative
 
-module CreateResource =
-    type Fetcher<'T> = delegate of k: bool * info: obj -> U2<'T, JS.Promise<'T>>
+module CreateEffect =
+    [<Interface>]
+    type Options =
+        inherit EffectOptions
+        abstract render: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?name: string, ?render: bool) : Options = jsNative
 
-    type Fetcher2<'S, 'T> = delegate of k: 'S * info: obj -> U2<'T, JS.Promise<'T>>
+module CreateResource =
+    type Fetcher<'I, 'T, 'R> = delegate of k: bool * info: CreateResource.Fetcher.Info<'R, 'I, 'T> -> U2<'T, JS.Promise<'T>>
+
+    type Fetcher2<'S, 'I, 'T, 'R> = delegate of k: 'S * info: CreateResource.Fetcher2.Info<'R, 'I, 'T> -> U2<'T, JS.Promise<'T>>
 
     [<Interface>]
     type Options<'I, 'T> =
@@ -1210,15 +1235,67 @@ module CreateResource =
         static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options.OnHydrated<'I, 'T>) : Options<'I, 'T> = jsNative
 
     [<Interface>]
-    type Options2<'I, 'T, 'S> =
+    type Options2<'T> =
+        abstract initialValue: JS.NoInfer<'T> option with get, set
+        abstract name: string option with get, set
+        abstract deferStream: bool option with get, set
+        abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
+        abstract storage: (JS.NoInfer<'T> option -> ((unit -> JS.NoInfer<'T> option) * (obj[] -> unit))) option with get, set
+        abstract onHydrated: CreateResource.Options2.OnHydrated<'T> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?initialValue: JS.NoInfer<'T>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (JS.NoInfer<'T> option -> ((unit -> JS.NoInfer<'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options2.OnHydrated<'T>) : Options2<'T> = jsNative
+
+    [<Interface>]
+    type Options3<'I, 'T, 'S> =
         abstract initialValue: obj with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
         abstract storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))) option with get, set
-        abstract onHydrated: CreateResource.Options2.OnHydrated<'S, 'I, 'T> option with get, set
+        abstract onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options2.OnHydrated<'S, 'I, 'T>) : Options2<'I, 'T, 'S> = jsNative
+        static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T>) : Options3<'I, 'T, 'S> = jsNative
+
+    [<Interface>]
+    type Options4<'S, 'T> =
+        abstract initialValue: JS.NoInfer<'T> option with get, set
+        abstract name: string option with get, set
+        abstract deferStream: bool option with get, set
+        abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
+        abstract storage: (JS.NoInfer<'T> option -> ((unit -> JS.NoInfer<'T> option) * (obj[] -> unit))) option with get, set
+        abstract onHydrated: CreateResource.Options4.OnHydrated<'S, 'T> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?initialValue: JS.NoInfer<'T>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (JS.NoInfer<'T> option -> ((unit -> JS.NoInfer<'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options4.OnHydrated<'S, 'T>) : Options4<'S, 'T> = jsNative
+
+    module Fetcher =
+        [<Interface>]
+        type Info<'R, 'I, 'T> =
+            abstract value: U2<'I, 'T> option with get, set
+            abstract refetching: U2<bool, 'R> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (refetching: U2<bool, 'R>, ?value: U2<'I, 'T>) : Info<'R, 'I, 'T> = jsNative
+
+        [<Interface>]
+        type Info2<'T, 'R> =
+            abstract value: 'T option with get, set
+            abstract refetching: U2<bool, 'R> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (refetching: U2<bool, 'R>, ?value: 'T) : Info2<'T, 'R> = jsNative
+
+        [<Interface>]
+        type Info3<'T, 'R> =
+            abstract value: 'T option with get, set
+            abstract refetching: U2<bool, 'R> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (refetching: U2<bool, 'R>, ?value: 'T) : Info3<'T, 'R> = jsNative
+
+    module Fetcher2 =
+        [<Interface>]
+        type Info<'R, 'I, 'T> =
+            abstract value: U2<'I, 'T> option with get, set
+            abstract refetching: U2<bool, 'R> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (refetching: U2<bool, 'R>, ?value: U2<'I, 'T>) : Info<'R, 'I, 'T> = jsNative
 
     module Options =
         type OnHydrated<'I, 'T> = delegate of k: bool option * info: CreateResource.Options.OnHydrated.Info<'I, 'T> -> unit
@@ -1231,7 +1308,17 @@ module CreateResource =
                 static member Create (?value: U2<'I, 'T>) : Info<'I, 'T> = jsNative
 
     module Options2 =
-        type OnHydrated<'S, 'I, 'T> = delegate of k: 'S option * info: CreateResource.Options2.OnHydrated.Info<'I, 'T> -> unit
+        type OnHydrated<'T> = delegate of k: bool option * info: CreateResource.Options2.OnHydrated.Info<'T> -> unit
+
+        module OnHydrated =
+            [<Interface>]
+            type Info<'T> =
+                abstract value: JS.NoInfer<'T> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?value: JS.NoInfer<'T>) : Info<'T> = jsNative
+
+    module Options3 =
+        type OnHydrated<'S, 'I, 'T> = delegate of k: 'S option * info: CreateResource.Options3.OnHydrated.Info<'I, 'T> -> unit
 
         module OnHydrated =
             [<Interface>]
@@ -1240,25 +1327,43 @@ module CreateResource =
                 [<ParamObject; Emit("$0")>]
                 static member Create (?value: U2<'I, 'T>) : Info<'I, 'T> = jsNative
 
+    module Options4 =
+        type OnHydrated<'S, 'T> = delegate of k: 'S option * info: CreateResource.Options4.OnHydrated.Info<'T> -> unit
+
+        module OnHydrated =
+            [<Interface>]
+            type Info<'T> =
+                abstract value: JS.NoInfer<'T> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?value: JS.NoInfer<'T>) : Info<'T> = jsNative
+
     module Result =
         type Item<'R, 'I, 'T> =
             abstract mutate: [<ParamArray>] args: obj -> obj
-            abstract mutate<'U>: value: U2<(U2<'I, 'T> -> 'U), 'U> -> 'U
+            abstract mutate<'U>: value: (U2<'I, 'T> -> 'U) -> 'U
+            abstract mutate<'U>: value: 'U -> 'U
+            abstract mutate<'U>: value: obj -> 'U
             abstract refetch: ('R option -> U3<'I, 'T, JS.Promise<U2<'I, 'T>>> option) with get, set
 
         type Item2<'R, 'T> =
-            abstract mutate: [<ParamArray>] args: obj -> obj
-            abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
+            abstract mutate: [<ParamArray>] args: obj[] -> unit
+            abstract mutate<'U>: value: ('T option -> 'U) -> 'U
+            abstract mutate<'U>: value: 'U -> 'U
+            abstract mutate<'U>: value: obj -> 'U
             abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
 
         type Item3<'R, 'I, 'T> =
             abstract mutate: [<ParamArray>] args: obj -> obj
-            abstract mutate<'U>: value: U2<(U2<'I, 'T> -> 'U), 'U> -> 'U
+            abstract mutate<'U>: value: (U2<'I, 'T> -> 'U) -> 'U
+            abstract mutate<'U>: value: 'U -> 'U
+            abstract mutate<'U>: value: obj -> 'U
             abstract refetch: ('R option -> U3<'I, 'T, JS.Promise<U2<'I, 'T>>> option) with get, set
 
         type Item4<'R, 'T> =
-            abstract mutate: [<ParamArray>] args: obj -> obj
-            abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
+            abstract mutate: [<ParamArray>] args: obj[] -> unit
+            abstract mutate<'U>: value: ('T option -> 'U) -> 'U
+            abstract mutate<'U>: value: 'U -> 'U
+            abstract mutate<'U>: value: obj -> 'U
             abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
 
 module DEV =
@@ -1271,11 +1376,14 @@ module DEV =
         [<ParamObject; Emit("$0")>]
         static member Create (?afterUpdate: (unit -> unit), ?afterCreateOwner: (Owner -> unit), ?afterCreateSignal: (SignalState<obj> -> unit), ?afterRegisterGraph: (SourceMapValue -> unit)) : Hooks = jsNative
 
+module DeferredOptions =
+    type Equals<'T> = delegate of prev: 'T * next: 'T -> bool
+
 module EnableExternalSource =
     [<Fickl.Core.CallableInterface>]
     type Factory =
         [<Emit("$0($1...)")>]
-        abstract Invoke: fn: obj * trigger: (unit -> unit) -> ExternalSource
+        abstract Invoke<'Prev, 'Next>: fn: ('Prev -> 'Next) * trigger: (unit -> unit) -> ExternalSource
 
     [<Fickl.Core.CallableInterface>]
     type Untrack =
@@ -1304,6 +1412,31 @@ module For =
 
     module Props =
         type Children<'U> = delegate of item: obj * index: (unit -> float) -> 'U
+
+module From =
+    type Producer<'T> = delegate of setter: (obj -> obj) -> (unit -> unit)
+
+    [<Interface>]
+    type Producer2<'T> =
+        abstract subscribe: (('T -> unit) -> U2<(unit -> unit), From.Producer2.Subscribe.Result>) with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (subscribe: (('T -> unit) -> U2<(unit -> unit), From.Producer2.Subscribe.Result>)) : Producer2<'T> = jsNative
+
+    type Producer3<'T> = delegate of setter: (obj[] -> unit) -> (unit -> unit)
+
+    [<Interface>]
+    type Producer4<'T> =
+        abstract subscribe: (('T option -> unit) -> U2<(unit -> unit), From.Producer2.Subscribe.Result>) with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (subscribe: (('T option -> unit) -> U2<(unit -> unit), From.Producer2.Subscribe.Result>)) : Producer4<'T> = jsNative
+
+    module Producer2 =
+        module Subscribe =
+            [<Interface>]
+            type Result =
+                abstract unsubscribe: (unit -> unit) with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (unsubscribe: (unit -> unit)) : Result = jsNative
 
 /// <summary>solid-js/h</summary>
 module H =
@@ -16703,345 +16836,345 @@ module H =
             module MaskSVGAttributes =
                 type Base<'T> =
                     abstract ref: U2<'T, ('T -> unit)> option with get, set
-                    abstract children: U7<float, bool, JSX.Element[], JSX.FunctionElement, Fable.Core.TS.Dom.Node, (unit -> JSX.Element), string> option with get, set
-                    abstract classList: JSX.ClassList option with get, set
+                    abstract children: U7<float, bool, SolidJs.H.JsxDevRuntime.JSX.Element[], SolidJs.H.JsxDevRuntime.JSX.FunctionElement, Fable.Core.TS.Dom.Node, (unit -> SolidJs.H.JsxDevRuntime.JSX.Element), string> option with get, set
+                    abstract classList: SolidJs.H.JsxDevRuntime.JSX.ClassList option with get, set
                     abstract ``$ServerOnly``: bool option with get, set
-                    abstract onAbort: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
-                    abstract onAnimationCancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
-                    abstract onAnimationEnd: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
-                    abstract onAnimationIteration: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
-                    abstract onAnimationStart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
-                    abstract onAuxClick: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onBeforeCopy: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onBeforeCut: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onBeforeInput: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.InputEvent, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
-                    abstract onBeforeMatch: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onBeforePaste: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onBeforeToggle: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ToggleEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>> option with get, set
-                    abstract onBeforeXRSelect: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onBlur: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract onCancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onCanPlay: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onCanPlayThrough: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onClick: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onClose: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onCommand: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onCompositionEnd: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
-                    abstract onCompositionStart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
-                    abstract onCompositionUpdate: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
-                    abstract onContentVisibilityAutoStateChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>> option with get, set
-                    abstract onContextLost: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onContextMenu: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onContextRestored: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onCopy: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onCueChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onCut: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onDblClick: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onDrag: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract onDragEnd: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract onDragEnter: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract onDragExit: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract onDragLeave: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract onDragOver: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract onDragStart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract onDrop: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract onDurationChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onEmptied: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onEnded: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onError: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ErrorEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>> option with get, set
-                    abstract onFocus: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract onFocusIn: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract onFocusOut: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract onFormData: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FormDataEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>> option with get, set
-                    abstract onFullscreenChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onFullscreenError: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onGotPointerCapture: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onInput: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.InputEvent, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
-                    abstract onInvalid: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onKeyDown: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
-                    abstract onKeyPress: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
-                    abstract onKeyUp: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
-                    abstract onLoad: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onLoadedData: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onLoadedMetadata: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onLoadStart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onLostPointerCapture: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onMouseDown: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onMouseEnter: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onMouseLeave: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onMouseMove: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onMouseOut: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onMouseOver: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onMouseUp: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onPaste: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onPause: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onPlay: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onPlaying: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onPointerCancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onPointerDown: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onPointerEnter: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onPointerLeave: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onPointerMove: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onPointerOut: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onPointerOver: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onPointerRawUpdate: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onPointerUp: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onProgress: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>> option with get, set
-                    abstract onRateChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onReset: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onResize: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
-                    abstract onScroll: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onScrollEnd: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onScrollSnapChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onScrollSnapChanging: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onSecurityPolicyViolation: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>> option with get, set
-                    abstract onSeeked: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onSeeking: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onSelect: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onSelectionChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onSelectStart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onSlotChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onStalled: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onSubmit: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.SubmitEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>> option with get, set
-                    abstract onSuspend: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onTimeUpdate: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onToggle: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ToggleEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>> option with get, set
-                    abstract onTouchCancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
-                    abstract onTouchEnd: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
-                    abstract onTouchMove: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
-                    abstract onTouchStart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
-                    abstract onTransitionCancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
-                    abstract onTransitionEnd: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
-                    abstract onTransitionRun: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
-                    abstract onTransitionStart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
-                    abstract onVolumeChange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onWaiting: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onWheel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.WheelEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>> option with get, set
-                    abstract onabort: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
-                    abstract onanimationcancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
-                    abstract onanimationend: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
-                    abstract onanimationiteration: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
-                    abstract onanimationstart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
-                    abstract onauxclick: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onbeforecopy: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onbeforecut: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onbeforeinput: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.InputEvent, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
-                    abstract onbeforematch: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onbeforepaste: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onbeforetoggle: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ToggleEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>> option with get, set
-                    abstract onbeforexrselect: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onblur: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract oncancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract oncanplay: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract oncanplaythrough: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onchange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onclick: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onclose: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract oncommand: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract oncompositionend: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
-                    abstract oncompositionstart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
-                    abstract oncompositionupdate: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
-                    abstract oncontentvisibilityautostatechange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>> option with get, set
-                    abstract oncontextlost: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract oncontextmenu: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract oncontextrestored: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract oncopy: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract oncuechange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract oncut: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract ondblclick: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract ondrag: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract ondragend: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract ondragenter: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract ondragexit: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract ondragleave: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract ondragover: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract ondragstart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract ondrop: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
-                    abstract ondurationchange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onemptied: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onended: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onerror: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ErrorEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>> option with get, set
-                    abstract onfocus: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract onfocusin: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract onfocusout: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract onformdata: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FormDataEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>> option with get, set
-                    abstract onfullscreenchange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onfullscreenerror: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract ongotpointercapture: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract oninput: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.InputEvent, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
-                    abstract oninvalid: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onkeydown: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
-                    abstract onkeypress: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
-                    abstract onkeyup: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
-                    abstract onload: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onloadeddata: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onloadedmetadata: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onloadstart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onlostpointercapture: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onmousedown: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onmouseenter: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onmouseleave: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onmousemove: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onmouseout: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onmouseover: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onmouseup: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
-                    abstract onpaste: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
-                    abstract onpause: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onplay: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onplaying: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onpointercancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onpointerdown: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onpointerenter: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onpointerleave: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onpointermove: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onpointerout: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onpointerover: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onpointerrawupdate: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onpointerup: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
-                    abstract onprogress: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>> option with get, set
-                    abstract onratechange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onreset: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onresize: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
-                    abstract onscroll: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onscrollend: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onscrollsnapchange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onscrollsnapchanging: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onsecuritypolicyviolation: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>> option with get, set
-                    abstract onseeked: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onseeking: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onselect: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onselectionchange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onselectstart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onslotchange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onstalled: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onsubmit: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.SubmitEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>> option with get, set
-                    abstract onsuspend: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract ontimeupdate: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract ontoggle: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ToggleEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>> option with get, set
-                    abstract ontouchcancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
-                    abstract ontouchend: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
-                    abstract ontouchmove: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
-                    abstract ontouchstart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
-                    abstract ontransitioncancel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
-                    abstract ontransitionend: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
-                    abstract ontransitionrun: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
-                    abstract ontransitionstart: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
-                    abstract onvolumechange: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onwaiting: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
-                    abstract onwheel: U2<JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.WheelEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>>, JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>> option with get, set
-                    abstract ``on:abort``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.UIEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>> option with get, set
-                    abstract ``on:animationcancel``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>> option with get, set
-                    abstract ``on:animationend``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>> option with get, set
-                    abstract ``on:animationiteration``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>> option with get, set
-                    abstract ``on:animationstart``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.AnimationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>> option with get, set
-                    abstract ``on:auxclick``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:beforecopy``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
-                    abstract ``on:beforecut``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
-                    abstract ``on:beforeinput``: U2<JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.InputEvent, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
-                    abstract ``on:beforematch``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:beforepaste``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
-                    abstract ``on:beforetoggle``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ToggleEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>> option with get, set
-                    abstract ``on:beforexrselect``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:blur``: U2<JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract ``on:cancel``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:canplay``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:canplaythrough``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:change``: U2<JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:click``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:close``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:command``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:compositionend``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>> option with get, set
-                    abstract ``on:compositionstart``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>> option with get, set
-                    abstract ``on:compositionupdate``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.CompositionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>> option with get, set
-                    abstract ``on:contentvisibilityautostatechange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>>> option with get, set
-                    abstract ``on:contextlost``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:contextmenu``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:contextrestored``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:copy``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
-                    abstract ``on:cuechange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:cut``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
-                    abstract ``on:dblclick``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:drag``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
-                    abstract ``on:dragend``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
-                    abstract ``on:dragenter``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
-                    abstract ``on:dragexit``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
-                    abstract ``on:dragleave``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
-                    abstract ``on:dragover``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
-                    abstract ``on:dragstart``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
-                    abstract ``on:drop``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
-                    abstract ``on:durationchange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:emptied``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:ended``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:error``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ErrorEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>>> option with get, set
-                    abstract ``on:focus``: U2<JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract ``on:focusin``: U2<JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract ``on:focusout``: U2<JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FocusEvent, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
-                    abstract ``on:formdata``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FormDataEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>>> option with get, set
-                    abstract ``on:fullscreenchange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:fullscreenerror``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:gotpointercapture``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:input``: U2<JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.InputEvent, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
-                    abstract ``on:invalid``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:keydown``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>> option with get, set
-                    abstract ``on:keypress``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>> option with get, set
-                    abstract ``on:keyup``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.KeyboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>> option with get, set
-                    abstract ``on:load``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:loadeddata``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:loadedmetadata``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:loadstart``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:lostpointercapture``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:mousedown``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:mouseenter``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:mouseleave``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:mousemove``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:mouseout``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:mouseover``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:mouseup``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
-                    abstract ``on:paste``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
-                    abstract ``on:pause``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:play``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:playing``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:pointercancel``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:pointerdown``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:pointerenter``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:pointerleave``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:pointermove``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:pointerout``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:pointerover``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:pointerrawupdate``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:pointerup``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
-                    abstract ``on:progress``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>, JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>>> option with get, set
-                    abstract ``on:ratechange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:reset``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:resize``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.UIEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>> option with get, set
-                    abstract ``on:scroll``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:scrollend``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:scrollsnapchange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:scrollsnapchanging``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:securitypolicyviolation``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>>> option with get, set
-                    abstract ``on:seeked``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:seeking``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:select``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:selectionchange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:selectstart``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:slotchange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:stalled``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:submit``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.SubmitEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>>> option with get, set
-                    abstract ``on:suspend``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:timeupdate``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:toggle``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ToggleEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>> option with get, set
-                    abstract ``on:touchcancel``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>> option with get, set
-                    abstract ``on:touchend``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>> option with get, set
-                    abstract ``on:touchmove``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>> option with get, set
-                    abstract ``on:touchstart``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TouchEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>> option with get, set
-                    abstract ``on:transitioncancel``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>> option with get, set
-                    abstract ``on:transitionend``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>> option with get, set
-                    abstract ``on:transitionrun``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>> option with get, set
-                    abstract ``on:transitionstart``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TransitionEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>> option with get, set
-                    abstract ``on:volumechange``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:waiting``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
-                    abstract ``on:wheel``: U2<JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>, JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.WheelEvent, JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>>> option with get, set
+                    abstract onAbort: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
+                    abstract onAnimationCancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
+                    abstract onAnimationEnd: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
+                    abstract onAnimationIteration: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
+                    abstract onAnimationStart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
+                    abstract onAuxClick: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onBeforeCopy: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onBeforeCut: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onBeforeInput: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.InputEvent, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
+                    abstract onBeforeMatch: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onBeforePaste: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onBeforeToggle: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ToggleEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>> option with get, set
+                    abstract onBeforeXRSelect: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onBlur: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract onCancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onCanPlay: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onCanPlayThrough: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onClick: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onClose: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onCommand: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onCompositionEnd: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
+                    abstract onCompositionStart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
+                    abstract onCompositionUpdate: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
+                    abstract onContentVisibilityAutoStateChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>> option with get, set
+                    abstract onContextLost: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onContextMenu: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onContextRestored: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onCopy: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onCueChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onCut: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onDblClick: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onDrag: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract onDragEnd: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract onDragEnter: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract onDragExit: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract onDragLeave: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract onDragOver: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract onDragStart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract onDrop: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract onDurationChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onEmptied: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onEnded: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onError: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ErrorEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>> option with get, set
+                    abstract onFocus: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract onFocusIn: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract onFocusOut: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract onFormData: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FormDataEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>> option with get, set
+                    abstract onFullscreenChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onFullscreenError: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onGotPointerCapture: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onInput: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.InputEvent, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
+                    abstract onInvalid: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onKeyDown: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
+                    abstract onKeyPress: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
+                    abstract onKeyUp: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
+                    abstract onLoad: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onLoadedData: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onLoadedMetadata: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onLoadStart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onLostPointerCapture: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onMouseDown: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onMouseEnter: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onMouseLeave: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onMouseMove: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onMouseOut: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onMouseOver: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onMouseUp: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onPaste: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onPause: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onPlay: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onPlaying: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onPointerCancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onPointerDown: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onPointerEnter: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onPointerLeave: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onPointerMove: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onPointerOut: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onPointerOver: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onPointerRawUpdate: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onPointerUp: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onProgress: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>> option with get, set
+                    abstract onRateChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onReset: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onResize: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
+                    abstract onScroll: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onScrollEnd: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onScrollSnapChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onScrollSnapChanging: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onSecurityPolicyViolation: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>> option with get, set
+                    abstract onSeeked: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onSeeking: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onSelect: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onSelectionChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onSelectStart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onSlotChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onStalled: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onSubmit: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.SubmitEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>> option with get, set
+                    abstract onSuspend: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onTimeUpdate: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onToggle: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ToggleEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>> option with get, set
+                    abstract onTouchCancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
+                    abstract onTouchEnd: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
+                    abstract onTouchMove: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
+                    abstract onTouchStart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
+                    abstract onTransitionCancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
+                    abstract onTransitionEnd: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
+                    abstract onTransitionRun: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
+                    abstract onTransitionStart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
+                    abstract onVolumeChange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onWaiting: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onWheel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.WheelEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>> option with get, set
+                    abstract onabort: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
+                    abstract onanimationcancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
+                    abstract onanimationend: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
+                    abstract onanimationiteration: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
+                    abstract onanimationstart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>> option with get, set
+                    abstract onauxclick: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onbeforecopy: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onbeforecut: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onbeforeinput: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.InputEvent, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
+                    abstract onbeforematch: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onbeforepaste: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onbeforetoggle: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ToggleEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>> option with get, set
+                    abstract onbeforexrselect: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onblur: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract oncancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract oncanplay: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract oncanplaythrough: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onchange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onclick: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onclose: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract oncommand: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract oncompositionend: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
+                    abstract oncompositionstart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
+                    abstract oncompositionupdate: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>> option with get, set
+                    abstract oncontentvisibilityautostatechange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>> option with get, set
+                    abstract oncontextlost: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract oncontextmenu: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract oncontextrestored: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract oncopy: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract oncuechange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract oncut: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract ondblclick: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract ondrag: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract ondragend: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract ondragenter: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract ondragexit: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract ondragleave: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract ondragover: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract ondragstart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract ondrop: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>> option with get, set
+                    abstract ondurationchange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onemptied: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onended: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onerror: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ErrorEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>> option with get, set
+                    abstract onfocus: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract onfocusin: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract onfocusout: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract onformdata: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.FormDataEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>> option with get, set
+                    abstract onfullscreenchange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onfullscreenerror: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract ongotpointercapture: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract oninput: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.InputEvent, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
+                    abstract oninvalid: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onkeydown: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
+                    abstract onkeypress: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
+                    abstract onkeyup: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>> option with get, set
+                    abstract onload: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onloadeddata: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onloadedmetadata: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onloadstart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onlostpointercapture: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onmousedown: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onmouseenter: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onmouseleave: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onmousemove: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onmouseout: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onmouseover: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onmouseup: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>> option with get, set
+                    abstract onpaste: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>> option with get, set
+                    abstract onpause: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onplay: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onplaying: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onpointercancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onpointerdown: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onpointerenter: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onpointerleave: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onpointermove: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onpointerout: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onpointerover: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onpointerrawupdate: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onpointerup: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>> option with get, set
+                    abstract onprogress: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>> option with get, set
+                    abstract onratechange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onreset: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onresize: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.UIEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>> option with get, set
+                    abstract onscroll: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onscrollend: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onscrollsnapchange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onscrollsnapchanging: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onsecuritypolicyviolation: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>> option with get, set
+                    abstract onseeked: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onseeking: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onselect: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onselectionchange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onselectstart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onslotchange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onstalled: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onsubmit: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.SubmitEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>> option with get, set
+                    abstract onsuspend: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract ontimeupdate: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract ontoggle: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.ToggleEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>> option with get, set
+                    abstract ontouchcancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
+                    abstract ontouchend: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
+                    abstract ontouchmove: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
+                    abstract ontouchstart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>> option with get, set
+                    abstract ontransitioncancel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
+                    abstract ontransitionend: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
+                    abstract ontransitionrun: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
+                    abstract ontransitionstart: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>> option with get, set
+                    abstract onvolumechange: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onwaiting: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>> option with get, set
+                    abstract onwheel: U2<SolidJs.H.JsxDevRuntime.JSX.BoundEventHandler<'T, Fable.Core.TS.Dom.WheelEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>> option with get, set
+                    abstract ``on:abort``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.UIEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>> option with get, set
+                    abstract ``on:animationcancel``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>> option with get, set
+                    abstract ``on:animationend``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>> option with get, set
+                    abstract ``on:animationiteration``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>> option with get, set
+                    abstract ``on:animationstart``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.AnimationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.AnimationEvent>>> option with get, set
+                    abstract ``on:auxclick``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:beforecopy``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
+                    abstract ``on:beforecut``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
+                    abstract ``on:beforeinput``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.InputEvent, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
+                    abstract ``on:beforematch``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:beforepaste``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
+                    abstract ``on:beforetoggle``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ToggleEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>> option with get, set
+                    abstract ``on:beforexrselect``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:blur``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract ``on:cancel``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:canplay``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:canplaythrough``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:change``: U2<SolidJs.H.JsxDevRuntime.JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.ChangeEventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:click``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:close``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:command``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:compositionend``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>> option with get, set
+                    abstract ``on:compositionstart``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>> option with get, set
+                    abstract ``on:compositionupdate``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.CompositionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.CompositionEvent>>> option with get, set
+                    abstract ``on:contentvisibilityautostatechange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent>>> option with get, set
+                    abstract ``on:contextlost``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:contextmenu``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:contextrestored``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:copy``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
+                    abstract ``on:cuechange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:cut``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
+                    abstract ``on:dblclick``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:drag``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
+                    abstract ``on:dragend``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
+                    abstract ``on:dragenter``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
+                    abstract ``on:dragexit``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
+                    abstract ``on:dragleave``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
+                    abstract ``on:dragover``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
+                    abstract ``on:dragstart``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
+                    abstract ``on:drop``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.DragEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.DragEvent>>> option with get, set
+                    abstract ``on:durationchange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:emptied``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:ended``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:error``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ErrorEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ErrorEvent>>> option with get, set
+                    abstract ``on:focus``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract ``on:focusin``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract ``on:focusout``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FocusEvent, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>>, SolidJs.H.JsxDevRuntime.JSX.FocusEventHandler<'T, Fable.Core.TS.Dom.FocusEvent>> option with get, set
+                    abstract ``on:formdata``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.FormDataEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.FormDataEvent>>> option with get, set
+                    abstract ``on:fullscreenchange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:fullscreenerror``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:gotpointercapture``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:input``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.InputEvent, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>>, SolidJs.H.JsxDevRuntime.JSX.InputEventHandler<'T, Fable.Core.TS.Dom.InputEvent>> option with get, set
+                    abstract ``on:invalid``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:keydown``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>> option with get, set
+                    abstract ``on:keypress``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>> option with get, set
+                    abstract ``on:keyup``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.KeyboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.KeyboardEvent>>> option with get, set
+                    abstract ``on:load``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:loadeddata``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:loadedmetadata``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:loadstart``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:lostpointercapture``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:mousedown``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:mouseenter``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:mouseleave``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:mousemove``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:mouseout``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:mouseover``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:mouseup``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.MouseEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.MouseEvent>>> option with get, set
+                    abstract ``on:paste``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ClipboardEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ClipboardEvent>>> option with get, set
+                    abstract ``on:pause``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:play``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:playing``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:pointercancel``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:pointerdown``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:pointerenter``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:pointerleave``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:pointermove``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:pointerout``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:pointerover``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:pointerrawupdate``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:pointerup``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.PointerEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.PointerEvent>>> option with get, set
+                    abstract ``on:progress``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget>>>> option with get, set
+                    abstract ``on:ratechange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:reset``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:resize``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.UIEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.UIEvent>>> option with get, set
+                    abstract ``on:scroll``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:scrollend``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:scrollsnapchange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:scrollsnapchanging``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:securitypolicyviolation``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SecurityPolicyViolationEvent>>> option with get, set
+                    abstract ``on:seeked``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:seeking``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:select``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:selectionchange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:selectstart``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:slotchange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:stalled``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:submit``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.SubmitEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.SubmitEvent>>> option with get, set
+                    abstract ``on:suspend``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:timeupdate``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:toggle``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.ToggleEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.ToggleEvent>>> option with get, set
+                    abstract ``on:touchcancel``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>> option with get, set
+                    abstract ``on:touchend``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>> option with get, set
+                    abstract ``on:touchmove``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>> option with get, set
+                    abstract ``on:touchstart``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TouchEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TouchEvent>>> option with get, set
+                    abstract ``on:transitioncancel``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>> option with get, set
+                    abstract ``on:transitionend``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>> option with get, set
+                    abstract ``on:transitionrun``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>> option with get, set
+                    abstract ``on:transitionstart``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.TransitionEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.TransitionEvent>>> option with get, set
+                    abstract ``on:volumechange``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:waiting``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.Event, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.Event>>> option with get, set
+                    abstract ``on:wheel``: U2<SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>, SolidJs.H.JsxDevRuntime.JSX.EventHandlerWithOptions<'T, Fable.Core.TS.Dom.WheelEvent, SolidJs.H.JsxDevRuntime.JSX.EventHandler<'T, Fable.Core.TS.Dom.WheelEvent>>> option with get, set
                     abstract innerHTML: U2<string, (unit -> string)> option with get, set
                     abstract textContent: U3<string, float, (unit -> U2<string, float>)> option with get, set
                     abstract autofocus: U2<bool, (unit -> bool option)> option with get, set
@@ -17050,7 +17183,7 @@ module H =
                     abstract id: U2<string, (unit -> string option)> option with get, set
                     abstract nonce: U2<string, (unit -> string option)> option with get, set
                     abstract slot: U2<string, (unit -> string option)> option with get, set
-                    abstract style: U3<string, JSX.CSSProperties, (unit -> U2<string, JSX.CSSProperties> option)> option with get, set
+                    abstract style: U3<string, SolidJs.H.JsxDevRuntime.JSX.CSSProperties, (unit -> U2<string, SolidJs.H.JsxDevRuntime.JSX.CSSProperties> option)> option with get, set
                     /// <summary>
                     /// Identifies the currently active element when DOM focus is on a composite widget, textbox,
                     /// group, or application.
@@ -18508,7 +18641,7 @@ module Html =
     [<Erase>]
     type Exports =
         [<Import("default", "solid-js/html")>]
-        static member html (statics: Fable.Core.TS.Es.TemplateStringsArray, [<ParamArray>] args: obj[]) : obj = jsNative
+        static member html (statics: Fable.Core.TS.Es.TemplateStringsArray, [<ParamArray>] args: obj[]) : U2<Fable.Core.TS.Dom.Node[], Fable.Core.TS.Dom.Node> = jsNative
 
 module Index =
     [<Interface>]
@@ -18523,7 +18656,7 @@ module Index =
         type Children<'U> = delegate of item: (unit -> obj) * index: float -> 'U
 
 module IndexArray =
-    type MapFn<'U> = delegate of v: obj * i: float -> 'U
+    type MapFn<'T, 'U> = delegate of v: (unit -> 'T) * i: float -> 'U
 
     [<Interface>]
     type Options =
@@ -18531,13 +18664,23 @@ module IndexArray =
         [<ParamObject; Emit("$0")>]
         static member Create (?fallback: (unit -> obj)) : Options = jsNative
 
+module InitializedResourceOptions =
+    type OnHydrated<'S, 'T> = delegate of k: 'S option * info: InitializedResourceOptions.OnHydrated.Info<'T> -> unit
+
+    module OnHydrated =
+        [<Interface>]
+        type Info<'T> =
+            abstract value: 'T option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?value: 'T) : Info<'T> = jsNative
+
 module InitializedResourceReturn =
-    [<Interface>]
     type Item<'T, 'R> =
-        abstract mutate: obj with get, set
-        abstract refetch: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (mutate: obj, refetch: obj) : Item<'T, 'R> = jsNative
+        abstract mutate: [<ParamArray>] args: obj -> obj
+        abstract mutate<'U>: value: ('T -> 'U) -> 'U
+        abstract mutate<'U>: value: 'U -> 'U
+        abstract mutate<'U>: value: U2<('T -> 'U), 'U> -> 'U
+        abstract refetch: ('R option -> U2<'T, JS.Promise<'T>> option) with get, set
 
 module JSX =
     type FunctionMaybe<'T> = U2<'T, (unit -> 'T)>
@@ -31956,6 +32099,9 @@ module JsxDevRuntime =
         [<Import("JSX", "solid-js/jsx-dev-runtime")>]
         static member JSX: JSX2 = jsNative
 
+    module JSX =
+        type Element = U5<float, bool, obj[], Fable.Core.TS.Dom.Node, string> option
+
 /// <summary>solid-js/jsx-runtime</summary>
 module JsxRuntime =
     /// <summary>The package's value exports, each bound to its import.</summary>
@@ -31963,6 +32109,9 @@ module JsxRuntime =
     type Exports =
         [<Import("JSX", "solid-js/jsx-runtime")>]
         static member JSX: JSX2 = jsNative
+
+    module JSX =
+        type Element = U5<float, bool, obj[], Fable.Core.TS.Dom.Node, string> option
 
 module Lazy =
     module Fn =
@@ -32024,9 +32173,15 @@ module Observable =
 module On =
     [<Interface>]
     type Options =
+        inherit OnOptions
+        [<ParamObject; Emit("$0")>]
+        static member Create (?defer: bool) : Options = jsNative
+
+    [<Interface>]
+    type Options2 =
         abstract defer: bool with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (defer: bool) : Options = jsNative
+        static member Create (defer: bool) : Options2 = jsNative
 
 module RequestCallback =
     [<Interface>]
@@ -32059,12 +32214,12 @@ module ResourceOptions =
             static member Create (?value: 'T) : Info<'T> = jsNative
 
 module ResourceReturn =
-    [<Interface>]
-    type Item<'R> =
-        abstract mutate: obj with get, set
-        abstract refetch: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (mutate: obj, refetch: obj) : Item<'R> = jsNative
+    type Item<'R, 'T> =
+        abstract mutate: [<ParamArray>] args: obj[] -> unit
+        abstract mutate<'U>: value: ('T option -> 'U) -> 'U
+        abstract mutate<'U>: value: 'U -> 'U
+        abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
+        abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
 
 module SharedConfig =
     [<Interface>]
@@ -32098,6 +32253,13 @@ module SignalOptions =
 
 module SignalState =
     type Comparator<'T> = delegate of prev: 'T * next: 'T -> bool
+
+module SplitProps =
+    module Result =
+        module Item =
+            type Item<'T> =
+                [<EmitIndexer>]
+                abstract Item: string -> obj with get, set
 
 /// <summary>solid-js/store</summary>
 module Store =
@@ -32205,7 +32367,7 @@ module Store =
         /// </code>
         /// </example>
         [<Import("unwrap", "solid-js/store")>]
-        static member unwrap<'T> (item: 'T, ?set: obj) : 'T = jsNative
+        static member unwrap<'T> (item: 'T, ?set: Fable.Core.TS.Es.Set<obj>) : 'T = jsNative
         /// <summary>
         /// Creates a reactive store that can be read through a proxy object and written with a setter function
         /// </summary>
@@ -32228,7 +32390,7 @@ module Store =
             static member Create (?onStoreNodeUpdate: Store.DEV.Hooks.OnStoreNodeUpdate) : Hooks = jsNative
 
         module Hooks =
-            type OnStoreNodeUpdate = delegate of state: Store.StoreNode * property: obj * value: obj option * prev: obj option -> unit
+            type OnStoreNodeUpdate = delegate of state: SolidJs.Store.StoreNode * property: obj * value: obj option * prev: obj option -> unit
 
     module SolidStore =
         type Unwrappable = obj
@@ -32505,7 +32667,7 @@ module Web =
         [<Import("setStyleProperty", "solid-js/web")>]
         static member setStyleProperty (node: JsxDevRuntime.DOMElement, name: string, value: obj) : unit = jsNative
         [<Import("addEventListener", "solid-js/web")>]
-        static member addEventListener (node: JsxDevRuntime.DOMElement, name: string, handler: obj, ``delegate``: bool) : unit = jsNative
+        static member addEventListener (node: JsxDevRuntime.DOMElement, name: string, handler: U3<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject, Web.AddEventListener.Handler>, ``delegate``: bool) : unit = jsNative
         [<Import("classList", "solid-js/web")>]
         static member classList (node: JsxDevRuntime.DOMElement, value: JSX.ClassList, ?prev: JSX.ClassList) : JSX.ClassList = jsNative
         [<Import("style", "solid-js/web")>]
@@ -32523,7 +32685,7 @@ module Web =
         [<Import("getNextMatch", "solid-js/web")>]
         static member getNextMatch (start: Fable.Core.TS.Dom.Node, elementName: string) : JsxDevRuntime.DOMElement = jsNative
         [<Import("getNextMarker", "solid-js/web")>]
-        static member getNextMarker (start: Fable.Core.TS.Dom.Node) : Fable.Core.TS.Dom.Node * obj = jsNative
+        static member getNextMarker (start: Fable.Core.TS.Dom.Node) : Fable.Core.TS.Dom.Node * Fable.Core.TS.Dom.Node[] = jsNative
         [<Import("useAssets", "solid-js/web")>]
         static member useAssets (fn: (unit -> JSXElement)) : unit = jsNative
         [<Import("getAssets", "solid-js/web")>]
@@ -32612,6 +32774,17 @@ module Web =
         /// <remarks>@deprecated Replaced by renderToStream</remarks>
         [<Import("pipeToNodeWritable", "solid-js/web")>]
         static member pipeToNodeWritable<'T> (fn: (unit -> 'T), writable: Web.PipeToNodeWritable.Writable, ?options: Web.PipeToNodeWritable.Options) : unit = jsNative
+
+    module AddEventListener =
+        [<Interface>]
+        type Handler =
+            abstract handleEvent: ``object``: Fable.Core.TS.Dom.Event -> unit
+            abstract once: bool option with get, set
+            abstract passive: bool option with get, set
+            abstract signal: Fable.Core.TS.Dom.AbortSignal option with get, set
+            abstract capture: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (handleEvent: (Fable.Core.TS.Dom.Event -> unit), ?once: bool, ?passive: bool, ?signal: Fable.Core.TS.Dom.AbortSignal, ?capture: bool) : Handler = jsNative
 
     module Assets =
         [<Interface>]

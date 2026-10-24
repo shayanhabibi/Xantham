@@ -6233,6 +6233,45 @@ module Es =
 
         type Float64ArrayConstructor = TypeScript.Lib.Es.Float64ArrayConstructor
 
+        module Intl =
+            type CollatorOptions = TypeScript.Lib.Es.Intl.CollatorOptions
+
+            type ResolvedCollatorOptions = TypeScript.Lib.Es.Intl.ResolvedCollatorOptions
+
+            type Collator = TypeScript.Lib.Es.Intl.Collator
+
+            type CollatorConstructor = TypeScript.Lib.Es.Intl.CollatorConstructor
+
+            type NumberFormatOptionsStyleRegistry = TypeScript.Lib.Es.Intl.NumberFormatOptionsStyleRegistry
+
+            type NumberFormatOptionsStyle = TypeScript.Lib.Es.Intl.NumberFormatOptionsStyle
+
+            type NumberFormatOptionsCurrencyDisplayRegistry = TypeScript.Lib.Es.Intl.NumberFormatOptionsCurrencyDisplayRegistry
+
+            type NumberFormatOptionsCurrencyDisplay = TypeScript.Lib.Es.Intl.NumberFormatOptionsCurrencyDisplay
+
+            type NumberFormatOptionsUseGroupingRegistry = TypeScript.Lib.Es.Intl.NumberFormatOptionsUseGroupingRegistry
+
+            type NumberFormatOptionsUseGrouping = TypeScript.Lib.Es.Intl.NumberFormatOptionsUseGrouping
+
+            type ResolvedNumberFormatOptionsUseGrouping = bool
+
+            type NumberFormatOptions = TypeScript.Lib.Es.Intl.NumberFormatOptions
+
+            type ResolvedNumberFormatOptions = TypeScript.Lib.Es.Intl.ResolvedNumberFormatOptions
+
+            type NumberFormat = TypeScript.Lib.Es.Intl.NumberFormat
+
+            type NumberFormatConstructor = TypeScript.Lib.Es.Intl.NumberFormatConstructor
+
+            type DateTimeFormatOptions = TypeScript.Lib.Es.Intl.DateTimeFormatOptions
+
+            type ResolvedDateTimeFormatOptions = TypeScript.Lib.Es.Intl.ResolvedDateTimeFormatOptions
+
+            type DateTimeFormat = TypeScript.Lib.Es.Intl.DateTimeFormat
+
+            type DateTimeFormatConstructor = TypeScript.Lib.Es.Intl.DateTimeFormatConstructor
+
     module Int16Array =
         module Every =
             type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> obj

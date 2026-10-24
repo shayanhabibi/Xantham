@@ -296,6 +296,45 @@ module Dom =
             [<ParamObject; Emit("$0")>]
             static member Create (Item: (obj -> 'T)) : Collection<'T> = jsNative
 
+    module GlobalThis =
+        type ActiveXObject = TypeScript.Lib.Dom.ActiveXObject
+
+        type ITextWriter = TypeScript.Lib.Dom.ITextWriter
+
+        type TextStreamBase = TypeScript.Lib.Dom.TextStreamBase
+
+        type TextStreamWriter = TypeScript.Lib.Dom.TextStreamWriter
+
+        type TextStreamReader = TypeScript.Lib.Dom.TextStreamReader
+
+        /// <summary>
+        /// Represents an Automation SAFEARRAY
+        /// </summary>
+        type SafeArray<'T> = TypeScript.Lib.Dom.SafeArray<'T>
+
+        /// <summary>
+        /// Allows enumerating over a COM collection, which may not have indexed item access.
+        /// </summary>
+        type Enumerator<'T> = TypeScript.Lib.Dom.Enumerator<'T>
+
+        type EnumeratorConstructor = TypeScript.Lib.Dom.EnumeratorConstructor
+
+        /// <summary>
+        /// Enables reading from a COM safe array, which might have an alternate lower bound, or multiple dimensions.
+        /// </summary>
+        type VBArray<'T> = TypeScript.Lib.Dom.VBArray<'T>
+
+        type VBArrayConstructor = TypeScript.Lib.Dom.VBArrayConstructor
+
+        /// <summary>
+        /// Automation date (VT_DATE)
+        /// </summary>
+        type VarDate = TypeScript.Lib.Dom.VarDate
+
+        type DateConstructor = TypeScript.Lib.Dom.DateConstructor
+
+        type Date = TypeScript.Lib.Dom.Date
+
     module WScript =
         [<Interface>]
         type Arguments =

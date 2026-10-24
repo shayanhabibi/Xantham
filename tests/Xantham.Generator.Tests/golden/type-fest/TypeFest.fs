@@ -10384,9 +10384,9 @@ module Globals =
     /// <remarks>@category Observable</remarks>
     [<Interface>]
     type ObservableLike<'ValueType> =
-        abstract subscribe: ?observer: ObservableLike.Subscribe.Observer<'ValueType> -> Unsubscribable
+        abstract subscribe: ?observer: TypeFest.Globals.ObservableLike.Subscribe.Observer<'ValueType> -> Unsubscribable
         [<ParamObject; Emit("$0")>]
-        static member Create (subscribe: (ObservableLike.Subscribe.Observer<'ValueType> option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
+        static member Create (subscribe: (TypeFest.Globals.ObservableLike.Subscribe.Observer<'ValueType> option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
 
     module ObservableLike =
         module Subscribe =

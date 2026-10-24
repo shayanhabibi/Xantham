@@ -3349,3 +3349,20 @@ alias of the same namespace. Declaration selection prefers a canonical occurrenc
 emit type abbreviations forwarding generic parameters. The nested-name lab and its consumer
 compile gate cover a root namespace alias, nested members, and two sibling aliases sharing the
 same source types.
+
+Width-cutoff protection includes the contract edges of explicit export seeds, not only class
+and interface declarations. Exported functions and anonymous object aliases can otherwise lose
+their options/member types when a newly harvested namespace fills the frontier. Applications
+still contribute their arguments without recursively opening substituted members. The bounded
+frontier regression covers exported generic function options alongside the generic-expansion
+termination case. A generic alias's own declaration also carries alias arguments; Resolve
+authenticates that declaration before deciding whether those arguments mark an application.
+Substituted contracts are followed from source roots with declaration ancestry. A private
+per-generation cache reads both the type symbol's and alias symbol's declaration handles;
+catalogue identity fields are not populated until a later pass. Revisiting a declaration with
+new arguments stops expansion on that path, while siblings keep independent paths. Anonymous
+union/intersection edges preserve ancestry. Fresh generic method binders remain outside
+application expansion. Traversal memoization reuses a path only when its ancestor set is no
+more restrictive. The regression pins callback parameter identity and bounds recursive
+callable trees through both returns and parameters; real-package findings are audited after
+regeneration.

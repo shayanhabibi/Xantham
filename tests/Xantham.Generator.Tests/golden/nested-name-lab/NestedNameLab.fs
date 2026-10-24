@@ -161,6 +161,8 @@ type Exports =
     static member AliasHolder: obj = jsNative
     [<Import("readAlias", "nested-name-lab")>]
     static member readAlias () : Original.Inner.Leaf<string> = jsNative
+    [<Import("readOnlyAlias", "nested-name-lab")>]
+    static member readOnlyAlias () : HiddenAliasSource.Inner.Deep.Leaf<string> = jsNative
     /// <summary>
     /// A class merged with a namespace of types.
     /// </summary>
@@ -232,6 +234,21 @@ module Gadget =
         [<ParamObject; Emit("$0")>]
         static member Create (serial: string) : Options = jsNative
 
+module HiddenAliasSource =
+    module Inner =
+        [<Interface>]
+        type Item<'T> =
+            abstract value: 'T with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (value: 'T) : Item<'T> = jsNative
+
+        module Deep =
+            [<Interface>]
+            type Leaf<'T> =
+                abstract item: NestedNameLab.HiddenAliasSource.Inner.Item<'T> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (item: NestedNameLab.HiddenAliasSource.Inner.Item<'T>) : Leaf<'T> = jsNative
+
 module Markup =
     [<Interface>]
     type Element =
@@ -266,6 +283,12 @@ module NestedNameLabGlobal =
         abstract u: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (u: float) : Unreached = jsNative
+
+module OnlyAlias =
+    type Item<'T> = HiddenAliasSource.Inner.Item<'T>
+
+    module Deep =
+        type Leaf<'T> = HiddenAliasSource.Inner.Deep.Leaf<'T>
 
 module Original =
     [<Interface>]

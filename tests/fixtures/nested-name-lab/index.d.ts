@@ -194,6 +194,15 @@ export namespace AliasHolder {
 }
 export declare function readAlias(): PublicAlias.Inner.Leaf<string>;
 
+declare namespace HiddenAliasSource {
+    namespace Inner {
+        interface Item<T> { value: T }
+        namespace Deep { interface Leaf<T> { item: Item<T> } }
+    }
+}
+export import OnlyAlias = HiddenAliasSource.Inner;
+export declare function readOnlyAlias(): OnlyAlias.Deep.Leaf<string>;
+
 /** A class merged with a namespace of types. */
 export declare class Queue {
     push(item: Queue.Item): void;

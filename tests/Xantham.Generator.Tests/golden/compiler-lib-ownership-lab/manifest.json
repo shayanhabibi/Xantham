@@ -3,7 +3,7 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 187,
+    "exact": 206,
     "ergonomic": 219,
     "widened": 63,
     "escape": 10
