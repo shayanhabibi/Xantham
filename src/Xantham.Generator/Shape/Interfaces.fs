@@ -431,6 +431,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 ReadOnly = m.ReadOnly
                                 Type = optionalRef optional reference
                                 Literal = None
+                                NullKey = not optional && requiresNullKey model m.TypeId
                             },
                         refFindings
 
@@ -462,9 +463,15 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         let required, optional =
                                             (sharedParams @ ownParams) |> List.partition (fun p -> not p.Optional)
 
+                                        let nullKeys =
+                                            shared @ arm.Own
+                                            |> List.filter (fun m -> not m.Optional && requiresNullKey model m.TypeId)
+                                            |> List.map (fun m -> Naming.memberName m.Symbol.Name)
+
                                         {
                                             Parameters = required @ optional
                                             Literals = []
+                                            NullKeys = nullKeys
                                         },
                                         List.concat sharedParamFindings @ List.concat ownParamFindings)
                                     |> List.unzip

@@ -4211,6 +4211,46 @@ let pipelineTests =
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "SE002"))
                           "a configured runtime was not derived, so there is nothing to report" ])
+        // D3: a required `T | null` member keeps an omittable Create parameter, and the Emit
+        // writes its key, as `null` where the argument is absent or `undefined`.
+        yield!
+            fixtureTests "required-nullable-lab" (handFixture "required-nullable-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a required nullable key is written by every Create, as null when absent" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"(o => ({...o, \\\"label\\\": o[\\\"label\\\"] ?? null, \\\"score\\\": o[\\\"score\\\"] ?? null}))($0)\")>]\n    static member Create (id: string, ?label: string, ?score: float, ?note: string) : Record2 = jsNative"
+                          "each required nullable key falls back to null; the optional key stays omitted"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"(o => ({...o, \\\"value\\\": o[\\\"value\\\"] ?? null}))($0)\")>]\n    static member Create (?value: 'T) : Box<'T> = jsNative"
+                          "a type parameter admitting null"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"$0\")>]\n    static member Create (?maybe: string, ?either: string) : Loose = jsNative"
+                          "an optional nullable key, and one admitting undefined, stay omittable"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"(o => ({...o, \\\"owner\\\": o[\\\"owner\\\"] ?? null}))($0)\")>]\n    static member Create (owner: string option, left: string) : Side = jsNative"
+                          "the exclusive-arm fold writes the shared nullable key"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"(o => ({kind: 'opened', ...o, \\\"by\\\": o[\\\"by\\\"] ?? null}))($0)\")>]\n    static member Create (?by: string) : Opened = jsNative"
+                          "a tagged arm's Create writes its nullable key beside the tag"
+
+                      let written =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SP006")
+                          |> List.map (fun f -> f.Symbol)
+                          |> List.sort
+
+                      Expect.equal written [ "Box"; "LeftArm"; "Opened"; "Record2"; "RightArm"; "Side" ] "SP006 per declaration, Loose excluded" ])
         // The fixture behind docs/.ai/fable5-workarounds.md. Each declaration is one documented
         // Fable 5 loss; the assertions pin the emitted shape the document quotes, and the run
         // gate proves the workaround against tests/fixtures/fable-workaround-lab/index.js.

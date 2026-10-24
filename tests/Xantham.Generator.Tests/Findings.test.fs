@@ -200,6 +200,7 @@ let findingsTests =
                     "SP.CreateNotSynthesized SP003 ergonomic"
                     "SP.MethodTypeParametersBoundAtCreate SP004 widened"
                     "SP.LiteralMembersWrittenByCreate SP005 exact"
+                    "SP.NullKeysWrittenByCreate SP006 exact"
                     "DO.OverloadDropped DO001 widened"
                     "DO.OverloadsDistinguishedByLiteral DO002 exact"
                     "DO.OverloadsDistinguishedByLiteralUnion DO003 exact"

@@ -129,6 +129,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                             Tags = []
                                                                             Type = reference
                                                                             Literal = None
+                                                                            NullKey = false
                                                                         }
                                                                     ]
                                                                 Create = None
@@ -173,6 +174,9 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                         Tags = m.Tags
                                                                         Type = optionalRef m.Optional reference
                                                                         Literal = literal
+                                                                        NullKey =
+                                                                            not m.Optional
+                                                                            && requiresNullKey model m.TypeId
                                                                     })
 
                                                             let optionalOrLiteral =

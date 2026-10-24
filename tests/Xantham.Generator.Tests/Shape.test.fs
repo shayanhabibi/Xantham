@@ -3596,7 +3596,7 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsFloat
-                                Literal = None } ]
+                                Literal = None; NullKey = false } ]
                       Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
@@ -3824,7 +3824,7 @@ let shapePassTests =
                                     Tags = []
                                     ReadOnly = true
                                     Type = FsString
-                                    Literal = None } ]
+                                    Literal = None; NullKey = false } ]
                           Entrypoint = None
                           CreateOverloads = []
                           Statics = [] }
@@ -3914,7 +3914,7 @@ let shapePassTests =
                                     Tags = []
                                     ReadOnly = true
                                     Type = FsFloat
-                                    Literal = None } ]
+                                    Literal = None; NullKey = false } ]
                           Entrypoint = None
                           CreateOverloads = []
                           Statics = [] }
@@ -4087,14 +4087,14 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsOption FsFloat
-                                Literal = None }
+                                Literal = None; NullKey = false }
                           FsProperty
                               { Name = "target"
                                 Docs = ""
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsString
-                                Literal = None } ]
+                                Literal = None; NullKey = false } ]
                       Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
@@ -4135,7 +4135,7 @@ let shapePassTests =
                   Tags = []
                   ReadOnly = false
                   Type = reference
-                  Literal = None }
+                  Literal = None; NullKey = false }
 
         let paramObjectMethod name parameters returns =
             FsMethod
@@ -4266,7 +4266,7 @@ let shapePassTests =
                     match literal with
                     | LitString _ -> FsString
                     | _ -> FsFloat
-                  Literal = Some literal }
+                  Literal = Some literal; NullKey = false }
 
         testCase "a literal member is written by Create, not bound as a parameter" <| fun _ ->
             let decl =
@@ -4309,7 +4309,7 @@ let shapePassTests =
                 Expect.equal
                     decl.CreateOverloads
                     [ { Parameters = []
-                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ] } ]
+                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ]; NullKeys = [] } ]
                     "every member is written"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
@@ -4990,7 +4990,7 @@ let shapePassTests =
 
         testCase "repair-arity widens a bare or mis-applied reference to a generic tagged union" <| fun _ ->
             let property name reference =
-                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None }
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None; NullKey = false }
 
             let model =
                 { Build.shapeModel [] with
@@ -5002,7 +5002,7 @@ let shapePassTests =
                                 Order = None
                                 TypeParameters = [ { Name = "T"; Constraint = None } ]
                                 Tag = "kind"
-                                Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Inlines = false; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]; Create = None } ] }
+                                Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Inlines = false; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None; NullKey = false } ]; Create = None } ] }
                           FsInterface
                               { Callable = false; Name = "Holder"
                                 Docs = ""
@@ -5574,7 +5574,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("Params", [ FsString ])
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -5627,7 +5627,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("ExcludeStrict", [ FsString; FsFloat ])
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -5797,7 +5797,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = false
                                             Type = FsUnit
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }

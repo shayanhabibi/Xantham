@@ -1486,6 +1486,9 @@ type FsPropertyMember =
         /// The value of a literal member: a required property typed by one string or
         /// numeric literal. `Type` is the literal's primitive.
         Literal: FsLiteral option
+        /// A required key whose type admits `null` and not `undefined` (D3): a `Create` writes
+        /// the key as `null` when its argument is absent or `undefined`.
+        NullKey: bool
     }
 
 /// A type parameter (§4.9), bound by a declaration or by a generic signature of its own. The
@@ -1656,6 +1659,9 @@ type FsCreateOverload =
         /// Literal members the Emit writes into the object, as JavaScript key and value, in
         /// member order, inherited ones included.
         Literals: (string * FsLiteral) list
+        /// The parameters whose key the Emit writes as `null` when the argument is absent or
+        /// `undefined` (D3), by parameter name.
+        NullKeys: string list
     }
 
 type FsInterfaceDecl =
@@ -1720,6 +1726,9 @@ type FsTaggedField =
         /// The value of a literal field: a required property typed by one string or numeric
         /// literal. `Type` is the literal's primitive.
         Literal: FsLiteral option
+        /// A required key whose type admits `null` and not `undefined` (D3): the case's `Create`
+        /// writes the key as `null` when its argument is absent or `undefined`.
+        NullKey: bool
     }
 
 /// The JavaScript `typeof` class of a value.

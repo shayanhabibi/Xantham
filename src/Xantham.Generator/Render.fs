@@ -591,7 +591,9 @@ let private renderParamList (parameters: FsParam list) =
         |> sprintf "(%s)"
 
 /// The attributes of a `Create` overload. Literal members are written into the object; the
-/// expression is parenthesised, since `{` in statement position opens a block.
+/// expression is parenthesised, since `{` in statement position opens a block. A key in
+/// `NullKeys` (D3) is written as `null` where its argument is absent or `undefined`; the
+/// argument object is bound once by an arrow, so each argument is evaluated once.
 let private createAttribute (overload: FsCreateOverload) =
     let parameters = overload.Parameters
 
@@ -599,14 +601,29 @@ let private createAttribute (overload: FsCreateOverload) =
         overload.Literals
         |> List.map (fun (key, value) -> $"{jsKey key}: {jsLiteral value}")
 
+    let nullKey (parameter: FsParam) =
+        List.contains parameter.Name overload.NullKeys
+
     if bindParameters parameters = parameters then
-        match literals, parameters with
-        | [], _ -> "[<ParamObject; Emit(\"$0\")>]"
-        | literals, [] ->
+        let nulls =
+            parameters
+            |> List.filter nullKey
+            |> List.map (fun parameter ->
+                let key = stringLit parameter.Name
+                $"{key}: o[{key}] ?? null")
+
+        match literals, parameters, nulls with
+        | [], _, [] -> "[<ParamObject; Emit(\"$0\")>]"
+        | literals, [], _ ->
             let expression = "({ " + String.concat ", " literals + " })"
             $"[<Emit({stringLit expression})>]"
-        | literals, _ ->
+        | literals, _, [] ->
             let expression = "({ " + String.concat ", " (literals @ [ "...$0" ]) + " })"
+            $"[<ParamObject; Emit({stringLit expression})>]"
+        | literals, _, nulls ->
+            let expression =
+                "(o => ({" + String.concat ", " (literals @ [ "...o" ] @ nulls) + "}))($0)"
+
             $"[<ParamObject; Emit({stringLit expression})>]"
     else
         let fields =
@@ -614,7 +631,9 @@ let private createAttribute (overload: FsCreateOverload) =
             |> List.mapi (fun index parameter ->
                 let field = $"{stringLit parameter.Name}: ${index}"
 
-                if parameter.Optional then
+                if nullKey parameter then
+                    $"{stringLit parameter.Name}: (${index}) ?? null"
+                elif parameter.Optional then
                     $"...(${index} === undefined ? {{}} : {{{field}}})"
                 else
                     field)
@@ -1123,6 +1142,11 @@ let private caseCreate (decl: FsTaggedUnionDecl) (case: FsTaggedCase) : (string 
         let required, optional = parameters |> List.partition (fun p -> not p.Optional)
         let tag = case.CompiledName |> Option.defaultValue case.Name
 
+        let nullKeys =
+            case.Fields
+            |> List.filter (fun field -> field.Literal.IsNone && field.NullKey)
+            |> List.map _.Name
+
         let literals =
             case.Fields
             |> List.choose (fun field -> field.Literal |> Option.map (fun value -> field.Name, value))
@@ -1131,6 +1155,7 @@ let private caseCreate (decl: FsTaggedUnionDecl) (case: FsTaggedCase) : (string 
         {
             Parameters = required @ optional
             Literals = (decl.Tag, LitString tag) :: literals
+            NullKeys = nullKeys
         })
 
 /// A tagged union (D4, §4.5(2)). `RequireQualifiedAccess` for the same reason the StringEnum

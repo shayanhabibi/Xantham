@@ -134,6 +134,14 @@ let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list 
     | FsSymbolKeyed _
     | FsLiteralKeyed _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
 
+let private nullKeysWritten (owner: string) (keys: string list) =
+    if keys.IsEmpty then
+        []
+    else
+        [
+            Finding.make owner (SynthesizeParamObjects.NullKeysWrittenByCreate(String.concat ", " keys))
+        ]
+
 /// Construction ergonomics (D3, §4.4): an interface gains a `[<ParamObject; Emit("$0")>]`
 /// Create overload mirroring its members, required members first, so consumers never hand-build
 /// objects. A method member reads as a delegate-typed parameter (§3 of the Fable 5 workarounds
@@ -226,10 +234,17 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                     ))
                                             ]
 
+                                    let nullKeys =
+                                        bound
+                                        |> List.choose (function
+                                            | FsProperty p when p.NullKey -> Some p.Name
+                                            | _ -> None)
+
                                     findings <-
                                         findings
                                         @ [ Finding.make decl.Name SynthesizeParamObjects.ParamObjectSynthesized ]
                                         @ written
+                                        @ nullKeysWritten decl.Name nullKeys
                                         @ carried
                                         @ List.concat callbacks
 
@@ -240,9 +255,19 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                     {
                                                         Parameters = required @ optional
                                                         Literals = literals
+                                                        NullKeys = nullKeys
                                                     }
                                                 ]
                                         }
+                            // The exclusive-arm fold's overloads write their null keys too.
+                            | FsInterface decl as kept ->
+                                findings <-
+                                    findings
+                                    @ nullKeysWritten
+                                        decl.Name
+                                        (decl.CreateOverloads |> List.collect _.NullKeys |> List.distinct)
+
+                                kept
                             | decl -> decl)
 
                     let model = { model with Decls = decls }

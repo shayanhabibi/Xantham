@@ -53,7 +53,7 @@ export declare function slots(): Slot[];
 [<Interface>]
 type Slot =
     abstract value: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"value\": o[\"value\"] ?? null}))($0)")>]
     static member Create (?value: string) : Slot = jsNative
 ```
 
@@ -62,21 +62,15 @@ type Slot =
 `None` compiles to `undefined`, and `Option.isSome` is a loose `!= null` test, so all three
 JavaScript states - `"a"`, `null`, and no property at all - arrive as `Some "a"`, `None` and
 `None`. Reading is one-way: JavaScript that distinguishes them, as `slots()` does, sees a
-distinction the F# side no longer holds. Writing is one-way in the other direction: a `Create`
-call with the argument omitted emits `{}`, so a declaration asking for `null` receives an absent
-property.
+distinction the F# side no longer holds. Writing through `Create` keeps the declared key (D3,
+`SP006`): a required `T | null` member is an omittable parameter, and the Emit writes the key as
+`null` when the argument is omitted or `None`, so `Slot.Create()` emits `{ value: null }`.
 
 ### The workaround
 
-A value that is `None` to F# and `null` to JavaScript:
+`Create` needs none. For a member with no synthesized `Create`, build the literal:
 
 ```fsharp
-let asNull: string option = emitJsExpr () "null"
-
-// Reaches the property as `null`, which the `.d.ts` declared and `None` cannot express.
-FableWorkaroundLab.Slot.Create(?value = asNull)
-
-// For a member with no synthesized `Create`, build the literal:
 let slot: FableWorkaroundLab.Slot = !!createObj [ "value" ==> (null: obj) ]
 ```
 
@@ -89,9 +83,8 @@ let isExplicitNull (slot: FableWorkaroundLab.Slot) : bool =
 
 ### What it costs
 
-`asNull` reads back as `None` at every later F# use, so the distinction survives exactly as long
-as the value stays inside the expression that built it. `isExplicitNull` names the property as a
-string, so a rename in the `.d.ts` moves past it silently.
+`isExplicitNull` names the property as a string, so a rename in the `.d.ts` moves past it
+silently.
 
 ---
 

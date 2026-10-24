@@ -211,6 +211,20 @@ let internal splitNullish (model: ShapeModel) (facts: TypeFacts) =
     |> List.partition snd
     |> fun (nullish, rest) -> List.map fst nullish, List.map fst rest
 
+/// Whether a required member of the type is written as a `null`-valued key (D3): the type
+/// admits `null`, as a union member or by itself, and admits neither `undefined` nor `void`.
+let internal requiresNullKey (model: ShapeModel) (typeId: int<Measure.typeId>) =
+    match Map.tryFind typeId model.Types with
+    | Some facts ->
+        let absence =
+            if facts.UnionMembers.IsEmpty then
+                absenceOf facts
+            else
+                absenceAcross model (fst (splitNullish model facts))
+
+        absence.FromNull && not absence.FromUndefined && not absence.FromVoid
+    | None -> false
+
 /// `true | false` after nullish hoisting: TS re-expands `boolean` inside larger unions, and
 /// the pair is just `bool` again.
 let internal isBooleanPair (model: ShapeModel) (memberIds: int<Measure.typeId> list) =
@@ -4643,6 +4657,7 @@ let internal shapeMembers
                             ReadOnly = m.ReadOnly
                             Type = optionalRef m.Optional reference
                             Literal = literal
+                            NullKey = not m.Optional && requiresNullKey model effectiveTypeId
                         }
                 ])
 
@@ -4680,6 +4695,7 @@ let internal shapeMembers
                                     ReadOnly = m.ReadOnly
                                     Type = reference
                                     Literal = None
+                                    NullKey = false
                                 }
                         )
                     ]

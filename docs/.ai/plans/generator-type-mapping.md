@@ -280,6 +280,21 @@ Policy question with a recommended default:
   signatures), also emit a `[<ParamObject>]` `Create` static or a companion `create`
   function so consumers don't hand-build objects via `createObj`. This is the single biggest
   "easy" win; the old Glutinum `jsOptions` approach is superseded by `ParamObject`.
+  **Required nullable members (D3, ruled 2026-10-24).** A required member whose type admits
+  `null` and admits neither `undefined` nor `void` (`value: string | null`, `value: T | null`)
+  keeps its omittable `?value` parameter, and the `Create` always writes the key:
+  `[<ParamObject; Emit("(o => ({...o, \"value\": o[\"value\"] ?? null}))($0)")>]`, so an
+  omitted argument, a `None` and a `None` held in a variable all reach JavaScript as `null`
+  (`SP006`, Exact). One `Create` per declaration; there are no per-combination overloads. The
+  arrow binds the argument object once: Fable inlines `$0` at each use, so the unbound
+  `({...$0, value: $0.value ?? null})` evaluates every argument twice, and the positional form
+  (`"k": $n`) evaluates each optional argument twice through its `=== undefined` test. Other
+  members keep their `ParamObject` behaviour. A `Create` whose parameter names are rebound
+  against a collision is already positional and writes `"value": ($n) ?? null`. The
+  exclusive-arm fold's overloads and a tagged arm's `Create` write their required nullable keys
+  the same way; the fold keeps its required `option` parameter for a member every arm shares.
+  Out of scope: `?: T | null` and `T | null | undefined` stay omittable keys, and direct
+  construction of a tagged case with fields of its own (not through its `Create`) remains open.
 - **`class`** → the ts2fable/Glutinum two-part pattern, which remains right:
   - instance side: F# interface (as above, plus `inherit` for base classes);
   - static side + constructor: members on an `Exports`-style erased type or a

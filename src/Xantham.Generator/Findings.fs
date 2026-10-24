@@ -235,6 +235,7 @@ module FindingCodes =
             "SP.CreateNotSynthesized", "SP003"
             "SP.MethodTypeParametersBoundAtCreate", "SP004"
             "SP.LiteralMembersWrittenByCreate", "SP005"
+            "SP.NullKeysWrittenByCreate", "SP006"
             "DO.OverloadDropped", "DO001"
             "DO.OverloadsDistinguishedByLiteral", "DO002"
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
@@ -1151,6 +1152,9 @@ type SynthesizeParamObjects =
     | [<Widened>] MethodTypeParametersBoundAtCreate of parameters: string
     /// W6. Literal members the `Create` Emit writes into the object in place of parameters.
     | [<Exact>] LiteralMembersWrittenByCreate of members: string
+    /// D3. Required members typed `T | null`, bound as omittable `Create` parameters: the Emit
+    /// writes each key, as `null` where the argument is absent or `undefined`.
+    | [<Exact>] NullKeysWrittenByCreate of members: string
 
     interface IFindingKind with
         member this.Message =
@@ -1163,6 +1167,8 @@ type SynthesizeParamObjects =
                 $"generic method's {parameters} bound once per Create call; the object holds one instantiation"
             | LiteralMembersWrittenByCreate members ->
                 $"Create writes the literal members {members} in its Emit; they are not parameters"
+            | NullKeysWrittenByCreate members ->
+                $"Create always writes the required nullable members {members}, as null when the argument is absent"
 
 /// `dedupe-overloads`.
 [<Prefix("DO", "dedupe-overloads")>]
