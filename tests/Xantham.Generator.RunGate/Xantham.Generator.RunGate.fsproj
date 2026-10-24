@@ -74,6 +74,8 @@
         <Compile Include="GeneratedErasedCases.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\generic-callable-reference-lab\GenericCallableReferenceLab.fs" Link="generic-callable-reference-lab\GenericCallableReferenceLab.fs" />
         <Compile Include="GenericCallableReferences.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\generic-callable-interface-lab\GenericCallableInterfaceLab.fs" Link="generic-callable-interface-lab\GenericCallableInterfaceLab.fs" />
+        <Compile Include="GenericCallableInterfaces.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>

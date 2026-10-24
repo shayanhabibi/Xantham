@@ -16,6 +16,11 @@ type JSX =
     [<ParamObject; Emit("$0")>]
     static member Create (SERIALIZABLE: obj) : JSX = jsNative
 
+[<Fickl.Core.CallableInterface>]
+type IsWrappable =
+    [<Emit("$0($1...)")>]
+    abstract Invoke: ?obj: obj -> bool
+
 type JSXElement = U5<float, bool, obj[], Fable.Core.TS.Dom.Node, string> option
 
 [<Interface>]
@@ -46,11 +51,8 @@ type DEV =
 type Memo<'Prev, 'Next> =
     inherit SignalState<'Next>
     inherit Computation<'Next, 'Next>
-    abstract value: 'Next with get, set
     abstract tOwned: Computation<U2<'Next, 'Prev>, 'Next>[] option with get, set
-    abstract tValue: 'Next option with get, set
     abstract comparator: Memo.Comparator<'Next> option with get, set
-    abstract fn: ('Next -> 'Next) with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (value: 'Next, context: obj, fn: ('Next -> 'Next), state: Computation.State, ``pure``: bool, ?tOwned: Computation<U2<'Next, 'Prev>, 'Next>[], ?name: string, ?graph: Owner, ?observers: Computation<obj, obj>[], ?observerSlots: float[], ?tValue: 'Next, ?comparator: Memo.Comparator<'Next>, ?``internal``: bool, ?owned: Computation<obj, obj>[], ?cleanups: (unit -> unit)[], ?owner: Owner, ?sourceMap: SourceMapValue[], ?tState: Computation.State, ?sources: SignalState<'Next>[], ?sourceSlots: float[], ?updatedAt: float, ?user: bool, ?suspense: Computation.Suspense) : Memo<'Prev, 'Next> = jsNative
 
@@ -106,6 +108,11 @@ type Task =
     abstract expirationTime: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: float, startTime: float, expirationTime: float, ?fn: (bool -> unit)) : Task = jsNative
+
+[<Fickl.Core.CallableInterface>]
+type EqualFn =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'T>: a: 'T * b: 'T -> bool
 
 [<Interface>]
 type Owner =
@@ -469,7 +476,7 @@ type Exports =
     [<Import("cancelCallback", "solid-js")>]
     static member cancelCallback (task: Task) : unit = jsNative
     [<Import("equalFn", "solid-js")>]
-    static member equalFn<'T> (a: 'T, b: 'T) : bool = jsNative
+    static member equalFn: EqualFn = jsNative
     [<Import("$PROXY", "solid-js")>]
     static member ``$PROXY``: obj = jsNative
     [<Import("$TRACK", "solid-js")>]
@@ -1028,7 +1035,7 @@ type Exports =
     [<Import("children", "solid-js")>]
     static member children (fn: (unit -> JSXElement)) : ChildrenReturn = jsNative
     [<Import("enableExternalSource", "solid-js")>]
-    static member enableExternalSource (factory: Func<(obj -> obj), (unit -> unit), ExternalSource>, ?untrack: ((unit -> obj) -> obj)) : unit = jsNative
+    static member enableExternalSource (factory: EnableExternalSource.Factory, ?untrack: EnableExternalSource.Untrack) : unit = jsNative
     /// <remarks>
     /// @deprecated
     /// since version 1.7.0 and will be removed in next major - use catchError instead
@@ -1373,6 +1380,17 @@ module DEV =
 
 module DeferredOptions =
     type Equals<'T> = delegate of prev: 'T * next: 'T -> bool
+
+module EnableExternalSource =
+    [<Fickl.Core.CallableInterface>]
+    type Factory =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'Prev, 'Next>: fn: ('Prev -> 'Next) * trigger: (unit -> unit) -> ExternalSource
+
+    [<Fickl.Core.CallableInterface>]
+    type Untrack =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'V>: fn: (unit -> 'V) -> 'V
 
 module ErrorBoundary =
     [<Interface>]
@@ -2811,10 +2829,10 @@ module Store =
     [<Interface>]
     type DEV =
         abstract ``$NODE``: obj
-        abstract isWrappable: (obj option -> bool)
+        abstract isWrappable: IsWrappable
         abstract hooks: Store.DEV.Hooks
         [<ParamObject; Emit("$0")>]
-        static member Create (``$NODE``: obj, isWrappable: (obj option -> bool), hooks: Store.DEV.Hooks) : DEV = jsNative
+        static member Create (``$NODE``: obj, isWrappable: IsWrappable, hooks: Store.DEV.Hooks) : DEV = jsNative
 
     [<Interface>]
     type ReconcileOptions =

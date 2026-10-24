@@ -28,7 +28,6 @@ type Input =
     inherit Properties<string>
     inherit Named
     abstract disabled: bool with get, set
-    abstract value: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (disabled: bool, value: string, stamp: string, title: string) : Input = jsNative
 
@@ -42,14 +41,12 @@ type OddKeys =
 [<Interface>]
 type Left =
     inherit Properties<string>
-    abstract value: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (value: string, stamp: string) : Left = jsNative
 
 [<Interface>]
 type Right =
     inherit Properties<string>
-    abstract value: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (value: string, stamp: string) : Right = jsNative
 

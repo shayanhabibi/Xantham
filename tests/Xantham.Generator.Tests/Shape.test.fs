@@ -11,6 +11,72 @@ open Xantham.Generator
 open Xantham.Generator.Shape
 
 [<Tests>]
+let inheritedCallableTests =
+    let invoke variable result =
+        FsInvoke { Docs = ""; Tags = []; TypeParameters = [ { Name = variable; Constraint = None } ]
+                   Parameters = [ { Name = "value"; Type = FsTypeVar variable; Optional = false; Rest = false } ]
+                   Return = result }
+    let interface_ name parameters bases members =
+        { Name = name; Callable = true; Docs = ""; Tags = []; Order = None
+          TypeParameters = parameters |> List.map (fun name -> { Name = name; Constraint = None })
+          Inherits = bases; Members = members; Entrypoint = None; CreateOverloads = []; Statics = [] }
+    let run baseMember childMember =
+        let parent = interface_ "Parent" [ "T" ] [] [ baseMember ]
+        let child = interface_ "Child" [] [ FsApp("Parent", [ FsString ]) ] [ childMember ]
+        let model = { Build.shapeModel Build.primitives with Decls = [ FsInterface parent; FsInterface child ] }
+        let shaped, _ = Build.runPass Inherited.dropInherited model
+        shaped.Decls |> List.pick (function FsInterface declaration when declaration.Name = "Child" -> Some declaration | _ -> None)
+    testList "inherited callable generic shaping" [
+        testCase "outer arguments are not captured by a method binder with the same spelling" <| fun _ ->
+            let parent = interface_ "Parent" [ "T" ] [] [ invoke "U" (FsTuple [ FsTypeVar "T"; FsTypeVar "U" ]) ]
+            let child = interface_ "Child" [ "U" ] [ FsApp("Parent", [ FsTypeVar "U" ]) ] [ invoke "V" (FsTuple [ FsTypeVar "U"; FsTypeVar "V" ]) ]
+            let model = { Build.shapeModel Build.primitives with Decls = [ FsInterface parent; FsInterface child ] }
+            let shaped, _ = Build.runPass Inherited.dropInherited model
+            let members = shaped.Decls |> List.pick (function FsInterface d when d.Name = "Child" -> Some d.Members | _ -> None)
+            Expect.isEmpty members "outer U and method V denote independent binders"
+        testCase "base arguments substitute through method return types" <| fun _ ->
+            let result = run (invoke "U" (FsTuple [ FsTypeVar "T"; FsTypeVar "U" ])) (invoke "U" (FsTuple [ FsString; FsTypeVar "U" ]))
+            Expect.isEmpty result.Members "the instantiated base owns the method"
+        testCase "method binders shadow outer substitution" <| fun _ ->
+            let member_ = invoke "T" (FsTypeVar "T")
+            Expect.isEmpty (run member_ member_).Members "invocation T stays independent of Parent<string>"
+        testCase "a distinct result contract remains declared" <| fun _ ->
+            let result = run (invoke "U" (FsTypeVar "T")) (invoke "U" FsFloat)
+            Expect.equal result.Members [ invoke "U" FsFloat ] "a string base cannot remove a number result"
+    ]
+
+[<Tests>]
+let genericCallableInterfaceTests =
+    testList "generic callable interfaces shaping" [
+        testCase "a single generic call keeps its binder on Invoke" <| fun _ ->
+            let parameter =
+                { Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter) with SymbolName = Some("T" * uom<symbolName>) }
+            let callback =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature [ Build.resolvedMember (Build.symbol 30 "value" SymbolFlags.Property) 20 ] 20 with
+                              TypeParameters = [ 20<typeId> ] } ] }
+            let model =
+                { Build.shapeModel (callback :: parameter :: Build.primitives) with DeclNames = Map.ofList [ 10<typeId>, "Identity" ] }
+            let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
+            let callbacks, callbackFindings = Build.runPass Callbacks.shapeCallbacks bound
+            Expect.isEmpty callbacks.Decls "a generic call is represented by an interface"
+            Expect.isEmpty callbackFindings "its method binder is retained"
+            let interfaces, _ = Build.runPass Interfaces.shapeInterfaces bound
+            match interfaces.Decls with
+            | [ FsInterface declaration ] ->
+                Expect.isTrue declaration.Callable "the declaration retains its callable representation"
+                Expect.isEmpty declaration.TypeParameters "T belongs to each invocation"
+                match declaration.Members with
+                | [ FsInvoke invoke ] ->
+                    Expect.equal (invoke.TypeParameters |> List.map _.Name) [ "T" ] "the method binds T"
+                    Expect.equal (invoke.Parameters |> List.map _.Type) [ FsTypeVar "T" ] "the input retains T"
+                    Expect.equal invoke.Return (FsTypeVar "T") "the result retains T"
+                | members -> failtestf "Expected one Invoke, got %A" members
+            | declarations -> failtestf "Expected the Identity interface, got %A" declarations
+    ]
+
+[<Tests>]
 let genericCallableReferenceTests =
     testList "generic callable references shaping" [
         testCase "a declared generic callback application is not expanded into a new delegate" <| fun _ ->
@@ -2403,7 +2469,7 @@ let shapePassTests =
             // inherit, so the edge goes rather than the generated file failing to compile.
             let interfaceDecl name parameters inherits =
                 FsInterface
-                    { Name = name
+                    { Callable = false; Name = name
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3284,7 +3350,7 @@ let shapePassTests =
             // it, and it is what the collision is judged against.
             let declared =
                 FsInterface
-                    { Name = "Clash"
+                    { Callable = false; Name = "Clash"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3494,7 +3560,7 @@ let shapePassTests =
 
                 let declaration =
                     FsInterface
-                        { Name = name
+                        { Callable = false; Name = name
                           Docs = ""
                           Tags = []
                           Order = None
@@ -3584,7 +3650,7 @@ let shapePassTests =
 
                 let declaration =
                     FsInterface
-                        { Name = name
+                        { Callable = false; Name = name
                           Docs = ""
                           Tags = []
                           Order = None
@@ -3661,7 +3727,7 @@ let shapePassTests =
 
             let declaration =
                 FsInterface
-                    { Name = "Vise"
+                    { Callable = false; Name = "Vise"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3716,7 +3782,7 @@ let shapePassTests =
 
             let declared =
                 FsInterface
-                    { Name = "DOMException"
+                    { Callable = false; Name = "DOMException"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3757,7 +3823,7 @@ let shapePassTests =
         testCase "synthesize-paramobjects gives plain-data interfaces a Create overload (D3)" <| fun _ ->
             let decl =
                 FsInterface
-                    { Name = "Options"
+                    { Callable = false; Name = "Options"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3800,7 +3866,7 @@ let shapePassTests =
         // function-valued property of the same signature already carries.
         let paramObjectDecl name members =
             FsInterface
-                { Name = name
+                { Callable = false; Name = name
                   Docs = ""
                   Tags = []
                   Order = None
@@ -4136,7 +4202,7 @@ let shapePassTests =
                         [ abbrev "DOMTargets"
                           abbrev "JSTargets"
                           FsInterface
-                              { Name = "Scope"
+                              { Callable = false; Name = "Scope"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4198,7 +4264,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsInterface
-                              { Name = "Store"
+                              { Callable = false; Name = "Store"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4254,7 +4320,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsInterface
-                              { Name = "Store"
+                              { Callable = false; Name = "Store"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4687,7 +4753,7 @@ let shapePassTests =
                                 Tag = "kind"
                                 Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Inlines = false; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]; Create = None } ] }
                           FsInterface
-                              { Name = "Holder"
+                              { Callable = false; Name = "Holder"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -5043,7 +5109,7 @@ let shapePassTests =
             let carrier = Build.facts (Build.typeResponse 10 TypeFlags.Object)
             let declaration =
                 FsInterface
-                    { Name = "Existing"; Docs = ""; Tags = []; Order = None; TypeParameters = []
+                    { Name = "Existing"; Callable = false; Docs = ""; Tags = []; Order = None; TypeParameters = []
                       Inherits = []; Members = []; Entrypoint = None; CreateOverloads = []; Statics = [] }
             for owned, expected in [ None, []; Some [], []; Some [ 20<typeId> ], [ "T" ] ] do
                 let model =
@@ -5145,7 +5211,7 @@ let shapePassTests =
         testCase "order-declarations puts declarations in source order, Exports last" <| fun _ ->
             let interface' name order =
                 FsInterface
-                    { Name = name
+                    { Callable = false; Name = name
                       Docs = ""
                       Tags = []
                       Order = Some order
@@ -5244,7 +5310,7 @@ let shapePassTests =
                                 TypeParameters = [ { Name = "P"; Constraint = None } ]
                                 Target = FsObj }
                           FsInterface
-                              { Name = "Context"
+                              { Callable = false; Name = "Context"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -5297,7 +5363,7 @@ let shapePassTests =
                                     [ { Name = "T"; Constraint = None }; { Name = "U"; Constraint = None } ]
                                 Target = FsTypeVar "T" }
                           FsInterface
-                              { Name = "Holder"
+                              { Callable = false; Name = "Holder"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -5426,7 +5492,7 @@ let shapePassTests =
             // FS0033: `PagesFunctionContext` takes three arguments and this position has none.
             let generic =
                 FsInterface
-                    { Name = "Ctx"
+                    { Callable = false; Name = "Ctx"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -5467,7 +5533,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsInterface
-                              { Name = "Branded"
+                              { Callable = false; Name = "Branded"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -5969,7 +6035,7 @@ let symbolKeyedMemberTests =
         )
 
     let decl name typeParameters inherits members =
-        { Name = name
+        { Callable = false; Name = name
           Docs = ""
           Tags = []
           Order = None
@@ -6335,7 +6401,7 @@ let literalKeyedMethodTests =
                 )
 
             let decl =
-                { Name = "Socket"
+                { Callable = false; Name = "Socket"
                   Docs = ""
                   Tags = []
                   Order = None
@@ -6372,7 +6438,7 @@ let literalKeyedMethodTests =
                 )
 
             let decl =
-                { Name = "Socket"
+                { Callable = false; Name = "Socket"
                   Docs = ""
                   Tags = []
                   Order = None

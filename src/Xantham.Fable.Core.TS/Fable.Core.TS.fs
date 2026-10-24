@@ -561,12 +561,17 @@ module Es =
                 : Access<'This, 'Value> =
                 jsNative
 
-    type ClassDecorator<'TFunction when 'TFunction :> Function> = ('TFunction -> 'TFunction option)
+    [<Fickl.Core.CallableInterface>]
+    type ClassDecorator =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'TFunction when 'TFunction :> Function> : target: 'TFunction -> 'TFunction option
 
     type PropertyDecorator = delegate of target: Object * propertyKey: obj -> unit
 
-    type MethodDecorator<'T> =
-        delegate of
+    [<Fickl.Core.CallableInterface>]
+    type MethodDecorator =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'T> :
             target: Object * propertyKey: obj * descriptor: TypedPropertyDescriptor<'T> ->
                 TypedPropertyDescriptor<'T> option
 
@@ -7117,8 +7122,6 @@ module Es =
 
     type Iterator2<'T, 'TResult, 'TNext> =
         inherit IteratorObject<'T, 'TResult, 'TNext>
-        abstract ``return``: ('TResult option -> U2<IteratorReturnResult<'TResult>, IteratorYieldResult<'T>>) option with get, set
-        abstract throw: (obj option -> U2<IteratorReturnResult<'TResult>, IteratorYieldResult<'T>>) option with get, set
         abstract next: ?value: 'TNext -> U2<IteratorReturnResult<'TResult>, IteratorYieldResult<'T>>
 
         /// <summary>
@@ -8575,8 +8578,6 @@ module Es =
     type SegmentIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
         abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
-        abstract ``return``: (unit option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
-        abstract throw: (obj option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -9701,8 +9702,6 @@ module Es =
     type ArrayIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
         abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
-        abstract ``return``: (unit option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
-        abstract throw: (obj option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
         /// </summary>
@@ -9796,8 +9795,6 @@ module Es =
     type MapIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
         abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
-        abstract ``return``: (unit option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
-        abstract throw: (obj option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -9903,8 +9900,6 @@ module Es =
     type SetIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
         abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
-        abstract ``return``: (unit option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
-        abstract throw: (obj option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -10170,8 +10165,6 @@ module Es =
     type StringIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
         abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
-        abstract ``return``: (unit option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
-        abstract throw: (obj option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -12038,8 +12031,6 @@ module Es =
     type RegExpStringIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
         abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
-        abstract ``return``: (unit option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
-        abstract throw: (obj option -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>) option with get, set
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -33464,20 +33455,6 @@ module Dom =
     type AudioParamMap =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, AudioParam>
         abstract forEach: callbackfn: AudioParamMap.ForEach.Callbackfn * ?thisArg: obj -> unit
-        abstract get: key: string -> AudioParam option
-        abstract has: key: string -> bool
-        /// <summary>
-        /// Returns an iterable of key, value pairs for every entry in the map.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.MapIterator<(string * AudioParam)>
-        /// <summary>
-        /// Returns an iterable of keys in the map
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.MapIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the map
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.MapIterator<AudioParam>
 
     type AudioParamMapConstructor =
         [<EmitConstructor>]
@@ -42629,33 +42606,6 @@ module Dom =
         /// Appends a new element with a specified value to the end of the Set.
         /// </summary>
         abstract add: value: string -> CustomStateSet
-        /// <summary>
-        /// Removes a specified value from the Set.
-        /// </summary>
-        /// <returns>Returns true if an element in the Set existed and has been removed, or false if the element does not exist.</returns>
-        abstract delete: value: string -> bool
-        /// <returns>a boolean indicating whether an element with the specified value exists in the Set or not.</returns>
-        abstract has: value: string -> bool
-        /// <summary>
-        /// Returns an iterable of [v,v] pairs for every value <c>v</c> in the set.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.SetIterator<(string * string)>
-        /// <summary>
-        /// Despite its name, returns an iterable of the values in the set.
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.SetIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the set.
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.SetIterator<string>
-        /// <returns>a new Set containing all the elements in this Set and also all the elements in the argument.</returns>
-        abstract union<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
-        /// <returns>a new Set containing all the elements in this Set which are not also in the argument.</returns>
-        abstract difference<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<string>
-
-        /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
-        abstract symmetricDifference<'U> :
-            other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
 
     type CustomStateSetConstructor =
         [<EmitConstructor>]
@@ -47465,20 +47415,6 @@ module Dom =
     type EventCounts =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, float>
         abstract forEach: callbackfn: EventCounts.ForEach.Callbackfn * ?thisArg: obj -> unit
-        abstract get: key: string -> float option
-        abstract has: key: string -> bool
-        /// <summary>
-        /// Returns an iterable of key, value pairs for every entry in the map.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.MapIterator<(string * float)>
-        /// <summary>
-        /// Returns an iterable of keys in the map
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.MapIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the map
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.MapIterator<float>
 
     type EventCountsConstructor =
         [<EmitConstructor>]
@@ -48369,12 +48305,6 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemWritableFileStream/write">MDN Reference</a>
         /// </summary>
         abstract write: data: FileSystemWriteChunkType -> JS.Promise<unit>
-        /// <summary>
-        /// The <b><c>getWriter()</c></b> method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter">MDN Reference</a>
-        /// </summary>
-        abstract getWriter: unit -> WritableStreamDefaultWriter<obj>
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -48669,29 +48599,8 @@ module Dom =
         /// Appends a new element with a specified value to the end of the Set.
         /// </summary>
         abstract add: value: FontFace -> FontFaceSet
-        /// <summary>
-        /// Removes a specified value from the Set.
-        /// </summary>
-        /// <returns>Returns true if an element in the Set existed and has been removed, or false if the element does not exist.</returns>
-        abstract delete: value: FontFace -> bool
-        /// <returns>a boolean indicating whether an element with the specified value exists in the Set or not.</returns>
-        abstract has: value: FontFace -> bool
-        /// <summary>
-        /// Returns an iterable of [v,v] pairs for every value <c>v</c> in the set.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.SetIterator<(FontFace * FontFace)>
-        /// <summary>
-        /// Despite its name, returns an iterable of the values in the set.
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.SetIterator<FontFace>
-        /// <summary>
-        /// Returns an iterable of values in the set.
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.SetIterator<FontFace>
         /// <returns>a new Set containing all the elements in this Set and also all the elements in the argument.</returns>
         abstract union<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<'U, FontFace>>
-        /// <returns>a new Set containing all the elements in this Set which are not also in the argument.</returns>
-        abstract difference<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<FontFace>
 
         /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
         abstract symmetricDifference<'U> :
@@ -50267,28 +50176,6 @@ module Dom =
         /// Executes a provided function once per each value in the ReadonlySet object, in insertion order.
         /// </summary>
         abstract forEach: callbackfn: GPUSupportedFeatures.ForEach.Callbackfn * ?thisArg: obj -> unit
-        /// <returns>a boolean indicating whether an element with the specified value exists in the Set or not.</returns>
-        abstract has: value: string -> bool
-        /// <summary>
-        /// Returns an iterable of [v,v] pairs for every value <c>v</c> in the set.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.SetIterator<(string * string)>
-        /// <summary>
-        /// Despite its name, returns an iterable of the values in the set.
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.SetIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the set.
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.SetIterator<string>
-        /// <returns>a new Set containing all the elements in this Set and also all the elements in the argument.</returns>
-        abstract union<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
-        /// <returns>a new Set containing all the elements in this Set which are not also in the argument.</returns>
-        abstract difference<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<string>
-
-        /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
-        abstract symmetricDifference<'U> :
-            other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
 
     type GPUSupportedFeaturesConstructor =
         [<EmitConstructor>]
@@ -54633,19 +54520,6 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOptionsCollection/remove">MDN Reference</a>
         /// </summary>
         abstract remove: index: float -> unit
-        /// <summary>
-        /// The HTMLCollection method <b><c>item()</c></b> returns the element located at the specified offset into the collection.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCollection/item">MDN Reference</a>
-        /// </summary>
-        abstract item: index: float -> HTMLOptionElement option
-        abstract namedItem: name: string -> HTMLOptionElement option
-
-        [<Emit("$0[Symbol.iterator]()")>]
-        abstract SymbolIterator: unit -> Fable.Core.TS.Es.ArrayIterator<HTMLOptionElement>
-
-        [<EmitIndexer>]
-        abstract Item: float -> HTMLOptionElement with get, set
 
     type HTMLOptionsCollectionConstructor =
         [<EmitConstructor>]
@@ -56380,29 +56254,8 @@ module Dom =
         /// Appends a new element with a specified value to the end of the Set.
         /// </summary>
         abstract add: value: AbstractRange -> Highlight
-        /// <summary>
-        /// Removes a specified value from the Set.
-        /// </summary>
-        /// <returns>Returns true if an element in the Set existed and has been removed, or false if the element does not exist.</returns>
-        abstract delete: value: AbstractRange -> bool
-        /// <returns>a boolean indicating whether an element with the specified value exists in the Set or not.</returns>
-        abstract has: value: AbstractRange -> bool
-        /// <summary>
-        /// Returns an iterable of [v,v] pairs for every value <c>v</c> in the set.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.SetIterator<(AbstractRange * AbstractRange)>
-        /// <summary>
-        /// Despite its name, returns an iterable of the values in the set.
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.SetIterator<AbstractRange>
-        /// <summary>
-        /// Returns an iterable of values in the set.
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.SetIterator<AbstractRange>
         /// <returns>a new Set containing all the elements in this Set and also all the elements in the argument.</returns>
         abstract union<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<'U, AbstractRange>>
-        /// <returns>a new Set containing all the elements in this Set which are not also in the argument.</returns>
-        abstract difference<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<AbstractRange>
 
         /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
         abstract symmetricDifference<'U> :
@@ -56429,43 +56282,10 @@ module Dom =
         /// Executes a provided function once per each key/value pair in the Map, in insertion order.
         /// </summary>
         abstract forEach: callbackfn: HighlightRegistry.ForEach.Callbackfn * ?thisArg: obj -> unit
-        /// <returns>true if an element in the Map existed and has been removed, or false if the element does not exist.</returns>
-        abstract delete: key: string -> bool
-        /// <summary>
-        /// Returns a specified element from the Map object. If the value that is associated to the provided key is an object, then you will get a reference to that object and any change made to that object will effectively modify it inside the Map.
-        /// </summary>
-        /// <returns>Returns the element associated with the specified key. If no element is associated with the specified key, undefined is returned.</returns>
-        abstract get: key: string -> Highlight option
-        /// <returns>boolean indicating whether an element with the specified key exists or not.</returns>
-        abstract has: key: string -> bool
         /// <summary>
         /// Adds a new element with a specified key and value to the Map. If an element with the same key already exists, the element will be updated.
         /// </summary>
         abstract set: key: string * value: Highlight -> HighlightRegistry
-        /// <summary>
-        /// Returns an iterable of key, value pairs for every entry in the map.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.MapIterator<(string * Highlight)>
-        /// <summary>
-        /// Returns an iterable of keys in the map
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.MapIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the map
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.MapIterator<Highlight>
-        /// <summary>
-        /// Returns a specified element from the Map object.
-        /// If no element is associated with the specified key, a new element with the value <c>defaultValue</c> will be inserted into the Map and returned.
-        /// </summary>
-        /// <returns>The element associated with the specified key, which will be <c>defaultValue</c> if no element previously existed.</returns>
-        abstract getOrInsert: key: string * defaultValue: Highlight -> Highlight
-        /// <summary>
-        /// Returns a specified element from the Map object.
-        /// If no element is associated with the specified key, the result of passing the specified key to the <c>callback</c> function will be inserted into the Map and returned.
-        /// </summary>
-        /// <returns>The element associated with the specific key, which will be the newly computed value if no element previously existed.</returns>
-        abstract getOrInsertComputed: key: string * callback: (string -> Highlight) -> Highlight
 
     type HighlightRegistryConstructor =
         [<EmitConstructor>]
@@ -57578,13 +57398,6 @@ module Dom =
             listener: ('E -> obj) *
             ?options: U2<bool, EventListenerOptions> ->
                 unit
-
-        /// <summary>
-        /// The <b><c>result</c></b> read-only property of the IDBRequest interface returns the result of the request.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBRequest/result">MDN Reference</a>
-        /// </summary>
-        abstract result: IDBDatabase
 
     type IDBOpenDBRequestConstructor =
         [<EmitConstructor>]
@@ -59124,20 +58937,6 @@ module Dom =
     type MIDIInputMap =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, MIDIInput>
         abstract forEach: callbackfn: MIDIInputMap.ForEach.Callbackfn * ?thisArg: obj -> unit
-        abstract get: key: string -> MIDIInput option
-        abstract has: key: string -> bool
-        /// <summary>
-        /// Returns an iterable of key, value pairs for every entry in the map.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.MapIterator<(string * MIDIInput)>
-        /// <summary>
-        /// Returns an iterable of keys in the map
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.MapIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the map
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.MapIterator<MIDIInput>
 
     type MIDIInputMapConstructor =
         [<EmitConstructor>]
@@ -59222,20 +59021,6 @@ module Dom =
     type MIDIOutputMap =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, MIDIOutput>
         abstract forEach: callbackfn: MIDIOutputMap.ForEach.Callbackfn * ?thisArg: obj -> unit
-        abstract get: key: string -> MIDIOutput option
-        abstract has: key: string -> bool
-        /// <summary>
-        /// Returns an iterable of key, value pairs for every entry in the map.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.MapIterator<(string * MIDIOutput)>
-        /// <summary>
-        /// Returns an iterable of keys in the map
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.MapIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the map
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.MapIterator<MIDIOutput>
 
     type MIDIOutputMapConstructor =
         [<EmitConstructor>]
@@ -68507,19 +68292,6 @@ module Dom =
         inherit Fable.Core.TS.Es.ReadonlyMap<string, obj>
         abstract forEach: callbackfn: RTCStatsReport.ForEach.Callbackfn * ?thisArg: obj -> unit
         abstract get: key: string -> obj
-        abstract has: key: string -> bool
-        /// <summary>
-        /// Returns an iterable of key, value pairs for every entry in the map.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.MapIterator<(string * obj)>
-        /// <summary>
-        /// Returns an iterable of keys in the map
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.MapIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the map
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.MapIterator<obj>
 
     type RTCStatsReportConstructor =
         [<EmitConstructor>]
@@ -68603,27 +68375,7 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/RadioNodeList/value">MDN Reference</a>
         /// </summary>
         abstract value: string with get, set
-        /// <summary>
-        /// Returns a node from a NodeList by index. This method doesn't throw exceptions as long as you provide arguments. A value of null is returned if the index is out of range, and a TypeError is thrown if no argument is provided.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/NodeList/item">MDN Reference</a>
-        /// </summary>
-        abstract item: index: float -> HTMLInputElement
         abstract forEach: callbackfn: RadioNodeList.ForEach.Callbackfn * ?thisArg: obj -> unit
-        /// <summary>
-        /// Returns an array of key, value pairs for every entry in the list.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.ArrayIterator<(float * HTMLInputElement)>
-        /// <summary>
-        /// Returns an list of values in the list.
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.ArrayIterator<HTMLInputElement>
-
-        [<Emit("$0[Symbol.iterator]()")>]
-        abstract SymbolIterator: unit -> Fable.Core.TS.Es.ArrayIterator<HTMLInputElement>
-
-        [<EmitIndexer>]
-        abstract Item: float -> HTMLInputElement with get, set
 
     type RadioNodeListConstructor =
         [<EmitConstructor>]
@@ -79835,33 +79587,6 @@ module Dom =
         /// Appends a new element with a specified value to the end of the Set.
         /// </summary>
         abstract add: value: string -> ViewTransitionTypeSet
-        /// <summary>
-        /// Removes a specified value from the Set.
-        /// </summary>
-        /// <returns>Returns true if an element in the Set existed and has been removed, or false if the element does not exist.</returns>
-        abstract delete: value: string -> bool
-        /// <returns>a boolean indicating whether an element with the specified value exists in the Set or not.</returns>
-        abstract has: value: string -> bool
-        /// <summary>
-        /// Returns an iterable of [v,v] pairs for every value <c>v</c> in the set.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.SetIterator<(string * string)>
-        /// <summary>
-        /// Despite its name, returns an iterable of the values in the set.
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.SetIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the set.
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.SetIterator<string>
-        /// <returns>a new Set containing all the elements in this Set and also all the elements in the argument.</returns>
-        abstract union<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
-        /// <returns>a new Set containing all the elements in this Set which are not also in the argument.</returns>
-        abstract difference<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<string>
-
-        /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
-        abstract symmetricDifference<'U> :
-            other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
 
     type ViewTransitionTypeSetConstructor =
         [<EmitConstructor>]
@@ -80888,28 +80613,6 @@ module Dom =
         /// Executes a provided function once per each value in the ReadonlySet object, in insertion order.
         /// </summary>
         abstract forEach: callbackfn: WGSLLanguageFeatures.ForEach.Callbackfn * ?thisArg: obj -> unit
-        /// <returns>a boolean indicating whether an element with the specified value exists in the Set or not.</returns>
-        abstract has: value: string -> bool
-        /// <summary>
-        /// Returns an iterable of [v,v] pairs for every value <c>v</c> in the set.
-        /// </summary>
-        abstract entries: unit -> Fable.Core.TS.Es.SetIterator<(string * string)>
-        /// <summary>
-        /// Despite its name, returns an iterable of the values in the set.
-        /// </summary>
-        abstract keys: unit -> Fable.Core.TS.Es.SetIterator<string>
-        /// <summary>
-        /// Returns an iterable of values in the set.
-        /// </summary>
-        abstract values: unit -> Fable.Core.TS.Es.SetIterator<string>
-        /// <returns>a new Set containing all the elements in this Set and also all the elements in the argument.</returns>
-        abstract union<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
-        /// <returns>a new Set containing all the elements in this Set which are not also in the argument.</returns>
-        abstract difference<'U> : other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<string>
-
-        /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
-        abstract symmetricDifference<'U> :
-            other: Fable.Core.TS.Es.ReadonlySetLike<'U> -> Fable.Core.TS.Es.Set<U2<string, 'U>>
 
     type WGSLLanguageFeaturesConstructor =
         [<EmitConstructor>]
@@ -92607,45 +92310,6 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader">MDN Reference</a>
         /// </summary>
         abstract getReader: options: Fable.Core.TS.Dom.ReadableStream.GetReader.Options -> ReadableStreamBYOBReader
-        /// <summary>
-        /// The <b><c>getReader()</c></b> method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader">MDN Reference</a>
-        /// </summary>
-        abstract getReader: unit -> ReadableStreamDefaultReader<obj>
-
-        /// <summary>
-        /// The <b><c>getReader()</c></b> method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader">MDN Reference</a>
-        /// </summary>
-        abstract getReader:
-            ?options: ReadableStreamGetReaderOptions -> U2<ReadableStreamBYOBReader, ReadableStreamDefaultReader<obj>>
-
-        /// <summary>
-        /// The <b><c>pipeThrough()</c></b> method of the ReadableStream interface provides a chainable way of piping the current stream through a transform stream or any other writable/readable pair.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeThrough">MDN Reference</a>
-        /// </summary>
-        abstract pipeThrough<'T> :
-            transform: ReadableWritablePair<'T, obj> * ?options: StreamPipeOptions -> ReadableStream<'T>
-
-        /// <summary>
-        /// The <b><c>pipeTo()</c></b> method of the ReadableStream interface pipes the current ReadableStream to a given WritableStream and returns a Promise that fulfills when the piping process completes successfully, or rejects if any errors were encountered.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeTo">MDN Reference</a>
-        /// </summary>
-        abstract pipeTo: destination: WritableStream<obj> * ?options: StreamPipeOptions -> JS.Promise<unit>
-        /// <summary>
-        /// The <b><c>tee()</c></b> method of the ReadableStream interface tees the current readable stream, returning a two-element array containing the two resulting branches as new ReadableStream instances.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/tee">MDN Reference</a>
-        /// </summary>
-        abstract tee: unit -> ReadableStream<obj> * ReadableStream<obj>
-        abstract values: ?options: ReadableStreamIteratorOptions -> ReadableStreamAsyncIterator<obj>
-
-        [<Emit("$0[Symbol.asyncIterator]($1...)")>]
-        abstract SymbolAsyncIterator: ?options: ReadableStreamIteratorOptions -> ReadableStreamAsyncIterator<obj>
 
     type WebTransportReceiveStreamConstructor =
         [<EmitConstructor>]
@@ -92672,12 +92336,6 @@ module Dom =
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportSendStream/getStats">MDN Reference</a>
         /// </summary>
         abstract getStats: unit -> JS.Promise<WebTransportSendStreamStats>
-        /// <summary>
-        /// The <b><c>getWriter()</c></b> method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter">MDN Reference</a>
-        /// </summary>
-        abstract getWriter: unit -> WritableStreamDefaultWriter<obj>
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -97198,12 +96856,6 @@ module Dom =
             [<ParamArray>] __0: obj[] ->
                 U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
 
-        abstract ``return``:
-            (unit option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
-
-        abstract throw:
-            (obj option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
-
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
         /// </summary>
@@ -97315,12 +96967,6 @@ module Dom =
         abstract next:
             [<ParamArray>] __0: obj[] ->
                 U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-
-        abstract ``return``:
-            (unit option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
-
-        abstract throw:
-            (obj option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -97434,12 +97080,6 @@ module Dom =
             [<ParamArray>] __0: obj[] ->
                 U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
 
-        abstract ``return``:
-            (unit option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
-
-        abstract throw:
-            (obj option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
-
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
         /// </summary>
@@ -97552,12 +97192,6 @@ module Dom =
             [<ParamArray>] __0: obj[] ->
                 U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
 
-        abstract ``return``:
-            (unit option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
-
-        abstract throw:
-            (obj option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
-
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
         /// </summary>
@@ -97669,12 +97303,6 @@ module Dom =
         abstract next:
             [<ParamArray>] __0: obj[] ->
                 U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-
-        abstract ``return``:
-            (unit option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
-
-        abstract throw:
-            (obj option -> U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>) option with get, set
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -97794,12 +97422,6 @@ module Dom =
                         U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
                         >) option with get, set
 
-        abstract throw:
-            (obj option
-                    -> JS.Promise<
-                        U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                        >) option with get, set
-
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator: unit -> FileSystemDirectoryHandleAsyncIterator<'T>
 
@@ -97812,12 +97434,6 @@ module Dom =
 
         abstract ``return``:
             (JS.Promise<unit> option
-                    -> JS.Promise<
-                        U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-                        >) option with get, set
-
-        abstract throw:
-            (obj option
                     -> JS.Promise<
                         U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
                         >) option with get, set

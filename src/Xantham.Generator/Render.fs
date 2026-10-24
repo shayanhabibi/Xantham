@@ -986,6 +986,9 @@ let private renderInterface attributes (runtimePackage: string<importSpecifier>)
     [
         yield! docLines "" decl.Docs decl.Tags
 
+        if decl.Callable then
+            yield "[<Fickl.Core.CallableInterface>]"
+
         // Any static with a body makes F# infer a class; the attribute keeps the type an
         // interface (and needs default-interface-member runtime support to type-check).
         if not (decl.CreateOverloads.IsEmpty && decl.Statics.IsEmpty) then

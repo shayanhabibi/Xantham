@@ -132,14 +132,14 @@ type Ns =
     /// <summary>
     /// A generic function-typed constant stays a property: the declaration kind decides.
     /// </summary>
-    abstract format: (obj -> string)
+    abstract format: Ns.Format
     abstract relabel<'T when 'T :> Shape>: shape: 'T * label: string -> 'T
     /// <summary>
     /// A function merged with a namespace stays a property; the namespace's function is a method.
     /// </summary>
     abstract tagged: Tagged with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (identity: ('T -> 'T), measure: ('T -> 'T), version: string, format: (obj -> string), relabel: Func<'T, string, 'T>, tagged: Tagged) : Ns = jsNative
+    static member Create (identity: ('T -> 'T), measure: ('T -> 'T), version: string, format: Ns.Format, relabel: Func<'T, string, 'T>, tagged: Tagged) : Ns = jsNative
 
 type Tagged =
     abstract kind: string
@@ -171,6 +171,12 @@ module Create =
 module Grid =
     module Each =
         type Visit<'T when 'T :> Shape> = delegate of cell: float * index: float * grid: Grid<'T> -> unit
+
+module Ns =
+    [<Fickl.Core.CallableInterface>]
+    type Format =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'T>: value: 'T -> string
 
 module Store =
     module Each =

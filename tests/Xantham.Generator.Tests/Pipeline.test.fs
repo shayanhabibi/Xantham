@@ -1406,15 +1406,15 @@ let pipelineTests =
                               "static member makeCoalescer<'T> () : 'T * Coalesce<'T> = jsNative"
                               "the reference survives a tuple return position at arity 1, unwidened"
 
-                      testCase "a single generic call signature keeps one head, hoisting both parameters onto it"
+                      testCase "a single generic call signature keeps its parameter on Invoke"
                       <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd
 
                           Expect.stringContains
                               source
-                              "type OneShot<'T, 'U> ="
-                              "the erased head carries the interface's parameter beside the signature's"
+                              "type OneShot<'T> =\n    [<Emit(\"$0($1...)\")>]\n    abstract Invoke<'U>: value: 'U -> 'U"
+                              "the interface owns T and each invocation independently binds U"
 
                       testCase "several non-generic call signatures collapse to one abbreviation, raising TR031"
                       <| fun _ ->
@@ -2834,7 +2834,7 @@ let pipelineTests =
                       let source = rendered.Files |> List.head |> snd
 
                       Expect.stringContains source "type Distinct<'T, 'A, 'B> =" "'A and 'B are two variables"
-                      Expect.stringContains source "type Single<'T, 'U> =" "and one signature collapses nothing"
+                      Expect.stringContains source "type Single<'T> =\n    [<Emit(\"$0($1...)\")>]\n    abstract Invoke<'U>: value: 'U -> 'U" "one signature keeps its invocation-owned binder"
 
                   testCase "one name under two bounds routes to an interface, not one delegate head" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -2847,7 +2847,7 @@ let pipelineTests =
                           (rendered.Findings
                            |> List.filter (fun f -> f.Key = "SI008")
                            |> List.map _.Symbol)
-                          [ "DivergentBound" ]
+                          [ "Single"; "DivergentBound"; "Holder.Single" ]
                           "reached through Invoke rather than dropped"
 
                       Expect.isEmpty
@@ -6221,14 +6221,14 @@ let pipelineTests =
 
                       Expect.stringContains source "initialValue: JS.NoInfer<'T> option" "the hoisted options bind 'T"
 
-                  testCase "type-scope-lab: out-of-scope findings remain only at the negatives" <| fun _ ->
+                  testCase "type-scope-lab: aliases and callable values retain their parameter scopes" <| fun _ ->
                       let rendered = generate ()
 
                       Expect.equal (sitesOf rendered "TR012") [] "every hoisted parameter is in scope"
                       Expect.equal
                           (sitesOf rendered "TR013")
-                          [ "Ns.format(value)" ]
-                          "the remaining function-typed constant; the alias now binds T"
+                          []
+                          "the alias and callable constant both retain their binders"
                       Expect.equal (sitesOf rendered "TR027") [ "Container.queryLike()" ] "the structural bound"
                       Expect.equal (sitesOf rendered "TP006") [ "Container.queryLike" ] "the structural bound" ])
 
@@ -7091,5 +7091,65 @@ let identityAliasFixtureTests =
                         [ "producer/AliasOwner.fs"; "consumer-out/AliasConsumer.fs" ]
                         "module Check\nlet text: string = AliasConsumer.Exports.text \"a\"\nlet number: float = AliasConsumer.Exports.number 1.0\nlet reorder (value: AliasOwner.Reordered<string, float>): AliasOwner.Existing = AliasConsumer.Exports.reorder value\n"
                 Expect.equal exitCode 0 diagnostics
+        ])
+    ]
+
+[<Tests>]
+let genericCallableInterfaceFixtureTests =
+    testList "generic callable interfaces" [
+        yield! fixtureTests "generic-callable-interface-lab" (handFixture "generic-callable-interface-lab") GeneratorConfig.Default (fun package -> [
+            testCase "generic calls retain invocation binders and named references" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type Identity =" "identity is independently polymorphic at each call"
+                Expect.stringContains source "[<Fickl.Core.CallableInterface>]\ntype Identity =" "construction produces a JavaScript callable"
+                Expect.stringContains source "[<Fickl.Core.CallableInterface>]\ntype InheritedIdentity =" "derived callable construction preserves its base contract"
+                Expect.stringContains source "type RedundantIdentity =\n    inherit InheritedIdentity" "a transitive base preserves both subtype relations"
+                Expect.isFalse (source.Contains "type RedundantIdentity<'") "a repeated inherited signature keeps invocation-owned binders"
+                Expect.stringContains source "type StringPair =\n    inherit PairWith<string>\n\n" "the instantiated inherited Invoke is not redeclared"
+                Expect.stringContains source "type RedundantPair =\n    inherit StringPair\n\n" "an applied ancestor remains available transitively"
+                Expect.stringContains source "type RenamedPair<'V> =\n    inherit PairWith<'V>\n\n" "renaming an outer binder retains the inherited method"
+                Expect.stringContains source "type RedundantGeneric<'V> =\n    inherit RenamedPair<'V>\n\n" "generic base substitution preserves both subtype relations"
+                Expect.stringContains source "type Collision<'U> =\n    inherit PairWith<'U>\n\n" "outer arguments remain distinct from inherited method binders"
+                Expect.stringContains source "type PairWith<'T> =" "only the outer binder belongs to the interface"
+                Expect.stringContains source "callback: Identity" "an argument uses its declared contract"
+                Expect.stringContains source "static member identity: Identity = jsNative" "a callable value keeps its polymorphic contract and native identity"
+                Expect.stringContains source "static member anonymousIdentity: AnonymousIdentity = jsNative" "an anonymous callable value receives its own invocation-owned contract"
+                Expect.isFalse (source.Contains "obj") "this lab has no source contract requiring obj"
+                Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR013")) "anonymous calls retain their binders too"
+            testCase "catalogue consumers call the same contract at distinct type arguments" <| fun _ ->
+                use scratch = Scratch.directory "generic-invoke-catalog"
+                let producer = Path.Combine(scratch.Path, "producer")
+                let config = { GeneratorConfig.Default with DeclarationCatalog = true; ModuleName = Some "InvokeOwner" }
+                Pipeline.run config package producer |> Async.RunSynchronously |> ignore
+                let consumer = Path.Combine(scratch.Path, "consumer")
+                Directory.CreateDirectory consumer |> ignore
+                File.WriteAllText(Path.Combine(consumer, "package.json"), """{"name":"invoke-consumer-lab","version":"1.0.0","types":"index.d.ts"}""")
+                let source = Path.Combine(package, "index").Replace('\\', '/')
+                File.WriteAllText(Path.Combine(consumer, "index.d.ts"), $"import type {{ Identity, PairWith }} from '{source}';\nexport function accept(value: Identity): PairWith<string>;\n")
+                let references = { config with ModuleName = Some "InvokeConsumer"; DeclarationReferences = [ Path.Combine(producer, "declarations.json") ] }
+                Pipeline.run references consumer (Path.Combine(scratch.Path, "consumer-out")) |> Async.RunSynchronously |> ignore
+                let exitCode, diagnostics =
+                    DeclarationCatalogTests.compileConsumer scratch.Path
+                        [ "producer/InvokeOwner.fs"; "consumer-out/InvokeConsumer.fs" ]
+                        "module Check\nlet identity = { new InvokeOwner.Identity with member _.Invoke<'T>(value: 'T) : 'T = value }\nlet number: int = identity.Invoke 1\nlet text: string = identity.Invoke \"a\"\nlet pair: string * int = (InvokeConsumer.Exports.accept identity).Invoke 2\n"
+                Expect.equal exitCode 0 diagnostics
+            testCase "catalogue callable bases retain consumer inheritance" <| fun _ ->
+                use scratch = Scratch.directory "generic-invoke-inheritance"
+                let producer = Path.Combine(scratch.Path, "producer")
+                let config = { GeneratorConfig.Default with DeclarationCatalog = true; ModuleName = Some "InvokeOwner" }
+                Pipeline.run config package producer |> Async.RunSynchronously |> ignore
+                let consumer = Path.Combine(scratch.Path, "consumer")
+                Directory.CreateDirectory consumer |> ignore
+                File.WriteAllText(Path.Combine(consumer, "package.json"), """{"name":"invoke-inherited-consumer-lab","version":"1.0.0","types":"index.d.ts"}""")
+                let source = Path.Combine(package, "index").Replace('\\', '/')
+                File.WriteAllText(Path.Combine(consumer, "index.d.ts"), $"import type {{ Identity, PairWith }} from '{source}';\nexport interface Child extends Identity {{}}\nexport interface PairChild extends PairWith<string> {{}}\nexport function child(): Child;\n")
+                let references = { config with ModuleName = Some "InvokeConsumer"; DeclarationReferences = [ Path.Combine(producer, "declarations.json") ] }
+                let output = Path.Combine(scratch.Path, "consumer-out")
+                Pipeline.run references consumer output |> Async.RunSynchronously |> ignore
+                let code = File.ReadAllText(Path.Combine(output, "InvokeConsumer.fs"))
+                Expect.stringContains code "[<Fickl.Core.CallableInterface>]\ntype Child =\n    inherit InvokeOwner.Identity" "catalogue ownership preserves base assignability"
+                Expect.stringContains code "[<Fickl.Core.CallableInterface>]\ntype PairChild =\n    inherit InvokeOwner.PairWith<string>" "base applications retain their outer argument"
+                Expect.isFalse (code.Contains "type Identity =") "the base remains owned by the producer"
         ])
     ]

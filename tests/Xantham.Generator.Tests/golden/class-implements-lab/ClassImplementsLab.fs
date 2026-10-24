@@ -13,7 +13,6 @@ open Fable.Core.TS.Dom
 [<Interface>]
 type Client =
     inherit Model<string>
-    abstract generate: options: Options -> string
     [<ParamObject; Emit("$0")>]
     static member Create (generate: (Options -> string)) : Client = jsNative
 

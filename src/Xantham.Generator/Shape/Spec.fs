@@ -264,6 +264,17 @@ let hasIncompatibleOverloadedTypeParameters (model: ShapeModel) (facts: TypeFact
         |> List.countBy fst
         |> List.exists (fun (_, count) -> count > 1)
 
+/// Call signatures represented as interface methods with invocation-owned type parameters.
+let internal hasInterfaceCallSignatures (model: ShapeModel) (facts: TypeFacts) =
+    match List.distinct facts.CallSignatures with
+    | [ signature ] -> not signature.TypeParameters.IsEmpty
+    | _ -> hasIncompatibleOverloadedTypeParameters model facts
+
+/// Callable values retain their interface rather than exposing only an exported method.
+let internal isPolymorphicCallableValue model symbolFlags facts =
+    not (hasAny SymbolFlags.Function symbolFlags)
+    && hasInterfaceCallSignatures model facts
+
 /// An object type whose whole content is one index signature: `interface Bag { [key:
 /// string]: number }`, or the anonymous shape `Record`/`ReadonlyRecord` express directly
 /// (§4.10, TR059).
@@ -3093,27 +3104,22 @@ let typeParamsOf
         |> List.filter (fun name -> Naming.typeVariable name = name)
         |> Set.ofList
 
-    // Written names in scope that differ from their TypeScript spelling. A verbatim name equal
-    // to one of these takes a suffix too: in `Outer<$T> { map<_T>() }` the method's `_T` is
-    // written `'_T2` beside the enclosing `'_T`.
-    let sanitisedInScope =
-        model.TypeVars
-        |> Map.toList
-        |> List.choose (fun (id, written) ->
-            match Map.tryFind id model.Types |> Option.bind _.SymbolName with
-            | Some name when name / uom<symbolName> <> written -> Some written
-            | _ -> None)
-        |> Set.ofList
-
     let named =
         named
         |> List.fold
             (fun (written, taken) (id, name) ->
                 let spelled = Naming.typeVariable name
 
-                if spelled = name && not (Set.contains name sanitisedInScope) then
-                    written @ [ id, name ], taken
-                else
+                let collides =
+                    model.TypeVars
+                    |> Map.exists (fun otherId allocated -> otherId <> id && allocated = name)
+                    || written
+                       |> List.exists (fun (otherId, allocated) -> otherId <> id && allocated = name)
+
+                match Map.tryFind id model.TypeVars with
+                | Some allocated -> written @ [ id, allocated ], Set.add allocated taken
+                | None when spelled = name && not collides -> written @ [ id, name ], Set.add name taken
+                | None ->
                     let free =
                         Seq.initInfinite (fun index -> index)
                         |> Seq.map (fun index -> if index = 0 then spelled else $"{spelled}{index + 1}")
@@ -3893,6 +3899,7 @@ let internal shapeHook
                 Docs = m.Docs
                 Tags = m.Tags
                 Order = order
+                Callable = false
                 TypeParameters =
                     (if Set.isEmpty (Set.intersect mentioned bound) then
                          []

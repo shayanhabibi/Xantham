@@ -122,7 +122,7 @@ let private hookPlacement expected origin file compilerLib =
                     CompilerLib = compilerLib } }
     let iface name =
         FsInterface
-            { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []
+            { Callable = false; Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []
               Inherits = []; Members = []; Entrypoint = None; CreateOverloads = []; Statics = [] }
     let station =
         { facts (typeResponse 10 TypeFlags.Object) with

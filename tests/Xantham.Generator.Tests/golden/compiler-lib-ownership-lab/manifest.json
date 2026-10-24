@@ -23,16 +23,16 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 188,
-      "ergonomic": 164,
-      "widened": 24
+      "total": 181,
+      "ergonomic": 159,
+      "widened": 22
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1085,
+      "total": 1091,
       "exact": 14,
-      "ergonomic": 1040,
-      "widened": 31
+      "ergonomic": 1044,
+      "widened": 33
     },
     {
       "pass": "SA - shape-aliases",
@@ -48,9 +48,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 181,
+      "total": 183,
       "exact": 6,
-      "ergonomic": 172,
+      "ergonomic": 174,
       "widened": 3
     },
     {
