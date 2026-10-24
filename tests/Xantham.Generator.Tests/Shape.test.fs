@@ -619,8 +619,7 @@ let typeRefTests =
             Expect.equal (findings |> List.map _.Key) [ "TR040" ] "reported as the mapping it is, not as an unmapped flag"
             Expect.stringContains (List.head findings).Message "primitives" "obj admits what object excludes"
 
-        testCase "symbol and unique symbol widen, each naming its own construct" <| fun _ ->
-            // Fable.Core 5.2.0 declares no `JS.Symbol`, checked against the shipped assembly.
+        testCase "symbol and unique symbol widen where the Symbol interface has no name" <| fun _ ->
             let model =
                 Build.shapeModel (
                     intrinsic 10 TypeFlags.ESSymbol
@@ -634,12 +633,33 @@ let typeRefTests =
             Expect.equal plain FsObj "symbol"
             Expect.equal unique FsObj "unique symbol"
             Expect.equal (plainFindings |> List.map _.Key) [ "TR041" ] "symbol"
-            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR042" ] "unique symbol"
+            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR041"; "TR042" ] "unique symbol"
 
             Expect.stringContains
-                (List.head uniqueFindings).Message
-                "unique"
+                (List.item 1 uniqueFindings).Message
+                "identity"
                 "a unique symbol loses its identity on top of its type"
+
+        testCase "symbol and unique symbol read as the named Symbol interface" <| fun _ ->
+            let symbolInterface = Build.facts (Build.typeResponse 20 TypeFlags.Object)
+
+            let model =
+                { Build.shapeModel (
+                      { intrinsic 10 TypeFlags.ESSymbol with SymbolApparentType = Some 20<typeId> }
+                      :: { intrinsic 11 TypeFlags.UniqueESSymbol with SymbolApparentType = Some 20<typeId> }
+                      :: symbolInterface
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 20<typeId>, "Symbol" ] }
+
+            let plain, plainFindings = Spec.typeRef Build.context model None "x" 10<typeId>
+            let unique, uniqueFindings = Spec.typeRef Build.context model None "x" 11<typeId>
+
+            Expect.equal plain (FsNamed "Symbol") "symbol"
+            Expect.equal unique (FsNamed "Symbol") "unique symbol"
+            Expect.equal (plainFindings |> List.map _.Key) [ "TR069" ] "symbol is ergonomic"
+            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR069"; "TR042" ] "unique symbol keeps its identity loss"
+            Expect.equal (plainFindings |> List.map _.Tier) [ Ergonomic ] "ergonomic"
 
         testCase "a union with undefined hoists to option with an ergonomic finding" <| fun _ ->
             let union =

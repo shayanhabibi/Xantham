@@ -115,7 +115,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -162,7 +162,7 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
         [<ParamObject; Emit("({ kind: 'method', ...$0 })")>]
-        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassMethodDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassMethodDecoratorContext<'This, 'Value> = jsNative
+        static member Create (name: U2<string, Symbol>, ``static``: bool, ``private``: bool, access: ClassMethodDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassMethodDecoratorContext<'This, 'Value> = jsNative
 
     module ClassMethodDecoratorContext =
         /// <summary>
@@ -205,7 +205,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -226,7 +226,7 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
         [<ParamObject; Emit("({ kind: 'getter', ...$0 })")>]
-        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassGetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassGetterDecoratorContext<'This, 'Value> = jsNative
+        static member Create (name: U2<string, Symbol>, ``static``: bool, ``private``: bool, access: ClassGetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassGetterDecoratorContext<'This, 'Value> = jsNative
 
     module ClassGetterDecoratorContext =
         /// <summary>
@@ -269,7 +269,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -290,7 +290,7 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
         [<ParamObject; Emit("({ kind: 'setter', ...$0 })")>]
-        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassSetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassSetterDecoratorContext<'This, 'Value> = jsNative
+        static member Create (name: U2<string, Symbol>, ``static``: bool, ``private``: bool, access: ClassSetterDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassSetterDecoratorContext<'This, 'Value> = jsNative
 
     module ClassSetterDecoratorContext =
         /// <summary>
@@ -333,7 +333,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -353,7 +353,7 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
         [<ParamObject; Emit("({ kind: 'accessor', ...$0 })")>]
-        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassAccessorDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassAccessorDecoratorContext<'This, 'Value> = jsNative
+        static member Create (name: U2<string, Symbol>, ``static``: bool, ``private``: bool, access: ClassAccessorDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassAccessorDecoratorContext<'This, 'Value> = jsNative
 
     module ClassAccessorDecoratorContext =
         /// <summary>
@@ -445,7 +445,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -465,7 +465,7 @@ module Es =
         abstract addInitializer: initializer: (unit -> unit) -> unit
         abstract metadata: obj option
         [<ParamObject; Emit("({ kind: 'field', ...$0 })")>]
-        static member Create (name: obj, ``static``: bool, ``private``: bool, access: ClassFieldDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassFieldDecoratorContext<'This, 'Value> = jsNative
+        static member Create (name: U2<string, Symbol>, ``static``: bool, ``private``: bool, access: ClassFieldDecoratorContext.Access<'This, 'Value>, addInitializer: ((unit -> unit) -> unit), ?metadata: obj) : ClassFieldDecoratorContext<'This, 'Value> = jsNative
 
     module ClassFieldDecoratorContext =
         /// <summary>
@@ -497,14 +497,14 @@ module Es =
         [<Emit("$0($1...)")>]
         abstract Invoke<'TFunction when 'TFunction :> Function>: target: 'TFunction -> 'TFunction option
 
-    type PropertyDecorator = delegate of target: Object * propertyKey: obj -> unit
+    type PropertyDecorator = delegate of target: Object * propertyKey: U2<string, Symbol> -> unit
 
     [<Fickl.Core.CallableInterface>]
     type MethodDecorator =
         [<Emit("$0($1...)")>]
-        abstract Invoke<'T>: target: Object * propertyKey: obj * descriptor: TypedPropertyDescriptor<'T> -> TypedPropertyDescriptor<'T> option
+        abstract Invoke<'T>: target: Object * propertyKey: U2<string, Symbol> * descriptor: TypedPropertyDescriptor<'T> -> TypedPropertyDescriptor<'T> option
 
-    type ParameterDecorator = delegate of target: Object * propertyKey: obj option * parameterIndex: float -> unit
+    type ParameterDecorator = delegate of target: Object * propertyKey: U2<string, Symbol> option * parameterIndex: float -> unit
 
     [<Interface>]
     type Symbol =
@@ -515,11 +515,11 @@ module Es =
         /// <summary>
         /// Returns the primitive value of the specified object.
         /// </summary>
-        abstract valueOf: unit -> obj
+        abstract valueOf: unit -> Symbol
         [<ParamObject; Emit("$0")>]
-        static member Create (toString: (unit -> string), valueOf: (unit -> obj)) : Symbol = jsNative
+        static member Create (toString: (unit -> string), valueOf: (unit -> Symbol)) : Symbol = jsNative
 
-    type PropertyKey = obj
+    type PropertyKey = U3<string, float, Symbol>
 
     [<Interface>]
     type PropertyDescriptor =
@@ -538,7 +538,7 @@ module Es =
         [<EmitIndexer>]
         abstract Item: float -> PropertyDescriptor with get, set
         [<EmitIndexer>]
-        abstract Item: obj -> PropertyDescriptor with get, set
+        abstract Item: Symbol -> PropertyDescriptor with get, set
 
     /// <summary>
     /// Provides functionality common to all JavaScript objects.

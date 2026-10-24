@@ -4,8 +4,8 @@
   "module": "CompilerLibOwnershipLab",
   "counts": {
     "exact": 206,
-    "ergonomic": 219,
-    "widened": 63,
+    "ergonomic": 226,
+    "widened": 56,
     "escape": 10
   },
   "passes": [
@@ -23,22 +23,22 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 181,
-      "ergonomic": 159,
-      "widened": 22
+      "total": 179,
+      "ergonomic": 161,
+      "widened": 18
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1091,
+      "total": 1085,
       "exact": 14,
-      "ergonomic": 1044,
-      "widened": 33
+      "ergonomic": 1053,
+      "widened": 18
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 66,
-      "ergonomic": 17,
-      "widened": 31,
+      "total": 65,
+      "ergonomic": 18,
+      "widened": 29,
       "escape": 18
     },
     {

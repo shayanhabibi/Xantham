@@ -113,6 +113,7 @@ let findingsTests =
                     "TR.ValueOfAsPropTypeLock TR066 ergonomic"
                     "TR.MappedAsPropertyRecord TR067 ergonomic"
                     "TR.ConditionalResolvedToConstraint TR068 widened"
+                    "TR.SymbolAsLibInterface TR069 ergonomic"
                     "TP.UnnamedTypeParameter TP001 widened"
                     "TP.ConstraintDropped TP002 ergonomic"
                     "TP.GenericFunctionHoisted TP003 ergonomic"

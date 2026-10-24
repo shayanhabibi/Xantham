@@ -2462,12 +2462,17 @@ let pipelineTests =
                       Expect.stringContains source "type Two = bigint" "a bigint literal keeps its own widening"
                       Expect.isTrue (says "TR039" "bigint literal") "reported as the literal it was"
 
-                      // `object`, `symbol` and `unique symbol` still widen - nothing shipped
-                      // binds a symbol - but each names its construct instead of a flag.
+                      // `object` still widens. `symbol` and `unique symbol` read as the lib's
+                      // `Symbol` interface, and each names its construct instead of a flag.
                       Expect.stringContains source "abstract holder: obj" "object is obj"
-                      Expect.stringContains source "static member describe (key: obj) : string" "so is symbol"
+
+                      Expect.stringContains
+                          source
+                          "static member describe (key: Fable.Core.TS.Es.Symbol) : string"
+                          "symbol is the lib's Symbol interface"
+
                       Expect.isTrue (says "TR040" "admits the primitives object excludes") "object's widening"
-                      Expect.isTrue (says "TR041" "no binding in Fable.Core") "symbol's"
+                      Expect.isTrue (says "TR069" "Symbol interface") "symbol's"
                       Expect.isTrue (says "TR042" "no F# form for its identity") "and unique symbol's"
 
                       // The point of the work: no site in this fixture answers with a flag name.
@@ -6060,6 +6065,62 @@ let pipelineTests =
                            |> List.filter (fun f -> f.Key = "MB008" || f.Key = "MB009")
                            |> List.forall (fun f -> f.Tier = Ergonomic))
                           "both mappings are ergonomic" ])
+
+        // W1: `symbol` and `unique symbol` read as the compiler lib's own `Symbol` interface,
+        // written through the Core.TS producer's name.
+        let symbolPrimitiveLab = handFixture "symbol-primitive-lab"
+        let symbolPrimitiveConfig = handConfig symbolPrimitiveLab
+
+        yield!
+            fixtureTests "symbol-primitive-lab" symbolPrimitiveLab symbolPrimitiveConfig (fun package ->
+                [ testCase "symbol-primitive-lab: symbol reads as the lib's Symbol interface" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate symbolPrimitiveConfig package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "eventName: U2<string, Fable.Core.TS.Es.Symbol>"
+                          "a string | symbol parameter keeps both arms"
+
+                      Expect.stringContains source "abstract key: Fable.Core.TS.Es.Symbol" "a symbol member"
+                      Expect.stringContains source "static member tag: Fable.Core.TS.Es.Symbol" "a unique symbol export"
+
+                      Expect.stringContains
+                          source
+                          "static member keyOf (e: Emitter) : U2<string, Fable.Core.TS.Es.Symbol>"
+                          "a string | symbol return"
+
+                      Expect.stringContains
+                          source
+                          "static member make (?description: string) : Fable.Core.TS.Es.Symbol"
+                          "a symbol return"
+
+                      // The negative: an arm that is obj in its own right still collapses the union.
+                      Expect.stringContains source "static member loose (value: obj) : unit" "symbol | object"
+
+                      let keysOf symbol =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol)
+                          |> List.map _.Key
+                          |> List.distinct
+                          |> List.sort
+
+                      Expect.equal (keysOf "Exports.make()") [ "TR069" ] "symbol is ergonomic"
+
+                      Expect.equal
+                          (keysOf "Exports.tag")
+                          [ "TR042"; "TR069" ]
+                          "unique symbol keeps its identity loss"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR041"))
+                          "nothing here widens symbol to obj"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "TR069")
+                           |> List.forall (fun f -> f.Tier = Ergonomic))
+                          "TR069 is ergonomic" ])
 
         // W5 (#136): an overload keyed by a string literal reads as a method of its own under
         // `[<Emit>]`, and the generic overload stays.

@@ -2166,14 +2166,17 @@ and internal typeRefOnPath
             // TypeScript's `object`. `obj` is the mapping §4.1 asks for, and still a widening:
             // `obj` admits the primitives `object` was written to exclude.
             FsObj, [ Finding.make owner TypeReference.ObjectTypeToObj ]
-        elif has TypeFlags.UniqueESSymbol then
-            // A `unique symbol` is a nominal singleton. Nothing shipped binds even the
-            // ordinary one (below), and F# has no form for the identity on top of it.
-            FsObj, [ Finding.make owner TypeReference.UniqueSymbolNoBinding ]
-        elif has TypeFlags.ESSymbol then
-            // `symbol`. §4.1 wanted `JS.Symbol`, which Fable.Core 5.2.0 does not declare, so
-            // this widens rather than binding a name the pinned package lacks.
-            FsObj, [ Finding.make owner TypeReference.SymbolNoBinding ]
+        elif has TypeFlags.UniqueESSymbol || has TypeFlags.ESSymbol then
+            // A `unique symbol` is a nominal singleton, and F# has no form for that identity.
+            let identity =
+                if has TypeFlags.UniqueESSymbol then
+                    [ Finding.make owner TypeReference.UniqueSymbolNoBinding ]
+                else
+                    []
+
+            match symbolRef ctx model self owner facts with
+            | Some(reference, findings) -> reference, findings @ identity
+            | None -> FsObj, Finding.make owner TypeReference.SymbolNoBinding :: identity
         elif has TypeFlags.Void || has TypeFlags.Undefined || has TypeFlags.Never then
             FsUnit, []
         elif has TypeFlags.Any then
@@ -2253,6 +2256,29 @@ and internal typeRefOnPath
             [
                 Finding.make owner (TypeReference.TypeFlagsNotMapped(string facts.Response.Flags))
             ]
+
+/// `symbol` as the compiler lib's `Symbol` interface, under the name the lib's owner gives it:
+/// the shipped Core.TS producer's, or this run's own declaration where the run ships the lib.
+/// `None` where that interface has no name in the run.
+and internal symbolRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    : (FsTypeRef * Finding list) option =
+    facts.SymbolApparentType
+    |> Option.filter (fun apparent -> Map.containsKey apparent model.Types)
+    |> Option.bind (fun apparent ->
+        match typeRef ctx model self owner apparent with
+        | FsObj, _ -> None
+        | reference, findings ->
+            let name =
+                match reference with
+                | FsNamed name -> name
+                | _ -> "Symbol"
+
+            Some(reference, findings @ [ Finding.make owner (TypeReference.SymbolAsLibInterface name) ]))
 
 /// `T extends U ? X : Y` at a reference position (§4.11). F# defers no type, so the mapping is
 /// a branch wherever the run can name one: the condition holds for every argument the head

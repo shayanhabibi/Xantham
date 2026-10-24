@@ -6847,7 +6847,7 @@ type PickIndexSignature<'ObjectType> = private PickIndexSignature__ of obj
 /// Matches any <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive value</a>.
 /// </summary>
 /// <remarks>@category Type</remarks>
-type Primitive = obj option
+type Primitive = U5<string, float, bigint, Fable.Core.TS.Es.Symbol, bool> option
 
 /// <summary>
 /// Create a type that represents either the value or the value wrapped in <c>PromiseLike</c>.
@@ -9939,7 +9939,7 @@ type UnknownRecord =
     [<EmitIndexer>]
     abstract Item: float -> obj with get, set
     [<EmitIndexer>]
-    abstract Item: obj -> obj with get, set
+    abstract Item: Fable.Core.TS.Es.Symbol -> obj with get, set
 
 /// <summary>
 /// Represents a set with <c>unknown</c> value.

@@ -1539,6 +1539,22 @@ let private deriveFacts
                 channel trace "intersection-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
                 @ (structure |> Option.map _.Discovered |> Option.defaultValue [])
+        elif has TypeFlags.ESSymbol || has TypeFlags.UniqueESSymbol then
+            // The apparent type of `symbol` is the compiler lib's global `Symbol` interface,
+            // followed as a nominal edge so a reference is written through the lib owner's name.
+            let! apparent = ctx.Session.getApparentType ty.Id
+
+            let apparent =
+                if apparent.Id <> ty.Id && apparent.Flags.HasFlag TypeFlags.Object then
+                    Some apparent
+                else
+                    None
+
+            return
+                { TypeFacts.shallow ty with
+                    SymbolApparentType = apparent |> Option.map _.TypeId
+                },
+                channel trace "symbol-apparent" (Option.toList apparent)
         elif has TypeFlags.EnumLiteral then
             // An enum member: its symbol names the F# enum case (§4.7); the value is already
             // on the response.
@@ -1930,6 +1946,7 @@ let private deriveFacts
                             NonNullableApplication = None
                             AliasIdentity = None
                             UnresolvedName = None
+                            SymbolApparentType = None
                         },
                         discovered
         elif has TypeFlags.TypeParameter && ty.IsThisType <> ValueSome true then

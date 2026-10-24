@@ -12,14 +12,14 @@ open Fable.Core.TS.Dom
 
 [<Interface>]
 type JSX =
-    abstract SERIALIZABLE: obj
+    abstract SERIALIZABLE: Fable.Core.TS.Es.Symbol
     [<ParamObject; Emit("$0")>]
-    static member Create (SERIALIZABLE: obj) : JSX = jsNative
+    static member Create (SERIALIZABLE: Fable.Core.TS.Es.Symbol) : JSX = jsNative
 
 [<Fickl.Core.CallableInterface>]
 type IsWrappable =
     [<Emit("$0($1...)")>]
-    abstract Invoke: ?obj: obj -> bool
+    abstract Invoke<'T>: ?obj: U7<string, float, bigint, Fable.Core.TS.Es.Symbol, bool, 'T, Fable.Core.TS.Es.Function> -> bool
 
 type JSXElement = U5<float, bool, obj[], Fable.Core.TS.Dom.Node, string> option
 
@@ -80,9 +80,9 @@ type WriteSignal = delegate of node: U2<Memo<obj, obj>, SignalState<obj>> * valu
 
 [<Interface>]
 type JSX2 =
-    abstract SERIALIZABLE: obj
+    abstract SERIALIZABLE: Fable.Core.TS.Es.Symbol
     [<ParamObject; Emit("$0")>]
-    static member Create (SERIALIZABLE: obj) : JSX2 = jsNative
+    static member Create (SERIALIZABLE: Fable.Core.TS.Es.Symbol) : JSX2 = jsNative
 
 type ObservableObserver<'T> = U2<('T -> unit), ObservableObserver2<'T>>
 
@@ -322,11 +322,11 @@ type ContextProviderComponent<'T> = (ContextProviderComponent.Props<'T> -> JSXEl
 
 [<Interface>]
 type Context<'T> =
-    abstract id: obj with get, set
+    abstract id: Fable.Core.TS.Es.Symbol with get, set
     abstract Provider: (Context.Provider.Props<'T> -> JSXElement) with get, set
     abstract defaultValue: 'T with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: obj, Provider: (Context.Provider.Props<'T> -> JSXElement), defaultValue: 'T) : Context<'T> = jsNative
+    static member Create (id: Fable.Core.TS.Es.Symbol, Provider: (Context.Provider.Props<'T> -> JSXElement), defaultValue: 'T) : Context<'T> = jsNative
 
 type ResolvedJSXElement = U4<float, bool, Fable.Core.TS.Dom.Node, string> option
 
@@ -478,11 +478,11 @@ type Exports =
     [<Import("equalFn", "solid-js")>]
     static member equalFn: EqualFn = jsNative
     [<Import("$PROXY", "solid-js")>]
-    static member ``$PROXY``: obj = jsNative
+    static member ``$PROXY``: Fable.Core.TS.Es.Symbol = jsNative
     [<Import("$TRACK", "solid-js")>]
-    static member ``$TRACK``: obj = jsNative
+    static member ``$TRACK``: Fable.Core.TS.Es.Symbol = jsNative
     [<Import("$DEVCOMP", "solid-js")>]
-    static member ``$DEVCOMP``: obj = jsNative
+    static member ``$DEVCOMP``: Fable.Core.TS.Es.Symbol = jsNative
     /// <summary>
     /// Creates a new non-tracked reactive context that doesn't auto-dispose
     /// </summary>
@@ -32267,11 +32267,11 @@ module SplitProps =
 module Store =
     [<Interface>]
     type DEV =
-        abstract ``$NODE``: obj
+        abstract ``$NODE``: Fable.Core.TS.Es.Symbol
         abstract isWrappable: IsWrappable
         abstract hooks: Store.DEV.Hooks
         [<ParamObject; Emit("$0")>]
-        static member Create (``$NODE``: obj, isWrappable: IsWrappable, hooks: Store.DEV.Hooks) : DEV = jsNative
+        static member Create (``$NODE``: Fable.Core.TS.Es.Symbol, isWrappable: IsWrappable, hooks: Store.DEV.Hooks) : DEV = jsNative
 
     [<Interface>]
     type ReconcileOptions =
@@ -32286,9 +32286,9 @@ module Store =
         [<EmitIndexer>]
         abstract Item: float -> obj with get, set
         [<EmitIndexer>]
-        abstract Item: obj -> obj with get, set
+        abstract Item: Fable.Core.TS.Es.Symbol -> obj with get, set
 
-    type NotWrappable = obj option
+    type NotWrappable = U6<string, float, bigint, Fable.Core.TS.Es.Symbol, bool, Fable.Core.TS.Es.Function> option
 
     type Store<'T> = 'T
 
@@ -32352,7 +32352,7 @@ module Store =
         [<Import("modifyMutable", "solid-js/store")>]
         static member modifyMutable<'T> (state: 'T, modifier: ('T -> 'T)) : unit = jsNative
         [<Import("$RAW", "solid-js/store")>]
-        static member ``$RAW``: obj = jsNative
+        static member ``$RAW``: Fable.Core.TS.Es.Symbol = jsNative
         /// <summary>
         /// Returns the underlying data in the store without a proxy.
         /// </summary>
@@ -32392,7 +32392,7 @@ module Store =
             static member Create (?onStoreNodeUpdate: Store.DEV.Hooks.OnStoreNodeUpdate) : Hooks = jsNative
 
         module Hooks =
-            type OnStoreNodeUpdate = delegate of state: SolidJs.Store.StoreNode * property: obj * value: obj option * prev: obj option -> unit
+            type OnStoreNodeUpdate = delegate of state: SolidJs.Store.StoreNode * property: U3<string, float, Fable.Core.TS.Es.Symbol> * value: U7<string, float, bigint, Fable.Core.TS.Es.Symbol, bool, Fable.Core.TS.Es.Function, SolidJs.Store.StoreNode> option * prev: U7<string, float, bigint, Fable.Core.TS.Es.Symbol, bool, Fable.Core.TS.Es.Function, SolidJs.Store.StoreNode> option -> unit
 
     module SolidStore =
         type Unwrappable = obj
@@ -32703,7 +32703,7 @@ module Web =
         [<Import("NoHydration", "solid-js/web")>]
         static member NoHydration (props: Web.NoHydration.Props) : JSXElement = jsNative
         [<Import("RequestContext", "solid-js/web")>]
-        static member RequestContext: obj = jsNative
+        static member RequestContext: Fable.Core.TS.Es.Symbol = jsNative
         [<Import("getRequestEvent", "solid-js/web")>]
         static member getRequestEvent () : RequestEvent option = jsNative
         [<Import("runHydrationEvents", "solid-js/web")>]

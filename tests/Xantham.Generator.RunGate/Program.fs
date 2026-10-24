@@ -190,7 +190,7 @@ let private bigints () =
     check "what came back is still a BigInt, not a number" (emitJsExpr (ledger.balance) "typeof $0 === \"bigint\"")
 
     // The neighbours, at runtime: a template literal really is a string on the way in and out,
-    // and `symbol` really is a symbol - which is why `obj` is where the binding had to stop.
+    // and a value typed as the lib's `Symbol` interface really is a primitive symbol.
     equal
         "a template literal parameter is a string JavaScript can call string methods on"
         "onsave"

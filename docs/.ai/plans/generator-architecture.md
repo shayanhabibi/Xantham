@@ -813,6 +813,12 @@ Phases — each ends with the compile gate green on its fixtures:
       `unique symbol` still widen to `obj`, with `TR041` and `TR042` naming the missing
       binding and, for the unique one, the identity there is no F# form for. These are the two
       findings to revisit if a binding ever ships.
+      *Superseded (W1, 2026-10-24):* the binding is the compiler lib's own `Symbol`
+      interface, which Core.TS generates. Resolve follows the checker's apparent type of a
+      `symbol` or `unique symbol` into `TypeFacts.SymbolApparentType`, and `typeRef` writes the
+      name that interface takes in the run (`Fable.Core.TS.Es.Symbol` under `widen`, the local
+      declaration under `ship`) with the ergonomic `TR069`. `TR041` remains the fallback where
+      the interface has no name; `TR042` now reports only the lost identity.
     - *Mapping a flag unblocked the unions it was poisoning.* `number | bigint` was `obj`
       across `workers-types` because one arm was unmapped; it is `U2<float, bigint>` now, and
       `WorkflowSleepDuration` (`` `${number} ${WorkflowDurationLabel}` | number ``) is

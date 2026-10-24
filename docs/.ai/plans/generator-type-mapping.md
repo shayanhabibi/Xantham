@@ -180,7 +180,7 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 | `number` | `float` | Exact | `int` only when a JSDoc/config override says so; TS has one number type. |
 | `boolean` | `bool` | Exact | |
 | `bigint` | `bigint` | Exact | Fable compiles to JS BigInt. |
-| `symbol` / `unique symbol` | `JS.Symbol` | Exact / Widened | unique symbols lose uniqueness; consider erased brand per unique symbol (open). |
+| `symbol` / `unique symbol` | the compiler lib's `Symbol` interface (`Fable.Core.TS.Es.Symbol`; the local `Symbol` where the run ships the lib) | Ergonomic / Widened | `TR069`: the interface also admits a boxed `Symbol` object. A `unique symbol` adds `TR042`: its singleton identity is not carried. Resolve reads the interface as the checker's apparent type of the primitive. Where the interface has no name in the run (a `map` group without it), `obj` with `TR041` (and `TR042`). |
 | `object` | `obj` | Widened | |
 | `unknown` | `obj` | Escape-ish | **Decided (D8):** `obj` for now. An erased `Unknown` wrapper forcing explicit narrowing may become a config toggle if it stays cheap to implement. |
 | `any` | `obj` | Ergonomic | `TR008`. Intrinsic name `any`: a written or omitted annotation, a shorthand ambient module, or a diagnosed circular return, accessor or import-alias annotation. A circular type alias is the error type (`TR063`). |

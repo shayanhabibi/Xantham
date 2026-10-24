@@ -116,7 +116,7 @@ type Exports =
     /// The marker a unique symbol keys, exported so that the brand can be spelled elsewhere.
     /// </summary>
     [<Import("orderIdTag", "brand-lab")>]
-    static member orderIdTag: obj = jsNative
+    static member orderIdTag: Fable.Core.TS.Es.Symbol = jsNative
     /// <summary>
     /// A brand as a bare exported function's parameter and return.
     /// </summary>

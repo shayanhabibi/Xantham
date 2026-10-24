@@ -1342,6 +1342,9 @@ type TypeFacts =
         AliasIdentity: (string<symbolName> * int<typeId>) option
         /// The name an error type's reference was written with, where the checker retains it.
         UnresolvedName: string<symbolName> option
+        /// The global `Symbol` interface type, as the checker's apparent type of a `symbol` or
+        /// `unique symbol`. Populated only on those two primitives.
+        SymbolApparentType: int<typeId> option
     }
 
 module TypeFacts =
@@ -1380,6 +1383,7 @@ module TypeFacts =
             NonNullableApplication = None
             AliasIdentity = None
             UnresolvedName = None
+            SymbolApparentType = None
         }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
