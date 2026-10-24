@@ -2196,7 +2196,8 @@ let private deriveFacts
 /// readable trace - a checker id is assigned in the order answers arrived, so it names no
 /// subset of a generation, only the generation as a whole), collect what derivation discovered,
 /// and recurse until the frontier is exhausted or a cutoff records the remainder.
-let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
+/// `observe` receives each source-contract walk's visit count and table size.
+let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) : Pass<ResolveModel> =
     {
         Name = "resolve-type-table"
         Run =
@@ -2283,9 +2284,6 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                             return canonical
                         }
 
-                    // Looked up before the first generation, so checker type ids are assigned in
-                    // the same order whether or not a frontier crosses the width. A seed whose
-                    // lookup fails is not canonical.
                     let! seeds =
                         model.Types
                         |> Map.toList
@@ -2293,8 +2291,8 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                             facts.Response.AliasTypeArguments |> ValueOption.exists (Array.isEmpty >> not))
                         |> List.map (fun (id, facts) ->
                             async {
-                                let! canonical = attempt (canonicalSourceType facts.Response)
-                                return id, (canonical = Ok true)
+                                let! canonical = canonicalSourceType facts.Response
+                                return id, canonical
                             })
                         |> Async.Parallel
 
@@ -2313,13 +2311,8 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                                     batch
                                     |> List.map (fun (id, facts: TypeFacts) ->
                                         async {
-                                            let! handles = attempt (sourceDeclarationHandles facts.Response)
-
-                                            return
-                                                id,
-                                                (match handles with
-                                                 | Ok handles -> Set.ofList handles
-                                                 | Error _ -> Set.empty)
+                                            let! handles = sourceDeclarationHandles facts.Response
+                                            return id, Set.ofList handles
                                         })
                                     |> Async.Parallel)
                                 |> Async.Sequential
@@ -2338,6 +2331,7 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                             // The greatest remaining application depth each type's members were followed at.
                             let expanded = System.Collections.Generic.Dictionary<int<typeId>, int>()
                             let shallow = System.Collections.Generic.HashSet<int<typeId>>()
+                            let visits = ref 0
 
                             let pending =
                                 System.Collections.Generic.Stack<Set<string> * int * bool * int<typeId>>()
@@ -2365,12 +2359,12 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                                     plainArguments[id] <- plain
                                     plain
 
-                            // A nominal declaration's members are not substituted, so its contract is
-                            // the same on every path: it restarts the ancestry and the depth. Below it,
-                            // an application stops expanding on re-entering a declaration of its
-                            // ancestry or past `ContractDepth` nested wrapping applications. Each type is
+                            // A nominal declaration restarts the ancestry and the depth. Below it, an
+                            // application stops expanding on re-entering a declaration of its ancestry
+                            // or past `ContractDepth` nested wrapping applications. Each type is
                             // expanded at most once per remaining depth.
                             let visit (ancestry: Set<string>) depth expandMembers id =
+                                visits.Value <- visits.Value + 1
                                 contracts.Add id |> ignore
 
                                 match Map.tryFind id table with
@@ -2473,6 +2467,7 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                                         let ancestry, depth, expandMembers, id = pending.Pop()
                                         visit ancestry depth expandMembers id
 
+                            observe visits.Value table.Count
                             return contracts
                         }
 
@@ -2747,6 +2742,9 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                             Degraded(model, findings)
                 }
     }
+
+let internal resolveTypeTableWithWidth followWidth =
+    resolveTypeTableObserved followWidth (fun _ _ -> ())
 
 let resolveTypeTable = resolveTypeTableWithWidth FollowWidth
 
