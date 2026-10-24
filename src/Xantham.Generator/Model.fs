@@ -1640,6 +1640,8 @@ type FsCreateOverload =
 type FsInterfaceDecl =
     {
         Name: string
+        /// Object expressions implementing this contract represent JavaScript functions.
+        Callable: bool
         Docs: string
         Tags: JSDocTagInfo list
         Order: DeclOrder option

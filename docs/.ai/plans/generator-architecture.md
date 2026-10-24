@@ -3277,3 +3277,24 @@ its catalogue and source changes passed independent review. SolidJS moves from 7
 ValueOf's second parameter now exposes the existing phantom limitation instead of silently
 discarding that parameter. Deferred computations remain lossy; this change preserves their
 binders and known carriers without claiming to implement TypeScript's type-level evaluation.
+
+## Invocation-owned callable parameters (pending Fickl 0.6.0 publication)
+
+A pure callable with one generic signature is an FsInterfaceDecl marked Callable. Its outer
+parameters remain on the interface; signature parameters remain on Invoke. Anonymous callback
+contracts follow the same route. Callable value exports remain properties, including typeof
+aliases sharing a function declaration's checker ID; actual function declarations stay methods.
+Render emits Fickl.Core.CallableInterface, and the catalogue records that representation.
+
+Inherited member comparison substitutes applied base arguments and alpha-renames method binders
+before comparison. Only identical resolved signatures collapse. Redundant callable bases are
+removed only when another base reaches the exact same instantiated reference. This retains
+subtype relations and avoids capturing an outer type parameter with a method parameter's name.
+
+The permanent runtime gate adds 28 checks for construction, identity, repeated generic calls,
+anonymous contracts, inherited assignability and binder collisions. An isolated local-package
+preflight passes six callable fixture tests, all 648 runtime checks and Partas. All 143 golden
+regeneration tests pass. Core.TS and corpus changes received independent review. The full run
+exposed four stale expectations, now corrected and covered by 11 passing focused checks; the
+fresh Core.TS package-consumer restore still fails because Fickl.Core 0.6.0 is not published.
+Do not treat these local-package results as a complete public-dependency gate.

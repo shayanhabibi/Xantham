@@ -626,11 +626,17 @@ module Es =
             [<ParamObject; Emit("$0")>]
             static member Create (has: ('This -> bool), get: ('This -> 'Value), set: Action<'This, 'Value>) : Access<'This, 'Value> = jsNative
 
-    type ClassDecorator<'TFunction when 'TFunction :> Function> = ('TFunction -> 'TFunction option)
+    [<Fickl.Core.CallableInterface>]
+    type ClassDecorator =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'TFunction when 'TFunction :> Function>: target: 'TFunction -> 'TFunction option
 
     type PropertyDecorator = delegate of target: Object * propertyKey: obj -> unit
 
-    type MethodDecorator<'T> = delegate of target: Object * propertyKey: obj * descriptor: TypedPropertyDescriptor<'T> -> TypedPropertyDescriptor<'T> option
+    [<Fickl.Core.CallableInterface>]
+    type MethodDecorator =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'T>: target: Object * propertyKey: obj * descriptor: TypedPropertyDescriptor<'T> -> TypedPropertyDescriptor<'T> option
 
     type ParameterDecorator = delegate of target: Object * propertyKey: obj option * parameterIndex: float -> unit
 

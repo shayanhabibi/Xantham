@@ -1,4 +1,4 @@
-﻿/// The renderer against hand-built models: identifier escaping, the printed source, and the
+/// The renderer against hand-built models: identifier escaping, the printed source, and the
 /// manifest, each asserted byte-for-byte - the renderer's contract is byte-identical output.
 module Xantham.Generator.Tests.RenderTests
 
@@ -102,7 +102,7 @@ let renderTests =
 
             let interface' name members =
                 FsInterface
-                    { Name = name
+                    { Callable = false; Name = name
                       Docs = ""
                       Tags = []
                       Order = None
@@ -190,7 +190,7 @@ let renderTests =
         testCase "nested declarations qualify shadowed root types" <| fun _ ->
             let interface' name inherits members =
                 FsInterface
-                    { Name = name
+                    { Callable = false; Name = name
                       Docs = ""
                       Tags = []
                       Order = None
@@ -408,7 +408,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Holder"
+                              { Callable = false; Name = "Holder"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -458,7 +458,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Labelled"
+                              { Callable = false; Name = "Labelled"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -500,7 +500,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Caster"
+                              { Callable = false; Name = "Caster"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -530,7 +530,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Options"
+                              { Callable = false; Name = "Options"
                                 Docs = "Opts."
                                 Tags = []
                                 Order = None
@@ -844,7 +844,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Options"
+                              { Callable = false; Name = "Options"
                                 Docs = ""
                                 Tags = []
                                 Order = Some { File = "/pkg/test-pkg/index.d.ts" * uom<declFile>; NodeIndex = 3<nodeId> }
@@ -969,7 +969,7 @@ let renderTests =
         testCase "nested exports qualify local shadows and foreign group results" <| fun _ ->
             let interface_ name =
                 FsInterface
-                    { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []; Inherits = []
+                    { Callable = false; Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []; Inherits = []
                       Members = []; Entrypoint = None; CreateOverloads = []; Statics = [] }
             let entry: Render.GroupModule =
                 { Group = "test-pkg" * uom<npmDependency>; Module = "TestPkg"; IsEntry = true; Namespace = None
@@ -1010,7 +1010,7 @@ let renderTests =
 let symbolKeyedRenderTests =
     let interface' inherits members =
         FsInterface
-            { Name = "Holder"
+            { Callable = false; Name = "Holder"
               Docs = ""
               Tags = []
               Order = None
@@ -1085,7 +1085,7 @@ let literalKeyedRenderTests =
 
     let decl entrypoint members =
         FsInterface
-            { Name = "Socket"
+            { Callable = false; Name = "Socket"
               Docs = ""
               Tags = []
               Order = None
@@ -1156,7 +1156,7 @@ let literalKeyedRenderTests =
 let literalMemberRenderTests =
     let interface' name members creates =
         FsInterface
-            { Name = name
+            { Callable = false; Name = name
               Docs = ""
               Tags = []
               Order = None

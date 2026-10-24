@@ -11,8 +11,8 @@ export interface Coalesce<T> {
     <U extends number>(value: U, fallback: U): U;
 }
 
-/** Negative: one generic call signature; its type parameter hoists onto the delegate head beside
- *  the interface's own. */
+/** One generic call signature keeps its invocation-owned parameter separate from the
+ *  interface's own parameter. */
 export interface OneShot<T> {
     <U extends T>(value: U): U;
 }

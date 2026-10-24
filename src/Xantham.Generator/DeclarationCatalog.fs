@@ -1585,6 +1585,8 @@ let internal applyWithProducer
                                 Canonical.list (typeText vars) interface_.Inherits
                                 interface_.Members |> List.map member_ |> List.sort |> Canonical.list id
                                 entrypoint
+                                if interface_.Callable then
+                                    "callable"
                             ]
                     | FsAbbrev abbrev -> Canonical.node "alias" [ typeText vars abbrev.Target ]
                     | FsDelegateType delegate_ ->

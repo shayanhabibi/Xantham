@@ -74,11 +74,14 @@ let shapeExports: Pass<ShapeModel> =
                                 // A function's value is a method only where its call signatures
                                 // are all it carries; one merged with a namespace holding values
                                 // is a hybrid object, bound whole and called through `Invoke`.
+                                // A polymorphic callable value also stays whole: turning it
+                                // into a method prevents passing its original interface value.
                                 | Some facts when
                                     not facts.CallSignatures.IsEmpty
                                     && facts.Members.IsEmpty
                                     && facts.IndexInfos.IsEmpty
                                     && facts.ConstructSignatures.IsEmpty
+                                    && not (isPolymorphicCallableValue model export.Symbol.Flags facts)
                                     ->
                                     facts.CallSignatures
                                     |> List.mapi (fun ordinal signature ->

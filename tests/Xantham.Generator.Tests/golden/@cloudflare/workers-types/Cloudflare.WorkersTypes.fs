@@ -2374,12 +2374,6 @@ type DigestStream =
     inherit WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>
     abstract digest: JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
     abstract bytesWritten: U2<float, bigint>
-    /// <summary>
-    /// The <b><c>getWriter()</c></b> method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter">MDN Reference</a>
-    /// </summary>
-    abstract getWriter: unit -> WritableStreamDefaultWriter<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>
     [<ParamObject; Emit("$0")>]
     static member Create (digest: JS.Promise<Fable.Core.TS.Es.ArrayBuffer>, bytesWritten: U2<float, bigint>, locked: bool, abort: (obj option -> JS.Promise<unit>), close: (unit -> JS.Promise<unit>), getWriter: (unit -> WritableStreamDefaultWriter<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>)) : DigestStream = jsNative
 
@@ -4067,18 +4061,6 @@ type FixedLengthStream =
 [<Interface>]
 type IdentityTransformStream =
     inherit TransformStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    /// <summary>
-    /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
-    /// </summary>
-    abstract readable: ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    /// <summary>
-    /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
-    /// </summary>
-    abstract writable: WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>
     [<ParamObject; Emit("$0")>]
     static member Create (readable: ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, writable: WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>) : IdentityTransformStream = jsNative
 
@@ -4102,18 +4084,6 @@ type ReadableStreamValuesOptions =
 [<Interface>]
 type CompressionStream =
     inherit TransformStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    /// <summary>
-    /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
-    /// </summary>
-    abstract readable: ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    /// <summary>
-    /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
-    /// </summary>
-    abstract writable: WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>
     [<ParamObject; Emit("$0")>]
     static member Create (readable: ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, writable: WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>) : CompressionStream = jsNative
 
@@ -4125,18 +4095,6 @@ type CompressionStream =
 [<Interface>]
 type DecompressionStream =
     inherit TransformStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    /// <summary>
-    /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
-    /// </summary>
-    abstract readable: ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    /// <summary>
-    /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
-    /// </summary>
-    abstract writable: WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>
     [<ParamObject; Emit("$0")>]
     static member Create (readable: ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, writable: WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>) : DecompressionStream = jsNative
 
@@ -4149,18 +4107,6 @@ type DecompressionStream =
 type TextEncoderStream =
     inherit TransformStream<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     abstract encoding: string
-    /// <summary>
-    /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
-    /// </summary>
-    abstract readable: ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    /// <summary>
-    /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
-    /// </summary>
-    abstract writable: WritableStream<string>
     [<ParamObject; Emit("$0")>]
     static member Create (encoding: string, readable: ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, writable: WritableStream<string>) : TextEncoderStream = jsNative
 
@@ -4175,18 +4121,6 @@ type TextDecoderStream =
     abstract encoding: string
     abstract fatal: bool
     abstract ignoreBOM: bool
-    /// <summary>
-    /// The <b><c>readable</c></b> read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/readable">MDN Reference</a>
-    /// </summary>
-    abstract readable: ReadableStream<string>
-    /// <summary>
-    /// The <b><c>writable</c></b> read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
-    /// <br /><br />
-    /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream/writable">MDN Reference</a>
-    /// </summary>
-    abstract writable: WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>
     [<ParamObject; Emit("$0")>]
     static member Create (encoding: string, fatal: bool, ignoreBOM: bool, readable: ReadableStream<string>, writable: WritableStream<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>) : TextDecoderStream = jsNative
 
@@ -5242,7 +5176,6 @@ type LoopbackDurableObjectNamespace =
     inherit DurableObjectNamespace<unit>
     abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> DurableObjectStub<unit>
     abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> DurableObjectStub<unit>
-    abstract jurisdiction: jurisdiction: DurableObjectJurisdiction -> DurableObjectNamespace<unit>
     [<ParamObject; Emit("$0")>]
     static member Create (newUniqueId: (DurableObjectNamespaceNewUniqueIdOptions option -> DurableObjectId), idFromName: (string -> DurableObjectId), idFromString: (string -> DurableObjectId), get: Func<DurableObjectId, DurableObjectNamespaceGetDurableObjectOptions option, DurableObjectStub<unit>>, getByName: Func<string, DurableObjectNamespaceGetDurableObjectOptions option, DurableObjectStub<unit>>, jurisdiction: (DurableObjectJurisdiction -> DurableObjectNamespace<unit>)) : LoopbackDurableObjectNamespace = jsNative
 

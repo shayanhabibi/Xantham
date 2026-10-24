@@ -451,10 +451,26 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     /// `strictNullChecks` the member reads `callback | undefined`, and the delegate is declared
     /// for the arm.
     let signatureShaped =
+        let mutable retainedValues = Set.empty
+
         let exported =
             model.ExportTypes
             |> Map.toList
-            |> List.collect (fun (_, ids) -> Option.toList ids.Declared @ Option.toList ids.Value)
+            |> List.collect (fun (symbolId, ids) ->
+                let retainedValue =
+                    ids.Value
+                    |> Option.bind (fun id -> Map.tryFind id model.Types)
+                    |> Option.exists (fun facts ->
+                        model.Harvest.Exports
+                        |> List.exists (fun export ->
+                            export.Symbol.SymbolId = symbolId
+                            && isPolymorphicCallableValue model export.Symbol.Flags facts))
+
+                if retainedValue then
+                    retainedValues <- Set.union retainedValues (Set.ofList (Option.toList ids.Value))
+                    []
+                else
+                    Option.toList ids.Declared @ Option.toList ids.Value)
 
         let methods =
             model.Types
@@ -492,7 +508,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 else
                     [])
 
-        Set.ofList (exported @ methods @ hooks)
+        Set.difference (Set.ofList (exported @ methods @ hooks)) retainedValues
 
     let needsName (facts: TypeFacts) =
         if Map.containsKey facts.Response.TypeId names then
@@ -517,17 +533,16 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
              || facts.SymbolName |> Option.forall isSyntheticName)
             && not (Set.contains facts.Response.TypeId signatureShaped)
-            // F# has no rank-2 form, so a generic signature can only be approximated by
-            // hoisting its variables onto the declaration - and a reference has nothing to
-            // apply them back with. Written inline, they stay in the scope that bound them.
-            && facts.CallSignatures
-               |> List.forall (fun signature -> signature.TypeParameters.IsEmpty)
+            && (hasInterfaceCallSignatures model facts
+                || facts.CallSignatures
+                   |> List.forall (fun signature -> signature.TypeParameters.IsEmpty))
             // An application of a generic callback alias - `ExportedHandlerFetchHandler<Env,
             // Cf, Props>` at a member of `ExportedHandler` - binds the alias's parameters on
             // its head and gives a reference nothing to apply them with. It expands in place,
             // under the name the alias itself already carries.
             && declParamIds facts = ownArguments facts
-            && callbackRetainedAsDelegate model names facts
+            && (hasInterfaceCallSignatures model facts
+                || callbackRetainedAsDelegate model names facts)
             && (instantiationOf { model with DeclNames = names } facts).IsNone
         elif flag TypeFlags.Object facts then
             // Entry-group object shapes with members become interfaces; arrays stay arrays and
@@ -627,7 +642,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     // The delegate declaration `shape-callbacks` writes for it (D5): the arity
                     // guarantee `System.Func` gives, under a name whose parameters read as
                     // TypeScript spelled them.
-                    if isPureCallback facts then
+                    if isPureCallback facts && not (hasInterfaceCallSignatures model facts) then
                         findings <-
                             findings
                             @ [ Finding.make claimed (SynthesizeAnonymous.CallbackDelegateNamed claimed) ]

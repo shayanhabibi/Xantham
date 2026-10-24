@@ -20,7 +20,7 @@ let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
              && facts.IndexInfos.IsEmpty
              && facts.ConstructSignatures.IsEmpty
          )
-         || hasIncompatibleOverloadedTypeParameters model facts)
+         || hasInterfaceCallSignatures model facts)
      // A pure index signature the checker gave no symbol of its own - reached through a
      // type alias, or written inline - resolves through `objectRef` as a `Record`/
      // `ReadonlyRecord` reference instead (TR059). `interface Bag { [key: string]:
@@ -152,6 +152,11 @@ let shapeInterfaces: Pass<ShapeModel> =
                         |> List.collect (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
                             | Some facts when declaresInterface model facts && not (Set.contains name declaredOnce) ->
+                                let facts =
+                                    { facts with
+                                        CallSignatures = List.distinct facts.CallSignatures
+                                    }
+
                                 declaredOnce <- Set.add name declaredOnce
                                 let typeParameters, scope, parameterFindings = declTypeParams ctx model name facts
 
@@ -383,6 +388,11 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         Docs = docs
                                         Tags = tags
                                         Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                        Callable =
+                                            isPureCallback facts
+                                            && facts.IndexInfos.IsEmpty
+                                            && facts.CallSignatures.Length = 1
+                                            && hasInterfaceCallSignatures model facts
                                         TypeParameters = typeParameters
                                         Inherits = (inherits |> List.map snd) @ Option.toList sequence
                                         Members = members @ invokes
@@ -468,6 +478,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                             Docs = docs
                                             Tags = tags
                                             Order = order
+                                            Callable = false
                                             TypeParameters = []
                                             Inherits = []
                                             Members = sharedMembers @ exclusiveMembers

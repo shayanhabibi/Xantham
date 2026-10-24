@@ -4,7 +4,7 @@
   "module": "SolidJs",
   "counts": {
     "exact": 72,
-    "ergonomic": 190,
+    "ergonomic": 194,
     "widened": 79,
     "escape": 1
   },
@@ -16,8 +16,8 @@
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 147,
-      "exact": 147
+      "total": 149,
+      "exact": 149
     },
     {
       "pass": "DT - detect-tagged-unions",
@@ -32,9 +32,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 978,
+      "total": 984,
       "exact": 15,
-      "ergonomic": 824,
+      "ergonomic": 830,
       "widened": 139
     },
     {
@@ -46,15 +46,15 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 252,
+      "total": 247,
       "exact": 2,
-      "ergonomic": 214,
-      "widened": 36
+      "ergonomic": 213,
+      "widened": 32
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 166,
-      "ergonomic": 158,
+      "total": 170,
+      "ergonomic": 162,
       "widened": 8
     },
     {

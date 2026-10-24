@@ -34,7 +34,6 @@ type Transport = U2<Transport2, Transport3>
 [<Interface>]
 type Transport2 =
     inherit Options<Target<obj>>
-    abstract target: MissingNamespace<Target<obj>> with get, set
     abstract secure: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (target: MissingNamespace<Target<obj>>, name: string, ?secure: bool) : Transport2 = jsNative

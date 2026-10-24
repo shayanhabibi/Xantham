@@ -2500,6 +2500,7 @@ let main _ =
         "html:<p>test</p>"
         (ExclusiveSignatureLab.Exports.render (U2.Case1(ExclusiveSignatureLab.HtmlPage.Create "<p>test</p>")))
 
+    GenericCallableInterfaces.run check
     Projections.run check
 
     match failures with
