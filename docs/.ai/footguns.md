@@ -71,7 +71,14 @@ Following an application's members again recreates substituted method binders in
 follow its arguments instead, and keep explicit structural promotion separate. A conditional
 alias can reduce to an anonymous type literal carrying `Instantiated`; that flag alone does
 not invalidate a nested contract reached from a canonical owner. Mapped computations remain
-outside that traversal. Successful derivation removes both pending and `NotFollowed` entries.
+outside that traversal. Successful derivation removes both pending and `NotFollowed` entries. The
+contract walk must stay linear in the table: memoise per type, never per path. Path-keyed
+memoisation enumerates every path through an interface diamond, and declaration ancestry alone
+admits one instantiation per permutation of mutually wrapping generic aliases. Moving a batch of
+checker queries changes the order checker type ids are assigned in, and Shape's naming reads that
+order: deferring the canonical-seed-alias lookups to the first oversized frontier moved Core.TS's
+namespace constructor objects under `GlobalThis` at equal tiers. Regenerate Core.TS after
+reordering session queries, and diff its symbol names, not only its tiers.
 
 ## Declaration catalogs
 

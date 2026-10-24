@@ -3366,3 +3366,28 @@ application expansion. Traversal memoization reuses a path only when its ancesto
 more restrictive. The regression pins callback parameter identity and bounds recursive
 callable trees through both returns and parameters; real-package findings are audited after
 regeneration.
+
+The contract walk's cost is linear in the table. Contracts are computed once per generation and
+shared by the deferred-type retry and the width cutoff; declaration handles for the whole table
+are prefetched in chunks of 128, and the traversal itself is a synchronous work-stack loop. The
+canonical-seed-alias set is still computed before the first generation: deferring it to the first
+oversized frontier reorders checker queries, and with them the checker type ids, which moved 16
+Core.TS constructor objects (`WebAssembly.*Constructor`, `Intl.*Constructor`) under `GlobalThis`.
+A nominal declaration restarts the ancestry and the depth,
+so its contract is the same on every path and a diamond of interfaces is walked once per node.
+Ancestry still stops an application from re-entering one of its own declarations; in addition,
+an application whose arguments wrap (anything beyond type parameters, primitives, literals and
+unions of those) consumes one unit of `ContractDepth` (1) when its members are followed, so
+mutually wrapping generic aliases admit a bounded number of instantiations instead of one per
+permutation of their declarations. Applications with plain arguments are bounded by the per-type
+memo, which expands each type at most once per remaining depth. Computed literal arguments are
+plain and unbounded in principle (`${S}k` spells out its path); measured on six to eight mutually
+recursive aliases, each appending its own digit, the table grows polynomially (209 entries at six,
+483 at eight), and a rule spending depth on literal arguments below an application left those
+counts unchanged, so none is applied.
+A generic call signature on an application keeps its parameters, return type and type
+parameters. A failed declaration-handle or seed lookup fails the pass. The width-1 regressions
+cover a 20-deep interface diamond chain, bounded by contract-walk visits per table entry through
+`resolveTypeTableObserved`; six mutually wrapping interfaces and aliases; six aliases over
+computed literal arguments; a callback below an application shared by two roots, in both root
+orders; and `Mapper<T>`.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "0a243863abeff6993ef5e8db4ba8639178f9514c488fb1dfc24e83744739d249",
+  "generator": "360267a102fd7526b822e399b4ba73036bbc44e93116f56ef2797853c7ab510f",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -1637051,125 +1637051,6 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "afbf870023765523d1d8b652545f96a78d55d5dd1135b2b2f820801c5cbd266f",
-      "handles": [
-        "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#919.189"
-      ],
-      "sources": [
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.core.d.ts",
-          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.iterable.d.ts",
-          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
-          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2016.array.include.d.ts",
-          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2019.array.d.ts",
-          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2020.intl.d.ts",
-          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2021.intl.d.ts",
-          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2022.array.d.ts",
-          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.array.d.ts",
-          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.intl.d.ts",
-          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2025.iterator.d.ts",
-          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es5.d.ts",
-          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.disposable.d.ts",
-          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.intl.d.ts",
-          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.iterator.d.ts",
-          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        }
-      ],
-      "role": "constructor",
-      "fSharpName": "Fable.Core.TS.Es.GlobalThis.Intl.DisplayNamesConstructor",
-      "arity": 0,
-      "constraints": [],
-      "api": "41754f28453c3d5180f82ff83afe3cc4ce05b04c63f39d62271d956601fa5dc4",
-      "owner": "FableCoreTsInput"
-    },
-    {
       "identity": "2bf373671e4cd204bbc5ea6407ba8d9044e6f2f084a037ac0bd18a2171447ce0",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#138256.262",
@@ -1639937,132 +1639818,6 @@
       "arity": 0,
       "constraints": [],
       "api": "e1b5912e3ad45495e4285de65b8d0bd7053a1745d01a506e1354b6be6e36ad38",
-      "owner": "FableCoreTsInput"
-    },
-    {
-      "identity": "7d3af8ba06e19ba203a9a7516eeffbeeeca85fce5ccb555a4954dfdb714b3b2f",
-      "handles": [
-        "typescript@7.1.0-beta/lib/lib.es2025.intl.d.ts#673.189"
-      ],
-      "sources": [
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.core.d.ts",
-          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.iterable.d.ts",
-          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
-          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2016.array.include.d.ts",
-          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2019.array.d.ts",
-          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2020.intl.d.ts",
-          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2021.intl.d.ts",
-          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2022.array.d.ts",
-          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.array.d.ts",
-          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.intl.d.ts",
-          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2025.intl.d.ts",
-          "sha256": "ffbe6d7b295306b2ba88030f65b74c107d8d99bdcf596ea99c62a02f606108b0",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2025.iterator.d.ts",
-          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es5.d.ts",
-          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.disposable.d.ts",
-          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.intl.d.ts",
-          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.iterator.d.ts",
-          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        }
-      ],
-      "role": "constructor",
-      "fSharpName": "Fable.Core.TS.Es.GlobalThis.Intl.DurationFormatConstructor",
-      "arity": 0,
-      "constraints": [],
-      "api": "ddc153d87e2d9af8205fab36fd8fdf07b3e7e8e55719e286ff4711be0906d296",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1645606,125 +1645361,6 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "39362727a2e39fe7ea09defe91b3c3722d0050b15cdfcdaf0bfabc1cd3abffff",
-      "handles": [
-        "typescript@7.1.0-beta/lib/lib.es2021.intl.d.ts#410.189"
-      ],
-      "sources": [
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.core.d.ts",
-          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.iterable.d.ts",
-          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
-          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2016.array.include.d.ts",
-          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2019.array.d.ts",
-          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2020.intl.d.ts",
-          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2021.intl.d.ts",
-          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2022.array.d.ts",
-          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.array.d.ts",
-          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.intl.d.ts",
-          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2025.iterator.d.ts",
-          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es5.d.ts",
-          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.disposable.d.ts",
-          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.intl.d.ts",
-          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.iterator.d.ts",
-          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        }
-      ],
-      "role": "constructor",
-      "fSharpName": "Fable.Core.TS.Es.GlobalThis.Intl.ListFormatConstructor",
-      "arity": 0,
-      "constraints": [],
-      "api": "9524e7e02218e2fc661589b152b68e1c49b29c77f27b3f1e9e50c07adacbf11c",
-      "owner": "FableCoreTsInput"
-    },
-    {
       "identity": "226e6ad616037c1048bdf0adb57f71b55dc8d473c694a8a76bb8d4c3e2b10a13",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#138256.262",
@@ -1649046,125 +1648682,6 @@
       "arity": 0,
       "constraints": [],
       "api": "fc8f081b6ac0ecafd685cf37b3738d4d306878079b59dc21ca218339d3d03989",
-      "owner": "FableCoreTsInput"
-    },
-    {
-      "identity": "74149d1499bf292f378c14e1099299d8b382e4eb4f30e2c70db8b4c453ddc8e9",
-      "handles": [
-        "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#764.189"
-      ],
-      "sources": [
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.core.d.ts",
-          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.iterable.d.ts",
-          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
-          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2016.array.include.d.ts",
-          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2019.array.d.ts",
-          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2020.intl.d.ts",
-          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2021.intl.d.ts",
-          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2022.array.d.ts",
-          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.array.d.ts",
-          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.intl.d.ts",
-          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2025.iterator.d.ts",
-          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es5.d.ts",
-          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.disposable.d.ts",
-          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.intl.d.ts",
-          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.iterator.d.ts",
-          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        }
-      ],
-      "role": "constructor",
-      "fSharpName": "Fable.Core.TS.Es.GlobalThis.Intl.LocaleConstructor",
-      "arity": 0,
-      "constraints": [],
-      "api": "bfdc1f99cc2adf01f8ae0e800658c159bc70661266b215780a1d7e651b727e72",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1663018,125 +1662535,6 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "17f3f3babf2c83827a315e568bbb704185b47666abad640a1e2b21ceaf0f483d",
-      "handles": [
-        "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#300.189"
-      ],
-      "sources": [
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.core.d.ts",
-          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.iterable.d.ts",
-          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
-          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2016.array.include.d.ts",
-          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2019.array.d.ts",
-          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2020.intl.d.ts",
-          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2021.intl.d.ts",
-          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2022.array.d.ts",
-          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.array.d.ts",
-          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.intl.d.ts",
-          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2025.iterator.d.ts",
-          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es5.d.ts",
-          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.disposable.d.ts",
-          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.intl.d.ts",
-          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.iterator.d.ts",
-          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        }
-      ],
-      "role": "constructor",
-      "fSharpName": "Fable.Core.TS.Es.GlobalThis.Intl.RelativeTimeFormatConstructor",
-      "arity": 0,
-      "constraints": [],
-      "api": "1487edba437e8e6ed8bfea0884887bb1a12ca43194bca486eee2004fa261fcc0",
-      "owner": "FableCoreTsInput"
-    },
-    {
       "identity": "34846c1416655c4179806756043a1cc82012805f733d3f321268e9069ed76aad",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#138256.262",
@@ -1674216,132 +1673614,6 @@
       "arity": 0,
       "constraints": [],
       "api": "73eb9ef9f19707361d8b03c7ab16e43b520c342fb3ed65238e69db85315d9112",
-      "owner": "FableCoreTsInput"
-    },
-    {
-      "identity": "245de932c0d8ba7e074e21d5c8fcd98eda21d15014040772bc73f76e4cb4f397",
-      "handles": [
-        "typescript@7.1.0-beta/lib/lib.es2022.intl.d.ts#196.189"
-      ],
-      "sources": [
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.core.d.ts",
-          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.iterable.d.ts",
-          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
-          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2016.array.include.d.ts",
-          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2019.array.d.ts",
-          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2020.intl.d.ts",
-          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2021.intl.d.ts",
-          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2022.array.d.ts",
-          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2022.intl.d.ts",
-          "sha256": "8b11e4285cd2bb164a4dc09248bdec69e9842517db4ca47c1ba913011e44ff2f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.array.d.ts",
-          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2023.intl.d.ts",
-          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es2025.iterator.d.ts",
-          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es5.d.ts",
-          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.disposable.d.ts",
-          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.intl.d.ts",
-          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        },
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.esnext.iterator.d.ts",
-          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        }
-      ],
-      "role": "constructor",
-      "fSharpName": "Fable.Core.TS.Es.GlobalThis.Intl.SegmenterConstructor",
-      "arity": 0,
-      "constraints": [],
-      "api": "4b75598f179ffb5aee7dfd8f096b46eb5771b0bb08eff3a2fbe088b4915ae87c",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1772905,6 +1772177,125 @@
       "owner": "FableCoreTsInput"
     },
     {
+      "identity": "afbf870023765523d1d8b652545f96a78d55d5dd1135b2b2f820801c5cbd266f",
+      "handles": [
+        "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#919.189"
+      ],
+      "sources": [
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.core.d.ts",
+          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.iterable.d.ts",
+          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
+          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2016.array.include.d.ts",
+          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2019.array.d.ts",
+          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2020.intl.d.ts",
+          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2021.intl.d.ts",
+          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2022.array.d.ts",
+          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.array.d.ts",
+          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.intl.d.ts",
+          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2025.iterator.d.ts",
+          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es5.d.ts",
+          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.disposable.d.ts",
+          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.intl.d.ts",
+          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.iterator.d.ts",
+          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        }
+      ],
+      "role": "constructor",
+      "fSharpName": "Fable.Core.TS.Es.Intl.DisplayNamesConstructor",
+      "arity": 0,
+      "constraints": [],
+      "api": "41754f28453c3d5180f82ff83afe3cc4ce05b04c63f39d62271d956601fa5dc4",
+      "owner": "FableCoreTsInput"
+    },
+    {
       "identity": "920b91ed2f0fcc6d2eafc2426241157322c643b7ec787aac18080decd5542b25",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#801.267"
@@ -1773148,6 +1772539,132 @@
       "arity": 0,
       "constraints": [],
       "api": "08d2853fec20a0c703cb6333643d9681ef78d18925b2efdda9ed2e7caecf305d",
+      "owner": "FableCoreTsInput"
+    },
+    {
+      "identity": "7d3af8ba06e19ba203a9a7516eeffbeeeca85fce5ccb555a4954dfdb714b3b2f",
+      "handles": [
+        "typescript@7.1.0-beta/lib/lib.es2025.intl.d.ts#673.189"
+      ],
+      "sources": [
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.core.d.ts",
+          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.iterable.d.ts",
+          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
+          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2016.array.include.d.ts",
+          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2019.array.d.ts",
+          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2020.intl.d.ts",
+          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2021.intl.d.ts",
+          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2022.array.d.ts",
+          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.array.d.ts",
+          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.intl.d.ts",
+          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2025.intl.d.ts",
+          "sha256": "ffbe6d7b295306b2ba88030f65b74c107d8d99bdcf596ea99c62a02f606108b0",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2025.iterator.d.ts",
+          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es5.d.ts",
+          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.disposable.d.ts",
+          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.intl.d.ts",
+          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.iterator.d.ts",
+          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        }
+      ],
+      "role": "constructor",
+      "fSharpName": "Fable.Core.TS.Es.Intl.DurationFormatConstructor",
+      "arity": 0,
+      "constraints": [],
+      "api": "ddc153d87e2d9af8205fab36fd8fdf07b3e7e8e55719e286ff4711be0906d296",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1773689,6 +1773206,125 @@
       "owner": "FableCoreTsInput"
     },
     {
+      "identity": "39362727a2e39fe7ea09defe91b3c3722d0050b15cdfcdaf0bfabc1cd3abffff",
+      "handles": [
+        "typescript@7.1.0-beta/lib/lib.es2021.intl.d.ts#410.189"
+      ],
+      "sources": [
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.core.d.ts",
+          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.iterable.d.ts",
+          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
+          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2016.array.include.d.ts",
+          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2019.array.d.ts",
+          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2020.intl.d.ts",
+          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2021.intl.d.ts",
+          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2022.array.d.ts",
+          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.array.d.ts",
+          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.intl.d.ts",
+          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2025.iterator.d.ts",
+          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es5.d.ts",
+          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.disposable.d.ts",
+          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.intl.d.ts",
+          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.iterator.d.ts",
+          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        }
+      ],
+      "role": "constructor",
+      "fSharpName": "Fable.Core.TS.Es.Intl.ListFormatConstructor",
+      "arity": 0,
+      "constraints": [],
+      "api": "9524e7e02218e2fc661589b152b68e1c49b29c77f27b3f1e9e50c07adacbf11c",
+      "owner": "FableCoreTsInput"
+    },
+    {
       "identity": "3d6cb2ebe20ee8400c48eca93ffaaefbf5bd21f2b98884ab17ba743a397fe486",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.es2021.intl.d.ts#220.267"
@@ -1773912,6 +1773548,125 @@
       "arity": 0,
       "constraints": [],
       "api": "124e4f955744cc18663cb39b39ba1b15c78c94aec38816ed0f66976f80587676",
+      "owner": "FableCoreTsInput"
+    },
+    {
+      "identity": "74149d1499bf292f378c14e1099299d8b382e4eb4f30e2c70db8b4c453ddc8e9",
+      "handles": [
+        "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#764.189"
+      ],
+      "sources": [
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.core.d.ts",
+          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.iterable.d.ts",
+          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
+          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2016.array.include.d.ts",
+          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2019.array.d.ts",
+          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2020.intl.d.ts",
+          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2021.intl.d.ts",
+          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2022.array.d.ts",
+          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.array.d.ts",
+          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.intl.d.ts",
+          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2025.iterator.d.ts",
+          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es5.d.ts",
+          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.disposable.d.ts",
+          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.intl.d.ts",
+          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.iterator.d.ts",
+          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        }
+      ],
+      "role": "constructor",
+      "fSharpName": "Fable.Core.TS.Es.Intl.LocaleConstructor",
+      "arity": 0,
+      "constraints": [],
+      "api": "bfdc1f99cc2adf01f8ae0e800658c159bc70661266b215780a1d7e651b727e72",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1775280,6 +1775035,125 @@
       "owner": "FableCoreTsInput"
     },
     {
+      "identity": "17f3f3babf2c83827a315e568bbb704185b47666abad640a1e2b21ceaf0f483d",
+      "handles": [
+        "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#300.189"
+      ],
+      "sources": [
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.core.d.ts",
+          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.iterable.d.ts",
+          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
+          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2016.array.include.d.ts",
+          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2019.array.d.ts",
+          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2020.intl.d.ts",
+          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2021.intl.d.ts",
+          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2022.array.d.ts",
+          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.array.d.ts",
+          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.intl.d.ts",
+          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2025.iterator.d.ts",
+          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es5.d.ts",
+          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.disposable.d.ts",
+          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.intl.d.ts",
+          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.iterator.d.ts",
+          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        }
+      ],
+      "role": "constructor",
+      "fSharpName": "Fable.Core.TS.Es.Intl.RelativeTimeFormatConstructor",
+      "arity": 0,
+      "constraints": [],
+      "api": "1487edba437e8e6ed8bfea0884887bb1a12ca43194bca486eee2004fa261fcc0",
+      "owner": "FableCoreTsInput"
+    },
+    {
       "identity": "0752c21fe8a2eab5ce9208515fde31f010095532dbac13a3946fe0e6d7f53969",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#77.267"
@@ -1776110,6 +1775984,132 @@
       "arity": 0,
       "constraints": [],
       "api": "80e4d0b9acf5aac8e97fb4004086ed16548cb12053b1ca057c98877f07db576a",
+      "owner": "FableCoreTsInput"
+    },
+    {
+      "identity": "245de932c0d8ba7e074e21d5c8fcd98eda21d15014040772bc73f76e4cb4f397",
+      "handles": [
+        "typescript@7.1.0-beta/lib/lib.es2022.intl.d.ts#196.189"
+      ],
+      "sources": [
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.core.d.ts",
+          "sha256": "770011bd32a52f929fc98fbf9976c1fa9d80b6445171c02b08627fdba9778933",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.iterable.d.ts",
+          "sha256": "ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2015.symbol.wellknown.d.ts",
+          "sha256": "c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2016.array.include.d.ts",
+          "sha256": "32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2019.array.d.ts",
+          "sha256": "ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2020.intl.d.ts",
+          "sha256": "7b4f295ddb7e8c73f608bf54aa5d76b604b4fc44340a2eaa1f34040e7261afd4",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2021.intl.d.ts",
+          "sha256": "a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2022.array.d.ts",
+          "sha256": "a6b2211fcbf07dcc84e274b0ce935473ac4e24e75a12234f6a65b7a6fbe9285b",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2022.intl.d.ts",
+          "sha256": "8b11e4285cd2bb164a4dc09248bdec69e9842517db4ca47c1ba913011e44ff2f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.array.d.ts",
+          "sha256": "0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2023.intl.d.ts",
+          "sha256": "2c14b6fc74e9488a93c8212bdac44cbf534d5c30c7b688d52d7e6013d19a56c1",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es2025.iterator.d.ts",
+          "sha256": "996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.es5.d.ts",
+          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.disposable.d.ts",
+          "sha256": "1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.intl.d.ts",
+          "sha256": "379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
+          "file": "lib/lib.esnext.iterator.d.ts",
+          "sha256": "7838fe28f089cd1d07670ef889f9f5d1291972f3eb30ca0d5c35c4b4f643dee8",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        }
+      ],
+      "role": "constructor",
+      "fSharpName": "Fable.Core.TS.Es.Intl.SegmenterConstructor",
+      "arity": 0,
+      "constraints": [],
+      "api": "4b75598f179ffb5aee7dfd8f096b46eb5771b0bb08eff3a2fbe088b4915ae87c",
       "owner": "FableCoreTsInput"
     },
     {

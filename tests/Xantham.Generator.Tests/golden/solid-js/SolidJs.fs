@@ -255,6 +255,8 @@ type InitializedResource<'T> = U3<Errored, Ready<'T>, Refreshing<'T>>
 
 type ResourceActions<'T, 'R> =
     abstract mutate: [<ParamArray>] args: obj -> obj
+    abstract mutate<'U>: value: ('T -> 'U) -> 'U
+    abstract mutate<'U>: value: 'U -> 'U
     abstract mutate<'U>: value: U2<('T -> 'U), 'U> -> 'U
     abstract refetch: ('R option -> U2<'T, JS.Promise<'T>> option) with get, set
 
@@ -1342,28 +1344,28 @@ module CreateResource =
             abstract mutate: [<ParamArray>] args: obj -> obj
             abstract mutate<'U>: value: (U2<'I, 'T> -> 'U) -> 'U
             abstract mutate<'U>: value: 'U -> 'U
-            abstract mutate<'U>: value: obj -> 'U
+            abstract mutate<'U>: value: U2<(U2<'I, 'T> -> 'U), 'U> -> 'U
             abstract refetch: ('R option -> U3<'I, 'T, JS.Promise<U2<'I, 'T>>> option) with get, set
 
         type Item2<'R, 'T> =
             abstract mutate: [<ParamArray>] args: obj[] -> unit
             abstract mutate<'U>: value: ('T option -> 'U) -> 'U
             abstract mutate<'U>: value: 'U -> 'U
-            abstract mutate<'U>: value: obj -> 'U
+            abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
             abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
 
         type Item3<'R, 'I, 'T> =
             abstract mutate: [<ParamArray>] args: obj -> obj
             abstract mutate<'U>: value: (U2<'I, 'T> -> 'U) -> 'U
             abstract mutate<'U>: value: 'U -> 'U
-            abstract mutate<'U>: value: obj -> 'U
+            abstract mutate<'U>: value: U2<(U2<'I, 'T> -> 'U), 'U> -> 'U
             abstract refetch: ('R option -> U3<'I, 'T, JS.Promise<U2<'I, 'T>>> option) with get, set
 
         type Item4<'R, 'T> =
             abstract mutate: [<ParamArray>] args: obj[] -> unit
             abstract mutate<'U>: value: ('T option -> 'U) -> 'U
             abstract mutate<'U>: value: 'U -> 'U
-            abstract mutate<'U>: value: obj -> 'U
+            abstract mutate<'U>: value: U2<('T option -> 'U), 'U> -> 'U
             abstract refetch: ('R option -> U2<'T, JS.Promise<'T option>> option) with get, set
 
 module DEV =
